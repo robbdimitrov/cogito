@@ -3,7 +3,7 @@ import os
 from flask import Flask
 
 from authservice import (
-    db, user
+    db, session
 )
 
 
@@ -15,6 +15,6 @@ def create_app():
     db.init_app(app)
 
     # Register the api routes
-    app.register_blueprint(user.bp)
+    app.register_blueprint(session.bp)
 
     return app
