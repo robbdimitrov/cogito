@@ -52,8 +52,9 @@ def create_user():
     except db_client.DBException as e:
         error = {'code': 400, 'error': 'BAD_REQUEST', 'message': str(e)}
         return make_response(jsonify(error), 400)
-    else:
-        return make_response(jsonify({'message': f'Created user {username}.'}), 201)
+
+    user = db_client.get_user(username)
+    return make_response(jsonify(user), 201)
 
 
 @bp.route('/users/<username>', methods=['GET'])
