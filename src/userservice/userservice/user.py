@@ -6,7 +6,7 @@ from werkzeug.security import (
 )
 
 from userservice import db_client
-from userservice.helpers import validate_email
+from userservice.utils import validate_email
 
 
 bp = Blueprint('user', __name__)
