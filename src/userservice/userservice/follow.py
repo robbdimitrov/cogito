@@ -2,8 +2,7 @@ from flask import (
     Blueprint, request, make_response, jsonify
 )
 
-from userservice import db_client, status
-from userservice.db_client import DBException
+from userservice import db_client
 
 
 bp = Blueprint('follow', __name__)
@@ -17,7 +16,7 @@ def get_followers(username):
 
     users = db_client.get_followers(username, page, limit)
 
-    return make_response(jsonify({'users': users}), status.OK)
+    return make_response(jsonify(users), 200)
 
 
 @bp.route('/users/<username>/following', methods=['GET'])
@@ -29,7 +28,7 @@ def get_following(username):
 
     users = db_client.get_following(username, page, limit)
 
-    return make_response(jsonify({'users': users}), status.OK)
+    return make_response(jsonify(users), 200)
 
 
 @bp.route('/users/<username>/following', methods=['POST'])
@@ -40,10 +39,11 @@ def follow_user(username):
 
     try:
         db_client.follow_user(username, user_id)
-    except DBException as e:
-        return make_response(jsonify({'error': str(e)}), status.BAD_REQUEST)
+    except db_client.DBException as e:
+        error = {'code': 400, 'error': 'BAD_REQUEST', 'message': str(e)}
+        return make_response(jsonify(error), 400)
     else:
-        return make_response(jsonify({'response': 'Followed user.'}), status.OK)
+        return make_response(jsonify({'message': 'Followed user.'}), 200)
 
 
 @bp.route('/users/<username>/following', methods=['DELETE'])
@@ -54,4 +54,4 @@ def unfollow_user(username):
 
     db_client.unfollow_user(username, user_id)
 
-    return make_response(jsonify({'response': 'Unfollowed user.'}), status.OK)
+    return make_response(jsonify({'message': 'Unfollowed user.'}), 200)

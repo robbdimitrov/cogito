@@ -6,32 +6,40 @@ class DBException(Exception):
     pass
 
 
+class ExistingUserException(DBException):
+    pass
+
+
+class WrongUsernameException(DBException):
+    pass
+
+
+class UserActionException(DBException):
+    pass
+
+
 def create_user(username, email, name, password):
     conn = db.get_db()
     cur = conn.cursor()
 
-    cur.execute('''
-        SELECT username, email FROM thoughts.users
-        WHERE username = %s OR email = %s
-        ''',
+    cur.execute('SELECT username, email FROM thoughts.users \
+        WHERE username = %s OR email = %s',
         (username, email))
     existing_user = cur.fetchone()
 
     if existing_user is not None:
         if existing_user[0] == username:
-            raise DBException('User with this username already exists.')
+            raise ExistingUserException('User with this username already exists.')
         else:
-            raise DBException('User with this email already exists.')
+            raise ExistingUserException('User with this email already exists.')
 
     try:
-        cur.execute('''
-            INSERT INTO thoughts.users(username, email, name, password)
-            VALUES(%s, %s, %s, %s);
-            ''',
-            (username, email, name, password))
+        cur.execute('INSERT INTO thoughts.users(username, email, name, password) \
+            VALUES(%s, %s, %s, %s)', (username, email, name, password))
         conn.commit()
     except psycopg2.Error as e:
         print(f'Error creating user: {str(e)}')
+        raise DBException('Error while writing to the database.')
     finally:
         cur.close()
 
@@ -40,11 +48,10 @@ def get_user(username):
     conn = db.get_db()
     cur = conn.cursor()
 
-    cur.execute('''
-        SELECT id, username, email, name, bio,
-        to_char(reg_date, 'DD-MM-YYYY"T"HH24:MI:SS') FROM thoughts.users
-        WHERE username = %s
-        ''',
+    # TODO: Move timestamp to psql function
+    cur.execute('SELECT id, username, email, name, bio, \
+        to_char(reg_date, \'DD-MM-YYYY"T"HH24:MI:SS\') FROM thoughts.users \
+        WHERE username = %s',
         (username,))
     result = cur.fetchone()
     cur.close()
@@ -67,11 +74,7 @@ def get_user_password_hash(username):
     conn = db.get_db()
     cur = conn.cursor()
 
-    cur.execute('''
-        SELECT id, password,
-        FROM thoughts.users
-        WHERE username = %s
-        ''',
+    cur.execute('SELECT id, password, FROM thoughts.users WHERE username = %s',
         (username,))
     result = cur.fetchone()
     cur.close()
@@ -94,8 +97,7 @@ def update_user(username, updates):
     for key, value in updates.items():
         values.append(f"{key} = '{value}'")
 
-    command = f"UPDATE thoughts.users SET {', '.join(values)} \
-        WHERE username = %s;"
+    command = f"UPDATE thoughts.users SET {', '.join(values)} WHERE username = %s"
 
     try:
         cur.execute(command, (username,))
@@ -111,11 +113,7 @@ def delete_user(username):
     conn = db.get_db()
     cur = conn.cursor()
 
-    cur.execute('''
-        DELETE FROM thoughts.users
-        WHERE username = %s
-        ''',
-        (username,))
+    cur.execute('DELETE FROM thoughts.users WHERE username = %s', (username,))
     conn.commit()
     cur.close()
 
@@ -124,14 +122,12 @@ def get_followers(username, page, limit):
     conn = db.get_db()
     cur = conn.cursor()
 
-    cur.execute('''
-        SELECT id, username, email, name, bio,
-        to_char(reg_date, 'DD-MM-YYYY"T"HH24:MI:SS')
-        FROM thoughts.users, thoughts.followers
-        WHERE user_id = (SELECT id FROM thoughts.users WHERE username = %s)
-        AND follower_id = id
-        OFFSET %s, LIMIT %s;
-        ''',
+    cur.execute('SELECT id, username, email, name, bio, \
+        to_char(reg_date, \'DD-MM-YYYY"T"HH24:MI:SS\') \
+        FROM thoughts.users, thoughts.followers \
+        WHERE user_id = (SELECT id FROM thoughts.users WHERE username = %s) \
+        AND follower_id = id \
+        OFFSET %s, LIMIT %s',
         (username, page * limit, limit))
     results = cur.fetchall()
     cur.close()
@@ -156,14 +152,12 @@ def get_following(username, page, limit):
     conn = db.get_db()
     cur = conn.cursor()
 
-    cur.execute('''
-        SELECT id, username, email, name, bio,
-        to_char(reg_date, 'DD-MM-YYYY"T"HH24:MI:SS')
-        FROM thoughts.users, thoughts.followers
-        WHERE follower_id = (SELECT id FROM thoughts.users WHERE username = %s)
-        AND user_id = id
-        OFFSET %s, LIMIT %s;
-        ''',
+    cur.execute('SELECT id, username, email, name, bio, \
+        to_char(reg_date, \'DD-MM-YYYY"T"HH24:MI:SS\') \
+        FROM thoughts.users, thoughts.followers \
+        WHERE follower_id = (SELECT id FROM thoughts.users WHERE username = %s) \
+        AND user_id = id \
+        OFFSET %s, LIMIT %s',
         (username, page * limit, limit))
     results = cur.fetchall()
     cur.close()
@@ -188,28 +182,23 @@ def follow_user(username, follower_id):
     conn = db.get_db()
     cur = conn.cursor()
 
-    cur.execute('''
-        SELECT id FROM thoughts.users
-        WHERE username = %s
-        ''',
+    cur.execute('SELECT id FROM thoughts.users WHERE username = %s',
         (username,))
     user = cur.fetchone()
 
     if user is None:
-        raise DBException('Wrong username.')
+        raise WrongUsernameException('Wrong username.')
 
     if user['id'] == follower_id:
-        raise DBException('You can\'t follow yourself.')
+        raise UserActionException('You can\'t follow yourself.')
 
     try:
-        cur.execute('''
-            INSERT INTO thoughts.followers
-            VALUES(%s, %s);
-            ''',
+        cur.execute('INSERT INTO thoughts.followers VALUES(%s, %s)',
             (user['id'], follower_id))
         conn.commit()
     except psycopg2.Error as e:
         print(f'Error following user: {str(e)}')
+        raise DBException('Error following user.')
     finally:
         cur.close()
 
@@ -218,11 +207,9 @@ def unfollow_user(username, user_id):
     conn = db.get_db()
     cur = conn.cursor()
 
-    cur.execute('''
-        DELETE FROM thoughts.followers
-        WHERE user_id = (SELECT id FROM thoughts.users WHERE username = %s)
-        AND follower_id = %s;
-        ''',
+    cur.execute('DELETE FROM thoughts.followers \
+        WHERE user_id = (SELECT id FROM thoughts.users WHERE username = %s) \
+        AND follower_id = %s',
         (username, user_id))
     conn.commit()
     cur.close()
