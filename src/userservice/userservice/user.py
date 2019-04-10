@@ -93,7 +93,7 @@ def update_user(username):
             password = changes.get('password')
             current_password = changes.get('currentPassword')
 
-            saved_password = db_client.get_user_password_hash(username)
+            saved_password = db_client.get_user_password_hash(username)['password']
             if check_password_hash(saved_password, current_password) == False:
                 error_message = 'Wrong password.'
                 error_type = 'WRONG_PASSWORD'
