@@ -51,7 +51,7 @@ def get_user(username):
 
     # TODO: Move timestamp to psql function
     cur.execute('SELECT id, username, email, name, bio, \
-        to_char(reg_date, \'DD-MM-YYYY"T"HH24:MI:SS\') FROM thoughts.users \
+        time_format(reg_date) FROM thoughts.users \
         WHERE username = %s',
         (username,))
     result = cur.fetchone()
@@ -124,7 +124,7 @@ def get_followers(username, page, limit):
     cur = conn.cursor()
 
     cur.execute('SELECT id, username, email, name, bio, \
-        to_char(reg_date, \'DD-MM-YYYY"T"HH24:MI:SS\') \
+        time_format(reg_date) \
         FROM thoughts.users, thoughts.followers \
         WHERE user_id = (SELECT id FROM thoughts.users WHERE username = %s) \
         AND follower_id = id \
@@ -154,7 +154,7 @@ def get_following(username, page, limit):
     cur = conn.cursor()
 
     cur.execute('SELECT id, username, email, name, bio, \
-        to_char(reg_date, \'DD-MM-YYYY"T"HH24:MI:SS\') \
+        time_format(reg_date) \
         FROM thoughts.users, thoughts.followers \
         WHERE follower_id = (SELECT id FROM thoughts.users WHERE username = %s) \
         AND user_id = id \

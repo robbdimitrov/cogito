@@ -4,9 +4,7 @@ import os
 from flask import (
     Blueprint, request, make_response, jsonify
 )
-from werkzeug.security import (
-    generate_password_hash, check_password_hash
-)
+from werkzeug.security import check_password_hash
 
 import jwt
 
@@ -74,8 +72,6 @@ def create_session(username):
 
 # TODO: validate email, create a new session in the db, create and return tokens
 # TODO: return invalid email/ invalid request when all else fails
-# TODO: create DB methods
-# TODO: simplify the code, extract to additional methods
 # TODO: create RPC call for the validity of the token
 
 
