@@ -22,19 +22,25 @@ def create_user():
     name = content.get('name') or ''
     password = content.get('password')
 
-    if username is None or username == '':
-        error = 'Username is missing.'
-    elif email is None or email == '':
-        error = 'Email is missing.'
-    elif validate_email(email) == False:
-        error = 'Invalid email address.'
-    elif password is None:
-        error = 'Password is missing'
-    else:
-        error = None
+    error_message = None
+    error_type = None
 
-    if error is not None:
-        return make_response(jsonify({'error': error}), 400)
+    if username is None or username == '':
+        error_message = 'Username is missing.'
+        error_type = 'MISSING_USERNAME'
+    elif email is None or email == '':
+        error_message = 'Email is missing.'
+        error_type = 'MISSING_EMAIL'
+    elif validate_email(email) == False:
+        error_message = 'Invalid email address.'
+        error_type = 'INVALID_EMAIL'
+    elif password is None:
+        error_message = 'Password is missing'
+        error_type = 'MISSING_PASSWORD'
+
+    if error_message is not None:
+        error = error = {'code': 400, 'error': error_type, 'message': error_message}
+        return make_response(jsonify(error), 400)
 
     password = generate_password_hash(password)
 
