@@ -11,8 +11,8 @@ CREATE TABLE IF NOT EXISTS thoughts.users (
 );
 
 CREATE TABLE IF NOT EXISTS thoughts.followers (
-  user_id integer REFERENCES thoughts.users(id),
-  follower_id integer REFERENCES thoughts.users(id)
+  user_id integer REFERENCES thoughts.users(id) ON DELETE CASCADE,
+  follower_id integer REFERENCES thoughts.users(id) ON DELETE CASCADE
 );
 
 CREATE OR REPLACE FUNCTION time_format(origin timestamp)

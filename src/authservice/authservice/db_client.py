@@ -11,6 +11,10 @@ def get_session(session_id):
     return {'id': 10, 'user_id': 1}
 
 
+def get_user_sessions(user_id):
+    return []
+
+
 def create_session(user_id):
     return {'id': 10, 'user_id': 1}
 
