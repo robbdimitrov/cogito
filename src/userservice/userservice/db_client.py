@@ -4,18 +4,22 @@ from userservice import db
 
 
 class DBException(Exception):
+    """Base class for database exceptions."""
     pass
 
 
 class ExistingUserException(DBException):
+    """Raised when user with same username or email already exists."""
     pass
 
 
 class WrongUsernameException(DBException):
+    """Raised when there is no user with the given username."""
     pass
 
 
 class UserActionException(DBException):
+    """Raised when there is an error resulting from user action."""
     pass
 
 
@@ -49,7 +53,6 @@ def get_user(username):
     conn = db.get_db()
     cur = conn.cursor()
 
-    # TODO: Move timestamp to psql function
     cur.execute('SELECT id, username, email, name, bio, \
         time_format(reg_date) FROM thoughts.users \
         WHERE username = %s',
