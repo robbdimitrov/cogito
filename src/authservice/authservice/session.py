@@ -26,7 +26,7 @@ def create_session():
     secret = current_app.config.get('JWT_SECRET')
 
     if email is not None and password is not None:
-        if validate_email == False:
+        if validate_email(email) == False:
             error = {'code': 400, 'error': 'INVALID_EMAIL',
                 'message': 'Invalid email address.'}
             return make_response(jsonify({'error': error}), 400)
