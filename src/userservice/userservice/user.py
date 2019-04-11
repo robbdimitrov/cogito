@@ -1,9 +1,5 @@
-from flask import (
-    Blueprint, request, make_response, jsonify
-)
-from werkzeug.security import (
-    generate_password_hash, check_password_hash
-)
+from flask import Blueprint, request, make_response, jsonify
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from userservice import db_client
 from userservice.utils import validate_email

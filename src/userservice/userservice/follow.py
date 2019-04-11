@@ -1,6 +1,4 @@
-from flask import (
-    Blueprint, request, make_response, jsonify
-)
+from flask import Blueprint, request, make_response, jsonify
 
 from userservice import db_client
 

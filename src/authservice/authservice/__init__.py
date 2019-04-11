@@ -2,9 +2,7 @@ import os
 
 from flask import Flask
 
-from authservice import (
-    db, session
-)
+from authservice import db, session
 
 
 def create_app():

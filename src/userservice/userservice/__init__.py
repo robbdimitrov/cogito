@@ -2,9 +2,7 @@ import os
 
 from flask import Flask
 
-from userservice import (
-    db, user, follow
-)
+from userservice import db, user, follow
 
 
 def create_app():
