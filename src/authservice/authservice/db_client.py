@@ -88,7 +88,7 @@ def get_user_password_hash(username):
     conn = db.get_db()
     cur = conn.cursor()
 
-    cur.execute('SELECT id, password, FROM thoughts.sessions \
+    cur.execute('SELECT id, password, FROM thoughts.users \
         WHERE username = %s', (username,))
     result = cur.fetchone()
     cur.close()
