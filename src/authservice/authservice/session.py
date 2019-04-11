@@ -23,6 +23,7 @@ def create_session():
     refresh_token = content.get('refresh_token')
     email = content.get('email')
     password = content.get('password')
+    name = content.get('name')
 
     secret = current_app.config.get('JWT_SECRET')
 
@@ -39,7 +40,7 @@ def create_session():
                 'message': 'Wrong username or password.'}
             return make_response(jsonify({'error': error}), 401)
 
-        session = db_client.create_session(current_user['id'])
+        session = db_client.create_session(current_user['id'], name)
     elif refresh_token is not None:
         try:
             payload = jwt.decode(refresh_token, secret, algorithms='HS256')

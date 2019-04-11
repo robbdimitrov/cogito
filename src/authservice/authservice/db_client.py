@@ -14,13 +14,23 @@ def create_session(user_id, name):
 
     try:
         cur.execute('INSERT INTO thoughts.sessions(name, user_id) \
-            VALUES(%s, %s)', (name, user_id))
+            VALUES(%s, %s) RETURNING id, user_id, name, time_format(date_created)',
+            (name, user_id))
+        result = cur.fetchone()
         conn.commit()
     except psycopg2.Error as e:
         print(f'Error creating user: {str(e)}')
         raise DBException('Error while writing to the database.')
     finally:
         cur.close()
+
+    session = {
+        'id': result[0],
+        'user_id': result[1],
+        'name': result[2],
+        'date_created': result[3]
+    }
+    return session
 
 
 def get_session(session_id):

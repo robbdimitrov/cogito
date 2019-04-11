@@ -45,7 +45,7 @@ def create_user():
     password = generate_password_hash(password)
 
     try:
-        db_client.create_user(username, email, name, password)
+        user = db_client.create_user(username, email, name, password)
     except db_client.ExistingUserException as e:
         error = {'code': 400, 'error': 'USER_EXISTS', 'message': str(e)}
         return make_response(jsonify(error), 400)
@@ -53,7 +53,6 @@ def create_user():
         error = {'code': 400, 'error': 'BAD_REQUEST', 'message': str(e)}
         return make_response(jsonify(error), 400)
 
-    user = db_client.get_user(username)
     return make_response(jsonify(user), 201)
 
 

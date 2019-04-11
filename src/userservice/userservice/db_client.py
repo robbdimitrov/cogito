@@ -39,14 +39,30 @@ def create_user(username, email, name, password):
             raise ExistingUserException('User with this email already exists.')
 
     try:
-        cur.execute('INSERT INTO thoughts.users(username, email, name, password) \
-            VALUES(%s, %s, %s, %s)', (username, email, name, password))
+        cur.execute('INSERT INTO thoughts.users (username, email, name, password) \
+            VALUES(%s, %s, %s, %s) \
+            RETURNING id, username, email, name, bio, time_format(reg_date)',
+            (username, email, name, password))
+        result = cur.fetchone()
         conn.commit()
     except psycopg2.Error as e:
         print(f'Error creating user: {str(e)}')
         raise DBException('Error while writing to the database.')
     finally:
         cur.close()
+
+    if result is None:
+        return None
+
+    user = {
+        'id': result[0],
+        'username': result[1],
+        'email': result[2],
+        'name': result[3],
+        'bio': result[4],
+        'reg_date': result[5]
+    }
+    return user
 
 
 def get_user(username):
