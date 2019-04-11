@@ -1,20 +1,25 @@
 import psycopg2
+
 from userservice import db
 
 
 class DBException(Exception):
+    """Base class for database exceptions."""
     pass
 
 
 class ExistingUserException(DBException):
+    """Raised when user with same username or email already exists."""
     pass
 
 
 class WrongUsernameException(DBException):
+    """Raised when there is no user with the given username."""
     pass
 
 
 class UserActionException(DBException):
+    """Raised when there is an error resulting from user action."""
     pass
 
 
@@ -34,8 +39,11 @@ def create_user(username, email, name, password):
             raise ExistingUserException('User with this email already exists.')
 
     try:
-        cur.execute('INSERT INTO thoughts.users(username, email, name, password) \
-            VALUES(%s, %s, %s, %s)', (username, email, name, password))
+        cur.execute('INSERT INTO thoughts.users (username, email, name, password) \
+            VALUES(%s, %s, %s, %s) \
+            RETURNING id, username, email, name, bio, time_format(reg_date)',
+            (username, email, name, password))
+        result = cur.fetchone()
         conn.commit()
     except psycopg2.Error as e:
         print(f'Error creating user: {str(e)}')
@@ -43,14 +51,26 @@ def create_user(username, email, name, password):
     finally:
         cur.close()
 
+    if result is None:
+        return None
+
+    user = {
+        'id': result[0],
+        'username': result[1],
+        'email': result[2],
+        'name': result[3],
+        'bio': result[4],
+        'reg_date': result[5]
+    }
+    return user
+
 
 def get_user(username):
     conn = db.get_db()
     cur = conn.cursor()
 
-    # TODO: Move timestamp to psql function
     cur.execute('SELECT id, username, email, name, bio, \
-        to_char(reg_date, \'DD-MM-YYYY"T"HH24:MI:SS\') FROM thoughts.users \
+        time_format(reg_date) FROM thoughts.users \
         WHERE username = %s',
         (username,))
     result = cur.fetchone()
@@ -123,7 +143,7 @@ def get_followers(username, page, limit):
     cur = conn.cursor()
 
     cur.execute('SELECT id, username, email, name, bio, \
-        to_char(reg_date, \'DD-MM-YYYY"T"HH24:MI:SS\') \
+        time_format(reg_date) \
         FROM thoughts.users, thoughts.followers \
         WHERE user_id = (SELECT id FROM thoughts.users WHERE username = %s) \
         AND follower_id = id \
@@ -153,7 +173,7 @@ def get_following(username, page, limit):
     cur = conn.cursor()
 
     cur.execute('SELECT id, username, email, name, bio, \
-        to_char(reg_date, \'DD-MM-YYYY"T"HH24:MI:SS\') \
+        time_format(reg_date) \
         FROM thoughts.users, thoughts.followers \
         WHERE follower_id = (SELECT id FROM thoughts.users WHERE username = %s) \
         AND user_id = id \

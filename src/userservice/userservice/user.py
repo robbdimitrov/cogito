@@ -1,12 +1,8 @@
-from flask import (
-    Blueprint, request, make_response, jsonify
-)
-from werkzeug.security import (
-    generate_password_hash, check_password_hash
-)
+from flask import Blueprint, request, make_response, jsonify
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from userservice import db_client
-from userservice.helpers import validate_email
+from userservice.utils import validate_email
 
 
 bp = Blueprint('user', __name__)
@@ -22,32 +18,38 @@ def create_user():
     name = content.get('name') or ''
     password = content.get('password')
 
-    if username is None or username == '':
-        error = 'Username is missing.'
-    elif email is None or email == '':
-        error = 'Email is missing.'
-    elif validate_email(email) == False:
-        error = 'Invalid email address.'
-    elif password is None:
-        error = 'Password is missing'
-    else:
-        error = None
+    error_message = None
+    error_type = None
 
-    if error is not None:
-        return make_response(jsonify({'error': error}), 400)
+    if username is None or username == '':
+        error_message = 'Username is missing.'
+        error_type = 'MISSING_USERNAME'
+    elif email is None or email == '':
+        error_message = 'Email is missing.'
+        error_type = 'MISSING_EMAIL'
+    elif validate_email(email) == False:
+        error_message = 'Invalid email address.'
+        error_type = 'INVALID_EMAIL'
+    elif password is None:
+        error_message = 'Password is missing'
+        error_type = 'MISSING_PASSWORD'
+
+    if error_message is not None:
+        error = error = {'code': 400, 'error': error_type, 'message': error_message}
+        return make_response(jsonify(error), 400)
 
     password = generate_password_hash(password)
 
     try:
-        db_client.create_user(username, email, name, password)
+        user = db_client.create_user(username, email, name, password)
     except db_client.ExistingUserException as e:
         error = {'code': 400, 'error': 'USER_EXISTS', 'message': str(e)}
         return make_response(jsonify(error), 400)
     except db_client.DBException as e:
         error = {'code': 400, 'error': 'BAD_REQUEST', 'message': str(e)}
         return make_response(jsonify(error), 400)
-    else:
-        return make_response(jsonify({'message': f'Created user {username}.'}), 201)
+
+    return make_response(jsonify(user), 201)
 
 
 @bp.route('/users/<username>', methods=['GET'])
@@ -87,7 +89,7 @@ def update_user(username):
             password = changes.get('password')
             current_password = changes.get('currentPassword')
 
-            saved_password = db_client.get_user_password_hash(username)
+            saved_password = db_client.get_user_password_hash(username)['password']
             if check_password_hash(saved_password, current_password) == False:
                 error_message = 'Wrong password.'
                 error_type = 'WRONG_PASSWORD'
