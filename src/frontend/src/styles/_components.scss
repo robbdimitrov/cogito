@@ -40,11 +40,10 @@ $button-background-color: $active-color;
 .button {
   background: $button-background-color;
   text-decoration: none;
-  height: $button-height;
-  padding: 0 10px;
+  padding: $padding * 0.7 $padding;
   font-size: rem(15);
   color: $primary-color;
-  border-radius: $button-height / 2;
+  border-radius: 25%/50%;
 
   &:not(:disabled) {
     &:hover, &:focus {
@@ -65,9 +64,8 @@ $button-background-color: $active-color;
 .outline-button {
   border-style: solid;
   border-width: $border-width-sm;
-  height: $button-height;
-  padding: 0 $padding;
-  border-radius: $button-height / 2;
+  padding: $padding * 0.7 $padding;
+  border-radius: 25%/50%;
   border-color: $button-background-color;
   font-weight: $font-weight-semibold;
   text-decoration: none;

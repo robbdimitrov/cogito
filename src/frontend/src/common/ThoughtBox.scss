@@ -59,8 +59,7 @@
 
 .close-button {
   margin-left: $padding;
-  width: $button-height;
-  height: $button-height;
+  padding: $padding;
   background-color: white;
 
   &:active {

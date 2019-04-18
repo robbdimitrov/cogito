@@ -8,7 +8,7 @@ function SessionItem(props) {
 
   return (
     <li className='session-item'>
-      <FontAwesomeIcon icon={icon} className='session-device-icon' />
+      <FontAwesomeIcon icon={icon} size='lg' className='session-device-icon' />
 
       <div className='session-content'>
         <strong className='session-name'>{props.name}</strong>
