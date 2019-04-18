@@ -1,8 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { getDeviceName } from '../common/utils';
 
 class Login extends React.Component {
+  handleLogin = (event) => {
+    event.preventDefault();
+    let device = getDeviceName();
+    console.log(`Loggin in ${device}`);
+  };
+
   render() {
     return (
       <div className='container'>
@@ -10,7 +17,7 @@ class Login extends React.Component {
           <h1 className='form-title'>Login</h1>
           <p className='form-message'>Welcome back! Login to access your account.</p>
 
-          <form className='action-form'>
+          <form className='action-form' onSubmit={this.handleLogin}>
             <div className='fieldset'>
               <FontAwesomeIcon icon='envelope' className='input-icon' />
               <input
