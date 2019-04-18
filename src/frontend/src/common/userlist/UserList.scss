@@ -1,0 +1,29 @@
+@import '../../styles/variables';
+@import '../../styles/colors';
+@import '../../styles/helpers';
+
+.user-list {
+  display: grid;
+  grid-gap: $padding;
+  grid-template-columns: 1fr 1fr;
+}
+
+.user-item {
+  height: 280px;
+}
+
+@media screen and (max-width: $break-sm) {
+  .user-list {
+    display: block;
+  }
+
+  .user-item {
+    height: auto;
+    width: 100%;
+    @include separator;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+}

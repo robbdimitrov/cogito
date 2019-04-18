@@ -8,11 +8,16 @@ button, input {
   border: none;
 }
 
+ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
 textarea, input:not([type='checkbox']),
 button, select {
   font-family: inherit;
   font-size: inherit;
-  padding: 0;
 }
 
 button, input:not([type='checkbox']) {

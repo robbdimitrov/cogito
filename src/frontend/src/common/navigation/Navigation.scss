@@ -1,0 +1,97 @@
+@import '../../styles/variables';
+@import '../../styles/colors';
+@import '../../styles/fonts';
+@import '../../styles/helpers';
+
+$icon-width: 30px;
+$icon-font-size: 21px;
+
+.navigation-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background: $primary-color;
+  height: $bar-height;
+}
+
+.navigation-content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 100%;
+  justify-content: space-between;
+}
+
+.dropdown {
+  position: relative;
+  width: $content-secondary-width;
+  z-index: $z-index-dropdown;
+  border-radius: $border-radius-xs;
+  left: -$content-secondary-width + $icon-width;
+}
+
+.nav-button {
+  text-decoration: none;
+  color: $primary-text-color;
+  display: flex;
+  align-items: center;
+  margin-right: $padding;
+}
+
+.nav-button.active {
+  color: $active-button-color;
+  @include active-border;
+  margin-top: $border-width-md;
+}
+
+.left-items {
+  height: 100%;
+  display: flex;
+}
+
+.nav-button-icon {
+  font-size: $icon-font-size;
+}
+
+.nav-button-label {
+  font-weight: $font-weight-semibold;
+  font-size: rem(15);
+  margin-left: $padding / 2;
+}
+
+.icon {
+  height: $icon-font-size;
+  color: $active-color;
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
+
+.profile-button {
+  width: $icon-width;
+  height: $icon-width;
+}
+
+.profile-button-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.right-items {
+  display: flex;
+  align-items: center;
+}
+
+.create-button {
+  margin-left: $padding;
+}
+
+@media screen and (max-width: $break-sm) {
+  .dropdown {
+    position: absolute;
+    width: 100%;
+    border-radius: 0;
+    left: 0;
+  }
+}

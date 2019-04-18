@@ -1,0 +1,85 @@
+@import '../styles/variables';
+@import '../styles/colors';
+@import '../styles/helpers';
+
+.thought-box {
+  background: $primary-color;
+  border-radius: $border-radius-sm;
+  width: 100%;
+  max-width: $content-primary-width;
+
+  .form-input {
+    width: 100%;
+    padding: 6px;
+    resize: none;
+    height: 90px;
+    margin: $padding;
+    margin-left: 0;
+    background: $selected-color;
+    border: 0;
+    border-bottom: 2px solid $active-color;
+    border-radius:
+      $border-radius-sm
+      $border-radius-sm
+      0 0;
+
+    &::placeholder {
+      color: gray;
+    }
+
+    &:focus {
+      outline-width: 0;
+
+      &::placeholder {
+        color: lighten($text-placeholder-color, 20%);
+      }
+    }
+  }
+}
+
+.thought-box-header {
+  border-bottom: 1px solid $shadow-color;
+  height: $bar-height;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.thought-box-content {
+  display: flex;
+  margin-top: $padding;
+
+  .avatar {
+    flex-shrink: 0;
+    width: $avatar-width-xs;
+    height: $avatar-width-xs;
+    margin: $padding;
+  }
+}
+
+.close-button {
+  margin-left: $padding;
+  width: $button-height;
+  height: $button-height;
+  background-color: white;
+
+  &:active {
+    color: lighten($primary-text-color, 30%);
+  }
+}
+
+.submit-button {
+  padding: 0 $padding;
+  margin-right: $padding;
+}
+
+.thought-box-counter {
+  margin: 0 10px 10px;
+  text-align: right;
+  display: block;
+  color: $detail-text-color;
+
+  &.invalid {
+    color: $error-color;
+  }
+}

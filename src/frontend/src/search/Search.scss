@@ -1,0 +1,43 @@
+@import '../styles/variables';
+@import '../styles/fonts';
+@import '../styles/helpers';
+
+.search-container {
+  margin-bottom: $spacing-md;
+
+  .user-container {
+    margin-bottom: $padding;
+  }
+
+  .search-bar {
+    margin-top: -$border-width-sm;
+  }
+}
+
+.search-users-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: $spacing-md;
+  margin-bottom: $padding;
+
+  .users-header-title {
+    font-size: rem(17);
+    font-weight: $font-weight-semibold;
+  }
+
+  .users-header-button {
+    font-size: rem(14);
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+@media screen and (max-width: $break-md) {
+  .search-users-header {
+    margin-left: $padding;
+    margin-right: $padding;
+  }
+}

@@ -1,0 +1,44 @@
+@import '../styles/variables';
+@import '../styles/fonts';
+@import '../styles/helpers';
+
+.settings-menu-item {
+  @include separator;
+
+  .settings-menu-item-title {
+    margin: $spacing-sm;
+    display: inline-block;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.header {
+    font-weight: $font-weight-semibold;
+    background: $secondary-color;
+    font-size: rem(18);
+  }
+}
+
+.settings-menu-button {
+  display: block;
+  color: $primary-text-color;
+  font-size: rem(17);
+
+  &:hover {
+    background: $selected-color;
+  }
+
+  &.active {
+    border-left: $border-width-lg solid $active-color;
+
+    .settings-menu-item-title {
+      margin-left: $spacing-sm - $border-width-lg;
+    }
+
+    &:hover {
+      background: $primary-color;
+    }
+  }
+}

@@ -1,0 +1,34 @@
+@import '../styles/variables';
+@import '../styles/fonts';
+@import '../styles/helpers';
+
+.settings-container {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.settings-menu {
+  width: $content-secondary-width;
+  margin: $spacing-md;
+  margin-left: 0;
+  background: $primary-color;
+}
+
+.settings-content {
+  background: $primary-color;
+  margin: $spacing-md 0;
+}
+
+@media screen and (max-width: $break-md) {
+  .settings-container {
+    flex-direction: column;
+    align-items: center
+  }
+
+  .settings-menu {
+    margin: $spacing-md 0 0;
+    width: 100%;
+    max-width: $content-main-width;
+  }
+}
