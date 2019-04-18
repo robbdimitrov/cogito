@@ -13,16 +13,20 @@ const sessions = [
 class Sessions extends React.Component {
   render() {
     return (
-      <ul className='sessions-list'>
-        {sessions.map((item) =>
-          <SessionItem
-            key={item.id}
-            name={item.name}
-            isDesktop={item.isDesktop}
-            isCurrent={item.isCurrent}
-          />
-        )}
-      </ul>
+      <div className='sessions-container form-content'>
+        <h1 className='form-title'>Sessions</h1>
+
+        <ul className='sessions-list'>
+          {sessions.map((item) =>
+            <SessionItem
+              key={item.id}
+              name={item.name}
+              isDesktop={item.isDesktop}
+              isCurrent={item.isCurrent}
+            />
+          )}
+        </ul>
+      </div>
     );
   }
 }
