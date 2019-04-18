@@ -4,15 +4,14 @@ import UserItem from './UserItem';
 import './UserList.scss';
 
 function UserList(props) {
-  const listItems = [...Array(props.items).keys()].map((number) =>
-    <UserItem
-      key={number.toString()}
-      value={number}
-    />
-  );
   return (
     <ul className='user-list'>
-      {listItems}
+      {[...Array(props.items).keys()].map((item) =>
+        <UserItem
+          key={item.toString()}
+          value={item}
+        />
+      )}
     </ul>
   );
 }

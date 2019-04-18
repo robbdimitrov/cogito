@@ -1,0 +1,8 @@
+@import '../../styles/fonts';
+@import '../../styles/colors';
+
+.settings-menu-item.header {
+  font-weight: $font-weight-semibold;
+  background: $secondary-color;
+  font-size: rem(18);
+}

@@ -5,15 +5,14 @@ import ThoughtItem from './ThoughtItem';
 import './ThoughtList.scss';
 
 function ThoughtList(props) {
-  const listItems = [...Array(props.items).keys()].map((number) =>
-    <ThoughtItem
-      key={number.toString()}
-      value={number}
-    />
-  );
   return (
     <ul className='thought-list'>
-      {listItems}
+      {[...Array(props.items).keys()].map((item) =>
+        <ThoughtItem
+          key={item.toString()}
+          value={item}
+        />
+      )}
     </ul>
   );
 }
