@@ -1,0 +1,30 @@
+@import '../styles/variables';
+
+.feed-container {
+  margin: $spacing-md 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.feed-container .user-card {
+  width: $content-secondary-width;
+  margin-right: $spacing-md;
+  display: block;
+}
+
+.feed-container .content {
+  width: $content-primary-width;
+}
+
+@media screen and (max-width: 820px) {
+  .feed-container .user-card {
+    display: none;
+  }
+}
+
+@media screen and (max-width: $break-sm) {
+  .feed-container .content {
+    width: 100%;
+  }
+}

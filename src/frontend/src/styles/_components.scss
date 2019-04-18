@@ -72,6 +72,7 @@ $button-background-color: $active-color;
   font-weight: $font-weight-semibold;
   text-decoration: none;
   color: $primary-text-color;
+  background: white;
 
   &:not(:disabled) {
     &:hover, &:focus {
@@ -150,6 +151,15 @@ $button-background-color: $active-color;
 
   button {
     margin-right: $padding;
+    background-color: white;
+  }
+
+  .visibility-button {
+    color: lighten(black, 30%);
+
+    &:active {
+      color: lighten(black, 70%);
+    }
   }
 
   .form-input {
@@ -164,7 +174,7 @@ $button-background-color: $active-color;
 }
 
 .reference-label::after {
-  content: " ";
+  content: ' ';
 }
 
 .reference, .form-title, .form-message {
@@ -183,7 +193,7 @@ $button-background-color: $active-color;
   margin-right: auto;
 }
 
-.form-message, form {
+.form-message, .action-form {
   margin-bottom: $spacing-lg;
 }
 

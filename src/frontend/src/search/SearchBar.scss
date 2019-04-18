@@ -1,0 +1,22 @@
+@import '../styles/variables';
+@import '../styles/fonts';
+@import '../styles/helpers';
+
+$search-bar-background: #35393C;
+
+.search-bar {
+  background: $search-bar-background;
+
+  .content {
+    padding: $spacing-md 0;
+  }
+
+  .search-input {
+    background: $search-bar-background;
+    font-size: rem(28);
+    color: $primary-color;
+    font-weight: $font-weight-semibold;
+    margin: 0 $spacing-sm;
+    flex: 1;
+  }
+}

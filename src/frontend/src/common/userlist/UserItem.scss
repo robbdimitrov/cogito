@@ -1,0 +1,73 @@
+@import '../../styles/variables';
+@import '../../styles/fonts';
+@import '../../styles/helpers';
+@import '../../styles/colors';
+
+$avatar-width-sm: 40px;
+
+.user-item.container {
+  box-sizing: border-box;
+
+  .content {
+    display: block;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .follow-button {
+    margin: $padding;
+  }
+
+  .avatar {
+    margin-left: $spacing-sm;
+  }
+
+  .follow-button {
+    margin: $spacing-sm $spacing-sm 0 0;
+  }
+
+  .texts {
+    margin: $spacing-sm;
+  }
+
+  .bio {
+    font-size: rem(14);
+    margin-top: rem(10);
+  }
+}
+
+
+
+@media screen and (max-width: $break-sm) {
+  .user-item.container {
+    .cover {
+      display: none;
+    }
+
+    .header {
+      display: block;
+    }
+
+    .content {
+      display: flex;
+    }
+
+    .avatar {
+      width: $avatar-width-sm;
+      height: $avatar-width-sm;
+      margin-top: $spacing-sm;
+    }
+
+    .title, .subtitle {
+      width: 75%;
+    }
+
+    .follow-button {
+      position: absolute;
+      right: 0;
+    }
+  }
+}

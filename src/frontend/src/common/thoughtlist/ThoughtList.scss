@@ -1,0 +1,15 @@
+@import '../../styles/colors';
+@import '../../styles/helpers';
+
+.thought-list {
+  flex-direction: column;
+}
+
+.thought-item {
+  width: 100%;
+  @include separator;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
