@@ -1,0 +1,15 @@
+@import '../../styles/variables';
+@import '../../styles/helpers';
+
+.settings-menu-item {
+  @include separator;
+
+  .settings-menu-item-title {
+    margin: $spacing-sm;
+    display: inline-block;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+}

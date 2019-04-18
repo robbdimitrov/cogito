@@ -1,0 +1,23 @@
+@import '../../styles/variables';
+@import '../../styles/fonts';
+@import '../../styles/helpers';
+
+.session-item {
+  @include separator;
+  display: flex;
+  flex-direction: row;
+  height: 90px;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.session-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.session-device-icon {
+
+}

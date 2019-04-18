@@ -35,7 +35,7 @@ function ThoughtItem(props) {
               </button>
 
               <button className='like-button'>
-              <FontAwesomeIcon icon='heart' className='button-icon' />
+                <FontAwesomeIcon icon='heart' className='button-icon' />
                 <span className='button-label'>3</span>
               </button>
             </div>
