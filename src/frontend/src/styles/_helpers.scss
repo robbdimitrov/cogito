@@ -13,6 +13,10 @@
   border: $border-width-sm solid $background-color;
 }
 
+@mixin separator-top {
+  border-top: $border-width-sm solid $background-color;
+}
+
 @mixin separator {
   border-bottom: $border-width-sm solid $background-color;
 }

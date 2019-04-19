@@ -1,8 +1,8 @@
 import React from 'react';
 
 import Navigation from '../common/navigation/Navigation';
-import Overlay from '../common/Overlay';
-import ThoughtBox from '../common/ThoughtBox';
+import Overlay from '../common/overlay/Overlay';
+import ThoughtBox from '../common/thoughtbox/ThoughtBox';
 
 class Root extends React.Component {
   constructor(props) {

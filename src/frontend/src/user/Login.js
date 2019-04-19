@@ -1,13 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { getDeviceName } from '../common/utils';
 
 class Login extends React.Component {
   handleLogin = (event) => {
     event.preventDefault();
-    let device = getDeviceName();
-    console.log(`Loggin in ${device}`);
+    console.log(`Logging in`);
   };
 
   render() {
