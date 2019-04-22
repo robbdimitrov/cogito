@@ -1,0 +1,24 @@
+{
+  "name": "apiservice",
+  "author": "Robert Dimitrov",
+  "license": "MIT",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./dist/server.bundle.js",
+    "build": "webpack --progress --mode=production",
+    "watch": "webpack --progress --watch --mode=development",
+    "lint": "eslint src/**/*.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "helmet": "^3.16.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "source-map-loader": "^0.2.4",
+    "webpack": "^4.30.0",
+    "webpack-cli": "^3.3.0"
+  }
+}
