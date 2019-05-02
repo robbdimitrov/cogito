@@ -1,7 +1,5 @@
 import os
 
-from flask import Flask
-
 from userservice import db, user, follow
 
 

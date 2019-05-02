@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package thoughts;
+
+message CreateUserRequest {
+  string username = 1;
+  string email = 2;
+  string name = 3;
+  string password = 4;
+  string bio = 5;
+}
+
+message User {
+  int32 id = 1;
+  string username = 2;
+  string email = 3;
+  string name = 4;
+  string bio = 5;
+  string reg_date = 6;
+}
+
+message CreateUserResponse {
+  User user = 1;
+}
+
+message GetFollowingRequest {
+
+}
+
+message GetFollowersRequest {
+
+}
+
+message FollowRequestllow {
+
+}
+
+message UnfollowRequest {
+
+}
+
+service UserService {
+  rpc Create(CreateUserRequest) returns (CreateUserResponse);
+  rpc GetFollowing(GetFollowingRequest)
+}
+
+
+
+CREATE TABLE IF NOT EXISTS thoughts.users (
+  id serial PRIMARY KEY,
+  username varchar(20) UNIQUE NOT NULL,
+  email varchar(100) UNIQUE NOT NULL,
+  name varchar(100) NOT NULL,
+  password varchar(100) NOT NULL,
+  bio varchar(250) DEFAULT '',
+  reg_date timestamp NOT NULL DEFAULT localtimestamp
+);
+
+CREATE TABLE IF NOT EXISTS thoughts.followers (
+  user_id integer REFERENCES thoughts.users(id) ON DELETE CASCADE,
+  follower_id integer REFERENCES thoughts.users(id) ON DELETE CASCADE
+);
+
