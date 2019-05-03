@@ -21,15 +21,20 @@ class AuthServiceStub(object):
         request_serializer=auth__service__pb2.LoginRequest.SerializeToString,
         response_deserializer=auth__service__pb2.AuthResponse.FromString,
         )
-    self.Validate = channel.unary_unary(
-        '/thoughts.AuthService/Validate',
-        request_serializer=auth__service__pb2.AuthRequest.SerializeToString,
-        response_deserializer=auth__service__pb2.AuthResponse.FromString,
-        )
     self.Refresh = channel.unary_unary(
         '/thoughts.AuthService/Refresh',
         request_serializer=auth__service__pb2.AuthRequest.SerializeToString,
         response_deserializer=auth__service__pb2.AuthResponse.FromString,
+        )
+    self.Validate = channel.unary_unary(
+        '/thoughts.AuthService/Validate',
+        request_serializer=auth__service__pb2.AuthRequest.SerializeToString,
+        response_deserializer=types__pb2.Status.FromString,
+        )
+    self.ValidatePassword = channel.unary_unary(
+        '/thoughts.AuthService/ValidatePassword',
+        request_serializer=auth__service__pb2.PasswordValidation.SerializeToString,
+        response_deserializer=types__pb2.Status.FromString,
         )
     self.GetSessions = channel.unary_unary(
         '/thoughts.AuthService/GetSessions',
@@ -55,6 +60,13 @@ class AuthServiceServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def Refresh(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
   def Validate(self, request, context):
     # missing associated documentation comment in .proto file
     pass
@@ -62,7 +74,7 @@ class AuthServiceServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def Refresh(self, request, context):
+  def ValidatePassword(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -91,15 +103,20 @@ def add_AuthServiceServicer_to_server(servicer, server):
           request_deserializer=auth__service__pb2.LoginRequest.FromString,
           response_serializer=auth__service__pb2.AuthResponse.SerializeToString,
       ),
-      'Validate': grpc.unary_unary_rpc_method_handler(
-          servicer.Validate,
-          request_deserializer=auth__service__pb2.AuthRequest.FromString,
-          response_serializer=auth__service__pb2.AuthResponse.SerializeToString,
-      ),
       'Refresh': grpc.unary_unary_rpc_method_handler(
           servicer.Refresh,
           request_deserializer=auth__service__pb2.AuthRequest.FromString,
           response_serializer=auth__service__pb2.AuthResponse.SerializeToString,
+      ),
+      'Validate': grpc.unary_unary_rpc_method_handler(
+          servicer.Validate,
+          request_deserializer=auth__service__pb2.AuthRequest.FromString,
+          response_serializer=types__pb2.Status.SerializeToString,
+      ),
+      'ValidatePassword': grpc.unary_unary_rpc_method_handler(
+          servicer.ValidatePassword,
+          request_deserializer=auth__service__pb2.PasswordValidation.FromString,
+          response_serializer=types__pb2.Status.SerializeToString,
       ),
       'GetSessions': grpc.unary_unary_rpc_method_handler(
           servicer.GetSessions,

@@ -22,6 +22,13 @@ message AuthResponse {
   string refresh_token = 3;
 }
 
+// Password
+
+message PasswordValidation {
+  string email = 1;
+  string password = 2;
+}
+
 // Session
 
 message Session {
@@ -45,8 +52,11 @@ message SessionRequest {
 
 service AuthService {
   rpc Login(LoginRequest) returns (AuthResponse);
-  rpc Validate(AuthRequest) returns (AuthResponse);
   rpc Refresh(AuthRequest) returns (AuthResponse);
+
+  rpc Validate(AuthRequest) returns (Status);
+  rpc ValidatePassword(PasswordValidation) returns (Status);
+
   rpc GetSessions(AuthRequest) returns (Sessions);
   rpc DeleteSession(SessionRequest) returns (Status);
 }

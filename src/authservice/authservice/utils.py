@@ -1,13 +1,13 @@
 import re
 
-import auth_service_pb2
+from authservice import auth_service_pb2
 
 
 def validate_email(email):
     return re.match(r'[^@]+@[^@]+\.[^@]+', email) is not None
 
 
-def dict_to_session(session):
+def object_to_session(item):
     return auth_service_pb2.Session(
         id=item['id'],
         name=item['name'],
