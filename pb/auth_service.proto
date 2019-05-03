@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+import "types.proto";
+
+package thoughts;
+
+// General
+
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+  string user_agent = 3;
+}
+
+message AuthRequest {
+  string token = 1;
+}
+
+message AuthResponse {
+  string token_type = 1;
+  string access_token = 2;
+  string refresh_token = 3;
+  Error error = 4;
+}
+
+// Password
+
+message PasswordValidation {
+  string email = 1;
+  string password = 2;
+}
+
+// Session
+
+message Session {
+  int32 id = 1;
+  string name = 2;
+  string user_agent = 3;
+  int32 user_id = 4;
+  string date_created = 5;
+}
+
+message Sessions {
+  repeated Session sessions = 1;
+}
+
+message SessionRequest {
+  string token = 1;
+  int32 session_id = 2;
+}
+
+// Service
+
+service AuthService {
+  rpc Login(LoginRequest) returns (AuthResponse);
+  rpc Refresh(AuthRequest) returns (AuthResponse);
+
+  rpc Validate(AuthRequest) returns (Status);
+  rpc ValidatePassword(PasswordValidation) returns (Status);
+
+  rpc GetSessions(AuthRequest) returns (Sessions);
+  rpc DeleteSession(SessionRequest) returns (Status);
+}
