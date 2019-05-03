@@ -1,13 +1,9 @@
 import datetime
+import bcrypt
 import jwt
 
-from authservice import (
-    db_client,
-    auth_service_pb2_grpc,
-    auth_service_pb2,
-    types_pb2
-)
-from authservice.utils import validate_email
+from authservice import auth_service_pb2_grpc, auth_service_pb2, types_pb2
+from authservice.utils import validate_email, dict_to_session
 
 
 class AuthService(auth_service_pb2_grpc.AuthServiceServicer):
@@ -25,35 +21,54 @@ class AuthService(auth_service_pb2_grpc.AuthServiceServicer):
         pass
 
     def GetSessions(self, request, context):
-        pass
+        """Get all active sessions of the active user."""
 
-    def DeleteSession(self, request, context):
-        """Delete a session with a given token."""
+        if request.token is None:
+            error = types_pb2.Error(code=400, error='INVALID_TOKEN',
+                message='Authentication token not provided.')
+            return types_pb2.Status(error=error)
 
-        auth_header = request.headers.get('Authorization')
-
-        if auth_header is None:
-            error = {'code': 400, 'error': 'INVALID_TOKEN',
-                'message': 'Authentication token not provided.'}
-            return make_response({'error': error}, 400)
-
-        auth_token = auth_header.split(" ")[1]
+        auth_token = request.token.split(' ')[1]
 
         try:
             payload = jwt.decode(auth_token, self.secret, algorithms='HS256')
         except jwt.ExpiredSignatureError:
-            error = {'code': 401, 'error': 'EXPIRED_TOKEN',
-                'message': 'Authorization token is expired.'}
-            return make_response(jsonify({'error': error}), 401)
+            error = types_pb2.Error(code=401, error='EXPIRED_TOKEN',
+                message='Authorization token is expired.')
+            return types_pb2.Status(error=error)
 
-        if db_client.get_session(session_id)['user_id'] != payload['sub']:
-            error = {'code': 403, 'error': 'FORBIDDEN',
-                'message': 'This action is forbidden.'}
-            return make_response(jsonify({'error': error}), 403)
+        sessions = self.db_client.get_user_sessions(payload['sub'])
+        sessions = [dict_to_session(item) for item in sessions]
 
-        db_client.delete_session(session_id)
+        return auth_service_pb2.Sessions(sessions=sessions)
 
-        return make_response(jsonify({'response': 'Deleted session.'}), 200)
+    def DeleteSession(self, request, context):
+        """Delete a session with a given token."""
+
+        if request.token is None:
+            error = types_pb2.Error(code=400, error='INVALID_TOKEN',
+                message='Authentication token not provided.')
+            return types_pb2.Status(error=error)
+
+        auth_token = request.token.split(' ')[1]
+
+        try:
+            payload = jwt.decode(auth_token, self.secret, algorithms='HS256')
+        except jwt.ExpiredSignatureError:
+            error = types_pb2.Error(code=401, error='EXPIRED_TOKEN',
+                message='Authorization token is expired.')
+            return types_pb2.Status(error=error)
+
+        session_id = request.session_id
+
+        if self.db_client.get_session(session_id)['user_id'] != payload['sub']:
+            error = types_pb2.Error(code=403, error='FORBIDDEN',
+                message='This action is forbidden.')
+            return types_pb2.Status(error=error)
+
+        self.db_client.delete_session(session_id)
+
+        return types_pb2.Status(message='Deleted session.')
 
 
 @bp.route('/session', methods=['POST'])
@@ -66,8 +81,6 @@ def create_session():
     email = content.get('email')
     password = content.get('password')
     name = content.get('name')
-
-    secret = os.getenv('JWT_SECRET')
 
     if email is not None and password is not None:
         if validate_email(email) == False:
@@ -116,60 +129,3 @@ def create_session():
     return make_response(jsonify({'token_type': 'bearer',
         'access_token': access_token,
         'refresh_token': refresh_token}), 200)
-
-
-@bp.route('/session', methods=['GET'])
-def get_sessions():
-    """Get all active sessions of the active user."""
-
-    auth_header = request.headers.get('Authorization')
-    secret = os.getenv('JWT_SECRET')
-
-    if auth_header is None:
-        error = {'code': 400, 'error': 'INVALID_TOKEN',
-            'message': 'Authentication token not provided.'}
-        return make_response({'error': error}, 400)
-
-    auth_token = auth_header.split(" ")[1]
-
-    try:
-        payload = jwt.decode(auth_token, secret, algorithms='HS256')
-    except jwt.ExpiredSignatureError:
-        error = {'code': 401, 'error': 'EXPIRED_TOKEN',
-            'message': 'Authorization token is expired.'}
-        return make_response(jsonify({'error': error}), 401)
-
-    sessions = db_client.get_user_sessions(payload['sub'])
-
-    return make_response(jsonify(sessions), 200)
-
-
-@bp.route('/session/<session_id>', methods=['DELETE'])
-def delete_session(session_id):
-    """Delete a session with a given token."""
-
-    auth_header = request.headers.get('Authorization')
-    secret = os.getenv('JWT_SECRET')
-
-    if auth_header is None:
-        error = {'code': 400, 'error': 'INVALID_TOKEN',
-            'message': 'Authentication token not provided.'}
-        return make_response({'error': error}, 400)
-
-    auth_token = auth_header.split(" ")[1]
-
-    try:
-        payload = jwt.decode(auth_token, secret, algorithms='HS256')
-    except jwt.ExpiredSignatureError:
-        error = {'code': 401, 'error': 'EXPIRED_TOKEN',
-            'message': 'Authorization token is expired.'}
-        return make_response(jsonify({'error': error}), 401)
-
-    if db_client.get_session(session_id)['user_id'] != payload['sub']:
-        error = {'code': 403, 'error': 'FORBIDDEN',
-            'message': 'This action is forbidden.'}
-        return make_response(jsonify({'error': error}), 403)
-
-    db_client.delete_session(session_id)
-
-    return make_response(jsonify({'response': 'Deleted session.'}), 200)

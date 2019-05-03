@@ -18,6 +18,6 @@ message User {
 }
 
 message Status {
-  int32 code = 1;
-  string message = 2;
+  string message = 1;
+  Error error = 2;
 }
