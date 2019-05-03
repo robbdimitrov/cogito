@@ -11,14 +11,14 @@ class DBClient:
     def __init__(self, db):
         self.db = db
 
-    def create_session(self, user_id, name):
+    def create_session(self, user_id, user_agent):
         conn = self.db.get_cur()
         cur = conn.cursor()
 
         try:
-            cur.execute('INSERT INTO thoughts.sessions(name, user_id) \
-                VALUES(%s, %s) RETURNING id, user_id, name, time_format(date_created)',
-                (name, user_id))
+            cur.execute('INSERT INTO thoughts.sessions(user_id, user_agent) \
+                VALUES(%s, %s) RETURNING id, user_id, user_agent, time_format(date_created)',
+                (user_id, user_agent))
             result = cur.fetchone()
             conn.commit()
         except psycopg2.Error as e:

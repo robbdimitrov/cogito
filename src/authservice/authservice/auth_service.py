@@ -37,7 +37,6 @@ class AuthService(auth_service_pb2_grpc.AuthServiceServicer):
 
         return payload
 
-
     def validate_password(self, email, password):
         current_user = self.db_client.get_user_password_hash(email)
 
@@ -45,6 +44,26 @@ class AuthService(auth_service_pb2_grpc.AuthServiceServicer):
             raise AuthException(401, 'INVALID_CREDENTIALS', 'Wrong username or password.')
 
         return current_user
+
+    def generate_tokens(self, session):
+        if session is None:
+            raise AuthException(401, 'INVALID_SESSION', 'Invalid session.')
+
+        access_payload = {'sub': session['user_id'],
+            'iat': datetime.datetime.utcnow(),
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=15)}
+
+        refresh_payload = {'sub': session['session_id'],
+            'iat': datetime.datetime.utcnow(),
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)}
+
+        access_token = jwt.encode(access_payload, self.secret, algorithm='HS256')
+        refresh_token = jwt.encode(refresh_payload, self.secret, algorithm='HS256')
+
+        return {
+            'access_token': access_token,
+            'refresh_token': refresh_token
+        }
 
     # Token Generation
 
@@ -61,98 +80,67 @@ class AuthService(auth_service_pb2_grpc.AuthServiceServicer):
             if validate_email(email) == False:
                 error = types_pb2.Error(code=400, error='INVALID_EMAIL',
                     message='Invalid email address.')
-                return types_pb2.Status(error=error)
+                return auth_service_pb2.AuthResponse(error=error)
 
-            # TODO: Move password validation to RPC call
-            current_user = db_client.get_user_password_hash(email)
-            if check_password_hash(current_user['password'], password) == False:
-                error = {'code': 401, 'error': 'INVALID_CREDENTIALS',
-                    'message': 'Wrong username or password.'}
-                return make_response(jsonify({'error': error}), 401)
+            try:
+                current_user = self.validate_password(email, password)
+            except AuthException as e:
+                error = types_pb2.Error(code=e.code, error=e.error,
+                    message=e.message)
+                return auth_service_pb2.AuthResponse(error=error)
 
-            session = db_client.create_session(current_user['id'], name)
+            session = self.db_client.create_session(current_user['id'], user_agent)
         else:
-            error = {'code': 400, 'error': 'MISSING_CREDENTIALS',
-                'message': 'Missing credentials.'}
-            return make_response(jsonify({'error': error}), 400)
+            error = types_pb2.Error(code=400, error='MISSING_CREDENTIALS',
+                message='Missing credentials.')
+            return auth_service_pb2.AuthResponse(error=error)
 
-        if session is None:
-            error = {'code': 401, 'error': 'INVALID_SESSION',
-                'message': 'Invalid session.'}
-            return make_response({'error': error}, 401)
+        try:
+            tokens = self.generate_tokens(session)
+        except AuthException as e:
+            error = types_pb2.Error(code=e.code, error=e.error,
+                message=e.message)
+            return auth_service_pb2.AuthResponse(error=error)
 
-        access_payload = {'sub': session['user_id'],
-            'iat': datetime.datetime.utcnow(),
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=15)}
-
-        refresh_payload = {'sub': session['session_id'],
-            'iat': datetime.datetime.utcnow(),
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)}
-
-        access_token = jwt.encode(access_payload, secret, algorithm='HS256')
-        refresh_token = jwt.encode(refresh_payload, secret, algorithm='HS256')
-
-        return make_response(jsonify({'token_type': 'bearer',
-            'access_token': access_token,
-            'refresh_token': refresh_token}), 200)
+        return auth_service_pb2.AuthResponse(
+            token_type='bearer',
+            access_token=tokens['access_token'],
+            refresh_token=tokens['refresh_token']
+        )
 
     def Refresh(self, request, context):
         """Validate refresh token, generate and
            return access and refresh tokens
         """
 
-        refresh_token = content.get('refresh_token')
-        email = content.get('email')
-        password = content.get('password')
-        name = content.get('name')
+        refresh_token = request.token
 
-        if email is not None and password is not None:
-            if validate_email(email) == False:
-                error = {'code': 400, 'error': 'INVALID_EMAIL',
-                    'message': 'Invalid email address.'}
-                return make_response(jsonify({'error': error}), 400)
-
-            # TODO: Move password validation to RPC call
-            current_user = db_client.get_user_password_hash(email)
-            if check_password_hash(current_user['password'], password) == False:
-                error = {'code': 401, 'error': 'INVALID_CREDENTIALS',
-                    'message': 'Wrong username or password.'}
-                return make_response(jsonify({'error': error}), 401)
-
-            session = db_client.create_session(current_user['id'], name)
-        elif refresh_token is not None:
+        if refresh_token is not None:
             try:
-                payload = jwt.decode(refresh_token, secret, algorithms='HS256')
+                payload = jwt.decode(refresh_token, self.secret, algorithms='HS256')
             except jwt.ExpiredSignatureError:
-                error = {'code': 401, 'error': 'EXPIRED_TOKEN',
-                    'message': 'Refresh token is expired.'}
-                return make_response(jsonify({'error': error}), 401)
+                error = types_pb2.Error(code=401, error='EXPIRED_TOKEN',
+                    message='Refresh token is expired.')
+                return auth_service_pb2.AuthResponse(error=error)
 
-            session = db_client.get_session(payload['sub'])
+            session = self.db_client.get_session(payload['sub'])
         else:
-            error = {'code': 400, 'error': 'MISSING_CREDENTIALS',
-                'message': 'Missing credentials.'}
-            return make_response(jsonify({'error': error}), 400)
+            error = types_pb2.Error(code=400, error='MISSING_CREDENTIALS',
+                message='Missing credentials.')
+            return auth_service_pb2.AuthResponse(error=error)
 
-        if session is None:
-            error = {'code': 401, 'error': 'INVALID_SESSION',
-                'message': 'Invalid session.'}
-            return make_response({'error': error}, 401)
+        try:
+            tokens = self.generate_tokens(session)
+        except AuthException as e:
+            error = types_pb2.Error(code=e.code, error=e.error,
+                message=e.message)
+            return auth_service_pb2.AuthResponse(error=error)
 
-        access_payload = {'sub': session['user_id'],
-            'iat': datetime.datetime.utcnow(),
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=15)}
-
-        refresh_payload = {'sub': session['session_id'],
-            'iat': datetime.datetime.utcnow(),
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)}
-
-        access_token = jwt.encode(access_payload, secret, algorithm='HS256')
-        refresh_token = jwt.encode(refresh_payload, secret, algorithm='HS256')
-
-        return make_response(jsonify({'token_type': 'bearer',
-            'access_token': access_token,
-            'refresh_token': refresh_token}), 200)
+        return auth_service_pb2.AuthResponse(
+            token_type='bearer',
+            access_token=tokens['access_token'],
+            refresh_token=tokens['refresh_token']
+        )
 
     # Validation
 

@@ -20,6 +20,7 @@ message AuthResponse {
   string token_type = 1;
   string access_token = 2;
   string refresh_token = 3;
+  Error error = 4;
 }
 
 // Password
