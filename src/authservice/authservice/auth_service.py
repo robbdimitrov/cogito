@@ -1,15 +1,59 @@
 import datetime
-
-from flask import Blueprint, request, make_response, jsonify, current_app
-from werkzeug.security import check_password_hash
-
 import jwt
 
-from authservice import db_client
+from authservice import (
+    db_client,
+    auth_service_pb2_grpc,
+    auth_service_pb2,
+    types_pb2
+)
 from authservice.utils import validate_email
 
 
-bp = Blueprint('session', __name__)
+class AuthService(auth_service_pb2_grpc.AuthServiceServicer):
+    def __init__(self, db_client, secret):
+        self.db_client = db_client
+        self.secret = secret
+
+    def Login(self, request, context):
+        pass
+
+    def Validate(self, request, context):
+        pass
+
+    def Refresh(self, request, context):
+        pass
+
+    def GetSessions(self, request, context):
+        pass
+
+    def DeleteSession(self, request, context):
+        """Delete a session with a given token."""
+
+        auth_header = request.headers.get('Authorization')
+
+        if auth_header is None:
+            error = {'code': 400, 'error': 'INVALID_TOKEN',
+                'message': 'Authentication token not provided.'}
+            return make_response({'error': error}, 400)
+
+        auth_token = auth_header.split(" ")[1]
+
+        try:
+            payload = jwt.decode(auth_token, self.secret, algorithms='HS256')
+        except jwt.ExpiredSignatureError:
+            error = {'code': 401, 'error': 'EXPIRED_TOKEN',
+                'message': 'Authorization token is expired.'}
+            return make_response(jsonify({'error': error}), 401)
+
+        if db_client.get_session(session_id)['user_id'] != payload['sub']:
+            error = {'code': 403, 'error': 'FORBIDDEN',
+                'message': 'This action is forbidden.'}
+            return make_response(jsonify({'error': error}), 403)
+
+        db_client.delete_session(session_id)
+
+        return make_response(jsonify({'response': 'Deleted session.'}), 200)
 
 
 @bp.route('/session', methods=['POST'])
@@ -23,7 +67,7 @@ def create_session():
     password = content.get('password')
     name = content.get('name')
 
-    secret = current_app.config.get('JWT_SECRET')
+    secret = os.getenv('JWT_SECRET')
 
     if email is not None and password is not None:
         if validate_email(email) == False:
@@ -79,7 +123,7 @@ def get_sessions():
     """Get all active sessions of the active user."""
 
     auth_header = request.headers.get('Authorization')
-    secret = current_app.config.get('JWT_SECRET')
+    secret = os.getenv('JWT_SECRET')
 
     if auth_header is None:
         error = {'code': 400, 'error': 'INVALID_TOKEN',
@@ -105,7 +149,7 @@ def delete_session(session_id):
     """Delete a session with a given token."""
 
     auth_header = request.headers.get('Authorization')
-    secret = current_app.config.get('JWT_SECRET')
+    secret = os.getenv('JWT_SECRET')
 
     if auth_header is None:
         error = {'code': 400, 'error': 'INVALID_TOKEN',

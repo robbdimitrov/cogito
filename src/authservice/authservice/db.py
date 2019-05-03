@@ -1,40 +1,17 @@
-import psycopg2
-
-import click
-from flask import current_app, g
-from flask.cli import with_appcontext
+import asyncpg
 
 
-def get_db():
-    if 'db' not in g:
-        g.db = psycopg2.connect(
-            current_app.config['DATABASE_URI']
-        )
+class Database:
+    def __init__(self, db_uri):
+        self.db_uri = db_uri
+        self.cur = None
 
-    return g.db
+    def get_cur(self):
+        if self.cur is None:
+            self.cur = asyncpg.connect(self.db_uri)
+        return self.cur
 
-
-def close_db(e=None):
-    db = g.pop('db', None)
-
-    if db is not None:
-        db.close()
-
-
-@click.command('init-db')
-@with_appcontext
-def init_db():
-    db = get_db()
-
-    with current_app.open_resource('schema.sql') as f:
-        cur = db.cursor()
-        cur.execute(f.read().decode('utf8'))
-        db.commit()
-        cur.close()
-
-    click.echo('Initialized the database.')
-
-
-def init_app(app):
-    app.teardown_appcontext(close_db)
-    app.cli.add_command(init_db)
+    def close(self):
+        if self.cur is not None:
+            self.cur.close()
+            self.cur = None
