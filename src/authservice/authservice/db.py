@@ -1,4 +1,4 @@
-import asyncpg
+import psycopg2
 
 
 class Database:
@@ -8,7 +8,7 @@ class Database:
 
     def get_cur(self):
         if self.cur is None:
-            self.cur = asyncpg.connect(self.db_uri)
+            self.cur = psycopg2.connect(self.db_uri)
         return self.cur
 
     def close(self):

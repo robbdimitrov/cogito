@@ -1,5 +1,4 @@
-import asyncpg
-import asyncio
+import psycopg2
 
 
 class DBException(Exception):

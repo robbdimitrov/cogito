@@ -13,7 +13,7 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-import types_pb2 as types__pb2
+import authservice.types_pb2 as types__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='thoughts',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x12\x61uth_service.proto\x12\x08thoughts\x1a\x0btypes.proto\"F\n\x0cLoginRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\x12\x12\n\nuser_agent\x18\x03 \x01(\t\"\x1c\n\x0b\x41uthRequest\x12\r\n\x05token\x18\x01 \x01(\t\"O\n\x0c\x41uthResponse\x12\x12\n\ntoken_type\x18\x01 \x01(\t\x12\x14\n\x0c\x61\x63\x63\x65ss_token\x18\x02 \x01(\t\x12\x15\n\rrefresh_token\x18\x03 \x01(\t\"5\n\x12PasswordValidation\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"^\n\x07Session\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x12\n\nuser_agent\x18\x03 \x01(\t\x12\x0f\n\x07user_id\x18\x04 \x01(\x05\x12\x14\n\x0c\x64\x61te_created\x18\x05 \x01(\t\"/\n\x08Sessions\x12#\n\x08sessions\x18\x01 \x03(\x0b\x32\x11.thoughts.Session\"3\n\x0eSessionRequest\x12\r\n\x05token\x18\x01 \x01(\t\x12\x12\n\nsession_id\x18\x02 \x01(\x05\x32\xf0\x02\n\x0b\x41uthService\x12\x37\n\x05Login\x12\x16.thoughts.LoginRequest\x1a\x16.thoughts.AuthResponse\x12\x38\n\x07Refresh\x12\x15.thoughts.AuthRequest\x1a\x16.thoughts.AuthResponse\x12\x33\n\x08Validate\x12\x15.thoughts.AuthRequest\x1a\x10.thoughts.Status\x12\x42\n\x10ValidatePassword\x12\x1c.thoughts.PasswordValidation\x1a\x10.thoughts.Status\x12\x38\n\x0bGetSessions\x12\x15.thoughts.AuthRequest\x1a\x12.thoughts.Sessions\x12;\n\rDeleteSession\x12\x18.thoughts.SessionRequest\x1a\x10.thoughts.Statusb\x06proto3')
+  serialized_pb=_b('\n\x12\x61uth_service.proto\x12\x08thoughts\x1a\x0btypes.proto\"F\n\x0cLoginRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\x12\x12\n\nuser_agent\x18\x03 \x01(\t\"\x1c\n\x0b\x41uthRequest\x12\r\n\x05token\x18\x01 \x01(\t\"o\n\x0c\x41uthResponse\x12\x12\n\ntoken_type\x18\x01 \x01(\t\x12\x14\n\x0c\x61\x63\x63\x65ss_token\x18\x02 \x01(\t\x12\x15\n\rrefresh_token\x18\x03 \x01(\t\x12\x1e\n\x05\x65rror\x18\x04 \x01(\x0b\x32\x0f.thoughts.Error\"5\n\x12PasswordValidation\x12\r\n\x05\x65mail\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\"^\n\x07Session\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x12\n\nuser_agent\x18\x03 \x01(\t\x12\x0f\n\x07user_id\x18\x04 \x01(\x05\x12\x14\n\x0c\x64\x61te_created\x18\x05 \x01(\t\"/\n\x08Sessions\x12#\n\x08sessions\x18\x01 \x03(\x0b\x32\x11.thoughts.Session\"3\n\x0eSessionRequest\x12\r\n\x05token\x18\x01 \x01(\t\x12\x12\n\nsession_id\x18\x02 \x01(\x05\x32\xf0\x02\n\x0b\x41uthService\x12\x37\n\x05Login\x12\x16.thoughts.LoginRequest\x1a\x16.thoughts.AuthResponse\x12\x38\n\x07Refresh\x12\x15.thoughts.AuthRequest\x1a\x16.thoughts.AuthResponse\x12\x33\n\x08Validate\x12\x15.thoughts.AuthRequest\x1a\x10.thoughts.Status\x12\x42\n\x10ValidatePassword\x12\x1c.thoughts.PasswordValidation\x1a\x10.thoughts.Status\x12\x38\n\x0bGetSessions\x12\x15.thoughts.AuthRequest\x1a\x12.thoughts.Sessions\x12;\n\rDeleteSession\x12\x18.thoughts.SessionRequest\x1a\x10.thoughts.Statusb\x06proto3')
   ,
   dependencies=[types__pb2.DESCRIPTOR,])
 
@@ -132,6 +132,13 @@ _AUTHRESPONSE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='error', full_name='thoughts.AuthResponse.error', index=3,
+      number=4, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -145,7 +152,7 @@ _AUTHRESPONSE = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=147,
-  serialized_end=226,
+  serialized_end=258,
 )
 
 
@@ -182,8 +189,8 @@ _PASSWORDVALIDATION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=228,
-  serialized_end=281,
+  serialized_start=260,
+  serialized_end=313,
 )
 
 
@@ -241,8 +248,8 @@ _SESSION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=283,
-  serialized_end=377,
+  serialized_start=315,
+  serialized_end=409,
 )
 
 
@@ -272,8 +279,8 @@ _SESSIONS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=379,
-  serialized_end=426,
+  serialized_start=411,
+  serialized_end=458,
 )
 
 
@@ -310,10 +317,11 @@ _SESSIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=428,
-  serialized_end=479,
+  serialized_start=460,
+  serialized_end=511,
 )
 
+_AUTHRESPONSE.fields_by_name['error'].message_type = types__pb2._ERROR
 _SESSIONS.fields_by_name['sessions'].message_type = _SESSION
 DESCRIPTOR.message_types_by_name['LoginRequest'] = _LOGINREQUEST
 DESCRIPTOR.message_types_by_name['AuthRequest'] = _AUTHREQUEST
@@ -381,8 +389,8 @@ _AUTHSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=482,
-  serialized_end=850,
+  serialized_start=514,
+  serialized_end=882,
   methods=[
   _descriptor.MethodDescriptor(
     name='Login',

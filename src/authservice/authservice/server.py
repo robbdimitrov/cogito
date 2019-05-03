@@ -13,7 +13,7 @@ class Server:
         self.config = {}
 
     def create_auth_service(self):
-        db = Database(self.config['DB_URL'])
+        db = Database(self.config['DB_URI'])
         db_client = DBClient(db)
         auth_service = AuthService(db_client, self.config['JWT_SECRET'])
         return auth_service
@@ -31,6 +31,7 @@ class Server:
     def serve(self):
         server = self.create_server()
         server.start()
+        print(f'Server running on port {self.config["PORT"]}')
         try:
             while True:
                 time.sleep(60 * 60 * 24)
