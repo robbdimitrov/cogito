@@ -1,6 +1,25 @@
 syntax = "proto3";
 
+import "pb/types.proto";
+
 package thoughts;
+
+// General
+
+message UserRequest {
+  string username = 1;
+}
+
+message UserResponse {
+  User user = 1;
+  Error error = 2;
+}
+
+message Users {
+  repeated User users = 1;
+}
+
+// Create User
 
 message CreateUserRequest {
   string username = 1;
@@ -10,54 +29,27 @@ message CreateUserRequest {
   string bio = 5;
 }
 
-message User {
-  int32 id = 1;
-  string username = 2;
-  string email = 3;
-  string name = 4;
-  string bio = 5;
-  string reg_date = 6;
-}
-
-message CreateUserResponse {
-  User user = 1;
-}
-
-message GetFollowingRequest {
-
-}
+// Following and Followers
 
 message GetFollowersRequest {
-
+  string username = 1;
+  int32 page_number = 2;
+  int32 results_per_page = 3;
 }
 
-message FollowRequestllow {
-
+message FollowRequest {
+  string username = 1;
+  int32 user_id = 2;
+  string access_token = 3;
 }
 
-message UnfollowRequest {
-
-}
+// Service
 
 service UserService {
-  rpc Create(CreateUserRequest) returns (CreateUserResponse);
-  rpc GetFollowing(GetFollowingRequest)
+  rpc Create(CreateUserRequest) returns (UserResponse);
+  rpc GetUser(UserRequest) returns (UserResponse);
+  rpc GetFollowing(GetFollowersRequest) returns (Users);
+  rpc GetFollowers(GetFollowersRequest) returns (Users);
+  rpc Follow(FollowRequest) returns (Status);
+  rpc Unfollow(FollowRequest) returns (Status);
 }
-
-
-
-CREATE TABLE IF NOT EXISTS thoughts.users (
-  id serial PRIMARY KEY,
-  username varchar(20) UNIQUE NOT NULL,
-  email varchar(100) UNIQUE NOT NULL,
-  name varchar(100) NOT NULL,
-  password varchar(100) NOT NULL,
-  bio varchar(250) DEFAULT '',
-  reg_date timestamp NOT NULL DEFAULT localtimestamp
-);
-
-CREATE TABLE IF NOT EXISTS thoughts.followers (
-  user_id integer REFERENCES thoughts.users(id) ON DELETE CASCADE,
-  follower_id integer REFERENCES thoughts.users(id) ON DELETE CASCADE
-);
-
