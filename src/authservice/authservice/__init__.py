@@ -1,6 +1,5 @@
 import os
 
-from authservice import db
 from authservice.server import Server
 
 

@@ -2,27 +2,27 @@ import grpc
 from concurrent import futures
 import time
 
-from authservice import auth_service_pb2_grpc
-from authservice.auth import AuthService
-from authservice.db import Database
-from authservice.db_client import DBClient
+from userservice import user_service_pb2_grpc
+from userservice.user_service import UserService
+from userservice.db import Database
+from userservice.db_client import DBClient
 
 
 class Server:
     def __init__(self):
         self.config = {}
 
-    def create_auth_service(self):
+    def create_user_service(self):
         db = Database(self.config['DB_URI'])
         db_client = DBClient(db)
-        auth_service = AuthService(db_client, self.config['JWT_SECRET'])
-        return auth_service
+        user_service = UserService(db_client)
+        return user_service
 
     def create_server(self):
-        auth_service = self.create_auth_service()
+        auth_service = self.create_user_service()
 
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-        auth_service_pb2_grpc.add_AuthServiceServicer_to_server(auth_service, server)
+        user_service_pb2_grpc.add_UserServiceServicer_to_server(auth_service, server)
 
         server.add_insecure_port(f'[::]:{self.config["PORT"]}')
 

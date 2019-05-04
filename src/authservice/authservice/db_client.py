@@ -11,7 +11,7 @@ class DBClient:
         self.db = db
 
     def create_session(self, user_id, user_agent):
-        conn = self.db.get_cur()
+        conn = self.db.get_conn()
         cur = conn.cursor()
 
         try:
@@ -24,7 +24,7 @@ class DBClient:
             print(f'Error creating user: {str(e)}')
             raise DBException('Error while writing to the database.')
         finally:
-            self.db.close()
+            cur.close()
 
         session = {
             'id': result[0],
@@ -35,13 +35,13 @@ class DBClient:
         return session
 
     def get_session(self, session_id):
-        conn = self.db.get_cur()
+        conn = self.db.get_conn()
         cur = conn.cursor()
 
         cur.execute('SELECT id, user_id, name, time_format(date_created) \
             FROM thoughts.sessions WHERE id = %s', (session_id,))
         result = cur.fetchone()
-        self.db.close()
+        cur.close()
 
         if result is None:
             return None
@@ -55,13 +55,13 @@ class DBClient:
         return session
 
     def get_user_sessions(self, user_id):
-        conn = self.db.get_cur()
+        conn = self.db.get_conn()
         cur = conn.cursor()
 
         cur.execute('SELECT id, user_id, name, time_format(date_created) \
             FROM thoughts.sessions WHERE user_id = %s', (user_id,))
         result = cur.fetchall()
-        self.db.close()
+        cur.close()
 
         if result is None:
             return None
@@ -75,21 +75,21 @@ class DBClient:
         return session
 
     def delete_session(self, session_id):
-        conn = self.db.get_cur()
+        conn = self.db.get_conn()
         cur = conn.cursor()
 
         cur.execute('DELETE FROM thoughts.sessions WHERE id = %s', (session_id,))
         conn.commit()
-        self.db.close()
+        cur.close()
 
     def get_user_password_hash(self, username):
-        conn = self.db.get_cur()
+        conn = self.db.get_conn()
         cur = conn.cursor()
 
         cur.execute('SELECT id, password, FROM thoughts.users \
             WHERE username = %s', (username,))
         result = cur.fetchone()
-        self.db.close()
+        cur.close()
 
         if result is None:
             return None

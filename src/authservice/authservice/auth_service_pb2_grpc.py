@@ -6,7 +6,7 @@ import authservice.types_pb2 as types__pb2
 
 
 class AuthServiceStub(object):
-  """Service
+  """Services
 
   """
 
@@ -49,7 +49,7 @@ class AuthServiceStub(object):
 
 
 class AuthServiceServicer(object):
-  """Service
+  """Services
 
   """
 

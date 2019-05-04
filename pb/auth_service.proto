@@ -45,11 +45,11 @@ message Sessions {
 }
 
 message SessionRequest {
-  string token = 1;
-  int32 session_id = 2;
+  int32 session_id = 1;
+  string token = 2;
 }
 
-// Service
+// Services
 
 service AuthService {
   rpc Login(LoginRequest) returns (AuthResponse);
