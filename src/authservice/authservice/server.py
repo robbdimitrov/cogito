@@ -2,7 +2,7 @@ import grpc
 from concurrent import futures
 import time
 
-from authservice import auth_service_pb2_grpc
+from authservice import thoughts_pb2_grpc
 from authservice.auth import AuthService
 from authservice.db import Database
 from authservice.db_client import DBClient
@@ -22,7 +22,7 @@ class Server:
         auth_service = self.create_auth_service()
 
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-        auth_service_pb2_grpc.add_AuthServiceServicer_to_server(auth_service, server)
+        thoughts_pb2_grpc.add_AuthServiceServicer_to_server(auth_service, server)
 
         server.add_insecure_port(f'[::]:{self.config["PORT"]}')
 

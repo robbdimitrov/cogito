@@ -2,7 +2,7 @@ import datetime
 import bcrypt
 import jwt
 
-from authservice import auth_service_pb2_grpc, auth_service_pb2, types_pb2
+from authservice import thoughts_pb2, thoughts_pb2_grpc
 from authservice.utils import validate_email, object_to_session
 
 
@@ -15,35 +15,10 @@ class AuthException(Exception):
         self.message = message
 
 
-class AuthService(auth_service_pb2_grpc.AuthServiceServicer):
+class AuthService(thoughts_pb2_grpc.AuthServiceServicer):
     def __init__(self, db_client, secret):
         self.db_client = db_client
         self.secret = secret
-
-    # Helpers
-
-    def validate_session(self, auth_header):
-        """Helper method for token validation"""
-
-        if auth_header is None:
-            raise AuthException(400, 'INVALID_TOKEN', 'Authentication token not provided.')
-
-        auth_token = auth_header.split(' ')[1]
-
-        try:
-            payload = jwt.decode(auth_token, self.secret, algorithms='HS256')
-        except jwt.ExpiredSignatureError:
-            raise AuthException(401, 'EXPIRED_TOKEN', 'Authorization token is expired.')
-
-        return payload
-
-    def validate_password(self, email, password):
-        current_user = self.db_client.get_user_password_hash(email)
-
-        if bcrypt.checkpw(password, current_user['password']) == False:
-            raise AuthException(401, 'INVALID_CREDENTIALS', 'Wrong username or password.')
-
-        return current_user
 
     def generate_tokens(self, session):
         if session is None:
@@ -78,31 +53,31 @@ class AuthService(auth_service_pb2_grpc.AuthServiceServicer):
 
         if email is not None and password is not None:
             if validate_email(email) == False:
-                error = types_pb2.Error(code=400, error='INVALID_EMAIL',
+                error = thoughts_pb2.Error(code=400, error='INVALID_EMAIL',
                     message='Invalid email address.')
-                return auth_service_pb2.AuthResponse(error=error)
+                return thoughts_pb2.AuthResponse(error=error)
 
             try:
                 current_user = self.validate_password(email, password)
             except AuthException as e:
-                error = types_pb2.Error(code=e.code, error=e.error,
+                error = thoughts_pb2.Error(code=e.code, error=e.error,
                     message=e.message)
-                return auth_service_pb2.AuthResponse(error=error)
+                return thoughts_pb2.AuthResponse(error=error)
 
             session = self.db_client.create_session(current_user['id'], user_agent)
         else:
-            error = types_pb2.Error(code=400, error='MISSING_CREDENTIALS',
+            error = thoughts_pb2.Error(code=400, error='MISSING_CREDENTIALS',
                 message='Missing credentials.')
-            return auth_service_pb2.AuthResponse(error=error)
+            return thoughts_pb2.AuthResponse(error=error)
 
         try:
             tokens = self.generate_tokens(session)
         except AuthException as e:
-            error = types_pb2.Error(code=e.code, error=e.error,
+            error = thoughts_pb2.Error(code=e.code, error=e.error,
                 message=e.message)
-            return auth_service_pb2.AuthResponse(error=error)
+            return thoughts_pb2.AuthResponse(error=error)
 
-        return auth_service_pb2.AuthResponse(
+        return thoughts_pb2.AuthResponse(
             token_type='bearer',
             access_token=tokens['access_token'],
             refresh_token=tokens['refresh_token']
@@ -119,24 +94,24 @@ class AuthService(auth_service_pb2_grpc.AuthServiceServicer):
             try:
                 payload = jwt.decode(refresh_token, self.secret, algorithms='HS256')
             except jwt.ExpiredSignatureError:
-                error = types_pb2.Error(code=401, error='EXPIRED_TOKEN',
+                error = thoughts_pb2.Error(code=401, error='EXPIRED_TOKEN',
                     message='Refresh token is expired.')
-                return auth_service_pb2.AuthResponse(error=error)
+                return thoughts_pb2.AuthResponse(error=error)
 
             session = self.db_client.get_session(payload['sub'])
         else:
-            error = types_pb2.Error(code=400, error='MISSING_CREDENTIALS',
+            error = thoughts_pb2.Error(code=400, error='MISSING_CREDENTIALS',
                 message='Missing credentials.')
-            return auth_service_pb2.AuthResponse(error=error)
+            return thoughts_pb2.AuthResponse(error=error)
 
         try:
             tokens = self.generate_tokens(session)
         except AuthException as e:
-            error = types_pb2.Error(code=e.code, error=e.error,
+            error = thoughts_pb2.Error(code=e.code, error=e.error,
                 message=e.message)
-            return auth_service_pb2.AuthResponse(error=error)
+            return thoughts_pb2.AuthResponse(error=error)
 
-        return auth_service_pb2.AuthResponse(
+        return thoughts_pb2.AuthResponse(
             token_type='bearer',
             access_token=tokens['access_token'],
             refresh_token=tokens['refresh_token']
@@ -150,11 +125,11 @@ class AuthService(auth_service_pb2_grpc.AuthServiceServicer):
         try:
             self.validate_session(request.token)
         except AuthException as e:
-            error = types_pb2.Error(code=e.code, error=e.error,
+            error = thoughts_pb2.Error(code=e.code, error=e.error,
                 message=e.message)
-            return types_pb2.Status(error=error)
+            return thoughts_pb2.Status(error=error)
 
-        return types_pb2.Status(message='Valid token')
+        return thoughts_pb2.Status(message='Valid token')
 
     def ValidatePassword(self, request, context):
         """Validate password"""
@@ -162,46 +137,8 @@ class AuthService(auth_service_pb2_grpc.AuthServiceServicer):
         try:
             self.validate_password(request.email, request.password)
         except AuthException as e:
-            error = types_pb2.Error(code=e.code, error=e.error,
+            error = thoughts_pb2.Error(code=e.code, error=e.error,
                 message=e.message)
-            return types_pb2.Status(error=error)
+            return thoughts_pb2.Status(error=error)
 
-        return types_pb2.Status(message='Valid password')
-
-    # Sessions
-
-    def GetSessions(self, request, context):
-        """Get all active sessions of the active user."""
-
-        try:
-            payload = self.validate_session(request.token)
-        except AuthException as e:
-            error = types_pb2.Error(code=e.code, error=e.error,
-                message=e.message)
-            return types_pb2.Status(error=error)
-
-        sessions = self.db_client.get_user_sessions(payload['sub'])
-        sessions = [object_to_session(item) for item in sessions]
-
-        return auth_service_pb2.Sessions(sessions=sessions)
-
-    def DeleteSession(self, request, context):
-        """Delete a session with a given token."""
-
-        try:
-            payload = self.validate_session(request.token)
-        except AuthException as e:
-            error = types_pb2.Error(code=e.code, error=e.error,
-                message=e.message)
-            return types_pb2.Status(error=error)
-
-        session_id = request.session_id
-
-        if self.db_client.get_session(session_id)['user_id'] != payload['sub']:
-            error = types_pb2.Error(code=403, error='FORBIDDEN',
-                message='This action is forbidden.')
-            return types_pb2.Status(error=error)
-
-        self.db_client.delete_session(session_id)
-
-        return types_pb2.Status(message='Deleted session.')
+        return thoughts_pb2.Status(message='Valid password')
