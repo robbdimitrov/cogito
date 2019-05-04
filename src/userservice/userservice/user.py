@@ -1,21 +1,21 @@
 import bcrypt
 
-from userservice import user_service_pb2_grpc, types_pb2
-from userservice.utils import validate_email
+from userservice import thoughts_pb2_grpc, thoughts_pb2
+from userservice.utils import validate_email, object_to_user
+from userservice import exceptions
 
-class UserService(user_service_pb2_grpc.UserServiceServicer):
+
+class UserService(thoughts_pb2_grpc.UserServiceServicer):
     def __init__(self, db_client):
         self.db_client = db_client
 
     def Create(self, request, context):
         """Validates input and creates new user account."""
 
-        content = request.get_json()
-
-        username = content.get('username')
-        email = content.get('email')
-        name = content.get('name') or ''
-        password = content.get('password')
+        username = request.username
+        email = request.email
+        name = request.name or ''
+        password = request.password
 
         error_message = None
         error_type = None
@@ -34,120 +34,98 @@ class UserService(user_service_pb2_grpc.UserServiceServicer):
             error_type = 'MISSING_PASSWORD'
 
         if error_message is not None:
-            error = error = {'code': 400, 'error': error_type, 'message': error_message}
-            return make_response(jsonify(error), 400)
+            error = thoughts_pb2.Error(code=400, error=error_type,
+                message=error_message)
+            return thoughts_pb2.UserResponse(error=error)
 
         salt = bcrypt.gensalt()
         password = bcrypt.hashpw(password, salt)
 
         try:
-            user = db_client.create_user(username, email, name, password)
-        except db_client.ExistingUserException as e:
-            error = {'code': 400, 'error': 'USER_EXISTS', 'message': str(e)}
-            return make_response(jsonify(error), 400)
-        except db_client.DBException as e:
-            error = {'code': 400, 'error': 'BAD_REQUEST', 'message': str(e)}
-            return make_response(jsonify(error), 400)
+            user = self.db_client.create_user(username, email, name, password)
+        except exceptions.ExistingUserException as e:
+            error = thoughts_pb2.Error(code=400, error='USER_EXISTS',
+                message=str(e))
+            return thoughts_pb2.UserResponse(error=error)
+        except exceptions.DBException as e:
+            error = thoughts_pb2.Error(code=400, error='BAD_REQUEST',
+                message=str(e))
+            return thoughts_pb2.UserResponse(error=error)
 
-        return make_response(jsonify(user), 201)
+        return thoughts_pb2.UserResponse(user=object_to_user(user))
 
     def GetUser(self, request, context):
         """Gets user with username from the database."""
 
-        user = db_client.get_user(username)
+        user = self.db_client.get_user(request.username)
 
         if user is None:
-            error = {'code': 404, 'error': 'NOT_FOUND', 'message': 'User not found.'}
-            return make_response(jsonify(error), 404)
+            error = thoughts_pb2.Error(code=404, error='NOT_FOUND',
+                message='User not found.')
+            return thoughts_pb2.UserResponse(error=error)
 
-        return make_response(jsonify(user), 200)
-
-
+        return thoughts_pb2.UserResponse(user=object_to_user(user))
 
     def UpdateUser(self, request, context):
-        # missing associated documentation comment in .proto file
-        pass
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        """Updated user with passed updated information"""
+        # TODO: Check for valid auth token with decorator
+
+        changes = {}
+
+        if request.username is not None:
+            changes['username'] = request.username
+        if request.name is not None:
+            changes['name'] = request.name
+        if request.bio is not None:
+            changes['bio'] = request.bio
+
+        email = request.email
+        password = request.password
+        old_password = request.old_password
+        username = request.username
+
+        error_message = None
+        error_type = None
+
+        if password is not None:
+            if old_password is None:
+                error_message = 'Current password is missing.'
+                error_type = 'MISSING_PASSWORD'
+            else:
+                saved_password = self.db_client.get_user_password_hash(username)['password']
+                if bcrypt.checkpw(old_password, saved_password) == False:
+                    error_message = 'Wrong password.'
+                    error_type = 'WRONG_PASSWORD'
+
+                salt = bcrypt.gensalt()
+                password = bcrypt.hashpw(password, salt)
+                changes['password'] = password
+
+        if email is not None and validate_email(email) == False:
+            error = 'Invalid email address.'
+            error_type = 'INVALID_EMAIL'
+        else:
+            changes['email'] = email
+
+        if error is not None:
+            error = thoughts_pb2.Error(code=400, error=error_type,
+                message=error_message)
+            return thoughts_pb2.Status(error=error)
+
+        try:
+            db_client.update_user(username, changes)
+        except:
+            error = thoughts_pb2.Error(code=400, error='BAD_REQUEST',
+                message='User update failed.')
+            return thoughts_pb2.Status(error=error)
+        else:
+            return thoughts_pb2.Status(message=f'Updated user {username}.')
 
     def DeleteUser(self, request, context):
-        # missing associated documentation comment in .proto file
-        pass
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
+        """Deleted a user if it matches the logged in user."""
+        # TODO: Check for valid auth token with decorator
+        user_id = request.token.user_id # TODO: Get user_id from token
 
-    def GetFollowing(self, request, context):
-        pass
+        self.db_client.delete_user(user_id)
 
-    def GetFollowers(self, request, context):
-        pass
-
-    def Follow(self, request, context):
-        pass
-
-    def Unfollow(self, request, context):
-        pass
-
-
-@bp.route('/users/<username>', methods=['PUT', 'UPDATE'])
-def update_user(username):
-    """Updated user with passed updated information"""
-    # TODO: Check for valid auth token with decorator
-
-    content = request.get_json()
-    changes = {}
-    allowed_keys = ['username', 'email', 'name', 'bio', 'password']
-
-    for key, value in content.items():
-        if key in allowed_keys:
-            changes[key] = value
-
-    error_message = None
-    error_type = None
-
-    if 'password' in changes:
-        if 'current_password' not in changes:
-            error_message = 'Current password is missing.'
-            error_type = 'MISSING_PASSWORD'
-        else:
-            password = changes.get('password')
-            current_password = changes.get('currentPassword')
-
-            saved_password = db_client.get_user_password_hash(username)['password']
-            if check_password_hash(saved_password, current_password) == False:
-                error_message = 'Wrong password.'
-                error_type = 'WRONG_PASSWORD'
-
-            password = generate_password_hash(password)
-            changes['password'] = password
-
-    email = content.get('email')
-
-    if email is not None and validate_email(email) == False:
-        error = 'Invalid email address.'
-        error_type = 'INVALID_EMAIL'
-
-    if error is not None:
-        error = {'code': 400, 'error': error_type, 'message': error_message}
-        return make_response(jsonify(error), 400)
-
-    try:
-        db_client.update_user(username, changes)
-    except:
-        error = {'code': 400, 'error': 'BAD_REQUEST', 'message': 'User update failed.'}
-        return make_response(jsonify(error), 400)
-    else:
-        return make_response(jsonify({'message': f'Updated user {username}.'}), 200)
-
-
-@bp.route('/users/<username>', methods=['DELETE'])
-def delete_user(username):
-    """Deleted a user if it matches the logged in user."""
-    # TODO: Check for valid auth token with decorator
-    db_client.delete_user(username)
-
-    return make_response(jsonify({'message': f'Deleted user {username}.'}), 200)
-
-
+        return thoughts_pb2.Status(message='Deleted user.')

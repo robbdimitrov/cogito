@@ -1,9 +1,10 @@
 from authservice import thoughts_pb2, thoughts_pb2_grpc
 from authservice.utils import validate_email, object_to_session
 from authservice.auth import AuthException
+from authservice.helpers import validate_token
 
 
-class AuthService(thoughts_pb2_grpc.AuthServiceServicer):
+class SessionService(thoughts_pb2_grpc.SessionServiceServicer):
     def __init__(self, db_client, secret):
         self.db_client = db_client
         self.secret = secret
@@ -12,7 +13,7 @@ class AuthService(thoughts_pb2_grpc.AuthServiceServicer):
         """Get all active sessions of the active user."""
 
         try:
-            payload = self.validate_session(request.token)
+            payload = validate_token(request.token, self.secret)
         except AuthException as e:
             error = thoughts_pb2.Error(code=e.code, error=e.error,
                 message=e.message)
@@ -27,7 +28,7 @@ class AuthService(thoughts_pb2_grpc.AuthServiceServicer):
         """Delete a session with a given token."""
 
         try:
-            payload = self.validate_session(request.token)
+            payload = validate_token(request.token, self.secret)
         except AuthException as e:
             error = thoughts_pb2.Error(code=e.code, error=e.error,
                 message=e.message)

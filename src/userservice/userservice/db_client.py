@@ -115,11 +115,11 @@ class DBClient:
         finally:
             cur.close()
 
-    def delete_user(self, username):
+    def delete_user(self, user_id):
         conn = self.db.get_conn()
         cur = conn.cursor()
 
-        cur.execute('DELETE FROM thoughts.users WHERE username = %s', (username,))
+        cur.execute('DELETE FROM thoughts.users WHERE id = %s', (user_id,))
         conn.commit()
         cur.close()
 

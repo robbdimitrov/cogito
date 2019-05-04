@@ -4,6 +4,7 @@ import time
 
 from authservice import thoughts_pb2_grpc
 from authservice.auth import AuthService
+from authservice.session import SessionService
 from authservice.db import Database
 from authservice.db_client import DBClient
 
@@ -11,18 +12,24 @@ from authservice.db_client import DBClient
 class Server:
     def __init__(self):
         self.config = {}
+        self.db_client = None
 
-    def create_auth_service(self):
-        db = Database(self.config['DB_URI'])
-        db_client = DBClient(db)
-        auth_service = AuthService(db_client, self.config['JWT_SECRET'])
-        return auth_service
+    def get_db_client(self):
+        if self.db_client is None:
+            db = Database(self.config['DB_URI'])
+            self.db_client = DBClient(db)
+        return self.db_client
 
     def create_server(self):
-        auth_service = self.create_auth_service()
+        db_client = self.get_db_client()
+        secret = self.config['JWT_SECRET']
+
+        auth_service = AuthService(db_client, secret)
+        session_service = SessionService(db_client, secret)
 
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
         thoughts_pb2_grpc.add_AuthServiceServicer_to_server(auth_service, server)
+        thoughts_pb2_grpc.add_SessionServiceServicer_to_server(session_service, server)
 
         server.add_insecure_port(f'[::]:{self.config["PORT"]}')
 

@@ -1,7 +1,10 @@
 import bcrypt
+import jwt
+
+from authservice.auth import AuthException
 
 
-def validate_session(self, auth_header):
+def validate_token(auth_header, secret):
     """Helper method for token validation"""
 
     if auth_header is None:
@@ -10,16 +13,8 @@ def validate_session(self, auth_header):
     auth_token = auth_header.split(' ')[1]
 
     try:
-        payload = jwt.decode(auth_token, self.secret, algorithms='HS256')
+        payload = jwt.decode(auth_token, secret, algorithms='HS256')
     except jwt.ExpiredSignatureError:
         raise AuthException(401, 'EXPIRED_TOKEN', 'Authorization token is expired.')
 
     return payload
-
-def validate_password(self, email, password):
-    current_user = self.db_client.get_user_password_hash(email)
-
-    if bcrypt.checkpw(password, current_user['password']) == False:
-        raise AuthException(401, 'INVALID_CREDENTIALS', 'Wrong username or password.')
-
-    return current_user

@@ -4,6 +4,7 @@ import jwt
 
 from authservice import thoughts_pb2, thoughts_pb2_grpc
 from authservice.utils import validate_email, object_to_session
+from authservice.helpers import validate_token
 
 
 class AuthException(Exception):
@@ -19,6 +20,16 @@ class AuthService(thoughts_pb2_grpc.AuthServiceServicer):
     def __init__(self, db_client, secret):
         self.db_client = db_client
         self.secret = secret
+
+    # Helpers
+
+    def validate_password(self, email, password):
+        current_user = self.db_client.get_user_password_hash(email)
+
+        if bcrypt.checkpw(password, current_user['password']) == False:
+            raise AuthException(401, 'INVALID_CREDENTIALS', 'Wrong username or password.')
+
+        return current_user
 
     def generate_tokens(self, session):
         if session is None:
@@ -123,7 +134,7 @@ class AuthService(thoughts_pb2_grpc.AuthServiceServicer):
         """Validate access token"""
 
         try:
-            self.validate_session(request.token)
+            validate_token(request.token, self.secret)
         except AuthException as e:
             error = thoughts_pb2.Error(code=e.code, error=e.error,
                 message=e.message)

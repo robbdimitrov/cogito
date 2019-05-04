@@ -1,8 +1,9 @@
-from userservice import user_service_pb2_grpc, user_service_pb2, types_pb2
+from userservice import thoughts_pb2, thoughts_pb2_grpc
 from userservice.utils import object_to_user
+from userservice import exceptions
 
 
-class FollowService(user_service_pb2_grpc.FollowServiceServicer):
+class FollowService(thoughts_pb2_grpc.FollowServiceServicer):
     def __init__(self, db_client):
         self.db_client = db_client
 
@@ -16,7 +17,7 @@ class FollowService(user_service_pb2_grpc.FollowServiceServicer):
         users = self.db_client.get_following(username, page, limit)
         users = [object_to_user(user) for user in users]
 
-        return user_service_pb2.Users(users=users)
+        return thoughts_pb2.Users(users=users)
 
     def GetFollowers(self, request, context):
         """Returns users followed by the user."""
@@ -28,29 +29,29 @@ class FollowService(user_service_pb2_grpc.FollowServiceServicer):
         users = self.db_client.get_followers(username, page, limit)
         users = [object_to_user(user) for user in users]
 
-        return user_service_pb2.Users(users=users)
+        return thoughts_pb2.Users(users=users)
 
     def Follow(self, request, context):
         """Follows or unfollows a user with the current user."""
 
-        user_id = request.user_id
+        user_id = request.token.user_id # TODO: Get user_id from token
         username = request.username
-
-        # TODO: validate token and id
 
         try:
             self.db_client.follow_user(username, user_id)
-        except db_client.DBException as e:
-            error = {'code': 400, 'error': 'BAD_REQUEST', 'message': str(e)}
-            return make_response(jsonify(error), 400)
+        except exceptions.DBException as e:
+            error = thoughts_pb2.Error(code=400, error='BAD_REQUEST',
+                message=str(e))
+            return thoughts_pb2.Status(error=error)
         else:
-            return make_response(jsonify({'message': 'Followed user.'}), 200)
+            return thoughts_pb2.Status(message='Followed user.')
 
     def Unfollow(self, request, context):
         """Unfollows a user with the current user."""
 
-        user_id = '2' # TODO: Get id of current user
+        user_id = request.token.user_id # TODO: Get user_id from token
+        username = request.username
 
-        db_client.unfollow_user(username, user_id)
+        self.db_client.unfollow_user(username, user_id)
 
-        return make_response(jsonify({'message': 'Unfollowed user.'}), 200)
+        return thoughts_pb2.Status(message='Unfollowed user.')
