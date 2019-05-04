@@ -5,15 +5,7 @@ import jwt
 from authservice import thoughts_pb2, thoughts_pb2_grpc
 from authservice.utils import validate_email, object_to_session
 from authservice.helpers import validate_token
-
-
-class AuthException(Exception):
-    """Exception used for token validation"""
-
-    def __init__(self, code, error, message):
-        self.code = code
-        self.error = error
-        self.message = message
+from authservice.exceptions import AuthException
 
 
 class AuthService(thoughts_pb2_grpc.AuthServiceServicer):
