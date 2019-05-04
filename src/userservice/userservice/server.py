@@ -2,11 +2,11 @@ import grpc
 from concurrent import futures
 import time
 
-from authservice import thoughts_pb2_grpc
-from authservice.auth import AuthService
-from authservice.session import SessionService
-from authservice.db import Database
-from authservice.db_client import DBClient
+from userservice import thoughts_pb2_grpc
+from userservice.user import UserService
+from userservice.follow import FollowService
+from userservice.db import Database
+from userservice.db_client import DBClient
 
 
 class Server:
@@ -20,16 +20,24 @@ class Server:
             self.db_client = DBClient(db)
         return self.db_client
 
+    def create_user_service(self):
+        db_client = self.get_db_client()
+        service = UserService(db_client)
+        return service
+
+    def create_follow_service(self):
+        db_client = self.get_db_client()
+        service = FollowService(db_client)
+        return service
+
     def create_server(self):
         db_client = self.get_db_client()
-        secret = self.config['JWT_SECRET']
-
-        auth_service = AuthService(db_client, secret)
-        session_service = SessionService(db_client, secret)
+        user_service = UserService(db_client)
+        follow_service = FollowService(db_client)
 
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-        thoughts_pb2_grpc.add_AuthServiceServicer_to_server(auth_service, server)
-        thoughts_pb2_grpc.add_SessionServiceServicer_to_server(session_service, server)
+        thoughts_pb2_grpc.add_UserServiceServicer_to_server(user_service, server)
+        thoughts_pb2_grpc.add_FollowServiceServicer_to_server(follow_service, server)
 
         server.add_insecure_port(f'[::]:{self.config["PORT"]}')
 

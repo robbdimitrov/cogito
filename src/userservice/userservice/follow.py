@@ -1,55 +1,57 @@
-from flask import Blueprint, request, make_response, jsonify
-
-from userservice import db_client
-
-
-bp = Blueprint('follow', __name__)
-
-@bp.route('/users/<username>/followers', methods=['GET'])
-def get_followers(username):
-    """Returns users followed by the user."""
-
-    page = request.args.get('page') or 0
-    limit = request.args.get('limit') or 20
-
-    users = db_client.get_followers(username, page, limit)
-
-    return make_response(jsonify(users), 200)
+from userservice import thoughts_pb2, thoughts_pb2_grpc
+from userservice.utils import object_to_user
+from userservice import exceptions
 
 
-@bp.route('/users/<username>/following', methods=['GET'])
-def get_following(username):
-    """Returns users following the user."""
+class FollowService(thoughts_pb2_grpc.FollowServiceServicer):
+    def __init__(self, db_client):
+        self.db_client = db_client
 
-    page = request.args.get('page') or 0
-    limit = request.args.get('limit') or 20
+    def GetFollowing(self, request, context):
+        """Returns users following the user."""
 
-    users = db_client.get_following(username, page, limit)
+        username = request.username
+        page = request.page_number or 0
+        limit = request.results_per_page or 20
 
-    return make_response(jsonify(users), 200)
+        users = self.db_client.get_following(username, page, limit)
+        users = [object_to_user(user) for user in users]
 
+        return thoughts_pb2.Users(users=users)
 
-@bp.route('/users/<username>/following', methods=['POST'])
-def follow_user(username):
-    """Follows or unfollows a user with the current user."""
+    def GetFollowers(self, request, context):
+        """Returns users followed by the user."""
 
-    user_id = '2' # TODO: Get id of current user
+        username = request.username
+        page = request.page_number or 0
+        limit = request.results_per_page or 20
 
-    try:
-        db_client.follow_user(username, user_id)
-    except db_client.DBException as e:
-        error = {'code': 400, 'error': 'BAD_REQUEST', 'message': str(e)}
-        return make_response(jsonify(error), 400)
-    else:
-        return make_response(jsonify({'message': 'Followed user.'}), 200)
+        users = self.db_client.get_followers(username, page, limit)
+        users = [object_to_user(user) for user in users]
 
+        return thoughts_pb2.Users(users=users)
 
-@bp.route('/users/<username>/following', methods=['DELETE'])
-def unfollow_user(username):
-    """Unfollows a user with the current user."""
+    def Follow(self, request, context):
+        """Follows or unfollows a user with the current user."""
 
-    user_id = '2' # TODO: Get id of current user
+        user_id = request.token.user_id # TODO: Get user_id from token
+        username = request.username
 
-    db_client.unfollow_user(username, user_id)
+        try:
+            self.db_client.follow_user(username, user_id)
+        except exceptions.DBException as e:
+            error = thoughts_pb2.Error(code=400, error='BAD_REQUEST',
+                message=str(e))
+            return thoughts_pb2.Status(error=error)
+        else:
+            return thoughts_pb2.Status(message='Followed user.')
 
-    return make_response(jsonify({'message': 'Unfollowed user.'}), 200)
+    def Unfollow(self, request, context):
+        """Unfollows a user with the current user."""
+
+        user_id = request.token.user_id # TODO: Get user_id from token
+        username = request.username
+
+        self.db_client.unfollow_user(username, user_id)
+
+        return thoughts_pb2.Status(message='Unfollowed user.')

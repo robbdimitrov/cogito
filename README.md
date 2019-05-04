@@ -1,5 +1,13 @@
 # Thoughts
 
+## Generation
+
+To generate python grpc code:
+```sh
+$ python -m grpc_tools.protoc -I../../pb --python_out=. \
+--grpc_python_out=. ../../pb/thoughts.proto
+```
+
 ## Development
 
 Pull Postgres

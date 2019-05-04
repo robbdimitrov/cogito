@@ -1,6 +1,6 @@
 import re
 
-from authservice import auth_service_pb2
+from authservice import thoughts_pb2
 
 
 def validate_email(email):
@@ -8,7 +8,7 @@ def validate_email(email):
 
 
 def object_to_session(item):
-    return auth_service_pb2.Session(
+    return thoughts_pb2.Session(
         id=item['id'],
         name=item['name'],
         user_agent=item['user_agent'],

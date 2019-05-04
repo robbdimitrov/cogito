@@ -1,0 +1,143 @@
+syntax = "proto3";
+
+package thoughts;
+
+/**
+ * General
+ */
+
+message Error {
+  int32 code = 1;
+  string error = 2;
+  string message = 3;
+}
+
+message Status {
+  string message = 1;
+  Error error = 2;
+}
+
+/**
+ * Authentication
+ */
+
+message Credentials {
+  string username = 1;
+  string password = 2;
+  string user_agent = 3;
+  string email = 4;
+}
+
+message AuthRequest {
+  string token = 1;
+}
+
+message AuthResponse {
+  string token_type = 1;
+  string access_token = 2;
+  string refresh_token = 3;
+  Error error = 4;
+}
+
+/**
+ * Users
+ */
+
+message UserRequest {
+  string username = 1;
+  string token = 2;
+}
+
+message UserResponse {
+  User user = 1;
+  Error error = 2;
+}
+
+message Users {
+  repeated User users = 1;
+}
+
+message UserUpdates {
+  string username = 1;
+  string email = 2;
+  string name = 3;
+  string password = 4;
+  string bio = 5;
+  string old_password = 6;
+}
+
+message User {
+  int32 id = 1;
+  string username = 2;
+  string email = 3;
+  string name = 4;
+  string bio = 5;
+  string reg_date = 6;
+}
+
+/**
+ * Sessions
+ */
+
+message Session {
+  int32 id = 1;
+  string name = 2;
+  string user_agent = 3;
+  int32 user_id = 4;
+  string date_created = 5;
+}
+
+message Sessions {
+  repeated Session sessions = 1;
+  Error error = 2;
+}
+
+message SessionRequest {
+  int32 session_id = 1;
+  string token = 2;
+}
+
+/**
+ * Following
+ */
+
+message FollowersRequest {
+  string username = 1;
+  int32 page_number = 2;
+  int32 results_per_page = 3;
+}
+
+message FollowRequest {
+  string username = 1;
+  string token = 3;
+}
+
+/**
+ * Services
+ */
+
+service UserService {
+  rpc Create(UserUpdates) returns (UserResponse);
+  rpc GetUser(UserRequest) returns (UserResponse);
+  rpc UpdateUser(UserUpdates) returns (Status);
+  rpc DeleteUser(UserRequest) returns (Status);
+}
+
+service FollowService {
+  rpc GetFollowing(FollowersRequest) returns (Users);
+  rpc GetFollowers(FollowersRequest) returns (Users);
+  rpc Follow(FollowRequest) returns (Status);
+  rpc Unfollow(FollowRequest) returns (Status);
+}
+
+service AuthService {
+  rpc Login(Credentials) returns (AuthResponse);
+  rpc Refresh(AuthRequest) returns (AuthResponse);
+  rpc Validate(AuthRequest) returns (Status);
+  rpc ValidatePassword(Credentials) returns (Status);
+}
+
+service SessionService {
+  rpc GetSessions(AuthRequest) returns (Sessions);
+  rpc DeleteSession(SessionRequest) returns (Status);
+}
