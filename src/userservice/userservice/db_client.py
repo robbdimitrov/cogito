@@ -54,14 +54,20 @@ class DBClient:
         }
         return user
 
-    def get_user(self, username):
+    def get_user(self, username, user_id):
         conn = self.db.get_conn()
         cur = conn.cursor()
 
-        cur.execute('SELECT id, username, email, name, bio, \
-            time_format(reg_date) FROM thoughts.users \
-            WHERE username = %s',
-            (username,))
+        if user_id is not None:
+            cur.execute('SELECT id, username, email, name, bio, \
+                time_format(reg_date) FROM thoughts.users \
+                WHERE user_id = %s',
+                (user_id,))
+        else:
+            cur.execute('SELECT id, username, email, name, bio, \
+                time_format(reg_date) FROM thoughts.users \
+                WHERE username = %s',
+                (username,))
         result = cur.fetchone()
         cur.close()
 
@@ -78,25 +84,7 @@ class DBClient:
         }
         return user
 
-    def get_user_password_hash(self, username):
-        conn = self.db.get_conn()
-        cur = conn.cursor()
-
-        cur.execute('SELECT id, password, FROM thoughts.users WHERE username = %s',
-            (username,))
-        result = cur.fetchone()
-        cur.close()
-
-        if result is None:
-            return None
-
-        user = {
-            'id': result[0],
-            'password': result[1]
-        }
-        return user
-
-    def update_user(self, username, updates):
+    def update_user(self, user_id, updates):
         conn = self.db.get_conn()
         cur = conn.cursor()
 
@@ -104,10 +92,10 @@ class DBClient:
         for key, value in updates.items():
             values.append(f"{key} = '{value}'")
 
-        command = f"UPDATE thoughts.users SET {', '.join(values)} WHERE username = %s"
+        command = f"UPDATE thoughts.users SET {', '.join(values)} WHERE id = %s"
 
         try:
-            cur.execute(command, (username,))
+            cur.execute(command, (user_id,))
             conn.commit()
         except psycopg2.Error as e:
             print(f'Error updating user: {str(e)}')

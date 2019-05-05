@@ -126,13 +126,13 @@ class AuthService(thoughts_pb2_grpc.AuthServiceServicer):
         """Validate access token"""
 
         try:
-            validate_token(request.token, self.secret)
+            payload = validate_token(request.token, self.secret)
         except AuthException as e:
             error = thoughts_pb2.Error(code=e.code, error=e.error,
                 message=e.message)
             return thoughts_pb2.Status(error=error)
 
-        return thoughts_pb2.Status(message='Valid token')
+        return thoughts_pb2.AuthStatus(user_id=payload['user_id'])
 
     def ValidatePassword(self, request, context):
         """Validate password"""

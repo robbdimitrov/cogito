@@ -2,6 +2,7 @@ import bcrypt
 
 from userservice import thoughts_pb2_grpc, thoughts_pb2
 from userservice.utils import validate_email, object_to_user
+from userservice.auth_client import get_auth_stub
 from userservice import exceptions
 
 
@@ -68,7 +69,14 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
 
     def UpdateUser(self, request, context):
         """Updated user with passed updated information"""
-        # TODO: Check for valid auth token with decorator
+
+        stub = get_auth_stub()
+        response = stub.Validate(thoughts_pb2.AuthRequest(token=request.token))
+
+        if response.error is not None:
+            return thoughts_pb2.UserResponse(error=response.error)
+
+        user_id = response.user_id
 
         changes = {}
 
@@ -82,7 +90,6 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
         email = request.email
         password = request.password
         old_password = request.old_password
-        username = request.username
 
         error_message = None
         error_type = None
@@ -92,14 +99,17 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
                 error_message = 'Current password is missing.'
                 error_type = 'MISSING_PASSWORD'
             else:
-                saved_password = self.db_client.get_user_password_hash(username)['password']
-                if bcrypt.checkpw(old_password, saved_password) == False:
+                user = self.db_client.get_user(None, user_id)
+
+                result = stub.ValidatePassword(thoughts_pb2.Credentials(email=user['email']))
+
+                if result.error is not None:
                     error_message = 'Wrong password.'
                     error_type = 'WRONG_PASSWORD'
-
-                salt = bcrypt.gensalt()
-                password = bcrypt.hashpw(password, salt)
-                changes['password'] = password
+                else:
+                    salt = bcrypt.gensalt()
+                    password = bcrypt.hashpw(password, salt)
+                    changes['password'] = password
 
         if email is not None and validate_email(email) == False:
             error = 'Invalid email address.'
@@ -113,18 +123,24 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
             return thoughts_pb2.Status(error=error)
 
         try:
-            db_client.update_user(username, changes)
+            self.db_client.update_user(user_id, changes)
         except:
             error = thoughts_pb2.Error(code=400, error='BAD_REQUEST',
                 message='User update failed.')
             return thoughts_pb2.Status(error=error)
         else:
-            return thoughts_pb2.Status(message=f'Updated user {username}.')
+            return thoughts_pb2.Status(message=f'Updated user.')
 
     def DeleteUser(self, request, context):
         """Deleted a user if it matches the logged in user."""
-        # TODO: Check for valid auth token with decorator
-        user_id = request.token.user_id # TODO: Get user_id from token
+
+        stub = get_auth_stub()
+        response = stub.Validate(thoughts_pb2.AuthRequest(token=request.token))
+
+        if response.error is not None:
+            return thoughts_pb2.Status(error=response.error)
+
+        user_id = response.user_id
 
         self.db_client.delete_user(user_id)
 
