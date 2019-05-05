@@ -3,7 +3,7 @@ import bcrypt
 import jwt
 
 from authservice import thoughts_pb2, thoughts_pb2_grpc
-from authservice.utils import validate_email, object_to_session
+from authservice.utils import validate_email
 from authservice.helpers import validate_token
 from authservice.exceptions import AuthException
 

@@ -1,7 +1,7 @@
 import bcrypt
 
 from userservice import thoughts_pb2_grpc, thoughts_pb2
-from userservice.utils import validate_email, object_to_user
+from userservice.utils import validate_email, dict_to_user
 from userservice.auth_client import get_auth_stub
 from userservice import exceptions
 
@@ -53,7 +53,7 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
                 message=str(e))
             return thoughts_pb2.UserResponse(error=error)
 
-        return thoughts_pb2.UserResponse(user=object_to_user(user))
+        return thoughts_pb2.UserResponse(user=dict_to_user(user))
 
     def GetUser(self, request, context):
         """Gets user with username from the database."""
@@ -65,7 +65,7 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
                 message='User not found.')
             return thoughts_pb2.UserResponse(error=error)
 
-        return thoughts_pb2.UserResponse(user=object_to_user(user))
+        return thoughts_pb2.UserResponse(user=dict_to_user(user))
 
     def UpdateUser(self, request, context):
         """Updated user with passed updated information"""
