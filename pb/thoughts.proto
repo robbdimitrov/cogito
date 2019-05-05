@@ -32,6 +32,11 @@ message AuthRequest {
   string token = 1;
 }
 
+message AuthStatus {
+  int32 user_id = 1;
+  Error error = 2;
+}
+
 message AuthResponse {
   string token_type = 1;
   string access_token = 2;
@@ -64,6 +69,7 @@ message UserUpdates {
   string password = 4;
   string bio = 5;
   string old_password = 6;
+  string token = 7;
 }
 
 message User {
@@ -109,7 +115,7 @@ message FollowersRequest {
 
 message FollowRequest {
   string username = 1;
-  string token = 3;
+  string token = 2;
 }
 
 /**
@@ -133,7 +139,7 @@ service FollowService {
 service AuthService {
   rpc Login(Credentials) returns (AuthResponse);
   rpc Refresh(AuthRequest) returns (AuthResponse);
-  rpc Validate(AuthRequest) returns (Status);
+  rpc Validate(AuthRequest) returns (AuthStatus);
   rpc ValidatePassword(Credentials) returns (Status);
 }
 

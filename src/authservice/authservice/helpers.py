@@ -1,7 +1,7 @@
 import bcrypt
 import jwt
 
-from authservice.auth import AuthException
+from authservice.exceptions import AuthException
 
 
 def validate_token(auth_header, secret):

@@ -217,7 +217,7 @@ class AuthServiceStub(object):
     self.Validate = channel.unary_unary(
         '/thoughts.AuthService/Validate',
         request_serializer=thoughts__pb2.AuthRequest.SerializeToString,
-        response_deserializer=thoughts__pb2.Status.FromString,
+        response_deserializer=thoughts__pb2.AuthStatus.FromString,
         )
     self.ValidatePassword = channel.unary_unary(
         '/thoughts.AuthService/ValidatePassword',
@@ -274,7 +274,7 @@ def add_AuthServiceServicer_to_server(servicer, server):
       'Validate': grpc.unary_unary_rpc_method_handler(
           servicer.Validate,
           request_deserializer=thoughts__pb2.AuthRequest.FromString,
-          response_serializer=thoughts__pb2.Status.SerializeToString,
+          response_serializer=thoughts__pb2.AuthStatus.SerializeToString,
       ),
       'ValidatePassword': grpc.unary_unary_rpc_method_handler(
           servicer.ValidatePassword,

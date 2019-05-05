@@ -1,5 +1,6 @@
 from userservice import thoughts_pb2, thoughts_pb2_grpc
 from userservice.utils import object_to_user
+from userservice.auth_client import get_auth_stub
 from userservice import exceptions
 
 
@@ -34,7 +35,13 @@ class FollowService(thoughts_pb2_grpc.FollowServiceServicer):
     def Follow(self, request, context):
         """Follows or unfollows a user with the current user."""
 
-        user_id = request.token.user_id # TODO: Get user_id from token
+        stub = get_auth_stub()
+        response = stub.Validate(thoughts_pb2.AuthRequest(token=request.token))
+
+        if response.error is not None:
+            return thoughts_pb2.UserResponse(error=response.error)
+
+        user_id = response.user_id
         username = request.username
 
         try:
@@ -49,7 +56,13 @@ class FollowService(thoughts_pb2_grpc.FollowServiceServicer):
     def Unfollow(self, request, context):
         """Unfollows a user with the current user."""
 
-        user_id = request.token.user_id # TODO: Get user_id from token
+        stub = get_auth_stub()
+        response = stub.Validate(thoughts_pb2.AuthRequest(token=request.token))
+
+        if response.error is not None:
+            return thoughts_pb2.UserResponse(error=response.error)
+
+        user_id = response.user_id
         username = request.username
 
         self.db_client.unfollow_user(username, user_id)
