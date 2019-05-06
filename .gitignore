@@ -9,6 +9,11 @@ dist
 venv
 __pycache__
 
+# Go
+bin
+pkg
+vendor
+
 # env
 .env
 
