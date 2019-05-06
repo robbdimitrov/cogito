@@ -1,6 +1,7 @@
 import grpc
 from concurrent import futures
 import time
+import logging
 
 from userservice import thoughts_pb2_grpc
 from userservice.user import UserService
@@ -46,7 +47,7 @@ class Server:
     def serve(self):
         server = self.create_server()
         server.start()
-        print(f'Server running on port {self.config["PORT"]}')
+        logging.info(f'Server running on port {self.config["PORT"]}')
         try:
             while True:
                 time.sleep(60 * 60 * 24)

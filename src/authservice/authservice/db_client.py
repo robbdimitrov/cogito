@@ -1,4 +1,5 @@
 import psycopg2
+import logging
 
 
 class DBException(Exception):
@@ -21,7 +22,7 @@ class DBClient:
             result = cur.fetchone()
             conn.commit()
         except psycopg2.Error as e:
-            print(f'Error creating user: {str(e)}')
+            logging.error(f'Error creating user: {str(e)}')
             raise DBException('Error while writing to the database.')
         finally:
             cur.close()

@@ -1,4 +1,5 @@
 import psycopg2
+import logging
 
 from userservice import db
 from userservice.exceptions import (
@@ -37,7 +38,7 @@ class DBClient:
             result = cur.fetchone()
             conn.commit()
         except psycopg2.Error as e:
-            print(f'Error creating user: {str(e)}')
+            logging.error(f'Error creating user: {str(e)}')
             raise DBException('Error while writing to the database.')
         finally:
             cur.close()
@@ -85,7 +86,7 @@ class DBClient:
             cur.execute(command, (user_id,))
             conn.commit()
         except psycopg2.Error as e:
-            print(f'Error updating user: {str(e)}')
+            logging.error(f'Error updating user: {str(e)}')
             raise DBException('Updating user failed.')
         finally:
             cur.close()
@@ -159,7 +160,7 @@ class DBClient:
                 (user['id'], follower_id))
             conn.commit()
         except psycopg2.Error as e:
-            print(f'Error following user: {str(e)}')
+            logging.error(f'Error following user: {str(e)}')
             raise DBException('Error following user.')
         finally:
             cur.close()
