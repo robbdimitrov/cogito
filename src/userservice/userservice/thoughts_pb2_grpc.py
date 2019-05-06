@@ -16,15 +16,15 @@ class UserServiceStub(object):
     Args:
       channel: A grpc.Channel.
     """
-    self.Create = channel.unary_unary(
-        '/thoughts.UserService/Create',
+    self.CreateUser = channel.unary_unary(
+        '/thoughts.UserService/CreateUser',
         request_serializer=thoughts__pb2.UserUpdates.SerializeToString,
-        response_deserializer=thoughts__pb2.UserResponse.FromString,
+        response_deserializer=thoughts__pb2.UserStatus.FromString,
         )
     self.GetUser = channel.unary_unary(
         '/thoughts.UserService/GetUser',
         request_serializer=thoughts__pb2.UserRequest.SerializeToString,
-        response_deserializer=thoughts__pb2.UserResponse.FromString,
+        response_deserializer=thoughts__pb2.UserStatus.FromString,
         )
     self.UpdateUser = channel.unary_unary(
         '/thoughts.UserService/UpdateUser',
@@ -44,7 +44,7 @@ class UserServiceServicer(object):
 
   """
 
-  def Create(self, request, context):
+  def CreateUser(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -75,15 +75,15 @@ class UserServiceServicer(object):
 
 def add_UserServiceServicer_to_server(servicer, server):
   rpc_method_handlers = {
-      'Create': grpc.unary_unary_rpc_method_handler(
-          servicer.Create,
+      'CreateUser': grpc.unary_unary_rpc_method_handler(
+          servicer.CreateUser,
           request_deserializer=thoughts__pb2.UserUpdates.FromString,
-          response_serializer=thoughts__pb2.UserResponse.SerializeToString,
+          response_serializer=thoughts__pb2.UserStatus.SerializeToString,
       ),
       'GetUser': grpc.unary_unary_rpc_method_handler(
           servicer.GetUser,
           request_deserializer=thoughts__pb2.UserRequest.FromString,
-          response_serializer=thoughts__pb2.UserResponse.SerializeToString,
+          response_serializer=thoughts__pb2.UserStatus.SerializeToString,
       ),
       'UpdateUser': grpc.unary_unary_rpc_method_handler(
           servicer.UpdateUser,
@@ -343,4 +343,224 @@ def add_SessionServiceServicer_to_server(servicer, server):
   }
   generic_handler = grpc.method_handlers_generic_handler(
       'thoughts.SessionService', rpc_method_handlers)
+  server.add_generic_rpc_handlers((generic_handler,))
+
+
+class PostServiceStub(object):
+  # missing associated documentation comment in .proto file
+  pass
+
+  def __init__(self, channel):
+    """Constructor.
+
+    Args:
+      channel: A grpc.Channel.
+    """
+    self.CreatePost = channel.unary_unary(
+        '/thoughts.PostService/CreatePost',
+        request_serializer=thoughts__pb2.Post.SerializeToString,
+        response_deserializer=thoughts__pb2.PostStatus.FromString,
+        )
+    self.GetPost = channel.unary_unary(
+        '/thoughts.PostService/GetPost',
+        request_serializer=thoughts__pb2.PostRequest.SerializeToString,
+        response_deserializer=thoughts__pb2.PostStatus.FromString,
+        )
+    self.GetPosts = channel.unary_unary(
+        '/thoughts.PostService/GetPosts',
+        request_serializer=thoughts__pb2.UserRequest.SerializeToString,
+        response_deserializer=thoughts__pb2.Posts.FromString,
+        )
+    self.GetLikedPosts = channel.unary_unary(
+        '/thoughts.PostService/GetLikedPosts',
+        request_serializer=thoughts__pb2.UserRequest.SerializeToString,
+        response_deserializer=thoughts__pb2.Posts.FromString,
+        )
+    self.GetRetweets = channel.unary_unary(
+        '/thoughts.PostService/GetRetweets',
+        request_serializer=thoughts__pb2.UserRequest.SerializeToString,
+        response_deserializer=thoughts__pb2.Posts.FromString,
+        )
+    self.DeletePost = channel.unary_unary(
+        '/thoughts.PostService/DeletePost',
+        request_serializer=thoughts__pb2.PostRequest.SerializeToString,
+        response_deserializer=thoughts__pb2.Status.FromString,
+        )
+
+
+class PostServiceServicer(object):
+  # missing associated documentation comment in .proto file
+  pass
+
+  def CreatePost(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetPost(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetPosts(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetLikedPosts(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetRetweets(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def DeletePost(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+
+def add_PostServiceServicer_to_server(servicer, server):
+  rpc_method_handlers = {
+      'CreatePost': grpc.unary_unary_rpc_method_handler(
+          servicer.CreatePost,
+          request_deserializer=thoughts__pb2.Post.FromString,
+          response_serializer=thoughts__pb2.PostStatus.SerializeToString,
+      ),
+      'GetPost': grpc.unary_unary_rpc_method_handler(
+          servicer.GetPost,
+          request_deserializer=thoughts__pb2.PostRequest.FromString,
+          response_serializer=thoughts__pb2.PostStatus.SerializeToString,
+      ),
+      'GetPosts': grpc.unary_unary_rpc_method_handler(
+          servicer.GetPosts,
+          request_deserializer=thoughts__pb2.UserRequest.FromString,
+          response_serializer=thoughts__pb2.Posts.SerializeToString,
+      ),
+      'GetLikedPosts': grpc.unary_unary_rpc_method_handler(
+          servicer.GetLikedPosts,
+          request_deserializer=thoughts__pb2.UserRequest.FromString,
+          response_serializer=thoughts__pb2.Posts.SerializeToString,
+      ),
+      'GetRetweets': grpc.unary_unary_rpc_method_handler(
+          servicer.GetRetweets,
+          request_deserializer=thoughts__pb2.UserRequest.FromString,
+          response_serializer=thoughts__pb2.Posts.SerializeToString,
+      ),
+      'DeletePost': grpc.unary_unary_rpc_method_handler(
+          servicer.DeletePost,
+          request_deserializer=thoughts__pb2.PostRequest.FromString,
+          response_serializer=thoughts__pb2.Status.SerializeToString,
+      ),
+  }
+  generic_handler = grpc.method_handlers_generic_handler(
+      'thoughts.PostService', rpc_method_handlers)
+  server.add_generic_rpc_handlers((generic_handler,))
+
+
+class ActionServiceStub(object):
+  # missing associated documentation comment in .proto file
+  pass
+
+  def __init__(self, channel):
+    """Constructor.
+
+    Args:
+      channel: A grpc.Channel.
+    """
+    self.LikePost = channel.unary_unary(
+        '/thoughts.ActionService/LikePost',
+        request_serializer=thoughts__pb2.PostRequest.SerializeToString,
+        response_deserializer=thoughts__pb2.Status.FromString,
+        )
+    self.UnlikePost = channel.unary_unary(
+        '/thoughts.ActionService/UnlikePost',
+        request_serializer=thoughts__pb2.PostRequest.SerializeToString,
+        response_deserializer=thoughts__pb2.Status.FromString,
+        )
+    self.RetweetPost = channel.unary_unary(
+        '/thoughts.ActionService/RetweetPost',
+        request_serializer=thoughts__pb2.PostRequest.SerializeToString,
+        response_deserializer=thoughts__pb2.Status.FromString,
+        )
+    self.RemoveRetweet = channel.unary_unary(
+        '/thoughts.ActionService/RemoveRetweet',
+        request_serializer=thoughts__pb2.PostRequest.SerializeToString,
+        response_deserializer=thoughts__pb2.Status.FromString,
+        )
+
+
+class ActionServiceServicer(object):
+  # missing associated documentation comment in .proto file
+  pass
+
+  def LikePost(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def UnlikePost(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def RetweetPost(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def RemoveRetweet(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+
+def add_ActionServiceServicer_to_server(servicer, server):
+  rpc_method_handlers = {
+      'LikePost': grpc.unary_unary_rpc_method_handler(
+          servicer.LikePost,
+          request_deserializer=thoughts__pb2.PostRequest.FromString,
+          response_serializer=thoughts__pb2.Status.SerializeToString,
+      ),
+      'UnlikePost': grpc.unary_unary_rpc_method_handler(
+          servicer.UnlikePost,
+          request_deserializer=thoughts__pb2.PostRequest.FromString,
+          response_serializer=thoughts__pb2.Status.SerializeToString,
+      ),
+      'RetweetPost': grpc.unary_unary_rpc_method_handler(
+          servicer.RetweetPost,
+          request_deserializer=thoughts__pb2.PostRequest.FromString,
+          response_serializer=thoughts__pb2.Status.SerializeToString,
+      ),
+      'RemoveRetweet': grpc.unary_unary_rpc_method_handler(
+          servicer.RemoveRetweet,
+          request_deserializer=thoughts__pb2.PostRequest.FromString,
+          response_serializer=thoughts__pb2.Status.SerializeToString,
+      ),
+  }
+  generic_handler = grpc.method_handlers_generic_handler(
+      'thoughts.ActionService', rpc_method_handlers)
   server.add_generic_rpc_handlers((generic_handler,))

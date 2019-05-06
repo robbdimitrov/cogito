@@ -10,7 +10,7 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
     def __init__(self, db_client):
         self.db_client = db_client
 
-    def Create(self, request, context):
+    def CreateUser(self, request, context):
         """Validates input and creates new user account."""
 
         username = request.username
