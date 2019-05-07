@@ -46,7 +46,7 @@ class FollowService(thoughts_pb2_grpc.FollowServiceServicer):
 
         try:
             self.db_client.follow_user(username, user_id)
-        except exceptions.DBException as e:
+        except exceptions.DbException as e:
             error = thoughts_pb2.Error(code=400, error='BAD_REQUEST',
                 message=str(e))
             return thoughts_pb2.Status(error=error)

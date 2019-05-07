@@ -2,12 +2,12 @@ import psycopg2
 import logging
 
 
-class DBException(Exception):
+class DbException(Exception):
     """Base class for database exceptions."""
     pass
 
 
-class DBClient:
+class DbClient:
     def __init__(self, db):
         self.db = db
 
@@ -23,7 +23,7 @@ class DBClient:
             conn.commit()
         except psycopg2.Error as e:
             logging.error(f'Error creating user: {str(e)}')
-            raise DBException('Error while writing to the database.')
+            raise DbException('Error while writing to the database.')
         finally:
             cur.close()
 

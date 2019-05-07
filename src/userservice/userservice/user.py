@@ -48,7 +48,7 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
             error = thoughts_pb2.Error(code=400, error='USER_EXISTS',
                 message=str(e))
             return thoughts_pb2.UserResponse(error=error)
-        except exceptions.DBException as e:
+        except exceptions.DbException as e:
             error = thoughts_pb2.Error(code=400, error='BAD_REQUEST',
                 message=str(e))
             return thoughts_pb2.UserResponse(error=error)

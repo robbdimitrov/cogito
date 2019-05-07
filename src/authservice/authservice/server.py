@@ -7,7 +7,7 @@ from authservice import thoughts_pb2_grpc
 from authservice.auth import AuthService
 from authservice.session import SessionService
 from authservice.db import Database
-from authservice.db_client import DBClient
+from authservice.db_client import DbClient
 
 
 class Server:
@@ -18,12 +18,12 @@ class Server:
     def get_db_client(self):
         if self.db_client is None:
             db = Database(self.config['DB_URI'])
-            self.db_client = DBClient(db)
+            self.db_client = DbClient(db)
         return self.db_client
 
     def create_server(self):
         db_client = self.get_db_client()
-        secret = self.config['JWT_SECRET']
+        secret = self.config['SECRET']
 
         auth_service = AuthService(db_client, secret)
         session_service = SessionService(db_client, secret)

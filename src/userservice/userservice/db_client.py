@@ -3,7 +3,7 @@ import logging
 
 from userservice import db
 from userservice.exceptions import (
-    DBException,
+    DbException,
     ExistingUserException,
     UserActionException,
     WrongUsernameException
@@ -11,7 +11,7 @@ from userservice.exceptions import (
 from userservice.utils import db_object_to_dict
 
 
-class DBClient:
+class DbClient:
     def __init__(self, db):
         self.db = db
 
@@ -39,7 +39,7 @@ class DBClient:
             conn.commit()
         except psycopg2.Error as e:
             logging.error(f'Error creating user: {str(e)}')
-            raise DBException('Error while writing to the database.')
+            raise DbException('Error while writing to the database.')
         finally:
             cur.close()
 
@@ -87,7 +87,7 @@ class DBClient:
             conn.commit()
         except psycopg2.Error as e:
             logging.error(f'Error updating user: {str(e)}')
-            raise DBException('Updating user failed.')
+            raise DbException('Updating user failed.')
         finally:
             cur.close()
 
@@ -161,7 +161,7 @@ class DBClient:
             conn.commit()
         except psycopg2.Error as e:
             logging.error(f'Error following user: {str(e)}')
-            raise DBException('Error following user.')
+            raise DbException('Error following user.')
         finally:
             cur.close()
 
