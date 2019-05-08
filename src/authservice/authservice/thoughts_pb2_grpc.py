@@ -376,11 +376,6 @@ class PostServiceStub(object):
         request_serializer=thoughts__pb2.UserRequest.SerializeToString,
         response_deserializer=thoughts__pb2.Posts.FromString,
         )
-    self.GetRetweets = channel.unary_unary(
-        '/thoughts.PostService/GetRetweets',
-        request_serializer=thoughts__pb2.UserRequest.SerializeToString,
-        response_deserializer=thoughts__pb2.Posts.FromString,
-        )
     self.DeletePost = channel.unary_unary(
         '/thoughts.PostService/DeletePost',
         request_serializer=thoughts__pb2.PostRequest.SerializeToString,
@@ -420,13 +415,6 @@ class PostServiceServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def GetRetweets(self, request, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
   def DeletePost(self, request, context):
     # missing associated documentation comment in .proto file
     pass
@@ -454,11 +442,6 @@ def add_PostServiceServicer_to_server(servicer, server):
       ),
       'GetLikedPosts': grpc.unary_unary_rpc_method_handler(
           servicer.GetLikedPosts,
-          request_deserializer=thoughts__pb2.UserRequest.FromString,
-          response_serializer=thoughts__pb2.Posts.SerializeToString,
-      ),
-      'GetRetweets': grpc.unary_unary_rpc_method_handler(
-          servicer.GetRetweets,
           request_deserializer=thoughts__pb2.UserRequest.FromString,
           response_serializer=thoughts__pb2.Posts.SerializeToString,
       ),

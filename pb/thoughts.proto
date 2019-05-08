@@ -182,7 +182,6 @@ service PostService {
   rpc GetPost(PostRequest) returns (PostStatus);
   rpc GetPosts(UserRequest) returns (Posts);
   rpc GetLikedPosts(UserRequest) returns (Posts);
-  rpc GetRetweets(UserRequest) returns (Posts);
   rpc DeletePost(PostRequest) returns (Status);
 }
 
