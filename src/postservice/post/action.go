@@ -6,26 +6,32 @@ import (
 	pb "postservice/genproto"
 )
 
-// ActionServer is handling like and retweet actions of posts
-type ActionServer struct{}
-
-// NewActionServer creates a new server instance
-func NewActionServer() *ActionServer {
-	return &ActionServer{}
+// ActionService is handling like and retweet actions of posts
+type ActionService struct {
+	dbClient *DbClient
 }
 
-func (server *ActionServer) LikePost(context.Context, *pb.PostRequest) (*pb.Status, error) {
-
+// NewActionService creates a new server instance
+func NewActionService(dbClient *DbClient) *ActionService {
+	return &ActionService{dbClient}
 }
 
-func (server *ActionServer) UnlikePost(context.Context, *pb.PostRequest) (*pb.Status, error) {
-
-}
-
-func (server *ActionServer) RetweetPost(context.Context, *pb.PostRequest) (*pb.Status, error) {
+// LikePost creates a like relationship between user and post
+func (s *ActionService) LikePost(ctx context.Context, req *pb.PostRequest) (*pb.Status, error) {
 
 }
 
-func (server *ActionServer) RemoveRetweet(context.Context, *pb.PostRequest) (*pb.Status, error) {
+// UnlikePost deletes a like relationship between user and post
+func (s *ActionService) UnlikePost(ctx context.Context, req *pb.PostRequest) (*pb.Status, error) {
+
+}
+
+// RetweetPost creates a retweet relationship between user and post
+func (s *ActionService) RetweetPost(ctx context.Context, req *pb.PostRequest) (*pb.Status, error) {
+
+}
+
+// RemoveRetweet deletes a retweet relationship between user and post
+func (s *ActionService) RemoveRetweet(ctx context.Context, req *pb.PostRequest) (*pb.Status, error) {
 
 }

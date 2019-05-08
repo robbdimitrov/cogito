@@ -6,30 +6,37 @@ import (
 	pb "postservice/genproto"
 )
 
-// PostServer is handling post-related grpc calls
-type PostServer struct{}
+// Service is handling post-related grpc calls
+type Service struct {
+	dbClient *DbClient
+}
 
-// NewPostServer creates a new server instance
-func NewPostServer() *PostServer {
-	return &PostServer{}
+// NewService creates a new server instance
+func NewService(dbClient *DbClient) *Service {
+	return &Service{dbClient}
+}
+
+// CreatePost creates a new Post object
+func (s *Service) CreatePost(ctx context.Context, req *pb.Post) (*pb.PostStatus, error) {
+
 }
 
 // GetPost returns a Post object with the id passed from the request
-func (server *PostServer) GetPost(context.Context, *pb.PostRequest) (*pb.PostStatus, error) {
+func (s *Service) GetPost(ctx context.Context, req *pb.PostRequest) (*pb.PostStatus, error) {
 
 }
 
 // GetPosts returns posts and retweets of user
-func (server *PostServer) GetPosts(context.Context, *pb.UserRequest) (*pb.Posts, error) {
+func (s *Service) GetPosts(ctx context.Context, req *pb.UserRequest) (*pb.Posts, error) {
 
 }
 
 // GetLikedPosts returns posts liked by the user
-func (server *PostServer) GetLikedPosts(context.Context, *pb.UserRequest) (*pb.Posts, error) {
+func (s *Service) GetLikedPosts(ctx context.Context, req *pb.UserRequest) (*pb.Posts, error) {
 
 }
 
 // DeletePost deletes a post owned by the user
-func (server *PostServer) DeletePost(context.Context, *pb.PostRequest) (*pb.Status, error) {
+func (s *Service) DeletePost(ctx context.Context, req *pb.PostRequest) (*pb.Status, error) {
 
 }

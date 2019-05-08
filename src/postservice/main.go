@@ -1,18 +1,17 @@
 package main
 
 import (
-  "os"
-  "strconv"
+	"os"
 
-  "postservice/post"
+	"postservice/post"
 )
 
 func main() {
-  port, err := strconv.Atoi(os.Getenv("PORT"))
-  if err == nil {
-    port = 50054
-  }
-  dbUrl := os.Getenv("DB_URI")
-  server := post.NewServer(port, dbUrl)
-  server.Start()
+	port, err := os.Getenv("PORT")
+	if err != nil {
+		port = 50054
+	}
+	dbURI := os.Getenv("DB_URI")
+	server := post.NewServer(port, dbURI)
+	server.Start()
 }
