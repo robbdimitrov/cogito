@@ -2,7 +2,6 @@ import React, { Suspense } from 'react';
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
 
 const Feed = React.lazy(() => import('../feed/Feed'));
-const Search = React.lazy(() => import('../search/Search'));
 const Profile = React.lazy(() => import('../profile/Profile'));
 const Login = React.lazy(() => import('../user/Login'));
 const Signup = React.lazy(() => import('../user/Signup'));
@@ -17,7 +16,6 @@ function AppRouter(props) {
         <Switch>
           <Redirect from='/' exact to='/feed'/>
           <Route path='/feed' exact component={Feed} />
-          <Route path='/search' exact component={Search} />
           <Route path='/thought' component={Feed} />
           <Route path='/login' exact component={Login} />
           <Route path='/signup' exact component={Signup} />

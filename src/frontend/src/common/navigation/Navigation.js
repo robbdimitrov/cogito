@@ -30,15 +30,6 @@ class Navigation extends React.Component {
               />
               <span className='nav-button-label'>Home</span>
             </NavLink>
-
-            <NavLink to='/search' className='nav-button'>
-              <FontAwesomeIcon
-                icon='search'
-                className='nav-button-icon'
-                size='2x'
-              />
-              <span className='nav-button-label'>Search</span>
-            </NavLink>
           </div>
 
           <FontAwesomeIcon icon='brain' className='icon' size='2x' />
