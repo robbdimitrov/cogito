@@ -140,9 +140,16 @@ func (c *DbClient) GetLikedPosts(userID int32) (pb.Posts, error) {
 	return pb.Posts{Posts: posts}, nil
 }
 
-// DeletePost deletes a post owned by the user
-func (c *DbClient) DeletePost() {
+// DeletePost deletes a post with the passed postID
+func (c *DbClient) DeletePost(postID int32) error {
+	conn := c.db.GetConn()
 
+	_, err := conn.Exec(`DELETE FROM thoughts.posts WHERE id = $1`, postID)
+	if err != nil {
+		return errors.New("Error happened writinh to the database")
+	}
+
+	return nil
 }
 
 // LikePost creates a like relationship between user and post
@@ -151,8 +158,16 @@ func (c *DbClient) LikePost() {
 }
 
 // UnlikePost deletes a like relationship between user and post
-func (c *DbClient) UnlikePost() {
+func (c *DbClient) UnlikePost(postID int32, userID int32) error {
+	conn := c.db.GetConn()
 
+	_, err := conn.Exec(`DELETE FROM thoughts.likes
+    WHERE post_id = $1 AND user_id = $2`, postID, userID)
+	if err != nil {
+		return errors.New("Error happened writinh to the database")
+	}
+
+	return nil
 }
 
 // RetweetPost creates a retweet relationship between user and post
@@ -161,6 +176,14 @@ func (c *DbClient) RetweetPost() {
 }
 
 // RemoveRetweet deletes a retweet relationship between user and post
-func (c *DbClient) RemoveRetweet() {
+func (c *DbClient) RemoveRetweet(postID int32, userID int32) error {
+	conn := c.db.GetConn()
 
+	_, err := conn.Exec(`DELETE FROM thoughts.retweets
+    WHERE post_id = $1 AND user_id = $2`, postID, userID)
+	if err != nil {
+		return errors.New("Error happened writinh to the database")
+	}
+
+	return nil
 }
