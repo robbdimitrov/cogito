@@ -2,8 +2,6 @@ package post
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"log"
 	"time"
 
@@ -23,7 +21,7 @@ func NewAuthClient(address string) *AuthClient {
 }
 
 // Validate checks the validity of the access token and returns userID or error
-func (c *AuthClient) Validate(token string) (int32, error) {
+func (c *AuthClient) Validate(token string) (*pb.AuthStatus, error) {
 	conn, err := grpc.Dial(c.address, grpc.WithInsecure())
 	if err != nil {
 		log.Panic("Error happened while eatablishing connection to the auth server")
@@ -35,9 +33,8 @@ func (c *AuthClient) Validate(token string) (int32, error) {
 
 	client := pb.NewAuthServiceClient(conn)
 	status, err := client.Validate(ctx, &pb.AuthRequest{Token: token})
-	if err != nil || status.Error != nil {
-		message := fmt.Sprintf("%s", status.Error)
-		return 0, errors.New(message)
+	if err != nil {
+		return nil, err
 	}
-	return status.UserId, nil
+	return status, nil
 }

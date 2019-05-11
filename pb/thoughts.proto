@@ -138,7 +138,7 @@ message PostStatus {
 }
 
 message PostRequest {
-  string post_id = 1;
+  int32 post_id = 1;
   string token = 2;
 }
 
