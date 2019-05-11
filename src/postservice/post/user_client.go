@@ -24,7 +24,7 @@ func NewUserClient(address string) *UserClient {
 func (c *UserClient) GetUser(username string) (*pb.UserStatus, error) {
 	conn, err := grpc.Dial(c.address, grpc.WithInsecure())
 	if err != nil {
-		log.Panic("Error happened while establishing connection to the auth server")
+		log.Panic("Error happened while establishing connection to the user server")
 	}
 	defer conn.Close()
 

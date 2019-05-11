@@ -31,7 +31,7 @@ func (s *Server) createDbClient() *DbClient {
 func (s *Server) Start() {
 	log.Printf("Starting server on port %s\n", s.port)
 
-	lis, err := net.Listen("tcp", s.port)
+	lis, err := net.Listen("tcp", ":"+s.port)
 	if err != nil {
 		log.Fatalf("Server failed to listen: %v", err)
 	}
