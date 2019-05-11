@@ -8,12 +8,13 @@ import (
 
 // ActionService is handling like and retweet actions of posts
 type ActionService struct {
-	dbClient *DbClient
+  dbClient *DbClient
+  authClient *AuthClient
 }
 
 // NewActionService creates a new server instance
-func NewActionService(dbClient *DbClient) *ActionService {
-	return &ActionService{dbClient}
+func NewActionService(dbClient *DbClient, authClient *AuthClient) *ActionService {
+	return &ActionService{dbClient, authClient}
 }
 
 // LikePost creates a like relationship between user and post

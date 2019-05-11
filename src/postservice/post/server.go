@@ -11,14 +11,14 @@ import (
 
 // Server is runing on a port and handling grpc requests
 type Server struct {
-	port  string
-	dbURI string
+	port    string
+	dbURI   string
+	authURI string
 }
 
 // NewServer is a constructor for new Server objects
-func NewServer(port string, dbURI string) *Server {
-	server := Server{port, dbURI}
-	return &server
+func NewServer(port string, dbURI string, authURI string) *Server {
+	return &Server{port, dbURI, authURI}
 }
 
 func (s *Server) createDbClient() *DbClient {
@@ -32,16 +32,18 @@ func (s *Server) Start() {
 
 	lis, err := net.Listen("tcp", s.port)
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.Fatalf("Server failed to listen: %v", err)
 	}
 
-	dbClient := s.createDbClient()
 	svr := grpc.NewServer()
 
-	pb.RegisterPostServiceServer(svr, NewService(dbClient))
-	pb.RegisterActionServiceServer(svr, NewActionService(dbClient))
+	dbClient := s.createDbClient()
+	authClient := NewAuthClient(s.authURI)
+
+	pb.RegisterPostServiceServer(svr, NewService(dbClient, authClient))
+	pb.RegisterActionServiceServer(svr, NewActionService(dbClient, authClient))
 
 	if err := svr.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+		log.Fatalf("Server failed to serve: %v", err)
 	}
 }

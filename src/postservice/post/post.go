@@ -8,12 +8,13 @@ import (
 
 // Service is handling post-related grpc calls
 type Service struct {
-	dbClient *DbClient
+  dbClient *DbClient
+  authClient *AuthClient
 }
 
 // NewService creates a new server instance
-func NewService(dbClient *DbClient) *Service {
-	return &Service{dbClient}
+func NewService(dbClient *DbClient, authClient *AuthClient) *Service {
+	return &Service{dbClient, authClient}
 }
 
 // CreatePost creates a new Post object
@@ -27,12 +28,12 @@ func (s *Service) GetPost(ctx context.Context, req *pb.PostRequest) (*pb.PostSta
 }
 
 // GetPosts returns posts and retweets of user
-func (s *Service) GetPosts(ctx context.Context, req *pb.UserRequest) (*pb.Posts, error) {
+func (s *Service) GetPosts(ctx context.Context, req *pb.DataRequest) (*pb.Posts, error) {
 
 }
 
 // GetLikedPosts returns posts liked by the user
-func (s *Service) GetLikedPosts(ctx context.Context, req *pb.UserRequest) (*pb.Posts, error) {
+func (s *Service) GetLikedPosts(ctx context.Context, req *pb.DataRequest) (*pb.Posts, error) {
 
 }
 

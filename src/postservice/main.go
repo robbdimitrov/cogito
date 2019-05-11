@@ -9,11 +9,7 @@ import (
 )
 
 func main() {
-	port, err := os.Getenv("PORT")
-	if err != nil {
-		port = 50054
-	}
-	dbURI := os.Getenv("DB_URI")
-	server := post.NewServer(port, dbURI)
+	server := post.NewServer(os.Getenv("PORT"),
+		os.Getenv("DB_URI"), os.Getenv("AUTH_URI"))
 	server.Start()
 }

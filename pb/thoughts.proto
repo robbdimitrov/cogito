@@ -12,6 +12,14 @@ message Error {
   string message = 3;
 }
 
+message DataRequest {
+  string username = 1;
+  string token = 2;
+  int32 page = 3;
+  int32 limit = 4;
+  bool count_only = 5;
+}
+
 /**
  * Status
  */
@@ -57,13 +65,14 @@ message AuthResponse {
  * Users
  */
 
-message UserRequest {
+message FollowRequest {
   string username = 1;
   string token = 2;
 }
 
 message Users {
   repeated User users = 1;
+  int32 count = 2;
 }
 
 message UserUpdates {
@@ -108,21 +117,6 @@ message SessionRequest {
 }
 
 /**
- * Following
- */
-
-message FollowersRequest {
-  string username = 1;
-  int32 page_number = 2;
-  int32 results_per_page = 3;
-}
-
-message FollowRequest {
-  string username = 1;
-  string token = 2;
-}
-
-/**
  * Posts
  */
 
@@ -135,6 +129,7 @@ message Post {
 
 message Posts {
   repeated Post posts = 1;
+  int32 count = 2;
 }
 
 message PostStatus {
@@ -153,14 +148,14 @@ message PostRequest {
 
 service UserService {
   rpc CreateUser(UserUpdates) returns (UserStatus);
-  rpc GetUser(UserRequest) returns (UserStatus);
+  rpc GetUser(DataRequest) returns (UserStatus);
   rpc UpdateUser(UserUpdates) returns (Status);
-  rpc DeleteUser(UserRequest) returns (Status);
+  rpc DeleteUser(DataRequest) returns (Status);
 }
 
 service FollowService {
-  rpc GetFollowing(FollowersRequest) returns (Users);
-  rpc GetFollowers(FollowersRequest) returns (Users);
+  rpc GetFollowing(DataRequest) returns (Users);
+  rpc GetFollowers(DataRequest) returns (Users);
   rpc Follow(FollowRequest) returns (Status);
   rpc Unfollow(FollowRequest) returns (Status);
 }
@@ -180,8 +175,8 @@ service SessionService {
 service PostService {
   rpc CreatePost(Post) returns (PostStatus);
   rpc GetPost(PostRequest) returns (PostStatus);
-  rpc GetPosts(UserRequest) returns (Posts);
-  rpc GetLikedPosts(UserRequest) returns (Posts);
+  rpc GetPosts(DataRequest) returns (Posts);
+  rpc GetLikedPosts(DataRequest) returns (Posts);
   rpc DeletePost(PostRequest) returns (Status);
 }
 

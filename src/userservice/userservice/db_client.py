@@ -109,7 +109,7 @@ class DbClient:
             WHERE user_id = (SELECT id FROM thoughts.users WHERE username = %s) \
             AND follower_id = id \
             ORDER BY date_created DESC \
-            OFFSET %s, LIMIT %s',
+            OFFSET %s LIMIT %s',
             (username, page * limit, limit))
         results = cur.fetchall()
         cur.close()
@@ -130,7 +130,7 @@ class DbClient:
             WHERE follower_id = (SELECT id FROM thoughts.users WHERE username = %s) \
             AND user_id = id \
             ORDER BY date_created DESC \
-            OFFSET %s, LIMIT %s',
+            OFFSET %s LIMIT %s',
             (username, page * limit, limit))
         results = cur.fetchall()
         cur.close()
