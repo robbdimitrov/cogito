@@ -1,12 +1,13 @@
 import grpc
 from concurrent import futures
 import time
+import logging
 
 from userservice import thoughts_pb2_grpc
 from userservice.user import UserService
 from userservice.follow import FollowService
 from userservice.db import Database
-from userservice.db_client import DBClient
+from userservice.db_client import DbClient
 
 
 class Server:
@@ -17,7 +18,7 @@ class Server:
     def get_db_client(self):
         if self.db_client is None:
             db = Database(self.config['DB_URI'])
-            self.db_client = DBClient(db)
+            self.db_client = DbClient(db)
         return self.db_client
 
     def create_user_service(self):
@@ -46,7 +47,7 @@ class Server:
     def serve(self):
         server = self.create_server()
         server.start()
-        print(f'Server running on port {self.config["PORT"]}')
+        logging.info(f'Server running on port {self.config["PORT"]}')
         try:
             while True:
                 time.sleep(60 * 60 * 24)

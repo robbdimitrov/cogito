@@ -7,17 +7,12 @@ CREATE TABLE IF NOT EXISTS thoughts.users (
   name varchar(100) NOT NULL,
   password varchar(100) NOT NULL,
   bio varchar(250) DEFAULT '',
-  reg_date timestamp NOT NULL DEFAULT localtimestamp
+  date_created timestamp NOT NULL DEFAULT localtimestamp
 );
 
-CREATE TABLE IF NOT EXISTS thoughts.followers (
+CREATE TABLE IF NOT EXISTS thoughts.followings (
+  id serial PRIMARY KEY,
   user_id integer REFERENCES thoughts.users(id) ON DELETE CASCADE,
-  follower_id integer REFERENCES thoughts.users(id) ON DELETE CASCADE
+  follower_id integer REFERENCES thoughts.users(id) ON DELETE CASCADE,
+  date_created timestamp NOT NULL DEFAULT localtimestamp
 );
-
-CREATE OR REPLACE FUNCTION time_format(origin timestamp)
-RETURNS text AS $$
-BEGIN
-  RETURN to_char(origin, 'DD-MM-YYYY"T"HH24:MI:SS');
-END;
-$$  LANGUAGE plpgsql;

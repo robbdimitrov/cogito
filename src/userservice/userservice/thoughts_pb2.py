@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='thoughts',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0ethoughts.proto\x12\x08thoughts\"5\n\x05\x45rror\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\r\n\x05\x65rror\x18\x02 \x01(\t\x12\x0f\n\x07message\x18\x03 \x01(\t\"9\n\x06Status\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"T\n\x0b\x43redentials\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\x12\x12\n\nuser_agent\x18\x03 \x01(\t\x12\r\n\x05\x65mail\x18\x04 \x01(\t\"\x1c\n\x0b\x41uthRequest\x12\r\n\x05token\x18\x01 \x01(\t\"=\n\nAuthStatus\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"o\n\x0c\x41uthResponse\x12\x12\n\ntoken_type\x18\x01 \x01(\t\x12\x14\n\x0c\x61\x63\x63\x65ss_token\x18\x02 \x01(\t\x12\x15\n\rrefresh_token\x18\x03 \x01(\t\x12\x1e\n\x05\x65rror\x18\x04 \x01(\x0b\x32\x0f.thoughts.Error\".\n\x0bUserRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\r\n\x05token\x18\x02 \x01(\t\"L\n\x0cUserResponse\x12\x1c\n\x04user\x18\x01 \x01(\x0b\x32\x0e.thoughts.User\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"&\n\x05Users\x12\x1d\n\x05users\x18\x01 \x03(\x0b\x32\x0e.thoughts.User\"\x80\x01\n\x0bUserUpdates\x12\x10\n\x08username\x18\x01 \x01(\t\x12\r\n\x05\x65mail\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x10\n\x08password\x18\x04 \x01(\t\x12\x0b\n\x03\x62io\x18\x05 \x01(\t\x12\x14\n\x0cold_password\x18\x06 \x01(\t\x12\r\n\x05token\x18\x07 \x01(\t\"`\n\x04User\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x10\n\x08username\x18\x02 \x01(\t\x12\r\n\x05\x65mail\x18\x03 \x01(\t\x12\x0c\n\x04name\x18\x04 \x01(\t\x12\x0b\n\x03\x62io\x18\x05 \x01(\t\x12\x10\n\x08reg_date\x18\x06 \x01(\t\"^\n\x07Session\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x12\n\nuser_agent\x18\x03 \x01(\t\x12\x0f\n\x07user_id\x18\x04 \x01(\x05\x12\x14\n\x0c\x64\x61te_created\x18\x05 \x01(\t\"O\n\x08Sessions\x12#\n\x08sessions\x18\x01 \x03(\x0b\x32\x11.thoughts.Session\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"3\n\x0eSessionRequest\x12\x12\n\nsession_id\x18\x01 \x01(\x05\x12\r\n\x05token\x18\x02 \x01(\t\"S\n\x10\x46ollowersRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x13\n\x0bpage_number\x18\x02 \x01(\x05\x12\x18\n\x10results_per_page\x18\x03 \x01(\x05\"0\n\rFollowRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\r\n\x05token\x18\x02 \x01(\t2\xee\x01\n\x0bUserService\x12\x37\n\x06\x43reate\x12\x15.thoughts.UserUpdates\x1a\x16.thoughts.UserResponse\x12\x38\n\x07GetUser\x12\x15.thoughts.UserRequest\x1a\x16.thoughts.UserResponse\x12\x35\n\nUpdateUser\x12\x15.thoughts.UserUpdates\x1a\x10.thoughts.Status\x12\x35\n\nDeleteUser\x12\x15.thoughts.UserRequest\x1a\x10.thoughts.Status2\xf5\x01\n\rFollowService\x12;\n\x0cGetFollowing\x12\x1a.thoughts.FollowersRequest\x1a\x0f.thoughts.Users\x12;\n\x0cGetFollowers\x12\x1a.thoughts.FollowersRequest\x1a\x0f.thoughts.Users\x12\x33\n\x06\x46ollow\x12\x17.thoughts.FollowRequest\x1a\x10.thoughts.Status\x12\x35\n\x08Unfollow\x12\x17.thoughts.FollowRequest\x1a\x10.thoughts.Status2\xf5\x01\n\x0b\x41uthService\x12\x36\n\x05Login\x12\x15.thoughts.Credentials\x1a\x16.thoughts.AuthResponse\x12\x38\n\x07Refresh\x12\x15.thoughts.AuthRequest\x1a\x16.thoughts.AuthResponse\x12\x37\n\x08Validate\x12\x15.thoughts.AuthRequest\x1a\x14.thoughts.AuthStatus\x12;\n\x10ValidatePassword\x12\x15.thoughts.Credentials\x1a\x10.thoughts.Status2\x87\x01\n\x0eSessionService\x12\x38\n\x0bGetSessions\x12\x15.thoughts.AuthRequest\x1a\x12.thoughts.Sessions\x12;\n\rDeleteSession\x12\x18.thoughts.SessionRequest\x1a\x10.thoughts.Statusb\x06proto3')
+  serialized_pb=_b('\n\x0ethoughts.proto\x12\x08thoughts\"5\n\x05\x45rror\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\r\n\x05\x65rror\x18\x02 \x01(\t\x12\x0f\n\x07message\x18\x03 \x01(\t\"_\n\x0b\x44\x61taRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\r\n\x05token\x18\x02 \x01(\t\x12\x0c\n\x04page\x18\x03 \x01(\x05\x12\r\n\x05limit\x18\x04 \x01(\x05\x12\x12\n\ncount_only\x18\x05 \x01(\x08\"9\n\x06Status\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"=\n\nAuthStatus\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"J\n\nUserStatus\x12\x1c\n\x04user\x18\x01 \x01(\x0b\x32\x0e.thoughts.User\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"T\n\x0b\x43redentials\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\x12\x12\n\nuser_agent\x18\x03 \x01(\t\x12\r\n\x05\x65mail\x18\x04 \x01(\t\"\x1c\n\x0b\x41uthRequest\x12\r\n\x05token\x18\x01 \x01(\t\"o\n\x0c\x41uthResponse\x12\x12\n\ntoken_type\x18\x01 \x01(\t\x12\x14\n\x0c\x61\x63\x63\x65ss_token\x18\x02 \x01(\t\x12\x15\n\rrefresh_token\x18\x03 \x01(\t\x12\x1e\n\x05\x65rror\x18\x04 \x01(\x0b\x32\x0f.thoughts.Error\"0\n\rFollowRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\r\n\x05token\x18\x02 \x01(\t\"5\n\x05Users\x12\x1d\n\x05users\x18\x01 \x03(\x0b\x32\x0e.thoughts.User\x12\r\n\x05\x63ount\x18\x02 \x01(\x05\"\x80\x01\n\x0bUserUpdates\x12\x10\n\x08username\x18\x01 \x01(\t\x12\r\n\x05\x65mail\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x10\n\x08password\x18\x04 \x01(\t\x12\x0b\n\x03\x62io\x18\x05 \x01(\t\x12\x14\n\x0cold_password\x18\x06 \x01(\t\x12\r\n\x05token\x18\x07 \x01(\t\"d\n\x04User\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x10\n\x08username\x18\x02 \x01(\t\x12\r\n\x05\x65mail\x18\x03 \x01(\t\x12\x0c\n\x04name\x18\x04 \x01(\t\x12\x0b\n\x03\x62io\x18\x05 \x01(\t\x12\x14\n\x0c\x64\x61te_created\x18\x06 \x01(\t\"^\n\x07Session\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x12\n\nuser_agent\x18\x03 \x01(\t\x12\x0f\n\x07user_id\x18\x04 \x01(\x05\x12\x14\n\x0c\x64\x61te_created\x18\x05 \x01(\t\"O\n\x08Sessions\x12#\n\x08sessions\x18\x01 \x03(\x0b\x32\x11.thoughts.Session\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"3\n\x0eSessionRequest\x12\x12\n\nsession_id\x18\x01 \x01(\x05\x12\r\n\x05token\x18\x02 \x01(\t\"J\n\x04Post\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0f\n\x07\x63ontent\x18\x02 \x01(\t\x12\x0f\n\x07user_id\x18\x03 \x01(\x05\x12\x14\n\x0c\x64\x61te_created\x18\x06 \x01(\t\">\n\x0bPostUpdates\x12\x0f\n\x07post_id\x18\x01 \x01(\x05\x12\x0f\n\x07\x63ontent\x18\x02 \x01(\t\x12\r\n\x05token\x18\x03 \x01(\t\"5\n\x05Posts\x12\x1d\n\x05posts\x18\x01 \x03(\x0b\x32\x0e.thoughts.Post\x12\r\n\x05\x63ount\x18\x02 \x01(\x05\"J\n\nPostStatus\x12\x1c\n\x04post\x18\x01 \x01(\x0b\x32\x0e.thoughts.Post\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"-\n\x0bPostRequest\x12\x0f\n\x07post_id\x18\x01 \x01(\x05\x12\r\n\x05token\x18\x02 \x01(\t2\xee\x01\n\x0bUserService\x12\x39\n\nCreateUser\x12\x15.thoughts.UserUpdates\x1a\x14.thoughts.UserStatus\x12\x36\n\x07GetUser\x12\x15.thoughts.DataRequest\x1a\x14.thoughts.UserStatus\x12\x35\n\nUpdateUser\x12\x15.thoughts.UserUpdates\x1a\x10.thoughts.Status\x12\x35\n\nDeleteUser\x12\x15.thoughts.DataRequest\x1a\x10.thoughts.Status2\xeb\x01\n\rFollowService\x12\x36\n\x0cGetFollowing\x12\x15.thoughts.DataRequest\x1a\x0f.thoughts.Users\x12\x36\n\x0cGetFollowers\x12\x15.thoughts.DataRequest\x1a\x0f.thoughts.Users\x12\x33\n\x06\x46ollow\x12\x17.thoughts.FollowRequest\x1a\x10.thoughts.Status\x12\x35\n\x08Unfollow\x12\x17.thoughts.FollowRequest\x1a\x10.thoughts.Status2\xf5\x01\n\x0b\x41uthService\x12\x36\n\x05Login\x12\x15.thoughts.Credentials\x1a\x16.thoughts.AuthResponse\x12\x38\n\x07Refresh\x12\x15.thoughts.AuthRequest\x1a\x16.thoughts.AuthResponse\x12\x37\n\x08Validate\x12\x15.thoughts.AuthRequest\x1a\x14.thoughts.AuthStatus\x12;\n\x10ValidatePassword\x12\x15.thoughts.Credentials\x1a\x10.thoughts.Status2\x87\x01\n\x0eSessionService\x12\x38\n\x0bGetSessions\x12\x15.thoughts.AuthRequest\x1a\x12.thoughts.Sessions\x12;\n\rDeleteSession\x12\x18.thoughts.SessionRequest\x1a\x10.thoughts.Status2\xa4\x02\n\x0bPostService\x12\x39\n\nCreatePost\x12\x15.thoughts.PostUpdates\x1a\x14.thoughts.PostStatus\x12\x36\n\x07GetPost\x12\x15.thoughts.PostRequest\x1a\x14.thoughts.PostStatus\x12\x32\n\x08GetPosts\x12\x15.thoughts.DataRequest\x1a\x0f.thoughts.Posts\x12\x37\n\rGetLikedPosts\x12\x15.thoughts.DataRequest\x1a\x0f.thoughts.Posts\x12\x35\n\nDeletePost\x12\x15.thoughts.PostRequest\x1a\x10.thoughts.Status2\xed\x01\n\rActionService\x12\x33\n\x08LikePost\x12\x15.thoughts.PostRequest\x1a\x10.thoughts.Status\x12\x35\n\nUnlikePost\x12\x15.thoughts.PostRequest\x1a\x10.thoughts.Status\x12\x36\n\x0bRetweetPost\x12\x15.thoughts.PostRequest\x1a\x10.thoughts.Status\x12\x38\n\rRemoveRetweet\x12\x15.thoughts.PostRequest\x1a\x10.thoughts.Statusb\x06proto3')
 )
 
 
@@ -71,6 +71,65 @@ _ERROR = _descriptor.Descriptor(
 )
 
 
+_DATAREQUEST = _descriptor.Descriptor(
+  name='DataRequest',
+  full_name='thoughts.DataRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='username', full_name='thoughts.DataRequest.username', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='token', full_name='thoughts.DataRequest.token', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='page', full_name='thoughts.DataRequest.page', index=2,
+      number=3, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='limit', full_name='thoughts.DataRequest.limit', index=3,
+      number=4, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='count_only', full_name='thoughts.DataRequest.count_only', index=4,
+      number=5, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=83,
+  serialized_end=178,
+)
+
+
 _STATUS = _descriptor.Descriptor(
   name='Status',
   full_name='thoughts.Status',
@@ -104,8 +163,84 @@ _STATUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=83,
-  serialized_end=140,
+  serialized_start=180,
+  serialized_end=237,
+)
+
+
+_AUTHSTATUS = _descriptor.Descriptor(
+  name='AuthStatus',
+  full_name='thoughts.AuthStatus',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='user_id', full_name='thoughts.AuthStatus.user_id', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='error', full_name='thoughts.AuthStatus.error', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=239,
+  serialized_end=300,
+)
+
+
+_USERSTATUS = _descriptor.Descriptor(
+  name='UserStatus',
+  full_name='thoughts.UserStatus',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='user', full_name='thoughts.UserStatus.user', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='error', full_name='thoughts.UserStatus.error', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=302,
+  serialized_end=376,
 )
 
 
@@ -156,8 +291,8 @@ _CREDENTIALS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=142,
-  serialized_end=226,
+  serialized_start=378,
+  serialized_end=462,
 )
 
 
@@ -187,46 +322,8 @@ _AUTHREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=228,
-  serialized_end=256,
-)
-
-
-_AUTHSTATUS = _descriptor.Descriptor(
-  name='AuthStatus',
-  full_name='thoughts.AuthStatus',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='user_id', full_name='thoughts.AuthStatus.user_id', index=0,
-      number=1, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='error', full_name='thoughts.AuthStatus.error', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=258,
-  serialized_end=319,
+  serialized_start=464,
+  serialized_end=492,
 )
 
 
@@ -277,27 +374,27 @@ _AUTHRESPONSE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=321,
-  serialized_end=432,
+  serialized_start=494,
+  serialized_end=605,
 )
 
 
-_USERREQUEST = _descriptor.Descriptor(
-  name='UserRequest',
-  full_name='thoughts.UserRequest',
+_FOLLOWREQUEST = _descriptor.Descriptor(
+  name='FollowRequest',
+  full_name='thoughts.FollowRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='username', full_name='thoughts.UserRequest.username', index=0,
+      name='username', full_name='thoughts.FollowRequest.username', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='token', full_name='thoughts.UserRequest.token', index=1,
+      name='token', full_name='thoughts.FollowRequest.token', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -315,46 +412,8 @@ _USERREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=434,
-  serialized_end=480,
-)
-
-
-_USERRESPONSE = _descriptor.Descriptor(
-  name='UserResponse',
-  full_name='thoughts.UserResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='user', full_name='thoughts.UserResponse.user', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='error', full_name='thoughts.UserResponse.error', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=482,
-  serialized_end=558,
+  serialized_start=607,
+  serialized_end=655,
 )
 
 
@@ -372,6 +431,13 @@ _USERS = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='count', full_name='thoughts.Users.count', index=1,
+      number=2, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
   ],
   extensions=[
   ],
@@ -384,8 +450,8 @@ _USERS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=560,
-  serialized_end=598,
+  serialized_start=657,
+  serialized_end=710,
 )
 
 
@@ -457,8 +523,8 @@ _USERUPDATES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=601,
-  serialized_end=729,
+  serialized_start=713,
+  serialized_end=841,
 )
 
 
@@ -505,7 +571,7 @@ _USER = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='reg_date', full_name='thoughts.User.reg_date', index=5,
+      name='date_created', full_name='thoughts.User.date_created', index=5,
       number=6, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -523,8 +589,8 @@ _USER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=731,
-  serialized_end=827,
+  serialized_start=843,
+  serialized_end=943,
 )
 
 
@@ -582,8 +648,8 @@ _SESSION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=829,
-  serialized_end=923,
+  serialized_start=945,
+  serialized_end=1039,
 )
 
 
@@ -620,8 +686,8 @@ _SESSIONS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=925,
-  serialized_end=1004,
+  serialized_start=1041,
+  serialized_end=1120,
 )
 
 
@@ -658,35 +724,125 @@ _SESSIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1006,
-  serialized_end=1057,
+  serialized_start=1122,
+  serialized_end=1173,
 )
 
 
-_FOLLOWERSREQUEST = _descriptor.Descriptor(
-  name='FollowersRequest',
-  full_name='thoughts.FollowersRequest',
+_POST = _descriptor.Descriptor(
+  name='Post',
+  full_name='thoughts.Post',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='username', full_name='thoughts.FollowersRequest.username', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR),
-    _descriptor.FieldDescriptor(
-      name='page_number', full_name='thoughts.FollowersRequest.page_number', index=1,
-      number=2, type=5, cpp_type=1, label=1,
+      name='id', full_name='thoughts.Post.id', index=0,
+      number=1, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='results_per_page', full_name='thoughts.FollowersRequest.results_per_page', index=2,
+      name='content', full_name='thoughts.Post.content', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='user_id', full_name='thoughts.Post.user_id', index=2,
       number=3, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='date_created', full_name='thoughts.Post.date_created', index=3,
+      number=6, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1175,
+  serialized_end=1249,
+)
+
+
+_POSTUPDATES = _descriptor.Descriptor(
+  name='PostUpdates',
+  full_name='thoughts.PostUpdates',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='post_id', full_name='thoughts.PostUpdates.post_id', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='content', full_name='thoughts.PostUpdates.content', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='token', full_name='thoughts.PostUpdates.token', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1251,
+  serialized_end=1313,
+)
+
+
+_POSTS = _descriptor.Descriptor(
+  name='Posts',
+  full_name='thoughts.Posts',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='posts', full_name='thoughts.Posts.posts', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='count', full_name='thoughts.Posts.count', index=1,
+      number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -703,27 +859,65 @@ _FOLLOWERSREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1059,
-  serialized_end=1142,
+  serialized_start=1315,
+  serialized_end=1368,
 )
 
 
-_FOLLOWREQUEST = _descriptor.Descriptor(
-  name='FollowRequest',
-  full_name='thoughts.FollowRequest',
+_POSTSTATUS = _descriptor.Descriptor(
+  name='PostStatus',
+  full_name='thoughts.PostStatus',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='username', full_name='thoughts.FollowRequest.username', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
+      name='post', full_name='thoughts.PostStatus.post', index=0,
+      number=1, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='token', full_name='thoughts.FollowRequest.token', index=1,
+      name='error', full_name='thoughts.PostStatus.error', index=1,
+      number=2, type=11, cpp_type=10, label=1,
+      has_default_value=False, default_value=None,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=1370,
+  serialized_end=1444,
+)
+
+
+_POSTREQUEST = _descriptor.Descriptor(
+  name='PostRequest',
+  full_name='thoughts.PostRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='post_id', full_name='thoughts.PostRequest.post_id', index=0,
+      number=1, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='token', full_name='thoughts.PostRequest.token', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -741,34 +935,41 @@ _FOLLOWREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1144,
-  serialized_end=1192,
+  serialized_start=1446,
+  serialized_end=1491,
 )
 
 _STATUS.fields_by_name['error'].message_type = _ERROR
 _AUTHSTATUS.fields_by_name['error'].message_type = _ERROR
+_USERSTATUS.fields_by_name['user'].message_type = _USER
+_USERSTATUS.fields_by_name['error'].message_type = _ERROR
 _AUTHRESPONSE.fields_by_name['error'].message_type = _ERROR
-_USERRESPONSE.fields_by_name['user'].message_type = _USER
-_USERRESPONSE.fields_by_name['error'].message_type = _ERROR
 _USERS.fields_by_name['users'].message_type = _USER
 _SESSIONS.fields_by_name['sessions'].message_type = _SESSION
 _SESSIONS.fields_by_name['error'].message_type = _ERROR
+_POSTS.fields_by_name['posts'].message_type = _POST
+_POSTSTATUS.fields_by_name['post'].message_type = _POST
+_POSTSTATUS.fields_by_name['error'].message_type = _ERROR
 DESCRIPTOR.message_types_by_name['Error'] = _ERROR
+DESCRIPTOR.message_types_by_name['DataRequest'] = _DATAREQUEST
 DESCRIPTOR.message_types_by_name['Status'] = _STATUS
+DESCRIPTOR.message_types_by_name['AuthStatus'] = _AUTHSTATUS
+DESCRIPTOR.message_types_by_name['UserStatus'] = _USERSTATUS
 DESCRIPTOR.message_types_by_name['Credentials'] = _CREDENTIALS
 DESCRIPTOR.message_types_by_name['AuthRequest'] = _AUTHREQUEST
-DESCRIPTOR.message_types_by_name['AuthStatus'] = _AUTHSTATUS
 DESCRIPTOR.message_types_by_name['AuthResponse'] = _AUTHRESPONSE
-DESCRIPTOR.message_types_by_name['UserRequest'] = _USERREQUEST
-DESCRIPTOR.message_types_by_name['UserResponse'] = _USERRESPONSE
+DESCRIPTOR.message_types_by_name['FollowRequest'] = _FOLLOWREQUEST
 DESCRIPTOR.message_types_by_name['Users'] = _USERS
 DESCRIPTOR.message_types_by_name['UserUpdates'] = _USERUPDATES
 DESCRIPTOR.message_types_by_name['User'] = _USER
 DESCRIPTOR.message_types_by_name['Session'] = _SESSION
 DESCRIPTOR.message_types_by_name['Sessions'] = _SESSIONS
 DESCRIPTOR.message_types_by_name['SessionRequest'] = _SESSIONREQUEST
-DESCRIPTOR.message_types_by_name['FollowersRequest'] = _FOLLOWERSREQUEST
-DESCRIPTOR.message_types_by_name['FollowRequest'] = _FOLLOWREQUEST
+DESCRIPTOR.message_types_by_name['Post'] = _POST
+DESCRIPTOR.message_types_by_name['PostUpdates'] = _POSTUPDATES
+DESCRIPTOR.message_types_by_name['Posts'] = _POSTS
+DESCRIPTOR.message_types_by_name['PostStatus'] = _POSTSTATUS
+DESCRIPTOR.message_types_by_name['PostRequest'] = _POSTREQUEST
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 Error = _reflection.GeneratedProtocolMessageType('Error', (_message.Message,), dict(
@@ -778,12 +979,33 @@ Error = _reflection.GeneratedProtocolMessageType('Error', (_message.Message,), d
   ))
 _sym_db.RegisterMessage(Error)
 
+DataRequest = _reflection.GeneratedProtocolMessageType('DataRequest', (_message.Message,), dict(
+  DESCRIPTOR = _DATAREQUEST,
+  __module__ = 'thoughts_pb2'
+  # @@protoc_insertion_point(class_scope:thoughts.DataRequest)
+  ))
+_sym_db.RegisterMessage(DataRequest)
+
 Status = _reflection.GeneratedProtocolMessageType('Status', (_message.Message,), dict(
   DESCRIPTOR = _STATUS,
   __module__ = 'thoughts_pb2'
   # @@protoc_insertion_point(class_scope:thoughts.Status)
   ))
 _sym_db.RegisterMessage(Status)
+
+AuthStatus = _reflection.GeneratedProtocolMessageType('AuthStatus', (_message.Message,), dict(
+  DESCRIPTOR = _AUTHSTATUS,
+  __module__ = 'thoughts_pb2'
+  # @@protoc_insertion_point(class_scope:thoughts.AuthStatus)
+  ))
+_sym_db.RegisterMessage(AuthStatus)
+
+UserStatus = _reflection.GeneratedProtocolMessageType('UserStatus', (_message.Message,), dict(
+  DESCRIPTOR = _USERSTATUS,
+  __module__ = 'thoughts_pb2'
+  # @@protoc_insertion_point(class_scope:thoughts.UserStatus)
+  ))
+_sym_db.RegisterMessage(UserStatus)
 
 Credentials = _reflection.GeneratedProtocolMessageType('Credentials', (_message.Message,), dict(
   DESCRIPTOR = _CREDENTIALS,
@@ -799,13 +1021,6 @@ AuthRequest = _reflection.GeneratedProtocolMessageType('AuthRequest', (_message.
   ))
 _sym_db.RegisterMessage(AuthRequest)
 
-AuthStatus = _reflection.GeneratedProtocolMessageType('AuthStatus', (_message.Message,), dict(
-  DESCRIPTOR = _AUTHSTATUS,
-  __module__ = 'thoughts_pb2'
-  # @@protoc_insertion_point(class_scope:thoughts.AuthStatus)
-  ))
-_sym_db.RegisterMessage(AuthStatus)
-
 AuthResponse = _reflection.GeneratedProtocolMessageType('AuthResponse', (_message.Message,), dict(
   DESCRIPTOR = _AUTHRESPONSE,
   __module__ = 'thoughts_pb2'
@@ -813,19 +1028,12 @@ AuthResponse = _reflection.GeneratedProtocolMessageType('AuthResponse', (_messag
   ))
 _sym_db.RegisterMessage(AuthResponse)
 
-UserRequest = _reflection.GeneratedProtocolMessageType('UserRequest', (_message.Message,), dict(
-  DESCRIPTOR = _USERREQUEST,
+FollowRequest = _reflection.GeneratedProtocolMessageType('FollowRequest', (_message.Message,), dict(
+  DESCRIPTOR = _FOLLOWREQUEST,
   __module__ = 'thoughts_pb2'
-  # @@protoc_insertion_point(class_scope:thoughts.UserRequest)
+  # @@protoc_insertion_point(class_scope:thoughts.FollowRequest)
   ))
-_sym_db.RegisterMessage(UserRequest)
-
-UserResponse = _reflection.GeneratedProtocolMessageType('UserResponse', (_message.Message,), dict(
-  DESCRIPTOR = _USERRESPONSE,
-  __module__ = 'thoughts_pb2'
-  # @@protoc_insertion_point(class_scope:thoughts.UserResponse)
-  ))
-_sym_db.RegisterMessage(UserResponse)
+_sym_db.RegisterMessage(FollowRequest)
 
 Users = _reflection.GeneratedProtocolMessageType('Users', (_message.Message,), dict(
   DESCRIPTOR = _USERS,
@@ -869,19 +1077,40 @@ SessionRequest = _reflection.GeneratedProtocolMessageType('SessionRequest', (_me
   ))
 _sym_db.RegisterMessage(SessionRequest)
 
-FollowersRequest = _reflection.GeneratedProtocolMessageType('FollowersRequest', (_message.Message,), dict(
-  DESCRIPTOR = _FOLLOWERSREQUEST,
+Post = _reflection.GeneratedProtocolMessageType('Post', (_message.Message,), dict(
+  DESCRIPTOR = _POST,
   __module__ = 'thoughts_pb2'
-  # @@protoc_insertion_point(class_scope:thoughts.FollowersRequest)
+  # @@protoc_insertion_point(class_scope:thoughts.Post)
   ))
-_sym_db.RegisterMessage(FollowersRequest)
+_sym_db.RegisterMessage(Post)
 
-FollowRequest = _reflection.GeneratedProtocolMessageType('FollowRequest', (_message.Message,), dict(
-  DESCRIPTOR = _FOLLOWREQUEST,
+PostUpdates = _reflection.GeneratedProtocolMessageType('PostUpdates', (_message.Message,), dict(
+  DESCRIPTOR = _POSTUPDATES,
   __module__ = 'thoughts_pb2'
-  # @@protoc_insertion_point(class_scope:thoughts.FollowRequest)
+  # @@protoc_insertion_point(class_scope:thoughts.PostUpdates)
   ))
-_sym_db.RegisterMessage(FollowRequest)
+_sym_db.RegisterMessage(PostUpdates)
+
+Posts = _reflection.GeneratedProtocolMessageType('Posts', (_message.Message,), dict(
+  DESCRIPTOR = _POSTS,
+  __module__ = 'thoughts_pb2'
+  # @@protoc_insertion_point(class_scope:thoughts.Posts)
+  ))
+_sym_db.RegisterMessage(Posts)
+
+PostStatus = _reflection.GeneratedProtocolMessageType('PostStatus', (_message.Message,), dict(
+  DESCRIPTOR = _POSTSTATUS,
+  __module__ = 'thoughts_pb2'
+  # @@protoc_insertion_point(class_scope:thoughts.PostStatus)
+  ))
+_sym_db.RegisterMessage(PostStatus)
+
+PostRequest = _reflection.GeneratedProtocolMessageType('PostRequest', (_message.Message,), dict(
+  DESCRIPTOR = _POSTREQUEST,
+  __module__ = 'thoughts_pb2'
+  # @@protoc_insertion_point(class_scope:thoughts.PostRequest)
+  ))
+_sym_db.RegisterMessage(PostRequest)
 
 
 
@@ -891,16 +1120,16 @@ _USERSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=1195,
-  serialized_end=1433,
+  serialized_start=1494,
+  serialized_end=1732,
   methods=[
   _descriptor.MethodDescriptor(
-    name='Create',
-    full_name='thoughts.UserService.Create',
+    name='CreateUser',
+    full_name='thoughts.UserService.CreateUser',
     index=0,
     containing_service=None,
     input_type=_USERUPDATES,
-    output_type=_USERRESPONSE,
+    output_type=_USERSTATUS,
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
@@ -908,8 +1137,8 @@ _USERSERVICE = _descriptor.ServiceDescriptor(
     full_name='thoughts.UserService.GetUser',
     index=1,
     containing_service=None,
-    input_type=_USERREQUEST,
-    output_type=_USERRESPONSE,
+    input_type=_DATAREQUEST,
+    output_type=_USERSTATUS,
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
@@ -926,7 +1155,7 @@ _USERSERVICE = _descriptor.ServiceDescriptor(
     full_name='thoughts.UserService.DeleteUser',
     index=3,
     containing_service=None,
-    input_type=_USERREQUEST,
+    input_type=_DATAREQUEST,
     output_type=_STATUS,
     serialized_options=None,
   ),
@@ -942,15 +1171,15 @@ _FOLLOWSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=1,
   serialized_options=None,
-  serialized_start=1436,
-  serialized_end=1681,
+  serialized_start=1735,
+  serialized_end=1970,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetFollowing',
     full_name='thoughts.FollowService.GetFollowing',
     index=0,
     containing_service=None,
-    input_type=_FOLLOWERSREQUEST,
+    input_type=_DATAREQUEST,
     output_type=_USERS,
     serialized_options=None,
   ),
@@ -959,7 +1188,7 @@ _FOLLOWSERVICE = _descriptor.ServiceDescriptor(
     full_name='thoughts.FollowService.GetFollowers',
     index=1,
     containing_service=None,
-    input_type=_FOLLOWERSREQUEST,
+    input_type=_DATAREQUEST,
     output_type=_USERS,
     serialized_options=None,
   ),
@@ -993,8 +1222,8 @@ _AUTHSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=2,
   serialized_options=None,
-  serialized_start=1684,
-  serialized_end=1929,
+  serialized_start=1973,
+  serialized_end=2218,
   methods=[
   _descriptor.MethodDescriptor(
     name='Login',
@@ -1044,8 +1273,8 @@ _SESSIONSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=3,
   serialized_options=None,
-  serialized_start=1932,
-  serialized_end=2067,
+  serialized_start=2221,
+  serialized_end=2356,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetSessions',
@@ -1069,5 +1298,116 @@ _SESSIONSERVICE = _descriptor.ServiceDescriptor(
 _sym_db.RegisterServiceDescriptor(_SESSIONSERVICE)
 
 DESCRIPTOR.services_by_name['SessionService'] = _SESSIONSERVICE
+
+
+_POSTSERVICE = _descriptor.ServiceDescriptor(
+  name='PostService',
+  full_name='thoughts.PostService',
+  file=DESCRIPTOR,
+  index=4,
+  serialized_options=None,
+  serialized_start=2359,
+  serialized_end=2651,
+  methods=[
+  _descriptor.MethodDescriptor(
+    name='CreatePost',
+    full_name='thoughts.PostService.CreatePost',
+    index=0,
+    containing_service=None,
+    input_type=_POSTUPDATES,
+    output_type=_POSTSTATUS,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='GetPost',
+    full_name='thoughts.PostService.GetPost',
+    index=1,
+    containing_service=None,
+    input_type=_POSTREQUEST,
+    output_type=_POSTSTATUS,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='GetPosts',
+    full_name='thoughts.PostService.GetPosts',
+    index=2,
+    containing_service=None,
+    input_type=_DATAREQUEST,
+    output_type=_POSTS,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='GetLikedPosts',
+    full_name='thoughts.PostService.GetLikedPosts',
+    index=3,
+    containing_service=None,
+    input_type=_DATAREQUEST,
+    output_type=_POSTS,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='DeletePost',
+    full_name='thoughts.PostService.DeletePost',
+    index=4,
+    containing_service=None,
+    input_type=_POSTREQUEST,
+    output_type=_STATUS,
+    serialized_options=None,
+  ),
+])
+_sym_db.RegisterServiceDescriptor(_POSTSERVICE)
+
+DESCRIPTOR.services_by_name['PostService'] = _POSTSERVICE
+
+
+_ACTIONSERVICE = _descriptor.ServiceDescriptor(
+  name='ActionService',
+  full_name='thoughts.ActionService',
+  file=DESCRIPTOR,
+  index=5,
+  serialized_options=None,
+  serialized_start=2654,
+  serialized_end=2891,
+  methods=[
+  _descriptor.MethodDescriptor(
+    name='LikePost',
+    full_name='thoughts.ActionService.LikePost',
+    index=0,
+    containing_service=None,
+    input_type=_POSTREQUEST,
+    output_type=_STATUS,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='UnlikePost',
+    full_name='thoughts.ActionService.UnlikePost',
+    index=1,
+    containing_service=None,
+    input_type=_POSTREQUEST,
+    output_type=_STATUS,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='RetweetPost',
+    full_name='thoughts.ActionService.RetweetPost',
+    index=2,
+    containing_service=None,
+    input_type=_POSTREQUEST,
+    output_type=_STATUS,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='RemoveRetweet',
+    full_name='thoughts.ActionService.RemoveRetweet',
+    index=3,
+    containing_service=None,
+    input_type=_POSTREQUEST,
+    output_type=_STATUS,
+    serialized_options=None,
+  ),
+])
+_sym_db.RegisterServiceDescriptor(_ACTIONSERVICE)
+
+DESCRIPTOR.services_by_name['ActionService'] = _ACTIONSERVICE
 
 # @@protoc_insertion_point(module_scope)

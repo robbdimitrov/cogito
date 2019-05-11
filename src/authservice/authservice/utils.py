@@ -7,7 +7,7 @@ def validate_email(email):
     return re.match(r'[^@]+@[^@]+\.[^@]+', email) is not None
 
 
-def object_to_session(item):
+def dict_to_session(item):
     return thoughts_pb2.Session(
         id=item['id'],
         name=item['name'],

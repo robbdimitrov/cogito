@@ -1,5 +1,5 @@
 from userservice import thoughts_pb2, thoughts_pb2_grpc
-from userservice.utils import object_to_user
+from userservice.utils import dict_to_user
 from userservice.auth_client import get_auth_stub
 from userservice import exceptions
 
@@ -16,7 +16,7 @@ class FollowService(thoughts_pb2_grpc.FollowServiceServicer):
         limit = request.results_per_page or 20
 
         users = self.db_client.get_following(username, page, limit)
-        users = [object_to_user(user) for user in users]
+        users = [dict_to_user(user) for user in users]
 
         return thoughts_pb2.Users(users=users)
 
@@ -28,7 +28,7 @@ class FollowService(thoughts_pb2_grpc.FollowServiceServicer):
         limit = request.results_per_page or 20
 
         users = self.db_client.get_followers(username, page, limit)
-        users = [object_to_user(user) for user in users]
+        users = [dict_to_user(user) for user in users]
 
         return thoughts_pb2.Users(users=users)
 
@@ -46,7 +46,7 @@ class FollowService(thoughts_pb2_grpc.FollowServiceServicer):
 
         try:
             self.db_client.follow_user(username, user_id)
-        except exceptions.DBException as e:
+        except exceptions.DbException as e:
             error = thoughts_pb2.Error(code=400, error='BAD_REQUEST',
                 message=str(e))
             return thoughts_pb2.Status(error=error)

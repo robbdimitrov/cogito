@@ -1,15 +1,17 @@
 import psycopg2
+import logging
 
 from userservice import db
 from userservice.exceptions import (
-    DBException,
+    DbException,
     ExistingUserException,
     UserActionException,
     WrongUsernameException
 )
+from userservice.utils import db_object_to_dict
 
 
-class DBClient:
+class DbClient:
     def __init__(self, db):
         self.db = db
 
@@ -31,27 +33,20 @@ class DBClient:
         try:
             cur.execute('INSERT INTO thoughts.users (username, email, name, password) \
                 VALUES(%s, %s, %s, %s) \
-                RETURNING id, username, email, name, bio, time_format(reg_date)',
+                RETURNING id, username, email, name, bio, time_format(date_created)',
                 (username, email, name, password))
             result = cur.fetchone()
             conn.commit()
         except psycopg2.Error as e:
-            print(f'Error creating user: {str(e)}')
-            raise DBException('Error while writing to the database.')
+            logging.error(f'Error creating user: {str(e)}')
+            raise DbException('Error while writing to the database.')
         finally:
             cur.close()
 
         if result is None:
             return None
 
-        user = {
-            'id': result[0],
-            'username': result[1],
-            'email': result[2],
-            'name': result[3],
-            'bio': result[4],
-            'reg_date': result[5]
-        }
+        user = db_object_to_dict(result)
         return user
 
     def get_user(self, username, user_id):
@@ -60,12 +55,12 @@ class DBClient:
 
         if user_id is not None:
             cur.execute('SELECT id, username, email, name, bio, \
-                time_format(reg_date) FROM thoughts.users \
+                time_format(date_created) FROM thoughts.users \
                 WHERE user_id = %s',
                 (user_id,))
         else:
             cur.execute('SELECT id, username, email, name, bio, \
-                time_format(reg_date) FROM thoughts.users \
+                time_format(date_created) FROM thoughts.users \
                 WHERE username = %s',
                 (username,))
         result = cur.fetchone()
@@ -74,14 +69,7 @@ class DBClient:
         if result is None:
             return None
 
-        user = {
-            'id': result[0],
-            'username': result[1],
-            'email': result[2],
-            'name': result[3],
-            'bio': result[4],
-            'reg_date': result[5]
-        }
+        user = db_object_to_dict(result)
         return user
 
     def update_user(self, user_id, updates):
@@ -98,8 +86,8 @@ class DBClient:
             cur.execute(command, (user_id,))
             conn.commit()
         except psycopg2.Error as e:
-            print(f'Error updating user: {str(e)}')
-            raise DBException('Updating user failed.')
+            logging.error(f'Error updating user: {str(e)}')
+            raise DbException('Updating user failed.')
         finally:
             cur.close()
 
@@ -116,11 +104,12 @@ class DBClient:
         cur = conn.cursor()
 
         cur.execute('SELECT id, username, email, name, bio, \
-            time_format(reg_date) \
-            FROM thoughts.users, thoughts.followers \
+            time_format(date_created) \
+            FROM thoughts.users, thoughts.followings \
             WHERE user_id = (SELECT id FROM thoughts.users WHERE username = %s) \
             AND follower_id = id \
-            OFFSET %s, LIMIT %s',
+            ORDER BY date_created DESC \
+            OFFSET %s LIMIT %s',
             (username, page * limit, limit))
         results = cur.fetchall()
         cur.close()
@@ -128,16 +117,7 @@ class DBClient:
         if results is None:
             return None
 
-        users = []
-        for result in results:
-            users.append({
-                'id': result[0],
-                'username': result[1],
-                'email': result[2],
-                'name': result[3],
-                'bio': result[4],
-                'reg_date': result[5]
-            })
+        users = [db_object_to_dict(result) for result in results]
         return users
 
     def get_following(self, username, page, limit):
@@ -145,11 +125,12 @@ class DBClient:
         cur = conn.cursor()
 
         cur.execute('SELECT id, username, email, name, bio, \
-            time_format(reg_date) \
-            FROM thoughts.users, thoughts.followers \
+            time_format(date_created) \
+            FROM thoughts.users, thoughts.followings \
             WHERE follower_id = (SELECT id FROM thoughts.users WHERE username = %s) \
             AND user_id = id \
-            OFFSET %s, LIMIT %s',
+            ORDER BY date_created DESC \
+            OFFSET %s LIMIT %s',
             (username, page * limit, limit))
         results = cur.fetchall()
         cur.close()
@@ -157,16 +138,7 @@ class DBClient:
         if results is None:
             return None
 
-        users = []
-        for result in results:
-            users.append({
-                'id': result[0],
-                'username': result[1],
-                'email': result[2],
-                'name': result[3],
-                'bio': result[4],
-                'reg_date': result[5]
-            })
+        users = [db_object_to_dict(result) for result in results]
         return users
 
     def follow_user(self, username, follower_id):
@@ -184,12 +156,12 @@ class DBClient:
             raise UserActionException('You can\'t follow yourself.')
 
         try:
-            cur.execute('INSERT INTO thoughts.followers VALUES(%s, %s)',
+            cur.execute('INSERT INTO thoughts.followings VALUES(%s, %s)',
                 (user['id'], follower_id))
             conn.commit()
         except psycopg2.Error as e:
-            print(f'Error following user: {str(e)}')
-            raise DBException('Error following user.')
+            logging.error(f'Error following user: {str(e)}')
+            raise DbException('Error following user.')
         finally:
             cur.close()
 
@@ -197,7 +169,7 @@ class DBClient:
         conn = self.db.get_conn()
         cur = conn.cursor()
 
-        cur.execute('DELETE FROM thoughts.followers \
+        cur.execute('DELETE FROM thoughts.followings \
             WHERE user_id = (SELECT id FROM thoughts.users WHERE username = %s) \
             AND follower_id = %s',
             (username, user_id))
