@@ -1,5 +1,5 @@
 from authservice import thoughts_pb2, thoughts_pb2_grpc
-from authservice.utils import validate_email, dict_to_session
+from authservice.utils import validate_email
 from authservice.auth import AuthException
 from authservice.helpers import validate_token
 
@@ -19,8 +19,8 @@ class SessionService(thoughts_pb2_grpc.SessionServiceServicer):
                 message=e.message)
             return thoughts_pb2.Status(error=error)
 
-        sessions = self.db_client.get_user_sessions(payload['sub'])
-        sessions = [dict_to_session(item) for item in sessions]
+        user_id = payload['sub']
+        sessions = self.db_client.get_user_sessions(user_id)
 
         return thoughts_pb2.Sessions(sessions=sessions)
 
