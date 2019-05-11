@@ -223,7 +223,7 @@ func (c *DbClient) RemoveRetweet(postID int32, userID int32) error {
 	_, err := conn.Exec(`DELETE FROM thoughts.retweets
     WHERE post_id = $1 AND user_id = $2`, postID, userID)
 	if err != nil {
-		return errors.New("Error happened writinh to the database")
+		return errors.New("Error happened while writing to the database")
 	}
 
 	return nil
