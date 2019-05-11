@@ -8,7 +8,6 @@ from userservice.exceptions import (
     UserActionException,
     WrongUsernameException
 )
-from userservice.utils import db_object_to_dict
 
 
 class DbClient:

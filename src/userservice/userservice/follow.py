@@ -1,22 +1,20 @@
 from userservice import thoughts_pb2, thoughts_pb2_grpc
-from userservice.utils import dict_to_user
-from userservice.auth_client import get_auth_stub
 from userservice import exceptions
 
 
 class FollowService(thoughts_pb2_grpc.FollowServiceServicer):
-    def __init__(self, db_client):
+    def __init__(self, db_client, auth_client):
         self.db_client = db_client
+        self.auth_client = auth_client
 
     def GetFollowing(self, request, context):
         """Returns users following the user."""
 
         username = request.username
-        page = request.page_number or 0
-        limit = request.results_per_page or 20
+        page = request.page
+        limit = request.limit
 
         users = self.db_client.get_following(username, page, limit)
-        users = [dict_to_user(user) for user in users]
 
         return thoughts_pb2.Users(users=users)
 
@@ -24,22 +22,20 @@ class FollowService(thoughts_pb2_grpc.FollowServiceServicer):
         """Returns users followed by the user."""
 
         username = request.username
-        page = request.page_number or 0
-        limit = request.results_per_page or 20
+        page = request.page
+        limit = request.limit
 
         users = self.db_client.get_followers(username, page, limit)
-        users = [dict_to_user(user) for user in users]
 
         return thoughts_pb2.Users(users=users)
 
     def Follow(self, request, context):
         """Follows or unfollows a user with the current user."""
 
-        stub = get_auth_stub()
-        response = stub.Validate(thoughts_pb2.AuthRequest(token=request.token))
+        response = self.auth_client.validate(request.token)
 
         if response.error is not None:
-            return thoughts_pb2.UserResponse(error=response.error)
+            return thoughts_pb2.Status(error=response.error)
 
         user_id = response.user_id
         username = request.username
@@ -56,11 +52,10 @@ class FollowService(thoughts_pb2_grpc.FollowServiceServicer):
     def Unfollow(self, request, context):
         """Unfollows a user with the current user."""
 
-        stub = get_auth_stub()
-        response = stub.Validate(thoughts_pb2.AuthRequest(token=request.token))
+        response = self.auth_client.validate(request.token)
 
         if response.error is not None:
-            return thoughts_pb2.UserResponse(error=response.error)
+            return thoughts_pb2.Status(error=response.error)
 
         user_id = response.user_id
         username = request.username

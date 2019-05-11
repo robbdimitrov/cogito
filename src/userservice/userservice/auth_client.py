@@ -1,10 +1,25 @@
 import os
 import grpc
 
-from userservice import thoughts_pb2_grpc
+from userservice import thoughts_pb2_grpc, thoughts_pb2
 
 
-def get_auth_stub():
-    channel = grpc.insecure_channel(os.getenv('AUTH_URI'))
-    stub = thoughts_pb2_grpc.AuthServiceStub(channel)
-    return stub
+class AuthClient:
+    def __init__(self, auth_uri):
+        self.auth_uri = auth_uri
+
+    def get_auth_stub(self):
+        channel = grpc.insecure_channel(self.auth_uri)
+        stub = thoughts_pb2_grpc.AuthServiceStub(channel)
+        return stub
+
+    def validate(self, token):
+        stub = self.get_auth_stub()
+        response = stub.Validate(thoughts_pb2.AuthRequest(token=token))
+        return response
+
+    def validate_password(self, email, password):
+        stub = self.get_auth_stub()
+        credentials = thoughts_pb2.Credentials(email=email, password=password)
+        response = stub.ValidatePassword(credentials)
+        return response

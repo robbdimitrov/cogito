@@ -6,6 +6,7 @@ import logging
 from userservice import thoughts_pb2_grpc
 from userservice.user import UserService
 from userservice.follow import FollowService
+from userservice.auth_client import AuthClient
 from userservice.db import Database
 from userservice.db_client import DbClient
 
@@ -13,28 +14,17 @@ from userservice.db_client import DbClient
 class Server:
     def __init__(self):
         self.config = {}
-        self.db_client = None
 
-    def get_db_client(self):
-        if self.db_client is None:
-            db = Database(self.config['DB_URI'])
-            self.db_client = DbClient(db)
-        return self.db_client
-
-    def create_user_service(self):
-        db_client = self.get_db_client()
-        service = UserService(db_client)
-        return service
-
-    def create_follow_service(self):
-        db_client = self.get_db_client()
-        service = FollowService(db_client)
-        return service
+    def create_db_client(self):
+        db = Database(self.config['DB_URI'])
+        db_client = DbClient(db)
+        return db_client
 
     def create_server(self):
-        db_client = self.get_db_client()
-        user_service = UserService(db_client)
-        follow_service = FollowService(db_client)
+        db_client = self.create_db_client()
+        auth_client = AuthClient(self.config["AUTH_URI"])
+        user_service = UserService(db_client, auth_client)
+        follow_service = FollowService(db_client, auth_client)
 
         server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
         thoughts_pb2_grpc.add_UserServiceServicer_to_server(user_service, server)
