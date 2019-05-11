@@ -17,14 +17,14 @@ type AuthClient struct {
 
 // NewAuthClient creates a new AuthClient instance
 func NewAuthClient(address string) *AuthClient {
-	return &AuthClient{address: address}
+	return &AuthClient{address}
 }
 
 // Validate checks the validity of the access token and returns userID or error
 func (c *AuthClient) Validate(token string) (*pb.AuthStatus, error) {
 	conn, err := grpc.Dial(c.address, grpc.WithInsecure())
 	if err != nil {
-		log.Panic("Error happened while eatablishing connection to the auth server")
+		log.Panic("Error happened while establishing connection to the auth server")
 	}
 	defer conn.Close()
 

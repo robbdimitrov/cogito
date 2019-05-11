@@ -127,6 +127,12 @@ message Post {
   string date_created = 6;
 }
 
+message PostUpdates {
+  int32 post_id = 1;
+  string content = 2;
+  string token = 3;
+}
+
 message Posts {
   repeated Post posts = 1;
   int32 count = 2;
@@ -173,7 +179,7 @@ service SessionService {
 }
 
 service PostService {
-  rpc CreatePost(Post) returns (PostStatus);
+  rpc CreatePost(PostUpdates) returns (PostStatus);
   rpc GetPost(PostRequest) returns (PostStatus);
   rpc GetPosts(DataRequest) returns (Posts);
   rpc GetLikedPosts(DataRequest) returns (Posts);

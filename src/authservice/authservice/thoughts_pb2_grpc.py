@@ -358,7 +358,7 @@ class PostServiceStub(object):
     """
     self.CreatePost = channel.unary_unary(
         '/thoughts.PostService/CreatePost',
-        request_serializer=thoughts__pb2.Post.SerializeToString,
+        request_serializer=thoughts__pb2.PostUpdates.SerializeToString,
         response_deserializer=thoughts__pb2.PostStatus.FromString,
         )
     self.GetPost = channel.unary_unary(
@@ -427,7 +427,7 @@ def add_PostServiceServicer_to_server(servicer, server):
   rpc_method_handlers = {
       'CreatePost': grpc.unary_unary_rpc_method_handler(
           servicer.CreatePost,
-          request_deserializer=thoughts__pb2.Post.FromString,
+          request_deserializer=thoughts__pb2.PostUpdates.FromString,
           response_serializer=thoughts__pb2.PostStatus.SerializeToString,
       ),
       'GetPost': grpc.unary_unary_rpc_method_handler(
