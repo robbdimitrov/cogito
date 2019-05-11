@@ -3,6 +3,8 @@ package main
 import (
 	"os"
 
+	_ "github.com/lib/pq"
+
 	"postservice/post"
 )
 

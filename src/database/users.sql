@@ -13,6 +13,6 @@ CREATE TABLE IF NOT EXISTS thoughts.users (
 CREATE TABLE IF NOT EXISTS thoughts.followings (
   id serial PRIMARY KEY,
   user_id integer REFERENCES thoughts.users(id) ON DELETE CASCADE,
-  follower_id integer REFERENCES thoughts.users(id) ON DELETE CASCADE
+  follower_id integer REFERENCES thoughts.users(id) ON DELETE CASCADE,
   date_created timestamp NOT NULL DEFAULT localtimestamp
 );

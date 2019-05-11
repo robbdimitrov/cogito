@@ -7,16 +7,16 @@ CREATE TABLE IF NOT EXISTS thoughts.posts (
   date_created timestamp NOT NULL DEFAULT localtimestamp
 );
 
-CREATE TABLE IF NOT EXISTS thoughts.likes {
+CREATE TABLE IF NOT EXISTS thoughts.likes (
   id serial PRIMARY KEY,
   post_id integer REFERENCES thoughts.posts(id) ON DELETE CASCADE,
   user_id integer REFERENCES thoughts.users(id) ON DELETE CASCADE,
   date_created timestamp NOT NULL DEFAULT localtimestamp
-}
+);
 
-CREATE TABLE IF NOT EXISTS thoughts.retweets {
+CREATE TABLE IF NOT EXISTS thoughts.retweets (
   id serial PRIMARY KEY,
   post_id integer REFERENCES thoughts.posts(id) ON DELETE CASCADE,
   user_id integer REFERENCES thoughts.users(id) ON DELETE CASCADE,
   date_created timestamp NOT NULL DEFAULT localtimestamp
-}
+);
