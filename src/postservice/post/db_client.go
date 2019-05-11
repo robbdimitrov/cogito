@@ -69,13 +69,14 @@ func (c *DbClient) GetPost(id int32) (pb.Post, error) {
 }
 
 // GetPosts returns the posts and retweets of the user with userID
-func (c *DbClient) GetPosts(userID int32) (pb.Posts, error) {
+func (c *DbClient) GetPosts(userID int32, page int32, limit int32)) (pb.Posts, error) {
 	conn := c.db.GetConn()
 
 	sel := fmt.Sprintf(`SELECT id, content, user_id, time_format(date_created)
     FROM thoughts.posts WHERE user_id = $1 OR id IN
     (SELECT post_id FROM thoughts.retweets WHERE user_id = $2 ORDER BY date_created)
-    ORDER BY date_created`, userID, userID)
+    ORDER BY date_created OFFSET $3, LIMIT $4`,
+    userID, userID, page * limit, limit)
 
 	rows, err := conn.Query(sel)
 	if err != nil {
@@ -105,13 +106,14 @@ func (c *DbClient) GetPosts(userID int32) (pb.Posts, error) {
 }
 
 // GetLikedPosts returns posts liked by the user
-func (c *DbClient) GetLikedPosts(userID int32) (pb.Posts, error) {
+func (c *DbClient) GetLikedPosts(userID int32, page int32, limit int32) (pb.Posts, error) {
 	conn := c.db.GetConn()
 
 	sel := fmt.Sprintf(`SELECT id, content, user_id, time_format(date_created)
     FROM thoughts.posts
     WHERE id IN (SELECT post_id FROM thoughts.likes WHERE user_id = $1
-    ORDER BY date_created DESC)`, userID)
+    ORDER BY date_created DESC), OFFSET $2, LIMIT $3`,
+    userID, page * limit, limit)
 
 	rows, err := conn.Query(sel)
 	if err != nil {
