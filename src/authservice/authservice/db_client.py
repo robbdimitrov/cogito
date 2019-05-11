@@ -1,6 +1,8 @@
 import psycopg2
 import logging
 
+from authservice import thoughts_pb2
+
 
 class DbException(Exception):
     """Base class for database exceptions."""
@@ -27,19 +29,17 @@ class DbClient:
         finally:
             cur.close()
 
-        session = {
-            'id': result[0],
-            'user_id': result[1],
-            'name': result[2],
-            'date_created': result[3]
-        }
+        session = thoughts_pb2.Session(id=result[0],
+            user_id=result[1],
+            user_agent=result[2],
+            date_created=result[3])
         return session
 
     def get_session(self, session_id):
         conn = self.db.get_conn()
         cur = conn.cursor()
 
-        cur.execute('SELECT id, user_id, name, time_format(date_created) \
+        cur.execute('SELECT id, user_id, user_agent, time_format(date_created) \
             FROM thoughts.sessions WHERE id = %s', (session_id,))
         result = cur.fetchone()
         cur.close()
@@ -47,19 +47,17 @@ class DbClient:
         if result is None:
             return None
 
-        session = {
-            'id': result[0],
-            'user_id': result[1],
-            'name': result[2],
-            'date_created': result[3]
-        }
+        session = thoughts_pb2.Session(id=result[0],
+            user_id=result[1],
+            user_agent=result[2],
+            date_created=result[3])
         return session
 
     def get_user_sessions(self, user_id):
         conn = self.db.get_conn()
         cur = conn.cursor()
 
-        cur.execute('SELECT id, user_id, name, time_format(date_created) \
+        cur.execute('SELECT id, user_id, user_agent, time_format(date_created) \
             FROM thoughts.sessions WHERE user_id = %s', (user_id,))
         result = cur.fetchall()
         cur.close()
@@ -67,13 +65,16 @@ class DbClient:
         if result is None:
             return None
 
-        session = {
-            'id': result[0],
-            'user_id': result[1],
-            'name': result[2],
-            'date_created': result[3]
-        }
-        return session
+        sessions = []
+
+        for row in result:
+            session = thoughts_pb2.Session(id=row[0],
+                user_id=row[1],
+                user_agent=row[2],
+                date_created=row[3])
+            sessions.append(session)
+
+        return sessions
 
     def delete_session(self, session_id):
         conn = self.db.get_conn()
