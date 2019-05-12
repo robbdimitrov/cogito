@@ -1,14 +1,13 @@
 import psycopg2
 import logging
 
-from userservice import db
+from userservice import db, thoughts_pb2
 from userservice.exceptions import (
     DbException,
     ExistingUserException,
     UserActionException,
     WrongUsernameException
 )
-from userservice.utils import db_object_to_dict
 
 
 class DbClient:
@@ -46,7 +45,13 @@ class DbClient:
         if result is None:
             return None
 
-        user = db_object_to_dict(result)
+        user = thoughts_pb2.User(
+            id=result[0],
+            username=result[1],
+            email=result[2],
+            name=result[3],
+            bio=result[4],
+            date_created=result[5])
         return user
 
     def get_user(self, username, user_id):
@@ -69,7 +74,13 @@ class DbClient:
         if result is None:
             return None
 
-        user = db_object_to_dict(result)
+        user = thoughts_pb2.User(
+            id=result[0],
+            username=result[1],
+            email=result[2],
+            name=result[3],
+            bio=result[4],
+            date_created=result[5])
         return user
 
     def update_user(self, user_id, updates):
@@ -117,7 +128,16 @@ class DbClient:
         if results is None:
             return None
 
-        users = [db_object_to_dict(result) for result in results]
+        users = []
+        for result in results:
+            user = thoughts_pb2.User(
+                id=result[0],
+                username=result[1],
+                email=result[2],
+                name=result[3],
+                bio=result[4],
+                date_created=result[5])
+            users.append(user)
         return users
 
     def get_following(self, username, page, limit):
@@ -138,7 +158,16 @@ class DbClient:
         if results is None:
             return None
 
-        users = [db_object_to_dict(result) for result in results]
+        users = []
+        for result in results:
+            user = thoughts_pb2.User(
+                id=result[0],
+                username=result[1],
+                email=result[2],
+                name=result[3],
+                bio=result[4],
+                date_created=result[5])
+            users.append(user)
         return users
 
     def follow_user(self, username, follower_id):

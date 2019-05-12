@@ -1,14 +1,14 @@
 import bcrypt
 
 from userservice import thoughts_pb2_grpc, thoughts_pb2
-from userservice.utils import validate_email, dict_to_user
-from userservice.auth_client import get_auth_stub
+from userservice.utils import validate_email
 from userservice import exceptions
 
 
 class UserService(thoughts_pb2_grpc.UserServiceServicer):
-    def __init__(self, db_client):
+    def __init__(self, db_client, auth_client):
         self.db_client = db_client
+        self.auth_client = auth_client
 
     def CreateUser(self, request, context):
         """Validates input and creates new user account."""
@@ -37,7 +37,7 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
         if error_message is not None:
             error = thoughts_pb2.Error(code=400, error=error_type,
                 message=error_message)
-            return thoughts_pb2.UserResponse(error=error)
+            return thoughts_pb2.UserStatus(error=error)
 
         salt = bcrypt.gensalt()
         password = bcrypt.hashpw(password, salt)
@@ -47,13 +47,13 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
         except exceptions.ExistingUserException as e:
             error = thoughts_pb2.Error(code=400, error='USER_EXISTS',
                 message=str(e))
-            return thoughts_pb2.UserResponse(error=error)
+            return thoughts_pb2.UserStatus(error=error)
         except exceptions.DbException as e:
             error = thoughts_pb2.Error(code=400, error='BAD_REQUEST',
                 message=str(e))
-            return thoughts_pb2.UserResponse(error=error)
+            return thoughts_pb2.UserStatus(error=error)
 
-        return thoughts_pb2.UserResponse(user=dict_to_user(user))
+        return thoughts_pb2.UserStatus(user=user)
 
     def GetUser(self, request, context):
         """Gets user with username from the database."""
@@ -63,18 +63,17 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
         if user is None:
             error = thoughts_pb2.Error(code=404, error='NOT_FOUND',
                 message='User not found.')
-            return thoughts_pb2.UserResponse(error=error)
+            return thoughts_pb2.UserStatus(error=error)
 
-        return thoughts_pb2.UserResponse(user=dict_to_user(user))
+        return thoughts_pb2.UserStatus(user=user)
 
     def UpdateUser(self, request, context):
         """Updated user with passed updated information"""
 
-        stub = get_auth_stub()
-        response = stub.Validate(thoughts_pb2.AuthRequest(token=request.token))
+        response = self.auth_client.validate(request.token)
 
         if response.error is not None:
-            return thoughts_pb2.UserResponse(error=response.error)
+            return thoughts_pb2.UserStatus(error=response.error)
 
         user_id = response.user_id
 
@@ -101,7 +100,7 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
             else:
                 user = self.db_client.get_user(None, user_id)
 
-                result = stub.ValidatePassword(thoughts_pb2.Credentials(email=user['email']))
+                result = self.auth_client.validate_password(user['email'], password)
 
                 if result.error is not None:
                     error_message = 'Wrong password.'
@@ -134,8 +133,7 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
     def DeleteUser(self, request, context):
         """Deleted a user if it matches the logged in user."""
 
-        stub = get_auth_stub()
-        response = stub.Validate(thoughts_pb2.AuthRequest(token=request.token))
+        response = self.auth_client.validate(request.token)
 
         if response.error is not None:
             return thoughts_pb2.Status(error=response.error)
