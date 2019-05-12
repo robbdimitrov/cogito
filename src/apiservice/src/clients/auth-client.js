@@ -26,13 +26,13 @@ export class AuthClient {
         }
         let error = response.getError();
         if (error !== undefined) {
-          return res.status(error.getCode()).send({
+          return rej({
             'code': error.getCode(),
             'error': error.getError(),
             'message': error.getMessage()
           });
         }
-        res.send({
+        res({
           'token_type': respose.getTokenType(),
           'access_token': response.getAccessToken(),
           'refresh_token': response.getRefreshToken()
@@ -52,13 +52,13 @@ export class AuthClient {
         }
         let error = response.getError();
         if (error !== undefined) {
-          return res.status(error.getCode()).send({
+          return rej({
             'code': error.getCode(),
             'error': error.getError(),
             'message': error.getMessage()
           });
         }
-        res.send({
+        res({
           'token_type': respose.getTokenType(),
           'access_token': response.getAccessToken(),
           'refresh_token': response.getRefreshToken()
@@ -78,8 +78,18 @@ export class AuthClient {
         if (err) {
           return rej(err);
         }
-        let sessions = response.getSessions();
-        res(JSON.stringify(sessions));
+        let sessions = [];
+        for (item in response.getSessions()) {
+          let session = {
+            'id': item.getId(),
+            'name': item.getName(),
+            'user_agent': item.getUserAgent(),
+            'user_id': item.getUserId(),
+            'date_created': item.getDateCreated()
+          };
+          sessions.push(session);
+        }
+        res({'sessions': sessions});
       });
     });
   }
@@ -96,15 +106,13 @@ export class AuthClient {
         }
         let error = response.getError();
         if (error !== undefined) {
-          return res.status(error.getCode()).send({
+          return rej({
             'code': error.getCode(),
             'error': error.getError(),
             'message': error.getMessage()
           });
         }
-        res.send({
-          'message': respose.getMessage()
-        });
+        res({'message': respose.getMessage()});
       });
     });
   }

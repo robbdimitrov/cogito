@@ -10,16 +10,13 @@ import { PostRouter } from './routers/post-router';
 import { UserRouter } from './routers/user-router';
 
 export class Server {
-  constructor(port, apiRoot, authURI, postURI, userURI) {
+  constructor(port, apiRoot) {
     this.port = port;
     this.apiRoot = apiRoot;
-    this.authURI = authURI;
-    this.postURI = postURI;
-    this.userURI = userURI;
 
     this.app = express();
     this.routers = {};
-    this.configure();
+    this.config = {};
   }
 
   // Configure Express middleware
@@ -44,15 +41,15 @@ export class Server {
 
   // Create API routers
   configureRouters() {
-    let authClient = new AuthClient(this.authURI);
+    let authClient = new AuthClient(this.config['AUTH_URI']);
     let authRouter = new AuthRouter(authClient);
     this.routers['sessions'] = authRouter;
 
-    let userClient = new UserClient(this.userURI);
+    let userClient = new UserClient(this.config['USER_URI']);
     let userRouter = new UserRouter(userClient);
     this.routers['users'] = userRouter;
 
-    let postClient = new PostClient(this.postURI);
+    let postClient = new PostClient(this.config['POST_URI']);
     let postRouter = new PostRouter(postClient);
     this.routers['posts'] = postRouter;
   }
@@ -72,6 +69,8 @@ export class Server {
 
   // Connect to database and start listening to port
   start() {
+    this.configure();
+
     this.app.listen(this.port, () => {
       process.stdout.write(`We are live on ${this.port}\n`);
     });
