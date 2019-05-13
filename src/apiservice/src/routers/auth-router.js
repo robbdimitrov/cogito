@@ -6,6 +6,7 @@ export class AuthRouter {
   constructor(authClient) {
     this.authClient = authClient;
     this.router = new Router();
+    this.connectRouter(this.router);
   }
 
   connectRouter(router) {
