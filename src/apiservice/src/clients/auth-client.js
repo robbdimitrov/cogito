@@ -89,7 +89,7 @@ export class AuthClient {
           };
           sessions.push(session);
         }
-        res({'sessions': sessions});
+        res(sessions);
       });
     });
   }

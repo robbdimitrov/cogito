@@ -124,7 +124,7 @@ message Post {
   int32 id = 1;
   string content = 2;
   int32 user_id = 3;
-  string date_created = 6;
+  string date_created = 4;
 }
 
 message PostUpdates {
