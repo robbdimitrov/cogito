@@ -14,7 +14,7 @@ export class AuthRouter {
       this.getSessions(req, res);
     });
 
-    router.delete(`/:id`, (req, res) => {
+    router.delete('/:id', (req, res) => {
       this.deleteSession(req, res);
     });
 

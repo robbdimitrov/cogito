@@ -1,3 +1,7 @@
+import { Router } from 'express';
+
+import { getToken } from './utils';
+
 export class PostRouter {
   constructor(postClient) {
     this.postClient = postClient;
@@ -16,9 +20,9 @@ export class PostRouter {
 
     router.get('/', (req, res) => {
       this.getPosts(req, res);
-    })
+    });
 
-    router.delete(`/:id`, (req, res) => {
+    router.delete('/:id', (req, res) => {
       this.deletePost(req, res);
     });
 
