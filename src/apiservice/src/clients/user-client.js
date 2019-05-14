@@ -1,3 +1,5 @@
+import * as grpc from 'grpc';
+
 import * as services from '../genproto/thoughts_grpc_pb';
 import * as messages from '../genproto/thoughts_pb';
 
@@ -100,7 +102,7 @@ export class UserClient {
             'message': error.getMessage()
           });
         }
-        res({'message': respose.getMessage()});
+        res({'message': response.getMessage()});
       });
     });
   }
@@ -123,7 +125,7 @@ export class UserClient {
             'message': error.getMessage()
           });
         }
-        res({'message': respose.getMessage()});
+        res({'message': response.getMessage()});
       });
     });
   }
@@ -150,8 +152,8 @@ export class UserClient {
           });
         }
         let users = [];
-        for (item in response.getUsers()) {
-          user = {
+        for (let item of response.getUsers()) {
+          let user = {
             'id': item.getId(),
             'username': item.getUsername(),
             'email': item.getEmail(),
@@ -186,8 +188,8 @@ export class UserClient {
           });
         }
         let users = [];
-        for (item in response.getUsers()) {
-          user = {
+        for (let item of response.getUsers()) {
+          let user = {
             'id': item.getId(),
             'username': item.getUsername(),
             'email': item.getEmail(),
@@ -220,7 +222,7 @@ export class UserClient {
             'message': error.getMessage()
           });
         }
-        res({'message': respose.getMessage()});
+        res({'message': response.getMessage()});
       });
     });
   }
@@ -243,7 +245,7 @@ export class UserClient {
             'message': error.getMessage()
           });
         }
-        res({'message': respose.getMessage()});
+        res({'message': response.getMessage()});
       });
     });
   }

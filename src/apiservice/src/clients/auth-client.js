@@ -1,3 +1,5 @@
+import * as grpc from 'grpc';
+
 import * as services from '../genproto/thoughts_grpc_pb';
 import * as messages from '../genproto/thoughts_pb';
 
@@ -33,7 +35,7 @@ export class AuthClient {
           });
         }
         res({
-          'token_type': respose.getTokenType(),
+          'token_type': response.getTokenType(),
           'access_token': response.getAccessToken(),
           'refresh_token': response.getRefreshToken()
         });
@@ -59,7 +61,7 @@ export class AuthClient {
           });
         }
         res({
-          'token_type': respose.getTokenType(),
+          'token_type': response.getTokenType(),
           'access_token': response.getAccessToken(),
           'refresh_token': response.getRefreshToken()
         });
@@ -79,7 +81,7 @@ export class AuthClient {
           return rej(err);
         }
         let sessions = [];
-        for (item in response.getSessions()) {
+        for (let item of response.getSessions()) {
           let session = {
             'id': item.getId(),
             'name': item.getName(),
@@ -95,7 +97,7 @@ export class AuthClient {
   }
 
   deleteSession(sessionId, token) {
-    let request = new messages.AuthRequest()
+    let request = new messages.AuthRequest();
     request.setSessionId(sessionId);
     request.setToken(token);
 
@@ -112,7 +114,7 @@ export class AuthClient {
             'message': error.getMessage()
           });
         }
-        res({'message': respose.getMessage()});
+        res({'message': response.getMessage()});
       });
     });
   }

@@ -1,3 +1,5 @@
+import * as grpc from 'grpc';
+
 import * as services from '../genproto/thoughts_grpc_pb';
 import * as messages from '../genproto/thoughts_pb';
 
@@ -91,12 +93,12 @@ export class PostClient {
           });
         }
         let posts = [];
-        for (item in response.getPosts()) {
-          post = {
-            'id': post.getId(),
-            'content': post.getContent(),
-            'user_id': post.getUserId(),
-            'date_created': post.getDateCreated()
+        for (let item of response.getPosts()) {
+          let post = {
+            'id': item.getId(),
+            'content': item.getContent(),
+            'user_id': item.getUserId(),
+            'date_created': item.getDateCreated()
           };
           posts.push(post);
         }
@@ -125,12 +127,12 @@ export class PostClient {
           });
         }
         let posts = [];
-        for (item in response.getPosts()) {
-          post = {
-            'id': post.getId(),
-            'content': post.getContent(),
-            'user_id': post.getUserId(),
-            'date_created': post.getDateCreated()
+        for (let item of response.getPosts()) {
+          let post = {
+            'id': item.getId(),
+            'content': item.getContent(),
+            'user_id': item.getUserId(),
+            'date_created': item.getDateCreated()
           };
           posts.push(post);
         }
@@ -157,7 +159,7 @@ export class PostClient {
             'message': error.getMessage()
           });
         }
-        res({'message': respose.getMessage()});
+        res({'message': response.getMessage()});
       });
     });
   }
@@ -182,7 +184,7 @@ export class PostClient {
             'message': error.getMessage()
           });
         }
-        res({'message': respose.getMessage()});
+        res({'message': response.getMessage()});
       });
     });
   }
@@ -205,7 +207,7 @@ export class PostClient {
             'message': error.getMessage()
           });
         }
-        res({'message': respose.getMessage()});
+        res({'message': response.getMessage()});
       });
     });
   }
@@ -228,7 +230,7 @@ export class PostClient {
             'message': error.getMessage()
           });
         }
-        res({'message': respose.getMessage()});
+        res({'message': response.getMessage()});
       });
     });
   }
@@ -251,7 +253,7 @@ export class PostClient {
             'message': error.getMessage()
           });
         }
-        res({'message': respose.getMessage()});
+        res({'message': response.getMessage()});
       });
     });
   }
