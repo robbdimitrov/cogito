@@ -39,7 +39,7 @@ export class UserRoter {
     });
   }
 
-  // User
+  // Users
 
   createUser(req, res) {
 
@@ -58,7 +58,7 @@ export class UserRoter {
   }
 
 
-  // Follow
+  // Follows
 
   getFollowing(req, res) {
 

@@ -65,7 +65,7 @@ message AuthResponse {
  * Users
  */
 
-message FollowRequest {
+message UserRequest {
   string username = 1;
   string token = 2;
 }
@@ -154,16 +154,16 @@ message PostRequest {
 
 service UserService {
   rpc CreateUser(UserUpdates) returns (UserStatus);
-  rpc GetUser(DataRequest) returns (UserStatus);
+  rpc GetUser(UserRequest) returns (UserStatus);
   rpc UpdateUser(UserUpdates) returns (Status);
-  rpc DeleteUser(DataRequest) returns (Status);
+  rpc DeleteUser(UserRequest) returns (Status);
 }
 
 service FollowService {
   rpc GetFollowing(DataRequest) returns (Users);
   rpc GetFollowers(DataRequest) returns (Users);
-  rpc Follow(FollowRequest) returns (Status);
-  rpc Unfollow(FollowRequest) returns (Status);
+  rpc Follow(UserRequest) returns (Status);
+  rpc Unfollow(UserRequest) returns (Status);
 }
 
 service AuthService {

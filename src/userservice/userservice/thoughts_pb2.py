@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='thoughts',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0ethoughts.proto\x12\x08thoughts\"5\n\x05\x45rror\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\r\n\x05\x65rror\x18\x02 \x01(\t\x12\x0f\n\x07message\x18\x03 \x01(\t\"_\n\x0b\x44\x61taRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\r\n\x05token\x18\x02 \x01(\t\x12\x0c\n\x04page\x18\x03 \x01(\x05\x12\r\n\x05limit\x18\x04 \x01(\x05\x12\x12\n\ncount_only\x18\x05 \x01(\x08\"9\n\x06Status\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"=\n\nAuthStatus\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"J\n\nUserStatus\x12\x1c\n\x04user\x18\x01 \x01(\x0b\x32\x0e.thoughts.User\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"T\n\x0b\x43redentials\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\x12\x12\n\nuser_agent\x18\x03 \x01(\t\x12\r\n\x05\x65mail\x18\x04 \x01(\t\"\x1c\n\x0b\x41uthRequest\x12\r\n\x05token\x18\x01 \x01(\t\"o\n\x0c\x41uthResponse\x12\x12\n\ntoken_type\x18\x01 \x01(\t\x12\x14\n\x0c\x61\x63\x63\x65ss_token\x18\x02 \x01(\t\x12\x15\n\rrefresh_token\x18\x03 \x01(\t\x12\x1e\n\x05\x65rror\x18\x04 \x01(\x0b\x32\x0f.thoughts.Error\"0\n\rFollowRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\r\n\x05token\x18\x02 \x01(\t\"5\n\x05Users\x12\x1d\n\x05users\x18\x01 \x03(\x0b\x32\x0e.thoughts.User\x12\r\n\x05\x63ount\x18\x02 \x01(\x05\"\x80\x01\n\x0bUserUpdates\x12\x10\n\x08username\x18\x01 \x01(\t\x12\r\n\x05\x65mail\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x10\n\x08password\x18\x04 \x01(\t\x12\x0b\n\x03\x62io\x18\x05 \x01(\t\x12\x14\n\x0cold_password\x18\x06 \x01(\t\x12\r\n\x05token\x18\x07 \x01(\t\"d\n\x04User\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x10\n\x08username\x18\x02 \x01(\t\x12\r\n\x05\x65mail\x18\x03 \x01(\t\x12\x0c\n\x04name\x18\x04 \x01(\t\x12\x0b\n\x03\x62io\x18\x05 \x01(\t\x12\x14\n\x0c\x64\x61te_created\x18\x06 \x01(\t\"^\n\x07Session\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x12\n\nuser_agent\x18\x03 \x01(\t\x12\x0f\n\x07user_id\x18\x04 \x01(\x05\x12\x14\n\x0c\x64\x61te_created\x18\x05 \x01(\t\"O\n\x08Sessions\x12#\n\x08sessions\x18\x01 \x03(\x0b\x32\x11.thoughts.Session\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"3\n\x0eSessionRequest\x12\x12\n\nsession_id\x18\x01 \x01(\x05\x12\r\n\x05token\x18\x02 \x01(\t\"J\n\x04Post\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0f\n\x07\x63ontent\x18\x02 \x01(\t\x12\x0f\n\x07user_id\x18\x03 \x01(\x05\x12\x14\n\x0c\x64\x61te_created\x18\x04 \x01(\t\">\n\x0bPostUpdates\x12\x0f\n\x07post_id\x18\x01 \x01(\x05\x12\x0f\n\x07\x63ontent\x18\x02 \x01(\t\x12\r\n\x05token\x18\x03 \x01(\t\"5\n\x05Posts\x12\x1d\n\x05posts\x18\x01 \x03(\x0b\x32\x0e.thoughts.Post\x12\r\n\x05\x63ount\x18\x02 \x01(\x05\"J\n\nPostStatus\x12\x1c\n\x04post\x18\x01 \x01(\x0b\x32\x0e.thoughts.Post\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"-\n\x0bPostRequest\x12\x0f\n\x07post_id\x18\x01 \x01(\x05\x12\r\n\x05token\x18\x02 \x01(\t2\xee\x01\n\x0bUserService\x12\x39\n\nCreateUser\x12\x15.thoughts.UserUpdates\x1a\x14.thoughts.UserStatus\x12\x36\n\x07GetUser\x12\x15.thoughts.DataRequest\x1a\x14.thoughts.UserStatus\x12\x35\n\nUpdateUser\x12\x15.thoughts.UserUpdates\x1a\x10.thoughts.Status\x12\x35\n\nDeleteUser\x12\x15.thoughts.DataRequest\x1a\x10.thoughts.Status2\xeb\x01\n\rFollowService\x12\x36\n\x0cGetFollowing\x12\x15.thoughts.DataRequest\x1a\x0f.thoughts.Users\x12\x36\n\x0cGetFollowers\x12\x15.thoughts.DataRequest\x1a\x0f.thoughts.Users\x12\x33\n\x06\x46ollow\x12\x17.thoughts.FollowRequest\x1a\x10.thoughts.Status\x12\x35\n\x08Unfollow\x12\x17.thoughts.FollowRequest\x1a\x10.thoughts.Status2\xf5\x01\n\x0b\x41uthService\x12\x36\n\x05Login\x12\x15.thoughts.Credentials\x1a\x16.thoughts.AuthResponse\x12\x38\n\x07Refresh\x12\x15.thoughts.AuthRequest\x1a\x16.thoughts.AuthResponse\x12\x37\n\x08Validate\x12\x15.thoughts.AuthRequest\x1a\x14.thoughts.AuthStatus\x12;\n\x10ValidatePassword\x12\x15.thoughts.Credentials\x1a\x10.thoughts.Status2\x87\x01\n\x0eSessionService\x12\x38\n\x0bGetSessions\x12\x15.thoughts.AuthRequest\x1a\x12.thoughts.Sessions\x12;\n\rDeleteSession\x12\x18.thoughts.SessionRequest\x1a\x10.thoughts.Status2\xa4\x02\n\x0bPostService\x12\x39\n\nCreatePost\x12\x15.thoughts.PostUpdates\x1a\x14.thoughts.PostStatus\x12\x36\n\x07GetPost\x12\x15.thoughts.PostRequest\x1a\x14.thoughts.PostStatus\x12\x32\n\x08GetPosts\x12\x15.thoughts.DataRequest\x1a\x0f.thoughts.Posts\x12\x37\n\rGetLikedPosts\x12\x15.thoughts.DataRequest\x1a\x0f.thoughts.Posts\x12\x35\n\nDeletePost\x12\x15.thoughts.PostRequest\x1a\x10.thoughts.Status2\xed\x01\n\rActionService\x12\x33\n\x08LikePost\x12\x15.thoughts.PostRequest\x1a\x10.thoughts.Status\x12\x35\n\nUnlikePost\x12\x15.thoughts.PostRequest\x1a\x10.thoughts.Status\x12\x36\n\x0bRetweetPost\x12\x15.thoughts.PostRequest\x1a\x10.thoughts.Status\x12\x38\n\rRemoveRetweet\x12\x15.thoughts.PostRequest\x1a\x10.thoughts.Statusb\x06proto3')
+  serialized_pb=_b('\n\x0ethoughts.proto\x12\x08thoughts\"5\n\x05\x45rror\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\r\n\x05\x65rror\x18\x02 \x01(\t\x12\x0f\n\x07message\x18\x03 \x01(\t\"_\n\x0b\x44\x61taRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\r\n\x05token\x18\x02 \x01(\t\x12\x0c\n\x04page\x18\x03 \x01(\x05\x12\r\n\x05limit\x18\x04 \x01(\x05\x12\x12\n\ncount_only\x18\x05 \x01(\x08\"9\n\x06Status\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"=\n\nAuthStatus\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"J\n\nUserStatus\x12\x1c\n\x04user\x18\x01 \x01(\x0b\x32\x0e.thoughts.User\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"T\n\x0b\x43redentials\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\x12\x12\n\nuser_agent\x18\x03 \x01(\t\x12\r\n\x05\x65mail\x18\x04 \x01(\t\"\x1c\n\x0b\x41uthRequest\x12\r\n\x05token\x18\x01 \x01(\t\"o\n\x0c\x41uthResponse\x12\x12\n\ntoken_type\x18\x01 \x01(\t\x12\x14\n\x0c\x61\x63\x63\x65ss_token\x18\x02 \x01(\t\x12\x15\n\rrefresh_token\x18\x03 \x01(\t\x12\x1e\n\x05\x65rror\x18\x04 \x01(\x0b\x32\x0f.thoughts.Error\".\n\x0bUserRequest\x12\x10\n\x08username\x18\x01 \x01(\t\x12\r\n\x05token\x18\x02 \x01(\t\"5\n\x05Users\x12\x1d\n\x05users\x18\x01 \x03(\x0b\x32\x0e.thoughts.User\x12\r\n\x05\x63ount\x18\x02 \x01(\x05\"\x80\x01\n\x0bUserUpdates\x12\x10\n\x08username\x18\x01 \x01(\t\x12\r\n\x05\x65mail\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x10\n\x08password\x18\x04 \x01(\t\x12\x0b\n\x03\x62io\x18\x05 \x01(\t\x12\x14\n\x0cold_password\x18\x06 \x01(\t\x12\r\n\x05token\x18\x07 \x01(\t\"d\n\x04User\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x10\n\x08username\x18\x02 \x01(\t\x12\r\n\x05\x65mail\x18\x03 \x01(\t\x12\x0c\n\x04name\x18\x04 \x01(\t\x12\x0b\n\x03\x62io\x18\x05 \x01(\t\x12\x14\n\x0c\x64\x61te_created\x18\x06 \x01(\t\"^\n\x07Session\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x12\n\nuser_agent\x18\x03 \x01(\t\x12\x0f\n\x07user_id\x18\x04 \x01(\x05\x12\x14\n\x0c\x64\x61te_created\x18\x05 \x01(\t\"O\n\x08Sessions\x12#\n\x08sessions\x18\x01 \x03(\x0b\x32\x11.thoughts.Session\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"3\n\x0eSessionRequest\x12\x12\n\nsession_id\x18\x01 \x01(\x05\x12\r\n\x05token\x18\x02 \x01(\t\"J\n\x04Post\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0f\n\x07\x63ontent\x18\x02 \x01(\t\x12\x0f\n\x07user_id\x18\x03 \x01(\x05\x12\x14\n\x0c\x64\x61te_created\x18\x04 \x01(\t\">\n\x0bPostUpdates\x12\x0f\n\x07post_id\x18\x01 \x01(\x05\x12\x0f\n\x07\x63ontent\x18\x02 \x01(\t\x12\r\n\x05token\x18\x03 \x01(\t\"5\n\x05Posts\x12\x1d\n\x05posts\x18\x01 \x03(\x0b\x32\x0e.thoughts.Post\x12\r\n\x05\x63ount\x18\x02 \x01(\x05\"J\n\nPostStatus\x12\x1c\n\x04post\x18\x01 \x01(\x0b\x32\x0e.thoughts.Post\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"-\n\x0bPostRequest\x12\x0f\n\x07post_id\x18\x01 \x01(\x05\x12\r\n\x05token\x18\x02 \x01(\t2\xee\x01\n\x0bUserService\x12\x39\n\nCreateUser\x12\x15.thoughts.UserUpdates\x1a\x14.thoughts.UserStatus\x12\x36\n\x07GetUser\x12\x15.thoughts.UserRequest\x1a\x14.thoughts.UserStatus\x12\x35\n\nUpdateUser\x12\x15.thoughts.UserUpdates\x1a\x10.thoughts.Status\x12\x35\n\nDeleteUser\x12\x15.thoughts.UserRequest\x1a\x10.thoughts.Status2\xe7\x01\n\rFollowService\x12\x36\n\x0cGetFollowing\x12\x15.thoughts.DataRequest\x1a\x0f.thoughts.Users\x12\x36\n\x0cGetFollowers\x12\x15.thoughts.DataRequest\x1a\x0f.thoughts.Users\x12\x31\n\x06\x46ollow\x12\x15.thoughts.UserRequest\x1a\x10.thoughts.Status\x12\x33\n\x08Unfollow\x12\x15.thoughts.UserRequest\x1a\x10.thoughts.Status2\xf5\x01\n\x0b\x41uthService\x12\x36\n\x05Login\x12\x15.thoughts.Credentials\x1a\x16.thoughts.AuthResponse\x12\x38\n\x07Refresh\x12\x15.thoughts.AuthRequest\x1a\x16.thoughts.AuthResponse\x12\x37\n\x08Validate\x12\x15.thoughts.AuthRequest\x1a\x14.thoughts.AuthStatus\x12;\n\x10ValidatePassword\x12\x15.thoughts.Credentials\x1a\x10.thoughts.Status2\x87\x01\n\x0eSessionService\x12\x38\n\x0bGetSessions\x12\x15.thoughts.AuthRequest\x1a\x12.thoughts.Sessions\x12;\n\rDeleteSession\x12\x18.thoughts.SessionRequest\x1a\x10.thoughts.Status2\xa4\x02\n\x0bPostService\x12\x39\n\nCreatePost\x12\x15.thoughts.PostUpdates\x1a\x14.thoughts.PostStatus\x12\x36\n\x07GetPost\x12\x15.thoughts.PostRequest\x1a\x14.thoughts.PostStatus\x12\x32\n\x08GetPosts\x12\x15.thoughts.DataRequest\x1a\x0f.thoughts.Posts\x12\x37\n\rGetLikedPosts\x12\x15.thoughts.DataRequest\x1a\x0f.thoughts.Posts\x12\x35\n\nDeletePost\x12\x15.thoughts.PostRequest\x1a\x10.thoughts.Status2\xed\x01\n\rActionService\x12\x33\n\x08LikePost\x12\x15.thoughts.PostRequest\x1a\x10.thoughts.Status\x12\x35\n\nUnlikePost\x12\x15.thoughts.PostRequest\x1a\x10.thoughts.Status\x12\x36\n\x0bRetweetPost\x12\x15.thoughts.PostRequest\x1a\x10.thoughts.Status\x12\x38\n\rRemoveRetweet\x12\x15.thoughts.PostRequest\x1a\x10.thoughts.Statusb\x06proto3')
 )
 
 
@@ -379,22 +379,22 @@ _AUTHRESPONSE = _descriptor.Descriptor(
 )
 
 
-_FOLLOWREQUEST = _descriptor.Descriptor(
-  name='FollowRequest',
-  full_name='thoughts.FollowRequest',
+_USERREQUEST = _descriptor.Descriptor(
+  name='UserRequest',
+  full_name='thoughts.UserRequest',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='username', full_name='thoughts.FollowRequest.username', index=0,
+      name='username', full_name='thoughts.UserRequest.username', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='token', full_name='thoughts.FollowRequest.token', index=1,
+      name='token', full_name='thoughts.UserRequest.token', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -413,7 +413,7 @@ _FOLLOWREQUEST = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=607,
-  serialized_end=655,
+  serialized_end=653,
 )
 
 
@@ -450,8 +450,8 @@ _USERS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=657,
-  serialized_end=710,
+  serialized_start=655,
+  serialized_end=708,
 )
 
 
@@ -523,8 +523,8 @@ _USERUPDATES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=713,
-  serialized_end=841,
+  serialized_start=711,
+  serialized_end=839,
 )
 
 
@@ -589,8 +589,8 @@ _USER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=843,
-  serialized_end=943,
+  serialized_start=841,
+  serialized_end=941,
 )
 
 
@@ -648,8 +648,8 @@ _SESSION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=945,
-  serialized_end=1039,
+  serialized_start=943,
+  serialized_end=1037,
 )
 
 
@@ -686,8 +686,8 @@ _SESSIONS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1041,
-  serialized_end=1120,
+  serialized_start=1039,
+  serialized_end=1118,
 )
 
 
@@ -724,8 +724,8 @@ _SESSIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1122,
-  serialized_end=1173,
+  serialized_start=1120,
+  serialized_end=1171,
 )
 
 
@@ -776,8 +776,8 @@ _POST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1175,
-  serialized_end=1249,
+  serialized_start=1173,
+  serialized_end=1247,
 )
 
 
@@ -821,8 +821,8 @@ _POSTUPDATES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1251,
-  serialized_end=1313,
+  serialized_start=1249,
+  serialized_end=1311,
 )
 
 
@@ -859,8 +859,8 @@ _POSTS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1315,
-  serialized_end=1368,
+  serialized_start=1313,
+  serialized_end=1366,
 )
 
 
@@ -897,8 +897,8 @@ _POSTSTATUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1370,
-  serialized_end=1444,
+  serialized_start=1368,
+  serialized_end=1442,
 )
 
 
@@ -935,8 +935,8 @@ _POSTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1446,
-  serialized_end=1491,
+  serialized_start=1444,
+  serialized_end=1489,
 )
 
 _STATUS.fields_by_name['error'].message_type = _ERROR
@@ -958,7 +958,7 @@ DESCRIPTOR.message_types_by_name['UserStatus'] = _USERSTATUS
 DESCRIPTOR.message_types_by_name['Credentials'] = _CREDENTIALS
 DESCRIPTOR.message_types_by_name['AuthRequest'] = _AUTHREQUEST
 DESCRIPTOR.message_types_by_name['AuthResponse'] = _AUTHRESPONSE
-DESCRIPTOR.message_types_by_name['FollowRequest'] = _FOLLOWREQUEST
+DESCRIPTOR.message_types_by_name['UserRequest'] = _USERREQUEST
 DESCRIPTOR.message_types_by_name['Users'] = _USERS
 DESCRIPTOR.message_types_by_name['UserUpdates'] = _USERUPDATES
 DESCRIPTOR.message_types_by_name['User'] = _USER
@@ -1028,12 +1028,12 @@ AuthResponse = _reflection.GeneratedProtocolMessageType('AuthResponse', (_messag
   ))
 _sym_db.RegisterMessage(AuthResponse)
 
-FollowRequest = _reflection.GeneratedProtocolMessageType('FollowRequest', (_message.Message,), dict(
-  DESCRIPTOR = _FOLLOWREQUEST,
+UserRequest = _reflection.GeneratedProtocolMessageType('UserRequest', (_message.Message,), dict(
+  DESCRIPTOR = _USERREQUEST,
   __module__ = 'thoughts_pb2'
-  # @@protoc_insertion_point(class_scope:thoughts.FollowRequest)
+  # @@protoc_insertion_point(class_scope:thoughts.UserRequest)
   ))
-_sym_db.RegisterMessage(FollowRequest)
+_sym_db.RegisterMessage(UserRequest)
 
 Users = _reflection.GeneratedProtocolMessageType('Users', (_message.Message,), dict(
   DESCRIPTOR = _USERS,
@@ -1120,8 +1120,8 @@ _USERSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=1494,
-  serialized_end=1732,
+  serialized_start=1492,
+  serialized_end=1730,
   methods=[
   _descriptor.MethodDescriptor(
     name='CreateUser',
@@ -1137,7 +1137,7 @@ _USERSERVICE = _descriptor.ServiceDescriptor(
     full_name='thoughts.UserService.GetUser',
     index=1,
     containing_service=None,
-    input_type=_DATAREQUEST,
+    input_type=_USERREQUEST,
     output_type=_USERSTATUS,
     serialized_options=None,
   ),
@@ -1155,7 +1155,7 @@ _USERSERVICE = _descriptor.ServiceDescriptor(
     full_name='thoughts.UserService.DeleteUser',
     index=3,
     containing_service=None,
-    input_type=_DATAREQUEST,
+    input_type=_USERREQUEST,
     output_type=_STATUS,
     serialized_options=None,
   ),
@@ -1171,8 +1171,8 @@ _FOLLOWSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=1,
   serialized_options=None,
-  serialized_start=1735,
-  serialized_end=1970,
+  serialized_start=1733,
+  serialized_end=1964,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetFollowing',
@@ -1197,7 +1197,7 @@ _FOLLOWSERVICE = _descriptor.ServiceDescriptor(
     full_name='thoughts.FollowService.Follow',
     index=2,
     containing_service=None,
-    input_type=_FOLLOWREQUEST,
+    input_type=_USERREQUEST,
     output_type=_STATUS,
     serialized_options=None,
   ),
@@ -1206,7 +1206,7 @@ _FOLLOWSERVICE = _descriptor.ServiceDescriptor(
     full_name='thoughts.FollowService.Unfollow',
     index=3,
     containing_service=None,
-    input_type=_FOLLOWREQUEST,
+    input_type=_USERREQUEST,
     output_type=_STATUS,
     serialized_options=None,
   ),
@@ -1222,8 +1222,8 @@ _AUTHSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=2,
   serialized_options=None,
-  serialized_start=1973,
-  serialized_end=2218,
+  serialized_start=1967,
+  serialized_end=2212,
   methods=[
   _descriptor.MethodDescriptor(
     name='Login',
@@ -1273,8 +1273,8 @@ _SESSIONSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=3,
   serialized_options=None,
-  serialized_start=2221,
-  serialized_end=2356,
+  serialized_start=2215,
+  serialized_end=2350,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetSessions',
@@ -1306,8 +1306,8 @@ _POSTSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=4,
   serialized_options=None,
-  serialized_start=2359,
-  serialized_end=2651,
+  serialized_start=2353,
+  serialized_end=2645,
   methods=[
   _descriptor.MethodDescriptor(
     name='CreatePost',
@@ -1366,8 +1366,8 @@ _ACTIONSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=5,
   serialized_options=None,
-  serialized_start=2654,
-  serialized_end=2891,
+  serialized_start=2648,
+  serialized_end=2885,
   methods=[
   _descriptor.MethodDescriptor(
     name='LikePost',

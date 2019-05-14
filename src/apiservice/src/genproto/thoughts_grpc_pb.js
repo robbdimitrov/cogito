@@ -59,17 +59,6 @@ function deserialize_thoughts_DataRequest(buffer_arg) {
   return thoughts_pb.DataRequest.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
-function serialize_thoughts_FollowRequest(arg) {
-  if (!(arg instanceof thoughts_pb.FollowRequest)) {
-    throw new Error('Expected argument of type thoughts.FollowRequest');
-  }
-  return Buffer.from(arg.serializeBinary());
-}
-
-function deserialize_thoughts_FollowRequest(buffer_arg) {
-  return thoughts_pb.FollowRequest.deserializeBinary(new Uint8Array(buffer_arg));
-}
-
 function serialize_thoughts_PostRequest(arg) {
   if (!(arg instanceof thoughts_pb.PostRequest)) {
     throw new Error('Expected argument of type thoughts.PostRequest');
@@ -147,6 +136,17 @@ function deserialize_thoughts_Status(buffer_arg) {
   return thoughts_pb.Status.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_thoughts_UserRequest(arg) {
+  if (!(arg instanceof thoughts_pb.UserRequest)) {
+    throw new Error('Expected argument of type thoughts.UserRequest');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_thoughts_UserRequest(buffer_arg) {
+  return thoughts_pb.UserRequest.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_thoughts_UserStatus(arg) {
   if (!(arg instanceof thoughts_pb.UserStatus)) {
     throw new Error('Expected argument of type thoughts.UserStatus');
@@ -200,10 +200,10 @@ var UserServiceService = exports.UserServiceService = {
     path: '/thoughts.UserService/GetUser',
     requestStream: false,
     responseStream: false,
-    requestType: thoughts_pb.DataRequest,
+    requestType: thoughts_pb.UserRequest,
     responseType: thoughts_pb.UserStatus,
-    requestSerialize: serialize_thoughts_DataRequest,
-    requestDeserialize: deserialize_thoughts_DataRequest,
+    requestSerialize: serialize_thoughts_UserRequest,
+    requestDeserialize: deserialize_thoughts_UserRequest,
     responseSerialize: serialize_thoughts_UserStatus,
     responseDeserialize: deserialize_thoughts_UserStatus,
   },
@@ -222,10 +222,10 @@ var UserServiceService = exports.UserServiceService = {
     path: '/thoughts.UserService/DeleteUser',
     requestStream: false,
     responseStream: false,
-    requestType: thoughts_pb.DataRequest,
+    requestType: thoughts_pb.UserRequest,
     responseType: thoughts_pb.Status,
-    requestSerialize: serialize_thoughts_DataRequest,
-    requestDeserialize: deserialize_thoughts_DataRequest,
+    requestSerialize: serialize_thoughts_UserRequest,
+    requestDeserialize: deserialize_thoughts_UserRequest,
     responseSerialize: serialize_thoughts_Status,
     responseDeserialize: deserialize_thoughts_Status,
   },
@@ -259,10 +259,10 @@ var FollowServiceService = exports.FollowServiceService = {
     path: '/thoughts.FollowService/Follow',
     requestStream: false,
     responseStream: false,
-    requestType: thoughts_pb.FollowRequest,
+    requestType: thoughts_pb.UserRequest,
     responseType: thoughts_pb.Status,
-    requestSerialize: serialize_thoughts_FollowRequest,
-    requestDeserialize: deserialize_thoughts_FollowRequest,
+    requestSerialize: serialize_thoughts_UserRequest,
+    requestDeserialize: deserialize_thoughts_UserRequest,
     responseSerialize: serialize_thoughts_Status,
     responseDeserialize: deserialize_thoughts_Status,
   },
@@ -270,10 +270,10 @@ var FollowServiceService = exports.FollowServiceService = {
     path: '/thoughts.FollowService/Unfollow',
     requestStream: false,
     responseStream: false,
-    requestType: thoughts_pb.FollowRequest,
+    requestType: thoughts_pb.UserRequest,
     responseType: thoughts_pb.Status,
-    requestSerialize: serialize_thoughts_FollowRequest,
-    requestDeserialize: deserialize_thoughts_FollowRequest,
+    requestSerialize: serialize_thoughts_UserRequest,
+    requestDeserialize: deserialize_thoughts_UserRequest,
     responseSerialize: serialize_thoughts_Status,
     responseDeserialize: deserialize_thoughts_Status,
   },

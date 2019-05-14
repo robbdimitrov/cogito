@@ -17,7 +17,6 @@ goog.exportSymbol('proto.thoughts.AuthStatus', null, global);
 goog.exportSymbol('proto.thoughts.Credentials', null, global);
 goog.exportSymbol('proto.thoughts.DataRequest', null, global);
 goog.exportSymbol('proto.thoughts.Error', null, global);
-goog.exportSymbol('proto.thoughts.FollowRequest', null, global);
 goog.exportSymbol('proto.thoughts.Post', null, global);
 goog.exportSymbol('proto.thoughts.PostRequest', null, global);
 goog.exportSymbol('proto.thoughts.PostStatus', null, global);
@@ -28,6 +27,7 @@ goog.exportSymbol('proto.thoughts.SessionRequest', null, global);
 goog.exportSymbol('proto.thoughts.Sessions', null, global);
 goog.exportSymbol('proto.thoughts.Status', null, global);
 goog.exportSymbol('proto.thoughts.User', null, global);
+goog.exportSymbol('proto.thoughts.UserRequest', null, global);
 goog.exportSymbol('proto.thoughts.UserStatus', null, global);
 goog.exportSymbol('proto.thoughts.UserUpdates', null, global);
 goog.exportSymbol('proto.thoughts.Users', null, global);
@@ -1670,12 +1670,12 @@ proto.thoughts.AuthResponse.prototype.hasError = function() {
  * @extends {jspb.Message}
  * @constructor
  */
-proto.thoughts.FollowRequest = function(opt_data) {
+proto.thoughts.UserRequest = function(opt_data) {
   jspb.Message.initialize(this, opt_data, 0, -1, null, null);
 };
-goog.inherits(proto.thoughts.FollowRequest, jspb.Message);
+goog.inherits(proto.thoughts.UserRequest, jspb.Message);
 if (goog.DEBUG && !COMPILED) {
-  proto.thoughts.FollowRequest.displayName = 'proto.thoughts.FollowRequest';
+  proto.thoughts.UserRequest.displayName = 'proto.thoughts.UserRequest';
 }
 
 
@@ -1690,8 +1690,8 @@ if (jspb.Message.GENERATE_TO_OBJECT) {
  *     for transitional soy proto support: http://goto/soy-param-migration
  * @return {!Object}
  */
-proto.thoughts.FollowRequest.prototype.toObject = function(opt_includeInstance) {
-  return proto.thoughts.FollowRequest.toObject(opt_includeInstance, this);
+proto.thoughts.UserRequest.prototype.toObject = function(opt_includeInstance) {
+  return proto.thoughts.UserRequest.toObject(opt_includeInstance, this);
 };
 
 
@@ -1700,11 +1700,11 @@ proto.thoughts.FollowRequest.prototype.toObject = function(opt_includeInstance) 
  * @param {boolean|undefined} includeInstance Whether to include the JSPB
  *     instance for transitional soy proto support:
  *     http://goto/soy-param-migration
- * @param {!proto.thoughts.FollowRequest} msg The msg instance to transform.
+ * @param {!proto.thoughts.UserRequest} msg The msg instance to transform.
  * @return {!Object}
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.thoughts.FollowRequest.toObject = function(includeInstance, msg) {
+proto.thoughts.UserRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
     username: jspb.Message.getFieldWithDefault(msg, 1, ""),
     token: jspb.Message.getFieldWithDefault(msg, 2, "")
@@ -1721,23 +1721,23 @@ proto.thoughts.FollowRequest.toObject = function(includeInstance, msg) {
 /**
  * Deserializes binary data (in protobuf wire format).
  * @param {jspb.ByteSource} bytes The bytes to deserialize.
- * @return {!proto.thoughts.FollowRequest}
+ * @return {!proto.thoughts.UserRequest}
  */
-proto.thoughts.FollowRequest.deserializeBinary = function(bytes) {
+proto.thoughts.UserRequest.deserializeBinary = function(bytes) {
   var reader = new jspb.BinaryReader(bytes);
-  var msg = new proto.thoughts.FollowRequest;
-  return proto.thoughts.FollowRequest.deserializeBinaryFromReader(msg, reader);
+  var msg = new proto.thoughts.UserRequest;
+  return proto.thoughts.UserRequest.deserializeBinaryFromReader(msg, reader);
 };
 
 
 /**
  * Deserializes binary data (in protobuf wire format) from the
  * given reader into the given message object.
- * @param {!proto.thoughts.FollowRequest} msg The message object to deserialize into.
+ * @param {!proto.thoughts.UserRequest} msg The message object to deserialize into.
  * @param {!jspb.BinaryReader} reader The BinaryReader to use.
- * @return {!proto.thoughts.FollowRequest}
+ * @return {!proto.thoughts.UserRequest}
  */
-proto.thoughts.FollowRequest.deserializeBinaryFromReader = function(msg, reader) {
+proto.thoughts.UserRequest.deserializeBinaryFromReader = function(msg, reader) {
   while (reader.nextField()) {
     if (reader.isEndGroup()) {
       break;
@@ -1765,9 +1765,9 @@ proto.thoughts.FollowRequest.deserializeBinaryFromReader = function(msg, reader)
  * Serializes the message to binary data (in protobuf wire format).
  * @return {!Uint8Array}
  */
-proto.thoughts.FollowRequest.prototype.serializeBinary = function() {
+proto.thoughts.UserRequest.prototype.serializeBinary = function() {
   var writer = new jspb.BinaryWriter();
-  proto.thoughts.FollowRequest.serializeBinaryToWriter(this, writer);
+  proto.thoughts.UserRequest.serializeBinaryToWriter(this, writer);
   return writer.getResultBuffer();
 };
 
@@ -1775,11 +1775,11 @@ proto.thoughts.FollowRequest.prototype.serializeBinary = function() {
 /**
  * Serializes the given message to binary data (in protobuf wire
  * format), writing to the given BinaryWriter.
- * @param {!proto.thoughts.FollowRequest} message
+ * @param {!proto.thoughts.UserRequest} message
  * @param {!jspb.BinaryWriter} writer
  * @suppress {unusedLocalVariables} f is only used for nested messages
  */
-proto.thoughts.FollowRequest.serializeBinaryToWriter = function(message, writer) {
+proto.thoughts.UserRequest.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
   f = message.getUsername();
   if (f.length > 0) {
@@ -1802,13 +1802,13 @@ proto.thoughts.FollowRequest.serializeBinaryToWriter = function(message, writer)
  * optional string username = 1;
  * @return {string}
  */
-proto.thoughts.FollowRequest.prototype.getUsername = function() {
+proto.thoughts.UserRequest.prototype.getUsername = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
 };
 
 
 /** @param {string} value */
-proto.thoughts.FollowRequest.prototype.setUsername = function(value) {
+proto.thoughts.UserRequest.prototype.setUsername = function(value) {
   jspb.Message.setProto3StringField(this, 1, value);
 };
 
@@ -1817,13 +1817,13 @@ proto.thoughts.FollowRequest.prototype.setUsername = function(value) {
  * optional string token = 2;
  * @return {string}
  */
-proto.thoughts.FollowRequest.prototype.getToken = function() {
+proto.thoughts.UserRequest.prototype.getToken = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
 };
 
 
 /** @param {string} value */
-proto.thoughts.FollowRequest.prototype.setToken = function(value) {
+proto.thoughts.UserRequest.prototype.setToken = function(value) {
   jspb.Message.setProto3StringField(this, 2, value);
 };
 
@@ -3285,7 +3285,7 @@ proto.thoughts.Post.toObject = function(includeInstance, msg) {
     id: jspb.Message.getFieldWithDefault(msg, 1, 0),
     content: jspb.Message.getFieldWithDefault(msg, 2, ""),
     userId: jspb.Message.getFieldWithDefault(msg, 3, 0),
-    dateCreated: jspb.Message.getFieldWithDefault(msg, 6, "")
+    dateCreated: jspb.Message.getFieldWithDefault(msg, 4, "")
   };
 
   if (includeInstance) {
@@ -3334,7 +3334,7 @@ proto.thoughts.Post.deserializeBinaryFromReader = function(msg, reader) {
       var value = /** @type {number} */ (reader.readInt32());
       msg.setUserId(value);
       break;
-    case 6:
+    case 4:
       var value = /** @type {string} */ (reader.readString());
       msg.setDateCreated(value);
       break;
@@ -3391,7 +3391,7 @@ proto.thoughts.Post.serializeBinaryToWriter = function(message, writer) {
   f = message.getDateCreated();
   if (f.length > 0) {
     writer.writeString(
-      6,
+      4,
       f
     );
   }
@@ -3444,17 +3444,17 @@ proto.thoughts.Post.prototype.setUserId = function(value) {
 
 
 /**
- * optional string date_created = 6;
+ * optional string date_created = 4;
  * @return {string}
  */
 proto.thoughts.Post.prototype.getDateCreated = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 4, ""));
 };
 
 
 /** @param {string} value */
 proto.thoughts.Post.prototype.setDateCreated = function(value) {
-  jspb.Message.setProto3StringField(this, 6, value);
+  jspb.Message.setProto3StringField(this, 4, value);
 };
 
 
