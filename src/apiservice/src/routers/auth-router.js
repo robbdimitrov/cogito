@@ -34,27 +34,15 @@ export class AuthRouter {
     let password = req.body.password;
     let userAgent = req.headers['user-agent'];
 
-    this.authClient.createSession(email, password, userAgent)
-      .then((result) => {
-        res.send(result);
-      })
-      .catch((err) => {
-        let code = err['code'] !== undefined ? err.code : 400;
-        res.status(code).send(err);
-      });
+    this.handleResponse(
+      this.authClient.createSession(email, password, userAgent), res
+    );
   }
 
   refreshToken(req, res) {
     let token = getToken(req);
 
-    this.authClient.refreshToken(token)
-      .then((result) => {
-        res.send(result);
-      })
-      .catch((err) => {
-        let code = err['code'] !== undefined ? err.code : 400;
-        res.status(code).send(err);
-      });
+    this.handleResponse(this.authClient.refreshToken(token), res);
   }
 
   // Sessions
@@ -62,27 +50,13 @@ export class AuthRouter {
   getSessions(req, res) {
     let token = getToken(req);
 
-    this.authClient.getSessions(token)
-      .then((result) => {
-        res.send(result);
-      })
-      .catch((err) => {
-        let code = err['code'] !== undefined ? err.code : 400;
-        res.status(code).send(err);
-      });
+    this.handleResponse(this.authClient.getSessions(token), res);
   }
 
   deleteSession(req, res) {
     let token = getToken(req);
     let sessionId = req.params.id;
 
-    this.authClient.deleteSession(sessionId, token)
-      .then((result) => {
-        res.send(result);
-      })
-      .catch((err) => {
-        let code = err['code'] !== undefined ? err.code : 400;
-        res.status(code).send(err);
-      });
+    this.handleResponse(this.authClient.deleteSession(sessionId, token), res);
   }
 }

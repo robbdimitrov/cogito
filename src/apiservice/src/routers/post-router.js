@@ -1,12 +1,10 @@
-import { Router } from 'express';
-
+import { APIRouter } from './api-router';
 import { getToken } from './utils';
 
-export class PostRouter {
+export class PostRouter extends APIRouter {
   constructor(postClient) {
+    super();
     this.postClient = postClient;
-    this.router = new Router();
-    this.connectRouter(this.router);
   }
 
   connectRouter(router) {
@@ -53,28 +51,14 @@ export class PostRouter {
     let content = req.body.content;
     let token = getToken(req);
 
-    this.postClient.createPost(content, token)
-      .then((result) => {
-        res.send(result);
-      })
-      .catch((err) => {
-        let code = err['code'] !== undefined ? err.code : 400;
-        res.status(code).send(err);
-      });
+    this.handleResponse(this.postClient.createPost(content, token), res);
   }
 
   getPost(req, res) {
     let postId = req.params.id;
     let token = getToken(req);
 
-    this.postClient.getPost(postId, token)
-      .then((result) => {
-        res.send(result);
-      })
-      .catch((err) => {
-        let code = err['code'] !== undefined ? err.code : 400;
-        res.status(code).send(err);
-      });
+    this.handleResponse(this.postClient.getPost(postId, token), res);
   }
 
   getPosts(req, res) {
@@ -84,14 +68,10 @@ export class PostRouter {
     let limit = parseInt(req.query.limit) || 20;
     let countOnly = (parseInt(req.query.count) || 0) === 1;
 
-    this.postClient.getPosts(username, token, page, limit, countOnly)
-      .then((result) => {
-        res.send(result);
-      })
-      .catch((err) => {
-        let code = err['code'] !== undefined ? err.code : 400;
-        res.status(code).send(err);
-      });
+    this.handleResponse(
+      this.postClient.getPosts(username,
+        token, page, limit, countOnly), res
+    );
   }
 
   getLikedPosts(req, res) {
@@ -101,28 +81,17 @@ export class PostRouter {
     let limit = parseInt(req.query.limit) || 20;
     let countOnly = (parseInt(req.query.count) || 0) === 1;
 
-    this.postClient.getLikedPosts(username, token, page, limit, countOnly)
-      .then((result) => {
-        res.send(result);
-      })
-      .catch((err) => {
-        let code = err['code'] !== undefined ? err.code : 400;
-        res.status(code).send(err);
-      });
+    this.handleResponse(
+      this.postClient.getLikedPosts(username,
+        token, page, limit, countOnly), res
+    );
   }
 
   deletePost(req, res) {
     let postId = req.params.id;
     let token = getToken(req);
 
-    this.postClient.deletePost(postId, token)
-      .then((result) => {
-        res.send(result);
-      })
-      .catch((err) => {
-        let code = err['code'] !== undefined ? err.code : 400;
-        res.status(code).send(err);
-      });
+    this.handleResponse(this.postClient.deletePost(postId, token), res);
   }
 
   // Actions
@@ -131,55 +100,27 @@ export class PostRouter {
     let postId = req.params.id;
     let token = getToken(req);
 
-    this.postClient.likePost(postId, token)
-      .then((result) => {
-        res.send(result);
-      })
-      .catch((err) => {
-        let code = err['code'] !== undefined ? err.code : 400;
-        res.status(code).send(err);
-      });
+    this.handleResponse(this.postClient.likePost(postId, token), res);
   }
 
   unlikePost(req, res) {
     let postId = req.params.id;
     let token = getToken(req);
 
-    this.postClient.unlikePost(postId, token)
-      .then((result) => {
-        res.send(result);
-      })
-      .catch((err) => {
-        let code = err['code'] !== undefined ? err.code : 400;
-        res.status(code).send(err);
-      });
+    this.handleResponse(this.postClient.unlikePost(postId, token), res);
   }
 
   retweetPost(req, res) {
     let postId = req.params.id;
     let token = getToken(req);
 
-    this.postClient.retweetPost(postId, token)
-      .then((result) => {
-        res.send(result);
-      })
-      .catch((err) => {
-        let code = err['code'] !== undefined ? err.code : 400;
-        res.status(code).send(err);
-      });
+    this.handleResponse(this.postClient.retweetPost(postId, token), res);
   }
 
   removeRetweet(req, res) {
     let postId = req.params.id;
     let token = getToken(req);
 
-    this.postClient.removeRetweet(postId, token)
-      .then((result) => {
-        res.send(result);
-      })
-      .catch((err) => {
-        let code = err['code'] !== undefined ? err.code : 400;
-        res.status(code).send(err);
-      });
+    this.handleResponse(this.postClient.removeRetweet(postId, token), res);
   }
 }
