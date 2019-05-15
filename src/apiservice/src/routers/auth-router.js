@@ -1,12 +1,10 @@
-import { Router } from 'express';
-
+import { APIRouter } from './api-router';
 import { getToken } from './utils';
 
-export class AuthRouter {
+export class AuthRouter extends APIRouter {
   constructor(authClient) {
+    super();
     this.authClient = authClient;
-    this.router = new Router();
-    this.connectRouter(this.router);
   }
 
   connectRouter(router) {

@@ -1,7 +1,7 @@
 import { APIRouter } from './api-router';
 import { getToken } from './utils';
 
-export class UserRoter extends APIRouter {
+export class UserRouter extends APIRouter {
   constructor(userClient) {
     super();
     this.userClient = userClient;
