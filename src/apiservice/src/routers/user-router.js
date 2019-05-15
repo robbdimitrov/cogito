@@ -1,12 +1,10 @@
-import { Router } from 'express';
-
+import { APIRouter } from './api-router';
 import { getToken } from './utils';
 
-export class UserRoter {
+export class UserRouter extends APIRouter {
   constructor(userClient) {
+    super();
     this.userClient = userClient;
-    this.router = new Router();
-    this.connectRouter(this.router);
   }
 
   connectRouter(router) {
@@ -51,28 +49,16 @@ export class UserRoter {
     let name = req.body.name;
     let password = req.body.password;
 
-    this.userClient.createUser(username, email, name, password)
-      .then((result) => {
-        res.send(result);
-      })
-      .catch((err) => {
-        let code = err['code'] !== undefined ? err.code : 400;
-        res.status(code).send(err);
-      });
+    this.handleResponse(
+      this.userClient.createUser(username, email, name, password), res
+    );
   }
 
   getUser(req, res) {
     let username = req.params.username;
     let token = getToken(req);
 
-    this.userClient.getUser(username, token)
-      .then((result) => {
-        res.send(result);
-      })
-      .catch((err) => {
-        let code = err['code'] !== undefined ? err.code : 400;
-        res.status(code).send(err);
-      });
+    this.handleResponse(this.userClient.getUser(username, token), res);
   }
 
   updateUser(req, res) {
@@ -84,29 +70,17 @@ export class UserRoter {
     let oldPassword = req.body.oldPassword;
     let token = getToken(req);
 
-    this.userClient.updateUser(username, email,
-      name, password, bio, oldPassword, token)
-      .then((result) => {
-        res.send(result);
-      })
-      .catch((err) => {
-        let code = err['code'] !== undefined ? err.code : 400;
-        res.status(code).send(err);
-      });
+    this.handleResponse(
+      this.userClient.updateUser(username, email,
+        name, password, bio, oldPassword, token), res
+    );
   }
 
   deleteUser(req, res) {
     let username = req.params.username;
     let token = getToken(req);
 
-    this.userClient.deleteUser(username, token)
-      .then((result) => {
-        res.send(result);
-      })
-      .catch((err) => {
-        let code = err['code'] !== undefined ? err.code : 400;
-        res.status(code).send(err);
-      });
+    this.handleResponse(this.userClient.deleteUser(username, token), res);
   }
 
 
@@ -119,14 +93,10 @@ export class UserRoter {
     let limit = parseInt(req.query.limit) || 20;
     let countOnly = (parseInt(req.query.count) || 0) === 1;
 
-    this.userClient.getFollowing(username, token, page, limit, countOnly)
-      .then((result) => {
-        res.send(result);
-      })
-      .catch((err) => {
-        let code = err['code'] !== undefined ? err.code : 400;
-        res.status(code).send(err);
-      });
+    this.handleResponse(
+      this.userClient.getFollowing(username,
+        token, page, limit, countOnly), res
+    );
   }
 
   getFollowers(req, res) {
@@ -136,41 +106,23 @@ export class UserRoter {
     let limit = parseInt(req.query.limit) || 20;
     let countOnly = (parseInt(req.query.count) || 0) === 1;
 
-    this.userClient.getFollowers(username, token, page, limit, countOnly)
-      .then((result) => {
-        res.send(result);
-      })
-      .catch((err) => {
-        let code = err['code'] !== undefined ? err.code : 400;
-        res.status(code).send(err);
-      });
+    this.handleResponse(
+      this.userClient.getFollowers(username,
+        token, page, limit, countOnly), res
+    );
   }
 
   follow(req, res) {
     let username = req.params.username;
     let token = getToken(req);
 
-    this.userClient.follow(username, token)
-      .then((result) => {
-        res.send(result);
-      })
-      .catch((err) => {
-        let code = err['code'] !== undefined ? err.code : 400;
-        res.status(code).send(err);
-      });
+    this.handleResponse(this.userClient.follow(username, token), res);
   }
 
   unfollow(req, res) {
     let username = req.params.username;
     let token = getToken(req);
 
-    this.userClient.unfollow(username, token)
-      .then((result) => {
-        res.send(result);
-      })
-      .catch((err) => {
-        let code = err['code'] !== undefined ? err.code : 400;
-        res.status(code).send(err);
-      });
+    this.handleResponse(this.userClient.unfollow(username, token), res);
   }
 }

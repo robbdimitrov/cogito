@@ -1,5 +1,5 @@
 const path = require('path');
-const CleanWebpackPlugin = require('clean-webpack-plugin')
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 const fs = require('fs');
 
 let nodeModules = {};
@@ -18,7 +18,7 @@ module.exports = {
   target: 'node',
   devtool: 'source-map',
   plugins: [
-    new CleanWebpackPlugin(['dist'])
+    new CleanWebpackPlugin()
   ],
   resolve: {
     extensions: ['.webpack.js', '.web.js', '.js']

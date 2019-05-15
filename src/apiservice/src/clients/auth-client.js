@@ -2,14 +2,15 @@ import * as grpc from 'grpc';
 
 import * as services from '../genproto/thoughts_grpc_pb';
 import * as messages from '../genproto/thoughts_pb';
+import { APIClient } from './api-client';
 
-export class AuthClient {
-  constructor(authURI) {
-    this.authURI = authURI;
+export class AuthClient extends APIClient {
+  constructor(grpcURI) {
+    super(grpcURI);
 
-    this.authClient = new services.AuthServiceClient(this.authURI,
+    this.authClient = new services.AuthServiceClient(this.grpcURI,
       grpc.credentials.createInsecure());
-    this.sessionClient = new services.SessionServiceClient(this.authURI,
+    this.sessionClient = new services.SessionServiceClient(this.grpcURI,
       grpc.credentials.createInsecure());
   }
 
@@ -28,11 +29,7 @@ export class AuthClient {
         }
         let error = response.getError();
         if (error !== undefined) {
-          return rej({
-            'code': error.getCode(),
-            'error': error.getError(),
-            'message': error.getMessage()
-          });
+          return this.handleError(error, rej);
         }
         res({
           'token_type': response.getTokenType(),
@@ -54,11 +51,7 @@ export class AuthClient {
         }
         let error = response.getError();
         if (error !== undefined) {
-          return rej({
-            'code': error.getCode(),
-            'error': error.getError(),
-            'message': error.getMessage()
-          });
+          return this.handleError(error, rej);
         }
         res({
           'token_type': response.getTokenType(),
@@ -108,11 +101,7 @@ export class AuthClient {
         }
         let error = response.getError();
         if (error !== undefined) {
-          return rej({
-            'code': error.getCode(),
-            'error': error.getError(),
-            'message': error.getMessage()
-          });
+          return this.handleError(error, rej);
         }
         res({'message': response.getMessage()});
       });

@@ -2,14 +2,15 @@ import * as grpc from 'grpc';
 
 import * as services from '../genproto/thoughts_grpc_pb';
 import * as messages from '../genproto/thoughts_pb';
+import { APIClient } from './api-client';
 
-export class UserClient {
-  constructor(userURI) {
-    this.userURI = userURI;
+export class UserClient extends APIClient {
+  constructor(grpcURI) {
+    super(grpcURI);
 
-    this.userClient = new services.UserServiceClient(this.userURI,
+    this.userClient = new services.UserServiceClient(this.grpcURI,
       grpc.credentials.createInsecure());
-    this.followClient = new services.FollowServiceClient(this.userURI,
+    this.followClient = new services.FollowServiceClient(this.grpcURI,
       grpc.credentials.createInsecure());
   }
 
@@ -29,11 +30,7 @@ export class UserClient {
         }
         let error = response.getError();
         if (error !== undefined) {
-          return rej({
-            'code': error.getCode(),
-            'error': error.getError(),
-            'message': error.getMessage()
-          });
+          return this.handleError(error, rej);
         }
         let user = response.getUser();
         res({
@@ -60,11 +57,7 @@ export class UserClient {
         }
         let error = response.getError();
         if (error !== undefined) {
-          return rej({
-            'code': error.getCode(),
-            'error': error.getError(),
-            'message': error.getMessage()
-          });
+          return this.handleError(error, rej);
         }
         let user = response.getUser();
         res({
@@ -96,11 +89,7 @@ export class UserClient {
         }
         let error = response.getError();
         if (error !== undefined) {
-          return rej({
-            'code': error.getCode(),
-            'error': error.getError(),
-            'message': error.getMessage()
-          });
+          return this.handleError(error, rej);
         }
         res({'message': response.getMessage()});
       });
@@ -119,11 +108,7 @@ export class UserClient {
         }
         let error = response.getError();
         if (error !== undefined) {
-          return rej({
-            'code': error.getCode(),
-            'error': error.getError(),
-            'message': error.getMessage()
-          });
+          return this.handleError(error, rej);
         }
         res({'message': response.getMessage()});
       });
@@ -216,11 +201,7 @@ export class UserClient {
         }
         let error = response.getError();
         if (error !== undefined) {
-          return rej({
-            'code': error.getCode(),
-            'error': error.getError(),
-            'message': error.getMessage()
-          });
+          return this.handleError(error, rej);
         }
         res({'message': response.getMessage()});
       });
@@ -239,11 +220,7 @@ export class UserClient {
         }
         let error = response.getError();
         if (error !== undefined) {
-          return rej({
-            'code': error.getCode(),
-            'error': error.getError(),
-            'message': error.getMessage()
-          });
+          return this.handleError(error, rej);
         }
         res({'message': response.getMessage()});
       });
