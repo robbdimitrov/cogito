@@ -32,7 +32,7 @@ func (c *UserClient) GetUser(username string) (*pb.UserStatus, error) {
 	defer cancel()
 
 	client := pb.NewUserServiceClient(conn)
-	status, err := client.GetUser(ctx, &pb.DataRequest{Username: username})
+	status, err := client.GetUser(ctx, &pb.UserRequest{Username: username})
 	if err != nil {
 		return nil, err
 	}
