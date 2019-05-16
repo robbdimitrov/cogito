@@ -181,6 +181,7 @@ service SessionService {
 service PostService {
   rpc CreatePost(PostUpdates) returns (PostStatus);
   rpc GetPost(PostRequest) returns (PostStatus);
+  rpc GetFeed(DataRequest) returns (Posts);
   rpc GetPosts(DataRequest) returns (Posts);
   rpc GetLikedPosts(DataRequest) returns (Posts);
   rpc DeletePost(PostRequest) returns (Status);
