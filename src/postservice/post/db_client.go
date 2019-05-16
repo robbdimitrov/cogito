@@ -68,13 +68,18 @@ func (c *DbClient) GetPost(id int32) (pb.Post, error) {
 func (c *DbClient) GetFeed(userID int32, page int32, limit int32) (pb.Posts, error) {
 	conn := c.db.GetConn()
 
-	// TODO: Fix query
-
-	rows, err := conn.Query(`SELECT id, content, user_id, time_format(date_created)
-    FROM thoughts.posts WHERE user_id = $1 OR id IN
-    (SELECT post_id FROM thoughts.retweets WHERE user_id = $2 ORDER BY date_created)
-    ORDER BY date_created OFFSET $3 LIMIT $4`,
-		userID, userID, page*limit, limit)
+	rows, err := conn.Query(`(SELECT id, content, user_id, time_format(date_created)
+	FROM thoughts.posts  WHERE user_id = $1 ORDER BY date_created DESC)
+	UNION
+	(SELECT id, content, user_id, time_format(date_created) FROM thoughts.posts 
+	WHERE id IN (SELECT post_id FROM thoughts.retweets
+	WHERE user_id = $1 ORDER BY date_created DESC))
+	UNION
+	(SELECT id, content, user_id, time_format(date_created) FROM thoughts.posts 
+	WHERE user_id IN (SELECT user_id FROM thoughts.followings
+	WHERE follower_id = $1) ORDER BY date_created DESC)
+	OFFSET $2 LIMIT $3`,
+		userID, page*limit, limit)
 	if err != nil {
 		return pb.Posts{}, errors.New("Error happened while reading from the database")
 	}
@@ -109,8 +114,8 @@ func (c *DbClient) GetPostsCount(userID int32) (int32, error) {
 
 	err := conn.QueryRow(`SELECT COUNT(*) FROM thoughts.posts
     WHERE user_id = $1 OR id IN (SELECT post_id
-    FROM thoughts.retweets WHERE user_id = $2)`,
-		userID, userID).Scan(&count)
+    FROM thoughts.retweets WHERE user_id = $1)`,
+		userID).Scan(&count)
 	if err != nil {
 		return 0, errors.New("Error happened while reading from the database")
 	}
@@ -121,13 +126,15 @@ func (c *DbClient) GetPostsCount(userID int32) (int32, error) {
 func (c *DbClient) GetPosts(userID int32, page int32, limit int32) (pb.Posts, error) {
 	conn := c.db.GetConn()
 
-	// TODO: Fix query
+	rows, err := conn.Query(`(SELECT id, content, user_id, time_format(date_created)
+	FROM thoughts.posts  WHERE user_id = $1 ORDER BY date_created DESC)
+	UNION
+	(SELECT id, content, user_id, time_format(date_created) FROM thoughts.posts 
+	WHERE id IN (SELECT post_id FROM thoughts.retweets
+	WHERE user_id = $1 ORDER BY date_created DESC))
+	OFFSET $2 LIMIT $3`,
+		userID, page*limit, limit)
 
-	rows, err := conn.Query(`SELECT id, content, user_id, time_format(date_created)
-    FROM thoughts.posts WHERE user_id = $1 OR id IN
-    (SELECT post_id FROM thoughts.retweets WHERE user_id = $2 ORDER BY date_created)
-    ORDER BY date_created OFFSET $3 LIMIT $4`,
-		userID, userID, page*limit, limit)
 	if err != nil {
 		return pb.Posts{}, errors.New("Error happened while reading from the database")
 	}
