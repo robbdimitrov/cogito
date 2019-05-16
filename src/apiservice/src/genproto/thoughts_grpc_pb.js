@@ -377,6 +377,17 @@ var PostServiceService = exports.PostServiceService = {
     responseSerialize: serialize_thoughts_PostStatus,
     responseDeserialize: deserialize_thoughts_PostStatus,
   },
+  getFeed: {
+    path: '/thoughts.PostService/GetFeed',
+    requestStream: false,
+    responseStream: false,
+    requestType: thoughts_pb.DataRequest,
+    responseType: thoughts_pb.Posts,
+    requestSerialize: serialize_thoughts_DataRequest,
+    requestDeserialize: deserialize_thoughts_DataRequest,
+    responseSerialize: serialize_thoughts_Posts,
+    responseDeserialize: deserialize_thoughts_Posts,
+  },
   getPosts: {
     path: '/thoughts.PostService/GetPosts',
     requestStream: false,

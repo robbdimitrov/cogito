@@ -8,6 +8,8 @@ export class PostRouter extends APIRouter {
   }
 
   connectRouter(router) {
+    // Post
+
     router.post('/', (req, res) => {
       this.createPost(req, res);
     });
@@ -16,23 +18,31 @@ export class PostRouter extends APIRouter {
       this.getPost(req, res);
     });
 
-    router.get('/', (req, res) => {
-      this.getPosts(req, res);
-    });
-
     router.delete('/:id', (req, res) => {
       this.deletePost(req, res);
     });
+
+    // Posts    
+
+    router.get('/feed', (req, res) => {
+      this.getFeed(req, res);
+    });
+
+    router.get('/users/:username', (req, res) => {
+      this.getPosts(req, res);
+    });
+
+    router.get('/users/:username/likes', (req, res) => {
+      this.getLikedPosts(req, res);
+    });
+
+    // Actions
 
     router.post('/:id/likes', (req, res) => {
       this.likePost(req, res);
     });
 
-    router.get('/users/:userId/likes', (req, res) => {
-      this.getLikedPosts(req, res);
-    });
-
-    router.delete('/:id/likes/:userId', (req, res) => {
+    router.delete('/:id/likes', (req, res) => {
       this.unlikePost(req, res);
     });
 
@@ -40,8 +50,8 @@ export class PostRouter extends APIRouter {
       this.likePost(req, res);
     });
 
-    router.delete('/:id/retweets/:userId', (req, res) => {
-      this.unlikePost(req, res);
+    router.delete('/:id/retweets', (req, res) => {
+      this.removeRetweet(req, res);
     });
   }
 
@@ -59,6 +69,17 @@ export class PostRouter extends APIRouter {
     let token = getToken(req);
 
     this.handleResponse(this.postClient.getPost(postId, token), res);
+  }
+
+  getFeed(req, res) {
+    let token = getToken(req);
+    let page = parseInt(req.query.page) || 0;
+    let limit = parseInt(req.query.limit) || 20;
+    let countOnly = (parseInt(req.query.count) || 0) === 1;
+
+    this.handleResponse(
+      this.postClient.getFeed(token, page, limit, countOnly), res
+    );
   }
 
   getPosts(req, res) {

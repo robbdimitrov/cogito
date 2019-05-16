@@ -8,6 +8,8 @@ export class UserRouter extends APIRouter {
   }
 
   connectRouter(router) {
+    // User
+
     router.post('/', (req, res) => {
       this.createUser(req, res);
     });
@@ -23,6 +25,8 @@ export class UserRouter extends APIRouter {
     router.delete('/:id', (req, res) => {
       this.deleteUser(req, res);
     });
+
+    // Followers
 
     router.get('/:id/following/', (req, res) => {
       this.getFollowing(req, res);

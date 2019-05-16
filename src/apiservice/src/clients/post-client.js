@@ -66,6 +66,39 @@ export class PostClient extends APIClient {
     });
   }
 
+  getFeed(token, page, limit, countOnly) {
+    let request = new messages.DataRequest();
+    request.setToken(token);
+    request.setPage(page);
+    request.setLimit(limit);
+    request.setCountOnly(countOnly);
+
+    return new Promise((res, rej) => {
+      this.postClient.getPosts(request, (err, response) => {
+        if (err) {
+          return rej(err);
+        }
+        let count = response.getCount();
+        if (count !== undefined) {
+          return rej({
+            count
+          });
+        }
+        let posts = [];
+        for (let item of response.getPosts()) {
+          let post = {
+            'id': item.getId(),
+            'content': item.getContent(),
+            'user_id': item.getUserId(),
+            'date_created': item.getDateCreated()
+          };
+          posts.push(post);
+        }
+        res(posts);
+      });
+    });
+  }
+
   getPosts(username, token, page, limit, countOnly) {
     let request = new messages.DataRequest();
     request.setUsername(username);

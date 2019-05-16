@@ -366,6 +366,11 @@ class PostServiceStub(object):
         request_serializer=thoughts__pb2.PostRequest.SerializeToString,
         response_deserializer=thoughts__pb2.PostStatus.FromString,
         )
+    self.GetFeed = channel.unary_unary(
+        '/thoughts.PostService/GetFeed',
+        request_serializer=thoughts__pb2.DataRequest.SerializeToString,
+        response_deserializer=thoughts__pb2.Posts.FromString,
+        )
     self.GetPosts = channel.unary_unary(
         '/thoughts.PostService/GetPosts',
         request_serializer=thoughts__pb2.DataRequest.SerializeToString,
@@ -395,6 +400,13 @@ class PostServiceServicer(object):
     raise NotImplementedError('Method not implemented!')
 
   def GetPost(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetFeed(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -434,6 +446,11 @@ def add_PostServiceServicer_to_server(servicer, server):
           servicer.GetPost,
           request_deserializer=thoughts__pb2.PostRequest.FromString,
           response_serializer=thoughts__pb2.PostStatus.SerializeToString,
+      ),
+      'GetFeed': grpc.unary_unary_rpc_method_handler(
+          servicer.GetFeed,
+          request_deserializer=thoughts__pb2.DataRequest.FromString,
+          response_serializer=thoughts__pb2.Posts.SerializeToString,
       ),
       'GetPosts': grpc.unary_unary_rpc_method_handler(
           servicer.GetPosts,
