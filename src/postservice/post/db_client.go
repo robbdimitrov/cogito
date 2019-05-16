@@ -64,6 +64,43 @@ func (c *DbClient) GetPost(id int32) (pb.Post, error) {
 	return post, nil
 }
 
+// GetFeed returns posts and retweets of users followed by the user
+func (c *DbClient) GetFeed(userID int32, page int32, limit int32) (pb.Posts, error) {
+	conn := c.db.GetConn()
+
+	// TODO: Fix query
+
+	rows, err := conn.Query(`SELECT id, content, user_id, time_format(date_created)
+    FROM thoughts.posts WHERE user_id = $1 OR id IN
+    (SELECT post_id FROM thoughts.retweets WHERE user_id = $2 ORDER BY date_created)
+    ORDER BY date_created OFFSET $3 LIMIT $4`,
+		userID, userID, page*limit, limit)
+	if err != nil {
+		return pb.Posts{}, errors.New("Error happened while reading from the database")
+	}
+	defer rows.Close()
+
+	var posts []*pb.Post
+	for rows.Next() {
+		var (
+			id          int32
+			content     string
+			userID      int32
+			dateCreated string
+		)
+		if err := rows.Scan(&id, &content, &userID, &dateCreated); err != nil {
+			return pb.Posts{}, errors.New("Error happened while parsing database response")
+		}
+		post := pb.Post{
+			Id:          id,
+			Content:     content,
+			UserId:      userID,
+			DateCreated: dateCreated}
+		posts = append(posts, &post)
+	}
+	return pb.Posts{Posts: posts}, nil
+}
+
 // GetPostsCount returns the number of posts and retweets of the user with userID
 func (c *DbClient) GetPostsCount(userID int32) (int32, error) {
 	conn := c.db.GetConn()
@@ -83,6 +120,8 @@ func (c *DbClient) GetPostsCount(userID int32) (int32, error) {
 // GetPosts returns the posts and retweets of the user with userID
 func (c *DbClient) GetPosts(userID int32, page int32, limit int32) (pb.Posts, error) {
 	conn := c.db.GetConn()
+
+	// TODO: Fix query
 
 	rows, err := conn.Query(`SELECT id, content, user_id, time_format(date_created)
     FROM thoughts.posts WHERE user_id = $1 OR id IN

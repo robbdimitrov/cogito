@@ -47,6 +47,22 @@ func (s *Service) GetPost(ctx context.Context, req *pb.PostRequest) (*pb.PostSta
 	return &pb.PostStatus{Post: &post}, nil
 }
 
+// GetFeed returns posts and retweets of users followed by the user
+func (s *Service) GetFeed(ctx context.Context, req *pb.DataRequest) (*pb.Posts, error) {
+	status, err := s.authClient.Validate(req.Token)
+	if err != nil {
+		return nil, err
+	} else if status.Error != nil {
+		return &pb.Posts{}, errors.New(status.Error.Message)
+	}
+
+	posts, err := s.dbClient.GetFeed(status.UserId, req.Page, req.Limit)
+	if err != nil {
+		return &posts, err
+	}
+	return &posts, nil
+}
+
 // GetPosts returns posts and retweets of user
 func (s *Service) GetPosts(ctx context.Context, req *pb.DataRequest) (*pb.Posts, error) {
 	status, err := s.userClient.GetUser(req.Username)
