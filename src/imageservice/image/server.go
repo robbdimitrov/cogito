@@ -23,12 +23,14 @@ func NewServer(port string, imagePath string) *Server {
 func (s *Server) uploadFile(w http.ResponseWriter, r *http.Request) {
 	log.Println("File Upload Endpoint Hit")
 
-	r.ParseMultipartForm(10 << 20)
+	if err := r.ParseMultipartForm(1024 * 1024 * 10); err != nil {
+		jsonResponse(w, http.StatusBadRequest, "FILE_TOO_BIG")
+		return
+	}
 
 	file, _, err := r.FormFile("image")
 	if err != nil {
-		log.Println("Error Retrieving the File")
-		log.Println(err)
+		log.Printf("Error Retrieving the File %v", err)
 		return
 	}
 	defer file.Close()
@@ -85,5 +87,8 @@ func (s *Server) Start() {
 	s.setupRoutes()
 	log.Printf("Starting server on port %s\n", s.port)
 
-	http.ListenAndServe(fmt.Sprintf(":%s", s.port), nil)
+	err := http.ListenAndServe(fmt.Sprintf(":%s", s.port), nil)
+	if err != nil {
+		log.Fatalf("Error prevented the server from running: %v", err)
+	}
 }
