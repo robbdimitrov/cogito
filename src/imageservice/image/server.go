@@ -23,14 +23,16 @@ func NewServer(port string, imagePath string) *Server {
 func (s *Server) uploadFile(w http.ResponseWriter, r *http.Request) {
 	log.Println("File Upload Endpoint Hit")
 
-	if err := r.ParseMultipartForm(1024 * 1024 * 10); err != nil {
+	err := r.ParseMultipartForm(1024 * 1024 * 10)
+	if err != nil {
+		log.Printf("Error Parsing File %v", err)
 		jsonResponse(w, http.StatusBadRequest, "FILE_TOO_BIG")
 		return
 	}
 
 	file, _, err := r.FormFile("image")
 	if err != nil {
-		log.Printf("Error Retrieving the File %v", err)
+		log.Printf("Error Retrieving File %v", err)
 		return
 	}
 	defer file.Close()
@@ -41,7 +43,7 @@ func (s *Server) uploadFile(w http.ResponseWriter, r *http.Request) {
 func (s *Server) saveFile(w http.ResponseWriter, file multipart.File) {
 	data, err := ioutil.ReadAll(file)
 	if err != nil {
-		fmt.Fprintf(w, "%v", err)
+		log.Printf("Error reading file: %v", err)
 		return
 	}
 
@@ -57,7 +59,7 @@ func (s *Server) saveFile(w http.ResponseWriter, file multipart.File) {
 	path := fmt.Sprintf("%s/", s.imagePath)
 	err = ioutil.WriteFile(path+randToken(12), data, 0666)
 	if err != nil {
-		fmt.Fprintf(w, "%v", err)
+		log.Printf("Error writing file %v", err)
 		return
 	}
 	jsonResponse(w, http.StatusCreated, "File uploaded successfully!.")
