@@ -12,19 +12,30 @@ const maxFileSize = 1 << 20
 
 // Service handles validating and saving of files
 type Service struct {
-	imagePath string
+	imagePath  string
+	authClient *AuthClient
 }
 
-// NewService creates a new image upload service instance
-func NewService(imagePath string) *Service {
-	return &Service{imagePath}
-}
-
-func (s *Service) uploadFile(w http.ResponseWriter, r *http.Request) {
+// UploadFile handles validation and uploading of image files
+func (s *Service) UploadFile(w http.ResponseWriter, r *http.Request) {
 	log.Println("File Upload Endpoint Hit")
 
+	s.authClient.Validate(getToken(r))
+
+	status, err := s.authClient.Validate(getToken(r))
+	if err != nil {
+		error := Error{http.StatusBadRequest, "VALIDATION_ERROR",
+			"There was an error while validating the upload request."}
+		ErrorResponse(w, error)
+		return
+	} else if status.Error != nil {
+		error := Error{int(status.Error.Code), status.Error.Error, status.Error.Message}
+		ErrorResponse(w, error)
+		return
+	}
+
 	r.Body = http.MaxBytesReader(w, r.Body, maxFileSize)
-	err := r.ParseMultipartForm(maxFileSize)
+	err = r.ParseMultipartForm(maxFileSize)
 	if err != nil {
 		log.Printf("Error Parsing File %v", err)
 
