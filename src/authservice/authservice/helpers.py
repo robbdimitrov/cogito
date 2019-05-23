@@ -7,7 +7,7 @@ from authservice.exceptions import AuthException
 def validate_token(auth_header, secret):
     """Helper method for token validation"""
 
-    if auth_header is None:
+    if len(auth_header) == 0:
         raise AuthException(400, 'INVALID_TOKEN', 'Authentication token not provided.')
 
     auth_token = auth_header.split(' ')[1]

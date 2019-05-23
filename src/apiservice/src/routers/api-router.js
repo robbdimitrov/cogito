@@ -3,7 +3,7 @@ import { Router } from 'express';
 export class APIRouter {
   constructor() {
     this.router = new Router();
-    this.connectRouter();
+    this.connectRouter(this.router);
   }
 
   connectRouter() {

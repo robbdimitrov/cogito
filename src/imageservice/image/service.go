@@ -20,22 +20,30 @@ type Service struct {
 func (s *Service) UploadFile(w http.ResponseWriter, r *http.Request) {
 	log.Println("File Upload Endpoint Hit")
 
-	s.authClient.Validate(getToken(r))
+	// s.authClient.Validate(getToken(r))
 
-	status, err := s.authClient.Validate(getToken(r))
-	if err != nil {
-		error := Error{http.StatusBadRequest, "VALIDATION_ERROR",
-			"There was an error while validating the upload request."}
-		ErrorResponse(w, error)
-		return
-	} else if status.Error != nil {
-		error := Error{int(status.Error.Code), status.Error.Error, status.Error.Message}
-		ErrorResponse(w, error)
-		return
-	}
+	// status, err := s.authClient.Validate(getToken(r))
+	// if err != nil {
+	// 	error := Error{http.StatusBadRequest, "VALIDATION_ERROR",
+	// 		"There was an error while validating the upload request."}
+	// 	ErrorResponse(w, error)
+	// 	return
+	// } else if status.Error != nil {
+	// 	error := Error{int(status.Error.Code), status.Error.Error, status.Error.Message}
+	// 	ErrorResponse(w, error)
+	// 	return
+	// }
+
+	log.Printf("Begin = %v", r.Body)
 
 	r.Body = http.MaxBytesReader(w, r.Body, maxFileSize)
-	err = r.ParseMultipartForm(maxFileSize)
+
+	log.Printf("Begin 2 = %v", r.Body)
+
+	err := r.ParseMultipartForm(maxFileSize)
+
+	log.Printf("Begin 3 = %v", r.Body)
+
 	if err != nil {
 		log.Printf("Error Parsing File %v", err)
 
@@ -44,6 +52,8 @@ func (s *Service) UploadFile(w http.ResponseWriter, r *http.Request) {
 		ErrorResponse(w, error)
 		return
 	}
+
+	log.Printf("parsing body = %v", err)
 
 	file, _, err := r.FormFile("image")
 	if err != nil {
@@ -55,6 +65,8 @@ func (s *Service) UploadFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer file.Close()
+
+	log.Printf("file = %v", file)
 
 	s.saveFile(w, file)
 }
