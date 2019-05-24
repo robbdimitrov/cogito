@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS thoughts.users (
   name varchar(100) NOT NULL,
   password varchar(100) NOT NULL,
   bio varchar(250) DEFAULT '',
+  avatar varchar(100) DEFAULT '',
   date_created timestamp NOT NULL DEFAULT localtimestamp
 );
 

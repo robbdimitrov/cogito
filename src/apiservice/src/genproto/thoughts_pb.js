@@ -2379,7 +2379,8 @@ proto.thoughts.User.toObject = function(includeInstance, msg) {
     email: jspb.Message.getFieldWithDefault(msg, 3, ""),
     name: jspb.Message.getFieldWithDefault(msg, 4, ""),
     bio: jspb.Message.getFieldWithDefault(msg, 5, ""),
-    dateCreated: jspb.Message.getFieldWithDefault(msg, 6, "")
+    avatar: jspb.Message.getFieldWithDefault(msg, 6, ""),
+    dateCreated: jspb.Message.getFieldWithDefault(msg, 7, "")
   };
 
   if (includeInstance) {
@@ -2437,6 +2438,10 @@ proto.thoughts.User.deserializeBinaryFromReader = function(msg, reader) {
       msg.setBio(value);
       break;
     case 6:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setAvatar(value);
+      break;
+    case 7:
       var value = /** @type {string} */ (reader.readString());
       msg.setDateCreated(value);
       break;
@@ -2504,10 +2509,17 @@ proto.thoughts.User.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getDateCreated();
+  f = message.getAvatar();
   if (f.length > 0) {
     writer.writeString(
       6,
+      f
+    );
+  }
+  f = message.getDateCreated();
+  if (f.length > 0) {
+    writer.writeString(
+      7,
       f
     );
   }
@@ -2590,17 +2602,32 @@ proto.thoughts.User.prototype.setBio = function(value) {
 
 
 /**
- * optional string date_created = 6;
+ * optional string avatar = 6;
  * @return {string}
  */
-proto.thoughts.User.prototype.getDateCreated = function() {
+proto.thoughts.User.prototype.getAvatar = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
 };
 
 
 /** @param {string} value */
-proto.thoughts.User.prototype.setDateCreated = function(value) {
+proto.thoughts.User.prototype.setAvatar = function(value) {
   jspb.Message.setProto3StringField(this, 6, value);
+};
+
+
+/**
+ * optional string date_created = 7;
+ * @return {string}
+ */
+proto.thoughts.User.prototype.getDateCreated = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 7, ""));
+};
+
+
+/** @param {string} value */
+proto.thoughts.User.prototype.setDateCreated = function(value) {
+  jspb.Message.setProto3StringField(this, 7, value);
 };
 
 

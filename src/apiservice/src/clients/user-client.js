@@ -39,6 +39,7 @@ export class UserClient extends APIClient {
           'email': user.getEmail(),
           'name': user.getName(),
           'bio': user.getBio(),
+          'avatar': user.getAvatar(),
           'date_created': user.getDateCreated()
         });
       });
@@ -66,6 +67,7 @@ export class UserClient extends APIClient {
           'email': user.getEmail(),
           'name': user.getName(),
           'bio': user.getBio(),
+          'avatar': user.getAvatar(),
           'date_created': user.getDateCreated()
         });
       });
@@ -144,6 +146,7 @@ export class UserClient extends APIClient {
             'email': item.getEmail(),
             'name': item.getName(),
             'bio': item.getBio(),
+            'avatar': item.getAvatar(),
             'date_created': item.getDateCreated()
           };
           users.push(user);
@@ -180,6 +183,7 @@ export class UserClient extends APIClient {
             'email': item.getEmail(),
             'name': item.getName(),
             'bio': item.getBio(),
+            'avatar': item.getAvatar(),
             'date_created': item.getDateCreated()
           };
           users.push(user);
