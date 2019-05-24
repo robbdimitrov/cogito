@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 
 	pb "postservice/genproto"
 )
@@ -31,7 +32,7 @@ func (s *Service) CreatePost(ctx context.Context, req *pb.PostUpdates) (*pb.Post
 
 	post, err := s.dbClient.CreatePost(req.Content, status.UserId)
 	if err != nil {
-		retErr := pb.Error{Code: 400, Error: "BAD_REQUEST", Message: "Like post failed."}
+		retErr := pb.Error{Code: http.StatusBadRequest, Error: "BAD_REQUEST", Message: "Like post failed."}
 		return &pb.PostStatus{Error: &retErr}, err
 	}
 	return &pb.PostStatus{Post: &post}, nil
@@ -41,7 +42,7 @@ func (s *Service) CreatePost(ctx context.Context, req *pb.PostUpdates) (*pb.Post
 func (s *Service) GetPost(ctx context.Context, req *pb.PostRequest) (*pb.PostStatus, error) {
 	post, err := s.dbClient.GetPost(req.PostId)
 	if err != nil {
-		retErr := pb.Error{Code: 404, Error: "NOT_FOUND", Message: "Post not found."}
+		retErr := pb.Error{Code: http.StatusNotFound, Error: "NOT_FOUND", Message: "Post not found."}
 		return &pb.PostStatus{Error: &retErr}, err
 	}
 	return &pb.PostStatus{Post: &post}, nil
@@ -124,13 +125,13 @@ func (s *Service) DeletePost(ctx context.Context, req *pb.PostRequest) (*pb.Stat
 
 	post, _ := s.dbClient.GetPost(req.PostId)
 	if post.UserId != status.UserId {
-		retErr := pb.Error{Code: 403, Error: "FORBIDDEN", Message: "This action is forbidden."}
+		retErr := pb.Error{Code: http.StatusForbidden, Error: "FORBIDDEN", Message: "This action is forbidden."}
 		return &pb.Status{Error: &retErr}, err
 	}
 
 	err = s.dbClient.DeletePost(req.PostId)
 	if err != nil {
-		retErr := pb.Error{Code: 400, Error: "BAD_REQUEST", Message: "Deleting post failed."}
+		retErr := pb.Error{Code: http.StatusBadRequest, Error: "BAD_REQUEST", Message: "Deleting post failed."}
 		return &pb.Status{Error: &retErr}, err
 	}
 	return &pb.Status{Message: "Successfully deleted post."}, nil
