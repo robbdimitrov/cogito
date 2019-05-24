@@ -90,6 +90,8 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
             changes['name'] = request.name
         if request.bio is not None:
             changes['bio'] = request.bio
+        if request.avatar is not None:
+            changes['avatar'] = request.avatar
 
         email = request.email
         password = request.password

@@ -32,7 +32,7 @@ class DbClient:
         try:
             cur.execute('INSERT INTO thoughts.users (username, email, name, password) \
                 VALUES(%s, %s, %s, %s) \
-                RETURNING id, username, email, name, bio, time_format(date_created)',
+                RETURNING id, username, email, name, bio, avatar, time_format(date_created)',
                 (username, email, name, password))
             result = cur.fetchone()
             conn.commit()
@@ -51,7 +51,8 @@ class DbClient:
             email=result[2],
             name=result[3],
             bio=result[4],
-            date_created=result[5])
+            avatar=result[5],
+            date_created=result[6])
         return user
 
     def get_user(self, username, user_id):
@@ -59,12 +60,12 @@ class DbClient:
         cur = conn.cursor()
 
         if user_id is not None:
-            cur.execute('SELECT id, username, email, name, bio, \
+            cur.execute('SELECT id, username, email, name, bio, avatar, \
                 time_format(date_created) FROM thoughts.users \
                 WHERE user_id = %s',
                 (user_id,))
         else:
-            cur.execute('SELECT id, username, email, name, bio, \
+            cur.execute('SELECT id, username, email, name, bio, avatar, \
                 time_format(date_created) FROM thoughts.users \
                 WHERE username = %s',
                 (username,))
@@ -80,7 +81,8 @@ class DbClient:
             email=result[2],
             name=result[3],
             bio=result[4],
-            date_created=result[5])
+            avatar=result[5],
+            date_created=result[6])
         return user
 
     def update_user(self, user_id, updates):
@@ -114,7 +116,7 @@ class DbClient:
         conn = self.db.get_conn()
         cur = conn.cursor()
 
-        cur.execute('SELECT id, username, email, name, bio, \
+        cur.execute('SELECT id, username, email, name, bio, avatar, \
             time_format(date_created) \
             FROM thoughts.users, thoughts.followings \
             WHERE user_id = (SELECT id FROM thoughts.users WHERE username = %s) \
@@ -136,7 +138,8 @@ class DbClient:
                 email=result[2],
                 name=result[3],
                 bio=result[4],
-                date_created=result[5])
+                avatar=result[5],
+                date_created=result[6])
             users.append(user)
         return users
 
@@ -144,7 +147,7 @@ class DbClient:
         conn = self.db.get_conn()
         cur = conn.cursor()
 
-        cur.execute('SELECT id, username, email, name, bio, \
+        cur.execute('SELECT id, username, email, name, bio, avatar, \
             time_format(date_created) \
             FROM thoughts.users, thoughts.followings \
             WHERE follower_id = (SELECT id FROM thoughts.users WHERE username = %s) \
@@ -166,7 +169,8 @@ class DbClient:
                 email=result[2],
                 name=result[3],
                 bio=result[4],
-                date_created=result[5])
+                avatar=result[5],
+                date_created=result[6])
             users.append(user)
         return users
 

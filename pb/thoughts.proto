@@ -91,7 +91,8 @@ message User {
   string email = 3;
   string name = 4;
   string bio = 5;
-  string date_created = 6;
+  string avatar = 6;
+  string date_created = 7;
 }
 
 /**
