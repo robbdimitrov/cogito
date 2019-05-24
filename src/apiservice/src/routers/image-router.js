@@ -18,13 +18,31 @@ export class ImageRouter extends APIRouter {
         method: 'POST',
         headers: req.headers
       };
-      http.request(options, (resp) => {
-        process.stdout.write(`StatusCode: ${resp.statusCode}\n`);
 
-        resp.on('data', (data) => {
-          process.stdout.write(`POST result: ${data}\n`);
-          res.send(data);
+      let request = http.request(options, (response) => {
+        response.setEncoding('utf8');
+        let rawData = '';
+
+        response.on('data', (chunk) => {
+          rawData += chunk;
+        }).on('close', () => {
+          res.writeHead(response.statusCode);
+          res.end();
+        }).on('end', () => {
+          res.status(response.statusCode).send(rawData);
         });
+      }).on('error', (err) => {
+        process.stderr.write(`Error happened while uploading data ${err}`);
+        res.writeHead(500);
+        res.end();
+      });
+
+      req.on('data', (chunk) => {
+        request.write(chunk);
+      }).on('close', function(){
+        request.end();
+      }).on('end', function(){
+        request.end();
       });
     });
 
