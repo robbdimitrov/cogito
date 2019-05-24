@@ -25,11 +25,10 @@ export class ImageRouter extends APIRouter {
 
         response.on('data', (chunk) => {
           rawData += chunk;
-        }).on('close', () => {
-          res.writeHead(response.statusCode);
-          res.end();
         }).on('end', () => {
           res.status(response.statusCode).send(rawData);
+        }).on('close', () => {
+          res.end();
         });
       }).on('error', (err) => {
         process.stderr.write(`Error happened while uploading data ${err}`);
@@ -39,9 +38,9 @@ export class ImageRouter extends APIRouter {
 
       req.on('data', (chunk) => {
         request.write(chunk);
-      }).on('close', function(){
-        request.end();
       }).on('end', function(){
+        request.end();
+      }).on('close', function(){
         request.end();
       });
     });
