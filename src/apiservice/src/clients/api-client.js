@@ -1,6 +1,6 @@
 export class APIClient {
-  constructor(grpcURI) {
-    this.grpcURI = grpcURI;
+  constructor(serviceURI) {
+    this.serviceURI = serviceURI;
   }
 
   handleError(error, rej) {

@@ -5,12 +5,12 @@ import * as messages from '../genproto/thoughts_pb';
 import { APIClient } from './api-client';
 
 export class PostClient extends APIClient {
-  constructor(grpcURI) {
-    super(grpcURI);
+  constructor(serviceURI) {
+    super(serviceURI);
 
-    this.postClient = new services.PostServiceClient(this.grpcURI,
+    this.postClient = new services.PostServiceClient(this.serviceURI,
       grpc.credentials.createInsecure());
-    this.actionClient = new services.ActionServiceClient(this.grpcURI,
+    this.actionClient = new services.ActionServiceClient(this.serviceURI,
       grpc.credentials.createInsecure());
   }
 

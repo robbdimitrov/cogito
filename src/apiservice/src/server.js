@@ -8,6 +8,7 @@ import { PostClient } from './clients/post-client';
 import { PostRouter } from './routers/post-router';
 import { UserClient } from './clients/user-client';
 import { UserRouter } from './routers/user-router';
+import { ImageClient } from './clients/image-client';
 import { ImageRouter } from './routers/image-router';
 
 export class Server {
@@ -54,7 +55,8 @@ export class Server {
     let postRouter = new PostRouter(postClient);
     this.routers['posts'] = postRouter;
 
-    let imageRouter = new ImageRouter(this.config['IMAGE_URI']);
+    let imageClient = new ImageClient(this.config['IMAGE_URI']);
+    let imageRouter = new ImageRouter(imageClient);
     this.routers['images'] = imageRouter;
   }
 
