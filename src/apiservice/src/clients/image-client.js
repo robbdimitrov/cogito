@@ -26,7 +26,6 @@ export class ImageClient extends APIClient {
       });
     }).on('error', (err) => {
       process.stderr.write(`Error happened ${err}`);
-      res.writeHead(500);
       res.end();
     });
 
@@ -38,8 +37,6 @@ export class ImageClient extends APIClient {
   }
 
   getImage(req, res) {
-    process.stdout.write(`Getting ${req.params.id}\n`);
-
     let parts = this.serviceURI.split(':');
     let options = {
       host: parts[0],
@@ -49,28 +46,17 @@ export class ImageClient extends APIClient {
       headers: req.headers
     };
 
-    process.stdout.write(`Options ${JSON.stringify(options)}\n`);
-
     let request = http.request(options, (response) => {
-      let rawData = '';
-
       response.on('data', (chunk) => {
-        rawData += chunk;
-      }).on('end', () => {
-        res.status(response.statusCode).send(rawData);
+        res.write(chunk);
       }).on('close', () => {
         res.end();
       });
     }).on('error', (err) => {
       process.stderr.write(`Error happened ${err}`);
-      res.writeHead(500);
       res.end();
     });
 
-    req.on('data', (chunk) => {
-      request.write(chunk);
-    }).on('close', function(){
-      // request.end();
-    });
+    request.end();
   }
 }
