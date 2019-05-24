@@ -1,6 +1,7 @@
 import datetime
 import bcrypt
 import jwt
+from http import HTTPStatus
 
 from authservice import thoughts_pb2, thoughts_pb2_grpc
 from authservice.utils import validate_email
@@ -56,7 +57,8 @@ class AuthService(thoughts_pb2_grpc.AuthServiceServicer):
 
         if email is not None and password is not None:
             if validate_email(email) == False:
-                error = thoughts_pb2.Error(code=400, error='INVALID_EMAIL',
+                error = thoughts_pb2.Error(code=HTTPStatus.BAD_REQUEST,
+                    error='INVALID_EMAIL',
                     message='Invalid email address.')
                 return thoughts_pb2.AuthResponse(error=error)
 
@@ -69,7 +71,8 @@ class AuthService(thoughts_pb2_grpc.AuthServiceServicer):
 
             session = self.db_client.create_session(current_user['id'], user_agent)
         else:
-            error = thoughts_pb2.Error(code=400, error='MISSING_CREDENTIALS',
+            error = thoughts_pb2.Error(code=HTTPStatus.BAD_REQUEST,
+                error='MISSING_CREDENTIALS',
                 message='Missing credentials.')
             return thoughts_pb2.AuthResponse(error=error)
 
@@ -97,13 +100,15 @@ class AuthService(thoughts_pb2_grpc.AuthServiceServicer):
             try:
                 payload = jwt.decode(refresh_token, self.secret, algorithms='HS256')
             except jwt.ExpiredSignatureError:
-                error = thoughts_pb2.Error(code=401, error='EXPIRED_TOKEN',
+                error = thoughts_pb2.Error(code=HTTPStatus.UNAUTHORIZED,
+                    error='EXPIRED_TOKEN',
                     message='Refresh token is expired.')
                 return thoughts_pb2.AuthResponse(error=error)
 
             session = self.db_client.get_session(payload['sub'])
         else:
-            error = thoughts_pb2.Error(code=400, error='MISSING_CREDENTIALS',
+            error = thoughts_pb2.Error(code=HTTPStatus.BAD_REQUEST,
+                error='MISSING_CREDENTIALS',
                 message='Missing credentials.')
             return thoughts_pb2.AuthResponse(error=error)
 
