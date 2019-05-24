@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from authservice import thoughts_pb2, thoughts_pb2_grpc
 from authservice.utils import validate_email
 from authservice.auth import AuthException
@@ -37,7 +39,8 @@ class SessionService(thoughts_pb2_grpc.SessionServiceServicer):
         session_id = request.session_id
 
         if self.db_client.get_session(session_id)['user_id'] != payload['sub']:
-            error = thoughts_pb2.Error(code=403, error='FORBIDDEN',
+            error = thoughts_pb2.Error(code=HTTPStatus.FORBIDDEN,
+                error='FORBIDDEN',
                 message='This action is forbidden.')
             return thoughts_pb2.Status(error=error)
 

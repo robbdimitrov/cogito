@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from userservice import thoughts_pb2, thoughts_pb2_grpc
 from userservice import exceptions
 
@@ -43,7 +45,8 @@ class FollowService(thoughts_pb2_grpc.FollowServiceServicer):
         try:
             self.db_client.follow_user(username, user_id)
         except exceptions.DbException as e:
-            error = thoughts_pb2.Error(code=400, error='BAD_REQUEST',
+            error = thoughts_pb2.Error(code=HTTPStatus.BAD_REQUEST,
+                error='BAD_REQUEST',
                 message=str(e))
             return thoughts_pb2.Status(error=error)
         else:

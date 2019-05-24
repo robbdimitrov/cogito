@@ -2,6 +2,7 @@ package post
 
 import (
 	"context"
+	"net/http"
 
 	pb "postservice/genproto"
 )
@@ -28,7 +29,7 @@ func (s *ActionService) LikePost(ctx context.Context, req *pb.PostRequest) (*pb.
 
 	err = s.dbClient.LikePost(req.PostId, status.UserId)
 	if err != nil {
-		retErr := pb.Error{Code: 400, Error: "BAD_REQUEST", Message: "Like post failed."}
+		retErr := pb.Error{Code: http.StatusBadRequest, Error: "BAD_REQUEST", Message: "Like post failed."}
 		return &pb.Status{Error: &retErr}, err
 	}
 	return &pb.Status{Message: "Successfully liked post."}, nil
@@ -45,7 +46,7 @@ func (s *ActionService) UnlikePost(ctx context.Context, req *pb.PostRequest) (*p
 
 	err = s.dbClient.UnlikePost(req.PostId, status.UserId)
 	if err != nil {
-		retErr := pb.Error{Code: 400, Error: "BAD_REQUEST", Message: "Unlike post failed."}
+		retErr := pb.Error{Code: http.StatusBadRequest, Error: "BAD_REQUEST", Message: "Unlike post failed."}
 		return &pb.Status{Error: &retErr}, err
 	}
 	return &pb.Status{Message: "Successfully unliked post."}, nil
@@ -62,7 +63,7 @@ func (s *ActionService) RetweetPost(ctx context.Context, req *pb.PostRequest) (*
 
 	err = s.dbClient.RetweetPost(req.PostId, status.UserId)
 	if err != nil {
-		retErr := pb.Error{Code: 400, Error: "BAD_REQUEST", Message: "Retweet post failed."}
+		retErr := pb.Error{Code: http.StatusBadRequest, Error: "BAD_REQUEST", Message: "Retweet post failed."}
 		return &pb.Status{Error: &retErr}, err
 	}
 	return &pb.Status{Message: "Successfully retweeted post."}, nil
@@ -79,7 +80,7 @@ func (s *ActionService) RemoveRetweet(ctx context.Context, req *pb.PostRequest) 
 
 	err = s.dbClient.RemoveRetweet(req.PostId, status.UserId)
 	if err != nil {
-		retErr := pb.Error{Code: 400, Error: "BAD_REQUEST", Message: "Retweet removal failed."}
+		retErr := pb.Error{Code: http.StatusBadRequest, Error: "BAD_REQUEST", Message: "Retweet removal failed."}
 		return &pb.Status{Error: &retErr}, err
 	}
 	return &pb.Status{Message: "Successfully removed retweet post."}, nil

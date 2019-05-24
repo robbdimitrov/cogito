@@ -1,4 +1,5 @@
 import bcrypt
+from http import HTTPStatus
 
 from userservice import thoughts_pb2_grpc, thoughts_pb2
 from userservice.utils import validate_email
@@ -35,7 +36,8 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
             error_type = 'MISSING_PASSWORD'
 
         if error_message is not None:
-            error = thoughts_pb2.Error(code=400, error=error_type,
+            error = thoughts_pb2.Error(code=HTTPStatus.BAD_REQUEST,
+                error=error_type,
                 message=error_message)
             return thoughts_pb2.UserStatus(error=error)
 
@@ -45,11 +47,13 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
         try:
             user = self.db_client.create_user(username, email, name, password)
         except exceptions.ExistingUserException as e:
-            error = thoughts_pb2.Error(code=400, error='USER_EXISTS',
+            error = thoughts_pb2.Error(code=HTTPStatus.BAD_REQUEST,
+                error='USER_EXISTS',
                 message=str(e))
             return thoughts_pb2.UserStatus(error=error)
         except exceptions.DbException as e:
-            error = thoughts_pb2.Error(code=400, error='BAD_REQUEST',
+            error = thoughts_pb2.Error(code=HTTPStatus.BAD_REQUEST,
+                error='BAD_REQUEST',
                 message=str(e))
             return thoughts_pb2.UserStatus(error=error)
 
@@ -61,7 +65,8 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
         user = self.db_client.get_user(request.username)
 
         if user is None:
-            error = thoughts_pb2.Error(code=404, error='NOT_FOUND',
+            error = thoughts_pb2.Error(code=HTTPStatus.NOT_FOUND,
+                error='NOT_FOUND',
                 message='User not found.')
             return thoughts_pb2.UserStatus(error=error)
 
@@ -117,14 +122,16 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
             changes['email'] = email
 
         if error is not None:
-            error = thoughts_pb2.Error(code=400, error=error_type,
+            error = thoughts_pb2.Error(code=HTTPStatus.BAD_REQUEST,
+                error=error_type,
                 message=error_message)
             return thoughts_pb2.Status(error=error)
 
         try:
             self.db_client.update_user(user_id, changes)
         except:
-            error = thoughts_pb2.Error(code=400, error='BAD_REQUEST',
+            error = thoughts_pb2.Error(code=HTTPStatus.BAD_REQUEST,
+                error='BAD_REQUEST',
                 message='User update failed.')
             return thoughts_pb2.Status(error=error)
         else:
