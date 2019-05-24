@@ -8,7 +8,7 @@ export class ImageClient extends APIClient {
     let options = {
       host: parts[0],
       port: parts[1],
-      path: '/upload',
+      path: '/images',
       method: 'POST',
       headers: req.headers
     };
@@ -24,8 +24,7 @@ export class ImageClient extends APIClient {
       }).on('close', () => {
         res.end();
       });
-    }).on('error', (err) => {
-      process.stderr.write(`Error happened ${err}`);
+    }).on('error', () => {
       res.end();
     });
 
@@ -52,8 +51,7 @@ export class ImageClient extends APIClient {
       }).on('close', () => {
         res.end();
       });
-    }).on('error', (err) => {
-      process.stderr.write(`Error happened ${err}`);
+    }).on('error', () => {
       res.end();
     });
 
