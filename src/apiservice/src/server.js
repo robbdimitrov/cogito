@@ -3,11 +3,13 @@ import * as express from 'express';
 import * as helmet from 'helmet';
 
 import { AuthClient } from './clients/auth-client';
-import { PostClient } from './clients/post-client';
-import { UserClient } from './clients/user-client';
 import { AuthRouter } from './routers/auth-router';
+import { PostClient } from './clients/post-client';
 import { PostRouter } from './routers/post-router';
+import { UserClient } from './clients/user-client';
 import { UserRouter } from './routers/user-router';
+import { ImageClient } from './clients/image-client';
+import { ImageRouter } from './routers/image-router';
 
 export class Server {
   constructor(port, apiRoot) {
@@ -52,6 +54,10 @@ export class Server {
     let postClient = new PostClient(this.config['POST_URI']);
     let postRouter = new PostRouter(postClient);
     this.routers['posts'] = postRouter;
+
+    let imageClient = new ImageClient(this.config['IMAGE_URI']);
+    let imageRouter = new ImageRouter(imageClient);
+    this.routers['images'] = imageRouter;
   }
 
   // Configure API endpoints
