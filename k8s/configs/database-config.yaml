@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: database-config
+  labels:
+    app: database
+data:
+  POSTGRES_DB: thoughtsdb
+  POSTGRES_USER: pguser
+  POSTGRES_PASSWORD: pgpassword
