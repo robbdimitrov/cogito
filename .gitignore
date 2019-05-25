@@ -3,6 +3,7 @@ Thumbs.db
 
 # Node
 node_modules
+build
 dist
 
 # Python

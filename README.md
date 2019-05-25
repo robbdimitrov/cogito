@@ -1,5 +1,12 @@
 # Thoughts
 
+## Build
+
+Build frontend
+```sh
+$ docker build -t thoughts/frontend src/frontend
+```
+
 ## Development
 
 Pull Postgres
