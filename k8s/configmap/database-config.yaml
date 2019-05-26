@@ -3,7 +3,8 @@ kind: ConfigMap
 metadata:
   name: database-config
   labels:
-    app: database
+    app: thoughts
+    tier: database
 data:
   POSTGRES_DB: thoughtsdb
   POSTGRES_USER: pguser
