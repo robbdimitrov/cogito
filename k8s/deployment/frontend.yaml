@@ -1,7 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    app: frontend
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 80
+  externalIPs:
+  - 80.11.12.10
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
+  labels:
+    app: frontend
 spec:
   replicas: 3
   selector:
@@ -18,18 +35,3 @@ spec:
         imagePullPolicy: Never
         ports:
         - containerPort: 80
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: frontend
-spec:
-  selector:
-    app: frontend
-  ports:
-  - name: http
-    protocol: TCP
-    port: 80
-    targetPort: 80
-  externalIPs:
-  - 80.11.12.10
