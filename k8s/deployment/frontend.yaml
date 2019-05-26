@@ -2,16 +2,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: frontend
-  labels:
-    app: thoughts
-    tier: frontend
 spec:
   selector:
     app: thoughts
     tier: frontend
   ports:
-  - name: htto
-    protocol: TCP
+  - protocol: TCP
     port: 80
     targetPort: 80
 ---
@@ -36,7 +32,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: thoughts/frontend:latest
+        image: thoughts/frontend
         imagePullPolicy: Never
         ports:
         - containerPort: 80

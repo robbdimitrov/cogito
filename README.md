@@ -1,33 +1,40 @@
 # Thoughts
 
-## Build
+## Build images
 
 Build frontend
 ```sh
 $ docker build -t thoughts/frontend src/frontend
 ```
 
+## Create deployments
+
+Create configs
+```
+$ kubectl apply -f k8s/configmap
+```
+
+Create volumes
+```
+$ kubectl apply -f k8s/volume
+```
+
+Create deployments
+```
+$ kubectl apply -f k8s/deployment
+```
+
+## Access the frontend
+
+```sh
+$ kubectl port-forward service/frontend 8080:80
+```
+
 ## Development
 
-Pull Postgres
+Print envs visible for Pod
 ```sh
-$ docker pull postgres
-```
-
-Create a directory for db persistence
-```sh
-$ mkdir -p $HOME/.containers/volumes/postgres
-```
-
-Run the postgres container
-```sh
-$ docker run --rm --name pg-docker -e POSTGRES_PASSWORD=docker -d -p 5432:5432 \
--v $HOME/.containers/volumes/postgres:/var/lib/postgresql/data postgres
-```
-
-Connect to docker container
-```sh
-$ docker exec -it pg-docker psql -U postgres
+$ kubectl exec <POD_ID> -- printenv | grep SERVICE
 ```
 
 ## Reference

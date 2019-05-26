@@ -1,16 +1,47 @@
-apiVersion: v1
-kind: Deployment
----
-apiVersion: v1
 kind: Service
+apiVersion: v1
+metadata:
+  name: database
+spec:
+  selector:
+    app: thoughts
+    tier: database
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
+---
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: database
   labels:
-    app: database
+    app: thoughts
+    tier: database
 spec:
-  ports:
-  - port: 5432
-    name: database
-  clusterIP: None
   selector:
-    app: database
+    matchLabels:
+      app: thoughts
+      tier: database
+  template:
+    metadata:
+      labels:
+        app: thoughts
+        tier: database
+    spec:
+      containers:
+      - name: database
+        image: postgres:11.3-alpine
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5432
+        envFrom:
+        - configMapRef:
+            name: database-config
+        volumeMounts:
+        - mountPath: "/var/lib/postgresql/data"
+          name: database-storage
+      volumes:
+        - name: database-storage
+          persistentVolumeClaim:
+            claimName: database-pv-claim
