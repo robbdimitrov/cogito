@@ -6,6 +6,4 @@ metadata:
     app: thoughts
     tier: database
 data:
-  POSTGRES_DB: thoughtsdb
-  POSTGRES_USER: pguser
   POSTGRES_PASSWORD: pgpassword

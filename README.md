@@ -7,6 +7,11 @@ Build frontend
 $ docker build -t thoughts/frontend src/frontend
 ```
 
+Build database
+```sh
+$ docker build -t thoughts/database src/database
+```
+
 ## Create deployments
 
 Create configs

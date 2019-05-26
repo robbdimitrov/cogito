@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
       - name: database
-        image: postgres:11.3-alpine
+        image: thoughts/database
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5432
