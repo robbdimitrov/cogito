@@ -4,7 +4,8 @@ metadata:
   name: frontend
 spec:
   selector:
-    app: frontend
+    app: thoughts
+    tier: frontend
   ports:
   - name: http
     protocol: TCP
@@ -18,16 +19,19 @@ kind: Deployment
 metadata:
   name: frontend
   labels:
-    app: frontend
+    app: thoughts
+    tier: frontend
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: frontend
+      app: thoughts
+      tier: frontend
   template:
     metadata:
       labels:
-        app: frontend
+        app: thoughts
+        tier: frontend
     spec:
       containers:
       - name: frontend
