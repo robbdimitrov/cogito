@@ -12,6 +12,11 @@ Build database
 $ docker build -t thoughts/database src/database
 ```
 
+Build userservice
+```sh
+$ docker build -t thoughts/userservice src/userservice
+```
+
 ## Create deployments
 
 Create configs
