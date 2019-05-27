@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: database-config
-  labels:
-    app: thoughts
-    tier: database
-data:
-  POSTGRES_PASSWORD: pgpassword

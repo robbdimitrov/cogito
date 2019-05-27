@@ -35,9 +35,9 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5432
-        envFrom:
-        - configMapRef:
-            name: database-config
+        env:
+        - name: POSTGRES_PASSWORD
+          value: "kubernetes"
         volumeMounts:
         - mountPath: "/var/lib/postgresql/data"
           name: database-storage
