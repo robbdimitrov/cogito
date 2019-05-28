@@ -2,19 +2,15 @@
 
 ## Build images
 
-Build frontend
+Build images
 ```sh
+$ docker build -t thoughts/apiservice src/apiservice
 $ docker build -t thoughts/frontend src/frontend
-```
-
-Build database
-```sh
 $ docker build -t thoughts/database src/database
-```
-
-Build userservice
-```sh
+$ docker build -t thoughts/authservice src/authservice
 $ docker build -t thoughts/userservice src/userservice
+$ docker build -t thoughts/postservice src/postservice
+$ docker build -t thoughts/imageservice src/imageservice
 ```
 
 ## Create deployments
