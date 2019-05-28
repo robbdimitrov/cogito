@@ -12,9 +12,8 @@ import { ImageClient } from './clients/image-client';
 import { ImageRouter } from './routers/image-router';
 
 export class Server {
-  constructor(port, apiRoot) {
+  constructor(port) {
     this.port = port;
-    this.apiRoot = apiRoot;
 
     this.app = express();
     this.routers = {};
@@ -62,23 +61,21 @@ export class Server {
 
   // Configure API endpoints
   connectRouters() {
-    let apiRoot = this.apiRoot;
-
     // Create and map express routers
     for (let key in this.routers) {
       if (this.routers.hasOwnProperty(key)) {
         let value = this.routers[key];
-        this.app.use(`/${apiRoot}/${key}`, value.router);
+        this.app.use(`/api/${key}`, value.router);
       }
     }
   }
 
-  // Connect to database and start listening to port
+  // Setup state and start server
   start() {
     this.configure();
 
     this.app.listen(this.port, () => {
-      process.stdout.write(`We are live on ${this.port}\n`);
+      process.stdout.write(`Starting server on port ${this.port}\n`);
     });
   }
 }

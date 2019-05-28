@@ -11,7 +11,8 @@ from authservice.db_client import DbClient
 
 
 class Server:
-    def __init__(self):
+    def __init__(self, port):
+        self.port = port
         self.config = {}
         self.db_client = None
 
@@ -32,14 +33,14 @@ class Server:
         thoughts_pb2_grpc.add_AuthServiceServicer_to_server(auth_service, server)
         thoughts_pb2_grpc.add_SessionServiceServicer_to_server(session_service, server)
 
-        server.add_insecure_port(f'[::]:{self.config["PORT"]}')
+        server.add_insecure_port(f'[::]:{self.port}')
 
         return server
 
     def serve(self):
         server = self.create_server()
         server.start()
-        logging.info(f'Server running on port {self.config["PORT"]}')
+        logging.info(f'Server running on port {self.port}')
         try:
             while True:
                 time.sleep(60 * 60 * 24)
