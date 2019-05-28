@@ -37,9 +37,9 @@ spec:
         - containerPort: 5432
         env:
         - name: POSTGRES_PASSWORD
-          value: "kubernetes"
+          value: kubernetes
         volumeMounts:
-        - mountPath: "/var/lib/postgresql/data"
+        - mountPath: /var/lib/postgresql/data
           name: database-storage
       volumes:
         - name: database-storage

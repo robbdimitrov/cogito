@@ -35,3 +35,14 @@ spec:
         imagePullPolicy: Never
         ports:
         - containerPort: 3000
+        env:
+        - name: PORT
+          value: "3000"
+        - name: AUTH_SERVICE_ADDR
+          value: authservice:5010
+        - name: POST_SERVICE_ADDR
+          value: postservice:5000
+        - name: USER_SERVICE_ADDR
+          value: userservice:5010
+        - name: IMAGE_SERVICE_ADDR
+          value: imageservice:5000
