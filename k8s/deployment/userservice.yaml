@@ -8,8 +8,8 @@ spec:
     tier: backend
   ports:
   - protocol: TCP
-    port: 3200
-    targetPort: 3200
+    port: 5010
+    targetPort: 5010
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -35,7 +35,4 @@ spec:
         image: thoughts/userservice
         imagePullPolicy: Never
         ports:
-        - containerPort: 3200
-        env:
-        - name: PORT
-          value: "3200"
+        - containerPort: 5010
