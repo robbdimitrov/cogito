@@ -1,7 +1,8 @@
-FROM golang:1.12-alpine as builder
+FROM golang:1.12 as builder
 WORKDIR /go/src/postservice
-COPY Gopkg.* .
-RUN dep ensure --vendor-only -v
+COPY Gopkg.* ./
+RUN go get github.com/golang/dep/cmd/dep && \
+    dep ensure --vendor-only -v
 COPY . .
 RUN go install .
 

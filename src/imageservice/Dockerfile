@@ -1,11 +1,12 @@
-FROM golang:1.12-alpine as builder
-WORKDIR /go/src/postservice
-COPY Gopkg.* .
-RUN dep ensure --vendor-only -v
+FROM golang:1.12 as builder
+WORKDIR /go/src/imageservice
+COPY Gopkg.* ./
+RUN go get github.com/golang/dep/cmd/dep && \
+    dep ensure --vendor-only -v
 COPY . .
 RUN go install .
 
 FROM alpine
-COPY --from=builder /go/bin/postservice /postservice
+COPY --from=builder /go/bin/imageservice /imageservice
 EXPOSE $PORT
-ENTRYPOINT ["/postservice"]
+ENTRYPOINT ["/imageservice"]

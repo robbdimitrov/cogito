@@ -19,7 +19,6 @@ metadata:
     app: thoughts
     tier: frontend
 spec:
-  replicas: 3
   selector:
     matchLabels:
       app: thoughts
