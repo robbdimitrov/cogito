@@ -1,28 +1,25 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: image-pv-volume
+  name: storage-pv-volume
   labels:
     app: thoughts
     tier: storage
-    type: local
 spec:
-  storageClassName: manual
   capacity:
     storage: 5Gi
   accessModes:
-    - ReadWriteOnce
+  - ReadWriteOnce
   hostPath:
     path: "/mnt/storage"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: image-pv-claim
+  name: storage-pv-claim
 spec:
-  storageClassName: manual
   accessModes:
-    - ReadWriteOnce
+  - ReadWriteOnce
   resources:
     requests:
       storage: 5Gi

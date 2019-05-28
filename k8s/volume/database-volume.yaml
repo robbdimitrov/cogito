@@ -5,13 +5,11 @@ metadata:
   labels:
     app: thoughts
     tier: database
-    type: local
 spec:
-  storageClassName: manual
   capacity:
     storage: 5Gi
   accessModes:
-    - ReadWriteOnce
+  - ReadWriteOnce
   hostPath:
     path: "/mnt/data"
 ---
@@ -20,9 +18,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: database-pv-claim
 spec:
-  storageClassName: manual
   accessModes:
-    - ReadWriteOnce
+  - ReadWriteOnce
   resources:
     requests:
       storage: 5Gi
