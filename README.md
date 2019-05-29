@@ -97,10 +97,16 @@ $ kubectl port-forward service/frontend 8080:80
 
 ## Cleanup
 
-To delete everything in the cluster use
+Delete everything in the cluster
 
 ```sh
 $ kubectl delete -f k8s --recursive
+```
+
+Cleanup unused docker images
+
+```sh
+$ make clean
 ```
 
 ## License
