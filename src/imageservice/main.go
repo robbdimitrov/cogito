@@ -7,7 +7,9 @@ import (
 )
 
 func main() {
-	server := image.NewServer(5000,
-		os.Getenv("AUTH_URI"))
+	port := os.Getenv("PORT")
+	authURI := os.Getenv("AUTH_SERVICE_ADDR")
+
+	server := image.NewServer(port, authURI)
 	server.Start()
 }

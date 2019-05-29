@@ -35,3 +35,15 @@ spec:
         imagePullPolicy: Never
         ports:
         - containerPort: 5000
+        env:
+        - name: PORT
+          value: "5000"
+        - name: AUTH_SERVICE_ADDR
+          value: authservice:5010
+        volumeMounts:
+        - mountPath: /data/images
+          name: image-storage
+      volumes:
+        - name: image-storage
+          persistentVolumeClaim:
+            claimName: storage-pv-claim

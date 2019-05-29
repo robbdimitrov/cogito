@@ -12,12 +12,15 @@ import { ImageClient } from './clients/image-client';
 import { ImageRouter } from './routers/image-router';
 
 export class Server {
-  constructor(port) {
+  constructor(port, authURI, userURI, postURI, imageURI) {
     this.port = port;
+    this.authURI = authURI;
+    this.userURI = userURI;
+    this.postURI = postURI;
+    this.imageURI = imageURI;
 
     this.app = express();
     this.routers = {};
-    this.config = {};
   }
 
   // Configure Express middleware
@@ -42,19 +45,19 @@ export class Server {
 
   // Create API routers
   configureRouters() {
-    let authClient = new AuthClient(this.config['AUTH_URI']);
+    let authClient = new AuthClient(this.authURI);
     let authRouter = new AuthRouter(authClient);
     this.routers['sessions'] = authRouter;
 
-    let userClient = new UserClient(this.config['USER_URI']);
+    let userClient = new UserClient(this.userURI);
     let userRouter = new UserRouter(userClient);
     this.routers['users'] = userRouter;
 
-    let postClient = new PostClient(this.config['POST_URI']);
+    let postClient = new PostClient(this.postURI);
     let postRouter = new PostRouter(postClient);
     this.routers['posts'] = postRouter;
 
-    let imageClient = new ImageClient(this.config['IMAGE_URI']);
+    let imageClient = new ImageClient(this.imageURI);
     let imageRouter = new ImageRouter(imageClient);
     this.routers['images'] = imageRouter;
   }

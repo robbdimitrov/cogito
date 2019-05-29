@@ -1,10 +1,12 @@
 import { Server } from './server';
 
-const server = new Server(process.env.PORT);
-server.config['AUTH_URI'] = process.env.AUTH_SERVICE_ADDR;
-server.config['POST_URI'] = process.env.POST_SERVICE_ADDR;
-server.config['USER_URI'] = process.env.USER_SERVICE_ADDR;
-server.config['IMAGE_URI'] = process.env.IMAGE_SERVICE_ADDR;
+const port = process.env.PORT;
+const authURI = process.env.AUTH_SERVICE_ADDR;
+const userURI = process.env.USER_SERVICE_ADDR;
+const postURI = process.env.POST_SERVICE_ADDR;
+const imageURI = process.env.IMAGE_SERVICE_ADDR;
+
+const server = new Server(port, authURI, userURI, postURI, imageURI);
 
 if (!module.parent) {
   server.start();

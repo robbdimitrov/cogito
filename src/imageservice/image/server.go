@@ -8,18 +8,18 @@ import (
 
 // Server is runing on a port and handling grpc requests
 type Server struct {
-	port    int32
+	port    string
 	authURI string
 }
 
 // NewServer is a constructor for new Server objects
-func NewServer(port int32, authURI string) *Server {
+func NewServer(port string, authURI string) *Server {
 	return &Server{port, authURI}
 }
 
 // Start starts the server instance
 func (s *Server) Start() {
-	log.Printf("Starting server on port %d\n", s.port)
+	log.Printf("Starting server on port %s\n", s.port)
 
 	authClient := NewAuthClient(s.authURI)
 	service := Service{"/data/images", authClient}
@@ -27,7 +27,7 @@ func (s *Server) Start() {
 	http.HandleFunc("/images", service.uploadFile)
 	http.HandleFunc("/images/", service.getFile)
 
-	err := http.ListenAndServe(fmt.Sprintf(":%d", s.port), nil)
+	err := http.ListenAndServe(fmt.Sprintf(":%s", s.port), nil)
 	if err != nil {
 		log.Fatalf("Error prevented the server from running: %v", err)
 	}
