@@ -31,4 +31,5 @@ imageservice:
 
 .PHONY: clean
 clean:
+	docker container prune --force
 	docker image prune --force
