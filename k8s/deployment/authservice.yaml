@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: authservice
+spec:
+  selector:
+    app: thoughts
+    tier: backend
+  ports:
+  - protocol: TCP
+    port: 5010
+    targetPort: 5010
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authservice
+  labels:
+    app: thoughts
+    tier: backend
+spec:
+  selector:
+    matchLabels:
+      app: thoughts
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: thoughts
+        tier: backend
+    spec:
+      containers:
+      - name: authservice
+        image: thoughts/authservice
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5010
+        env:
+        - name: PORT
+          value: "5010"
+        - name: DATABASE_URI
+          value: postgresql://postgres:kubernetes@database:5432
+        - name: SECRET
+          value: 'bdf8699c13d5b532d58c4e85a92064f9'

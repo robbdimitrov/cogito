@@ -3,6 +3,7 @@ Thumbs.db
 
 # Node
 node_modules
+build
 dist
 
 # Python
@@ -13,9 +14,6 @@ __pycache__
 bin
 pkg
 vendor
-
-# env
-.env
 
 # Logs
 npm-debug.log*

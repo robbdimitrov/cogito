@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	server := post.NewServer(os.Getenv("PORT"),
+	server := post.NewServer(5000,
 		os.Getenv("DB_URI"), os.Getenv("AUTH_URI"),
 		os.Getenv("USER_URI"))
 	server.Start()

@@ -1,0 +1,47 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: database
+spec:
+  selector:
+    app: thoughts
+    tier: database
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: database
+  labels:
+    app: thoughts
+    tier: database
+spec:
+  selector:
+    matchLabels:
+      app: thoughts
+      tier: database
+  template:
+    metadata:
+      labels:
+        app: thoughts
+        tier: database
+    spec:
+      containers:
+      - name: database
+        image: thoughts/database
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_PASSWORD
+          value: kubernetes
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: database-storage
+      volumes:
+        - name: database-storage
+          persistentVolumeClaim:
+            claimName: database-pv-claim

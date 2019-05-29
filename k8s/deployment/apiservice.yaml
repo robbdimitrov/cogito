@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: apiservice
+spec:
+  selector:
+    app: thoughts
+    tier: backend
+  ports:
+  - protocol: TCP
+    port: 3000
+    targetPort: 3000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apiservice
+  labels:
+    app: thoughts
+    tier: backend
+spec:
+  selector:
+    matchLabels:
+      app: thoughts
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: thoughts
+        tier: backend
+    spec:
+      containers:
+      - name: apiservice
+        image: thoughts/apiservice
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 3000
+        env:
+        - name: PORT
+          value: "3000"
+        - name: AUTH_SERVICE_ADDR
+          value: authservice:5010
+        - name: POST_SERVICE_ADDR
+          value: postservice:5000
+        - name: USER_SERVICE_ADDR
+          value: userservice:5010
+        - name: IMAGE_SERVICE_ADDR
+          value: imageservice:5000

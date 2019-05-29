@@ -2,10 +2,10 @@ import os
 
 from authservice.server import Server
 
+port = os.getenv('PORT')
+db_uri = os.getenv('DATABASE_URI')
+secret = os.getenv('SECRET')
 
 def create_app():
-    app = Server()
-    app.config['DB_URI'] = os.getenv('DB_URI')
-    app.config['SECRET'] = os.getenv('SECRET')
-    app.config['PORT'] = os.getenv('PORT')
+    app = Server(port, db_uri, secret)
     return app

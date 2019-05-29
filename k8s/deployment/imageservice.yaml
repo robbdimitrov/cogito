@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: imageservice
+spec:
+  selector:
+    app: thoughts
+    tier: backend
+  ports:
+  - protocol: TCP
+    port: 5000
+    targetPort: 5000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: imageservice
+  labels:
+    app: thoughts
+    tier: backend
+spec:
+  selector:
+    matchLabels:
+      app: thoughts
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: thoughts
+        tier: backend
+    spec:
+      containers:
+      - name: imageservice
+        image: thoughts/imageservice
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5000
+        env:
+        - name: PORT
+          value: "5000"
+        - name: AUTH_SERVICE_ADDR
+          value: authservice:5010
+        volumeMounts:
+        - mountPath: /data/images
+          name: image-storage
+      volumes:
+        - name: image-storage
+          persistentVolumeClaim:
+            claimName: storage-pv-claim
