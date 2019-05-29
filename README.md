@@ -1,51 +1,107 @@
 # Thoughts
 
-## Build images
+Thoughts is a message sharing service.
 
-Build images
+## Table of contents
+
+- [Stack](#stack)
+- [Screenshots](#screenshots)
+- [Architecture](#architecture)
+- [Setup](#setup)
+  - [Clone the repository](#clone-the-repository)
+  - [Build the images](#build-the-images)
+  - [Create deployments](#create-deployments)
+- [Access the front end](#access-the-front-end)
+- [Cleanup](#cleanup)
+- [License](#license)
+
+## Stack
+
+- React front end
+- Express API gateway
+- PostgreSQL database
+- Python services
+- Go services
+
+## Screenshots
+
+## Architecture
+
+**Thoughts** is composed of microservices written in Go, Python and JavaScript, communicating over [gRPC](https://github.com/grpc/grpc).
+
+Protobuf definitions can be found at the [`./pb` directory](./pb).
+
+| Service | Language | Description |
+| --- | --- | --- |
+| [apiservice](./src/apiservice) | JavaScript | Express HTTP API Gateway between the front end and the back end services. |
+| [authservice](./src/authservice) | Python | Authentication service for creation and validation of access and refresh tokens. |
+| [database](./src/database) | SQL | PostgreSQL database with tables, relationships and functions. |
+| [frontend](./src/frontend) | JavaScript | React front end of the app. |
+| [imageservice](./src/imageservice) | Go | Image upload and delivery service used for storing and retrieving image assets. |
+| [postservice](./src/postservice) | Go | Service for creation, liking, retweeting and fetching of posts. |
+| [userservice](./src/userservice) | Python | Service for creation, following and fetching of users. |
+
+## Setup
+
+### Clone the repository
+
+Clone the repository to your filesystem
+
 ```sh
-$ docker build -t thoughts/apiservice src/apiservice
-$ docker build -t thoughts/frontend src/frontend
-$ docker build -t thoughts/database src/database
-$ docker build -t thoughts/authservice src/authservice
-$ docker build -t thoughts/userservice src/userservice
-$ docker build -t thoughts/postservice src/postservice
-$ docker build -t thoughts/imageservice src/imageservice
+$ git clone git@github.com:robbdimitrov/thoughts.git
+$ cd thoughts
 ```
 
-## Create deployments
+### Build the images
 
-Create configs
-```
-$ kubectl apply -f k8s/configmap
+There are couple of ways to build the images. The easiest would be to run `make` in the root directory
+
+```sh
+$ make
 ```
 
-Create volumes
+Specific images can be built with `make` as well
+
+```sh
+$ make apiservice
+$ make frontend
+$ make database
+$ make authservice
+$ make userservice
+$ make postservice
+$ make imageservice
 ```
+
+### Create deployments
+
+Create everything recursively
+
+```sh
+$ kubectl apply -f k8s --recursive
+```
+
+Or make deployments and volumes separately
+
+```sh
+$ kubectl apply -f k8s/deployment
 $ kubectl apply -f k8s/volume
 ```
 
-Create deployments
-```
-$ kubectl apply -f k8s/deployment
-```
+## Access the front end
 
-## Access the frontend
+Enable port-forwarding for the front end and access it [here](http://localhost:8080/)
 
 ```sh
 $ kubectl port-forward service/frontend 8080:80
 ```
 
-## Development
+## Cleanup
 
-Print envs visible for Pod
+To delete everything in the cluster use
+
 ```sh
-$ kubectl exec <POD_ID> -- printenv | grep SERVICE
+$ kubectl delete -f k8s --recursive
 ```
-
-## Reference
-
-https://github.com/GoogleCloudPlatform/microservices-demo
 
 ## License
 
