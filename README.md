@@ -29,6 +29,8 @@ Thoughts is a message sharing service.
 
 **Thoughts** is composed of microservices written in Go, Python and JavaScript, communicating over [gRPC](https://github.com/grpc/grpc).
 
+[![Architecture diagram](/docs/architecture-diagram.png)](/docs/architecture-diagram.png)
+
 Protobuf definitions can be found at the [`./pb` directory](./pb).
 
 | Service | Language | Description |
