@@ -1,5 +1,5 @@
 import {
-  CREATE_POST, LIKE_POST, RETWEET_POST, DELETE_POST
+  LIKE_POST, RETWEET_POST, DELETE_POST
 } from '../constants';
 
 export function likePost(postId) {

@@ -13,10 +13,10 @@ const sessions = [
 class Sessions extends React.Component {
   render() {
     return (
-      <div className='sessions-container form-content'>
-        <h1 className='form-title'>Sessions</h1>
+      <div className="sessions-container form-content">
+        <h1 className="form-title">Sessions</h1>
 
-        <ul className='sessions-list'>
+        <ul className="sessions-list">
           {sessions.map((item) =>
             <SessionItem
               key={item.id}

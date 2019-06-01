@@ -4,7 +4,14 @@ import {
 
 export function followUser(userId) {
   return {
-    type: types,
+    type: FOLLOW_USER,
+    userId
+  }
+}
+
+export function unfollowUser(userId) {
+  return {
+    type: UNFOLLOW_USER,
     userId
   }
 }

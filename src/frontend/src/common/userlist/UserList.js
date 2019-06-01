@@ -6,7 +6,7 @@ import './UserList.scss';
 
 function UserList({users}) {
   return (
-    <ul className='user-list'>
+    <ul className="user-list">
       {users.map((user) =>
         <UserItem key={user.id} user={user} />
       )}

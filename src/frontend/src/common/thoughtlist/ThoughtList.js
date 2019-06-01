@@ -6,7 +6,7 @@ import './ThoughtList.scss';
 
 function ThoughtList({posts, users}) {
   return (
-    <ul className='thought-list'>
+    <ul className="thought-list">
       {posts.map((post) =>
         <ThoughtItem key={post.id} post={post} user={users[0]} />
       )}

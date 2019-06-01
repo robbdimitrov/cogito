@@ -12,9 +12,9 @@ const menuItems = [
 
 function SettingsMenu(props) {
   return (
-    <div className='settings-menu'>
-      <ul className='settings-menu-list'>
-        <SettingsMenuHeader title='Settings' />
+    <div className="settings-menu">
+      <ul className="settings-menu-list">
+        <SettingsMenuHeader title="Settings" />
 
         {menuItems.map((item) =>
           <SettingsMenuItem

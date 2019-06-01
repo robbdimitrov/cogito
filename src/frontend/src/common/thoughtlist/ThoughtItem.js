@@ -6,42 +6,42 @@ import './ThoughtItem.scss';
 
 function ThoughtItem({post, user, context}) {
   return (
-    <li className='thought-item'>
-      <article className='container'>
+    <li className="thought-item">
+      <article className="container">
         {context &&
-          <div className='context'>
-            <FontAwesomeIcon icon='retweet' className='context-icon' />
-            <span className='context-label'>
+          <div className="context">
+            <FontAwesomeIcon icon="retweet" className="context-icon" />
+            <span className="context-label">
               {context.user.name} {context.action}
             </span>
           </div>
         }
 
-        <div className='wrapper'>
+        <div className="wrapper">
           <img
-            className='avatar'
+            className="avatar"
             src={user.avatar}
             alt={user.name}
           />
 
-          <div className='content'>
-            <p className='profile-action'>
-              <strong className='name'>{user.name}</strong>
-              <small className='username'>@{user.username}</small>
-              <small className='time'>3h</small>
+          <div className="content">
+            <p className="profile-action">
+              <strong className="name">{user.name}</strong>
+              <small className="username">@{user.username}</small>
+              <small className="time">3h</small>
             </p>
 
-            <p className='text'>{post.content}</p>
+            <p className="text">{post.content}</p>
 
-            <div className='buttons'>
-              <button className='retweet-button'>
-                <FontAwesomeIcon icon='retweet' className='button-icon' />
-                <span className='button-label'>{post.retweets}</span>
+            <div className="buttons">
+              <button className="retweet-button">
+                <FontAwesomeIcon icon="retweet" className="button-icon" />
+                <span className="button-label">{post.retweets}</span>
               </button>
 
-              <button className='like-button'>
-                <FontAwesomeIcon icon='heart' className='button-icon' />
-                <span className='button-label'>{post.likes}</span>
+              <button className="like-button">
+                <FontAwesomeIcon icon="heart" className="button-icon" />
+                <span className="button-label">{post.likes}</span>
               </button>
             </div>
           </div>
