@@ -1,8 +1,9 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import './UserItem.scss';
 
-function UserItem(props) {
+function UserItem({user}) {
   return (
     <li className='user-item container user-card'>
       <div className='cover'></div>
@@ -11,8 +12,8 @@ function UserItem(props) {
         <div className='header'>
           <img
             className='avatar'
-            src='https://via.placeholder.com/300.png'
-            alt='John Doe'
+            src={user.avatar}
+            alt={user.name}
           />
 
           <button className='follow-button outline-button'>
@@ -21,16 +22,20 @@ function UserItem(props) {
         </div>
 
         <div className='texts'>
-          <p className='title semibold'>John Smith</p>
-          <p className='subtitle light'>@johnsmith</p>
+          <p className='title semibold'>{user.name}</p>
+          <p className='subtitle light'>@{user.username}</p>
 
           <p className='bio'>
-            A secret agent, Forbes man of the year
+            {user.bio}
           </p>
         </div>
       </div>
     </li>
   );
 }
+
+UserItem.propTypes = {
+  user: PropTypes.object.isRequired
+};
 
 export default UserItem;

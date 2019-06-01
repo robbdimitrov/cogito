@@ -32,7 +32,7 @@ function UserDropdown(props) {
           </Link>
         </li>
       </ul>
-  </div>
+    </div>
   );
 }
 
