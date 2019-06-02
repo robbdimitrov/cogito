@@ -1,6 +1,6 @@
 import {
   FOLLOW_USER, UNFOLLOW_USER
-} from '../constants';
+} from './types';
 
 export function followUser(userId) {
   return {

@@ -1,6 +1,6 @@
 import {
   LIKE_POST, RETWEET_POST, DELETE_POST
-} from '../constants';
+} from './types';
 
 export function likePost(postId) {
   return {

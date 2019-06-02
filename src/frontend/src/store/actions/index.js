@@ -1,6 +1,6 @@
 import {
   LOGIN_USER, SUCCESS, ERROR
-} from '../constants';
+} from './types';
 
 export function loginUser(email, password) {
   return {
