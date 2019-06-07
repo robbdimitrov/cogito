@@ -19,6 +19,12 @@ export const UNFOLLOW_USER = 'UNFOLLOW_USER';
 export const CREATE_POST = 'CREATE_POST';
 export const DELETE_POST = 'DELETE_POST';
 
+export const REQUEST_FEED = 'REQUEST_FEED';
+export const RECEIVE_FEED = 'RECEIVE_FEED';
+
+export const REQUEST_LIKES = 'REQUEST_LIKES';
+export const RECEIVE_LIKES = 'RECEIVE_LIKES';
+
 export const REQUEST_POST = 'REQUEST_POST';
 export const RECEIVE_POST = 'REQUEST_POST';
 
