@@ -18,6 +18,9 @@ const Session = {
   },
   setRefreshToken: (value) => {
     setStorage('refreshToken', value);
+  },
+  reset: () => {
+    localStorage.clear();
   }
 };
 
