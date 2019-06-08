@@ -32,7 +32,7 @@ func (s *ActionService) LikePost(ctx context.Context, req *pb.PostRequest) (*pb.
 		retErr := pb.Error{Code: http.StatusBadRequest, Error: "BAD_REQUEST", Message: "Like post failed."}
 		return &pb.Status{Error: &retErr}, err
 	}
-	return &pb.Status{Message: "Successfully liked post."}, nil
+	return &pb.Status{Message: "Post liked."}, nil
 }
 
 // UnlikePost deletes a like relationship between user and post
@@ -49,7 +49,7 @@ func (s *ActionService) UnlikePost(ctx context.Context, req *pb.PostRequest) (*p
 		retErr := pb.Error{Code: http.StatusBadRequest, Error: "BAD_REQUEST", Message: "Unlike post failed."}
 		return &pb.Status{Error: &retErr}, err
 	}
-	return &pb.Status{Message: "Successfully unliked post."}, nil
+	return &pb.Status{Message: "Post unliked."}, nil
 }
 
 // RetweetPost creates a retweet relationship between user and post
@@ -66,7 +66,7 @@ func (s *ActionService) RetweetPost(ctx context.Context, req *pb.PostRequest) (*
 		retErr := pb.Error{Code: http.StatusBadRequest, Error: "BAD_REQUEST", Message: "Retweet post failed."}
 		return &pb.Status{Error: &retErr}, err
 	}
-	return &pb.Status{Message: "Successfully retweeted post."}, nil
+	return &pb.Status{Message: "Post retweeted."}, nil
 }
 
 // RemoveRetweet deletes a retweet relationship between user and post
@@ -83,5 +83,5 @@ func (s *ActionService) RemoveRetweet(ctx context.Context, req *pb.PostRequest) 
 		retErr := pb.Error{Code: http.StatusBadRequest, Error: "BAD_REQUEST", Message: "Retweet removal failed."}
 		return &pb.Status{Error: &retErr}, err
 	}
-	return &pb.Status{Message: "Successfully removed retweet post."}, nil
+	return &pb.Status{Message: "Post retweet removed."}, nil
 }

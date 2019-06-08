@@ -134,5 +134,5 @@ func (s *Service) DeletePost(ctx context.Context, req *pb.PostRequest) (*pb.Stat
 		retErr := pb.Error{Code: http.StatusBadRequest, Error: "BAD_REQUEST", Message: "Deleting post failed."}
 		return &pb.Status{Error: &retErr}, err
 	}
-	return &pb.Status{Message: "Successfully deleted post."}, nil
+	return &pb.Status{Message: "Post deleted."}, nil
 }

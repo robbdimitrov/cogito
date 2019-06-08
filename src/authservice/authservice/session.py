@@ -46,4 +46,4 @@ class SessionService(thoughts_pb2_grpc.SessionServiceServicer):
 
         self.db_client.delete_session(session_id)
 
-        return thoughts_pb2.Status(message='Deleted session.')
+        return thoughts_pb2.Status(message='Session deleted.')

@@ -38,7 +38,7 @@ export class APIClient {
 
   // Session
 
-  loginUser(username, password) {
+  createSession(username, password) {
     const url = '/sessions';
     const body = {username, password};
     return this.request(url, 'POST', body);
@@ -49,13 +49,6 @@ export class APIClient {
     const headers = this.headers();
     headers.set('authorization', session.refreshToken());
     return this.request(url, 'POST', undefined, headers);
-  }
-
-  logoutUser() {
-    const url = '/sessions/';
-    const headers = this.headers();
-    headers.set('authorization', session.refreshToken());
-    return this.request(url, 'DELETE', undefined, headers);
   }
 
   getSessions() {
