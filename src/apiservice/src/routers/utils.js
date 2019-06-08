@@ -1,3 +1,3 @@
 export function getToken(req) {
-  return req.headers['X-Access-Token'];
+  return req.headers['authorization'];
 }
