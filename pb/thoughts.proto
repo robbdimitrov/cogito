@@ -54,7 +54,7 @@ message AuthRequest {
   string token = 1;
 }
 
-message AuthResponse {
+message AuthStatus {
   string token_type = 1;
   string access_token = 2;
   string refresh_token = 3;
@@ -154,7 +154,7 @@ message PostRequest {
  */
 
 service UserService {
-  rpc CreateUser(UserUpdates) returns (UserStatus);
+  rpc CreateUser(UserUpdates) returns (Status);
   rpc GetUser(UserRequest) returns (UserStatus);
   rpc UpdateUser(UserUpdates) returns (Status);
   rpc DeleteUser(UserRequest) returns (Status);
@@ -168,8 +168,8 @@ service FollowService {
 }
 
 service AuthService {
-  rpc Login(Credentials) returns (AuthResponse);
-  rpc Refresh(AuthRequest) returns (AuthResponse);
+  rpc Login(Credentials) returns (AuthStatus);
+  rpc Refresh(AuthRequest) returns (AuthStatus);
   rpc Validate(AuthRequest) returns (AuthStatus);
   rpc ValidatePassword(Credentials) returns (Status);
 }

@@ -31,29 +31,14 @@ class DbClient:
 
         try:
             cur.execute('INSERT INTO thoughts.users (username, email, name, password) \
-                VALUES(%s, %s, %s, %s) \
-                RETURNING id, username, email, name, bio, avatar, time_format(date_created)',
+                VALUES(%s, %s, %s, %s)',
                 (username, email, name, password))
-            result = cur.fetchone()
             conn.commit()
         except psycopg2.Error as e:
             logging.error(f'Error creating user: {str(e)}')
             raise DbException('Error while writing to the database.')
         finally:
             cur.close()
-
-        if result is None:
-            return None
-
-        user = thoughts_pb2.User(
-            id=result[0],
-            username=result[1],
-            email=result[2],
-            name=result[3],
-            bio=result[4],
-            avatar=result[5],
-            date_created=result[6])
-        return user
 
     def get_user(self, username, user_id):
         conn = self.db.get_conn()

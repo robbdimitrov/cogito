@@ -48,13 +48,13 @@ export class UserRouter extends APIRouter {
   // Users
 
   createUser(req, res) {
-    let username = req.body.username;
+    let identifier = req.body.identifier;
     let email = req.body.email;
     let name = req.body.name;
     let password = req.body.password;
 
     this.handleResponse(
-      this.userClient.createUser(username, email, name, password), res
+      this.userClient.createUser(identifier, email, name, password), res
     );
   }
 
@@ -66,16 +66,16 @@ export class UserRouter extends APIRouter {
   }
 
   updateUser(req, res) {
-    let username = req.body.username;
+    let identifier = req.body.identifier;
     let email = req.body.email;
     let name = req.body.name;
     let password = req.body.password;
     let bio = req.body.bio;
-    let oldPassword = req.body.oldPassword;
+    let oldPassword = req.body.old_password;
     let token = getToken(req);
 
     this.handleResponse(
-      this.userClient.updateUser(username, email,
+      this.userClient.updateUser(identifier, email,
         name, password, bio, oldPassword, token), res
     );
   }
@@ -86,7 +86,6 @@ export class UserRouter extends APIRouter {
 
     this.handleResponse(this.userClient.deleteUser(username, token), res);
   }
-
 
   // Follows
 

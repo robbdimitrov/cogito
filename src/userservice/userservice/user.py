@@ -39,25 +39,25 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
             error = thoughts_pb2.Error(code=HTTPStatus.BAD_REQUEST,
                 error=error_type,
                 message=error_message)
-            return thoughts_pb2.UserStatus(error=error)
+            return thoughts_pb2.Status(error=error)
 
         salt = bcrypt.gensalt()
         password = bcrypt.hashpw(password, salt)
 
         try:
-            user = self.db_client.create_user(username, email, name, password)
+            self.db_client.create_user(username, email, name, password)
         except exceptions.ExistingUserException as e:
             error = thoughts_pb2.Error(code=HTTPStatus.BAD_REQUEST,
                 error='USER_EXISTS',
                 message=str(e))
-            return thoughts_pb2.UserStatus(error=error)
+            return thoughts_pb2.Status(error=error)
         except exceptions.DbException as e:
             error = thoughts_pb2.Error(code=HTTPStatus.BAD_REQUEST,
                 error='BAD_REQUEST',
                 message=str(e))
-            return thoughts_pb2.UserStatus(error=error)
+            return thoughts_pb2.Status(error=error)
 
-        return thoughts_pb2.UserStatus(user=user)
+        return thoughts_pb2.Status(message='User created.')
 
     def GetUser(self, request, context):
         """Gets user with username from the database."""
@@ -78,7 +78,7 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
         response = self.auth_client.validate(request.token)
 
         if response.error is not None:
-            return thoughts_pb2.UserStatus(error=response.error)
+            return thoughts_pb2.Status(error=response.error)
 
         user_id = response.user_id
 
@@ -137,7 +137,7 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
                 message='User update failed.')
             return thoughts_pb2.Status(error=error)
         else:
-            return thoughts_pb2.Status(message=f'Updated user.')
+            return thoughts_pb2.Status(message=f'User updated.')
 
     def DeleteUser(self, request, context):
         """Deleted a user if it matches the logged in user."""
