@@ -83,5 +83,5 @@ func (s *ActionService) RemoveRetweet(ctx context.Context, req *pb.PostRequest) 
 		retErr := pb.Error{Code: http.StatusBadRequest, Error: "BAD_REQUEST", Message: "Retweet removal failed."}
 		return &pb.Status{Error: &retErr}, err
 	}
-	return &pb.Status{Message: "Post retweet removed."}, nil
+	return &pb.Status{Message: "Retweet deleted."}, nil
 }

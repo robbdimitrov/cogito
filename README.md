@@ -36,13 +36,13 @@ Protobuf definitions can be found at the [`/pb` directory](/pb).
 
 Service | Language | Description
 --- | --- | ---
-[apiservice](./src/apiservice) | JavaScript | Express HTTP API Gateway between the front end and the back end services.
-[authservice](./src/authservice) | Python | Authentication service for creation and validation of access and refresh tokens.
-[database](./src/database) | SQL | PostgreSQL database with tables, relationships and functions.
-[frontend](./src/frontend) | JavaScript | React front end of the app.
-[imageservice](./src/imageservice) | Go | Image upload and delivery service used for storing and retrieving image assets.
-[postservice](./src/postservice) | Go | Service for creation, liking, retweeting and fetching of posts.
-[userservice](./src/userservice) | Python | Service for creation, following and fetching of users.
+[apiservice](/src/apiservice) | JavaScript | Express HTTP API Gateway between the front end and the back end services.
+[authservice](/src/authservice) | Python | Authentication service for creation and validation of access and refresh tokens.
+[database](/src/database) | SQL | PostgreSQL database with tables, relationships and functions.
+[frontend](/src/frontend) | JavaScript | React front end of the app.
+[imageservice](/src/imageservice) | Go | Image upload and delivery service used for storing and retrieving image assets.
+[postservice](/src/postservice) | Go | Service for creation, liking, retweeting and fetching of posts.
+[userservice](/src/userservice) | Python | Service for creation, following and fetching of users.
 
 ## Setup
 

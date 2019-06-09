@@ -62,6 +62,7 @@ Response:
     "followers": 10,
     "date_created": "2017-11-15T10:05:28+00:00"
   },
+  "session_id": "5a0c11682ce7e1000f2a1f5a",
   "token": {
     "token_type": "Bearer",
     "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
@@ -80,7 +81,7 @@ Headers:
 
 ```
 content-type: application/json
-authorization: <refresh-token>
+authorization: Bearer <refresh-token>
 ```
 
 Response:
@@ -105,7 +106,7 @@ Headers:
 
 ```
 content-type: application/json
-authorization: <access-token>
+authorization: Bearer <access-token>
 ```
 
 Response:
@@ -145,7 +146,7 @@ Headers:
 
 ```
 content-type: application/json
-authorization: <access-token>
+authorization: Bearer <access-token>
 ```
 
 Response:
@@ -215,7 +216,7 @@ Headers:
 
 ```
 content-type: application/json
-authorization: <access-token>
+authorization: Bearer <access-token>
 ```
 
 Response:
@@ -242,7 +243,7 @@ Headers:
 
 ```
 content-type: application/json
-authorization: <access-token>
+authorization: Bearer <access-token>
 ```
 
 Response:
@@ -283,7 +284,7 @@ Headers:
 
 ```
 content-type: application/json
-authorization: <access-token>
+authorization: Bearer <access-token>
 ```
 
 Response:
@@ -339,7 +340,7 @@ Headers:
 
 ```
 content-type: application/json
-authorization: <access-token>
+authorization: Bearer <access-token>
 ```
 
 Response:
@@ -393,7 +394,7 @@ Headers:
 
 ```
 content-type: application/json
-authorization: <access-token>
+authorization: Bearer <access-token>
 ```
 
 Response:
@@ -420,7 +421,7 @@ Headers:
 
 ```
 content-type: application/json
-authorization: <access-token>
+authorization: Bearer <access-token>
 ```
 
 Response:
@@ -428,5 +429,210 @@ Response:
 ```json
 {
   "message": "User unfollowed."
+}
+```
+
+## Posts
+
+### Create post
+
+```
+POST /posts
+```
+
+Body parameters:
+
+```
+content: string
+```
+
+Headers:
+
+```
+content-type: application/json
+authorization: Bearer <access-token>
+```
+
+Response:
+
+```json
+{
+  "post": {
+    "id": "5a0c11682ce7e1000f2a1f5a",
+    "content": "Some post content",
+    "user_id": "a12r11682ce7e1000f2a1f5a",
+    "likes": 0,
+    "retweets": 0,
+    "date_created": "2017-11-15T10:05:28+00:00"
+  }
+}
+```
+
+### Get post
+
+```
+GET /posts/<postId>
+```
+
+URL parameters:
+
+```
+postId - id of the post
+```
+
+Headers:
+
+```
+content-type: application/json
+authorization: Bearer <access-token>
+```
+
+Response:
+
+```json
+{
+  "post": {
+    "id": "5a0c11682ce7e1000f2a1f5a",
+    "content": "Some post content",
+    "user_id": "a12r11682ce7e1000f2a1f5a",
+    "likes": 10,
+    "retweets": 2,
+    "date_created": "2017-11-15T10:05:28+00:00"
+  }
+}
+```
+
+### Delete post
+
+```
+DELETE /posts/<postId>
+```
+
+URL parameters:
+
+```
+postId - id of the post
+```
+
+Headers:
+
+```
+content-type: application/json
+authorization: Bearer <access-token>
+```
+
+Response:
+
+```json
+{
+  "message": "Post deleted."
+}
+```
+
+### Like post
+
+```
+POST /posts/<postId>/likes
+```
+
+URL parameters:
+
+```
+postId - id of the post
+```
+
+Headers:
+
+```
+content-type: application/json
+authorization: Bearer <access-token>
+```
+
+Response:
+
+```json
+{
+  "message": "Post liked."
+}
+```
+
+### Unlike post
+
+```
+DELETE /posts/<postId>/likes
+```
+
+URL parameters:
+
+```
+postId - id of the post
+```
+
+Headers:
+
+```
+content-type: application/json
+authorization: Bearer <access-token>
+```
+
+Response:
+
+```json
+{
+  "message": "Post unliked."
+}
+```
+
+### Retweet post
+
+```
+POST /posts/<postId>/retweets
+```
+
+URL parameters:
+
+```
+postId - id of the post
+```
+
+Headers:
+
+```
+content-type: application/json
+authorization: Bearer <access-token>
+```
+
+Response:
+
+```json
+{
+  "message": "Post retweeted."
+}
+```
+
+### Delete retweet
+
+```
+DELETE /posts/<postId>/retweets
+```
+
+URL parameters:
+
+```
+postId - id of the post
+```
+
+Headers:
+
+```
+content-type: application/json
+authorization: Bearer <access-token>
+```
+
+Response:
+
+```json
+{
+  "message": "Retweet deleted."
 }
 ```
