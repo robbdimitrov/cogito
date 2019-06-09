@@ -6,12 +6,12 @@ export class APIClient {
 
   headers() {
     const headers = new Headers({
-      'content-type': 'application/json'
+      'Content-Type': 'application/json'
     });
 
     const token = session.token();
     if (token !== undefined) {
-      headers.set('authorization', token);
+      headers.set('Authorization', `Bearer ${token}`);
     }
 
     return headers;
@@ -25,7 +25,7 @@ export class APIClient {
     const options = {method, headers};
 
     if (body !== undefined) {
-      if (headers.get('content-type') === 'application/json') {
+      if (headers.get('Content-Type') === 'application/json') {
         options.body = JSON.stringify(body);
       } else {
         options.body = body;
@@ -47,7 +47,8 @@ export class APIClient {
   refreshToken() {
     const url = '/sessions';
     const headers = this.headers();
-    headers.set('authorization', session.refreshToken());
+    const token = session.refreshToken();
+    headers.set('Authorization', `Bearer ${token}`);
     return this.request(url, 'POST', undefined, headers);
   }
 

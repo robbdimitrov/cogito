@@ -30,7 +30,7 @@ export class AuthRouter extends APIRouter {
   login(req, res) {
     const email = req.body.email;
     const password = req.body.password;
-    const userAgent = req.headers['user-agent'];
+    const userAgent = req.get('User-Agent');
 
     this.handleResponse(
       this.authClient.createSession(email, password, userAgent), res

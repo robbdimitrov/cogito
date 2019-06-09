@@ -14,5 +14,5 @@ func RandToken(len int) string {
 }
 
 func getToken(r *http.Request) string {
-	return r.Header.Get("authorization")
+	return r.Header.Get("Authorization")
 }
