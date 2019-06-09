@@ -17,7 +17,7 @@ export class UserClient extends APIClient {
   // Users
 
   createUser(username, email, name, password) {
-    let request = new messages.UserUpdates();
+    const request = new messages.UserUpdates();
     request.setUsername(username);
     request.setEmail(email);
     request.setName(name);
@@ -28,26 +28,17 @@ export class UserClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let error = response.getError();
+        const error = response.getError();
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        let user = response.getUser();
-        res({
-          'id': user.getId(),
-          'username': user.getUsername(),
-          'email': user.getEmail(),
-          'name': user.getName(),
-          'bio': user.getBio(),
-          'avatar': user.getAvatar(),
-          'date_created': user.getDateCreated()
-        });
+        res({message: response.getMessage()});
       });
     });
   }
 
   getUser(username, token) {
-    let request = new messages.UserRequest();
+    const request = new messages.UserRequest();
     request.setUsername(username);
     request.setToken(token);
 
@@ -56,26 +47,28 @@ export class UserClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let error = response.getError();
+        const error = response.getError();
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        let user = response.getUser();
-        res({
-          'id': user.getId(),
-          'username': user.getUsername(),
-          'email': user.getEmail(),
-          'name': user.getName(),
-          'bio': user.getBio(),
-          'avatar': user.getAvatar(),
-          'date_created': user.getDateCreated()
-        });
+
+        const item = response.getUser();
+        const user = {
+          id: item.getId(),
+          username: item.getUsername(),
+          email: item.getEmail(),
+          name: item.getName(),
+          bio: item.getBio(),
+          avatar: item.getAvatar(),
+          date_created: item.getDateCreated()
+        };
+        res({user});
       });
     });
   }
 
   updateUser(username, email, name, password, bio, oldPassword, token) {
-    let request = new messages.UserUpdates();
+    const request = new messages.UserUpdates();
     request.setUsername(username);
     request.setEmail(email);
     request.setName(name);
@@ -89,17 +82,17 @@ export class UserClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let error = response.getError();
+        const error = response.getError();
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({'message': response.getMessage()});
+        res({message: response.getMessage()});
       });
     });
   }
 
   deleteUser(username, token) {
-    let request = new messages.UserRequest();
+    const request = new messages.UserRequest();
     request.setUsername(username);
     request.setToken(token);
 
@@ -108,11 +101,11 @@ export class UserClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let error = response.getError();
+        const error = response.getError();
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({'message': response.getMessage()});
+        res({message: response.getMessage()});
       });
     });
   }
@@ -120,7 +113,7 @@ export class UserClient extends APIClient {
   // Follows
 
   getFollowing(username, token, page, limit, countOnly) {
-    let request = new messages.DataRequest();
+    const request = new messages.DataRequest();
     request.setUsername(username);
     request.setToken(token);
     request.setPage(page);
@@ -132,32 +125,32 @@ export class UserClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let count = response.getCount();
+        const count = response.getCount();
         if (count !== undefined) {
           return rej({
             count
           });
         }
-        let users = [];
-        for (let item of response.getUsers()) {
-          let user = {
-            'id': item.getId(),
-            'username': item.getUsername(),
-            'email': item.getEmail(),
-            'name': item.getName(),
-            'bio': item.getBio(),
-            'avatar': item.getAvatar(),
-            'date_created': item.getDateCreated()
+        const users = [];
+        for (const item of response.getUsers()) {
+          const user = {
+            id: item.getId(),
+            username: item.getUsername(),
+            email: item.getEmail(),
+            name: item.getName(),
+            bio: item.getBio(),
+            avatar: item.getAvatar(),
+            date_created: item.getDateCreated()
           };
           users.push(user);
         }
-        res(users);
+        res({users});
       });
     });
   }
 
   getFollowers(username, token, page, limit, countOnly) {
-    let request = new messages.DataRequest();
+    const request = new messages.DataRequest();
     request.setUsername(username);
     request.setToken(token);
     request.setPage(page);
@@ -169,32 +162,32 @@ export class UserClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let count = response.getCount();
+        const count = response.getCount();
         if (count !== undefined) {
           return rej({
             count
           });
         }
-        let users = [];
-        for (let item of response.getUsers()) {
-          let user = {
-            'id': item.getId(),
-            'username': item.getUsername(),
-            'email': item.getEmail(),
-            'name': item.getName(),
-            'bio': item.getBio(),
-            'avatar': item.getAvatar(),
-            'date_created': item.getDateCreated()
+        const users = [];
+        for (const item of response.getUsers()) {
+          const user = {
+            id: item.getId(),
+            username: item.getUsername(),
+            email: item.getEmail(),
+            name: item.getName(),
+            bio: item.getBio(),
+            avatar: item.getAvatar(),
+            date_created: item.getDateCreated()
           };
           users.push(user);
         }
-        res(users);
+        res({users});
       });
     });
   }
 
   follow(username, token) {
-    let request = new messages.UserRequest();
+    const request = new messages.UserRequest();
     request.setUsername(username);
     request.setToken(token);
 
@@ -203,17 +196,17 @@ export class UserClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let error = response.getError();
+        const error = response.getError();
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({'message': response.getMessage()});
+        res({message: response.getMessage()});
       });
     });
   }
 
   unfollow(username, token) {
-    let request = new messages.UserRequest();
+    const request = new messages.UserRequest();
     request.setUsername(username);
     request.setToken(token);
 
@@ -222,11 +215,11 @@ export class UserClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let error = response.getError();
+        const error = response.getError();
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({'message': response.getMessage()});
+        res({message: response.getMessage()});
       });
     });
   }

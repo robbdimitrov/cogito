@@ -29,7 +29,8 @@ func SuccessResponse(w http.ResponseWriter, filename string) {
 func ErrorResponse(w http.ResponseWriter, error Error) {
 	jsonResponse(w, error.Code)
 
-	json, err := json.Marshal(error)
+	res := map[string]Error{"error": error}
+	json, err := json.Marshal(res)
 	if err != nil {
 		log.Printf("Error converting to json %v", err)
 		return

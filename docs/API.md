@@ -42,7 +42,7 @@ password: string
 Headers:
 
 ```
-content-type: application/json
+Content-Type: application/json
 ```
 
 Response:
@@ -80,8 +80,8 @@ POST /sessions
 Headers:
 
 ```
-content-type: application/json
-authorization: Bearer <refresh-token>
+Content-Type: application/json
+Authorization: Bearer <refresh-token>
 ```
 
 Response:
@@ -105,8 +105,8 @@ GET /sessions
 Headers:
 
 ```
-content-type: application/json
-authorization: Bearer <access-token>
+Content-Type: application/json
+Authorization: Bearer <access-token>
 ```
 
 Response:
@@ -145,8 +145,8 @@ sessionId - id of the session
 Headers:
 
 ```
-content-type: application/json
-authorization: Bearer <access-token>
+Content-Type: application/json
+Authorization: Bearer <access-token>
 ```
 
 Response:
@@ -177,7 +177,7 @@ password: string
 Headers:
 
 ```
-content-type: application/json
+Content-Type: application/json
 ```
 
 Response:
@@ -215,8 +215,8 @@ bio: string (optional)
 Headers:
 
 ```
-content-type: application/json
-authorization: Bearer <access-token>
+Content-Type: application/json
+Authorization: Bearer <access-token>
 ```
 
 Response:
@@ -242,8 +242,8 @@ identifier - id or username of the user
 Headers:
 
 ```
-content-type: application/json
-authorization: Bearer <access-token>
+Content-Type: application/json
+Authorization: Bearer <access-token>
 ```
 
 Response:
@@ -283,8 +283,8 @@ limit - results per request
 Headers:
 
 ```
-content-type: application/json
-authorization: Bearer <access-token>
+Content-Type: application/json
+Authorization: Bearer <access-token>
 ```
 
 Response:
@@ -339,8 +339,8 @@ limit - results per request
 Headers:
 
 ```
-content-type: application/json
-authorization: Bearer <access-token>
+Content-Type: application/json
+Authorization: Bearer <access-token>
 ```
 
 Response:
@@ -393,8 +393,8 @@ identifier - id or username of the user
 Headers:
 
 ```
-content-type: application/json
-authorization: Bearer <access-token>
+Content-Type: application/json
+Authorization: Bearer <access-token>
 ```
 
 Response:
@@ -420,8 +420,8 @@ identifier - id or username of the user
 Headers:
 
 ```
-content-type: application/json
-authorization: Bearer <access-token>
+Content-Type: application/json
+Authorization: Bearer <access-token>
 ```
 
 Response:
@@ -449,8 +449,8 @@ content: string
 Headers:
 
 ```
-content-type: application/json
-authorization: Bearer <access-token>
+Content-Type: application/json
+Authorization: Bearer <access-token>
 ```
 
 Response:
@@ -483,8 +483,8 @@ postId - id of the post
 Headers:
 
 ```
-content-type: application/json
-authorization: Bearer <access-token>
+Content-Type: application/json
+Authorization: Bearer <access-token>
 ```
 
 Response:
@@ -517,8 +517,8 @@ postId - id of the post
 Headers:
 
 ```
-content-type: application/json
-authorization: Bearer <access-token>
+Content-Type: application/json
+Authorization: Bearer <access-token>
 ```
 
 Response:
@@ -544,8 +544,8 @@ postId - id of the post
 Headers:
 
 ```
-content-type: application/json
-authorization: Bearer <access-token>
+Content-Type: application/json
+Authorization: Bearer <access-token>
 ```
 
 Response:
@@ -571,8 +571,8 @@ postId - id of the post
 Headers:
 
 ```
-content-type: application/json
-authorization: Bearer <access-token>
+Content-Type: application/json
+Authorization: Bearer <access-token>
 ```
 
 Response:
@@ -598,8 +598,8 @@ postId - id of the post
 Headers:
 
 ```
-content-type: application/json
-authorization: Bearer <access-token>
+Content-Type: application/json
+Authorization: Bearer <access-token>
 ```
 
 Response:
@@ -625,8 +625,8 @@ postId - id of the post
 Headers:
 
 ```
-content-type: application/json
-authorization: Bearer <access-token>
+Content-Type: application/json
+Authorization: Bearer <access-token>
 ```
 
 Response:

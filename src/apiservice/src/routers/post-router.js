@@ -22,7 +22,7 @@ export class PostRouter extends APIRouter {
       this.deletePost(req, res);
     });
 
-    // Posts    
+    // Posts
 
     router.get('/feed', (req, res) => {
       this.getFeed(req, res);
@@ -58,24 +58,24 @@ export class PostRouter extends APIRouter {
   // Posts
 
   createPost(req, res) {
-    let content = req.body.content;
-    let token = getToken(req);
+    const content = req.body.content;
+    const token = getToken(req);
 
     this.handleResponse(this.postClient.createPost(content, token), res);
   }
 
   getPost(req, res) {
-    let postId = req.params.id;
-    let token = getToken(req);
+    const postId = req.params.id;
+    const token = getToken(req);
 
     this.handleResponse(this.postClient.getPost(postId, token), res);
   }
 
   getFeed(req, res) {
-    let token = getToken(req);
-    let page = parseInt(req.query.page) || 0;
-    let limit = parseInt(req.query.limit) || 20;
-    let countOnly = (parseInt(req.query.count) || 0) === 1;
+    const token = getToken(req);
+    const page = parseInt(req.query.page) || 0;
+    const limit = parseInt(req.query.limit) || 20;
+    const countOnly = (parseInt(req.query.count) || 0) === 1;
 
     this.handleResponse(
       this.postClient.getFeed(token, page, limit, countOnly), res
@@ -83,11 +83,11 @@ export class PostRouter extends APIRouter {
   }
 
   getPosts(req, res) {
-    let username = req.params.username;
-    let token = getToken(req);
-    let page = parseInt(req.query.page) || 0;
-    let limit = parseInt(req.query.limit) || 20;
-    let countOnly = (parseInt(req.query.count) || 0) === 1;
+    const username = req.params.username;
+    const token = getToken(req);
+    const page = parseInt(req.query.page) || 0;
+    const limit = parseInt(req.query.limit) || 20;
+    const countOnly = (parseInt(req.query.count) || 0) === 1;
 
     this.handleResponse(
       this.postClient.getPosts(username,
@@ -96,11 +96,11 @@ export class PostRouter extends APIRouter {
   }
 
   getLikedPosts(req, res) {
-    let username = req.params.username;
-    let token = getToken(req);
-    let page = parseInt(req.query.page) || 0;
-    let limit = parseInt(req.query.limit) || 20;
-    let countOnly = (parseInt(req.query.count) || 0) === 1;
+    const username = req.params.username;
+    const token = getToken(req);
+    const page = parseInt(req.query.page) || 0;
+    const limit = parseInt(req.query.limit) || 20;
+    const countOnly = (parseInt(req.query.count) || 0) === 1;
 
     this.handleResponse(
       this.postClient.getLikedPosts(username,
@@ -109,8 +109,8 @@ export class PostRouter extends APIRouter {
   }
 
   deletePost(req, res) {
-    let postId = req.params.id;
-    let token = getToken(req);
+    const postId = req.params.id;
+    const token = getToken(req);
 
     this.handleResponse(this.postClient.deletePost(postId, token), res);
   }
@@ -118,29 +118,29 @@ export class PostRouter extends APIRouter {
   // Actions
 
   likePost(req, res) {
-    let postId = req.params.id;
-    let token = getToken(req);
+    const postId = req.params.id;
+    const token = getToken(req);
 
     this.handleResponse(this.postClient.likePost(postId, token), res);
   }
 
   unlikePost(req, res) {
-    let postId = req.params.id;
-    let token = getToken(req);
+    const postId = req.params.id;
+    const token = getToken(req);
 
     this.handleResponse(this.postClient.unlikePost(postId, token), res);
   }
 
   retweetPost(req, res) {
-    let postId = req.params.id;
-    let token = getToken(req);
+    const postId = req.params.id;
+    const token = getToken(req);
 
     this.handleResponse(this.postClient.retweetPost(postId, token), res);
   }
 
   removeRetweet(req, res) {
-    let postId = req.params.id;
-    let token = getToken(req);
+    const postId = req.params.id;
+    const token = getToken(req);
 
     this.handleResponse(this.postClient.removeRetweet(postId, token), res);
   }

@@ -41,29 +41,29 @@ export class Server {
 
   // Create API routers
   configureRouters() {
-    let authClient = new AuthClient(this.authURI);
-    let authRouter = new AuthRouter(authClient);
-    this.routers['sessions'] = authRouter;
+    const authClient = new AuthClient(this.authURI);
+    const authRouter = new AuthRouter(authClient);
+    this.routers.sessions = authRouter;
 
-    let userClient = new UserClient(this.userURI);
-    let userRouter = new UserRouter(userClient);
-    this.routers['users'] = userRouter;
+    const userClient = new UserClient(this.userURI);
+    const userRouter = new UserRouter(userClient);
+    this.routers.users = userRouter;
 
-    let postClient = new PostClient(this.postURI);
-    let postRouter = new PostRouter(postClient);
-    this.routers['posts'] = postRouter;
+    const postClient = new PostClient(this.postURI);
+    const postRouter = new PostRouter(postClient);
+    this.routers.posts = postRouter;
 
-    let imageClient = new ImageClient(this.imageURI);
-    let imageRouter = new ImageRouter(imageClient);
-    this.routers['images'] = imageRouter;
+    const imageClient = new ImageClient(this.imageURI);
+    const imageRouter = new ImageRouter(imageClient);
+    this.routers.images = imageRouter;
   }
 
   // Configure API endpoints
   connectRouters() {
     // Create and map express routers
-    for (let key in this.routers) {
+    for (const key in this.routers) {
       if (this.routers.hasOwnProperty(key)) {
-        let value = this.routers[key];
+        const value = this.routers[key];
         this.app.use(`/api/${key}`, value.router);
       }
     }

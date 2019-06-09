@@ -5,9 +5,9 @@ export class APIClient {
 
   handleError(error, rej) {
     return rej({
-      'code': error.getCode(),
-      'error': error.getError(),
-      'message': error.getMessage()
+      code: error.getCode(),
+      error: error.getError(),
+      message: error.getMessage()
     });
   }
 }

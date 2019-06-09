@@ -17,7 +17,7 @@ export class PostClient extends APIClient {
   // Posts
 
   createPost(content, token) {
-    let request = new messages.PostUpdates();
+    const request = new messages.PostUpdates();
     request.setContent(content);
     request.setToken(token);
 
@@ -26,23 +26,25 @@ export class PostClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let error = response.getError();
+        const error = response.getError();
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        let post = response.getPost();
-        res({
-          'id': post.getId(),
-          'content': post.getContent(),
-          'user_id': post.getUserId(),
-          'date_created': post.getDateCreated()
-        });
+
+        const item = response.getPost();
+        const post = {
+          id: item.getId(),
+          content: item.getContent(),
+          user_id: item.getUserId(),
+          date_created: item.getDateCreated()
+        };
+        res({post});
       });
     });
   }
 
   getPost(postId, token) {
-    let request = new messages.PostRequest();
+    const request = new messages.PostRequest();
     request.setPostId(postId);
     request.setToken(token);
 
@@ -51,23 +53,25 @@ export class PostClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let error = response.getError();
+        const error = response.getError();
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        let post = response.getPost();
-        res({
-          'id': post.getId(),
-          'content': post.getContent(),
-          'user_id': post.getUserId(),
-          'date_created': post.getDateCreated()
-        });
+
+        const item = response.getPost();
+        const post = {
+          id: item.getId(),
+          content: item.getContent(),
+          user_id: item.getUserId(),
+          date_created: item.getDateCreated()
+        };
+        res({post});
       });
     });
   }
 
   getFeed(token, page, limit, countOnly) {
-    let request = new messages.DataRequest();
+    const request = new messages.DataRequest();
     request.setToken(token);
     request.setPage(page);
     request.setLimit(limit);
@@ -78,29 +82,29 @@ export class PostClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let count = response.getCount();
+        const count = response.getCount();
         if (count !== undefined) {
           return rej({
             count
           });
         }
-        let posts = [];
-        for (let item of response.getPosts()) {
-          let post = {
-            'id': item.getId(),
-            'content': item.getContent(),
-            'user_id': item.getUserId(),
-            'date_created': item.getDateCreated()
+        const posts = [];
+        for (const item of response.getPosts()) {
+          const post = {
+            id: item.getId(),
+            content: item.getContent(),
+            user_id: item.getUserId(),
+            date_created: item.getDateCreated()
           };
           posts.push(post);
         }
-        res(posts);
+        res({posts});
       });
     });
   }
 
   getPosts(username, token, page, limit, countOnly) {
-    let request = new messages.DataRequest();
+    const request = new messages.DataRequest();
     request.setUsername(username);
     request.setToken(token);
     request.setPage(page);
@@ -112,29 +116,29 @@ export class PostClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let count = response.getCount();
+        const count = response.getCount();
         if (count !== undefined) {
           return rej({
             count
           });
         }
-        let posts = [];
-        for (let item of response.getPosts()) {
-          let post = {
-            'id': item.getId(),
-            'content': item.getContent(),
-            'user_id': item.getUserId(),
-            'date_created': item.getDateCreated()
+        const posts = [];
+        for (const item of response.getPosts()) {
+          const post = {
+            id: item.getId(),
+            content: item.getContent(),
+            user_id: item.getUserId(),
+            date_created: item.getDateCreated()
           };
           posts.push(post);
         }
-        res(posts);
+        res({posts});
       });
     });
   }
 
   getLikedPosts(username, token, page, limit, countOnly) {
-    let request = new messages.DataRequest();
+    const request = new messages.DataRequest();
     request.setUsername(username);
     request.setToken(token);
     request.setPage(page);
@@ -146,29 +150,29 @@ export class PostClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let count = response.getCount();
+        const count = response.getCount();
         if (count !== undefined) {
           return rej({
             count
           });
         }
-        let posts = [];
-        for (let item of response.getPosts()) {
-          let post = {
-            'id': item.getId(),
-            'content': item.getContent(),
-            'user_id': item.getUserId(),
-            'date_created': item.getDateCreated()
+        const posts = [];
+        for (const item of response.getPosts()) {
+          const post = {
+            id: item.getId(),
+            content: item.getContent(),
+            user_id: item.getUserId(),
+            date_created: item.getDateCreated()
           };
           posts.push(post);
         }
-        res(posts);
+        res({posts});
       });
     });
   }
 
   deletePost(postId, token) {
-    let request = new messages.PostRequest();
+    const request = new messages.PostRequest();
     request.setPostId(postId);
     request.setToken(token);
 
@@ -177,11 +181,11 @@ export class PostClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let error = response.getError();
+        const error = response.getError();
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({'message': response.getMessage()});
+        res({message: response.getMessage()});
       });
     });
   }
@@ -189,7 +193,7 @@ export class PostClient extends APIClient {
   // Actions
 
   likePost(postId, token) {
-    let request = new messages.PostRequest();
+    const request = new messages.PostRequest();
     request.setPostId(postId);
     request.setToken(token);
 
@@ -198,17 +202,17 @@ export class PostClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let error = response.getError();
+        const error = response.getError();
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({'message': response.getMessage()});
+        res({message: response.getMessage()});
       });
     });
   }
 
   unlikePost(postId, token) {
-    let request = new messages.PostRequest();
+    const request = new messages.PostRequest();
     request.setPostId(postId);
     request.setToken(token);
 
@@ -217,17 +221,17 @@ export class PostClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let error = response.getError();
+        const error = response.getError();
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({'message': response.getMessage()});
+        res({message: response.getMessage()});
       });
     });
   }
 
   retweetPost(postId, token) {
-    let request = new messages.PostRequest();
+    const request = new messages.PostRequest();
     request.setPostId(postId);
     request.setToken(token);
 
@@ -236,17 +240,17 @@ export class PostClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let error = response.getError();
+        const error = response.getError();
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({'message': response.getMessage()});
+        res({message: response.getMessage()});
       });
     });
   }
 
   removeRetweet(postId, token) {
-    let request = new messages.PostRequest();
+    const request = new messages.PostRequest();
     request.setPostId(postId);
     request.setToken(token);
 
@@ -255,11 +259,11 @@ export class PostClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let error = response.getError();
+        const error = response.getError();
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({'message': response.getMessage()});
+        res({message: response.getMessage()});
       });
     });
   }

@@ -4,8 +4,8 @@ import { APIClient } from './api-client';
 
 export class ImageClient extends APIClient {
   uploadImage(req, res) {
-    let parts = this.serviceURI.split(':');
-    let options = {
+    const parts = this.serviceURI.split(':');
+    const options = {
       host: parts[0],
       port: parts[1],
       path: '/images',
@@ -13,7 +13,7 @@ export class ImageClient extends APIClient {
       headers: req.headers
     };
 
-    let request = http.request(options, (response) => {
+    const request = http.request(options, (response) => {
       response.setEncoding('utf8');
       let rawData = '';
 
@@ -36,8 +36,8 @@ export class ImageClient extends APIClient {
   }
 
   getImage(req, res) {
-    let parts = this.serviceURI.split(':');
-    let options = {
+    const parts = this.serviceURI.split(':');
+    const options = {
       host: parts[0],
       port: parts[1],
       path: '/images/' + req.params.id,
@@ -45,7 +45,7 @@ export class ImageClient extends APIClient {
       headers: req.headers
     };
 
-    let request = http.request(options, (response) => {
+    const request = http.request(options, (response) => {
       response.on('data', (chunk) => {
         res.write(chunk);
       }).on('close', () => {

@@ -17,7 +17,7 @@ export class AuthClient extends APIClient {
   // Authentication
 
   createSession(email, password, userAgent) {
-    let request = new messages.Credentials();
+    const request = new messages.Credentials();
     request.setEmail(email);
     request.setPassword(password);
     request.setUserAgent(userAgent);
@@ -27,21 +27,22 @@ export class AuthClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let error = response.getError();
+        const error = response.getError();
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({
-          'token_type': response.getTokenType(),
-          'access_token': response.getAccessToken(),
-          'refresh_token': response.getRefreshToken()
-        });
+        const token = {
+          token_type: response.getTokenType(),
+          access_token: response.getAccessToken(),
+          refresh_token: response.getRefreshToken()
+        };
+        res({token});
       });
     });
   }
 
   refreshToken(token) {
-    let request = new messages.AuthRequest();
+    const request = new messages.AuthRequest();
     request.setToken(token);
 
     return new Promise((res, rej) => {
@@ -49,15 +50,16 @@ export class AuthClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let error = response.getError();
+        const error = response.getError();
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({
-          'token_type': response.getTokenType(),
-          'access_token': response.getAccessToken(),
-          'refresh_token': response.getRefreshToken()
-        });
+        const token = {
+          token_type: response.getTokenType(),
+          access_token: response.getAccessToken(),
+          refresh_token: response.getRefreshToken()
+        };
+        res({token});
       });
     });
   }
@@ -65,7 +67,7 @@ export class AuthClient extends APIClient {
   // Sessions
 
   getSessions(token) {
-    let request = new messages.AuthRequest();
+    const request = new messages.AuthRequest();
     request.setToken(token);
 
     return new Promise((res, rej) => {
@@ -73,24 +75,24 @@ export class AuthClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let sessions = [];
-        for (let item of response.getSessions()) {
-          let session = {
-            'id': item.getId(),
-            'name': item.getName(),
-            'user_agent': item.getUserAgent(),
-            'user_id': item.getUserId(),
-            'date_created': item.getDateCreated()
+        const sessions = [];
+        for (const item of response.getSessions()) {
+          const session = {
+            id: item.getId(),
+            name: item.getName(),
+            user_agent: item.getUserAgent(),
+            user_id: item.getUserId(),
+            date_created: item.getDateCreated()
           };
           sessions.push(session);
         }
-        res(sessions);
+        res({sessions});
       });
     });
   }
 
   deleteSession(sessionId, token) {
-    let request = new messages.AuthRequest();
+    const request = new messages.AuthRequest();
     request.setSessionId(sessionId);
     request.setToken(token);
 
@@ -99,11 +101,11 @@ export class AuthClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let error = response.getError();
+        const error = response.getError();
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({'message': response.getMessage()});
+        res({message: response.getMessage()});
       });
     });
   }
