@@ -32,16 +32,7 @@ export class UserClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        const user = response.getUser();
-        res({
-          id: user.getId(),
-          username: user.getUsername(),
-          email: user.getEmail(),
-          name: user.getName(),
-          bio: user.getBio(),
-          avatar: user.getAvatar(),
-          date_created: user.getDateCreated()
-        });
+        res({message: response.getMessage()});
       });
     });
   }
@@ -60,16 +51,18 @@ export class UserClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        const user = response.getUser();
-        res({
-          id: user.getId(),
-          username: user.getUsername(),
-          email: user.getEmail(),
-          name: user.getName(),
-          bio: user.getBio(),
-          avatar: user.getAvatar(),
-          date_created: user.getDateCreated()
-        });
+
+        const item = response.getUser();
+        const user = {
+          id: item.getId(),
+          username: item.getUsername(),
+          email: item.getEmail(),
+          name: item.getName(),
+          bio: item.getBio(),
+          avatar: item.getAvatar(),
+          date_created: item.getDateCreated()
+        };
+        res({user});
       });
     });
   }
@@ -151,7 +144,7 @@ export class UserClient extends APIClient {
           };
           users.push(user);
         }
-        res(users);
+        res({users});
       });
     });
   }
@@ -188,7 +181,7 @@ export class UserClient extends APIClient {
           };
           users.push(user);
         }
-        res(users);
+        res({users});
       });
     });
   }
