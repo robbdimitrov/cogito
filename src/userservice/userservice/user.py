@@ -151,4 +151,4 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
 
         self.db_client.delete_user(user_id)
 
-        return thoughts_pb2.Status(message='Deleted user.')
+        return thoughts_pb2.Status(message='User deleted.')

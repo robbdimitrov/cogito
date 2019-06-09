@@ -74,14 +74,6 @@ func (s *Service) GetPosts(ctx context.Context, req *pb.DataRequest) (*pb.Posts,
 		return nil, errors.New(message)
 	}
 
-	if req.CountOnly {
-		count, err := s.dbClient.GetPostsCount(status.User.Id)
-		if err != nil {
-			return nil, err
-		}
-		return &pb.Posts{Count: count}, nil
-	}
-
 	posts, err := s.dbClient.GetPosts(status.User.Id, req.Page, req.Limit)
 	if err != nil {
 		return &posts, err
@@ -97,14 +89,6 @@ func (s *Service) GetLikedPosts(ctx context.Context, req *pb.DataRequest) (*pb.P
 	} else if status.Error != nil {
 		message := fmt.Sprintf("%s", status.Error)
 		return nil, errors.New(message)
-	}
-
-	if req.CountOnly {
-		count, err := s.dbClient.GetLikedPostsCount(status.User.Id)
-		if err != nil {
-			return nil, err
-		}
-		return &pb.Posts{Count: count}, nil
 	}
 
 	posts, err := s.dbClient.GetLikedPosts(status.User.Id, req.Page, req.Limit)

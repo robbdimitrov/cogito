@@ -19,6 +19,9 @@
   * [Create post](#create-post)
   * [Get post](#get-post)
   * [Delete post](#delete-post)
+  * [Get feed](#get-feed)
+  * [Get posts](#get-posts)
+  * [Get likes](#get-likes)
   * [Like post](#like-post)
   * [Unlike post](#unlike-post)
   * [Retweet post](#retweet-post)
@@ -526,6 +529,143 @@ Response:
 ```json
 {
   "message": "Post deleted."
+}
+```
+
+### Get feed
+
+```
+GET /posts/feed
+```
+
+URL parameters:
+
+```
+page - number of page with results
+limit - results per request
+```
+
+Headers:
+
+```
+Content-Type: application/json
+Authorization: Bearer <access-token>
+```
+
+Response:
+
+```json
+{
+  "posts": [
+    {
+      "id": "5a0c11682ce7e1000f2a1f5a",
+      "content": "Some post content",
+      "user_id": "a12r11682ce7e1000f2a1f5a",
+      "likes": 10,
+      "retweets": 2,
+      "date_created": "2017-11-15T10:05:28+00:00"
+    },
+    {
+      "id": "5a0c11682ce7e1000f2a1f5a",
+      "content": "Some post content",
+      "user_id": "a12r11682ce7e1000f2a1f5a",
+      "likes": 10,
+      "retweets": 2,
+      "date_created": "2017-11-15T10:05:28+00:00"
+    }
+  ]
+}
+```
+
+### Get posts
+
+```
+GET /users/<identifier>/posts
+```
+
+URL parameters:
+
+```
+identifier - id or username of the user
+page - number of page with results
+limit - results per request
+```
+
+Headers:
+
+```
+Content-Type: application/json
+Authorization: Bearer <access-token>
+```
+
+Response:
+
+```json
+{
+  "posts": [
+    {
+      "id": "5a0c11682ce7e1000f2a1f5a",
+      "content": "Some post content",
+      "user_id": "a12r11682ce7e1000f2a1f5a",
+      "likes": 10,
+      "retweets": 2,
+      "date_created": "2017-11-15T10:05:28+00:00"
+    },
+    {
+      "id": "5a0c11682ce7e1000f2a1f5a",
+      "content": "Some post content",
+      "user_id": "a12r11682ce7e1000f2a1f5a",
+      "likes": 10,
+      "retweets": 2,
+      "date_created": "2017-11-15T10:05:28+00:00"
+    }
+  ]
+}
+```
+
+### Get likes
+
+```
+GET /users/<identifier>/likes
+```
+
+URL parameters:
+
+```
+identifier - id or username of the user
+page - number of page with results
+limit - results per request
+```
+
+Headers:
+
+```
+Content-Type: application/json
+Authorization: Bearer <access-token>
+```
+
+Response:
+
+```json
+{
+  "posts": [
+    {
+      "id": "5a0c11682ce7e1000f2a1f5a",
+      "content": "Some post content",
+      "user_id": "a12r11682ce7e1000f2a1f5a",
+      "likes": 10,
+      "retweets": 2,
+      "date_created": "2017-11-15T10:05:28+00:00"
+    },
+    {
+      "id": "5a0c11682ce7e1000f2a1f5a",
+      "content": "Some post content",
+      "user_id": "a12r11682ce7e1000f2a1f5a",
+      "likes": 10,
+      "retweets": 2,
+      "date_created": "2017-11-15T10:05:28+00:00"
+    }
+  ]
 }
 ```
 

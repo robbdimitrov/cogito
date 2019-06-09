@@ -28,14 +28,6 @@ export class PostRouter extends APIRouter {
       this.getFeed(req, res);
     });
 
-    router.get('/users/:username', (req, res) => {
-      this.getPosts(req, res);
-    });
-
-    router.get('/users/:username/likes', (req, res) => {
-      this.getLikedPosts(req, res);
-    });
-
     // Actions
 
     router.post('/:id/likes', (req, res) => {
@@ -75,36 +67,9 @@ export class PostRouter extends APIRouter {
     const token = getToken(req);
     const page = parseInt(req.query.page) || 0;
     const limit = parseInt(req.query.limit) || 20;
-    const countOnly = (parseInt(req.query.count) || 0) === 1;
 
     this.handleResponse(
-      this.postClient.getFeed(token, page, limit, countOnly), res
-    );
-  }
-
-  getPosts(req, res) {
-    const username = req.params.username;
-    const token = getToken(req);
-    const page = parseInt(req.query.page) || 0;
-    const limit = parseInt(req.query.limit) || 20;
-    const countOnly = (parseInt(req.query.count) || 0) === 1;
-
-    this.handleResponse(
-      this.postClient.getPosts(username,
-        token, page, limit, countOnly), res
-    );
-  }
-
-  getLikedPosts(req, res) {
-    const username = req.params.username;
-    const token = getToken(req);
-    const page = parseInt(req.query.page) || 0;
-    const limit = parseInt(req.query.limit) || 20;
-    const countOnly = (parseInt(req.query.count) || 0) === 1;
-
-    this.handleResponse(
-      this.postClient.getLikedPosts(username,
-        token, page, limit, countOnly), res
+      this.postClient.getFeed(token, page, limit), res
     );
   }
 

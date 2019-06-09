@@ -15,17 +15,6 @@ function deserialize_thoughts_AuthRequest(buffer_arg) {
   return thoughts_pb.AuthRequest.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
-function serialize_thoughts_AuthResponse(arg) {
-  if (!(arg instanceof thoughts_pb.AuthResponse)) {
-    throw new Error('Expected argument of type thoughts.AuthResponse');
-  }
-  return Buffer.from(arg.serializeBinary());
-}
-
-function deserialize_thoughts_AuthResponse(buffer_arg) {
-  return thoughts_pb.AuthResponse.deserializeBinary(new Uint8Array(buffer_arg));
-}
-
 function serialize_thoughts_AuthStatus(arg) {
   if (!(arg instanceof thoughts_pb.AuthStatus)) {
     throw new Error('Expected argument of type thoughts.AuthStatus');
@@ -190,11 +179,11 @@ var UserServiceService = exports.UserServiceService = {
     requestStream: false,
     responseStream: false,
     requestType: thoughts_pb.UserUpdates,
-    responseType: thoughts_pb.UserStatus,
+    responseType: thoughts_pb.Status,
     requestSerialize: serialize_thoughts_UserUpdates,
     requestDeserialize: deserialize_thoughts_UserUpdates,
-    responseSerialize: serialize_thoughts_UserStatus,
-    responseDeserialize: deserialize_thoughts_UserStatus,
+    responseSerialize: serialize_thoughts_Status,
+    responseDeserialize: deserialize_thoughts_Status,
   },
   getUser: {
     path: '/thoughts.UserService/GetUser',
@@ -286,22 +275,22 @@ var AuthServiceService = exports.AuthServiceService = {
     requestStream: false,
     responseStream: false,
     requestType: thoughts_pb.Credentials,
-    responseType: thoughts_pb.AuthResponse,
+    responseType: thoughts_pb.AuthStatus,
     requestSerialize: serialize_thoughts_Credentials,
     requestDeserialize: deserialize_thoughts_Credentials,
-    responseSerialize: serialize_thoughts_AuthResponse,
-    responseDeserialize: deserialize_thoughts_AuthResponse,
+    responseSerialize: serialize_thoughts_AuthStatus,
+    responseDeserialize: deserialize_thoughts_AuthStatus,
   },
   refresh: {
     path: '/thoughts.AuthService/Refresh',
     requestStream: false,
     responseStream: false,
     requestType: thoughts_pb.AuthRequest,
-    responseType: thoughts_pb.AuthResponse,
+    responseType: thoughts_pb.AuthStatus,
     requestSerialize: serialize_thoughts_AuthRequest,
     requestDeserialize: deserialize_thoughts_AuthRequest,
-    responseSerialize: serialize_thoughts_AuthResponse,
-    responseDeserialize: deserialize_thoughts_AuthResponse,
+    responseSerialize: serialize_thoughts_AuthStatus,
+    responseDeserialize: deserialize_thoughts_AuthStatus,
   },
   validate: {
     path: '/thoughts.AuthService/Validate',

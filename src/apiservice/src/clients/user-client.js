@@ -37,9 +37,9 @@ export class UserClient extends APIClient {
     });
   }
 
-  getUser(username, token) {
+  getUser(userId, token) {
     const request = new messages.UserRequest();
-    request.setUsername(username);
+    request.setUserId(userId);
     request.setToken(token);
 
     return new Promise((res, rej) => {
@@ -91,9 +91,9 @@ export class UserClient extends APIClient {
     });
   }
 
-  deleteUser(username, token) {
+  deleteUser(userId, token) {
     const request = new messages.UserRequest();
-    request.setUsername(username);
+    request.setUserId(userId);
     request.setToken(token);
 
     return new Promise((res, rej) => {
@@ -112,25 +112,18 @@ export class UserClient extends APIClient {
 
   // Follows
 
-  getFollowing(username, token, page, limit, countOnly) {
+  getFollowing(userId, token, page, limit) {
     const request = new messages.DataRequest();
-    request.setUsername(username);
+    request.setUserId(userId);
     request.setToken(token);
     request.setPage(page);
     request.setLimit(limit);
-    request.setCountOnly(countOnly);
 
     return new Promise((res, rej) => {
       this.userClient.getFollowing(request, (err, response) => {
         if (err) {
           return rej(err);
         }
-        const count = response.getCount();
-        if (count !== undefined) {
-          return rej({
-            count
-          });
-        }
         const users = [];
         for (const item of response.getUsers()) {
           const user = {
@@ -149,25 +142,18 @@ export class UserClient extends APIClient {
     });
   }
 
-  getFollowers(username, token, page, limit, countOnly) {
+  getFollowers(userId, token, page, limit) {
     const request = new messages.DataRequest();
-    request.setUsername(username);
+    request.setUserId(userId);
     request.setToken(token);
     request.setPage(page);
     request.setLimit(limit);
-    request.setCountOnly(countOnly);
 
     return new Promise((res, rej) => {
       this.userClient.getFollowers(request, (err, response) => {
         if (err) {
           return rej(err);
         }
-        const count = response.getCount();
-        if (count !== undefined) {
-          return rej({
-            count
-          });
-        }
         const users = [];
         for (const item of response.getUsers()) {
           const user = {
@@ -186,9 +172,9 @@ export class UserClient extends APIClient {
     });
   }
 
-  follow(username, token) {
+  followUser(userId, token) {
     const request = new messages.UserRequest();
-    request.setUsername(username);
+    request.setUserId(userId);
     request.setToken(token);
 
     return new Promise((res, rej) => {
@@ -205,9 +191,9 @@ export class UserClient extends APIClient {
     });
   }
 
-  unfollow(username, token) {
+  unfollowUser(userId, token) {
     const request = new messages.UserRequest();
-    request.setUsername(username);
+    request.setUserId(userId);
     request.setToken(token);
 
     return new Promise((res, rej) => {

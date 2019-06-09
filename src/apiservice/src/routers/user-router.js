@@ -2,9 +2,10 @@ import { APIRouter } from './api-router';
 import { getToken } from './utils';
 
 export class UserRouter extends APIRouter {
-  constructor(userClient) {
+  constructor(userClient, postClient) {
     super();
     this.userClient = userClient;
+    this.postClient = postClient;
   }
 
   connectRouter(router) {
@@ -28,45 +29,55 @@ export class UserRouter extends APIRouter {
 
     // Followers
 
-    router.get('/:id/following/', (req, res) => {
+    router.get('/:id/following', (req, res) => {
       this.getFollowing(req, res);
     });
 
-    router.get('/:id/followers/', (req, res) => {
+    router.get('/:id/followers', (req, res) => {
       this.getFollowers(req, res);
     });
 
-    router.post('/:id/followers/', (req, res) => {
+    router.post('/:id/followers', (req, res) => {
       this.follow(req, res);
     });
 
     router.delete('/:id/followers/:followerId', (req, res) => {
       this.unfollow(req, res);
     });
+
+    // Posts
+
+    router.get('/:id/posts', (req, res) => {
+      this.getPosts(req, res);
+    });
+
+    router.get('/:id/likes', (req, res) => {
+      this.getLikedPosts(req, res);
+    });
   }
 
   // Users
 
   createUser(req, res) {
-    const identifier = req.body.identifier;
+    const username = req.body.username;
     const email = req.body.email;
     const name = req.body.name;
     const password = req.body.password;
 
     this.handleResponse(
-      this.userClient.createUser(identifier, email, name, password), res
+      this.userClient.createUser(username, email, name, password), res
     );
   }
 
   getUser(req, res) {
-    const username = req.params.username;
+    const id = req.params.id;
     const token = getToken(req);
 
-    this.handleResponse(this.userClient.getUser(username, token), res);
+    this.handleResponse(this.userClient.getUser(id, token), res);
   }
 
   updateUser(req, res) {
-    const identifier = req.body.identifier;
+    const username = req.body.username;
     const email = req.body.email;
     const name = req.body.name;
     const password = req.body.password;
@@ -75,57 +86,77 @@ export class UserRouter extends APIRouter {
     const token = getToken(req);
 
     this.handleResponse(
-      this.userClient.updateUser(identifier, email,
+      this.userClient.updateUser(username, email,
         name, password, bio, oldPassword, token), res
     );
   }
 
   deleteUser(req, res) {
-    const username = req.params.username;
+    const id = req.params.id;
     const token = getToken(req);
 
-    this.handleResponse(this.userClient.deleteUser(username, token), res);
+    this.handleResponse(this.userClient.deleteUser(id, token), res);
   }
 
   // Follows
 
   getFollowing(req, res) {
-    const username = req.params.username;
+    const id = req.params.id;
     const token = getToken(req);
     const page = parseInt(req.query.page) || 0;
     const limit = parseInt(req.query.limit) || 20;
-    const countOnly = (parseInt(req.query.count) || 0) === 1;
 
     this.handleResponse(
-      this.userClient.getFollowing(username,
-        token, page, limit, countOnly), res
+      this.userClient.getFollowing(id, token, page, limit), res
     );
   }
 
   getFollowers(req, res) {
-    const username = req.params.username;
+    const id = req.params.id;
     const token = getToken(req);
     const page = parseInt(req.query.page) || 0;
     const limit = parseInt(req.query.limit) || 20;
-    const countOnly = (parseInt(req.query.count) || 0) === 1;
 
     this.handleResponse(
-      this.userClient.getFollowers(username,
-        token, page, limit, countOnly), res
+      this.userClient.getFollowers(id, token, page, limit), res
     );
   }
 
   follow(req, res) {
-    const username = req.params.username;
+    const id = req.params.id;
     const token = getToken(req);
 
-    this.handleResponse(this.userClient.follow(username, token), res);
+    this.handleResponse(this.userClient.follow(id, token), res);
   }
 
   unfollow(req, res) {
-    const username = req.params.username;
+    const id = req.params.id;
     const token = getToken(req);
 
-    this.handleResponse(this.userClient.unfollow(username, token), res);
+    this.handleResponse(this.userClient.unfollow(id, token), res);
+  }
+
+  // Posts
+
+  getPosts(req, res) {
+    const id = req.params.id;
+    const token = getToken(req);
+    const page = parseInt(req.query.page) || 0;
+    const limit = parseInt(req.query.limit) || 20;
+
+    this.handleResponse(
+      this.postClient.getPosts(id, token, page, limit), res
+    );
+  }
+
+  getLikedPosts(req, res) {
+    const id = req.params.id;
+    const token = getToken(req);
+    const page = parseInt(req.query.page) || 0;
+    const limit = parseInt(req.query.limit) || 20;
+
+    this.handleResponse(
+      this.postClient.getLikedPosts(id, token, page, limit), res
+    );
   }
 }
