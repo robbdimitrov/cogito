@@ -17,7 +17,7 @@ export class AuthClient extends APIClient {
   // Authentication
 
   createSession(email, password, userAgent) {
-    let request = new messages.Credentials();
+    const request = new messages.Credentials();
     request.setEmail(email);
     request.setPassword(password);
     request.setUserAgent(userAgent);
@@ -27,7 +27,7 @@ export class AuthClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let error = response.getError();
+        const error = response.getError();
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
@@ -41,7 +41,7 @@ export class AuthClient extends APIClient {
   }
 
   refreshToken(token) {
-    let request = new messages.AuthRequest();
+    const request = new messages.AuthRequest();
     request.setToken(token);
 
     return new Promise((res, rej) => {
@@ -49,7 +49,7 @@ export class AuthClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let error = response.getError();
+        const error = response.getError();
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
@@ -65,7 +65,7 @@ export class AuthClient extends APIClient {
   // Sessions
 
   getSessions(token) {
-    let request = new messages.AuthRequest();
+    const request = new messages.AuthRequest();
     request.setToken(token);
 
     return new Promise((res, rej) => {
@@ -73,9 +73,9 @@ export class AuthClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let sessions = [];
-        for (let item of response.getSessions()) {
-          let session = {
+        const sessions = [];
+        for (const item of response.getSessions()) {
+          const session = {
             'id': item.getId(),
             'name': item.getName(),
             'user_agent': item.getUserAgent(),
@@ -90,7 +90,7 @@ export class AuthClient extends APIClient {
   }
 
   deleteSession(sessionId, token) {
-    let request = new messages.AuthRequest();
+    const request = new messages.AuthRequest();
     request.setSessionId(sessionId);
     request.setToken(token);
 
@@ -99,7 +99,7 @@ export class AuthClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let error = response.getError();
+        const error = response.getError();
         if (error !== undefined) {
           return this.handleError(error, rej);
         }

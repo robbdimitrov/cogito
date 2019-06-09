@@ -48,10 +48,10 @@ export class UserRouter extends APIRouter {
   // Users
 
   createUser(req, res) {
-    let identifier = req.body.identifier;
-    let email = req.body.email;
-    let name = req.body.name;
-    let password = req.body.password;
+    const identifier = req.body.identifier;
+    const email = req.body.email;
+    const name = req.body.name;
+    const password = req.body.password;
 
     this.handleResponse(
       this.userClient.createUser(identifier, email, name, password), res
@@ -59,20 +59,20 @@ export class UserRouter extends APIRouter {
   }
 
   getUser(req, res) {
-    let username = req.params.username;
-    let token = getToken(req);
+    const username = req.params.username;
+    const token = getToken(req);
 
     this.handleResponse(this.userClient.getUser(username, token), res);
   }
 
   updateUser(req, res) {
-    let identifier = req.body.identifier;
-    let email = req.body.email;
-    let name = req.body.name;
-    let password = req.body.password;
-    let bio = req.body.bio;
-    let oldPassword = req.body.old_password;
-    let token = getToken(req);
+    const identifier = req.body.identifier;
+    const email = req.body.email;
+    const name = req.body.name;
+    const password = req.body.password;
+    const bio = req.body.bio;
+    const oldPassword = req.body.old_password;
+    const token = getToken(req);
 
     this.handleResponse(
       this.userClient.updateUser(identifier, email,
@@ -81,8 +81,8 @@ export class UserRouter extends APIRouter {
   }
 
   deleteUser(req, res) {
-    let username = req.params.username;
-    let token = getToken(req);
+    const username = req.params.username;
+    const token = getToken(req);
 
     this.handleResponse(this.userClient.deleteUser(username, token), res);
   }
@@ -90,11 +90,11 @@ export class UserRouter extends APIRouter {
   // Follows
 
   getFollowing(req, res) {
-    let username = req.params.username;
-    let token = getToken(req);
-    let page = parseInt(req.query.page) || 0;
-    let limit = parseInt(req.query.limit) || 20;
-    let countOnly = (parseInt(req.query.count) || 0) === 1;
+    const username = req.params.username;
+    const token = getToken(req);
+    const page = parseInt(req.query.page) || 0;
+    const limit = parseInt(req.query.limit) || 20;
+    const countOnly = (parseInt(req.query.count) || 0) === 1;
 
     this.handleResponse(
       this.userClient.getFollowing(username,
@@ -103,11 +103,11 @@ export class UserRouter extends APIRouter {
   }
 
   getFollowers(req, res) {
-    let username = req.params.username;
-    let token = getToken(req);
-    let page = parseInt(req.query.page) || 0;
-    let limit = parseInt(req.query.limit) || 20;
-    let countOnly = (parseInt(req.query.count) || 0) === 1;
+    const username = req.params.username;
+    const token = getToken(req);
+    const page = parseInt(req.query.page) || 0;
+    const limit = parseInt(req.query.limit) || 20;
+    const countOnly = (parseInt(req.query.count) || 0) === 1;
 
     this.handleResponse(
       this.userClient.getFollowers(username,
@@ -116,15 +116,15 @@ export class UserRouter extends APIRouter {
   }
 
   follow(req, res) {
-    let username = req.params.username;
-    let token = getToken(req);
+    const username = req.params.username;
+    const token = getToken(req);
 
     this.handleResponse(this.userClient.follow(username, token), res);
   }
 
   unfollow(req, res) {
-    let username = req.params.username;
-    let token = getToken(req);
+    const username = req.params.username;
+    const token = getToken(req);
 
     this.handleResponse(this.userClient.unfollow(username, token), res);
   }

@@ -9,7 +9,7 @@ import './Profile.scss';
 
 class Profile extends React.Component {
   render() {
-    let match = this.props.match;
+    const match = this.props.match;
     return (
       <div className="profile-container">
         <UserHeader />

@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import './SessionItem.scss';
 
 function SessionItem(props) {
-  let icon = props.isDesktop ? 'desktop' : 'mobile-alt';
+  const icon = props.isDesktop ? 'desktop' : 'mobile-alt';
 
   return (
     <li className="session-item">

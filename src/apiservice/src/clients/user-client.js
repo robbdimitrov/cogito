@@ -17,7 +17,7 @@ export class UserClient extends APIClient {
   // Users
 
   createUser(username, email, name, password) {
-    let request = new messages.UserUpdates();
+    const request = new messages.UserUpdates();
     request.setUsername(username);
     request.setEmail(email);
     request.setName(name);
@@ -28,11 +28,11 @@ export class UserClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let error = response.getError();
+        const error = response.getError();
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        let user = response.getUser();
+        const user = response.getUser();
         res({
           'id': user.getId(),
           'username': user.getUsername(),
@@ -47,7 +47,7 @@ export class UserClient extends APIClient {
   }
 
   getUser(username, token) {
-    let request = new messages.UserRequest();
+    const request = new messages.UserRequest();
     request.setUsername(username);
     request.setToken(token);
 
@@ -56,11 +56,11 @@ export class UserClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let error = response.getError();
+        const error = response.getError();
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        let user = response.getUser();
+        const user = response.getUser();
         res({
           'id': user.getId(),
           'username': user.getUsername(),
@@ -75,7 +75,7 @@ export class UserClient extends APIClient {
   }
 
   updateUser(username, email, name, password, bio, oldPassword, token) {
-    let request = new messages.UserUpdates();
+    const request = new messages.UserUpdates();
     request.setUsername(username);
     request.setEmail(email);
     request.setName(name);
@@ -89,7 +89,7 @@ export class UserClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let error = response.getError();
+        const error = response.getError();
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
@@ -99,7 +99,7 @@ export class UserClient extends APIClient {
   }
 
   deleteUser(username, token) {
-    let request = new messages.UserRequest();
+    const request = new messages.UserRequest();
     request.setUsername(username);
     request.setToken(token);
 
@@ -108,7 +108,7 @@ export class UserClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let error = response.getError();
+        const error = response.getError();
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
@@ -120,7 +120,7 @@ export class UserClient extends APIClient {
   // Follows
 
   getFollowing(username, token, page, limit, countOnly) {
-    let request = new messages.DataRequest();
+    const request = new messages.DataRequest();
     request.setUsername(username);
     request.setToken(token);
     request.setPage(page);
@@ -132,15 +132,15 @@ export class UserClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let count = response.getCount();
+        const count = response.getCount();
         if (count !== undefined) {
           return rej({
             count
           });
         }
-        let users = [];
-        for (let item of response.getUsers()) {
-          let user = {
+        const users = [];
+        for (const item of response.getUsers()) {
+          const user = {
             'id': item.getId(),
             'username': item.getUsername(),
             'email': item.getEmail(),
@@ -157,7 +157,7 @@ export class UserClient extends APIClient {
   }
 
   getFollowers(username, token, page, limit, countOnly) {
-    let request = new messages.DataRequest();
+    const request = new messages.DataRequest();
     request.setUsername(username);
     request.setToken(token);
     request.setPage(page);
@@ -169,15 +169,15 @@ export class UserClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let count = response.getCount();
+        const count = response.getCount();
         if (count !== undefined) {
           return rej({
             count
           });
         }
-        let users = [];
-        for (let item of response.getUsers()) {
-          let user = {
+        const users = [];
+        for (const item of response.getUsers()) {
+          const user = {
             'id': item.getId(),
             'username': item.getUsername(),
             'email': item.getEmail(),
@@ -194,7 +194,7 @@ export class UserClient extends APIClient {
   }
 
   follow(username, token) {
-    let request = new messages.UserRequest();
+    const request = new messages.UserRequest();
     request.setUsername(username);
     request.setToken(token);
 
@@ -203,7 +203,7 @@ export class UserClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let error = response.getError();
+        const error = response.getError();
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
@@ -213,7 +213,7 @@ export class UserClient extends APIClient {
   }
 
   unfollow(username, token) {
-    let request = new messages.UserRequest();
+    const request = new messages.UserRequest();
     request.setUsername(username);
     request.setToken(token);
 
@@ -222,7 +222,7 @@ export class UserClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        let error = response.getError();
+        const error = response.getError();
         if (error !== undefined) {
           return this.handleError(error, rej);
         }

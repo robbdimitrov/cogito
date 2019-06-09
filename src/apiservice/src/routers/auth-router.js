@@ -28,9 +28,9 @@ export class AuthRouter extends APIRouter {
   // Authentication
 
   login(req, res) {
-    let email = req.body.email;
-    let password = req.body.password;
-    let userAgent = req.headers['User-Agent'];
+    const email = req.body.email;
+    const password = req.body.password;
+    const userAgent = req.headers['User-Agent'];
 
     this.handleResponse(
       this.authClient.createSession(email, password, userAgent), res
@@ -38,7 +38,7 @@ export class AuthRouter extends APIRouter {
   }
 
   refreshToken(req, res) {
-    let token = getToken(req);
+    const token = getToken(req);
 
     this.handleResponse(this.authClient.refreshToken(token), res);
   }
@@ -46,14 +46,14 @@ export class AuthRouter extends APIRouter {
   // Sessions
 
   getSessions(req, res) {
-    let token = getToken(req);
+    const token = getToken(req);
 
     this.handleResponse(this.authClient.getSessions(token), res);
   }
 
   deleteSession(req, res) {
-    let token = getToken(req);
-    let sessionId = req.params.id;
+    const token = getToken(req);
+    const sessionId = req.params.id;
 
     this.handleResponse(this.authClient.deleteSession(sessionId, token), res);
   }
