@@ -70,23 +70,16 @@ export class PostClient extends APIClient {
     });
   }
 
-  getFeed(token, page, limit, countOnly) {
+  getFeed(token, page, limit) {
     const request = new messages.DataRequest();
     request.setToken(token);
     request.setPage(page);
     request.setLimit(limit);
-    request.setCountOnly(countOnly);
 
     return new Promise((res, rej) => {
       this.postClient.getPosts(request, (err, response) => {
         if (err) {
           return rej(err);
-        }
-        const count = response.getCount();
-        if (count !== undefined) {
-          return rej({
-            count
-          });
         }
         const posts = [];
         for (const item of response.getPosts()) {
@@ -103,24 +96,17 @@ export class PostClient extends APIClient {
     });
   }
 
-  getPosts(username, token, page, limit, countOnly) {
+  getPosts(username, token, page, limit) {
     const request = new messages.DataRequest();
     request.setUsername(username);
     request.setToken(token);
     request.setPage(page);
     request.setLimit(limit);
-    request.setCountOnly(countOnly);
 
     return new Promise((res, rej) => {
       this.postClient.getPosts(request, (err, response) => {
         if (err) {
           return rej(err);
-        }
-        const count = response.getCount();
-        if (count !== undefined) {
-          return rej({
-            count
-          });
         }
         const posts = [];
         for (const item of response.getPosts()) {
@@ -137,24 +123,17 @@ export class PostClient extends APIClient {
     });
   }
 
-  getLikedPosts(username, token, page, limit, countOnly) {
+  getLikedPosts(username, token, page, limit) {
     const request = new messages.DataRequest();
     request.setUsername(username);
     request.setToken(token);
     request.setPage(page);
     request.setLimit(limit);
-    request.setCountOnly(countOnly);
 
     return new Promise((res, rej) => {
       this.postClient.getLikedPosts(request, (err, response) => {
         if (err) {
           return rej(err);
-        }
-        const count = response.getCount();
-        if (count !== undefined) {
-          return rej({
-            count
-          });
         }
         const posts = [];
         for (const item of response.getPosts()) {

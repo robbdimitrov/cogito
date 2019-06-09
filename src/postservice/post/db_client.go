@@ -71,11 +71,11 @@ func (c *DbClient) GetFeed(userID int32, page int32, limit int32) (pb.Posts, err
 	rows, err := conn.Query(`(SELECT id, content, user_id, time_format(date_created)
 	FROM thoughts.posts  WHERE user_id = $1 ORDER BY date_created DESC)
 	UNION
-	(SELECT id, content, user_id, time_format(date_created) FROM thoughts.posts 
+	(SELECT id, content, user_id, time_format(date_created) FROM thoughts.posts
 	WHERE id IN (SELECT post_id FROM thoughts.retweets
 	WHERE user_id = $1 ORDER BY date_created DESC))
 	UNION
-	(SELECT id, content, user_id, time_format(date_created) FROM thoughts.posts 
+	(SELECT id, content, user_id, time_format(date_created) FROM thoughts.posts
 	WHERE user_id IN (SELECT user_id FROM thoughts.followings
 	WHERE follower_id = $1) ORDER BY date_created DESC)
 	OFFSET $2 LIMIT $3`,
@@ -106,22 +106,6 @@ func (c *DbClient) GetFeed(userID int32, page int32, limit int32) (pb.Posts, err
 	return pb.Posts{Posts: posts}, nil
 }
 
-// GetPostsCount returns the number of posts and retweets of the user with userID
-func (c *DbClient) GetPostsCount(userID int32) (int32, error) {
-	conn := c.db.GetConn()
-
-	var count int32
-
-	err := conn.QueryRow(`SELECT COUNT(*) FROM thoughts.posts
-    WHERE user_id = $1 OR id IN (SELECT post_id
-    FROM thoughts.retweets WHERE user_id = $1)`,
-		userID).Scan(&count)
-	if err != nil {
-		return 0, errors.New("Error happened while reading from the database")
-	}
-	return count, nil
-}
-
 // GetPosts returns the posts and retweets of the user with userID
 func (c *DbClient) GetPosts(userID int32, page int32, limit int32) (pb.Posts, error) {
 	conn := c.db.GetConn()
@@ -129,7 +113,7 @@ func (c *DbClient) GetPosts(userID int32, page int32, limit int32) (pb.Posts, er
 	rows, err := conn.Query(`(SELECT id, content, user_id, time_format(date_created)
 	FROM thoughts.posts  WHERE user_id = $1 ORDER BY date_created DESC)
 	UNION
-	(SELECT id, content, user_id, time_format(date_created) FROM thoughts.posts 
+	(SELECT id, content, user_id, time_format(date_created) FROM thoughts.posts
 	WHERE id IN (SELECT post_id FROM thoughts.retweets
 	WHERE user_id = $1 ORDER BY date_created DESC))
 	OFFSET $2 LIMIT $3`,
@@ -159,21 +143,6 @@ func (c *DbClient) GetPosts(userID int32, page int32, limit int32) (pb.Posts, er
 		posts = append(posts, &post)
 	}
 	return pb.Posts{Posts: posts}, nil
-}
-
-// GetLikedPostsCount returns the number of liked posts of the user with userID
-func (c *DbClient) GetLikedPostsCount(userID int32) (int32, error) {
-	conn := c.db.GetConn()
-
-	var count int32
-
-	err := conn.QueryRow(`SELECT COUNT(*) FROM thoughts.posts
-    WHERE id IN (SELECT post_id FROM thoughts.likes
-    WHERE user_id = $1)`, userID).Scan(&count)
-	if err != nil {
-		return 0, errors.New("Error happened while reading from the database")
-	}
-	return count, nil
 }
 
 // GetLikedPosts returns posts liked by the user

@@ -112,24 +112,17 @@ export class UserClient extends APIClient {
 
   // Follows
 
-  getFollowing(username, token, page, limit, countOnly) {
+  getFollowing(username, token, page, limit) {
     const request = new messages.DataRequest();
     request.setUsername(username);
     request.setToken(token);
     request.setPage(page);
     request.setLimit(limit);
-    request.setCountOnly(countOnly);
 
     return new Promise((res, rej) => {
       this.userClient.getFollowing(request, (err, response) => {
         if (err) {
           return rej(err);
-        }
-        const count = response.getCount();
-        if (count !== undefined) {
-          return rej({
-            count
-          });
         }
         const users = [];
         for (const item of response.getUsers()) {
@@ -149,24 +142,17 @@ export class UserClient extends APIClient {
     });
   }
 
-  getFollowers(username, token, page, limit, countOnly) {
+  getFollowers(username, token, page, limit) {
     const request = new messages.DataRequest();
     request.setUsername(username);
     request.setToken(token);
     request.setPage(page);
     request.setLimit(limit);
-    request.setCountOnly(countOnly);
 
     return new Promise((res, rej) => {
       this.userClient.getFollowers(request, (err, response) => {
         if (err) {
           return rej(err);
-        }
-        const count = response.getCount();
-        if (count !== undefined) {
-          return rej({
-            count
-          });
         }
         const users = [];
         for (const item of response.getUsers()) {

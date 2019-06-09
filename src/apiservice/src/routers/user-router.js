@@ -94,11 +94,10 @@ export class UserRouter extends APIRouter {
     const token = getToken(req);
     const page = parseInt(req.query.page) || 0;
     const limit = parseInt(req.query.limit) || 20;
-    const countOnly = (parseInt(req.query.count) || 0) === 1;
 
     this.handleResponse(
       this.userClient.getFollowing(username,
-        token, page, limit, countOnly), res
+        token, page, limit), res
     );
   }
 
@@ -107,11 +106,10 @@ export class UserRouter extends APIRouter {
     const token = getToken(req);
     const page = parseInt(req.query.page) || 0;
     const limit = parseInt(req.query.limit) || 20;
-    const countOnly = (parseInt(req.query.count) || 0) === 1;
 
     this.handleResponse(
       this.userClient.getFollowers(username,
-        token, page, limit, countOnly), res
+        token, page, limit), res
     );
   }
 

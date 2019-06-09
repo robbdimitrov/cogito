@@ -17,7 +17,6 @@ message DataRequest {
   string token = 2;
   int32 page = 3;
   int32 limit = 4;
-  bool count_only = 5;
 }
 
 /**
@@ -72,7 +71,6 @@ message UserRequest {
 
 message Users {
   repeated User users = 1;
-  int32 count = 2;
 }
 
 message UserUpdates {
@@ -136,7 +134,6 @@ message PostUpdates {
 
 message Posts {
   repeated Post posts = 1;
-  int32 count = 2;
 }
 
 message PostStatus {
