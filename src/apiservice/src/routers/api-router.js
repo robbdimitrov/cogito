@@ -13,9 +13,9 @@ export class APIRouter {
   handleResponse(promise, res) {
     promise.then((result) => {
       res.send(result);
-    }).catch((err) => {
-      const code = err['code'] !== undefined ? err.code : 500;
-      res.status(code).send(err);
+    }).catch((error) => {
+      const code = error.code || 500;
+      res.status(code).send({error});
     });
   }
 }

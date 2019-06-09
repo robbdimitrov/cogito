@@ -32,10 +32,10 @@ export class PostClient extends APIClient {
         }
         const post = response.getPost();
         res({
-          'id': post.getId(),
-          'content': post.getContent(),
-          'user_id': post.getUserId(),
-          'date_created': post.getDateCreated()
+          id: post.getId(),
+          content: post.getContent(),
+          user_id: post.getUserId(),
+          date_created: post.getDateCreated()
         });
       });
     });
@@ -57,10 +57,10 @@ export class PostClient extends APIClient {
         }
         const post = response.getPost();
         res({
-          'id': post.getId(),
-          'content': post.getContent(),
-          'user_id': post.getUserId(),
-          'date_created': post.getDateCreated()
+          id: post.getId(),
+          content: post.getContent(),
+          user_id: post.getUserId(),
+          date_created: post.getDateCreated()
         });
       });
     });
@@ -87,10 +87,10 @@ export class PostClient extends APIClient {
         const posts = [];
         for (const item of response.getPosts()) {
           const post = {
-            'id': item.getId(),
-            'content': item.getContent(),
-            'user_id': item.getUserId(),
-            'date_created': item.getDateCreated()
+            id: item.getId(),
+            content: item.getContent(),
+            user_id: item.getUserId(),
+            date_created: item.getDateCreated()
           };
           posts.push(post);
         }
@@ -121,14 +121,14 @@ export class PostClient extends APIClient {
         const posts = [];
         for (const item of response.getPosts()) {
           const post = {
-            'id': item.getId(),
-            'content': item.getContent(),
-            'user_id': item.getUserId(),
-            'date_created': item.getDateCreated()
+            id: item.getId(),
+            content: item.getContent(),
+            user_id: item.getUserId(),
+            date_created: item.getDateCreated()
           };
           posts.push(post);
         }
-        res(posts);
+        res({posts});
       });
     });
   }
@@ -155,12 +155,12 @@ export class PostClient extends APIClient {
         const posts = [];
         for (const item of response.getPosts()) {
           const post = {
-            'id': item.getId(),
-            'content': item.getContent(),
-            'user_id': item.getUserId(),
-            'date_created': item.getDateCreated()
+            id: item.getId(),
+            content: item.getContent(),
+            user_id: item.getUserId(),
+            date_created: item.getDateCreated()
           };
-          posts.push(post);
+          posts.push({post});
         }
         res(posts);
       });
@@ -181,7 +181,7 @@ export class PostClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({'message': response.getMessage()});
+        res({message: response.getMessage()});
       });
     });
   }
@@ -202,7 +202,7 @@ export class PostClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({'message': response.getMessage()});
+        res({message: response.getMessage()});
       });
     });
   }
@@ -221,7 +221,7 @@ export class PostClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({'message': response.getMessage()});
+        res({message: response.getMessage()});
       });
     });
   }
@@ -240,7 +240,7 @@ export class PostClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({'message': response.getMessage()});
+        res({message: response.getMessage()});
       });
     });
   }
@@ -259,7 +259,7 @@ export class PostClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({'message': response.getMessage()});
+        res({message: response.getMessage()});
       });
     });
   }

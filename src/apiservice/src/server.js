@@ -43,19 +43,19 @@ export class Server {
   configureRouters() {
     const authClient = new AuthClient(this.authURI);
     const authRouter = new AuthRouter(authClient);
-    this.routers['sessions'] = authRouter;
+    this.routers.sessions = authRouter;
 
     const userClient = new UserClient(this.userURI);
     const userRouter = new UserRouter(userClient);
-    this.routers['users'] = userRouter;
+    this.routers.users = userRouter;
 
     const postClient = new PostClient(this.postURI);
     const postRouter = new PostRouter(postClient);
-    this.routers['posts'] = postRouter;
+    this.routers.posts = postRouter;
 
     const imageClient = new ImageClient(this.imageURI);
     const imageRouter = new ImageRouter(imageClient);
-    this.routers['images'] = imageRouter;
+    this.routers.images = imageRouter;
   }
 
   // Configure API endpoints

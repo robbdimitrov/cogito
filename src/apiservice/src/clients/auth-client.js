@@ -31,11 +31,12 @@ export class AuthClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({
-          'token_type': response.getTokenType(),
-          'access_token': response.getAccessToken(),
-          'refresh_token': response.getRefreshToken()
-        });
+        const token = {
+          token_type: response.getTokenType(),
+          access_token: response.getAccessToken(),
+          refresh_token: response.getRefreshToken()
+        };
+        res({token});
       });
     });
   }
@@ -53,11 +54,12 @@ export class AuthClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({
-          'token_type': response.getTokenType(),
-          'access_token': response.getAccessToken(),
-          'refresh_token': response.getRefreshToken()
-        });
+        const token = {
+          token_type: response.getTokenType(),
+          access_token: response.getAccessToken(),
+          refresh_token: response.getRefreshToken()
+        };
+        res({token});
       });
     });
   }
@@ -76,15 +78,15 @@ export class AuthClient extends APIClient {
         const sessions = [];
         for (const item of response.getSessions()) {
           const session = {
-            'id': item.getId(),
-            'name': item.getName(),
-            'user_agent': item.getUserAgent(),
-            'user_id': item.getUserId(),
-            'date_created': item.getDateCreated()
+            id: item.getId(),
+            name: item.getName(),
+            user_agent: item.getUserAgent(),
+            user_id: item.getUserId(),
+            date_created: item.getDateCreated()
           };
           sessions.push(session);
         }
-        res(sessions);
+        res({sessions});
       });
     });
   }
@@ -103,7 +105,7 @@ export class AuthClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({'message': response.getMessage()});
+        res({message: response.getMessage()});
       });
     });
   }

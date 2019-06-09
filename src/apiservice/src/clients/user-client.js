@@ -34,13 +34,13 @@ export class UserClient extends APIClient {
         }
         const user = response.getUser();
         res({
-          'id': user.getId(),
-          'username': user.getUsername(),
-          'email': user.getEmail(),
-          'name': user.getName(),
-          'bio': user.getBio(),
-          'avatar': user.getAvatar(),
-          'date_created': user.getDateCreated()
+          id: user.getId(),
+          username: user.getUsername(),
+          email: user.getEmail(),
+          name: user.getName(),
+          bio: user.getBio(),
+          avatar: user.getAvatar(),
+          date_created: user.getDateCreated()
         });
       });
     });
@@ -62,13 +62,13 @@ export class UserClient extends APIClient {
         }
         const user = response.getUser();
         res({
-          'id': user.getId(),
-          'username': user.getUsername(),
-          'email': user.getEmail(),
-          'name': user.getName(),
-          'bio': user.getBio(),
-          'avatar': user.getAvatar(),
-          'date_created': user.getDateCreated()
+          id: user.getId(),
+          username: user.getUsername(),
+          email: user.getEmail(),
+          name: user.getName(),
+          bio: user.getBio(),
+          avatar: user.getAvatar(),
+          date_created: user.getDateCreated()
         });
       });
     });
@@ -93,7 +93,7 @@ export class UserClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({'message': response.getMessage()});
+        res({message: response.getMessage()});
       });
     });
   }
@@ -112,7 +112,7 @@ export class UserClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({'message': response.getMessage()});
+        res({message: response.getMessage()});
       });
     });
   }
@@ -141,13 +141,13 @@ export class UserClient extends APIClient {
         const users = [];
         for (const item of response.getUsers()) {
           const user = {
-            'id': item.getId(),
-            'username': item.getUsername(),
-            'email': item.getEmail(),
-            'name': item.getName(),
-            'bio': item.getBio(),
-            'avatar': item.getAvatar(),
-            'date_created': item.getDateCreated()
+            id: item.getId(),
+            username: item.getUsername(),
+            email: item.getEmail(),
+            name: item.getName(),
+            bio: item.getBio(),
+            avatar: item.getAvatar(),
+            date_created: item.getDateCreated()
           };
           users.push(user);
         }
@@ -178,13 +178,13 @@ export class UserClient extends APIClient {
         const users = [];
         for (const item of response.getUsers()) {
           const user = {
-            'id': item.getId(),
-            'username': item.getUsername(),
-            'email': item.getEmail(),
-            'name': item.getName(),
-            'bio': item.getBio(),
-            'avatar': item.getAvatar(),
-            'date_created': item.getDateCreated()
+            id: item.getId(),
+            username: item.getUsername(),
+            email: item.getEmail(),
+            name: item.getName(),
+            bio: item.getBio(),
+            avatar: item.getAvatar(),
+            date_created: item.getDateCreated()
           };
           users.push(user);
         }
@@ -207,7 +207,7 @@ export class UserClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({'message': response.getMessage()});
+        res({message: response.getMessage()});
       });
     });
   }
@@ -226,7 +226,7 @@ export class UserClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({'message': response.getMessage()});
+        res({message: response.getMessage()});
       });
     });
   }
