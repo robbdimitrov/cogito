@@ -20,7 +20,7 @@ class AuthService(thoughts_pb2_grpc.AuthServiceServicer):
         current_user = self.db_client.get_user_password_hash(email)
 
         if bcrypt.checkpw(password, current_user['password']) == False:
-            raise AuthException(401, 'INVALID_CREDENTIALS', 'Wrong username or password.')
+            raise AuthException(401, 'INVALID_CREDENTIALS', 'Wrong email or password.')
 
         return current_user
 

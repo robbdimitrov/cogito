@@ -59,13 +59,13 @@ export class UserRouter extends APIRouter {
   // Users
 
   createUser(req, res) {
-    const identifier = req.body.identifier;
+    const username = req.body.username;
     const email = req.body.email;
     const name = req.body.name;
     const password = req.body.password;
 
     this.handleResponse(
-      this.userClient.createUser(identifier, email, name, password), res
+      this.userClient.createUser(username, email, name, password), res
     );
   }
 
@@ -77,7 +77,7 @@ export class UserRouter extends APIRouter {
   }
 
   updateUser(req, res) {
-    const identifier = req.body.identifier;
+    const username = req.body.username;
     const email = req.body.email;
     const name = req.body.name;
     const password = req.body.password;
@@ -86,7 +86,7 @@ export class UserRouter extends APIRouter {
     const token = getToken(req);
 
     this.handleResponse(
-      this.userClient.updateUser(identifier, email,
+      this.userClient.updateUser(username, email,
         name, password, bio, oldPassword, token), res
     );
   }
@@ -107,8 +107,7 @@ export class UserRouter extends APIRouter {
     const limit = parseInt(req.query.limit) || 20;
 
     this.handleResponse(
-      this.userClient.getFollowing(id,
-        token, page, limit), res
+      this.userClient.getFollowing(id, token, page, limit), res
     );
   }
 
@@ -119,8 +118,7 @@ export class UserRouter extends APIRouter {
     const limit = parseInt(req.query.limit) || 20;
 
     this.handleResponse(
-      this.userClient.getFollowers(id,
-        token, page, limit), res
+      this.userClient.getFollowers(id, token, page, limit), res
     );
   }
 
@@ -147,8 +145,7 @@ export class UserRouter extends APIRouter {
     const limit = parseInt(req.query.limit) || 20;
 
     this.handleResponse(
-      this.postClient.getPosts(id,
-        token, page, limit), res
+      this.postClient.getPosts(id, token, page, limit), res
     );
   }
 
@@ -159,8 +156,7 @@ export class UserRouter extends APIRouter {
     const limit = parseInt(req.query.limit) || 20;
 
     this.handleResponse(
-      this.postClient.getLikedPosts(id,
-        token, page, limit), res
+      this.postClient.getLikedPosts(id, token, page, limit), res
     );
   }
 }

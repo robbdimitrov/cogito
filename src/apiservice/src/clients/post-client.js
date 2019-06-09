@@ -96,9 +96,9 @@ export class PostClient extends APIClient {
     });
   }
 
-  getPosts(username, token, page, limit) {
+  getPosts(userId, token, page, limit) {
     const request = new messages.DataRequest();
-    request.setUsername(username);
+    request.setUserId(userId);
     request.setToken(token);
     request.setPage(page);
     request.setLimit(limit);
@@ -123,9 +123,9 @@ export class PostClient extends APIClient {
     });
   }
 
-  getLikedPosts(username, token, page, limit) {
+  getLikedPosts(userId, token, page, limit) {
     const request = new messages.DataRequest();
-    request.setUsername(username);
+    request.setUserId(userId);
     request.setToken(token);
     request.setPage(page);
     request.setLimit(limit);
