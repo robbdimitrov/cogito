@@ -45,13 +45,13 @@ export class Server {
     const authRouter = new AuthRouter(authClient);
     this.routers.sessions = authRouter;
 
-    const userClient = new UserClient(this.userURI);
-    const userRouter = new UserRouter(userClient);
-    this.routers.users = userRouter;
-
     const postClient = new PostClient(this.postURI);
     const postRouter = new PostRouter(postClient);
     this.routers.posts = postRouter;
+
+    const userClient = new UserClient(this.userURI);
+    const userRouter = new UserRouter(userClient, postClient);
+    this.routers.users = userRouter;
 
     const imageClient = new ImageClient(this.imageURI);
     const imageRouter = new ImageRouter(imageClient);
