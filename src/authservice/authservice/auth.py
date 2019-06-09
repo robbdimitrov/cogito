@@ -149,4 +149,4 @@ class AuthService(thoughts_pb2_grpc.AuthServiceServicer):
                 message=e.message)
             return thoughts_pb2.Status(error=error)
 
-        return thoughts_pb2.Status(message='Valid password')
+        return thoughts_pb2.Status(message='Credentials validated.')
