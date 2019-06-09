@@ -19,27 +19,27 @@ class Navigation extends React.Component {
 
   render() {
     return (
-      <header className='navigation-container bottom-shadow'>
-        <div className='navigation-content main-container'>
-          <div className='left-items'>
-            <NavLink to='/feed' className='nav-button'>
+      <header className="navigation-container bottom-shadow">
+        <div className="navigation-content main-container">
+          <div className="left-items">
+            <NavLink to="/feed" className="nav-button">
               <FontAwesomeIcon
-                icon='home'
-                className='nav-button-icon'
-                size='2x'
+                icon="home"
+                className="nav-button-icon"
+                size="2x"
               />
-              <span className='nav-button-label'>Home</span>
+              <span className="nav-button-label">Home</span>
             </NavLink>
           </div>
 
-          <FontAwesomeIcon icon='brain' className='icon' size='2x' />
+          <FontAwesomeIcon icon="brain" className="icon" size="2x" />
 
-          <div className='right-items'>
-            <div className='profile-button' onClick={this.handleClick}>
+          <div className="right-items">
+            <div className="profile-button" onClick={this.handleClick}>
               <img
-                className='profile-button-image'
-                src='https://via.placeholder.com/300.png'
-                alt='Profile'
+                className="profile-button-image"
+                src="https://via.placeholder.com/300.png"
+                alt="Profile"
               />
 
               {this.state.isDropdownShown &&
@@ -48,7 +48,7 @@ class Navigation extends React.Component {
             </div>
 
             <button
-              className='button create-button'
+              className="button create-button"
               onClick={this.props.openPopup}
             >
               Create

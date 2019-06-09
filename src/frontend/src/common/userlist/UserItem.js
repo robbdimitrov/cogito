@@ -1,36 +1,41 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import './UserItem.scss';
 
-function UserItem(props) {
+function UserItem({user}) {
   return (
-    <li className='user-item container user-card'>
-      <div className='cover'></div>
+    <li className="user-item container user-card">
+      <div className="cover"></div>
 
-      <div className='content'>
-        <div className='header'>
+      <div className="content">
+        <div className="header">
           <img
-            className='avatar'
-            src='https://via.placeholder.com/300.png'
-            alt='John Doe'
+            className="avatar"
+            src={user.avatar}
+            alt={user.name}
           />
 
-          <button className='follow-button outline-button'>
+          <button className="follow-button outline-button">
             Follow
           </button>
         </div>
 
-        <div className='texts'>
-          <p className='title semibold'>John Smith</p>
-          <p className='subtitle light'>@johnsmith</p>
+        <div className="texts">
+          <p className="title semibold">{user.name}</p>
+          <p className="subtitle light">@{user.username}</p>
 
-          <p className='bio'>
-            A secret agent, Forbes man of the year
+          <p className="bio">
+            {user.bio}
           </p>
         </div>
       </div>
     </li>
   );
 }
+
+UserItem.propTypes = {
+  user: PropTypes.object.isRequired
+};
 
 export default UserItem;

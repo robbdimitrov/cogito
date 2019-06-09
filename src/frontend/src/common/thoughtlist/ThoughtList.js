@@ -4,14 +4,11 @@ import ThoughtItem from './ThoughtItem';
 
 import './ThoughtList.scss';
 
-function ThoughtList(props) {
+function ThoughtList({posts, users}) {
   return (
-    <ul className='thought-list'>
-      {[...Array(props.items).keys()].map((item) =>
-        <ThoughtItem
-          key={item.toString()}
-          value={item}
-        />
+    <ul className="thought-list">
+      {posts.map((post) =>
+        <ThoughtItem key={post.id} post={post} user={users[0]} />
       )}
     </ul>
   );

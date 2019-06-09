@@ -1,9 +1,8 @@
 /**
  * Goes through the userAgent and matches the OS to one of the existing.
  */
-export function getDeviceName() {
+export function getDeviceName(userAgent) {
   let name = 'Unknown';
-  let userAgent = navigator.userAgent;
 
   if (userAgent.indexOf('Windows') !== -1) {
     name = 'Windows';
@@ -24,4 +23,16 @@ export function getDeviceName() {
   }
 
   return name;
+}
+
+/**
+ * Sets value with key in local storage. If value is missing,
+ * the item is removed from localStorage
+ */
+export function setStorage(key, value) {
+  if (value !== undefined) {
+    localStorage.setItem(key, value);
+  } else {
+    localStorage.removeItem(key);
+  }
 }

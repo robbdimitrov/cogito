@@ -14,13 +14,13 @@ function AppRouter(props) {
 
       <Suspense fallback={<div>Loading...</div>}>
         <Switch>
-          <Redirect from='/' exact to='/feed'/>
-          <Route path='/feed' exact component={Feed} />
-          <Route path='/thought' component={Feed} />
-          <Route path='/login' exact component={Login} />
-          <Route path='/signup' exact component={Signup} />
-          <Route path='/settings' component={Settings} />
-          <Route path='/:userId' component={Profile} />
+          <Redirect from="/" exact to="/feed"/>
+          <Route path="/feed" exact component={Feed} />
+          <Route path="/thought" component={Feed} />
+          <Route path="/login" exact component={Login} />
+          <Route path="/signup" exact component={Signup} />
+          <Route path="/settings" component={Settings} />
+          <Route path="/:userId" component={Profile} />
         </Switch>
       </Suspense>
     </BrowserRouter>

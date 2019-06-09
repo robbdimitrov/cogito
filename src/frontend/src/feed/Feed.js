@@ -7,9 +7,9 @@ import './Feed.scss';
 class Feed extends React.Component {
   render() {
     return (
-      <div className='feed-container'>
-        <UserCard className='user-card' />
-        <div className='content'>
+      <div className="feed-container">
+        <UserCard className="user-card" />
+        <div className="content">
           <ThoughtList items={3} />
         </div>
       </div>

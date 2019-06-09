@@ -10,10 +10,10 @@ const Sessions = React.lazy(() => import('./sessions/Sessions'));
 
 function Settings({ match }) {
   return (
-    <div className='settings-container'>
+    <div className="settings-container">
       <SettingsMenu />
 
-      <div className='settings-content main-content'>
+      <div className="settings-content main-content">
         <Switch>
           <Route path={`${match.path}/account`} exact component={EditProfile} />
           <Route path={`${match.path}/password`} exact component={Password} />

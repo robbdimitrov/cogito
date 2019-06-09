@@ -1,5 +1,6 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import PropTypes from 'prop-types';
 
 import './ThoughtBox.scss';
 
@@ -34,32 +35,32 @@ class ThoughtBox extends React.Component {
 
   render() {
     return (
-      <form className='thought-box' onSubmit={this.handleSubmit}>
-        <div className='thought-box-header'>
-          <button className='close-button' onClick={this.props.closePopup}>
-            <FontAwesomeIcon icon='times' />
+      <form className="thought-box" onSubmit={this.handleSubmit}>
+        <div className="thought-box-header">
+          <button className="close-button" onClick={this.props.closePopup}>
+            <FontAwesomeIcon icon="times" />
           </button>
 
           <input
-            type='submit'
-            className='button submit-button'
+            type="submit"
+            className="button submit-button"
             disabled={!this.isPostValid()}
-            value='Create'
+            value="Create"
           />
         </div>
 
-        <div className='thought-box-content'>
+        <div className="thought-box-content">
           <img
-            className='avatar'
-            src='https://via.placeholder.com/300.png'
-            alt={'User\'s name'}
+            className="avatar"
+            src={this.props.user.avatar}
+            alt={this.props.user.name}
           />
 
           <textarea
-            className='form-input'
-            type='text'
-            name='thought'
-            placeholder='What are you thinking?'
+            className="form-input"
+            type="text"
+            name="thought"
+            placeholder="What are you thinking?"
             value={this.state.value}
             onChange={this.handleChange}
             required
@@ -73,5 +74,9 @@ class ThoughtBox extends React.Component {
     )
   }
 }
+
+ThoughtBox.propTypes = {
+  user: PropTypes.object.isRequired
+};
 
 export default ThoughtBox;
