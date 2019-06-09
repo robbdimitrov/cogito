@@ -1,7 +1,10 @@
 from http import HTTPStatus
 
 from userservice import thoughts_pb2, thoughts_pb2_grpc
-from userservice import exceptions
+from userservice.exceptions import (
+    DbException,
+    UserNotFoundException
+)
 
 
 class FollowService(thoughts_pb2_grpc.FollowServiceServicer):
@@ -12,22 +15,22 @@ class FollowService(thoughts_pb2_grpc.FollowServiceServicer):
     def GetFollowing(self, request, context):
         """Returns users following the user."""
 
-        username = request.username
+        user_id = request.user_id
         page = request.page
         limit = request.limit
 
-        users = self.db_client.get_following(username, page, limit)
+        users = self.db_client.get_following(user_id, page, limit)
 
         return thoughts_pb2.Users(users=users)
 
     def GetFollowers(self, request, context):
         """Returns users followed by the user."""
 
-        username = request.username
+        user_id = request.user_id
         page = request.page
         limit = request.limit
 
-        users = self.db_client.get_followers(username, page, limit)
+        users = self.db_client.get_followers(user_id, page, limit)
 
         return thoughts_pb2.Users(users=users)
 
@@ -39,12 +42,17 @@ class FollowService(thoughts_pb2_grpc.FollowServiceServicer):
         if response.error is not None:
             return thoughts_pb2.Status(error=response.error)
 
-        user_id = response.user_id
-        username = request.username
+        current_id = response.user_id
+        user_id = request.user_id
 
         try:
-            self.db_client.follow_user(username, user_id)
-        except exceptions.DbException as e:
+            self.db_client.follow_user(user_id, current_id)
+        except UserNotFoundException as e:
+            error = thoughts_pb2.Error(code=HTTPStatus.NOT_FOUND,
+                error='NOT_FOUND',
+                message=str(e))
+            return thoughts_pb2.Status(error=error)
+        except DbException as e:
             error = thoughts_pb2.Error(code=HTTPStatus.BAD_REQUEST,
                 error='BAD_REQUEST',
                 message=str(e))
@@ -60,9 +68,9 @@ class FollowService(thoughts_pb2_grpc.FollowServiceServicer):
         if response.error is not None:
             return thoughts_pb2.Status(error=response.error)
 
-        user_id = response.user_id
-        username = request.username
+        current_id = response.user_id
+        user_id = request.user_id
 
-        self.db_client.unfollow_user(username, user_id)
+        self.db_client.unfollow_user(user_id, current_id)
 
         return thoughts_pb2.Status(message='User unfollowed.')

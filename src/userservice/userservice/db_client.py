@@ -6,7 +6,7 @@ from userservice.exceptions import (
     DbException,
     ExistingUserException,
     UserActionException,
-    WrongUsernameException
+    UserNotFoundException
 )
 
 
@@ -40,20 +40,14 @@ class DbClient:
         finally:
             cur.close()
 
-    def get_user(self, username, user_id):
+    def get_user(self, user_id):
         conn = self.db.get_conn()
         cur = conn.cursor()
 
-        if user_id is not None:
-            cur.execute('SELECT id, username, email, name, bio, avatar, \
-                time_format(date_created) FROM thoughts.users \
-                WHERE user_id = %s',
-                (user_id,))
-        else:
-            cur.execute('SELECT id, username, email, name, bio, avatar, \
-                time_format(date_created) FROM thoughts.users \
-                WHERE username = %s',
-                (username,))
+        cur.execute('SELECT id, username, email, name, bio, avatar, \
+            time_format(date_created) FROM thoughts.users \
+            WHERE id = %(id)s OR username = %(id)s',
+            {'id': user_id})
         result = cur.fetchone()
         cur.close()
 
@@ -97,18 +91,19 @@ class DbClient:
         conn.commit()
         cur.close()
 
-    def get_followers(self, username, page, limit):
+    def get_followers(self, user_id, page, limit):
         conn = self.db.get_conn()
         cur = conn.cursor()
 
         cur.execute('SELECT id, username, email, name, bio, avatar, \
             time_format(date_created) \
             FROM thoughts.users, thoughts.followings \
-            WHERE user_id = (SELECT id FROM thoughts.users WHERE username = %s) \
+            WHERE user_id = (SELECT id FROM thoughts.users \
+            WHERE username = %(id)s OR id = %(id)s)) \
             AND follower_id = id \
             ORDER BY date_created DESC \
-            OFFSET %s LIMIT %s',
-            (username, page * limit, limit))
+            OFFSET %(offset)s LIMIT %(limit)s',
+            {'id': user_id, 'offset': page * limit, 'limit': limit})
         results = cur.fetchall()
         cur.close()
 
@@ -128,18 +123,19 @@ class DbClient:
             users.append(user)
         return users
 
-    def get_following(self, username, page, limit):
+    def get_following(self, user_id, page, limit):
         conn = self.db.get_conn()
         cur = conn.cursor()
 
         cur.execute('SELECT id, username, email, name, bio, avatar, \
             time_format(date_created) \
             FROM thoughts.users, thoughts.followings \
-            WHERE follower_id = (SELECT id FROM thoughts.users WHERE username = %s) \
+            WHERE follower_id = (SELECT id FROM thoughts.users WHERE \
+            username = %(id)s OR id = %(id)s) \
             AND user_id = id \
             ORDER BY date_created DESC \
-            OFFSET %s LIMIT %s',
-            (username, page * limit, limit))
+            OFFSET %(offset)s LIMIT %(limit)s',
+            {'id': user_id, 'offset': page * limit, 'limit': limit})
         results = cur.fetchall()
         cur.close()
 
@@ -159,23 +155,24 @@ class DbClient:
             users.append(user)
         return users
 
-    def follow_user(self, username, follower_id):
+    def follow_user(self, user_id, follower_id):
         conn = self.db.get_conn()
         cur = conn.cursor()
 
-        cur.execute('SELECT id FROM thoughts.users WHERE username = %s',
-            (username,))
+        cur.execute('SELECT id FROM thoughts.users \
+            WHERE username = %(id)s or id = %(id)s',
+            {'id': user_id})
         user = cur.fetchone()
 
         if user is None:
-            raise WrongUsernameException('Wrong username.')
+            raise UserNotFoundException('User not found.')
 
-        if user['id'] == follower_id:
+        if user[0] == follower_id:
             raise UserActionException('You can\'t follow yourself.')
 
         try:
             cur.execute('INSERT INTO thoughts.followings VALUES(%s, %s)',
-                (user['id'], follower_id))
+                (user[0], follower_id))
             conn.commit()
         except psycopg2.Error as e:
             logging.error(f'Error following user: {str(e)}')
@@ -183,13 +180,14 @@ class DbClient:
         finally:
             cur.close()
 
-    def unfollow_user(self, username, user_id):
+    def unfollow_user(self, user_id, current_id):
         conn = self.db.get_conn()
         cur = conn.cursor()
 
         cur.execute('DELETE FROM thoughts.followings \
-            WHERE user_id = (SELECT id FROM thoughts.users WHERE username = %s) \
-            AND follower_id = %s',
-            (username, user_id))
+            WHERE user_id = (SELECT id FROM thoughts.users \
+            WHERE username = %(id)s OR id = %(id)s) \
+            AND follower_id = %(current)s',
+            {'id': user_id, 'current': current_id})
         conn.commit()
         cur.close()
