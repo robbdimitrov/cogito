@@ -1,6 +1,12 @@
 import { setStorage } from './utils';
 
 const Session = {
+  id: () => {
+    return localStorage.getItem('sessionId');
+  },
+  setId: (value) => {
+    setStorage('sessionId', value);
+  },
   token: () => {
     return localStorage.getItem('accessToken');
   },
@@ -18,6 +24,9 @@ const Session = {
   },
   setRefreshToken: (value) => {
     setStorage('refreshToken', value);
+  },
+  reset: () => {
+    localStorage.clear();
   }
 };
 

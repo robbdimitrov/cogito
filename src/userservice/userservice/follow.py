@@ -50,7 +50,7 @@ class FollowService(thoughts_pb2_grpc.FollowServiceServicer):
                 message=str(e))
             return thoughts_pb2.Status(error=error)
         else:
-            return thoughts_pb2.Status(message='Followed user.')
+            return thoughts_pb2.Status(message='User followed.')
 
     def Unfollow(self, request, context):
         """Unfollows a user with the current user."""
@@ -65,4 +65,4 @@ class FollowService(thoughts_pb2_grpc.FollowServiceServicer):
 
         self.db_client.unfollow_user(username, user_id)
 
-        return thoughts_pb2.Status(message='Unfollowed user.')
+        return thoughts_pb2.Status(message='User unfollowed.')

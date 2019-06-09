@@ -26,14 +26,10 @@ export class Server {
   // Configure Express middleware
   configure() {
     this.configureLogger();
-    this.configureBodyParser();
+    this.app.use(bodyParser.json());
     this.app.use(helmet());
     this.configureRouters();
     this.connectRouters();
-  }
-
-  configureBodyParser() {
-    this.app.use(bodyParser.urlencoded({extended: true}));
   }
 
   configureLogger() {
