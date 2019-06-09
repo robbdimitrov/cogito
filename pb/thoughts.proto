@@ -13,7 +13,7 @@ message Error {
 }
 
 message DataRequest {
-  string username = 1;
+  string user_id = 1;
   string token = 2;
   int32 page = 3;
   int32 limit = 4;
@@ -29,12 +29,20 @@ message Status {
 }
 
 message AuthStatus {
-  int32 user_id = 1;
-  Error error = 2;
+  string token_type = 1;
+  string access_token = 2;
+  string refresh_token = 3;
+  int32 user_id = 4;
+  Error error = 5;
 }
 
 message UserStatus {
   User user = 1;
+  Error error = 2;
+}
+
+message PostStatus {
+  Post post = 1;
   Error error = 2;
 }
 
@@ -53,19 +61,12 @@ message AuthRequest {
   string token = 1;
 }
 
-message AuthStatus {
-  string token_type = 1;
-  string access_token = 2;
-  string refresh_token = 3;
-  Error error = 4;
-}
-
 /**
  * Users
  */
 
 message UserRequest {
-  string username = 1;
+  string user_id = 1;
   string token = 2;
 }
 
@@ -90,7 +91,11 @@ message User {
   string name = 4;
   string bio = 5;
   string avatar = 6;
-  string date_created = 7;
+  int32 posts = 7;
+  int32 likes = 8;
+  int32 following = 9;
+  int32 followers = 10;
+  string date_created = 11;
 }
 
 /**
@@ -123,7 +128,9 @@ message Post {
   int32 id = 1;
   string content = 2;
   int32 user_id = 3;
-  string date_created = 4;
+  int32 likes = 4;
+  int32 retweets = 5;
+  string date_created = 6;
 }
 
 message PostUpdates {
@@ -134,11 +141,6 @@ message PostUpdates {
 
 message Posts {
   repeated Post posts = 1;
-}
-
-message PostStatus {
-  Post post = 1;
-  Error error = 2;
 }
 
 message PostRequest {

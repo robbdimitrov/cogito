@@ -19,7 +19,7 @@ class UserServiceStub(object):
     self.CreateUser = channel.unary_unary(
         '/thoughts.UserService/CreateUser',
         request_serializer=thoughts__pb2.UserUpdates.SerializeToString,
-        response_deserializer=thoughts__pb2.UserStatus.FromString,
+        response_deserializer=thoughts__pb2.Status.FromString,
         )
     self.GetUser = channel.unary_unary(
         '/thoughts.UserService/GetUser',
@@ -78,7 +78,7 @@ def add_UserServiceServicer_to_server(servicer, server):
       'CreateUser': grpc.unary_unary_rpc_method_handler(
           servicer.CreateUser,
           request_deserializer=thoughts__pb2.UserUpdates.FromString,
-          response_serializer=thoughts__pb2.UserStatus.SerializeToString,
+          response_serializer=thoughts__pb2.Status.SerializeToString,
       ),
       'GetUser': grpc.unary_unary_rpc_method_handler(
           servicer.GetUser,
@@ -207,12 +207,12 @@ class AuthServiceStub(object):
     self.Login = channel.unary_unary(
         '/thoughts.AuthService/Login',
         request_serializer=thoughts__pb2.Credentials.SerializeToString,
-        response_deserializer=thoughts__pb2.AuthResponse.FromString,
+        response_deserializer=thoughts__pb2.AuthStatus.FromString,
         )
     self.Refresh = channel.unary_unary(
         '/thoughts.AuthService/Refresh',
         request_serializer=thoughts__pb2.AuthRequest.SerializeToString,
-        response_deserializer=thoughts__pb2.AuthResponse.FromString,
+        response_deserializer=thoughts__pb2.AuthStatus.FromString,
         )
     self.Validate = channel.unary_unary(
         '/thoughts.AuthService/Validate',
@@ -264,12 +264,12 @@ def add_AuthServiceServicer_to_server(servicer, server):
       'Login': grpc.unary_unary_rpc_method_handler(
           servicer.Login,
           request_deserializer=thoughts__pb2.Credentials.FromString,
-          response_serializer=thoughts__pb2.AuthResponse.SerializeToString,
+          response_serializer=thoughts__pb2.AuthStatus.SerializeToString,
       ),
       'Refresh': grpc.unary_unary_rpc_method_handler(
           servicer.Refresh,
           request_deserializer=thoughts__pb2.AuthRequest.FromString,
-          response_serializer=thoughts__pb2.AuthResponse.SerializeToString,
+          response_serializer=thoughts__pb2.AuthStatus.SerializeToString,
       ),
       'Validate': grpc.unary_unary_rpc_method_handler(
           servicer.Validate,
