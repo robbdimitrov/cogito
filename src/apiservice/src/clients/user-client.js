@@ -3,6 +3,7 @@ import * as grpc from 'grpc';
 import * as services from '../genproto/thoughts_grpc_pb';
 import * as messages from '../genproto/thoughts_pb';
 import { APIClient } from './api-client';
+import { itemToUser, itemsToUsers } from '../routers/utils';
 
 export class UserClient extends APIClient {
   constructor(serviceURI) {
@@ -51,17 +52,7 @@ export class UserClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-
-        const item = response.getUser();
-        const user = {
-          id: item.getId(),
-          username: item.getUsername(),
-          email: item.getEmail(),
-          name: item.getName(),
-          bio: item.getBio(),
-          avatar: item.getAvatar(),
-          date_created: item.getDateCreated()
-        };
+        const user = itemToUser(response.getUser());
         res({user});
       });
     });
@@ -124,19 +115,7 @@ export class UserClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        const users = [];
-        for (const item of response.getUsers()) {
-          const user = {
-            id: item.getId(),
-            username: item.getUsername(),
-            email: item.getEmail(),
-            name: item.getName(),
-            bio: item.getBio(),
-            avatar: item.getAvatar(),
-            date_created: item.getDateCreated()
-          };
-          users.push(user);
-        }
+        const users = itemsToUsers(response.getUsers());
         res({users});
       });
     });
@@ -154,19 +133,7 @@ export class UserClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        const users = [];
-        for (const item of response.getUsers()) {
-          const user = {
-            id: item.getId(),
-            username: item.getUsername(),
-            email: item.getEmail(),
-            name: item.getName(),
-            bio: item.getBio(),
-            avatar: item.getAvatar(),
-            date_created: item.getDateCreated()
-          };
-          users.push(user);
-        }
+        const users = itemsToUsers(response.getUsers());
         res({users});
       });
     });
