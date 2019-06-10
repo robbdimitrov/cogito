@@ -1,5 +1,5 @@
 import { APIRouter } from './api-router';
-import { getToken } from './utils';
+import { getToken } from '../utils';
 
 export class PostRouter extends APIRouter {
   constructor(postClient) {
