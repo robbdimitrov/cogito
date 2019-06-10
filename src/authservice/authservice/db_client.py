@@ -58,7 +58,9 @@ class DbClient:
         cur = conn.cursor()
 
         cur.execute('SELECT id, user_id, user_agent, time_format(date_created) \
-            FROM thoughts.sessions WHERE user_id = %s', (user_id,))
+            FROM thoughts.sessions WHERE user_id = %(id)s OR \
+            user_id = (SELECT id FROM thoughts.users WHERE username = %(id)s)',
+            {'id': user_id})
         result = cur.fetchall()
         cur.close()
 
