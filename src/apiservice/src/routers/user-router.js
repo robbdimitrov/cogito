@@ -1,5 +1,4 @@
 import { APIRouter } from './api-router';
-import { getToken } from '../utils';
 
 export class UserRouter extends APIRouter {
   constructor(userClient, postClient) {
@@ -71,7 +70,7 @@ export class UserRouter extends APIRouter {
 
   getUser(req, res) {
     const id = req.params.id;
-    const token = getToken(req);
+    const token = this.getToken(req);
 
     this.handleResponse(this.userClient.getUser(id, token), res);
   }
@@ -83,7 +82,7 @@ export class UserRouter extends APIRouter {
     const password = req.body.password;
     const bio = req.body.bio;
     const oldPassword = req.body.old_password;
-    const token = getToken(req);
+    const token = this.getToken(req);
 
     this.handleResponse(
       this.userClient.updateUser(username, email,
@@ -93,7 +92,7 @@ export class UserRouter extends APIRouter {
 
   deleteUser(req, res) {
     const id = req.params.id;
-    const token = getToken(req);
+    const token = this.getToken(req);
 
     this.handleResponse(this.userClient.deleteUser(id, token), res);
   }
@@ -102,7 +101,7 @@ export class UserRouter extends APIRouter {
 
   getFollowing(req, res) {
     const id = req.params.id;
-    const token = getToken(req);
+    const token = this.getToken(req);
     const page = parseInt(req.query.page) || 0;
     const limit = parseInt(req.query.limit) || 20;
 
@@ -113,7 +112,7 @@ export class UserRouter extends APIRouter {
 
   getFollowers(req, res) {
     const id = req.params.id;
-    const token = getToken(req);
+    const token = this.getToken(req);
     const page = parseInt(req.query.page) || 0;
     const limit = parseInt(req.query.limit) || 20;
 
@@ -124,14 +123,14 @@ export class UserRouter extends APIRouter {
 
   follow(req, res) {
     const id = req.params.id;
-    const token = getToken(req);
+    const token = this.getToken(req);
 
     this.handleResponse(this.userClient.follow(id, token), res);
   }
 
   unfollow(req, res) {
     const id = req.params.id;
-    const token = getToken(req);
+    const token = this.getToken(req);
 
     this.handleResponse(this.userClient.unfollow(id, token), res);
   }
@@ -140,7 +139,7 @@ export class UserRouter extends APIRouter {
 
   getPosts(req, res) {
     const id = req.params.id;
-    const token = getToken(req);
+    const token = this.getToken(req);
     const page = parseInt(req.query.page) || 0;
     const limit = parseInt(req.query.limit) || 20;
 
@@ -151,7 +150,7 @@ export class UserRouter extends APIRouter {
 
   getLikedPosts(req, res) {
     const id = req.params.id;
-    const token = getToken(req);
+    const token = this.getToken(req);
     const page = parseInt(req.query.page) || 0;
     const limit = parseInt(req.query.limit) || 20;
 

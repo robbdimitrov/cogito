@@ -1,5 +1,4 @@
 import { APIRouter } from './api-router';
-import { getToken } from '../utils';
 
 export class PostRouter extends APIRouter {
   constructor(postClient) {
@@ -51,20 +50,20 @@ export class PostRouter extends APIRouter {
 
   createPost(req, res) {
     const content = req.body.content;
-    const token = getToken(req);
+    const token = this.getToken(req);
 
     this.handleResponse(this.postClient.createPost(content, token), res);
   }
 
   getPost(req, res) {
     const postId = req.params.id;
-    const token = getToken(req);
+    const token = this.getToken(req);
 
     this.handleResponse(this.postClient.getPost(postId, token), res);
   }
 
   getFeed(req, res) {
-    const token = getToken(req);
+    const token = this.getToken(req);
     const page = parseInt(req.query.page) || 0;
     const limit = parseInt(req.query.limit) || 20;
 
@@ -75,7 +74,7 @@ export class PostRouter extends APIRouter {
 
   deletePost(req, res) {
     const postId = req.params.id;
-    const token = getToken(req);
+    const token = this.getToken(req);
 
     this.handleResponse(this.postClient.deletePost(postId, token), res);
   }
@@ -84,28 +83,28 @@ export class PostRouter extends APIRouter {
 
   likePost(req, res) {
     const postId = req.params.id;
-    const token = getToken(req);
+    const token = this.getToken(req);
 
     this.handleResponse(this.postClient.likePost(postId, token), res);
   }
 
   unlikePost(req, res) {
     const postId = req.params.id;
-    const token = getToken(req);
+    const token = this.getToken(req);
 
     this.handleResponse(this.postClient.unlikePost(postId, token), res);
   }
 
   retweetPost(req, res) {
     const postId = req.params.id;
-    const token = getToken(req);
+    const token = this.getToken(req);
 
     this.handleResponse(this.postClient.retweetPost(postId, token), res);
   }
 
   removeRetweet(req, res) {
     const postId = req.params.id;
-    const token = getToken(req);
+    const token = this.getToken(req);
 
     this.handleResponse(this.postClient.removeRetweet(postId, token), res);
   }
