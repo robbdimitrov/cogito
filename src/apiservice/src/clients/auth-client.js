@@ -5,9 +5,10 @@ import * as messages from '../genproto/thoughts_pb';
 import { APIClient } from './api-client';
 
 export class AuthClient extends APIClient {
-  constructor(serviceURI) {
+  constructor(serviceURI, userClient) {
     super(serviceURI);
 
+    this.userClient = userClient;
     this.authClient = new services.AuthServiceClient(this.serviceURI,
       grpc.credentials.createInsecure());
     this.sessionClient = new services.SessionServiceClient(this.serviceURI,
@@ -36,7 +37,16 @@ export class AuthClient extends APIClient {
           access_token: response.getAccessToken(),
           refresh_token: response.getRefreshToken()
         };
-        res({token});
+        const session_id = response.getSessionId();
+        this.userClient.getUser(response.getUserId())
+          .then((result) => {
+            const user = result;
+            res({
+              user, token, session_id
+            });
+          }).catch((error) => {
+            rej(error);
+          });
       });
     });
   }

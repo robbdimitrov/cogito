@@ -86,7 +86,9 @@ class AuthService(thoughts_pb2_grpc.AuthServiceServicer):
         return thoughts_pb2.AuthStatus(
             token_type='bearer',
             access_token=tokens['access_token'],
-            refresh_token=tokens['refresh_token']
+            refresh_token=tokens['refresh_token'],
+            user_id=current_user['id'],
+            session_id=session['session_id']
         )
 
     def Refresh(self, request, context):

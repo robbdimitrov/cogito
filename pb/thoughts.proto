@@ -33,7 +33,8 @@ message AuthStatus {
   string access_token = 2;
   string refresh_token = 3;
   int32 user_id = 4;
-  Error error = 5;
+  int32 session_id = 5;
+  Error error = 6;
 }
 
 message UserStatus {

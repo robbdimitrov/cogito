@@ -686,6 +686,7 @@ proto.thoughts.AuthStatus.toObject = function(includeInstance, msg) {
     accessToken: jspb.Message.getFieldWithDefault(msg, 2, ""),
     refreshToken: jspb.Message.getFieldWithDefault(msg, 3, ""),
     userId: jspb.Message.getFieldWithDefault(msg, 4, 0),
+    sessionId: jspb.Message.getFieldWithDefault(msg, 5, 0),
     error: (f = msg.getError()) && proto.thoughts.Error.toObject(includeInstance, f)
   };
 
@@ -740,6 +741,10 @@ proto.thoughts.AuthStatus.deserializeBinaryFromReader = function(msg, reader) {
       msg.setUserId(value);
       break;
     case 5:
+      var value = /** @type {number} */ (reader.readInt32());
+      msg.setSessionId(value);
+      break;
+    case 6:
       var value = new proto.thoughts.Error;
       reader.readMessage(value,proto.thoughts.Error.deserializeBinaryFromReader);
       msg.setError(value);
@@ -801,10 +806,17 @@ proto.thoughts.AuthStatus.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
+  f = message.getSessionId();
+  if (f !== 0) {
+    writer.writeInt32(
+      5,
+      f
+    );
+  }
   f = message.getError();
   if (f != null) {
     writer.writeMessage(
-      5,
+      6,
       f,
       proto.thoughts.Error.serializeBinaryToWriter
     );
@@ -873,18 +885,33 @@ proto.thoughts.AuthStatus.prototype.setUserId = function(value) {
 
 
 /**
- * optional Error error = 5;
+ * optional int32 session_id = 5;
+ * @return {number}
+ */
+proto.thoughts.AuthStatus.prototype.getSessionId = function() {
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 5, 0));
+};
+
+
+/** @param {number} value */
+proto.thoughts.AuthStatus.prototype.setSessionId = function(value) {
+  jspb.Message.setProto3IntField(this, 5, value);
+};
+
+
+/**
+ * optional Error error = 6;
  * @return {?proto.thoughts.Error}
  */
 proto.thoughts.AuthStatus.prototype.getError = function() {
   return /** @type{?proto.thoughts.Error} */ (
-    jspb.Message.getWrapperField(this, proto.thoughts.Error, 5));
+    jspb.Message.getWrapperField(this, proto.thoughts.Error, 6));
 };
 
 
 /** @param {?proto.thoughts.Error|undefined} value */
 proto.thoughts.AuthStatus.prototype.setError = function(value) {
-  jspb.Message.setWrapperField(this, 5, value);
+  jspb.Message.setWrapperField(this, 6, value);
 };
 
 
@@ -898,7 +925,7 @@ proto.thoughts.AuthStatus.prototype.clearError = function() {
  * @return {boolean}
  */
 proto.thoughts.AuthStatus.prototype.hasError = function() {
-  return jspb.Message.getField(this, 5) != null;
+  return jspb.Message.getField(this, 6) != null;
 };
 
 

@@ -41,7 +41,8 @@ export class Server {
 
   // Create API routers
   configureRouters() {
-    const authClient = new AuthClient(this.authURI);
+    const userClient = new UserClient(this.userURI);
+    const authClient = new AuthClient(this.authURI, userClient);
     const authRouter = new AuthRouter(authClient);
     this.routers.sessions = authRouter;
 
@@ -49,7 +50,6 @@ export class Server {
     const postRouter = new PostRouter(postClient);
     this.routers.posts = postRouter;
 
-    const userClient = new UserClient(this.userURI);
     const userRouter = new UserRouter(userClient, postClient);
     this.routers.users = userRouter;
 
