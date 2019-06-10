@@ -36,6 +36,8 @@ export class PostClient extends APIClient {
           id: item.getId(),
           content: item.getContent(),
           user_id: item.getUserId(),
+          likes: item.getLikes(),
+          retweets: item.getRetweets(),
           date_created: item.getDateCreated()
         };
         res({post});
@@ -63,6 +65,8 @@ export class PostClient extends APIClient {
           id: item.getId(),
           content: item.getContent(),
           user_id: item.getUserId(),
+          likes: item.getLikes(),
+          retweets: item.getRetweets(),
           date_created: item.getDateCreated()
         };
         res({post});
@@ -87,6 +91,8 @@ export class PostClient extends APIClient {
             id: item.getId(),
             content: item.getContent(),
             user_id: item.getUserId(),
+            likes: item.getLikes(),
+            retweets: item.getRetweets(),
             date_created: item.getDateCreated()
           };
           posts.push(post);
@@ -114,6 +120,8 @@ export class PostClient extends APIClient {
             id: item.getId(),
             content: item.getContent(),
             user_id: item.getUserId(),
+            likes: item.getLikes(),
+            retweets: item.getRetweets(),
             date_created: item.getDateCreated()
           };
           posts.push(post);
@@ -141,6 +149,8 @@ export class PostClient extends APIClient {
             id: item.getId(),
             content: item.getContent(),
             user_id: item.getUserId(),
+            likes: item.getLikes(),
+            retweets: item.getRetweets(),
             date_created: item.getDateCreated()
           };
           posts.push(post);

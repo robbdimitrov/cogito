@@ -66,7 +66,7 @@ func (s *Service) GetFeed(ctx context.Context, req *pb.DataRequest) (*pb.Posts, 
 
 // GetPosts returns posts and retweets of user
 func (s *Service) GetPosts(ctx context.Context, req *pb.DataRequest) (*pb.Posts, error) {
-	status, err := s.userClient.GetUser(req.Username)
+	status, err := s.userClient.GetUser(req.UserId)
 	if err != nil {
 		return nil, err
 	} else if status.Error != nil {
@@ -83,7 +83,7 @@ func (s *Service) GetPosts(ctx context.Context, req *pb.DataRequest) (*pb.Posts,
 
 // GetLikedPosts returns posts liked by the user
 func (s *Service) GetLikedPosts(ctx context.Context, req *pb.DataRequest) (*pb.Posts, error) {
-	status, err := s.userClient.GetUser(req.Username)
+	status, err := s.userClient.GetUser(req.UserId)
 	if err != nil {
 		return nil, err
 	} else if status.Error != nil {

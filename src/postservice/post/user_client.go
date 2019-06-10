@@ -21,7 +21,7 @@ func NewUserClient(address string) *UserClient {
 }
 
 // GetUser gets the user with username from the user grpc service
-func (c *UserClient) GetUser(username string) (*pb.UserStatus, error) {
+func (c *UserClient) GetUser(userID string) (*pb.UserStatus, error) {
 	conn, err := grpc.Dial(c.address, grpc.WithInsecure())
 	if err != nil {
 		log.Panic("Error happened while establishing connection to the user server")
@@ -32,7 +32,7 @@ func (c *UserClient) GetUser(username string) (*pb.UserStatus, error) {
 	defer cancel()
 
 	client := pb.NewUserServiceClient(conn)
-	status, err := client.GetUser(ctx, &pb.UserRequest{Username: username})
+	status, err := client.GetUser(ctx, &pb.UserRequest{UserId: userID})
 	if err != nil {
 		return nil, err
 	}
