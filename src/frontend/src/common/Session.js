@@ -1,25 +1,25 @@
 import { setStorage } from './utils';
 
 const Session = {
-  id: () => {
+  getId: () => {
     return localStorage.getItem('sessionId');
   },
   setId: (value) => {
     setStorage('sessionId', value);
   },
-  token: () => {
+  getToken: () => {
     return localStorage.getItem('accessToken');
   },
   setToken: (value) => {
     setStorage('accessToken', value);
   },
-  userId: () => {
+  getUserId: () => {
     return localStorage.getItem('userId');
   },
   setUserId: (value) => {
     setStorage('userId', value);
   },
-  refreshToken: () => {
+  getRefreshToken: () => {
     return localStorage.getItem('refreshToken');
   },
   setRefreshToken: (value) => {
