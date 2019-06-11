@@ -8,6 +8,10 @@ from userservice.exceptions import (
     UserActionException,
     UserNotFoundException
 )
+from userservice.utils import (
+    row_to_user,
+    rows_to_users
+)
 
 
 class DbClient:
@@ -54,14 +58,7 @@ class DbClient:
         if result is None:
             return None
 
-        user = thoughts_pb2.User(
-            id=result[0],
-            username=result[1],
-            email=result[2],
-            name=result[3],
-            bio=result[4],
-            avatar=result[5],
-            date_created=result[6])
+        user = row_to_user(result)
         return user
 
     def update_user(self, user_id, updates):
@@ -110,17 +107,7 @@ class DbClient:
         if results is None:
             return None
 
-        users = []
-        for result in results:
-            user = thoughts_pb2.User(
-                id=result[0],
-                username=result[1],
-                email=result[2],
-                name=result[3],
-                bio=result[4],
-                avatar=result[5],
-                date_created=result[6])
-            users.append(user)
+        users = rows_to_users(results)
         return users
 
     def get_following(self, user_id, page, limit):
@@ -142,17 +129,7 @@ class DbClient:
         if results is None:
             return None
 
-        users = []
-        for result in results:
-            user = thoughts_pb2.User(
-                id=result[0],
-                username=result[1],
-                email=result[2],
-                name=result[3],
-                bio=result[4],
-                avatar=result[5],
-                date_created=result[6])
-            users.append(user)
+        users = rows_to_users(results)
         return users
 
     def follow_user(self, user_id, follower_id):
