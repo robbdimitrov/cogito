@@ -20,48 +20,23 @@ func NewDbClient(db *Database) *DbClient {
 func (c *DbClient) CreatePost(content string, userID int32) (pb.Post, error) {
 	conn := c.db.GetConn()
 
-	var (
-		id          int32
-		dateCreated string
-	)
-
-	err := conn.QueryRow(`INSERT INTO thoughts.posts(content, user_id) VALUES($1, $2)
+	row := conn.QueryRow(`INSERT INTO thoughts.posts(content, user_id) VALUES($1, $2)
     RETURNING id, content, user_id, time_format(date_created)`,
-		content, userID).Scan(&id, &content, &userID, &dateCreated)
-	if err != nil {
-		return pb.Post{}, errors.New("Error happened while saving to the database")
-	}
+		content, userID)
 
-	post := pb.Post{
-		Id:          id,
-		Content:     content,
-		UserId:      userID,
-		DateCreated: dateCreated}
-	return post, nil
+	post, err := rowToPost(row)
+	return post, err
 }
 
 // GetPost returns a Post row with the passed id from the database
 func (c *DbClient) GetPost(id int32) (pb.Post, error) {
 	conn := c.db.GetConn()
 
-	var (
-		content     string
-		userID      int32
-		dateCreated string
-	)
+	row := conn.QueryRow(`SELECT id, content, user_id, time_format(date_created)
+    FROM thoughts.posts WHERE id = $1`, id)
 
-	err := conn.QueryRow(`SELECT id, content, user_id, time_format(date_created)
-    FROM thoughts.posts WHERE id = $1`, id).Scan(&id, &content, &userID, &dateCreated)
-	if err != nil {
-		return pb.Post{}, errors.New("Error happened while reading from the database")
-	}
-
-	post := pb.Post{
-		Id:          id,
-		Content:     content,
-		UserId:      userID,
-		DateCreated: dateCreated}
-	return post, nil
+	post, err := rowToPost(row)
+	return post, err
 }
 
 // GetFeed returns posts and retweets of users followed by the user
@@ -85,25 +60,8 @@ func (c *DbClient) GetFeed(userID int32, page int32, limit int32) (pb.Posts, err
 	}
 	defer rows.Close()
 
-	var posts []*pb.Post
-	for rows.Next() {
-		var (
-			id          int32
-			content     string
-			userID      int32
-			dateCreated string
-		)
-		if err := rows.Scan(&id, &content, &userID, &dateCreated); err != nil {
-			return pb.Posts{}, errors.New("Error happened while parsing database response")
-		}
-		post := pb.Post{
-			Id:          id,
-			Content:     content,
-			UserId:      userID,
-			DateCreated: dateCreated}
-		posts = append(posts, &post)
-	}
-	return pb.Posts{Posts: posts}, nil
+	posts, err := rowsToPosts(rows)
+	return posts, nil
 }
 
 // GetPosts returns the posts and retweets of the user with userID
@@ -124,25 +82,8 @@ func (c *DbClient) GetPosts(userID int32, page int32, limit int32) (pb.Posts, er
 	}
 	defer rows.Close()
 
-	var posts []*pb.Post
-	for rows.Next() {
-		var (
-			id          int32
-			content     string
-			userID      int32
-			dateCreated string
-		)
-		if err := rows.Scan(&id, &content, &userID, &dateCreated); err != nil {
-			return pb.Posts{}, errors.New("Error happened while parsing database response")
-		}
-		post := pb.Post{
-			Id:          id,
-			Content:     content,
-			UserId:      userID,
-			DateCreated: dateCreated}
-		posts = append(posts, &post)
-	}
-	return pb.Posts{Posts: posts}, nil
+	posts, err := rowsToPosts(rows)
+	return posts, nil
 }
 
 // GetLikedPosts returns posts liked by the user
@@ -159,25 +100,8 @@ func (c *DbClient) GetLikedPosts(userID int32, page int32, limit int32) (pb.Post
 	}
 	defer rows.Close()
 
-	var posts []*pb.Post
-	for rows.Next() {
-		var (
-			id          int32
-			content     string
-			userID      int32
-			dateCreated string
-		)
-		if err := rows.Scan(&id, &content, &userID, &dateCreated); err != nil {
-			return pb.Posts{}, errors.New("Error happened while parsing database response")
-		}
-		post := pb.Post{
-			Id:          id,
-			Content:     content,
-			UserId:      userID,
-			DateCreated: dateCreated}
-		posts = append(posts, &post)
-	}
-	return pb.Posts{Posts: posts}, nil
+	posts, err := rowsToPosts(rows)
+	return posts, nil
 }
 
 // DeletePost deletes a post with the passed postID
