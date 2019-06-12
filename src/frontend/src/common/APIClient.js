@@ -9,7 +9,7 @@ class APIClient {
       'Content-Type': 'application/json'
     });
 
-    const token = session.token();
+    const token = session.getToken();
     if (token !== undefined) {
       headers.set('Authorization', `Bearer ${token}`);
     }
@@ -47,7 +47,7 @@ class APIClient {
   refreshToken() {
     const url = '/sessions';
     const headers = this.headers();
-    const token = session.refreshToken();
+    const token = session.getRefreshToken();
     headers.set('Authorization', `Bearer ${token}`);
     return this.request(url, 'POST', undefined, headers);
   }
@@ -71,7 +71,7 @@ class APIClient {
   }
 
   updateUser(name, username, email, bio, password, oldPassword, avatar) {
-    const url = `/users/${session.userId}`;
+    const url = `/users/${session.getUserId()}`;
 
     const body = {};
 
