@@ -105,8 +105,18 @@ class APIClient {
     return this.request(url);
   }
 
+  getFollowingIds(userId) {
+    const url = `/users/${userId}/following?ids=1`;
+    return this.request(url);
+  }
+
   getFollowing(userId, page, limit = 20) {
     const url = `/users/${userId}/following?page=${page}&limit=${limit}`;
+    return this.request(url);
+  }
+
+  getFollowersIds(userId) {
+    const url = `/users/${userId}/following?ids=1`;
     return this.request(url);
   }
 

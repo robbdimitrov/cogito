@@ -1,5 +1,21 @@
 import apiClient from '../../common/APIClient';
 
+export const FETCH_FOLLOWING_IDS = 'FETCH_FOLLOWING_IDS';
+export function fetchFollowingIds(userId) {
+  return (dispatch) => {
+    apiClient.getFollowingIds(userId).then((response) => {
+      if (!response.ok) {
+        return;
+      }
+      dispatch({
+        type: FETCH_FOLLOWING_IDS,
+        userId,
+        usersIds: response.users
+      });
+    });
+  };
+}
+
 export const FETCH_FOLLOWING = 'FETCH_FOLLOWING';
 export function fetchFollowing(userId, page) {
   return (dispatch) => {
@@ -12,6 +28,22 @@ export function fetchFollowing(userId, page) {
         userId,
         users: response.users,
         page
+      });
+    });
+  };
+}
+
+export const FETCH_FOLLOWER_IDS = 'FETCH_FOLLOWING_IDS';
+export function fetchFollowerIds(userId) {
+  return (dispatch) => {
+    apiClient.getFollowersIds(userId).then((response) => {
+      if (!response.ok) {
+        return;
+      }
+      dispatch({
+        type: FETCH_FOLLOWER_IDS,
+        userId,
+        usersIds: response.users
       });
     });
   };
