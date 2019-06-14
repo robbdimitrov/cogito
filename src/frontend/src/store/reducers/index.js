@@ -1,11 +1,13 @@
 import { combineReducers } from 'redux';
 
-import postsReducer from './posts';
-import usersReducer from './users';
+import users from './users';
+import posts from './posts';
+import feed from './feed';
 
 const reducer = combineReducers({
-  postsReducer,
-  usersReducer
+  users,
+  posts,
+  feed
 });
 
 export default reducer;

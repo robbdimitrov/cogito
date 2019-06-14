@@ -1,77 +1,135 @@
-import {
-  LOGIN_USER, LOGOUT_USER,
-  REGISTER_USER, UPDATE_USER,
-  REQUEST_USER, RECEIVE_USER,
-  REQUEST_USERS, RECEIVE_USERS,
-  FOLLOW_USER, UNFOLLOW_USER
-} from './types';
+import apiClient from '../../common/APIClient';
+import session from '../../common/Session';
+import { fetchFollowingIds, fetchFollowersIds } from './follow';
+import { loginUser } from './auth';
 
-// Auth
+// Register
 
-export function loginUser(email, password) {
-  return {
-    type: LOGIN_USER
+export const REGISTER_USER = 'REGISTER_USER';
+export function registerUser(name, username, email, password) {
+  return (dispatch) => {
+    apiClient.registerUser(name, username, email, password).then((response) => {
+      if (!response.ok) {
+        dispatch({
+          type: REGISTER_USER,
+          error: response.error.message
+        });
+        return;
+      }
+
+      dispatch(loginUser(email, password));
+    });
   };
 }
 
-export function logoutUser() {
-  return {
-    type: LOGOUT_USER
+// Update
+
+export const UPDATE_USER = 'UPDATE_USER';
+export function updateUser(name, username, email, bio, avatar) {
+  return (dispatch) => {
+    apiClient.updateUser(name, username, email, bio,
+      undefined, undefined, avatar).then((response) => {
+        if (!response.ok) {
+          dispatch({
+            type: UPDATE_USER,
+            error: response.error.message
+          });
+          return;
+        }
+
+        dispatch({
+          type: UPDATE_USER,
+          userId: session.getUserId(),
+          name, username, email, bio, avatar
+        });
+      });
+  };
+}
+
+export const UPDATE_PASSWORD = 'UPDATE_PASSWORD';
+export function updatePassword(password, oldPassword) {
+  return (dispatch) => {
+    apiClient.updateUser(undefined, undefined, undefined, undefined,
+      password, oldPassword).then((response) => {
+        if (!response.ok) {
+          dispatch({
+            type: UPDATE_PASSWORD,
+            error: response.error.message
+          });
+          return;
+        }
+
+        dispatch({
+          type: UPDATE_PASSWORD
+        });
+      });
   };
 }
 
 // User
 
-export function registerUser() {
-  return {
-    type: REGISTER_USER
+export const FETCH_USER = 'FETCH_USER';
+export function fetchUser(userId) {
+  return (dispatch) => {
+    apiClient.getUser(userId).then((response) => {
+      if (!response.ok) {
+        dispatch({
+          type: FETCH_USER,
+          userId,
+          error: response.error.message
+        });
+      }
+
+      dispatch({
+        type: FETCH_USER,
+        user: response.user
+      });
+    });
   };
 }
 
-export function updateUser() {
-  return {
-    type: UPDATE_USER
-  };
-}
-
-// Fetch
-
-export function requestUser() {
-  return {
-    type: REQUEST_USER
-  };
-}
-
-export function receiveUser() {
-  return {
-    type: RECEIVE_USER
-  };
-}
-
-export function requestUsers() {
-  return {
-    type: REQUEST_USERS
-  };
-}
-
-export function receiveUsers() {
-  return {
-    type: RECEIVE_USERS
+export function fetchUserIfNeeded(userId) {
+  return function(dispatch, getState) {
+    if (!getState().users[userId]) {
+      if (userId === session.getUserId()) {
+        dispatch(fetchFollowingIds(userId));
+        dispatch(fetchFollowersIds(userId));
+      }
+      return dispatch(fetchUser(userId));
+    }
   };
 }
 
 // Actions
 
+export const FOLLOW_USER = 'FOLLOW_USER';
 export function followUser(userId) {
-  return {
-    type: FOLLOW_USER,
-    userId
-  }
+  return function(dispatch) {
+    apiClient.followUser(userId).then((response) => {
+      if (!response.ok) {
+        return;
+      }
+      dispatch({
+        type: FOLLOW_USER,
+        currentId: session.getUserId(),
+        userId
+      });
+    });
+  };
 }
 
+export const UNFOLLOW_USER = 'UNFOLLOW_USER';
 export function unfollowUser(userId) {
-  return {
-    type: UNFOLLOW_USER,
-    userId
-  }
+  return function(dispatch) {
+    apiClient.unfollowUser(userId).then((response) => {
+      if (!response.ok) {
+        return;
+      }
+      dispatch({
+        type: UNFOLLOW_USER,
+        currentId: session.getUserId(),
+        userId
+      });
+    });
+  };
 }

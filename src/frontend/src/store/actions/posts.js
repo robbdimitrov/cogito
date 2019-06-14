@@ -1,135 +1,91 @@
-import { apiRoot } from '../../../config';
-import {
-  CREATE_POST, DELETE_POST,
-  REQUEST_FEED, RECEIVE_FEED,
-  REQUEST_LIKES, RECEIVE_LIKES,
-  REQUEST_POST, RECEIVE_POST,
-  REQUEST_POSTS, RECEIVE_POSTS,
-  LIKE_POST, UNLIKE_POST,
-  RETWEET_POST
-} from './types';
+import apiClient from '../../common/APIClient';
+import session from '../../common/Session';
 
-// Post
-
-export function createPost() {
-  return {
-    type: CREATE_POST
+export const CREATE_POST = 'CREATE_POST';
+export function createPost(content) {
+  return function(dispatch) {
+    apiClient.createPost(content).then((response) => {
+      if (!response.ok) {
+        return;
+      }
+      dispatch({
+        type: CREATE_POST,
+        userId: session.getUserId(),
+        post: response.post
+      });
+    });
   };
 }
 
-export function deletePost() {
-  return {
-    type: DELETE_POST
+export const DELETE_POST = 'DELETE_POST';
+export function deletePost(postId) {
+  return function(dispatch) {
+    apiClient.deletePost(postId).then((response) => {
+      if (!response.ok) {
+        return;
+      }
+      dispatch({
+        type: DELETE_POST,
+        userId: session.getUserId(),
+        postId
+      });
+    });
   };
 }
 
 // Fetch
 
+export const FETCH_POST = 'FETCH_POST';
 export function fetchPost(postId) {
   return function(dispatch) {
-    dispatch(requestPost(postId));
-    return fetch(`${apiRoot}/posts/${postId}`)
-      .then(response => response.json())
-      .then(json => dispatch(receivePost(postId, json)));
+    apiClient.getPost(postId).then((response) => {
+      if (!response.ok) {
+        dispatch({
+          type: FETCH_POST,
+          postId,
+          error: response.error.message
+        });
+        return;
+      }
+
+      dispatch({
+        type: FETCH_POST,
+        post: response.post
+      });
+    });
   };
 }
 
-export function fetchPosts(username, page, limit) {
+export const FETCH_POSTS = 'FETCH_POSTS';
+export function fetchPosts(userId, page) {
   return function(dispatch) {
-    dispatch(requestPosts(username));
-    return fetch(`${apiRoot}/users/${username}/posts?page=${page}&limit=${limit}`)
-      .then(response => response.json())
-      .then(json => dispatch(receivePosts(username, json)));
+    apiClient.getPosts(userId, page).then((response) => {
+      if (!response.ok) {
+        return;
+      }
+      dispatch({
+        type: FETCH_POSTS,
+        userId,
+        posts: response.posts,
+        page
+      });
+    });
   };
 }
 
-export function fetchLikes(username, page, limit) {
+export const FETCH_LIKES = 'FETCH_LIKES';
+export function fetchLikes(userId, page, limit) {
   return function(dispatch) {
-    dispatch(requestPosts(username));
-    return fetch(`${apiRoot}/users/${username}/likes?page=${page}&limit=${limit}`)
-      .then(response => response.json())
-      .then(json => dispatch(receivePosts(username, json)));
-  };
-}
-
-export function fetchFeed(userId, page, limit) {
-  return function(dispatch) {
-    dispatch(requestPosts(userId));
-    return fetch(`${apiRoot}/feed?page=${page}&limit=${limit}`)
-      .then(response => response.json())
-      .then(json => dispatch(receivePosts(userId, json)));
-  };
-}
-
-export function requestFeed(userId) {
-  return {
-    type: REQUEST_FEED
-  };
-}
-
-export function receiveFeed() {
-  return {
-    type: RECEIVE_FEED
-  };
-}
-
-export function requestLikes(userId) {
-  return {
-    type: REQUEST_LIKES
-  };
-}
-
-export function receiveLikes() {
-  return {
-    type: RECEIVE_LIKES
-  };
-}
-
-export function requestPost(postId) {
-  return {
-    type: REQUEST_POST,
-    postId
-  };
-}
-
-export function receivePost() {
-  return {
-    type: RECEIVE_POST
-  };
-}
-
-export function requestPosts(username) {
-  return {
-    type: REQUEST_POSTS,
-    username
-  };
-}
-
-export function receivePosts() {
-  return {
-    type: RECEIVE_POSTS
-  };
-}
-
-// Actions
-
-export function likePost(postId) {
-  return {
-    type: LIKE_POST,
-    postId
-  };
-}
-
-export function unlikePost(postId) {
-  return {
-    type: UNLIKE_POST,
-    postId
-  };
-}
-
-export function retweetPost(postId) {
-  return {
-    type: RETWEET_POST,
-    postId
+    apiClient.getLikes(userId, page).then((response) => {
+      if (!response.ok) {
+        return;
+      }
+      dispatch({
+        type: FETCH_LIKES,
+        userId,
+        posts: response.posts,
+        page
+      });
+    });
   };
 }

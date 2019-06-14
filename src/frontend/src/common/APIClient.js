@@ -1,7 +1,7 @@
 import session from './Session';
 import { apiRoot } from '../../config';
 
-export class APIClient {
+class APIClient {
   // Internal
 
   headers() {
@@ -9,7 +9,7 @@ export class APIClient {
       'Content-Type': 'application/json'
     });
 
-    const token = session.token();
+    const token = session.getToken();
     if (token !== undefined) {
       headers.set('Authorization', `Bearer ${token}`);
     }
@@ -38,16 +38,16 @@ export class APIClient {
 
   // Session
 
-  createSession(username, password) {
+  createSession(email, password) {
     const url = '/sessions';
-    const body = {username, password};
+    const body = {email, password};
     return this.request(url, 'POST', body);
   }
 
   refreshToken() {
     const url = '/sessions';
     const headers = this.headers();
-    const token = session.refreshToken();
+    const token = session.getRefreshToken();
     headers.set('Authorization', `Bearer ${token}`);
     return this.request(url, 'POST', undefined, headers);
   }
@@ -71,10 +71,22 @@ export class APIClient {
   }
 
   updateUser(name, username, email, bio, password, oldPassword, avatar) {
-    const url = `/users/${session.userId}`;
+    const url = `/users/${session.getUserId()}`;
 
-    const body = {name, username, email, bio};
+    const body = {};
 
+    if (name !== undefined) {
+      body.name = name;
+    }
+    if (username !== undefined) {
+      body.username = username;
+    }
+    if (email !== undefined) {
+      body.email = email;
+    }
+    if (bio !== undefined) {
+      body.bio = bio;
+    }
     if (password !== undefined) {
       body.password = password;
     }
@@ -93,25 +105,35 @@ export class APIClient {
     return this.request(url);
   }
 
-  getFollowing(username, page, limit) {
-    const url = `/users/${username}/following?page=${page}&limit=${limit}`;
+  getFollowingIds(userId) {
+    const url = `/users/${userId}/following?ids=1`;
     return this.request(url);
   }
 
-  getFollowers(username, page, limit) {
-    const url = `/users/${username}/followers?page=${page}&limit=${limit}`;
+  getFollowing(userId, page, limit = 20) {
+    const url = `/users/${userId}/following?page=${page}&limit=${limit}`;
+    return this.request(url);
+  }
+
+  getFollowersIds(userId) {
+    const url = `/users/${userId}/following?ids=1`;
+    return this.request(url);
+  }
+
+  getFollowers(userId, page, limit = 20) {
+    const url = `/users/${userId}/followers?page=${page}&limit=${limit}`;
     return this.request(url);
   }
 
   // User actions
 
-  followUser(username) {
-    const url = `/users/${username}/following`;
+  followUser(userId) {
+    const url = `/users/${userId}/following`;
     return this.request(url, 'POST');
   }
 
-  unfollowUser(username) {
-    const url = `/users/${username}/following`;
+  unfollowUser(userId) {
+    const url = `/users/${userId}/following`;
     return this.request(url, 'DELETE');
   }
 
@@ -133,18 +155,18 @@ export class APIClient {
     return this.request(url, 'DELETE');
   }
 
-  getFeed(page, limit) {
+  getFeed(page, limit = 20) {
     const url = `/posts/feed?page=${page}&limit=${limit}`;
     return this.request(url);
   }
 
-  getPosts(username, page, limit) {
-    const url = `/users/${username}/posts?page=${page}&limit=${limit}`;
+  getPosts(userId, page, limit = 20) {
+    const url = `/users/${userId}/posts?page=${page}&limit=${limit}`;
     return this.request(url);
   }
 
-  getLikes(username, page, limit) {
-    const url = `/users/${username}/likes?page=${page}&limit=${limit}`;
+  getLikes(userId, page, limit = 20) {
+    const url = `/users/${userId}/likes?page=${page}&limit=${limit}`;
     return this.request(url);
   }
 
@@ -170,3 +192,7 @@ export class APIClient {
     return this.request(url, 'DELETE');
   }
 }
+
+const apiClient = new APIClient();
+
+export default apiClient;
