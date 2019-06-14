@@ -1,6 +1,8 @@
 import apiClient from '../../common/APIClient';
 import session from '../../common/Session';
 
+import { fetchFollowingIds, fetchFollowersIds } from './follow';
+
 export const LOGIN_USER = 'LOGIN_USER';
 export function loginUser(email, password) {
   return (dispatch) => {
@@ -18,6 +20,8 @@ export function loginUser(email, password) {
       session.setRefreshToken(response.token.refresh_token);
       session.setUserId(response.user.id);
 
+      dispatch(fetchFollowingIds(response.user.id));
+      dispatch(fetchFollowersIds(response.user.id));
       dispatch({
         type: LOGIN_USER,
         user: response.user

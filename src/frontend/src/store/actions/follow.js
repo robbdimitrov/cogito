@@ -33,15 +33,15 @@ export function fetchFollowing(userId, page) {
   };
 }
 
-export const FETCH_FOLLOWER_IDS = 'FETCH_FOLLOWING_IDS';
-export function fetchFollowerIds(userId) {
+export const FETCH_FOLLOWERS_IDS = 'FETCH_FOLLOWERS_IDS';
+export function fetchFollowersIds(userId) {
   return (dispatch) => {
     apiClient.getFollowersIds(userId).then((response) => {
       if (!response.ok) {
         return;
       }
       dispatch({
-        type: FETCH_FOLLOWER_IDS,
+        type: FETCH_FOLLOWERS_IDS,
         userId,
         usersIds: response.users
       });

@@ -1,4 +1,6 @@
 import apiClient from '../../common/APIClient';
+import session from '../../common/Session';
+import { fetchFollowingIds, fetchFollowersIds } from './follow';
 
 // Register
 
@@ -83,6 +85,18 @@ export function fetchUser(userId) {
         user: response.user
       });
     });
+  };
+}
+
+export function fetchUserIfNeeded(userId) {
+  return function(dispatch, getState) {
+    if (!getState().users[userId]) {
+      if (userId === session.getUserId()) {
+        dispatch(fetchFollowingIds(userId));
+        dispatch(fetchFollowersIds(userId));
+      }
+      return dispatch(fetchUser(userId));
+    }
   };
 }
 
