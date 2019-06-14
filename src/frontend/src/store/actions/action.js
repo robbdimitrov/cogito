@@ -1,4 +1,5 @@
 import apiClient from '../../common/APIClient';
+import session from '../../common/Session';
 
 export const LIKE_POST = 'LIKE_POST';
 export function likePost(postId) {
@@ -9,6 +10,7 @@ export function likePost(postId) {
       }
       dispatch({
         type: LIKE_POST,
+        userId: session.getUserId(),
         postId
       });
     });
@@ -24,6 +26,7 @@ export function unlikePost(postId) {
       }
       dispatch({
         type: UNLIKE_POST,
+        userId: session.getUserId(),
         postId
       });
     });
@@ -39,6 +42,7 @@ export function retweetPost(postId) {
       }
       dispatch({
         type: RETWEET_POST,
+        userId: session.getUserId(),
         postId
       });
     });
@@ -54,6 +58,7 @@ export function deleteRetweet(postId) {
       }
       dispatch({
         type: DELETE_RETWEET,
+        userId: session.getUserId(),
         postId
       });
     });
