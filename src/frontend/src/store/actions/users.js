@@ -1,6 +1,7 @@
 import apiClient from '../../common/APIClient';
 import session from '../../common/Session';
 import { fetchFollowingIds, fetchFollowersIds } from './follow';
+import { loginUser } from './auth';
 
 // Register
 
@@ -16,9 +17,7 @@ export function registerUser(name, username, email, password) {
         return;
       }
 
-      dispatch({
-        type: REGISTER_USER
-      });
+      dispatch(loginUser(email, password));
     });
   };
 }
@@ -40,6 +39,7 @@ export function updateUser(name, username, email, bio, avatar) {
 
         dispatch({
           type: UPDATE_USER,
+          userId: session.getUserId(),
           name, username, email, bio, avatar
         });
       });
@@ -111,6 +111,7 @@ export function followUser(userId) {
       }
       dispatch({
         type: FOLLOW_USER,
+        currentId: session.getUserId(),
         userId
       });
     });
@@ -126,6 +127,7 @@ export function unfollowUser(userId) {
       }
       dispatch({
         type: UNFOLLOW_USER,
+        currentId: session.getUserId(),
         userId
       });
     });
