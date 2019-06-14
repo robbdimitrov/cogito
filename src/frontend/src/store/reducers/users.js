@@ -8,52 +8,72 @@ import {
 } from '../actions/users';
 import { LOGIN_USER, LOGOUT_USER } from '../actions/auth';
 
+function addUser(state, action) {
+  const { user } = action;
+
+  return {
+    ...state,
+    [user.id]: {
+      ...user,
+      ...userProperties(user)
+    }
+  };
+}
+
+function updateUser(state, action) {
+  const { userId, name, username, email, bio, avatar } = action;
+
+  return {
+    ...state,
+    [userId]: {
+      ...state[userId],
+      name, username, email, bio, avatar
+    }
+  };
+}
+
+function followUser(state, action) {
+  const { currentId, userId } = action;
+
+  return {
+    ...state,
+    [currentId]: {
+      ...state[currentId],
+      following: addItem(state[currentId].following, userId)
+    },
+    [userId]: {
+      ...state[userId],
+      following: addItem(state[userId].followers, currentId)
+    }
+  };
+}
+
+function unfollowUser(state, action) {
+  const { currentId, userId } = action;
+
+  return {
+    ...state,
+    [currentId]: {
+      ...state[currentId],
+      following: removeItem(state[currentId].following, userId)
+    },
+    [userId]: {
+      ...state[userId],
+      following: removeItem(state[userId].followers, currentId)
+    }
+  };
+}
+
 function users(state = {}, action) {
   switch (action.type) {
     case FETCH_USER:
-      return {
-        ...state,
-        [action.user.id]: {
-          ...action.user,
-          ...userProperties(action.user)
-        }
-      };
+      return addUser(state, action);
     case UPDATE_USER:
-      return {
-        ...state,
-        [action.userId]: {
-          ...state[action.userId],
-          name: action.name,
-          username: action.username,
-          email: action.email,
-          bio: action.bio,
-          avatar: action.avatar
-        }
-      }
+      return updateUser(state, action);
     case FOLLOW_USER:
-      return {
-        ...state,
-        [action.currentId]: {
-          ...state[action.currentId],
-          following: addItem(state[action.currentId].following, action.userId)
-        },
-        [action.userId]: {
-          ...state[action.userId],
-          following: addItem(state[action.userId].followers, action.currentId)
-        }
-      }
+      return followUser(state, action);
     case UNFOLLOW_USER:
-      return {
-        ...state,
-        [action.currentId]: {
-          ...state[action.currentId],
-          following: removeItem(state[action.currentId].following, action.userId)
-        },
-        [action.userId]: {
-          ...state[action.userId],
-          following: removeItem(state[action.userId].followers, action.currentId)
-        }
-      }
+      return unfollowUser(state, action);
     case UPDATE_PASSWORD:
     case REGISTER_USER:
     case LOGIN_USER:

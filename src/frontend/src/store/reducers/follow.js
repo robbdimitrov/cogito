@@ -4,6 +4,9 @@ import {
   FETCH_FOLLOWERS, FETCH_FOLLOWERS_IDS
 } from '../actions/follow';
 
+const followingKey = 'following';
+const followersKey = 'followers';
+
 function addUsers(state = {}, action, key) {
   const { userId, users } = action;
 
@@ -39,13 +42,13 @@ function addUsersIds(state = {}, action, key) {
 function follow(state = {}, action) {
   switch (action.type) {
     case FETCH_FOLLOWING:
-      return addUsers(state, action, 'following');
+      return addUsers(state, action, followingKey);
     case FETCH_FOLLOWING_IDS:
-      return addUsersIds(state, action, 'following');
+      return addUsersIds(state, action, followingKey);
     case FETCH_FOLLOWERS:
-      return addUsers(state, action, 'followers');
+      return addUsers(state, action, followersKey);
     case FETCH_FOLLOWERS_IDS:
-      return addUsersIds(state, action, 'followers');
+      return addUsersIds(state, action, followersKey);
     default:
       return state;
   }
