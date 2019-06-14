@@ -43,7 +43,7 @@ function followUser(state, action) {
     },
     [userId]: {
       ...state[userId],
-      following: addItem(state[userId].followers, currentId)
+      followers: addItem(state[userId].followers, currentId)
     }
   };
 }
@@ -59,7 +59,7 @@ function unfollowUser(state, action) {
     },
     [userId]: {
       ...state[userId],
-      following: removeItem(state[userId].followers, currentId)
+      followers: removeItem(state[userId].followers, currentId)
     }
   };
 }
