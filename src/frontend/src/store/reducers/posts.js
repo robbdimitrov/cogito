@@ -5,6 +5,7 @@ import {
 import {
   LIKE_POST, UNLIKE_POST, RETWEET_POST, DELETE_RETWEET
 } from '../actions/action';
+import { FETCH_FEED } from '../actions/feed';
 
 // Post
 
@@ -92,6 +93,7 @@ function addPosts(state, action) {
   const { posts } = action;
 
   return {
+    ...state,
     ...posts.reduce((obj, post) => {
       obj[post.id] = {
         ...post
@@ -121,6 +123,7 @@ function posts(state = {}, action) {
       return addPost(state, action);
     case FETCH_POSTS:
     case FETCH_LIKES:
+    case FETCH_FEED:
       return addPosts(state, action);
     default:
       return state;
