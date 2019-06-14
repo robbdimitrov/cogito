@@ -3,7 +3,18 @@ import {
 } from '../actions/action';
 import { addItem, removeItem } from './helpers';
 
-function likePost(state, action) {
+const actionKeys = {
+  like: {
+    normal: 'likes',
+    active: 'liked'
+  },
+  retweet: {
+    normal: 'retweets',
+    active: 'retweeted'
+  }
+};
+
+function addAction(state, action, keys) {
   const { userId, postId } = action;
 
   return {
@@ -12,21 +23,21 @@ function likePost(state, action) {
       ...state.users,
       [userId]: {
         ...state.users[userId],
-        likes: addItem(state.users[userId], postId)
+        [keys.normal]: addItem(state.users[userId][keys.normal], postId)
       }
     },
     posts: {
       ...state.posts,
       [postId]: {
         ...state.posts[postId],
-        likes: state.posts[postId].likes + 1,
-        liked: true
+        [keys.normal]: state.posts[postId][keys.normal] + 1,
+        [keys.active]: true
       }
     }
   };
 }
 
-function unlikePost(state, action) {
+function removeAction(state, action, keys) {
   const { userId, postId } = action;
 
   return {
@@ -35,61 +46,15 @@ function unlikePost(state, action) {
       ...state.users,
       [userId]: {
         ...state.users[userId],
-        likes: removeItem(state.users[userId], postId)
+        [keys.normal]: removeItem(state.users[userId][keys.normal], postId)
       }
     },
     posts: {
       ...state.posts,
       [postId]: {
         ...state.posts[postId],
-        likes: state.posts[postId].likes - 1,
-        liked: false
-      }
-    }
-  };
-}
-
-function retweetPost(state, action) {
-  const { userId, postId } = action;
-
-  return {
-    ...state,
-    users: {
-      ...state.users,
-      [userId]: {
-        ...state.users[userId],
-        retweets: addItem(state.users[userId], postId)
-      }
-    },
-    posts: {
-      ...state.posts,
-      [postId]: {
-        ...state.posts[postId],
-        retweets: state.posts[postId].likes + 1,
-        retweeted: true
-      }
-    }
-  };
-}
-
-function deleteRetweet(state, action) {
-  const { userId, postId } = action;
-
-  return {
-    ...state,
-    users: {
-      ...state.users,
-      [userId]: {
-        ...state.users[userId],
-        retweets: removeItem(state.users[userId], postId)
-      }
-    },
-    posts: {
-      ...state.posts,
-      [postId]: {
-        ...state.posts[postId],
-        retweets: state.posts[postId].likes - 1,
-        retweeted: false
+        [keys.normal]: state.posts[postId][keys.normal] - 1,
+        [keys.active]: false
       }
     }
   };
@@ -98,13 +63,13 @@ function deleteRetweet(state, action) {
 function actions(state = {}, action) {
   switch (action.type) {
     case LIKE_POST:
-      return likePost(state, action);
+      return addAction(state, action, actionKeys.like);
     case UNLIKE_POST:
-      return unlikePost(state, action);
+      return removeAction(state, action, actionKeys.like);
     case RETWEET_POST:
-      return retweetPost(state, action);
+      return addAction(state, action, actionKeys.retweet);
     case DELETE_RETWEET:
-      return deleteRetweet(state, action);
+      return removeAction(state, action, actionKeys.retweet);
     default:
       return state;
   }

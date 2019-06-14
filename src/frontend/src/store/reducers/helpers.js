@@ -1,4 +1,14 @@
-export function addItems(state = {items: []}, items, page = 0) {
+// State
+
+const initialState = {
+  count: 0,
+  items: [],
+  page: 0
+};
+
+// Functions
+
+export function addItems(state = initialState, items, page = 0) {
   return {
     ...state,
     items: [...state.items, ...items],
@@ -6,7 +16,7 @@ export function addItems(state = {items: []}, items, page = 0) {
   };
 }
 
-export function addItem(state = {items: []}, item) {
+export function addItem(state = initialState, item) {
   return {
 		...state,
 		count: state.count + 1,
@@ -14,17 +24,11 @@ export function addItem(state = {items: []}, item) {
   };
 }
 
-export function removeItem(state = {items: []}, item) {
-	const index = state.items.indexOf(item);
-
-	if (index < 0) {
-		return state;
-	}
-
+export function removeItem(state = initialState, item) {
 	return {
 		...state,
 		count: state.count - 1,
-		items: state.items.splice(index, 1)
+		items: state.items.filter((x) => x !== item)
 	}
 }
 
