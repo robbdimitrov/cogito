@@ -1,15 +1,41 @@
-import { userProperties, addItems } from './helpers';
-import {
-  FETCH_FOLLOWING, FETCH_FOLLOWING_IDS,
-  FETCH_FOLLOWERS, FETCH_FOLLOWERS_IDS
-} from '../actions/follow';
+import { userProperties, addItems, addItem, removeItem } from './helpers';
 
-export const followKeys = {
-  following: 'following',
-  followers: 'followers'
-};
+const followingKey = 'following';
+const followersKey = 'followers';
 
-function addUsers(state = {}, action, key) {
+export function followUser(state, action) {
+  const { currentId, userId } = action;
+
+  return {
+    ...state,
+    [currentId]: {
+      ...state[currentId],
+      following: addItem(state[currentId].following, userId)
+    },
+    [userId]: {
+      ...state[userId],
+      followers: addItem(state[userId].followers, currentId)
+    }
+  };
+}
+
+export function unfollowUser(state, action) {
+  const { currentId, userId } = action;
+
+  return {
+    ...state,
+    [currentId]: {
+      ...state[currentId],
+      following: removeItem(state[currentId].following, userId)
+    },
+    [userId]: {
+      ...state[userId],
+      followers: removeItem(state[userId].followers, currentId)
+    }
+  };
+}
+
+function addUsers(state, action, key) {
   const { userId, users } = action;
 
   return {
@@ -29,7 +55,7 @@ function addUsers(state = {}, action, key) {
   };
 }
 
-function addUsersIds(state = {}, action, key) {
+function addUsersIds(state, action, key) {
   const { userId, usersIds } = action;
 
   return {
@@ -41,19 +67,18 @@ function addUsersIds(state = {}, action, key) {
   };
 }
 
-function follow(state = {}, action) {
-  switch (action.type) {
-    case FETCH_FOLLOWING:
-      return addUsers(state, action, followKeys.following);
-    case FETCH_FOLLOWING_IDS:
-      return addUsersIds(state, action, followKeys.following);
-    case FETCH_FOLLOWERS:
-      return addUsers(state, action, followKeys.followers);
-    case FETCH_FOLLOWERS_IDS:
-      return addUsersIds(state, action, followKeys.followers);
-    default:
-      return state;
-  }
+export function addFollowing(state, action) {
+  return addUsers(state, action, followingKey);
 }
 
-export default follow;
+export function addFollowingIds(state, action) {
+  return addUsersIds(state, action, followingKey);
+}
+
+export function addFollowers(state, action) {
+  return addUsers(state, action, followersKey);
+}
+
+export function addFollowersIds(state, action) {
+  return addUsersIds(state, action, followersKey);
+}

@@ -1,4 +1,5 @@
 import apiClient from '../../common/APIClient';
+import session from '../../common/Session';
 
 export const CREATE_POST = 'CREATE_POST';
 export function createPost(content) {
@@ -9,6 +10,7 @@ export function createPost(content) {
       }
       dispatch({
         type: CREATE_POST,
+        userId: session.getUserId(),
         post: response.post
       });
     });
@@ -24,6 +26,7 @@ export function deletePost(postId) {
       }
       dispatch({
         type: DELETE_POST,
+        userId: session.getUserId(),
         postId
       });
     });
