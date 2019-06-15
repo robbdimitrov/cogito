@@ -63,18 +63,15 @@ func (c *DbClient) GetPost(id int32) (pb.Post, error) {
 func (c *DbClient) GetFeed(userID int32, page int32, limit int32) (pb.Posts, error) {
 	conn := c.db.GetConn()
 
-	rows, err := conn.Query(`(SELECT id, content, user_id, time_format(date_created)
-	FROM thoughts.posts  WHERE user_id = $1 ORDER BY date_created DESC)
-	UNION
-	(SELECT id, content, user_id, time_format(date_created) FROM thoughts.posts
-	WHERE id IN (SELECT post_id FROM thoughts.retweets
-	WHERE user_id = $1 ORDER BY date_created DESC))
-	UNION
-	(SELECT id, content, user_id, time_format(date_created) FROM thoughts.posts
-	WHERE user_id IN (SELECT user_id FROM thoughts.followings
-	WHERE follower_id = $1) ORDER BY date_created DESC)
-	OFFSET $2 LIMIT $3`,
-		userID, page*limit, limit)
+	query := c.createPostQuery(
+		`WHERE posts.user_id = $1 OR posts.id IN (SELECT post_id
+		FROM thoughts.retweets WHERE user_id = $1) OR
+		posts.user_id IN (SELECT user_id
+		FROM thoughts.followings WHERE follower_id = $1)`,
+		"ORDER BY posts.date_created DESC",
+		"OFFSET $2 LIMIT $3")
+	rows, err := conn.Query(query, userID, page*limit, limit)
+
 	if err != nil {
 		return pb.Posts{}, errors.New("Error happened while reading from the database")
 	}
@@ -89,9 +86,9 @@ func (c *DbClient) GetPosts(userID int32, page int32, limit int32) (pb.Posts, er
 	conn := c.db.GetConn()
 
 	query := c.createPostQuery(
-		`WHERE posts.user_id = $1 OR posts.id IN (SELECT post_id FROM thoughts.retweets
-		WHERE user_id = $1 ORDER BY date_created DESC)`,
-		"ORDER BY posts.date_created DESC)",
+		`WHERE posts.user_id = $1 OR posts.id IN (SELECT post_id
+		FROM thoughts.retweets WHERE user_id = $1)`,
+		"ORDER BY posts.date_created DESC",
 		"OFFSET $2 LIMIT $3")
 	rows, err := conn.Query(query, userID, page*limit, limit)
 
@@ -109,8 +106,8 @@ func (c *DbClient) GetLikedPosts(userID int32, page int32, limit int32) (pb.Post
 	conn := c.db.GetConn()
 
 	query := c.createPostQuery(
-		"WHERE posts.id IN (SELECT post_id FROM thoughts.likes WHERE user_id = $1",
-		"ORDER BY posts.date_created DESC)",
+		"WHERE posts.id IN (SELECT post_id FROM thoughts.likes WHERE user_id = $1)",
+		"ORDER BY posts.date_created DESC",
 		"OFFSET $2 LIMIT $3")
 	rows, err := conn.Query(query, userID, page*limit, limit)
 	if err != nil {
