@@ -68,9 +68,9 @@ class FollowService(thoughts_pb2_grpc.FollowServiceServicer):
         if response.error is not None:
             return thoughts_pb2.Status(error=response.error)
 
-        current_id = response.user_id
+        follower_id = response.user_id
         user_id = request.user_id
 
-        self.db_client.unfollow_user(user_id, current_id)
+        self.db_client.unfollow_user(user_id, follower_id)
 
         return thoughts_pb2.Status(message='User unfollowed.')
