@@ -88,14 +88,12 @@ func (c *DbClient) GetFeed(userID int32, page int32, limit int32) (pb.Posts, err
 func (c *DbClient) GetPosts(userID int32, page int32, limit int32) (pb.Posts, error) {
 	conn := c.db.GetConn()
 
-	rows, err := conn.Query(`(SELECT id, content, user_id, time_format(date_created)
-	FROM thoughts.posts  WHERE user_id = $1 ORDER BY date_created DESC)
-	UNION
-	(SELECT id, content, user_id, time_format(date_created) FROM thoughts.posts
-	WHERE id IN (SELECT post_id FROM thoughts.retweets
-	WHERE user_id = $1 ORDER BY date_created DESC))
-	OFFSET $2 LIMIT $3`,
-		userID, page*limit, limit)
+	query := c.createPostQuery(
+		`WHERE posts.user_id = $1 OR posts.id IN (SELECT post_id FROM thoughts.retweets
+		WHERE user_id = $1 ORDER BY date_created DESC)`,
+		"ORDER BY posts.date_created DESC)",
+		"OFFSET $2 LIMIT $3")
+	rows, err := conn.Query(query, userID, page*limit, limit)
 
 	if err != nil {
 		return pb.Posts{}, errors.New("Error happened while reading from the database")
@@ -141,7 +139,7 @@ func (c *DbClient) LikePost(postID int32, userID int32) error {
 	conn := c.db.GetConn()
 
 	_, err := conn.Exec(`INSERT INTO thoughts.likes (post_id, user_id)
-    VALUES ($1, $2)`, postID, userID)
+	VALUES ($1, $2)`, postID, userID)
 	if err != nil {
 		return errors.New("Error happened while writing to the database")
 	}
@@ -154,7 +152,7 @@ func (c *DbClient) UnlikePost(postID int32, userID int32) error {
 	conn := c.db.GetConn()
 
 	_, err := conn.Exec(`DELETE FROM thoughts.likes
-    WHERE post_id = $1 AND user_id = $2`, postID, userID)
+	WHERE post_id = $1 AND user_id = $2`, postID, userID)
 	if err != nil {
 		return errors.New("Error happened while writing to the database")
 	}
@@ -167,7 +165,7 @@ func (c *DbClient) RetweetPost(postID int32, userID int32) error {
 	conn := c.db.GetConn()
 
 	_, err := conn.Exec(`INSERT INTO thoughts.retweets (post_id, user_id)
-    VALUES ($1, $2)`, postID, userID)
+	VALUES ($1, $2)`, postID, userID)
 	if err != nil {
 		return errors.New("Error happened while writing to the database")
 	}
@@ -180,7 +178,7 @@ func (c *DbClient) RemoveRetweet(postID int32, userID int32) error {
 	conn := c.db.GetConn()
 
 	_, err := conn.Exec(`DELETE FROM thoughts.retweets
-    WHERE post_id = $1 AND user_id = $2`, postID, userID)
+	WHERE post_id = $1 AND user_id = $2`, postID, userID)
 	if err != nil {
 		return errors.New("Error happened while writing to the database")
 	}
