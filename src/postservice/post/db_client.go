@@ -22,7 +22,7 @@ func (c *DbClient) createPostQuery(where string, order string, limit string) str
 		count(distinct likes.id) AS likes,
 		count(distinct retweets.id) AS retweets,
 		time_format(posts.date_created) AS date_created
-		FROM  thoughts.posts AS posts  LEFT JOIN thoughts.likes AS likes
+		FROM thoughts.posts AS posts LEFT JOIN thoughts.likes AS likes
 		ON likes.post_id = posts.id LEFT JOIN thoughts.retweets AS retweets
 		ON retweets.post_id = posts.id
 		%s
@@ -50,10 +50,10 @@ func (c *DbClient) CreatePost(content string, userID int32) (pb.Post, error) {
 }
 
 // GetPost returns a Post row with the passed id from the database
-func (c *DbClient) GetPost(id int32) (pb.Post, error) {
+func (c *DbClient) GetPost(id int32, userID int32) (pb.Post, error) {
 	conn := c.db.GetConn()
 
-	row := conn.QueryRow(c.createPostQuery("WHERE id = $1", "", ""), id)
+	row := conn.QueryRow(c.createPostQuery("WHERE id = $1", "", ""), id, userID)
 
 	post, err := rowToPost(row)
 	return post, err
@@ -70,7 +70,7 @@ func (c *DbClient) GetFeed(userID int32, page int32, limit int32) (pb.Posts, err
 		FROM thoughts.followings WHERE follower_id = $1)`,
 		"ORDER BY posts.date_created DESC",
 		"OFFSET $2 LIMIT $3")
-	rows, err := conn.Query(query, userID, page*limit, limit)
+	rows, err := conn.Query(query, userID, page*limit, limit, currentID)
 
 	if err != nil {
 		return pb.Posts{}, errors.New("Error happened while reading from the database")
