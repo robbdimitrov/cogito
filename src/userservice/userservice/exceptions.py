@@ -8,7 +8,7 @@ class ExistingUserException(DbException):
     pass
 
 
-class WrongUsernameException(DbException):
+class UserNotFoundException(DbException):
     """Raised when there is no user with the given username."""
     pass
 

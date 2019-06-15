@@ -60,9 +60,9 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
         return thoughts_pb2.Status(message='User created.')
 
     def GetUser(self, request, context):
-        """Gets user with username from the database."""
+        """Gets user with username or user_id from the database."""
 
-        user = self.db_client.get_user(request.username)
+        user = self.db_client.get_user(request.user_id)
 
         if user is None:
             error = thoughts_pb2.Error(code=HTTPStatus.NOT_FOUND,
@@ -105,7 +105,7 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
                 error_message = 'Current password is missing.'
                 error_type = 'MISSING_PASSWORD'
             else:
-                user = self.db_client.get_user(None, user_id)
+                user = self.db_client.get_user(user_id)
 
                 result = self.auth_client.validate_password(user['email'], password)
 

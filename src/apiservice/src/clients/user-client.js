@@ -14,6 +14,32 @@ export class UserClient extends APIClient {
       grpc.credentials.createInsecure());
   }
 
+  // Helpers
+
+  itemToUser(item) {
+    const user = {
+      id: item.getId(),
+      username: item.getUsername(),
+      email: item.getEmail(),
+      name: item.getName(),
+      bio: item.getBio(),
+      avatar: item.getAvatar(),
+      posts: item.getPosts(),
+      likes: item.getLikes(),
+      following: item.getFollowing(),
+      followers: item.getFollowers(),
+      date_created: item.getDateCreated()
+    };
+    return user;
+  }
+
+  itemsToUsers(items) {
+    const users = [];
+    for (const item of items) {
+      users.push(this.itemToUser(item));
+    }
+  }
+
   // Users
 
   createUser(username, email, name, password) {
@@ -51,17 +77,7 @@ export class UserClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-
-        const item = response.getUser();
-        const user = {
-          id: item.getId(),
-          username: item.getUsername(),
-          email: item.getEmail(),
-          name: item.getName(),
-          bio: item.getBio(),
-          avatar: item.getAvatar(),
-          date_created: item.getDateCreated()
-        };
+        const user = this.itemToUser(response.getUser());
         res({user});
       });
     });
@@ -124,19 +140,7 @@ export class UserClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        const users = [];
-        for (const item of response.getUsers()) {
-          const user = {
-            id: item.getId(),
-            username: item.getUsername(),
-            email: item.getEmail(),
-            name: item.getName(),
-            bio: item.getBio(),
-            avatar: item.getAvatar(),
-            date_created: item.getDateCreated()
-          };
-          users.push(user);
-        }
+        const users = this.itemsToUsers(response.getUsers());
         res({users});
       });
     });
@@ -154,19 +158,7 @@ export class UserClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        const users = [];
-        for (const item of response.getUsers()) {
-          const user = {
-            id: item.getId(),
-            username: item.getUsername(),
-            email: item.getEmail(),
-            name: item.getName(),
-            bio: item.getBio(),
-            avatar: item.getAvatar(),
-            date_created: item.getDateCreated()
-          };
-          users.push(user);
-        }
+        const users = this.itemsToUsers(response.getUsers());
         res({users});
       });
     });

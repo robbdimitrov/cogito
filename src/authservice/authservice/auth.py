@@ -60,33 +60,35 @@ class AuthService(thoughts_pb2_grpc.AuthServiceServicer):
                 error = thoughts_pb2.Error(code=HTTPStatus.BAD_REQUEST,
                     error='INVALID_EMAIL',
                     message='Invalid email address.')
-                return thoughts_pb2.AuthResponse(error=error)
+                return thoughts_pb2.AuthStatus(error=error)
 
             try:
                 current_user = self.validate_password(email, password)
             except AuthException as e:
                 error = thoughts_pb2.Error(code=e.code, error=e.error,
                     message=e.message)
-                return thoughts_pb2.AuthResponse(error=error)
+                return thoughts_pb2.AuthStatus(error=error)
 
             session = self.db_client.create_session(current_user['id'], user_agent)
         else:
             error = thoughts_pb2.Error(code=HTTPStatus.BAD_REQUEST,
                 error='MISSING_CREDENTIALS',
                 message='Missing credentials.')
-            return thoughts_pb2.AuthResponse(error=error)
+            return thoughts_pb2.AuthStatus(error=error)
 
         try:
             tokens = self.generate_tokens(session)
         except AuthException as e:
             error = thoughts_pb2.Error(code=e.code, error=e.error,
                 message=e.message)
-            return thoughts_pb2.AuthResponse(error=error)
+            return thoughts_pb2.AuthStatus(error=error)
 
-        return thoughts_pb2.AuthResponse(
+        return thoughts_pb2.AuthStatus(
             token_type='bearer',
             access_token=tokens['access_token'],
-            refresh_token=tokens['refresh_token']
+            refresh_token=tokens['refresh_token'],
+            user_id=current_user['id'],
+            session_id=session['session_id']
         )
 
     def Refresh(self, request, context):
@@ -103,23 +105,23 @@ class AuthService(thoughts_pb2_grpc.AuthServiceServicer):
                 error = thoughts_pb2.Error(code=HTTPStatus.UNAUTHORIZED,
                     error='EXPIRED_TOKEN',
                     message='Refresh token is expired.')
-                return thoughts_pb2.AuthResponse(error=error)
+                return thoughts_pb2.AuthStatus(error=error)
 
             session = self.db_client.get_session(payload['sub'])
         else:
             error = thoughts_pb2.Error(code=HTTPStatus.BAD_REQUEST,
                 error='MISSING_CREDENTIALS',
                 message='Missing credentials.')
-            return thoughts_pb2.AuthResponse(error=error)
+            return thoughts_pb2.AuthStatus(error=error)
 
         try:
             tokens = self.generate_tokens(session)
         except AuthException as e:
             error = thoughts_pb2.Error(code=e.code, error=e.error,
                 message=e.message)
-            return thoughts_pb2.AuthResponse(error=error)
+            return thoughts_pb2.AuthStatus(error=error)
 
-        return thoughts_pb2.AuthResponse(
+        return thoughts_pb2.AuthStatus(
             token_type='bearer',
             access_token=tokens['access_token'],
             refresh_token=tokens['refresh_token']
