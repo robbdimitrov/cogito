@@ -17,11 +17,14 @@ func rowToPost(row scanner) (pb.Post, error) {
 		content     string
 		userID      int32
 		likes       int32
+		liked       bool
 		retweets    int32
+		retweeted   bool
 		dateCreated string
 	)
 
-	err := row.Scan(&id, &content, &userID, &likes, &retweets, &dateCreated)
+	err := row.Scan(&id, &content, &userID, &likes, &liked, &retweets,
+		&retweeted, &dateCreated)
 	if err != nil {
 		return pb.Post{}, errors.New("Error happened while parsing database response")
 	}
@@ -31,7 +34,9 @@ func rowToPost(row scanner) (pb.Post, error) {
 		Content:     content,
 		UserId:      userID,
 		Likes:       likes,
+		Liked:       liked,
 		Retweets:    retweets,
+		Retweeted:   retweeted,
 		DateCreated: dateCreated}
 
 	return post, nil
