@@ -15,7 +15,11 @@ def row_to_user(row):
         name=row[3],
         bio=row[4],
         avatar=row[5],
-        date_created=row[6])
+        posts=row[6],
+        likes=row[7],
+        following=[8],
+        followers=[9],
+        date_created=row[10])
     return user
 
 
