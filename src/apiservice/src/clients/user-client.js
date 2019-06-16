@@ -119,6 +119,22 @@ export class UserClient extends APIClient {
         if (err) {
           return rej(err);
         }
+        const users = response.getIds();
+        res({users});
+      });
+    });
+  }
+
+  getFollowingIds(userId, token) {
+    const request = new messages.UserRequest();
+    request.setUserId(userId);
+    request.setToken(token);
+
+    return new Promise((res, rej) => {
+      this.userClient.getFollowingIds(request, (err, response) => {
+        if (err) {
+          return rej(err);
+        }
         const users = itemsToUsers(response.getUsers());
         res({users});
       });
@@ -138,6 +154,22 @@ export class UserClient extends APIClient {
           return rej(err);
         }
         const users = itemsToUsers(response.getUsers());
+        res({users});
+      });
+    });
+  }
+
+  getFollowersIds(userId, token) {
+    const request = new messages.UserRequest();
+    request.setUserId(userId);
+    request.setToken(token);
+
+    return new Promise((res, rej) => {
+      this.userClient.getFollowersIds(request, (err, response) => {
+        if (err) {
+          return rej(err);
+        }
+        const users = response.getIds();
         res({users});
       });
     });
