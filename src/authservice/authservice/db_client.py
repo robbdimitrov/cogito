@@ -1,7 +1,7 @@
 import psycopg2
 import logging
 
-from authservice import thoughts_pb2
+from authservice.utils import row_to_session, rows_to_sessions
 
 
 class DbException(Exception):
@@ -19,7 +19,8 @@ class DbClient:
 
         try:
             cur.execute('INSERT INTO thoughts.sessions(user_id, user_agent) \
-                VALUES(%s, %s) RETURNING id, user_id, user_agent, time_format(date_created)',
+                VALUES(%s, %s) RETURNING id, user_id, user_agent, \
+                time_format(date_created) AS date_created',
                 (user_id, user_agent))
             result = cur.fetchone()
             conn.commit()
@@ -29,53 +30,41 @@ class DbClient:
         finally:
             cur.close()
 
-        session = thoughts_pb2.Session(id=result[0],
-            user_id=result[1],
-            user_agent=result[2],
-            date_created=result[3])
+        session = row_to_session(result)
         return session
 
     def get_session(self, session_id):
         conn = self.db.get_conn()
         cur = conn.cursor()
 
-        cur.execute('SELECT id, user_id, user_agent, time_format(date_created) \
-            FROM thoughts.sessions WHERE id = %s', (session_id,))
+        cur.execute('SELECT id, user_id, user_agent, \
+            time_format(date_created) AS date_created \
+            FROM thoughts.sessions WHERE id = %s',
+            (session_id,))
         result = cur.fetchone()
         cur.close()
 
         if result is None:
             return None
 
-        session = thoughts_pb2.Session(id=result[0],
-            user_id=result[1],
-            user_agent=result[2],
-            date_created=result[3])
+        session = row_to_session(result)
         return session
 
     def get_user_sessions(self, user_id):
         conn = self.db.get_conn()
         cur = conn.cursor()
 
-        cur.execute('SELECT id, user_id, user_agent, time_format(date_created) \
-            FROM thoughts.sessions WHERE user_id = %(id)s OR \
-            user_id = (SELECT id FROM thoughts.users WHERE username = %(id)s)',
-            {'id': user_id})
+        cur.execute('SELECT id, user_id, user_agent, \
+            time_format(date_created) AS date_created \
+            FROM thoughts.sessions WHERE user_id = %s',
+            (user_id,))
         result = cur.fetchall()
         cur.close()
 
         if result is None:
             return None
 
-        sessions = []
-
-        for row in result:
-            session = thoughts_pb2.Session(id=row[0],
-                user_id=row[1],
-                user_agent=row[2],
-                date_created=row[3])
-            sessions.append(session)
-
+        sessions = rows_to_sessions(result)
         return sessions
 
     def delete_session(self, session_id):
@@ -86,12 +75,12 @@ class DbClient:
         conn.commit()
         cur.close()
 
-    def get_user_password_hash(self, username):
+    def get_user_password_hash(self, email):
         conn = self.db.get_conn()
         cur = conn.cursor()
 
-        cur.execute('SELECT id, password, FROM thoughts.users WHERE username = %s',
-            (username,))
+        cur.execute('SELECT id, password, FROM thoughts.users WHERE email = %s',
+            (email,))
         result = cur.fetchone()
         cur.close()
 
