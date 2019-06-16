@@ -23,6 +23,15 @@ class FollowService(thoughts_pb2_grpc.FollowServiceServicer):
 
         return thoughts_pb2.Users(users=users)
 
+    def GetFollowingIds(self, request, context):
+        """Returns the ids of users followed by the user."""
+
+        user_id = request.user_id
+
+        ids = self.db_client.get_following_ids(user_id)
+
+        return thoughts_pb2.Identifiers(ids=ids)
+
     def GetFollowers(self, request, context):
         """Returns users followed by the user."""
 
@@ -34,7 +43,16 @@ class FollowService(thoughts_pb2_grpc.FollowServiceServicer):
 
         return thoughts_pb2.Users(users=users)
 
-    def Follow(self, request, context):
+    def GetFollowersIds(self, request, context):
+        """Returns the ids of users following the user."""
+
+        user_id = request.user_id
+
+        ids = self.db_client.get_followers_ids(user_id)
+
+        return thoughts_pb2.Identifiers(ids=ids)
+
+    def FollowUser(self, request, context):
         """Follows or unfollows a user with the current user."""
 
         response = self.auth_client.validate(request.token)
@@ -60,7 +78,7 @@ class FollowService(thoughts_pb2_grpc.FollowServiceServicer):
         else:
             return thoughts_pb2.Status(message='User followed.')
 
-    def Unfollow(self, request, context):
+    def UnfollowUser(self, request, context):
         """Unfollows a user with the current user."""
 
         response = self.auth_client.validate(request.token)

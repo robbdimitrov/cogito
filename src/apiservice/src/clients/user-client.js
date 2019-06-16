@@ -119,6 +119,22 @@ export class UserClient extends APIClient {
         if (err) {
           return rej(err);
         }
+        const users = response.getIds();
+        res({users});
+      });
+    });
+  }
+
+  getFollowingIds(userId, token) {
+    const request = new messages.UserRequest();
+    request.setUserId(userId);
+    request.setToken(token);
+
+    return new Promise((res, rej) => {
+      this.userClient.getFollowingIds(request, (err, response) => {
+        if (err) {
+          return rej(err);
+        }
         const users = itemsToUsers(response.getUsers());
         res({users});
       });
@@ -143,13 +159,29 @@ export class UserClient extends APIClient {
     });
   }
 
+  getFollowersIds(userId, token) {
+    const request = new messages.UserRequest();
+    request.setUserId(userId);
+    request.setToken(token);
+
+    return new Promise((res, rej) => {
+      this.userClient.getFollowersIds(request, (err, response) => {
+        if (err) {
+          return rej(err);
+        }
+        const users = response.getIds();
+        res({users});
+      });
+    });
+  }
+
   followUser(userId, token) {
     const request = new messages.UserRequest();
     request.setUserId(userId);
     request.setToken(token);
 
     return new Promise((res, rej) => {
-      this.userClient.follow(request, (err, response) => {
+      this.userClient.followUser(request, (err, response) => {
         if (err) {
           return rej(err);
         }
@@ -168,7 +200,7 @@ export class UserClient extends APIClient {
     request.setToken(token);
 
     return new Promise((res, rej) => {
-      this.userClient.unfollow(request, (err, response) => {
+      this.userClient.unfollowUser(request, (err, response) => {
         if (err) {
           return rej(err);
         }

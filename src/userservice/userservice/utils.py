@@ -29,3 +29,10 @@ def rows_to_users(rows):
         user = row_to_user(row)
         users.append(user)
     return users
+
+
+def rows_to_ids(rows):
+    ids = []
+    for row in rows:
+        ids.append(row[0])
+    return ids

@@ -10,7 +10,8 @@ from userservice.exceptions import (
 )
 from userservice.utils import (
     row_to_user,
-    rows_to_users
+    rows_to_users,
+    rows_to_ids
 )
 
 
@@ -109,24 +110,6 @@ class DbClient:
         conn.commit()
         cur.close()
 
-    def get_followers(self, user_id, page, limit):
-        conn = self.db.get_conn()
-        cur = conn.cursor()
-
-        cur.execute(self.create_user_query('WHERE users.id IN \
-            (SELECT follower_id FROM thoughts.followings \
-            WHERE user_id = %s ORDER BY date_created DESC) \
-            OFFSET %s LIMIT %s'),
-            (user_id, page * limit, limit))
-        results = cur.fetchall()
-        cur.close()
-
-        if results is None:
-            return None
-
-        users = rows_to_users(results)
-        return users
-
     def get_following(self, user_id, page, limit):
         conn = self.db.get_conn()
         cur = conn.cursor()
@@ -139,10 +122,48 @@ class DbClient:
         results = cur.fetchall()
         cur.close()
 
-        if results is None:
-            return None
+        users = rows_to_users(results)
+        return users
+
+    def get_following_ids(self, user_id):
+        conn = self.db.get_conn()
+        cur = conn.cursor()
+
+        cur.execute('SELECT user_id FROM thoughts.users \
+            WHERE follower_id = %s',
+            (user_id,))
+        results = cur.fetchall()
+        cur.close()
+
+        users = rows_to_ids(results)
+        return users
+
+    def get_followers(self, user_id, page, limit):
+        conn = self.db.get_conn()
+        cur = conn.cursor()
+
+        cur.execute(self.create_user_query('WHERE users.id IN \
+            (SELECT follower_id FROM thoughts.followings \
+            WHERE user_id = %s ORDER BY date_created DESC) \
+            OFFSET %s LIMIT %s'),
+            (user_id, page * limit, limit))
+        results = cur.fetchall()
+        cur.close()
 
         users = rows_to_users(results)
+        return users
+
+    def get_followers_ids(self, user_id):
+        conn = self.db.get_conn()
+        cur = conn.cursor()
+
+        cur.execute('SELECT follower_id FROM thoughts.users \
+            WHERE user_id = %s',
+            (user_id,))
+        results = cur.fetchall()
+        cur.close()
+
+        users = rows_to_ids(results)
         return users
 
     def follow_user(self, user_id, follower_id):

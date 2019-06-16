@@ -33,19 +33,27 @@ export class UserRouter extends APIRouter {
     // Followers
 
     router.get('/:id/following', (req, res) => {
-      this.getFollowing(req, res);
+      if (req.query.ids) {
+        this.getFollowingIds(req, res);
+      } else {
+        this.getFollowing(req, res);
+      }
     });
 
     router.get('/:id/followers', (req, res) => {
-      this.getFollowers(req, res);
+      if (req.query.ids) {
+        this.getFollowersIds(req, res);
+      } else {
+        this.getFollowers(req, res);
+      }
     });
 
     router.post('/:id/followers', (req, res) => {
-      this.follow(req, res);
+      this.followUser(req, res);
     });
 
     router.delete('/:id/followers/:followerId', (req, res) => {
-      this.unfollow(req, res);
+      this.unfollowUser(req, res);
     });
 
     // Posts
@@ -119,6 +127,15 @@ export class UserRouter extends APIRouter {
     );
   }
 
+  getFollowingIds(req, res) {
+    const id = req.params.id;
+    const token = this.getToken(req);
+
+    this.handleResponse(
+      this.userClient.getFollowingIds(id, token), res
+    );
+  }
+
   getFollowers(req, res) {
     const id = req.params.id;
     const token = this.getToken(req);
@@ -130,21 +147,30 @@ export class UserRouter extends APIRouter {
     );
   }
 
-  follow(req, res) {
+  getFollowersIds(req, res) {
     const id = req.params.id;
     const token = this.getToken(req);
 
     this.handleResponse(
-      this.userClient.follow(id, token), res
+      this.userClient.getFollowersIds(id, token), res
     );
   }
 
-  unfollow(req, res) {
+  followUser(req, res) {
     const id = req.params.id;
     const token = this.getToken(req);
 
     this.handleResponse(
-      this.userClient.unfollow(id, token), res
+      this.userClient.followUser(id, token), res
+    );
+  }
+
+  unfollowUser(req, res) {
+    const id = req.params.id;
+    const token = this.getToken(req);
+
+    this.handleResponse(
+      this.userClient.unfollowUser(id, token), res
     );
   }
 

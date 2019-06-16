@@ -48,6 +48,17 @@ function deserialize_thoughts_DataRequest(buffer_arg) {
   return thoughts_pb.DataRequest.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_thoughts_Identifiers(arg) {
+  if (!(arg instanceof thoughts_pb.Identifiers)) {
+    throw new Error('Expected argument of type thoughts.Identifiers');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_thoughts_Identifiers(buffer_arg) {
+  return thoughts_pb.Identifiers.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 function serialize_thoughts_PostRequest(arg) {
   if (!(arg instanceof thoughts_pb.PostRequest)) {
     throw new Error('Expected argument of type thoughts.PostRequest');
@@ -233,6 +244,17 @@ var FollowServiceService = exports.FollowServiceService = {
     responseSerialize: serialize_thoughts_Users,
     responseDeserialize: deserialize_thoughts_Users,
   },
+  getFollowingIds: {
+    path: '/thoughts.FollowService/GetFollowingIds',
+    requestStream: false,
+    responseStream: false,
+    requestType: thoughts_pb.UserRequest,
+    responseType: thoughts_pb.Identifiers,
+    requestSerialize: serialize_thoughts_UserRequest,
+    requestDeserialize: deserialize_thoughts_UserRequest,
+    responseSerialize: serialize_thoughts_Identifiers,
+    responseDeserialize: deserialize_thoughts_Identifiers,
+  },
   getFollowers: {
     path: '/thoughts.FollowService/GetFollowers',
     requestStream: false,
@@ -244,8 +266,19 @@ var FollowServiceService = exports.FollowServiceService = {
     responseSerialize: serialize_thoughts_Users,
     responseDeserialize: deserialize_thoughts_Users,
   },
-  follow: {
-    path: '/thoughts.FollowService/Follow',
+  getFollowersIds: {
+    path: '/thoughts.FollowService/GetFollowersIds',
+    requestStream: false,
+    responseStream: false,
+    requestType: thoughts_pb.UserRequest,
+    responseType: thoughts_pb.Identifiers,
+    requestSerialize: serialize_thoughts_UserRequest,
+    requestDeserialize: deserialize_thoughts_UserRequest,
+    responseSerialize: serialize_thoughts_Identifiers,
+    responseDeserialize: deserialize_thoughts_Identifiers,
+  },
+  followUser: {
+    path: '/thoughts.FollowService/FollowUser',
     requestStream: false,
     responseStream: false,
     requestType: thoughts_pb.UserRequest,
@@ -255,8 +288,8 @@ var FollowServiceService = exports.FollowServiceService = {
     responseSerialize: serialize_thoughts_Status,
     responseDeserialize: deserialize_thoughts_Status,
   },
-  unfollow: {
-    path: '/thoughts.FollowService/Unfollow',
+  unfollowUser: {
+    path: '/thoughts.FollowService/UnfollowUser',
     requestStream: false,
     responseStream: false,
     requestType: thoughts_pb.UserRequest,
