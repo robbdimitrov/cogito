@@ -17,9 +17,9 @@ func rowToPost(row scanner) (pb.Post, error) {
 		content     string
 		userID      int32
 		likes       int32
-		liked       bool
+		liked       string
 		retweets    int32
-		retweeted   bool
+		retweeted   string
 		dateCreated string
 	)
 
@@ -34,9 +34,9 @@ func rowToPost(row scanner) (pb.Post, error) {
 		Content:     content,
 		UserId:      userID,
 		Likes:       likes,
-		Liked:       liked,
+		Liked:       liked == "t",
 		Retweets:    retweets,
-		Retweeted:   retweeted,
+		Retweeted:   retweeted == "t",
 		DateCreated: dateCreated}
 
 	return post, nil
