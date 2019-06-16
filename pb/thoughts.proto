@@ -19,6 +19,10 @@ message DataRequest {
   int32 limit = 4;
 }
 
+message Identifiers {
+  repeated int32 ids = 1;
+}
+
 /**
  * Status
  */
@@ -165,7 +169,9 @@ service UserService {
 
 service FollowService {
   rpc GetFollowing(DataRequest) returns (Users);
+  rpc GetFollowingIds(UserRequest) returns (Identifiers);
   rpc GetFollowers(DataRequest) returns (Users);
+  rpc GetFollowersIds(UserRequest) returns (Identifiers);
   rpc Follow(UserRequest) returns (Status);
   rpc Unfollow(UserRequest) returns (Status);
 }

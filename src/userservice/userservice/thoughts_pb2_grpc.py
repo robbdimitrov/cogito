@@ -116,10 +116,20 @@ class FollowServiceStub(object):
         request_serializer=thoughts__pb2.DataRequest.SerializeToString,
         response_deserializer=thoughts__pb2.Users.FromString,
         )
+    self.GetFollowingIds = channel.unary_unary(
+        '/thoughts.FollowService/GetFollowingIds',
+        request_serializer=thoughts__pb2.UserRequest.SerializeToString,
+        response_deserializer=thoughts__pb2.Identifiers.FromString,
+        )
     self.GetFollowers = channel.unary_unary(
         '/thoughts.FollowService/GetFollowers',
         request_serializer=thoughts__pb2.DataRequest.SerializeToString,
         response_deserializer=thoughts__pb2.Users.FromString,
+        )
+    self.GetFollowersIds = channel.unary_unary(
+        '/thoughts.FollowService/GetFollowersIds',
+        request_serializer=thoughts__pb2.UserRequest.SerializeToString,
+        response_deserializer=thoughts__pb2.Identifiers.FromString,
         )
     self.Follow = channel.unary_unary(
         '/thoughts.FollowService/Follow',
@@ -144,7 +154,21 @@ class FollowServiceServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def GetFollowingIds(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
   def GetFollowers(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def GetFollowersIds(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -173,10 +197,20 @@ def add_FollowServiceServicer_to_server(servicer, server):
           request_deserializer=thoughts__pb2.DataRequest.FromString,
           response_serializer=thoughts__pb2.Users.SerializeToString,
       ),
+      'GetFollowingIds': grpc.unary_unary_rpc_method_handler(
+          servicer.GetFollowingIds,
+          request_deserializer=thoughts__pb2.UserRequest.FromString,
+          response_serializer=thoughts__pb2.Identifiers.SerializeToString,
+      ),
       'GetFollowers': grpc.unary_unary_rpc_method_handler(
           servicer.GetFollowers,
           request_deserializer=thoughts__pb2.DataRequest.FromString,
           response_serializer=thoughts__pb2.Users.SerializeToString,
+      ),
+      'GetFollowersIds': grpc.unary_unary_rpc_method_handler(
+          servicer.GetFollowersIds,
+          request_deserializer=thoughts__pb2.UserRequest.FromString,
+          response_serializer=thoughts__pb2.Identifiers.SerializeToString,
       ),
       'Follow': grpc.unary_unary_rpc_method_handler(
           servicer.Follow,
