@@ -194,13 +194,13 @@ Response:
 ### Update user
 
 ```
-PUT /users/<identifier>
+PUT /users/<userId>
 ```
 
 URL parameters:
 
 ```
-identifier - id or username of the user
+userId - id of the user
 ```
 
 Body parameters:
@@ -233,13 +233,13 @@ Response:
 ### Get user
 
 ```
-GET /users/<identifier>
+GET /users/<userId>
 ```
 
 URL parameters:
 
 ```
-identifier - id or username of the user
+userId - id of the user
 ```
 
 Headers:
@@ -272,13 +272,13 @@ Response:
 ### Get following
 
 ```
-GET /users/<identifier>/following
+GET /users/<userId>/following
 ```
 
 URL parameters:
 
 ```
-identifier - id or username of the user
+userId - id of the user
 page - number of page with results
 limit - results per request
 ```
@@ -328,13 +328,13 @@ Response:
 ### Get followers
 
 ```
-GET /users/<identifier>/followers
+GET /users/<userId>/followers
 ```
 
 URL parameters:
 
 ```
-identifier - id or username of the user
+userId - id of the user
 page - number of page with results
 limit - results per request
 ```
@@ -384,13 +384,13 @@ Response:
 ### Follow user
 
 ```
-POST /users/<identifier>/followers
+POST /users/<userId>/followers
 ```
 
 URL parameters:
 
 ```
-identifier - id or username of the user
+userId - id of the user
 ```
 
 Headers:
@@ -411,13 +411,13 @@ Response:
 ### Unfollow user
 
 ```
-DELETE /users/<identifier>/followers
+DELETE /users/<userId>/followers
 ```
 
 URL parameters:
 
 ```
-identifier - id or username of the user
+userId - id of the user
 ```
 
 Headers:
@@ -465,7 +465,9 @@ Response:
     "content": "Some post content",
     "user_id": "a12r11682ce7e1000f2a1f5a",
     "likes": 0,
+    "liked": false,
     "retweets": 0,
+    "retweeted": false,
     "date_created": "2017-11-15T10:05:28+00:00"
   }
 }
@@ -499,7 +501,9 @@ Response:
     "content": "Some post content",
     "user_id": "a12r11682ce7e1000f2a1f5a",
     "likes": 10,
+    "liked": true,
     "retweets": 2,
+    "retweeted": false,
     "date_created": "2017-11-15T10:05:28+00:00"
   }
 }
@@ -562,7 +566,9 @@ Response:
       "content": "Some post content",
       "user_id": "a12r11682ce7e1000f2a1f5a",
       "likes": 10,
+      "liked": true,
       "retweets": 2,
+      "retweeted": false,
       "date_created": "2017-11-15T10:05:28+00:00"
     },
     {
@@ -570,7 +576,9 @@ Response:
       "content": "Some post content",
       "user_id": "a12r11682ce7e1000f2a1f5a",
       "likes": 10,
+      "liked": true,
       "retweets": 2,
+      "retweeted": false,
       "date_created": "2017-11-15T10:05:28+00:00"
     }
   ]
@@ -580,13 +588,13 @@ Response:
 ### Get posts
 
 ```
-GET /users/<identifier>/posts
+GET /users/<userId>/posts
 ```
 
 URL parameters:
 
 ```
-identifier - id or username of the user
+userId - id of the user
 page - number of page with results
 limit - results per request
 ```
@@ -608,7 +616,9 @@ Response:
       "content": "Some post content",
       "user_id": "a12r11682ce7e1000f2a1f5a",
       "likes": 10,
+      "liked": true,
       "retweets": 2,
+      "retweeted": false,
       "date_created": "2017-11-15T10:05:28+00:00"
     },
     {
@@ -616,7 +626,9 @@ Response:
       "content": "Some post content",
       "user_id": "a12r11682ce7e1000f2a1f5a",
       "likes": 10,
+      "liked": true,
       "retweets": 2,
+      "retweeted": false,
       "date_created": "2017-11-15T10:05:28+00:00"
     }
   ]
@@ -626,13 +638,13 @@ Response:
 ### Get likes
 
 ```
-GET /users/<identifier>/likes
+GET /users/<userId>/likes
 ```
 
 URL parameters:
 
 ```
-identifier - id or username of the user
+userId - id of the user
 page - number of page with results
 limit - results per request
 ```
@@ -654,7 +666,9 @@ Response:
       "content": "Some post content",
       "user_id": "a12r11682ce7e1000f2a1f5a",
       "likes": 10,
+      "liked": true,
       "retweets": 2,
+      "retweeted": false,
       "date_created": "2017-11-15T10:05:28+00:00"
     },
     {
@@ -662,7 +676,9 @@ Response:
       "content": "Some post content",
       "user_id": "a12r11682ce7e1000f2a1f5a",
       "likes": 10,
+      "liked": true,
       "retweets": 2,
+      "retweeted": false,
       "date_created": "2017-11-15T10:05:28+00:00"
     }
   ]

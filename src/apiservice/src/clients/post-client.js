@@ -3,6 +3,7 @@ import * as grpc from 'grpc';
 import * as services from '../genproto/thoughts_grpc_pb';
 import * as messages from '../genproto/thoughts_pb';
 import { APIClient } from './api-client';
+import { itemToPost, itemsToPosts } from '../utils';
 
 export class PostClient extends APIClient {
   constructor(serviceURI) {
@@ -12,29 +13,6 @@ export class PostClient extends APIClient {
       grpc.credentials.createInsecure());
     this.actionClient = new services.ActionServiceClient(this.serviceURI,
       grpc.credentials.createInsecure());
-  }
-
-  // Helper
-
-  itemToPost(item) {
-    const post = {
-      id: item.getId(),
-      content: item.getContent(),
-      user_id: item.getUserId(),
-      likes: item.getLikes(),
-      retweets: item.getRetweets(),
-      date_created: item.getDateCreated()
-    };
-    return post;
-  }
-
-  itemsToPosts(items) {
-    const posts = [];
-    for (const item of items) {
-      const post = this.itemToPost(item);
-      posts.push(post);
-    }
-    return posts;
   }
 
   // Posts
@@ -53,7 +31,7 @@ export class PostClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        const post = this.itemToPost(response.getPost());
+        const post = itemToPost(response.getPost());
         res({post});
       });
     });
@@ -73,7 +51,7 @@ export class PostClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        const post = this.itemToPost(response.getPost());
+        const post = itemToPost(response.getPost());
         res({post});
       });
     });
@@ -90,7 +68,7 @@ export class PostClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        const posts = this.itemsToPosts(response.getPosts());
+        const posts = itemsToPosts(response.getPosts());
         res({posts});
       });
     });
@@ -108,7 +86,7 @@ export class PostClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        const posts = this.itemsToPosts(response.getPosts());
+        const posts = itemsToPosts(response.getPosts());
         res({posts});
       });
     });
@@ -126,7 +104,7 @@ export class PostClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        const posts = this.itemsToPosts(response.getPosts());
+        const posts = itemsToPosts(response.getPosts());
         res({posts});
       });
     });

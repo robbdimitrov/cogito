@@ -69,9 +69,9 @@ export function updatePassword(password, oldPassword) {
 // User
 
 export const FETCH_USER = 'FETCH_USER';
-export function fetchUser(userId) {
+export function fetchUser(userId, username) {
   return (dispatch) => {
-    apiClient.getUser(userId).then((response) => {
+    apiClient.getUser(userId, username).then((response) => {
       if (!response.ok) {
         dispatch({
           type: FETCH_USER,
