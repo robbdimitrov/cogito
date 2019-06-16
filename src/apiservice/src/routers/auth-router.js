@@ -39,7 +39,9 @@ export class AuthRouter extends APIRouter {
   refreshToken(req, res) {
     const token = this.getToken(req);
 
-    this.handleResponse(this.authClient.refreshToken(token), res);
+    this.handleResponse(
+      this.authClient.refreshToken(token), res
+    );
   }
 
   // Sessions
@@ -47,13 +49,17 @@ export class AuthRouter extends APIRouter {
   getSessions(req, res) {
     const token = this.getToken(req);
 
-    this.handleResponse(this.authClient.getSessions(token), res);
+    this.handleResponse(
+      this.authClient.getSessions(token), res
+    );
   }
 
   deleteSession(req, res) {
     const token = this.getToken(req);
     const sessionId = req.params.id;
 
-    this.handleResponse(this.authClient.deleteSession(sessionId, token), res);
+    this.handleResponse(
+      this.authClient.deleteSession(sessionId, token), res
+    );
   }
 }

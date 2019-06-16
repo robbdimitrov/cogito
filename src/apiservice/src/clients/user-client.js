@@ -3,6 +3,7 @@ import * as grpc from 'grpc';
 import * as services from '../genproto/thoughts_grpc_pb';
 import * as messages from '../genproto/thoughts_pb';
 import { APIClient } from './api-client';
+import { itemToUser, itemsToUsers } from '../utils';
 
 export class UserClient extends APIClient {
   constructor(serviceURI) {
@@ -12,32 +13,6 @@ export class UserClient extends APIClient {
       grpc.credentials.createInsecure());
     this.followClient = new services.FollowServiceClient(this.serviceURI,
       grpc.credentials.createInsecure());
-  }
-
-  // Helpers
-
-  itemToUser(item) {
-    const user = {
-      id: item.getId(),
-      username: item.getUsername(),
-      email: item.getEmail(),
-      name: item.getName(),
-      bio: item.getBio(),
-      avatar: item.getAvatar(),
-      posts: item.getPosts(),
-      likes: item.getLikes(),
-      following: item.getFollowing(),
-      followers: item.getFollowers(),
-      date_created: item.getDateCreated()
-    };
-    return user;
-  }
-
-  itemsToUsers(items) {
-    const users = [];
-    for (const item of items) {
-      users.push(this.itemToUser(item));
-    }
   }
 
   // Users
@@ -77,7 +52,7 @@ export class UserClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        const user = this.itemToUser(response.getUser());
+        const user = itemToUser(response.getUser());
         res({user});
       });
     });
@@ -140,7 +115,7 @@ export class UserClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        const users = this.itemsToUsers(response.getUsers());
+        const users = itemsToUsers(response.getUsers());
         res({users});
       });
     });
@@ -158,7 +133,7 @@ export class UserClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        const users = this.itemsToUsers(response.getUsers());
+        const users = itemsToUsers(response.getUsers());
         res({users});
       });
     });

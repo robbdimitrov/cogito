@@ -72,7 +72,9 @@ export class UserRouter extends APIRouter {
     const id = req.params.id;
     const token = this.getToken(req);
 
-    this.handleResponse(this.userClient.getUser(id, token), res);
+    this.handleResponse(
+      this.userClient.getUser(id, token), res
+    );
   }
 
   updateUser(req, res) {
@@ -94,7 +96,9 @@ export class UserRouter extends APIRouter {
     const id = req.params.id;
     const token = this.getToken(req);
 
-    this.handleResponse(this.userClient.deleteUser(id, token), res);
+    this.handleResponse(
+      this.userClient.deleteUser(id, token), res
+    );
   }
 
   // Follows
@@ -125,14 +129,18 @@ export class UserRouter extends APIRouter {
     const id = req.params.id;
     const token = this.getToken(req);
 
-    this.handleResponse(this.userClient.follow(id, token), res);
+    this.handleResponse(
+      this.userClient.follow(id, token), res
+    );
   }
 
   unfollow(req, res) {
     const id = req.params.id;
     const token = this.getToken(req);
 
-    this.handleResponse(this.userClient.unfollow(id, token), res);
+    this.handleResponse(
+      this.userClient.unfollow(id, token), res
+    );
   }
 
   // Posts

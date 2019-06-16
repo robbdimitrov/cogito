@@ -52,14 +52,18 @@ export class PostRouter extends APIRouter {
     const content = req.body.content;
     const token = this.getToken(req);
 
-    this.handleResponse(this.postClient.createPost(content, token), res);
+    this.handleResponse(
+      this.postClient.createPost(content, token), res
+    );
   }
 
   getPost(req, res) {
     const postId = req.params.id;
     const token = this.getToken(req);
 
-    this.handleResponse(this.postClient.getPost(postId, token), res);
+    this.handleResponse(
+      this.postClient.getPost(postId, token), res
+    );
   }
 
   getFeed(req, res) {
@@ -76,7 +80,9 @@ export class PostRouter extends APIRouter {
     const postId = req.params.id;
     const token = this.getToken(req);
 
-    this.handleResponse(this.postClient.deletePost(postId, token), res);
+    this.handleResponse(
+      this.postClient.deletePost(postId, token), res
+    );
   }
 
   // Actions
@@ -85,27 +91,35 @@ export class PostRouter extends APIRouter {
     const postId = req.params.id;
     const token = this.getToken(req);
 
-    this.handleResponse(this.postClient.likePost(postId, token), res);
+    this.handleResponse(
+      this.postClient.likePost(postId, token), res
+    );
   }
 
   unlikePost(req, res) {
     const postId = req.params.id;
     const token = this.getToken(req);
 
-    this.handleResponse(this.postClient.unlikePost(postId, token), res);
+    this.handleResponse(
+      this.postClient.unlikePost(postId, token), res
+    );
   }
 
   retweetPost(req, res) {
     const postId = req.params.id;
     const token = this.getToken(req);
 
-    this.handleResponse(this.postClient.retweetPost(postId, token), res);
+    this.handleResponse(
+      this.postClient.retweetPost(postId, token), res
+    );
   }
 
   removeRetweet(req, res) {
     const postId = req.params.id;
     const token = this.getToken(req);
 
-    this.handleResponse(this.postClient.removeRetweet(postId, token), res);
+    this.handleResponse(
+      this.postClient.removeRetweet(postId, token), res
+    );
   }
 }

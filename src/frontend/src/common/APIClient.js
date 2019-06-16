@@ -100,8 +100,13 @@ class APIClient {
     return this.request(url, 'PUT', body);
   }
 
-  getUser(identifier) {
-    const url = `/users/${identifier}`;
+  getUser(userId, username) {
+    let url = `/users/${userId}`;
+
+    if (username) {
+      url = `/users?username=${username}`;
+    }
+
     return this.request(url);
   }
 
