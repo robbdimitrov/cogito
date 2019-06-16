@@ -46,9 +46,9 @@ class DbClient:
 
     def create_user_query(self, where = ''):
         query = f'SELECT users.id, users.username, users.email, users.name, \
-            users.bio, users.avatar,
-            count(distinct posts.id) AS posts,
-            count(distinct likes.id) AS likes,
+            users.bio, users.avatar, \
+            count(distinct posts.id) AS posts, \
+            count(distinct likes.id) AS likes, \
             count(distinct following.id) AS following, \
             count(distinct followers.id) AS followers, \
             time_format(users.date_created) as date_created \

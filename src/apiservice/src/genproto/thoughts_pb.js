@@ -273,7 +273,7 @@ proto.thoughts.DataRequest.prototype.toObject = function(opt_includeInstance) {
  */
 proto.thoughts.DataRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
-    userId: jspb.Message.getFieldWithDefault(msg, 1, ""),
+    userId: jspb.Message.getFieldWithDefault(msg, 1, 0),
     token: jspb.Message.getFieldWithDefault(msg, 2, ""),
     page: jspb.Message.getFieldWithDefault(msg, 3, 0),
     limit: jspb.Message.getFieldWithDefault(msg, 4, 0)
@@ -314,7 +314,7 @@ proto.thoughts.DataRequest.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {number} */ (reader.readInt32());
       msg.setUserId(value);
       break;
     case 2:
@@ -359,8 +359,8 @@ proto.thoughts.DataRequest.prototype.serializeBinary = function() {
 proto.thoughts.DataRequest.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
   f = message.getUserId();
-  if (f.length > 0) {
-    writer.writeString(
+  if (f !== 0) {
+    writer.writeInt32(
       1,
       f
     );
@@ -390,17 +390,17 @@ proto.thoughts.DataRequest.serializeBinaryToWriter = function(message, writer) {
 
 
 /**
- * optional string user_id = 1;
- * @return {string}
+ * optional int32 user_id = 1;
+ * @return {number}
  */
 proto.thoughts.DataRequest.prototype.getUserId = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 1, 0));
 };
 
 
-/** @param {string} value */
+/** @param {number} value */
 proto.thoughts.DataRequest.prototype.setUserId = function(value) {
-  jspb.Message.setProto3StringField(this, 1, value);
+  jspb.Message.setProto3IntField(this, 1, value);
 };
 
 
@@ -1747,8 +1747,9 @@ proto.thoughts.UserRequest.prototype.toObject = function(opt_includeInstance) {
  */
 proto.thoughts.UserRequest.toObject = function(includeInstance, msg) {
   var f, obj = {
-    userId: jspb.Message.getFieldWithDefault(msg, 1, ""),
-    token: jspb.Message.getFieldWithDefault(msg, 2, "")
+    userId: jspb.Message.getFieldWithDefault(msg, 1, 0),
+    username: jspb.Message.getFieldWithDefault(msg, 2, ""),
+    token: jspb.Message.getFieldWithDefault(msg, 3, "")
   };
 
   if (includeInstance) {
@@ -1786,10 +1787,14 @@ proto.thoughts.UserRequest.deserializeBinaryFromReader = function(msg, reader) {
     var field = reader.getFieldNumber();
     switch (field) {
     case 1:
-      var value = /** @type {string} */ (reader.readString());
+      var value = /** @type {number} */ (reader.readInt32());
       msg.setUserId(value);
       break;
     case 2:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setUsername(value);
+      break;
+    case 3:
       var value = /** @type {string} */ (reader.readString());
       msg.setToken(value);
       break;
@@ -1823,49 +1828,71 @@ proto.thoughts.UserRequest.prototype.serializeBinary = function() {
 proto.thoughts.UserRequest.serializeBinaryToWriter = function(message, writer) {
   var f = undefined;
   f = message.getUserId();
-  if (f.length > 0) {
-    writer.writeString(
+  if (f !== 0) {
+    writer.writeInt32(
       1,
       f
     );
   }
-  f = message.getToken();
+  f = message.getUsername();
   if (f.length > 0) {
     writer.writeString(
       2,
       f
     );
   }
+  f = message.getToken();
+  if (f.length > 0) {
+    writer.writeString(
+      3,
+      f
+    );
+  }
 };
 
 
 /**
- * optional string user_id = 1;
- * @return {string}
+ * optional int32 user_id = 1;
+ * @return {number}
  */
 proto.thoughts.UserRequest.prototype.getUserId = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 1, ""));
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 1, 0));
 };
 
 
-/** @param {string} value */
+/** @param {number} value */
 proto.thoughts.UserRequest.prototype.setUserId = function(value) {
-  jspb.Message.setProto3StringField(this, 1, value);
+  jspb.Message.setProto3IntField(this, 1, value);
 };
 
 
 /**
- * optional string token = 2;
+ * optional string username = 2;
  * @return {string}
  */
-proto.thoughts.UserRequest.prototype.getToken = function() {
+proto.thoughts.UserRequest.prototype.getUsername = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 2, ""));
 };
 
 
 /** @param {string} value */
-proto.thoughts.UserRequest.prototype.setToken = function(value) {
+proto.thoughts.UserRequest.prototype.setUsername = function(value) {
   jspb.Message.setProto3StringField(this, 2, value);
+};
+
+
+/**
+ * optional string token = 3;
+ * @return {string}
+ */
+proto.thoughts.UserRequest.prototype.getToken = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 3, ""));
+};
+
+
+/** @param {string} value */
+proto.thoughts.UserRequest.prototype.setToken = function(value) {
+  jspb.Message.setProto3StringField(this, 3, value);
 };
 
 
@@ -3435,8 +3462,10 @@ proto.thoughts.Post.toObject = function(includeInstance, msg) {
     content: jspb.Message.getFieldWithDefault(msg, 2, ""),
     userId: jspb.Message.getFieldWithDefault(msg, 3, 0),
     likes: jspb.Message.getFieldWithDefault(msg, 4, 0),
-    retweets: jspb.Message.getFieldWithDefault(msg, 5, 0),
-    dateCreated: jspb.Message.getFieldWithDefault(msg, 6, "")
+    liked: jspb.Message.getFieldWithDefault(msg, 5, false),
+    retweets: jspb.Message.getFieldWithDefault(msg, 6, 0),
+    retweeted: jspb.Message.getFieldWithDefault(msg, 7, false),
+    dateCreated: jspb.Message.getFieldWithDefault(msg, 8, "")
   };
 
   if (includeInstance) {
@@ -3490,10 +3519,18 @@ proto.thoughts.Post.deserializeBinaryFromReader = function(msg, reader) {
       msg.setLikes(value);
       break;
     case 5:
+      var value = /** @type {boolean} */ (reader.readBool());
+      msg.setLiked(value);
+      break;
+    case 6:
       var value = /** @type {number} */ (reader.readInt32());
       msg.setRetweets(value);
       break;
-    case 6:
+    case 7:
+      var value = /** @type {boolean} */ (reader.readBool());
+      msg.setRetweeted(value);
+      break;
+    case 8:
       var value = /** @type {string} */ (reader.readString());
       msg.setDateCreated(value);
       break;
@@ -3554,17 +3591,31 @@ proto.thoughts.Post.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
+  f = message.getLiked();
+  if (f) {
+    writer.writeBool(
+      5,
+      f
+    );
+  }
   f = message.getRetweets();
   if (f !== 0) {
     writer.writeInt32(
-      5,
+      6,
+      f
+    );
+  }
+  f = message.getRetweeted();
+  if (f) {
+    writer.writeBool(
+      7,
       f
     );
   }
   f = message.getDateCreated();
   if (f.length > 0) {
     writer.writeString(
-      6,
+      8,
       f
     );
   }
@@ -3632,32 +3683,66 @@ proto.thoughts.Post.prototype.setLikes = function(value) {
 
 
 /**
- * optional int32 retweets = 5;
+ * optional bool liked = 5;
+ * Note that Boolean fields may be set to 0/1 when serialized from a Java server.
+ * You should avoid comparisons like {@code val === true/false} in those cases.
+ * @return {boolean}
+ */
+proto.thoughts.Post.prototype.getLiked = function() {
+  return /** @type {boolean} */ (jspb.Message.getFieldWithDefault(this, 5, false));
+};
+
+
+/** @param {boolean} value */
+proto.thoughts.Post.prototype.setLiked = function(value) {
+  jspb.Message.setProto3BooleanField(this, 5, value);
+};
+
+
+/**
+ * optional int32 retweets = 6;
  * @return {number}
  */
 proto.thoughts.Post.prototype.getRetweets = function() {
-  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 5, 0));
+  return /** @type {number} */ (jspb.Message.getFieldWithDefault(this, 6, 0));
 };
 
 
 /** @param {number} value */
 proto.thoughts.Post.prototype.setRetweets = function(value) {
-  jspb.Message.setProto3IntField(this, 5, value);
+  jspb.Message.setProto3IntField(this, 6, value);
 };
 
 
 /**
- * optional string date_created = 6;
+ * optional bool retweeted = 7;
+ * Note that Boolean fields may be set to 0/1 when serialized from a Java server.
+ * You should avoid comparisons like {@code val === true/false} in those cases.
+ * @return {boolean}
+ */
+proto.thoughts.Post.prototype.getRetweeted = function() {
+  return /** @type {boolean} */ (jspb.Message.getFieldWithDefault(this, 7, false));
+};
+
+
+/** @param {boolean} value */
+proto.thoughts.Post.prototype.setRetweeted = function(value) {
+  jspb.Message.setProto3BooleanField(this, 7, value);
+};
+
+
+/**
+ * optional string date_created = 8;
  * @return {string}
  */
 proto.thoughts.Post.prototype.getDateCreated = function() {
-  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 6, ""));
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 8, ""));
 };
 
 
 /** @param {string} value */
 proto.thoughts.Post.prototype.setDateCreated = function(value) {
-  jspb.Message.setProto3StringField(this, 6, value);
+  jspb.Message.setProto3StringField(this, 8, value);
 };
 
 

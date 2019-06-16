@@ -1,5 +1,4 @@
 import { APIRouter } from './api-router';
-import { getToken } from './utils';
 
 export class AuthRouter extends APIRouter {
   constructor(authClient) {
@@ -38,7 +37,7 @@ export class AuthRouter extends APIRouter {
   }
 
   refreshToken(req, res) {
-    const token = getToken(req);
+    const token = this.getToken(req);
 
     this.handleResponse(this.authClient.refreshToken(token), res);
   }
@@ -46,13 +45,13 @@ export class AuthRouter extends APIRouter {
   // Sessions
 
   getSessions(req, res) {
-    const token = getToken(req);
+    const token = this.getToken(req);
 
     this.handleResponse(this.authClient.getSessions(token), res);
   }
 
   deleteSession(req, res) {
-    const token = getToken(req);
+    const token = this.getToken(req);
     const sessionId = req.params.id;
 
     this.handleResponse(this.authClient.deleteSession(sessionId, token), res);

@@ -14,6 +14,29 @@ export class PostClient extends APIClient {
       grpc.credentials.createInsecure());
   }
 
+  // Helper
+
+  itemToPost(item) {
+    const post = {
+      id: item.getId(),
+      content: item.getContent(),
+      user_id: item.getUserId(),
+      likes: item.getLikes(),
+      retweets: item.getRetweets(),
+      date_created: item.getDateCreated()
+    };
+    return post;
+  }
+
+  itemsToPosts(items) {
+    const posts = [];
+    for (const item of items) {
+      const post = this.itemToPost(item);
+      posts.push(post);
+    }
+    return posts;
+  }
+
   // Posts
 
   createPost(content, token) {
@@ -30,14 +53,7 @@ export class PostClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-
-        const item = response.getPost();
-        const post = {
-          id: item.getId(),
-          content: item.getContent(),
-          user_id: item.getUserId(),
-          date_created: item.getDateCreated()
-        };
+        const post = this.itemToPost(response.getPost());
         res({post});
       });
     });
@@ -57,14 +73,7 @@ export class PostClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-
-        const item = response.getPost();
-        const post = {
-          id: item.getId(),
-          content: item.getContent(),
-          user_id: item.getUserId(),
-          date_created: item.getDateCreated()
-        };
+        const post = this.itemToPost(response.getPost());
         res({post});
       });
     });
@@ -81,16 +90,7 @@ export class PostClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        const posts = [];
-        for (const item of response.getPosts()) {
-          const post = {
-            id: item.getId(),
-            content: item.getContent(),
-            user_id: item.getUserId(),
-            date_created: item.getDateCreated()
-          };
-          posts.push(post);
-        }
+        const posts = this.itemsToPosts(response.getPosts());
         res({posts});
       });
     });
@@ -108,16 +108,7 @@ export class PostClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        const posts = [];
-        for (const item of response.getPosts()) {
-          const post = {
-            id: item.getId(),
-            content: item.getContent(),
-            user_id: item.getUserId(),
-            date_created: item.getDateCreated()
-          };
-          posts.push(post);
-        }
+        const posts = this.itemsToPosts(response.getPosts());
         res({posts});
       });
     });
@@ -135,16 +126,7 @@ export class PostClient extends APIClient {
         if (err) {
           return rej(err);
         }
-        const posts = [];
-        for (const item of response.getPosts()) {
-          const post = {
-            id: item.getId(),
-            content: item.getContent(),
-            user_id: item.getUserId(),
-            date_created: item.getDateCreated()
-          };
-          posts.push(post);
-        }
+        const posts = this.itemsToPosts(response.getPosts());
         res({posts});
       });
     });

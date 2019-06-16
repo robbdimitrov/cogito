@@ -10,6 +10,10 @@ export class APIRouter {
     // Implemented by subclasses
   }
 
+  getToken(req) {
+    return req.get('Authorization');
+  }
+
   handleResponse(promise, res) {
     promise.then((result) => {
       res.send(result);
