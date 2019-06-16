@@ -12,20 +12,6 @@ $context-icon-width: 16px;
   background: $primary-color;
 }
 
-.context-icon {
-  margin-left: ($avatar-width-sm + $padding) - $context-icon-width;
-  width: $context-icon-width;
-  margin-right: $padding;
-}
-
-.context {
-  display: inline-block;
-  margin-top: $padding;
-  color: gray;
-  font-size: rem(12);
-  font-weight: $font-weight-regular;
-}
-
 .buttons > button {
   display: flex;
   align-items: center;
