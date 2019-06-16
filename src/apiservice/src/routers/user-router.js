@@ -14,6 +14,10 @@ export class UserRouter extends APIRouter {
       this.createUser(req, res);
     });
 
+    router.get('/', (req, res) => {
+      this.getUser(req, res);
+    });
+
     router.get('/:id', (req, res) => {
       this.getUser(req, res);
     });
@@ -70,10 +74,11 @@ export class UserRouter extends APIRouter {
 
   getUser(req, res) {
     const id = req.params.id;
+    const username = req.query.username;
     const token = this.getToken(req);
 
     this.handleResponse(
-      this.userClient.getUser(id, token), res
+      this.userClient.getUser(id, username, token), res
     );
   }
 

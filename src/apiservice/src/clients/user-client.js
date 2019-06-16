@@ -38,10 +38,14 @@ export class UserClient extends APIClient {
     });
   }
 
-  getUser(userId, token) {
+  getUser(userId, username, token) {
     const request = new messages.UserRequest();
-    request.setUserId(userId);
     request.setToken(token);
+    if (userId) {
+      request.setUserId(userId);
+    } else {
+      request.setUsername(username);
+    }
 
     return new Promise((res, rej) => {
       this.userClient.getUser(request, (err, response) => {
