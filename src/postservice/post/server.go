@@ -41,9 +41,8 @@ func (s *Server) Start() {
 
 	dbClient := s.createDbClient()
 	authClient := NewAuthClient(s.authURI)
-	userClient := NewUserClient(s.userURI)
 
-	pb.RegisterPostServiceServer(svr, NewService(dbClient, authClient, userClient))
+	pb.RegisterPostServiceServer(svr, NewService(dbClient, authClient))
 	pb.RegisterActionServiceServer(svr, NewActionService(dbClient, authClient))
 
 	if err := svr.Serve(lis); err != nil {
