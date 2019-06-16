@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 import './UserHeader.scss';
 
-function UserHeader({user}) {
+function UserHeader({ user }) {
   return (
     <div className="user-header container">
       <div className="cover"></div>

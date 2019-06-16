@@ -4,10 +4,10 @@ import SessionItem from './SessionItem';
 import './Sessions.scss';
 
 const sessions = [
-  {name: 'Macintosh', isDesktop: true, isCurrent: true, id: 1},
-  {name: 'Android', isDesktop: false, isCurrent: false, id: 2},
-  {name: 'iPhone', isDesktop: false, isCurrent: false, id: 3},
-  {name: 'Android', isDesktop: false, isCurrent: false, id: 4},
+  { name: 'Macintosh', isDesktop: true, isCurrent: true, id: 1 },
+  { name: 'Android', isDesktop: false, isCurrent: false, id: 2 },
+  { name: 'iPhone', isDesktop: false, isCurrent: false, id: 3 },
+  { name: 'Android', isDesktop: false, isCurrent: false, id: 4 },
 ];
 
 class Sessions extends React.Component {

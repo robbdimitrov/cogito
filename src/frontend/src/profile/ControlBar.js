@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 import './ControlBar.scss';
 
-function ControlBar({user, path}) {
+function ControlBar({ user, path }) {
   return (
     <div className="control-bar-container bottom-shadow">
       <div className="control-bar main-content">

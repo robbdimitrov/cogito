@@ -69,7 +69,7 @@ export class AuthClient extends APIClient {
           access_token: response.getAccessToken(),
           refresh_token: response.getRefreshToken()
         };
-        res({token});
+        res({ token });
       });
     });
   }
@@ -96,7 +96,7 @@ export class AuthClient extends APIClient {
           };
           sessions.push(session);
         }
-        res({sessions});
+        res({ sessions });
       });
     });
   }
@@ -115,7 +115,7 @@ export class AuthClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({message: response.getMessage()});
+        res({ message: response.getMessage() });
       });
     });
   }

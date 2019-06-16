@@ -33,7 +33,7 @@ export class UserClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({message: response.getMessage()});
+        res({ message: response.getMessage() });
       });
     });
   }
@@ -57,7 +57,7 @@ export class UserClient extends APIClient {
           return this.handleError(error, rej);
         }
         const user = itemToUser(response.getUser());
-        res({user});
+        res({ user });
       });
     });
   }
@@ -81,7 +81,7 @@ export class UserClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({message: response.getMessage()});
+        res({ message: response.getMessage() });
       });
     });
   }
@@ -100,7 +100,7 @@ export class UserClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({message: response.getMessage()});
+        res({ message: response.getMessage() });
       });
     });
   }
@@ -120,7 +120,7 @@ export class UserClient extends APIClient {
           return rej(err);
         }
         const users = response.getIds();
-        res({users});
+        res({ users });
       });
     });
   }
@@ -136,7 +136,7 @@ export class UserClient extends APIClient {
           return rej(err);
         }
         const users = itemsToUsers(response.getUsers());
-        res({users});
+        res({ users });
       });
     });
   }
@@ -154,7 +154,7 @@ export class UserClient extends APIClient {
           return rej(err);
         }
         const users = itemsToUsers(response.getUsers());
-        res({users});
+        res({ users });
       });
     });
   }
@@ -170,7 +170,7 @@ export class UserClient extends APIClient {
           return rej(err);
         }
         const users = response.getIds();
-        res({users});
+        res({ users });
       });
     });
   }
@@ -189,7 +189,7 @@ export class UserClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({message: response.getMessage()});
+        res({ message: response.getMessage() });
       });
     });
   }
@@ -208,7 +208,7 @@ export class UserClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({message: response.getMessage()});
+        res({ message: response.getMessage() });
       });
     });
   }

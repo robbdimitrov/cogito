@@ -32,7 +32,7 @@ export class PostClient extends APIClient {
           return this.handleError(error, rej);
         }
         const post = itemToPost(response.getPost());
-        res({post});
+        res({ post });
       });
     });
   }
@@ -52,7 +52,7 @@ export class PostClient extends APIClient {
           return this.handleError(error, rej);
         }
         const post = itemToPost(response.getPost());
-        res({post});
+        res({ post });
       });
     });
   }
@@ -69,7 +69,7 @@ export class PostClient extends APIClient {
           return rej(err);
         }
         const posts = itemsToPosts(response.getPosts());
-        res({posts});
+        res({ posts });
       });
     });
   }
@@ -87,7 +87,7 @@ export class PostClient extends APIClient {
           return rej(err);
         }
         const posts = itemsToPosts(response.getPosts());
-        res({posts});
+        res({ posts });
       });
     });
   }
@@ -105,7 +105,7 @@ export class PostClient extends APIClient {
           return rej(err);
         }
         const posts = itemsToPosts(response.getPosts());
-        res({posts});
+        res({ posts });
       });
     });
   }
@@ -124,7 +124,7 @@ export class PostClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({message: response.getMessage()});
+        res({ message: response.getMessage() });
       });
     });
   }
@@ -145,7 +145,7 @@ export class PostClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({message: response.getMessage()});
+        res({ message: response.getMessage() });
       });
     });
   }
@@ -164,7 +164,7 @@ export class PostClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({message: response.getMessage()});
+        res({ message: response.getMessage() });
       });
     });
   }
@@ -183,7 +183,7 @@ export class PostClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({message: response.getMessage()});
+        res({ message: response.getMessage() });
       });
     });
   }
@@ -202,7 +202,7 @@ export class PostClient extends APIClient {
         if (error !== undefined) {
           return this.handleError(error, rej);
         }
-        res({message: response.getMessage()});
+        res({ message: response.getMessage() });
       });
     });
   }

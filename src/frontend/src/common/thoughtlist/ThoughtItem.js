@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 import './ThoughtItem.scss';
 
-function ThoughtItem({post, user, context}) {
+function ThoughtItem({ post, user, context }) {
   return (
     <li className="thought-item">
       <article className="container">

@@ -7,11 +7,11 @@ import './ThoughtBox.scss';
 class ThoughtBox extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {value: '', maxLength: 140};
+    this.state = { value: '', maxLength: 140 };
   }
 
   handleChange = (event) => {
-    this.setState({value: event.target.value});
+    this.setState({ value: event.target.value });
   };
 
   isPostValid = () => {

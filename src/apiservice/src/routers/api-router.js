@@ -19,7 +19,7 @@ export class APIRouter {
       res.send(result);
     }).catch((error) => {
       const code = error.code || 500;
-      res.status(code).send({error});
+      res.status(code).send({ error });
     });
   }
 }

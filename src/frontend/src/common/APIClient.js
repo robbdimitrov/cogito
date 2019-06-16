@@ -22,7 +22,7 @@ class APIClient {
 
     const url = apiRoot + urlPath;
 
-    const options = {method, headers};
+    const options = { method, headers };
 
     if (body !== undefined) {
       if (headers.get('Content-Type') === 'application/json') {
@@ -40,7 +40,7 @@ class APIClient {
 
   createSession(email, password) {
     const url = '/sessions';
-    const body = {email, password};
+    const body = { email, password };
     return this.request(url, 'POST', body);
   }
 
@@ -66,7 +66,7 @@ class APIClient {
 
   createUser(name, username, email, password) {
     const url = '/users';
-    const body = {name, username, email, password};
+    const body = { name, username, email, password };
     return this.request(url, 'POST', body);
   }
 
@@ -146,7 +146,7 @@ class APIClient {
 
   createPost(content) {
     const url = '/posts';
-    const body = {content};
+    const body = { content };
     return this.request(url, 'POST', body);
   }
 

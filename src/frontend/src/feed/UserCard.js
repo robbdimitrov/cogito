@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import './UserCard.scss';
 
-function UserCard({user}) {
+function UserCard({ user }) {
   return (
     <div className="user-card container">
       <div className="cover"></div>

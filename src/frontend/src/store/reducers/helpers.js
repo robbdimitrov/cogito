@@ -34,9 +34,9 @@ export function removeItem(state = initialState, item) {
 
 export function userProperties(user) {
   return {
-    posts: {count: user.posts},
-    likes: {count: user.likes},
-    following: {count: user.following},
-    followers: {count: user.followers}
+    posts: { count: user.posts },
+    likes: { count: user.likes },
+    following: { count: user.following },
+    followers: { count: user.followers }
   };
 }

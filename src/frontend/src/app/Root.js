@@ -7,7 +7,7 @@ import ThoughtBox from '../common/thoughtbox/ThoughtBox';
 class Root extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {isPopupShown: false};
+    this.state = { isPopupShown: false };
   }
 
   openPopup = () => {

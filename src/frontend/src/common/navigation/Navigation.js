@@ -8,7 +8,7 @@ import './Navigation.scss';
 class Navigation extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {isDropdownShown: false};
+    this.state = { isDropdownShown: false };
   }
 
   handleClick = () => {

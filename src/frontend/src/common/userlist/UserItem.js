@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import './UserItem.scss';
 
-function UserItem({user}) {
+function UserItem({ user }) {
   return (
     <li className="user-item container user-card">
       <div className="cover"></div>

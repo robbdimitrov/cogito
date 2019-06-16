@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import UserItem from './UserItem';
 import './UserList.scss';
 
-function UserList({users}) {
+function UserList({ users }) {
   return (
     <ul className="user-list">
       {users.map((user) =>
