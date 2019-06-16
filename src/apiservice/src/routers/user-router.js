@@ -41,11 +41,11 @@ export class UserRouter extends APIRouter {
     });
 
     router.post('/:id/followers', (req, res) => {
-      this.follow(req, res);
+      this.followUser(req, res);
     });
 
     router.delete('/:id/followers/:followerId', (req, res) => {
-      this.unfollow(req, res);
+      this.unfollowUser(req, res);
     });
 
     // Posts
@@ -130,21 +130,21 @@ export class UserRouter extends APIRouter {
     );
   }
 
-  follow(req, res) {
+  followUser(req, res) {
     const id = req.params.id;
     const token = this.getToken(req);
 
     this.handleResponse(
-      this.userClient.follow(id, token), res
+      this.userClient.followUser(id, token), res
     );
   }
 
-  unfollow(req, res) {
+  unfollowUser(req, res) {
     const id = req.params.id;
     const token = this.getToken(req);
 
     this.handleResponse(
-      this.userClient.unfollow(id, token), res
+      this.userClient.unfollowUser(id, token), res
     );
   }
 

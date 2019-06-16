@@ -277,8 +277,8 @@ var FollowServiceService = exports.FollowServiceService = {
     responseSerialize: serialize_thoughts_Identifiers,
     responseDeserialize: deserialize_thoughts_Identifiers,
   },
-  follow: {
-    path: '/thoughts.FollowService/Follow',
+  followUser: {
+    path: '/thoughts.FollowService/FollowUser',
     requestStream: false,
     responseStream: false,
     requestType: thoughts_pb.UserRequest,
@@ -288,8 +288,8 @@ var FollowServiceService = exports.FollowServiceService = {
     responseSerialize: serialize_thoughts_Status,
     responseDeserialize: deserialize_thoughts_Status,
   },
-  unfollow: {
-    path: '/thoughts.FollowService/Unfollow',
+  unfollowUser: {
+    path: '/thoughts.FollowService/UnfollowUser',
     requestStream: false,
     responseStream: false,
     requestType: thoughts_pb.UserRequest,

@@ -149,7 +149,7 @@ export class UserClient extends APIClient {
     request.setToken(token);
 
     return new Promise((res, rej) => {
-      this.userClient.follow(request, (err, response) => {
+      this.userClient.followUser(request, (err, response) => {
         if (err) {
           return rej(err);
         }
@@ -168,7 +168,7 @@ export class UserClient extends APIClient {
     request.setToken(token);
 
     return new Promise((res, rej) => {
-      this.userClient.unfollow(request, (err, response) => {
+      this.userClient.unfollowUser(request, (err, response) => {
         if (err) {
           return rej(err);
         }

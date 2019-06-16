@@ -131,13 +131,13 @@ class FollowServiceStub(object):
         request_serializer=thoughts__pb2.UserRequest.SerializeToString,
         response_deserializer=thoughts__pb2.Identifiers.FromString,
         )
-    self.Follow = channel.unary_unary(
-        '/thoughts.FollowService/Follow',
+    self.FollowUser = channel.unary_unary(
+        '/thoughts.FollowService/FollowUser',
         request_serializer=thoughts__pb2.UserRequest.SerializeToString,
         response_deserializer=thoughts__pb2.Status.FromString,
         )
-    self.Unfollow = channel.unary_unary(
-        '/thoughts.FollowService/Unfollow',
+    self.UnfollowUser = channel.unary_unary(
+        '/thoughts.FollowService/UnfollowUser',
         request_serializer=thoughts__pb2.UserRequest.SerializeToString,
         response_deserializer=thoughts__pb2.Status.FromString,
         )
@@ -175,14 +175,14 @@ class FollowServiceServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def Follow(self, request, context):
+  def FollowUser(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def Unfollow(self, request, context):
+  def UnfollowUser(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -212,13 +212,13 @@ def add_FollowServiceServicer_to_server(servicer, server):
           request_deserializer=thoughts__pb2.UserRequest.FromString,
           response_serializer=thoughts__pb2.Identifiers.SerializeToString,
       ),
-      'Follow': grpc.unary_unary_rpc_method_handler(
-          servicer.Follow,
+      'FollowUser': grpc.unary_unary_rpc_method_handler(
+          servicer.FollowUser,
           request_deserializer=thoughts__pb2.UserRequest.FromString,
           response_serializer=thoughts__pb2.Status.SerializeToString,
       ),
-      'Unfollow': grpc.unary_unary_rpc_method_handler(
-          servicer.Unfollow,
+      'UnfollowUser': grpc.unary_unary_rpc_method_handler(
+          servicer.UnfollowUser,
           request_deserializer=thoughts__pb2.UserRequest.FromString,
           response_serializer=thoughts__pb2.Status.SerializeToString,
       ),

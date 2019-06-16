@@ -34,7 +34,7 @@ class FollowService(thoughts_pb2_grpc.FollowServiceServicer):
 
         return thoughts_pb2.Users(users=users)
 
-    def Follow(self, request, context):
+    def FollowUser(self, request, context):
         """Follows or unfollows a user with the current user."""
 
         response = self.auth_client.validate(request.token)
@@ -60,7 +60,7 @@ class FollowService(thoughts_pb2_grpc.FollowServiceServicer):
         else:
             return thoughts_pb2.Status(message='User followed.')
 
-    def Unfollow(self, request, context):
+    def UnfollowUser(self, request, context):
         """Unfollows a user with the current user."""
 
         response = self.auth_client.validate(request.token)

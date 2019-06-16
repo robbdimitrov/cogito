@@ -172,8 +172,8 @@ service FollowService {
   rpc GetFollowingIds(UserRequest) returns (Identifiers);
   rpc GetFollowers(DataRequest) returns (Users);
   rpc GetFollowersIds(UserRequest) returns (Identifiers);
-  rpc Follow(UserRequest) returns (Status);
-  rpc Unfollow(UserRequest) returns (Status);
+  rpc FollowUser(UserRequest) returns (Status);
+  rpc UnfollowUser(UserRequest) returns (Status);
 }
 
 service AuthService {
