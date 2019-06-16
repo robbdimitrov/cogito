@@ -47,10 +47,10 @@ class DbClient:
     def create_user_query(self, where = ''):
         query = f'SELECT users.id, users.username, users.email, users.name, \
             users.bio, users.avatar, \
-            count(distinct posts.id) AS posts, \
-            count(distinct likes.id) AS likes, \
-            count(distinct following.id) AS following, \
-            count(distinct followers.id) AS followers, \
+            COUNT(distinct posts.id) AS posts, \
+            COUNT(distinct likes.id) AS likes, \
+            COUNT(distinct following.id) AS following, \
+            COUNT(distinct followers.id) AS followers, \
             time_format(users.date_created) as date_created \
             FROM thoughts.users AS users LEFT JOIN thoughts.followings AS following \
             ON following.follower_id = users.id LEFT JOIN thoughts.followings AS followers \

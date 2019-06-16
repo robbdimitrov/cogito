@@ -20,12 +20,12 @@ func NewDbClient(db *Database) *DbClient {
 func (c *DbClient) createPostQuery(where string, order string,
 	limit string, userIDPos string) string {
 	query := fmt.Sprintf(`SELECT posts.id, posts.content, posts.user_id,
-		count(distinct likes.id) AS likes,
-		exists(select 1 from thoughts.likes as likes
-		where likes.post_id = posts.id and likes.user_id = %s) as liked,
-		count(distinct retweets.id) AS retweets,
-		exists(select 1 from thoughts.retweets as retweets
-		where retweets.post_id = posts.id and retweets.user_id = %s) as retweeted,
+		COUNT(DISTINCT likes.id) AS likes,
+		EXISTS(SELECT 1 FROM thoughts.likes AS likes
+		WHERE likes.post_id = posts.id AND likes.user_id = %s) AS liked,
+		COUNT(DISTINCT retweets.id) AS retweets,
+		EXISTS(SELECT 1 FROM thoughts.retweets AS retweets
+		WHERE retweets.post_id = posts.id AND retweets.user_id = %s) AS retweeted,
 		time_format(posts.date_created) AS date_created
 		FROM thoughts.posts AS posts LEFT JOIN thoughts.likes AS likes
 		ON likes.post_id = posts.id LEFT JOIN thoughts.retweets AS retweets
