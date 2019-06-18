@@ -1,6 +1,10 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PropTypes from 'prop-types';
+
+import session from '../Session';
+import { createPost } from '../../store/actions/posts';
 
 import './ThoughtBox.scss';
 
@@ -29,7 +33,7 @@ class ThoughtBox extends React.Component {
 
   handleSubmit = (event) => {
     event.preventDefault();
-    console.log(`Created post ${this.state.value}`);
+    this.props.createPost(this.state.value);
     this.props.closePopup();
   };
 
@@ -76,7 +80,16 @@ class ThoughtBox extends React.Component {
 }
 
 ThoughtBox.propTypes = {
-  user: PropTypes.object.isRequired
+  user: PropTypes.object.isRequired,
+  createPost: PropTypes.func.isRequired,
+  closePopup: PropTypes.func.isRequired
 };
 
-export default ThoughtBox;
+const mapStateToProps = (state) => ({
+  user: state.users[session.getUserId()]
+});
+
+export default connect(
+  mapStateToProps,
+  { createPost }
+)(ThoughtBox);
