@@ -4,19 +4,10 @@ import PropTypes from 'prop-types';
 
 import './ThoughtItem.scss';
 
-function ThoughtItem({ post, user, context }) {
+function ThoughtItem({ post, user }) {
   return (
     <li className="thought-item">
       <article className="container">
-        {context &&
-          <div className="context">
-            <FontAwesomeIcon icon="retweet" className="context-icon" />
-            <span className="context-label">
-              {context.user.name} {context.action}
-            </span>
-          </div>
-        }
-
         <div className="wrapper">
           <img
             className="avatar"
@@ -53,8 +44,7 @@ function ThoughtItem({ post, user, context }) {
 
 ThoughtItem.propTypes = {
   post: PropTypes.object.isRequired,
-  user: PropTypes.object.isRequired,
-  context: PropTypes.object
+  user: PropTypes.object.isRequired
 };
 
 export default ThoughtItem;

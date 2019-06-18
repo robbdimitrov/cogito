@@ -18,18 +18,18 @@ export function addItems(state = initialState, items, page = 0) {
 
 export function addItem(state = initialState, item) {
   return {
-		...state,
-		count: state.count + 1,
+    ...state,
+    count: state.count + 1,
     items: [...state.items, item],
   };
 }
 
 export function removeItem(state = initialState, item) {
-	return {
-		...state,
-		count: state.count - 1,
-		items: state.items.filter((x) => x !== item)
-	}
+  return {
+    ...state,
+    count: state.count - 1,
+    items: state.items.filter((x) => x !== item)
+  }
 }
 
 export function userProperties(user) {
