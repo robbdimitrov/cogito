@@ -27,7 +27,7 @@ export function getDeviceName(userAgent) {
 
 /**
  * Sets value with key in local storage. If value is missing,
- * the item is removed from localStorage
+ * the item is removed from localStorage.
  */
 export function setStorage(key, value) {
   if (value !== undefined) {
@@ -35,4 +35,16 @@ export function setStorage(key, value) {
   } else {
     localStorage.removeItem(key);
   }
+}
+
+/**
+ * Deletes the object associated with the identifier.
+ */
+export function deleteObject(state, identifier) {
+  return Object.keys(state).reduce((obj, key) => {
+    if (key !== identifier) {
+      obj[key] = state[key];
+    }
+    return obj;
+  }, {})
 }
