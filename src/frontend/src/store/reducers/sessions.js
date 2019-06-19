@@ -10,11 +10,9 @@ const initialState = {
 function addSessions(state, action) {
   const { sessions } = action;
 
-  const sessionsIds = Object.keys(sessions).map(Number);
-
   return {
     byId: addObjects(state.byId, sessions),
-    allIds: addIds(state.allIds, sessionsIds)
+    allIds: addIds(state.allIds, sessions)
   };
 }
 

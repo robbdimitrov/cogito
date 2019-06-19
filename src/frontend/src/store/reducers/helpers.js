@@ -49,9 +49,13 @@ export function removeItem(state = initialState, item) {
 /**
  * Adds multiple ids to an ids array.
  */
-export function addIds(state, ids) {
+export function addIds(state, objects) {
+  let ids = Object.keys(objects).map(Number);
   let idsToAdd = ids.filter((x) => state.indexOf(x) === -1);
-  return [...state, ...idsToAdd];
+  return [
+    ...state,
+    ...idsToAdd
+  ];
 }
 
 /**
@@ -97,6 +101,22 @@ export function addObjects(state, objects) {
       };
       return obj;
     })
+  };
+}
+
+export function updateObject(state, objectId, updates) {
+  const object = state[objectId];
+
+  if (!object) {
+    return state;
+  }
+
+  return {
+    ...state,
+    [objectId]: {
+      ...object,
+      ...updates
+    }
   };
 }
 

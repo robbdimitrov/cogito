@@ -1,5 +1,6 @@
 import { FETCH_FEED } from '../actions/feed';
 import { LOGOUT_USER } from '../actions/auth';
+import { addIds } from './helpers';
 
 const initialState = {
   items: [],
@@ -10,7 +11,7 @@ function addPosts(state, action) {
   const { posts, page } = action;
 
   return {
-    posts: posts.map((post) => post.id),
+    posts: addIds(state.posts, posts),
     page
   };
 }
