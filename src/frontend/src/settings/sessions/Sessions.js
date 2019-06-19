@@ -1,28 +1,25 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 
 import SessionItem from './SessionItem';
+import { deleteSession } from '../../store/actions/sessions';
 import './Sessions.scss';
-
-const sessions = [
-  { name: 'Macintosh', isDesktop: true, isCurrent: true, id: 1 },
-  { name: 'Android', isDesktop: false, isCurrent: false, id: 2 },
-  { name: 'iPhone', isDesktop: false, isCurrent: false, id: 3 },
-  { name: 'Android', isDesktop: false, isCurrent: false, id: 4 },
-];
 
 class Sessions extends React.Component {
   render() {
+    const sessions = this.props.sessions.byId;
+    const sessionsIds = this.props.sessions.allIds;
     return (
       <div className="sessions-container form-content">
         <h1 className="form-title">Sessions</h1>
 
         <ul className="sessions-list">
-          {sessions.map((item) =>
+          {sessionsIds.map((sessionId) =>
             <SessionItem
-              key={item.id}
-              name={item.name}
-              isDesktop={item.isDesktop}
-              isCurrent={item.isCurrent}
+              key={sessionId}
+              session={sessions[sessionId]}
+              deleteSession={deleteSession}
             />
           )}
         </ul>
@@ -31,4 +28,15 @@ class Sessions extends React.Component {
   }
 }
 
-export default Sessions;
+Sessions.propTypes = {
+  sessions: PropTypes.array.isRequired
+};
+
+const mapStateToProps = (state) => ({
+  sessions: state.sessions
+});
+
+export default connect(
+  mapStateToProps,
+  { deleteSession }
+)(Sessions);

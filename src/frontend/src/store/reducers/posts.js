@@ -6,7 +6,6 @@ import {
   LIKE_POST, UNLIKE_POST, RETWEET_POST, DELETE_RETWEET
 } from '../actions/action';
 import { FETCH_FEED } from '../actions/feed';
-import { deleteObject } from '../../common/utils';
 
 // Post
 
@@ -25,7 +24,12 @@ function deletePost(state, action) {
   const { postId } = action;
 
   return {
-    ...deleteObject(state, postId)
+    ...Object.keys(state).reduce((obj, key) => {
+      if (key !== postId) {
+        obj[key] = state[key];
+      }
+      return obj;
+    }, {})
   };
 }
 
