@@ -1,11 +1,14 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import { loginUser } from '../store/actions/auth';
 
 class Login extends React.Component {
   handleLogin = (event) => {
     event.preventDefault();
-    console.log(`Logging in`);
+    this.props.loginUser();
   };
 
   render() {
@@ -53,4 +56,7 @@ class Login extends React.Component {
   }
 }
 
-export default Login;
+export default connect(
+  null,
+  { loginUser }
+)(Login);

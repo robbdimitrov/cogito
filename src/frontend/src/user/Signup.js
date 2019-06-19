@@ -1,8 +1,16 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import { registerUser } from '../store/actions/users';
+
 class Signup extends React.Component {
+  handleSignup = (event) => {
+    event.preventDefault();
+    this.props.registerUser();
+  };
+
   render() {
     return (
       <div className="container">
@@ -10,7 +18,7 @@ class Signup extends React.Component {
           <h1 className="form-title">Register</h1>
           <p className="form-message">Create an account and join in!</p>
 
-          <form className="action-form">
+          <form className="action-form" onSubmit={this.handleSignup}>
             <div className="fieldset">
               <FontAwesomeIcon icon="passport" className="input-icon" />
               <input
@@ -70,4 +78,7 @@ class Signup extends React.Component {
   }
 }
 
-export default Signup;
+export default connect(
+  null,
+  { registerUser }
+)(Signup);
