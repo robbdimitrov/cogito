@@ -1,5 +1,6 @@
 import { FETCH_SESSIONS, DELETE_SESSION } from '../actions/sessions';
 import { LOGOUT_USER } from '../actions/auth';
+import { addIds, removeId, addObjects, removeObject } from './helpers';
 
 const initialState = {
   byId: {},
@@ -9,20 +10,11 @@ const initialState = {
 function addSessions(state, action) {
   const { sessions } = action;
 
+  const sessionsIds = Object.keys(sessions).map(Number);
+
   return {
-    byId: {
-      ...state.byId,
-      ...sessions.reduce((obj, session) => {
-        obj[session.id] = {
-          ...session
-        };
-        return obj;
-      })
-    },
-    allIds: [
-      ...state.allIds,
-      ...Object.keys(sessions).map(Number)
-    ]
+    byId: addObjects(state.byId, sessions),
+    allIds: addIds(state.allIds, sessionsIds)
   };
 }
 
@@ -30,13 +22,8 @@ function deleteSession(state, action) {
   const { sessionId } = action;
 
   return {
-    byId: Object.keys(state.byId).reduce((obj, key) => {
-      if (key !== sessionId) {
-        obj[key] = state[key];
-      }
-      return obj;
-    }, {}),
-    allIds: state.allIds.filter((item) => item !== sessionId)
+    byId: removeObject(state.byId, sessionId),
+    allIds: removeId(state.allIds, sessionId)
   };
 }
 

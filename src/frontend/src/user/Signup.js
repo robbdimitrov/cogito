@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { registerUser } from '../store/actions/users';
 
 class Signup extends React.Component {
-  handleSignup = (event) => {
+  handleSubmit = (event) => {
     event.preventDefault();
     this.props.registerUser();
   };
@@ -18,7 +18,7 @@ class Signup extends React.Component {
           <h1 className="form-title">Register</h1>
           <p className="form-message">Create an account and join in!</p>
 
-          <form className="action-form" onSubmit={this.handleSignup}>
+          <form className="action-form" onSubmit={this.handleSubmit}>
             <div className="fieldset">
               <FontAwesomeIcon icon="passport" className="input-icon" />
               <input
