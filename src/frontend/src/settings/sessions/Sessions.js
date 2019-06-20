@@ -8,8 +8,8 @@ import './Sessions.scss';
 
 class Sessions extends React.Component {
   render() {
-    const sessions = this.props.sessions.byId;
-    const sessionsIds = this.props.sessions.allIds;
+    const { sessions, sessionsIds } = this.props;
+
     return (
       <div className="sessions-container form-content">
         <h1 className="form-title">Sessions</h1>
@@ -19,7 +19,7 @@ class Sessions extends React.Component {
             <SessionItem
               key={sessionId}
               session={sessions[sessionId]}
-              deleteSession={deleteSession}
+              deleteSession={() => deleteSession(sessionId)}
             />
           )}
         </ul>
@@ -33,7 +33,8 @@ Sessions.propTypes = {
 };
 
 const mapStateToProps = (state) => ({
-  sessions: state.sessions
+  sessions: state.sessions.byId,
+  sessionsIds: state.session.allIds
 });
 
 export default connect(

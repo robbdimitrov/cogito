@@ -96,7 +96,7 @@ export function fetchUser(userId, username) {
 
 export function fetchUserIfNeeded(userId) {
   return function(dispatch, getState) {
-    if (!getState().users[userId]) {
+    if (!getState().users.byId[userId]) {
       if (userId === session.getUserId()) {
         dispatch(fetchFollowingIds(userId));
         dispatch(fetchFollowersIds(userId));

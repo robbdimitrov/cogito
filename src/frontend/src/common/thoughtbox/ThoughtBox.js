@@ -86,7 +86,7 @@ ThoughtBox.propTypes = {
 };
 
 const mapStateToProps = (state) => ({
-  user: state.users[session.getUserId()]
+  user: state.users.byId[session.getUserId()]
 });
 
 export default connect(
