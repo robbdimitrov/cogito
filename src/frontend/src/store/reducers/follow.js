@@ -1,4 +1,8 @@
 import { userProperties, addItems, addItem, removeItem } from './helpers';
+import {
+  addId, addIds, removeId, addObject,
+  addObjects, updateObject, removeObject
+} from './helpers';
 
 const followingKey = 'following';
 const followersKey = 'followers';
@@ -8,13 +12,13 @@ export function followUser(state, action) {
 
   return {
     ...state,
-    [currentId]: {
-      ...state[currentId],
-      following: addItem(state[currentId].following, userId)
-    },
-    [userId]: {
-      ...state[userId],
-      followers: addItem(state[userId].followers, currentId)
+    byId: {
+      ...updateObject(state.byId, currentId, {
+        following: addItem(state.byId[currentId].following, userId)
+      }),
+      ...updateObject(state.byId, userId, {
+        followers: addItem(state.byId[userId].followers, currentId)
+      })
     }
   };
 }
@@ -24,13 +28,13 @@ export function unfollowUser(state, action) {
 
   return {
     ...state,
-    [currentId]: {
-      ...state[currentId],
-      following: removeItem(state[currentId].following, userId)
-    },
-    [userId]: {
-      ...state[userId],
-      followers: removeItem(state[userId].followers, currentId)
+    byId: {
+      ...updateObject(state.byId, currentId, {
+        following: removeItem(state.byId[currentId].following, userId)
+      }),
+      ...updateObject(state.byId, userId, {
+        followers: removeItem(state.byId[userId].followers, currentId)
+      })
     }
   };
 }
@@ -43,7 +47,7 @@ function addUsers(state, action, key) {
     ...users.reduce((obj, user) => {
       obj[user.id] = {
         ...user,
-        ...userProperties()
+        ...userProperties(user)
       };
       return obj;
     }),
@@ -60,10 +64,9 @@ function addUsersIds(state, action, key) {
 
   return {
     ...state,
-    [userId]: {
-      ...state[userId],
-      [key]: addItems(state[userId][key], usersIds)
-    }
+    byId: updateObject(state.byId, userId, {
+      [key]: addItems(state.byId[userId][key], usersIds)
+    })
   };
 }
 
