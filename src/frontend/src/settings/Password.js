@@ -1,13 +1,22 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import PropTypes from 'prop-types';
+
+import { updatePassword } from '../store/actions/users';
 
 class Password extends React.Component {
+  handleSubmit = (event) => {
+    event.preventDefault();
+    this.props.updatePassword();
+  };
+
   render() {
     return (
       <div className="form-content">
         <h1 className="form-title">Change password</h1>
 
-        <form>
+        <form className="action-form" onSubmit={this.handleSubmit}>
           <div className="fieldset">
             <FontAwesomeIcon icon="lock" className="input-icon" />
             <input
@@ -43,4 +52,11 @@ class Password extends React.Component {
   }
 }
 
-export default Password;
+Password.propTypes = {
+  updatePassword: PropTypes.func.isRequired
+};
+
+export default connect(
+  null,
+  { updatePassword }
+)(Password);

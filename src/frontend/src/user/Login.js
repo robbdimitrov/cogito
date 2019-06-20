@@ -2,6 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import PropType from 'prop-types';
 
 import { loginUser } from '../store/actions/auth';
 
@@ -55,6 +56,10 @@ class Login extends React.Component {
     );
   }
 }
+
+Login.propTypes = {
+  loginUser: PropType.func.isRequired
+};
 
 export default connect(
   null,

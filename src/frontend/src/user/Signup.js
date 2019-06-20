@@ -2,6 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import PropType from 'prop-types';
 
 import { registerUser } from '../store/actions/users';
 
@@ -77,6 +78,10 @@ class Signup extends React.Component {
     );
   }
 }
+
+Signup.propTypes = {
+  registerUser: PropType.func.isRequired
+};
 
 export default connect(
   null,
