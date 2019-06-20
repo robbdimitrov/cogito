@@ -42,56 +42,48 @@ function deletePost(state, action) {
 function likePost(state, action) {
   const { postId } = action;
 
-  const updates = {
-    likes: state.byId[postId].likes + 1,
-    liked: true
-  };
-
   return {
     ...state,
-    byId: updateObject(state.byId, postId, updates)
+    byId: updateObject(state.byId, postId, {
+      likes: state.byId[postId].likes + 1,
+      liked: true
+    })
   };
 }
 
 function unlikePost(state, action) {
   const { postId } = action;
 
-  const updates = {
-    likes: state.byId[postId].likes - 1,
-    liked: false
-  };
-
   return {
     ...state,
-    byId: updateObject(state.byId, postId, updates)
+    byId: updateObject(state.byId, postId, {
+      likes: state.byId[postId].likes - 1,
+      liked: false
+    })
   };
 }
 
 function retweetPost(state, action) {
   const { postId } = action;
 
-  const updates = {
-    retweets: state.byId[postId].retweets + 1,
-    retweeted: true
-  };
-
   return {
     ...state,
-    byId: updateObject(state.byId, postId, updates)
+    byId: updateObject(state.byId, postId, {
+      retweets: state.byId[postId].retweets + 1,
+      retweeted: true
+    })
   };
 }
 
 function deleteRetweet(state, action) {
   const { postId } = action;
 
-  const updates = {
-    retweets: state.byId[postId].retweets - 1,
-    retweeted: false
-  };
-
   return {
     ...state,
-    byId: updateObject(state.byId, postId, updates)
+    byId: updateObject(state.byId, postId, {
+      retweets: state.byId[postId].retweets - 1,
+      retweeted: false
+    })
   };
 }
 

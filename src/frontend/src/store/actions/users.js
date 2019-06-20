@@ -40,7 +40,13 @@ export function updateUser(name, username, email, bio, avatar) {
         dispatch({
           type: UPDATE_USER,
           userId: session.getUserId(),
-          name, username, email, bio, avatar
+          updates: {
+            name,
+            username,
+            email,
+            bio,
+            avatar
+          }
         });
       });
   };
