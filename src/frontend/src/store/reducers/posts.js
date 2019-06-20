@@ -12,6 +12,8 @@ import {
   addObjects, updateObject, removeObject
 } from './helpers';
 
+// State
+
 const initialState = {
   byId: {},
   allIds: []
@@ -25,6 +27,15 @@ function addPost(state, action) {
   return {
     byId: addObject(state.byId, post),
     allIds: addId(state.allIds, post.id)
+  };
+}
+
+function addPosts(state, action) {
+  const { posts } = action;
+
+  return {
+    byId: addObjects(state.byId, posts),
+    allIds: addIds(state.allIds, posts)
   };
 }
 
@@ -84,17 +95,6 @@ function deleteRetweet(state, action) {
       retweets: state.byId[postId].retweets - 1,
       retweeted: false
     })
-  };
-}
-
-// Fetch
-
-function addPosts(state, action) {
-  const { posts } = action;
-
-  return {
-    byId: addObjects(state.byId, posts),
-    allIds: addIds(state.allIds, posts)
   };
 }
 

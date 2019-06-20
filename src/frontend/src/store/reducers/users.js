@@ -20,6 +20,8 @@ import {
 } from '../actions/posts';
 import { addId, addObject, updateObject } from './helpers';
 
+// State
+
 const initialState = {
   byId: {},
   allIds: []
