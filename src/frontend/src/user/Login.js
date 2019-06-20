@@ -7,10 +7,32 @@ import PropType from 'prop-types';
 import { loginUser } from '../store/actions/auth';
 
 class Login extends React.Component {
-  handleSubmit = (event) => {
+  constructor(props) {
+    super(props);
+    this.state = {
+      email: '',
+      password: ''
+    };
+
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleInputChange = this.handleInputChange.bind(this);
+  }
+
+  handleSubmit(event) {
     event.preventDefault();
-    this.props.loginUser();
-  };
+    const { email, password} = this.state;
+    this.props.loginUser(email, password);
+  }
+
+  handleInputChange(event) {
+    const target = event.target;
+    const value = target.value;
+    const name = target.name;
+
+    this.setState({
+      [name]: value
+    });
+  }
 
   render() {
     return (
@@ -23,24 +45,35 @@ class Login extends React.Component {
             <div className="fieldset">
               <FontAwesomeIcon icon="envelope" className="input-icon" />
               <input
-                type="email" className="form-input"
-                id="email" placeholder="Email"
-                pattern="[^@]+@[^@]+\.[^@]+" required
+                className="form-input"
+                type="email"
+                name="email"
+                placeholder="Email"
+                pattern="[^@]+@[^@]+\.[^@]+"
+                onChange={this.handleInputChange}
+                value={this.state.email}
+                required
               />
             </div>
 
             <div className="fieldset">
               <FontAwesomeIcon icon="lock" className="input-icon" />
               <input
-                type="password" className="form-input"
-                id="password" placeholder="Password"
-                minLength="4" maxLength="30" required
+                className="form-input"
+                type="password"
+                name="password"
+                placeholder="Password"
+                minLength="4"
+                maxLength="30"
+                onChange={this.handleInputChange}
+                value={this.state.password}
+                required
               />
             </div>
 
             <input
-              type="submit"
               className="button form-button"
+              type="submit"
               value="Log In"
             />
           </form>
