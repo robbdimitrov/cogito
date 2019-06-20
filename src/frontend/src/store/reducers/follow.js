@@ -1,7 +1,6 @@
-import { userProperties, addItems, addItem, removeItem } from './helpers';
 import {
-  addId, addIds, removeId, addObject,
-  addObjects, updateObject, removeObject
+  userProperties, addItems, addItem, removeItem,
+  addObjects, updateObject, updateObjects, addIds
 } from './helpers';
 
 const followingKey = 'following';
@@ -12,14 +11,14 @@ export function followUser(state, action) {
 
   return {
     ...state,
-    byId: {
-      ...updateObject(state.byId, currentId, {
+    byId: updateObjects(state.byId, {
+      [currentId]: {
         following: addItem(state.byId[currentId].following, userId)
-      }),
-      ...updateObject(state.byId, userId, {
+      },
+      [userId]: {
         followers: addItem(state.byId[userId].followers, currentId)
-      })
-    }
+      }
+    })
   };
 }
 
@@ -28,34 +27,38 @@ export function unfollowUser(state, action) {
 
   return {
     ...state,
-    byId: {
-      ...updateObject(state.byId, currentId, {
+    byId: updateObjects(state.byId, {
+      [currentId]: {
         following: removeItem(state.byId[currentId].following, userId)
-      }),
-      ...updateObject(state.byId, userId, {
+      },
+      [userId]: {
         followers: removeItem(state.byId[userId].followers, currentId)
-      })
-    }
+      }
+    })
   };
 }
 
 function addUsers(state, action, key) {
-  const { userId, users } = action;
+  const { userId } = action;
+
+  const users = action.users.map((user) => {
+    return {
+      ...user,
+      ...userProperties(user)
+    };
+  });
+  const usersIds = users.map((user) => user.id);
 
   return {
     ...state,
-    ...users.reduce((obj, user) => {
-      obj[user.id] = {
-        ...user,
-        ...userProperties(user)
-      };
-      return obj;
-    }),
-    [userId]: {
-      ...state[userId],
-      [key]: addItems(state[userId][key],
-        action.users.map((user) => user.id))
-    }
+    byId: {
+      ...addObjects(state.byId, users),
+      [userId]: {
+        ...state.byId[userId],
+        [key]: addItems(state.byId[userId][key], usersIds)
+      }
+    },
+    allIds: addIds(state.allIds, usersIds)
   };
 }
 

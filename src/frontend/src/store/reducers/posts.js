@@ -8,7 +8,7 @@ import {
 import { FETCH_FEED } from '../actions/feed';
 import { LOGOUT_USER } from '../actions/auth';
 import {
-  addId, addIds, removeId, addObject,
+  addId, addObjectsIds, removeId, addObject,
   addObjects, updateObject, removeObject
 } from './helpers';
 
@@ -35,7 +35,7 @@ function addPosts(state, action) {
 
   return {
     byId: addObjects(state.byId, posts),
-    allIds: addIds(state.allIds, posts)
+    allIds: addObjectsIds(state.allIds, posts)
   };
 }
 

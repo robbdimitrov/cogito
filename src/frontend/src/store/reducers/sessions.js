@@ -1,6 +1,6 @@
 import { FETCH_SESSIONS, DELETE_SESSION } from '../actions/sessions';
 import { LOGOUT_USER } from '../actions/auth';
-import { addIds, removeId, addObjects, removeObject } from './helpers';
+import { addObjectsIds, removeId, addObjects, removeObject } from './helpers';
 
 const initialState = {
   byId: {},
@@ -12,7 +12,7 @@ function addSessions(state, action) {
 
   return {
     byId: addObjects(state.byId, sessions),
-    allIds: addIds(state.allIds, sessions)
+    allIds: addObjectsIds(state.allIds, sessions)
   };
 }
 
