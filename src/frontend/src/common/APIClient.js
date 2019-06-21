@@ -92,7 +92,7 @@ class APIClient {
       body.password = password;
     }
     if (oldPassword !== undefined) {
-      body.oldPassword = oldPassword;
+      body.old_password = oldPassword;
     }
     if (avatar !== undefined) {
       body.avatar = avatar;

@@ -26,7 +26,9 @@ class EditProfile extends React.Component {
 
   handleSubmit(event) {
     event.preventDefault();
-    this.props.updateUser();
+
+    const { name, username, email } = this.state;
+    this.props.updateUser(name, username, email);
   }
 
   handleInputChange(event) {
@@ -48,8 +50,10 @@ class EditProfile extends React.Component {
           <div className="fieldset">
             <FontAwesomeIcon icon="passport" className="input-icon" />
             <input
-              type="text" className="form-input"
-              id="name" placeholder="Name"
+              className="form-input"
+              type="text"
+              name="name"
+              placeholder="Name"
               onChange={this.handleInputChange}
               value={this.state.name}
               required
@@ -59,8 +63,10 @@ class EditProfile extends React.Component {
           <div className="fieldset">
             <FontAwesomeIcon icon="user" className="input-icon" />
             <input
-              type="text" className="form-input"
-              id="username" placeholder="Username"
+              className="form-input"
+              type="text"
+              name="username"
+              placeholder="Username"
               onChange={this.handleInputChange}
               value={this.state.username}
               required
@@ -70,8 +76,10 @@ class EditProfile extends React.Component {
           <div className="fieldset">
             <FontAwesomeIcon icon="envelope" className="input-icon" />
             <input
-              type="email" className="form-input"
-              id="email" placeholder="Email"
+              className="form-input"
+              type="email"
+              name="email"
+              placeholder="Email"
               pattern="[^@]+@[^@]+\.[^@]+"
               onChange={this.handleInputChange}
               value={this.state.email}

@@ -11,31 +11,43 @@ import './ThoughtBox.scss';
 class ThoughtBox extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { value: '', maxLength: 140 };
+    this.state = {
+      value: '',
+      maxLength: 140
+    };
+
+    this.handleInputChange = this.handleInputChange.bind(this);
   }
 
-  handleChange = (event) => {
-    this.setState({ value: event.target.value });
+  handleSubmit(event) {
+    event.preventDefault();
+    this.props.createPost(this.state.value);
+    this.props.closePopup();
   };
 
-  isPostValid = () => {
+  handleInputChange(event) {
+    this.setState({
+      value: event.target.value
+    });
+  }
+
+  isPostValid() {
     return this.state.value.length > 0 &&
       this.state.value.length <= this.state.maxLength;
-  };
+  }
 
-  couterClassName = () => {
+  counterValue() {
+    const { value, maxLength } = this.state;
+    return `${value.length}/${maxLength}`;
+  }
+
+  couterClassName() {
     let className = 'thought-box-counter';
     if (this.state.value.length > this.state.maxLength) {
       className += ' invalid';
     }
     return className;
-  };
-
-  handleSubmit = (event) => {
-    event.preventDefault();
-    this.props.createPost(this.state.value);
-    this.props.closePopup();
-  };
+  }
 
   render() {
     return (
@@ -46,8 +58,8 @@ class ThoughtBox extends React.Component {
           </button>
 
           <input
-            type="submit"
             className="button submit-button"
+            type="submit"
             disabled={!this.isPostValid()}
             value="Create"
           />
@@ -65,14 +77,14 @@ class ThoughtBox extends React.Component {
             type="text"
             name="thought"
             placeholder="What are you thinking?"
+            onChange={this.handleInputChange}
             value={this.state.value}
-            onChange={this.handleChange}
             required
           />
         </div>
 
         <span className={this.couterClassName()}>
-          {this.state.value.length}/{this.state.maxLength}
+          {this.counterValue()}
         </span>
       </form>
     )

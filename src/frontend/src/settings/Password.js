@@ -6,10 +6,33 @@ import PropTypes from 'prop-types';
 import { updatePassword } from '../store/actions/users';
 
 class Password extends React.Component {
-  handleSubmit = (event) => {
+  constructor(props) {
+    super(props);
+    this.state = {
+      password: '',
+      oldPassword: ''
+    };
+
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleInputChange = this.handleInputChange.bind(this);
+  }
+
+  handleSubmit(event) {
     event.preventDefault();
-    this.props.updatePassword();
-  };
+
+    const { password, oldPassword } = this.state;
+    this.props.updatePassword(password, oldPassword);
+  }
+
+  handleInputChange(event) {
+    const target = event.target;
+    const value = target.value;
+    const name = target.name;
+
+    this.setState({
+      [name]: value
+    });
+  }
 
   render() {
     return (
@@ -20,9 +43,15 @@ class Password extends React.Component {
           <div className="fieldset">
             <FontAwesomeIcon icon="lock" className="input-icon" />
             <input
-              type="password" className="form-input"
-              id="old-password" placeholder="New Password"
-              minLength="4" maxLength="30" required
+              className="form-input"
+              type="password"
+              name="password"
+              placeholder="New Password"
+              minLength="4"
+              maxLength="30"
+              onChange={this.handleInputChange}
+              value={this.state.password}
+              required
             />
             <button className="visibility-button">
               <FontAwesomeIcon icon="eye" />
@@ -32,9 +61,15 @@ class Password extends React.Component {
           <div className="fieldset">
             <FontAwesomeIcon icon="lock" className="input-icon" />
             <input
-              type="password" className="form-input"
-              id="password" placeholder="Current Password"
-              minLength="4" maxLength="30" required
+              className="form-input"
+              type="password"
+              name="oldPassword"
+              placeholder="Current Password"
+              minLength="4"
+              maxLength="30"
+              onChange={this.handleInputChange}
+              value={this.state.oldPassword}
+              required
             />
             <button className="visibility-button">
               <FontAwesomeIcon icon="eye" />
