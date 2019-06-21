@@ -3,19 +3,22 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { NavLink } from 'react-router-dom';
 
 import UserDropdown from './UserDropdown';
+import session from '../Session';
 import './Navigation.scss';
 
 class Navigation extends React.Component {
   constructor(props) {
     super(props);
     this.state = { isDropdownShown: false };
+
+    this.handleClick = this.handleClick.bind(this);
   }
 
-  handleClick = () => {
+  handleClick() {
     this.setState(state => ({
       isDropdownShown: !state.isDropdownShown
     }));
-  };
+  }
 
   render() {
     return (

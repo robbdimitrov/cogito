@@ -41,7 +41,7 @@ class Signup extends React.Component {
     return (
       <div className="container">
         <div className="form-content main-content">
-          <h1 className="form-title">Register</h1>
+          <h1 className="form-title">Sign Up</h1>
           <p className="form-message">Create an account and join in!</p>
 
           <form className="action-form" onSubmit={this.handleSubmit}>
@@ -102,7 +102,7 @@ class Signup extends React.Component {
             <input
               className="button form-button"
               type="submit"
-              value="Register"
+              value="Create Account"
             />
           </form>
 
@@ -110,7 +110,7 @@ class Signup extends React.Component {
             <span className="reference-label">Already have an accout?</span>
 
             <Link to="/login" className="reference-button">
-              <span>Login</span>
+              <span>Log In</span>
             </Link>
           </div>
         </div>

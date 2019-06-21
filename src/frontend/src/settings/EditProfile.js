@@ -44,7 +44,7 @@ class EditProfile extends React.Component {
   render() {
     return (
       <div className="form-content">
-        <h1 className="form-title">Edit profile</h1>
+        <h1 className="form-title">Edit Profile</h1>
 
         <form className="action-form" onSubmit={this.handleSubmit}>
           <div className="fieldset">

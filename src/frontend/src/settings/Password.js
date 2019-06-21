@@ -37,7 +37,7 @@ class Password extends React.Component {
   render() {
     return (
       <div className="form-content">
-        <h1 className="form-title">Change password</h1>
+        <h1 className="form-title">Change Password</h1>
 
         <form className="action-form" onSubmit={this.handleSubmit}>
           <div className="fieldset">
