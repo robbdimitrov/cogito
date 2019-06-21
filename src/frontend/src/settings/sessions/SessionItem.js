@@ -18,7 +18,7 @@ function SessionItem({ session, deleteSession }) {
 
       <div className="session-content">
         <strong className="session-name">{device.name}</strong>
-        <small className="session-date">{dateString}</small>
+        <small className="session-date">Created {dateString}</small>
       </div>
 
       <button
