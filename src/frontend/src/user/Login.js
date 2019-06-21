@@ -39,7 +39,7 @@ class Login extends React.Component {
       <div className="container">
         <div className="form-content main-content">
           <h1 className="form-title">Log In</h1>
-          <p className="form-message">Welcome back! Login to access your account.</p>
+          <p className="form-message">Welcome back! Log in to access your account.</p>
 
           <form className="action-form" onSubmit={this.handleSubmit}>
             <div className="fieldset">

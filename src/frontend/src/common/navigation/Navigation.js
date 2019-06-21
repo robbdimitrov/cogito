@@ -20,43 +20,63 @@ class Navigation extends React.Component {
     }));
   }
 
+  isUserLoggedIn() {
+    return session.getUserId() !== null;
+  }
+
   render() {
     return (
       <header className="navigation-container bottom-shadow">
         <div className="navigation-content main-container">
-          <div className="left-items">
-            <NavLink to="/feed" className="nav-button">
-              <FontAwesomeIcon
-                icon="home"
-                className="nav-button-icon"
-                size="2x"
-              />
-              <span className="nav-button-label">Home</span>
-            </NavLink>
-          </div>
+          {this.state.isUserLoggedIn ? (
+            <div className="left-items">
+              <NavLink to="/feed" className="nav-button">
+                <FontAwesomeIcon
+                  icon="home"
+                  className="nav-button-icon"
+                  size="2x"
+                />
+                <span className="nav-button-label">Home</span>
+              </NavLink>
+            </div>
+          ) : (
+            <div className="left-items"></div>
+          )}
 
           <FontAwesomeIcon icon="brain" className="icon" size="2x" />
 
-          <div className="right-items">
-            <div className="profile-button" onClick={this.handleClick}>
-              <img
-                className="profile-button-image"
-                src="https://via.placeholder.com/300.png"
-                alt="Profile"
-              />
+          {this.state.isUserLoggedIn ? (
+            <div className="right-items">
+              <div className="profile-button" onClick={this.handleClick}>
+                <img
+                  className="profile-button-image"
+                  src="https://via.placeholder.com/300.png"
+                  alt="Profile"
+                />
 
-              {this.state.isDropdownShown &&
-                <UserDropdown />
-              }
+                {this.state.isDropdownShown &&
+                  <UserDropdown />
+                }
+              </div>
+
+              <button
+                className="button create-button"
+                onClick={this.props.openPopup}
+              >
+                Create
+              </button>
             </div>
-
-            <button
-              className="button create-button"
-              onClick={this.props.openPopup}
-            >
-              Create
-            </button>
-          </div>
+          ) : (
+            <div className="right-items">
+              <NavLink to="/login">
+                <button
+                  className="button login-button"
+                >
+                  Log In
+                </button>
+              </NavLink>
+            </div>
+          )}
         </div>
       </header>
     );
