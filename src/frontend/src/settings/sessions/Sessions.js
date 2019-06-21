@@ -3,23 +3,25 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 import SessionItem from './SessionItem';
-import { deleteSession } from '../../store/actions/sessions';
+import { fetchSessions, deleteSession } from '../../store/actions/sessions';
 import './Sessions.scss';
 
 class Sessions extends React.Component {
-  render() {
-    const { sessions, sessionsIds } = this.props;
+  componentWillMount() {
+    this.props.fetchSessions();
+  }
 
+  render() {
     return (
       <div className="sessions-container form-content">
         <h1 className="form-title">Sessions</h1>
 
         <ul className="sessions-list">
-          {sessionsIds.map((sessionId) =>
+          {this.props.sessionsIds.map((sessionId) =>
             <SessionItem
               key={sessionId}
-              session={sessions[sessionId]}
-              deleteSession={() => deleteSession(sessionId)}
+              session={this.props.sessions[sessionId]}
+              deleteSession={this.props.deleteSession}
             />
           )}
         </ul>
@@ -39,5 +41,5 @@ const mapStateToProps = (state) => ({
 
 export default connect(
   mapStateToProps,
-  { deleteSession }
+  { fetchSessions, deleteSession }
 )(Sessions);
