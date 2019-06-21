@@ -44,6 +44,7 @@ func (s *Service) uploadFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	file, _, err := r.FormFile("image")
+	defer file.Close()
 	if err != nil {
 		log.Printf("Error Retrieving File %v", err)
 
@@ -52,7 +53,6 @@ func (s *Service) uploadFile(w http.ResponseWriter, r *http.Request) {
 		ErrorResponse(w, error)
 		return
 	}
-	defer file.Close()
 
 	s.saveFile(w, file)
 }
