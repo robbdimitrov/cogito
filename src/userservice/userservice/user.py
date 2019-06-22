@@ -62,7 +62,7 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
     def GetUser(self, request, context):
         """Gets user with username or user_id from the database."""
 
-        user = self.db_client.get_user(request.user_id)
+        user = self.db_client.get_user(request.user_id, request.username)
 
         if user is None:
             error = thoughts_pb2.Error(code=HTTPStatus.NOT_FOUND,
