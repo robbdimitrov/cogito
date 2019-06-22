@@ -6,7 +6,7 @@ import session from './Session';
 function GuardRoute({ component: Component, ...rest }) {
   return (
     <Route {...rest} render={(props) => (
-      session.getUserId() !== null
+      session.isAuthenticated()
         ? <Component {...props} />
         : <Redirect to='/login' />
     )} />

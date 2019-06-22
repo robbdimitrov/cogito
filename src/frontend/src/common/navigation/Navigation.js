@@ -9,7 +9,9 @@ import './Navigation.scss';
 class Navigation extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { isDropdownShown: false };
+    this.state = {
+      isDropdownShown: false
+    };
 
     this.handleClick = this.handleClick.bind(this);
   }
@@ -20,15 +22,11 @@ class Navigation extends React.Component {
     }));
   }
 
-  isUserLoggedIn() {
-    return session.getUserId() !== null;
-  }
-
   render() {
     return (
       <header className="navigation-container bottom-shadow">
         <div className="navigation-content main-container">
-          {this.state.isUserLoggedIn ? (
+          {session.isAuthenticated() ? (
             <div className="left-items">
               <NavLink to="/feed" className="nav-button">
                 <FontAwesomeIcon
@@ -45,7 +43,7 @@ class Navigation extends React.Component {
 
           <FontAwesomeIcon icon="brain" className="icon" size="2x" />
 
-          {this.state.isUserLoggedIn ? (
+          {session.isAuthenticated() ? (
             <div className="right-items">
               <div className="profile-button" onClick={this.handleClick}>
                 <img

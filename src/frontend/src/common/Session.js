@@ -33,6 +33,10 @@ class Session {
     setStorage('refreshToken', value);
   }
 
+  isAuthenticated() {
+    return this.getUserId() !== null;
+  }
+
   reset() {
     localStorage.clear();
   }
