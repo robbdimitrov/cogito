@@ -1,6 +1,6 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 
 import UserDropdown from './UserDropdown';
 import session from '../Session';
@@ -68,13 +68,9 @@ class Navigation extends React.Component {
             </div>
           ) : (
             <div className="right-items">
-              <NavLink to="/login">
-                <button
-                  className="button login-button"
-                >
-                  Log In
-                </button>
-              </NavLink>
+              <Link to="/login" className="button login-button">
+                Log In
+              </Link>
             </div>
           )}
         </div>

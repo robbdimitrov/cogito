@@ -1,15 +1,15 @@
 import React from 'react';
-
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
 import './UserDropdown.scss';
 
-function UserDropdown(props) {
+function UserDropdown({ user }) {
   return (
     <div className="dropdown">
       <ul className="dropdown-list">
         <li className="dropdown-item">
-          <Link to="/user" className="dropdown-button">
+          <Link to={`/${user.username}`} className="dropdown-button">
             <span className="dropdown-item-title">
               Profile
             </span>
@@ -35,5 +35,9 @@ function UserDropdown(props) {
     </div>
   );
 }
+
+UserDropdown.propTypes = {
+  user: PropTypes.object.isRequired
+};
 
 export default UserDropdown;

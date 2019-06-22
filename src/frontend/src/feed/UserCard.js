@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
 
 import './UserCard.scss';
 
@@ -9,16 +10,18 @@ function UserCard({ user }) {
       <div className="cover"></div>
 
       <div className="content">
-        <img
-          className="avatar"
-          src={user.avatar}
-          alt={user.name}
-        />
+        <Link to={`/${user.username}`}>
+          <img
+            className="avatar"
+            src={user.avatar}
+            alt={user.name}
+          />
+        </Link>
 
-        <div className="texts">
+        <Link to={`/${user.username}`} className="texts">
           <p className="title semibold">{user.name}</p>
           <p className="subtitle light">@{user.username}</p>
-        </div>
+        </Link>
       </div>
 
       <div className="counters">

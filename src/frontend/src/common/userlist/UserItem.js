@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
 
 import './UserItem.scss';
 
@@ -10,11 +11,13 @@ function UserItem({ user }) {
 
       <div className="content">
         <div className="header">
-          <img
-            className="avatar"
-            src={user.avatar}
-            alt={user.name}
-          />
+          <Link to={`/${user.username}`}>
+            <img
+              className="avatar"
+              src={user.avatar}
+              alt={user.name}
+            />
+          </Link>
 
           <button className="follow-button outline-button">
             Follow
@@ -22,8 +25,10 @@ function UserItem({ user }) {
         </div>
 
         <div className="texts">
-          <p className="title semibold">{user.name}</p>
-          <p className="subtitle light">@{user.username}</p>
+          <Link to={`/${user.username}`}>
+            <p className="title semibold">{user.name}</p>
+            <p className="subtitle light">@{user.username}</p>
+          </Link>
 
           <p className="bio">
             {user.bio}
