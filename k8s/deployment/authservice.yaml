@@ -41,4 +41,4 @@ spec:
         - name: DATABASE_URI
           value: postgresql://postgres:kubernetes@database:5432
         - name: SECRET
-          value: 'bdf8699c13d5b532d58c4e85a92064f9'
+          value: bdf8699c13d5b532d58c4e85a92064f9
