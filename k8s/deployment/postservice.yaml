@@ -35,3 +35,12 @@ spec:
         imagePullPolicy: Never
         ports:
         - containerPort: 5000
+        env:
+        - name: PORT
+          value: "5000"
+        - name: DATABASE_URI
+          value: postgresql://postgres:kubernetes@database:5432
+        - name: AUTH_SERVICE_ADDR
+          value: authservice:5010
+        - name: USER_SERVICE_ADDR
+          value: userservice:5010
