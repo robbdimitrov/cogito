@@ -7,7 +7,7 @@ export const LOGIN_USER = 'LOGIN_USER';
 export function loginUser(email, password) {
   return (dispatch) => {
     apiClient.createSession(email, password).then((response) => {
-      if (!response.ok) {
+      if (response.error) {
         dispatch(handleError(response.error));
         return;
       }

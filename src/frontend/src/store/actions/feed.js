@@ -5,7 +5,7 @@ export const FETCH_FEED = 'FETCH_FEED';
 export function fetchFeed(page) {
   return (dispatch) => {
     apiClient.getFeed(page).then((response) => {
-      if (!response.ok) {
+      if (response.error) {
         dispatch(handleError(response.error));
         return;
       }

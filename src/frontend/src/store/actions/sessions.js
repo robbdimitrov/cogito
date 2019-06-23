@@ -4,7 +4,7 @@ export const FETCH_SESSIONS = 'FETCH_SESSIONS';
 export function fetchSessions() {
   return function(dispatch) {
     apiClient.getSessions().then((response) => {
-      if (!response.ok) {
+      if (response.error) {
         return;
       }
       dispatch({
@@ -19,7 +19,7 @@ export const DELETE_SESSION = 'DELETE_SESSION';
 export function deleteSession(sessionId) {
   return function(dispatch) {
     apiClient.deleteSession(sessionId).then((response) => {
-      if (!response.ok) {
+      if (response.error) {
         return;
       }
       dispatch({

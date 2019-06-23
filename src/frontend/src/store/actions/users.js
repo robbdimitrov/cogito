@@ -10,7 +10,7 @@ export const REGISTER_USER = 'REGISTER_USER';
 export function registerUser(name, username, email, password) {
   return (dispatch) => {
     apiClient.createUser(name, username, email, password).then((response) => {
-      if (!response.ok) {
+      if (response.error) {
         dispatch(handleError(response.error));
         return;
       }
@@ -27,7 +27,7 @@ export function updateUser(name, username, email, bio, avatar) {
   return (dispatch) => {
     apiClient.updateUser(name, username, email, bio,
       undefined, undefined, avatar).then((response) => {
-        if (!response.ok) {
+        if (response.error) {
           dispatch(handleError(response.error));
           return;
         }
@@ -52,7 +52,7 @@ export function updatePassword(password, oldPassword) {
   return (dispatch) => {
     apiClient.updateUser(undefined, undefined, undefined, undefined,
       password, oldPassword).then((response) => {
-        if (!response.ok) {
+        if (response.error) {
           dispatch(handleError(response.error));
           return;
         }
@@ -70,7 +70,7 @@ export const FETCH_USER = 'FETCH_USER';
 export function fetchUser(userId, username) {
   return (dispatch) => {
     apiClient.getUser(userId, username).then((response) => {
-      if (!response.ok) {
+      if (response.error) {
         dispatch(handleError(response.error));
       }
 
@@ -100,7 +100,7 @@ export const FOLLOW_USER = 'FOLLOW_USER';
 export function followUser(userId) {
   return function(dispatch) {
     apiClient.followUser(userId).then((response) => {
-      if (!response.ok) {
+      if (response.error) {
         return;
       }
       dispatch({
@@ -116,7 +116,7 @@ export const UNFOLLOW_USER = 'UNFOLLOW_USER';
 export function unfollowUser(userId) {
   return function(dispatch) {
     apiClient.unfollowUser(userId).then((response) => {
-      if (!response.ok) {
+      if (response.error) {
         return;
       }
       dispatch({
