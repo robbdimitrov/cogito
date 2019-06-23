@@ -1,4 +1,4 @@
-import apiClient from '../../common/APIClient';
+import apiClient from '../../common/services/APIClient';
 
 export const FETCH_SESSIONS = 'FETCH_SESSIONS';
 export function fetchSessions() {

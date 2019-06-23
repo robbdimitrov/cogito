@@ -3,8 +3,8 @@ import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PropTypes from 'prop-types';
 
-import session from '../Session';
-import { createPost } from '../../store/actions/posts';
+import session from '../../services/Session';
+import { createPost } from '../../../store/actions/posts';
 
 import './ThoughtBox.scss';
 
@@ -97,9 +97,11 @@ ThoughtBox.propTypes = {
   closePopup: PropTypes.func.isRequired
 };
 
-const mapStateToProps = (state) => ({
-  user: state.users.byId[session.getUserId()]
-});
+const mapStateToProps = (state) => {
+  return {
+    user: state.users.byId[session.getUserId()]
+  };
+};
 
 export default connect(
   mapStateToProps,

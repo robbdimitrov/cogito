@@ -1,7 +1,8 @@
-import apiClient from '../../common/APIClient';
-import session from '../../common/Session';
+import apiClient from '../../common/services/APIClient';
+import session from '../../common/services/Session';
 import { fetchFollowingIds, fetchFollowersIds } from './follow';
 import { loginUser } from './auth';
+import { handleError } from './errors';
 
 // Register
 
@@ -10,10 +11,7 @@ export function registerUser(name, username, email, password) {
   return (dispatch) => {
     apiClient.registerUser(name, username, email, password).then((response) => {
       if (!response.ok) {
-        dispatch({
-          type: REGISTER_USER,
-          error: response.error.message
-        });
+        dispatch(handleError(response.error));
         return;
       }
 
@@ -30,10 +28,7 @@ export function updateUser(name, username, email, bio, avatar) {
     apiClient.updateUser(name, username, email, bio,
       undefined, undefined, avatar).then((response) => {
         if (!response.ok) {
-          dispatch({
-            type: UPDATE_USER,
-            error: response.error.message
-          });
+          dispatch(handleError(response.error));
           return;
         }
 
@@ -58,10 +53,7 @@ export function updatePassword(password, oldPassword) {
     apiClient.updateUser(undefined, undefined, undefined, undefined,
       password, oldPassword).then((response) => {
         if (!response.ok) {
-          dispatch({
-            type: UPDATE_PASSWORD,
-            error: response.error.message
-          });
+          dispatch(handleError(response.error));
           return;
         }
 
@@ -79,11 +71,7 @@ export function fetchUser(userId, username) {
   return (dispatch) => {
     apiClient.getUser(userId, username).then((response) => {
       if (!response.ok) {
-        dispatch({
-          type: FETCH_USER,
-          userId,
-          error: response.error.message
-        });
+        dispatch(handleError(response.error));
       }
 
       dispatch({

@@ -1,5 +1,6 @@
-import apiClient from '../../common/APIClient';
-import session from '../../common/Session';
+import apiClient from '../../common/services/APIClient';
+import session from '../../common/services/Session';
+import { handleError } from './errors';
 
 export const CREATE_POST = 'CREATE_POST';
 export function createPost(content) {
@@ -40,11 +41,7 @@ export function fetchPost(postId) {
   return function(dispatch) {
     apiClient.getPost(postId).then((response) => {
       if (!response.ok) {
-        dispatch({
-          type: FETCH_POST,
-          postId,
-          error: response.error.message
-        });
+        dispatch(handleError(response.error));
         return;
       }
 

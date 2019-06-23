@@ -1,5 +1,5 @@
 import session from './Session';
-import { apiRoot } from '../config';
+import { apiRoot } from '../../config';
 
 class APIClient {
   // Internal

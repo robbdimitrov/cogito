@@ -1,4 +1,4 @@
-import { setStorage } from './utils';
+import { setStorage } from '../utils';
 
 class Session {
   getId() {

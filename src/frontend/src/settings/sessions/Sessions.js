@@ -34,10 +34,12 @@ Sessions.propTypes = {
   sessions: PropTypes.array.isRequired
 };
 
-const mapStateToProps = (state) => ({
-  sessions: state.sessions.byId,
-  sessionsIds: state.session.allIds
-});
+const mapStateToProps = (state) => {
+  return {
+    sessions: state.sessions.byId,
+    sessionsIds: state.session.allIds
+  };
+};
 
 export default connect(
   mapStateToProps,

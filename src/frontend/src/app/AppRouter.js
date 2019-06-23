@@ -1,7 +1,7 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
 
-import GuardRoute from '../common/GuardRoute';
+import GuardRoute from '../common/components/GuardRoute';
 
 const Feed = React.lazy(() => import('../feed/Feed'));
 const Profile = React.lazy(() => import('../profile/Profile'));

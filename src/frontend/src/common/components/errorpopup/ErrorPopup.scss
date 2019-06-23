@@ -1,0 +1,29 @@
+@import '../../../styles/variables';
+@import '../../../styles/colors';
+@import '../../../styles/fonts';
+@import '../../../styles/helpers';
+
+.error-popup {
+  background: $error-color;
+  height: $bar-height;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.error-close-button {
+  margin-right: $padding;
+  padding: $padding;
+  color: $primary-color;
+  background: $error-color;
+
+  &:active {
+    color: darken($primary-color, 30%);
+  }
+}
+
+.error-message {
+  color: $primary-color;
+  margin-left: auto;
+  margin-right: auto;
+}

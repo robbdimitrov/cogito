@@ -1,6 +1,6 @@
-import apiClient from '../../common/APIClient';
-import session from '../../common/Session';
-
+import apiClient from '../../common/services/APIClient';
+import session from '../../common/services/Session';
+import { handleError } from './errors';
 import { fetchFollowingIds, fetchFollowersIds } from './follow';
 
 export const LOGIN_USER = 'LOGIN_USER';
@@ -8,10 +8,7 @@ export function loginUser(email, password) {
   return (dispatch) => {
     apiClient.createSession(email, password).then((response) => {
       if (!response.ok) {
-        dispatch({
-          type: LOGIN_USER,
-          error: response.error.message
-        });
+        dispatch(handleError(response.error));
         return;
       }
 

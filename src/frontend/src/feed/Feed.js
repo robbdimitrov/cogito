@@ -3,10 +3,10 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 
 import UserCard from './UserCard';
-import ThoughtList from '../common/thoughtlist/ThoughtList';
+import ThoughtList from '../common/components/thoughtlist/ThoughtList';
 import { fetchFeed } from '../store/actions/feed';
 import { fetchUserIfNeeded } from '../store/actions/users';
-import session from '../common/Session';
+import session from '../common/services/Session';
 import './Feed.scss';
 
 class Feed extends React.Component {

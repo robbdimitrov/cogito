@@ -1,5 +1,5 @@
-import apiClient from '../../common/APIClient';
-import session from '../../common/Session';
+import apiClient from '../../common/services/APIClient';
+import session from '../../common/services/Session';
 
 export const LIKE_POST = 'LIKE_POST';
 export function likePost(postId) {

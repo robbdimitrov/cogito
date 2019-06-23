@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PropTypes from 'prop-types';
 
 import { updateUser, fetchUserIfNeeded } from '../store/actions/users';
-import session from '../common/Session';
+import session from '../common/services/Session';
 
 class EditProfile extends React.Component {
   constructor(props) {

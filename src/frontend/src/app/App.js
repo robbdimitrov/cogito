@@ -2,7 +2,7 @@ import React from 'react';
 
 import Root from './Root';
 import AppRouter from './AppRouter';
-import IconLibrary from '../common/IconLibrary';
+import IconLibrary from '../common/services/IconLibrary';
 
 IconLibrary.configure();
 

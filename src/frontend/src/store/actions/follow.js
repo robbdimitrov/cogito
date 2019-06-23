@@ -1,4 +1,4 @@
-import apiClient from '../../common/APIClient';
+import apiClient from '../../common/services/APIClient';
 
 export const FETCH_FOLLOWING_IDS = 'FETCH_FOLLOWING_IDS';
 export function fetchFollowingIds(userId) {

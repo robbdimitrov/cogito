@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link, NavLink } from 'react-router-dom';
 
 import UserDropdown from './UserDropdown';
-import session from '../Session';
+import session from '../../services/Session';
 import './Navigation.scss';
 
 class Navigation extends React.Component {

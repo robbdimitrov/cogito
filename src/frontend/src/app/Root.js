@@ -1,8 +1,11 @@
 import React from 'react';
+import { connect } from 'react-redux';
 
-import Navigation from '../common/navigation/Navigation';
-import Overlay from '../common/overlay/Overlay';
-import ThoughtBox from '../common/thoughtbox/ThoughtBox';
+import Navigation from '../common/components/navigation/Navigation';
+import Overlay from '../common/components/overlay/Overlay';
+import ThoughtBox from '../common/components/thoughtbox/ThoughtBox';
+import ErrorPopup from '../common/components/errorpopup/ErrorPopup';
+import { dismissError } from '../store/actions/errors';
 
 class Root extends React.Component {
   constructor(props) {
@@ -34,9 +37,28 @@ class Root extends React.Component {
         }
 
         <Navigation openPopup={this.openPopup} />
+
+        {this.props.error &&
+          <ErrorPopup
+            error={this.props.error}
+            dismiss={() => this.props.dismissError(this.props.error.id)}
+          />
+        }
       </React.Fragment>
     );
   }
 }
 
-export default Root;
+const mapStateToProps = (state) => {
+  const errorId = state.errors.allIds[0];
+  const error = state.errors.byId[errorId];
+
+  return {
+    error
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  { dismissError }
+)(Root);
