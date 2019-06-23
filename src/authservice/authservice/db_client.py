@@ -79,7 +79,7 @@ class DbClient:
         conn = self.db.get_conn()
         cur = conn.cursor()
 
-        cur.execute('SELECT id, password, FROM thoughts.users WHERE email = %s',
+        cur.execute('SELECT id, password FROM thoughts.users WHERE email = %s',
             (email,))
         result = cur.fetchone()
         cur.close()

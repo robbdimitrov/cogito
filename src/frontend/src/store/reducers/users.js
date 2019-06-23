@@ -32,6 +32,10 @@ const initialState = {
 function addUser(state, action) {
   const { user } = action;
 
+  if (!user) {
+    return state;
+  }
+
   return {
     byId: addObject(state.byId, {
       ...action.user,
@@ -148,6 +152,7 @@ function addLikes(state, action) {
 
 function users(state = initialState, action) {
   switch (action.type) {
+    case LOGIN_USER:
     case FETCH_USER:
       return addUser(state, action);
     case UPDATE_USER:
@@ -164,8 +169,6 @@ function users(state = initialState, action) {
       return addFollowers(state, action);
     case FETCH_FOLLOWERS_IDS:
       return addFollowersIds(state, action);
-    case LOGIN_USER:
-      return addUser(state, action);
     case LIKE_POST:
       return likePost(state, action);
     case UNLIKE_POST:
