@@ -2,7 +2,7 @@ import bcrypt
 from http import HTTPStatus
 
 from userservice import thoughts_pb2_grpc, thoughts_pb2
-from userservice.utils import validate_email
+from userservice.utils import validate_email, make_password_hash
 from userservice import exceptions
 
 
@@ -41,8 +41,7 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
                 message=error_message)
             return thoughts_pb2.Status(error=error)
 
-        salt = bcrypt.gensalt()
-        password = bcrypt.hashpw(password, salt)
+        password = make_password_hash(password)
 
         try:
             self.db_client.create_user(username, email, name, password)
@@ -113,8 +112,7 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
                     error_message = 'Wrong password.'
                     error_type = 'WRONG_PASSWORD'
                 else:
-                    salt = bcrypt.gensalt()
-                    password = bcrypt.hashpw(password, salt)
+                    password = make_password_hash(password)
                     changes['password'] = password
 
         if email is not None and validate_email(email) == False:

@@ -40,7 +40,7 @@ export class AuthClient extends APIClient {
         const session_id = response.getSessionId();
         this.userClient.getUser(response.getUserId())
           .then((result) => {
-            const user = result;
+            const user = result.user;
             res({
               user, token, session_id
             });

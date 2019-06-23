@@ -68,11 +68,11 @@ class DbClient:
         conn = self.db.get_conn()
         cur = conn.cursor()
 
-        if username is not None:
-            cur.execute(self.create_user_query('WHERE username = %s'),
+        if username:
+            cur.execute(self.create_user_query('WHERE users.username = %s'),
                 (username,))
         else:
-            cur.execute(self.create_user_query('WHERE id = %s')
+            cur.execute(self.create_user_query('WHERE users.id = %s'),
                 (user_id,))
         result = cur.fetchone()
         cur.close()

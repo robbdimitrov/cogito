@@ -1,3 +1,4 @@
+import bcrypt
 import re
 
 from userservice import thoughts_pb2
@@ -5,6 +6,11 @@ from userservice import thoughts_pb2
 
 def validate_email(email):
     return re.match(r'[^@]+@[^@]+\.[^@]+', email) is not None
+
+
+def make_password_hash(password):
+    hash = bcrypt.hashpw(password=password.encode('utf-8'), salt=bcrypt.gensalt())
+    return hash.decode('utf-8')
 
 
 def row_to_user(row):
@@ -17,8 +23,8 @@ def row_to_user(row):
         avatar=row[5],
         posts=row[6],
         likes=row[7],
-        following=[8],
-        followers=[9],
+        following=row[8],
+        followers=row[9],
         date_created=row[10])
     return user
 

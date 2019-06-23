@@ -9,7 +9,7 @@ import { handleError } from './errors';
 export const REGISTER_USER = 'REGISTER_USER';
 export function registerUser(name, username, email, password) {
   return (dispatch) => {
-    apiClient.registerUser(name, username, email, password).then((response) => {
+    apiClient.createUser(name, username, email, password).then((response) => {
       if (!response.ok) {
         dispatch(handleError(response.error));
         return;
