@@ -1,29 +1,43 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 
 import Navigation from '../common/components/navigation/Navigation';
 import Overlay from '../common/components/overlay/Overlay';
 import ThoughtBox from '../common/components/thoughtbox/ThoughtBox';
 import ErrorPopup from '../common/components/errorpopup/ErrorPopup';
 import { dismissError } from '../store/actions/errors';
+import session from '../common/services/Session';
+import { fetchUserIfNeeded } from '../store/actions/users';
+import { logoutUser } from '../store/actions/auth';
 
 class Root extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { isPopupShown: false };
+    this.state = {
+      isPopupShown: false
+    };
+
+    this.openPopup = this.openPopup.bind(this);
+    this.closePopup = this.closePopup.bind(this);
   }
 
-  openPopup = () => {
+  componentWillMount() {
+    const userId = session.getUserId();
+    this.props.fetchUserIfNeeded(userId);
+  }
+
+  openPopup() {
     this.setState(state => ({
       isPopupShown: true
     }));
-  };
+  }
 
-  closePopup = () => {
+  closePopup() {
     this.setState(state => ({
       isPopupShown: false
     }));
-  };
+  }
 
   render() {
     return (
@@ -36,7 +50,11 @@ class Root extends React.Component {
           </Overlay>
         }
 
-        <Navigation openPopup={this.openPopup} />
+        <Navigation
+          user={this.props.user}
+          openPopup={this.openPopup}
+          logoutUser={this.props.logoutUser}
+        />
 
         {this.props.error &&
           <ErrorPopup
@@ -52,13 +70,20 @@ class Root extends React.Component {
 const mapStateToProps = (state) => {
   const errorId = state.errors.allIds[0];
   const error = state.errors.byId[errorId];
+  const user = state.users.byId[session.getUserId()];
 
   return {
-    error
+    error,
+    user
   };
+};
+
+Root.propTypes = {
+  dismissError: PropTypes.func.isRequired,
+  fetchUserIfNeeded: PropTypes.func.isRequired
 };
 
 export default connect(
   mapStateToProps,
-  { dismissError }
+  { dismissError, fetchUserIfNeeded, logoutUser }
 )(Root);

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 import './UserDropdown.scss';
 
-function UserDropdown({ user }) {
+function UserDropdown({ user, logoutUser }) {
   return (
     <div className="dropdown">
       <ul className="dropdown-list">
@@ -25,11 +25,11 @@ function UserDropdown({ user }) {
         </li>
 
         <li className="dropdown-item">
-          <Link to="/" className="dropdown-button">
+          <div className="dropdown-button" onClick={logoutUser}>
             <span className="dropdown-item-title">
               Sign out
             </span>
-          </Link>
+          </div>
         </li>
       </ul>
     </div>
@@ -37,7 +37,8 @@ function UserDropdown({ user }) {
 }
 
 UserDropdown.propTypes = {
-  user: PropTypes.object.isRequired
+  user: PropTypes.object.isRequired,
+  logoutUser: PropTypes.func.isRequired
 };
 
 export default UserDropdown;

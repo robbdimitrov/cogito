@@ -49,7 +49,7 @@ export function removeItem(state = initialState, item) {
 /**
  * Adds multiple ids to an ids array.
  */
-export function addIds(state, ids) {
+export function addIds(state = [], ids) {
   let idsToAdd = ids.filter((x) => state.indexOf(x) === -1);
   return [
     ...state,
@@ -68,7 +68,7 @@ export function addObjectsIds(state, objects) {
 /**
  * Adds an id to an ids array.
  */
-export function addId(state, id) {
+export function addId(state = [], id) {
   if (state.indexOf(id) === -1) {
     return [...state, id];
   }

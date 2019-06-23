@@ -129,7 +129,7 @@ class DbClient:
         conn = self.db.get_conn()
         cur = conn.cursor()
 
-        cur.execute('SELECT user_id FROM thoughts.users \
+        cur.execute('SELECT id FROM thoughts.followings \
             WHERE follower_id = %s',
             (user_id,))
         results = cur.fetchall()
@@ -157,7 +157,7 @@ class DbClient:
         conn = self.db.get_conn()
         cur = conn.cursor()
 
-        cur.execute('SELECT follower_id FROM thoughts.users \
+        cur.execute('SELECT follower_id FROM thoughts.followings \
             WHERE user_id = %s',
             (user_id,))
         results = cur.fetchall()

@@ -84,12 +84,15 @@ export function fetchUser(userId, username) {
 
 export function fetchUserIfNeeded(userId) {
   return function(dispatch, getState) {
+    if (!userId) {
+      return;
+    }
     if (!getState().users.byId[userId]) {
+      dispatch(fetchUser(userId));
       if (userId === session.getUserId()) {
         dispatch(fetchFollowingIds(userId));
         dispatch(fetchFollowersIds(userId));
       }
-      return dispatch(fetchUser(userId));
     }
   };
 }

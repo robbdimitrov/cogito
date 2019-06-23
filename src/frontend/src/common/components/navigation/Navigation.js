@@ -1,6 +1,7 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Link, NavLink } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
 import UserDropdown from './UserDropdown';
 import session from '../../services/Session';
@@ -53,7 +54,10 @@ class Navigation extends React.Component {
                 />
 
                 {this.state.isDropdownShown &&
-                  <UserDropdown />
+                  <UserDropdown
+                    user={this.props.user}
+                    logoutUser={this.props.logoutUser}
+                  />
                 }
               </div>
 
@@ -76,5 +80,10 @@ class Navigation extends React.Component {
     );
   }
 }
+
+Navigation.propTypes = {
+  openPopup: PropTypes.func.isRequired,
+  logoutUser: PropTypes.func.isRequired
+};
 
 export default Navigation;

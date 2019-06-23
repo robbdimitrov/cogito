@@ -115,11 +115,11 @@ export class UserClient extends APIClient {
     request.setLimit(limit);
 
     return new Promise((res, rej) => {
-      this.userClient.getFollowing(request, (err, response) => {
+      this.followClient.getFollowing(request, (err, response) => {
         if (err) {
           return rej(err);
         }
-        const users = response.getIds();
+        const users = itemsToUsers(response.getUsers());
         res({ users });
       });
     });
@@ -131,11 +131,11 @@ export class UserClient extends APIClient {
     request.setToken(token);
 
     return new Promise((res, rej) => {
-      this.userClient.getFollowingIds(request, (err, response) => {
+      this.followClient.getFollowingIds(request, (err, response) => {
         if (err) {
           return rej(err);
         }
-        const users = itemsToUsers(response.getUsers());
+        const users = response.getIdsList();
         res({ users });
       });
     });
@@ -149,7 +149,7 @@ export class UserClient extends APIClient {
     request.setLimit(limit);
 
     return new Promise((res, rej) => {
-      this.userClient.getFollowers(request, (err, response) => {
+      this.followClient.getFollowers(request, (err, response) => {
         if (err) {
           return rej(err);
         }
@@ -165,11 +165,11 @@ export class UserClient extends APIClient {
     request.setToken(token);
 
     return new Promise((res, rej) => {
-      this.userClient.getFollowersIds(request, (err, response) => {
+      this.followClient.getFollowersIds(request, (err, response) => {
         if (err) {
           return rej(err);
         }
-        const users = response.getIds();
+        const users = response.getIdsList();
         res({ users });
       });
     });
@@ -181,7 +181,7 @@ export class UserClient extends APIClient {
     request.setToken(token);
 
     return new Promise((res, rej) => {
-      this.userClient.followUser(request, (err, response) => {
+      this.followClient.followUser(request, (err, response) => {
         if (err) {
           return rej(err);
         }
@@ -200,7 +200,7 @@ export class UserClient extends APIClient {
     request.setToken(token);
 
     return new Promise((res, rej) => {
-      this.userClient.unfollowUser(request, (err, response) => {
+      this.followClient.unfollowUser(request, (err, response) => {
         if (err) {
           return rej(err);
         }
