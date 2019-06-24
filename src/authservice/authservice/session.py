@@ -38,7 +38,7 @@ class SessionService(thoughts_pb2_grpc.SessionServiceServicer):
 
         session_id = request.session_id
 
-        if self.db_client.get_session(session_id)['user_id'] != payload['sub']:
+        if self.db_client.get_session(session_id).user_id != payload['sub']:
             error = thoughts_pb2.Error(code=HTTPStatus.FORBIDDEN,
                 error='FORBIDDEN',
                 message='This action is forbidden.')

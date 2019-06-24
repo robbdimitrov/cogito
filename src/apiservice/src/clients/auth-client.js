@@ -102,7 +102,7 @@ export class AuthClient extends APIClient {
   }
 
   deleteSession(sessionId, token) {
-    const request = new messages.AuthRequest();
+    const request = new messages.SessionRequest();
     request.setSessionId(sessionId);
     request.setToken(token);
 

@@ -4,7 +4,6 @@ import { Link, NavLink } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
 import UserDropdown from './UserDropdown';
-import session from '../../services/Session';
 import './Navigation.scss';
 
 class Navigation extends React.Component {
@@ -18,7 +17,7 @@ class Navigation extends React.Component {
   }
 
   handleClick() {
-    this.setState(state => ({
+    this.setState((state) => ({
       isDropdownShown: !state.isDropdownShown
     }));
   }
@@ -27,7 +26,7 @@ class Navigation extends React.Component {
     return (
       <header className="navigation-container bottom-shadow">
         <div className="navigation-content main-container">
-          {session.isAuthenticated() ? (
+          {this.props.isLoggedIn ? (
             <div className="left-items">
               <NavLink to="/feed" className="nav-button">
                 <FontAwesomeIcon
@@ -44,7 +43,7 @@ class Navigation extends React.Component {
 
           <FontAwesomeIcon icon="brain" className="icon" size="2x" />
 
-          {session.isAuthenticated() ? (
+          {this.props.isLoggedIn ? (
             <div className="right-items">
               <div className="profile-button" onClick={this.handleClick}>
                 <img
@@ -83,7 +82,8 @@ class Navigation extends React.Component {
 
 Navigation.propTypes = {
   openPopup: PropTypes.func.isRequired,
-  logoutUser: PropTypes.func.isRequired
+  logoutUser: PropTypes.func.isRequired,
+  isLoggedIn: PropTypes.bool.isRequired
 };
 
 export default Navigation;

@@ -1,6 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
+import { withRouter } from 'react-router-dom';
 
 import Navigation from '../common/components/navigation/Navigation';
 import Overlay from '../common/components/overlay/Overlay';
@@ -20,6 +21,8 @@ class Root extends React.Component {
 
     this.openPopup = this.openPopup.bind(this);
     this.closePopup = this.closePopup.bind(this);
+    this.handleLogout = this.handleLogout.bind(this);
+    this.dismissError = this.dismissError.bind(this);
   }
 
   componentWillMount() {
@@ -27,16 +30,36 @@ class Root extends React.Component {
     this.props.fetchUserIfNeeded(userId);
   }
 
+  componentDidUpdate(prevProps) {
+    const { isLoggedIn } = this.props;
+
+    if(prevProps.isLoggedIn !== isLoggedIn) {
+      if (isLoggedIn) {
+        this.props.history.push('/');
+      } else {
+        this.props.history.push('/login');
+      }
+    }
+  }
+
   openPopup() {
-    this.setState(state => ({
+    this.setState({
       isPopupShown: true
-    }));
+    });
   }
 
   closePopup() {
-    this.setState(state => ({
+    this.setState({
       isPopupShown: false
-    }));
+    });
+  }
+
+  handleLogout() {
+    this.props.logoutUser();
+  }
+
+  dismissError() {
+    this.props.dismissError(this.props.error.id);
   }
 
   render() {
@@ -53,13 +76,14 @@ class Root extends React.Component {
         <Navigation
           user={this.props.user}
           openPopup={this.openPopup}
-          logoutUser={this.props.logoutUser}
+          logoutUser={this.handleLogout}
+          isLoggedIn={this.props.isLoggedIn}
         />
 
         {this.props.error &&
           <ErrorPopup
             error={this.props.error}
-            dismiss={() => this.props.dismissError(this.props.error.id)}
+            dismiss={this.dismissError}
           />
         }
       </React.Fragment>
@@ -67,23 +91,25 @@ class Root extends React.Component {
   }
 }
 
-const mapStateToProps = (state) => {
-  const errorId = state.errors.allIds[0];
-  const error = state.errors.byId[errorId];
-  const user = state.users.byId[session.getUserId()];
-
-  return {
-    error,
-    user
-  };
-};
-
 Root.propTypes = {
   dismissError: PropTypes.func.isRequired,
   fetchUserIfNeeded: PropTypes.func.isRequired
 };
 
+const mapStateToProps = (state) => {
+  const errorId = state.errors.allIds[0];
+  const error = state.errors.byId[errorId];
+  const user = state.users.byId[session.getUserId()];
+  const isLoggedIn = session.isAuthenticated();
+
+  return {
+    error,
+    user,
+    isLoggedIn
+  };
+};
+
 export default connect(
   mapStateToProps,
   { dismissError, fetchUserIfNeeded, logoutUser }
-)(Root);
+)(withRouter(Root));
