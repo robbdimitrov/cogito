@@ -166,8 +166,24 @@ $button-background-color: $active-color;
     margin-right: $padding;
   }
 
+  textarea.form-input {
+    resize: none;
+    border: 0;
+    margin-top: $padding * 0.8;
+    margin-bottom: $padding * 0.8;
+  }
+
   .input-icon {
     margin-left: $padding;
+  }
+}
+
+.fieldset.long {
+  height: $input-height * 3;
+  align-items: flex-start;
+
+  .input-icon {
+    margin-top: $padding * 1.2;
   }
 }
 

@@ -28,8 +28,6 @@
     }
 
     &:focus {
-      outline-width: 0;
-
       &::placeholder {
         color: lighten($text-placeholder-color, 20%);
       }

@@ -4,7 +4,8 @@ import {
   faBrain, faHome, faTimes, faRetweet,
   faHeart, faCalendarAlt, faPassport,
   faUser,  faEnvelope,  faLock,
-  faEye, faMobileAlt, faDesktop
+  faEye, faMobileAlt, faDesktop,
+  faFileAlt
 } from '@fortawesome/free-solid-svg-icons';
 
 const IconLibrary = {
@@ -13,7 +14,8 @@ const IconLibrary = {
       faBrain, faHome, faTimes, faRetweet,
       faHeart, faCalendarAlt, faPassport,
       faUser, faEnvelope, faLock,
-      faEye, faMobileAlt, faDesktop
+      faEye, faMobileAlt, faDesktop,
+      faFileAlt
     );
   }
 };

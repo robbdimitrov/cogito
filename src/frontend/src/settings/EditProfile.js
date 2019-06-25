@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PropTypes from 'prop-types';
 
-import { updateUser, fetchUserIfNeeded } from '../store/actions/users';
+import { updateUser } from '../store/actions/users';
 import session from '../common/services/Session';
 
 class EditProfile extends React.Component {
@@ -20,8 +20,13 @@ class EditProfile extends React.Component {
   }
 
   componentWillMount() {
-    const userId = session.getUserId();
-    this.props.fetchUserIfNeeded(userId);
+    const { name, username, email } = this.props.user;
+
+    this.setState({
+      name,
+      username,
+      email
+    });
   }
 
   handleSubmit(event) {
@@ -87,6 +92,19 @@ class EditProfile extends React.Component {
             />
           </div>
 
+          <div className="fieldset long">
+            <FontAwesomeIcon icon="file-alt" className="input-icon" />
+            <textarea
+              className="form-input"
+              type="text"
+              name="bio"
+              placeholder="Add your bio"
+              onChange={this.handleInputChange}
+              value={this.state.bio}
+              required
+            />
+          </div>
+
           <input
             type="submit"
             className="button form-button"
@@ -111,5 +129,5 @@ const mapStateToProps = (state) => {
 
 export default connect(
   mapStateToProps,
-  { updateUser, fetchUserIfNeeded }
+  { updateUser }
 )(EditProfile);
