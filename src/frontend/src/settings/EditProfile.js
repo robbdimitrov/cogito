@@ -5,6 +5,8 @@ import PropTypes from 'prop-types';
 
 import { updateUser } from '../store/actions/users';
 import session from '../common/services/Session';
+import { imageURI } from '../common/utils';
+import './EditProfile.scss';
 
 class EditProfile extends React.Component {
   constructor(props) {
@@ -50,6 +52,19 @@ class EditProfile extends React.Component {
     return (
       <div className="form-content">
         <h1 className="form-title">Edit Profile</h1>
+
+        <div className="avatar-section">
+          <img
+            className="avatar"
+            src={this.props.user.avatar}
+            alt={this.props.user.name}
+          />
+
+          <label htmlFor="file" className="icon-button">
+            <FontAwesomeIcon icon="image" className="input-icon" />
+          </label>
+          <input id="file" type="file" accept="image/*" />
+        </div>
 
         <form className="action-form" onSubmit={this.handleSubmit}>
           <div className="fieldset">

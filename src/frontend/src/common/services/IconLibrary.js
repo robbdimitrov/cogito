@@ -5,7 +5,7 @@ import {
   faHeart, faCalendarAlt, faPassport,
   faUser,  faEnvelope,  faLock,
   faEye, faMobileAlt, faDesktop,
-  faFileAlt
+  faFileAlt, faImage
 } from '@fortawesome/free-solid-svg-icons';
 
 const IconLibrary = {
@@ -15,7 +15,7 @@ const IconLibrary = {
       faHeart, faCalendarAlt, faPassport,
       faUser, faEnvelope, faLock,
       faEye, faMobileAlt, faDesktop,
-      faFileAlt
+      faFileAlt, faImage
     );
   }
 };

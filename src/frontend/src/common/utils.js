@@ -1,3 +1,5 @@
+import { apiRoot } from '../config';
+
 /**
  * Goes through the userAgent and extracts the device information.
  */
@@ -38,4 +40,11 @@ export function setStorage(key, value) {
   } else {
     localStorage.removeItem(key);
   }
+}
+
+/**
+ * Creates an image url path using filename and api root path.
+ */
+export function imageURI(filename) {
+  return `${apiRoot}/images/${filename}`;
 }
