@@ -8,7 +8,7 @@ import { handleError } from './errors';
 
 export const REGISTER_USER = 'REGISTER_USER';
 export function registerUser(name, username, email, password) {
-  return (dispatch) => {
+  return function(dispatch) {
     apiClient.createUser(name, username, email, password).then((response) => {
       if (response.error) {
         dispatch(handleError(response.error));
@@ -24,7 +24,7 @@ export function registerUser(name, username, email, password) {
 
 export const UPDATE_USER = 'UPDATE_USER';
 export function updateUser(name, username, email, bio, avatar) {
-  return (dispatch) => {
+  return function(dispatch) {
     apiClient.updateUser(name, username, email, bio,
       undefined, undefined, avatar).then((response) => {
         if (response.error) {
@@ -47,20 +47,40 @@ export function updateUser(name, username, email, bio, avatar) {
   };
 }
 
-export const UPDATE_PASSWORD = 'UPDATE_PASSWORD';
-export function updatePassword(password, oldPassword) {
-  return (dispatch) => {
-    apiClient.updateUser(undefined, undefined, undefined, undefined,
-      password, oldPassword).then((response) => {
-        if (response.error) {
-          dispatch(handleError(response.error));
-          return;
-        }
+export function updateAvatar(file) {
+  return function(dispatch) {
+    apiClient.postImage(file).then((response) => {
+      if (response.error) {
+        dispatch(handleError(response.error));
+        return;
+      }
 
-        dispatch({
-          type: UPDATE_PASSWORD
-        });
+      const avatar = response.image;
+
+      dispatch({
+        type: UPDATE_USER,
+        userId: session.getUserId(),
+        updates: {
+          avatar
+        }
       });
+    });
+  };
+}
+
+export function updatePassword(password, oldPassword) {
+  return function(dispatch) {
+    apiClient.updatePassword(password, oldPassword).then((response) => {
+      if (response.error) {
+        dispatch(handleError(response.error));
+        return;
+      }
+
+      dispatch({
+        type: UPDATE_USER,
+        userId: session.getUserId()
+      });
+    });
   };
 }
 
@@ -68,7 +88,7 @@ export function updatePassword(password, oldPassword) {
 
 export const FETCH_USER = 'FETCH_USER';
 export function fetchUser(userId, username) {
-  return (dispatch) => {
+  return function(dispatch) {
     apiClient.getUser(userId, username).then((response) => {
       if (response.error) {
         dispatch(handleError(response.error));
@@ -78,6 +98,11 @@ export function fetchUser(userId, username) {
         type: FETCH_USER,
         user: response.user
       });
+
+      if (userId === session.getUserId()) {
+        dispatch(fetchFollowingIds(userId));
+        dispatch(fetchFollowersIds(userId));
+      }
     });
   };
 }
@@ -89,10 +114,6 @@ export function fetchUserIfNeeded(userId) {
     }
     if (!getState().users.byId[userId]) {
       dispatch(fetchUser(userId));
-      if (userId === session.getUserId()) {
-        dispatch(fetchFollowingIds(userId));
-        dispatch(fetchFollowersIds(userId));
-      }
     }
   };
 }

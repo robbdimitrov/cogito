@@ -62,7 +62,7 @@ export class UserClient extends APIClient {
     });
   }
 
-  updateUser(username, email, name, password, bio, oldPassword, token) {
+  updateUser(username, email, name, password, bio, oldPassword, avatar, token) {
     const request = new messages.UserUpdates();
     request.setUsername(username);
     request.setEmail(email);
@@ -70,6 +70,7 @@ export class UserClient extends APIClient {
     request.setPassword(password);
     request.setBio(bio);
     request.setOldPassword(oldPassword);
+    request.setAvatar(avatar);
     request.setToken(token);
 
     return new Promise((res, rej) => {

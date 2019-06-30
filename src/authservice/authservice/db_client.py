@@ -1,5 +1,4 @@
 import psycopg2
-import logging
 
 from authservice.utils import row_to_session, rows_to_sessions
 
@@ -25,7 +24,7 @@ class DbClient:
             result = cur.fetchone()
             conn.commit()
         except psycopg2.Error as e:
-            logging.error(f'Error creating user: {str(e)}')
+            print(f'Error creating user: {str(e)}')
             raise DbException('Error while writing to the database.')
         finally:
             cur.close()

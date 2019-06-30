@@ -1,6 +1,6 @@
 import { userProperties, addItem, removeItem, addItems } from './helpers';
 import {
-  REGISTER_USER, UPDATE_USER ,UPDATE_PASSWORD,
+  REGISTER_USER, UPDATE_USER,
   FETCH_USER, FOLLOW_USER, UNFOLLOW_USER
 } from '../actions/users';
 import { LOGIN_USER, LOGOUT_USER } from '../actions/auth';
@@ -187,7 +187,6 @@ function users(state = initialState, action) {
       return addLikes(state, action);
     case LOGOUT_USER:
       return initialState;
-    case UPDATE_PASSWORD:
     case REGISTER_USER:
     default:
       return state;

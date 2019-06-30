@@ -138,9 +138,9 @@ class AuthService(thoughts_pb2_grpc.AuthServiceServicer):
         except AuthException as e:
             error = thoughts_pb2.Error(code=e.code, error=e.error,
                 message=e.message)
-            return thoughts_pb2.Status(error=error)
+            return thoughts_pb2.AuthStatus(error=error)
 
-        return thoughts_pb2.AuthStatus(user_id=payload['user_id'])
+        return thoughts_pb2.AuthStatus(user_id=payload['sub'])
 
     def ValidatePassword(self, request, context):
         """Validate password"""

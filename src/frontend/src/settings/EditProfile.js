@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PropTypes from 'prop-types';
 
-import { updateUser } from '../store/actions/users';
+import { updateUser, updateAvatar } from '../store/actions/users';
 import session from '../common/services/Session';
 import { imageURI } from '../common/utils';
 import './EditProfile.scss';
@@ -12,6 +12,7 @@ class EditProfile extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      avatar: '',
       name: '',
       username: '',
       email: ''
@@ -19,16 +20,28 @@ class EditProfile extends React.Component {
 
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleImageChange = this.handleImageChange.bind(this);
   }
 
-  componentWillMount() {
-    const { name, username, email } = this.props.user;
+  componentDidMount() {
+    const { avatar, name, username, email } = this.props.user;
 
     this.setState({
+      avatar,
       name,
       username,
       email
     });
+  }
+
+  componentDidUpdate() {
+    const { avatar } = this.props.user;
+
+    if (avatar !== this.state.avatar) {
+      this.setState({
+        avatar
+      });
+    }
   }
 
   handleSubmit(event) {
@@ -36,6 +49,10 @@ class EditProfile extends React.Component {
 
     const { name, username, email } = this.state;
     this.props.updateUser(name, username, email);
+  }
+
+  handleImageChange(event) {
+    this.props.updateAvatar(event.target.files[0]);
   }
 
   handleInputChange(event) {
@@ -48,6 +65,14 @@ class EditProfile extends React.Component {
     });
   }
 
+  profileImage() {
+    if (this.props.user.avatar) {
+      return imageURI(this.props.user.avatar);
+    } else {
+      return '';
+    }
+  }
+
   render() {
     return (
       <div className="form-content">
@@ -56,14 +81,19 @@ class EditProfile extends React.Component {
         <div className="avatar-section">
           <img
             className="avatar"
-            src={this.props.user.avatar}
+            src={this.profileImage()}
             alt={this.props.user.name}
           />
 
           <label htmlFor="file" className="icon-button">
             <FontAwesomeIcon icon="image" className="input-icon" />
           </label>
-          <input id="file" type="file" accept="image/*" />
+          <input
+            id="file"
+            type="file"
+            accept="image/*"
+            onChange={this.handleImageChange}
+          />
         </div>
 
         <form className="action-form" onSubmit={this.handleSubmit}>
@@ -76,7 +106,6 @@ class EditProfile extends React.Component {
               placeholder="Name"
               onChange={this.handleInputChange}
               value={this.state.name}
-              required
             />
           </div>
 
@@ -116,7 +145,6 @@ class EditProfile extends React.Component {
               placeholder="Add your bio"
               onChange={this.handleInputChange}
               value={this.state.bio}
-              required
             />
           </div>
 
@@ -133,7 +161,8 @@ class EditProfile extends React.Component {
 
 EditProfile.propTypes = {
   user: PropTypes.object.isRequired,
-  updateUser: PropTypes.func.isRequired
+  updateUser: PropTypes.func.isRequired,
+  updateAvatar: PropTypes.func.isRequired
 };
 
 const mapStateToProps = (state) => {
@@ -144,5 +173,5 @@ const mapStateToProps = (state) => {
 
 export default connect(
   mapStateToProps,
-  { updateUser }
+  { updateUser, updateAvatar }
 )(EditProfile);

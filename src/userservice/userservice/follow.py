@@ -57,7 +57,7 @@ class FollowService(thoughts_pb2_grpc.FollowServiceServicer):
 
         response = self.auth_client.validate(request.token)
 
-        if response.error is not None:
+        if response.error.code != 0:
             return thoughts_pb2.Status(error=response.error)
 
         current_id = response.user_id
@@ -83,7 +83,7 @@ class FollowService(thoughts_pb2_grpc.FollowServiceServicer):
 
         response = self.auth_client.validate(request.token)
 
-        if response.error is not None:
+        if response.error.code != 0:
             return thoughts_pb2.Status(error=response.error)
 
         follower_id = response.user_id

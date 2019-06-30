@@ -97,11 +97,12 @@ export class UserRouter extends APIRouter {
     const password = req.body.password;
     const bio = req.body.bio;
     const oldPassword = req.body.old_password;
+    const avatar = req.body.avatar;
     const token = this.getToken(req);
 
     this.handleResponse(
       this.userClient.updateUser(username, email,
-        name, password, bio, oldPassword, token), res
+        name, password, bio, oldPassword, avatar, token), res
     );
   }
 

@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='thoughts',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0ethoughts.proto\x12\x08thoughts\"5\n\x05\x45rror\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\r\n\x05\x65rror\x18\x02 \x01(\t\x12\x0f\n\x07message\x18\x03 \x01(\t\"J\n\x0b\x44\x61taRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\x12\r\n\x05token\x18\x02 \x01(\t\x12\x0c\n\x04page\x18\x03 \x01(\x05\x12\r\n\x05limit\x18\x04 \x01(\x05\"\x1a\n\x0bIdentifiers\x12\x0b\n\x03ids\x18\x01 \x03(\x05\"9\n\x06Status\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"\x92\x01\n\nAuthStatus\x12\x12\n\ntoken_type\x18\x01 \x01(\t\x12\x14\n\x0c\x61\x63\x63\x65ss_token\x18\x02 \x01(\t\x12\x15\n\rrefresh_token\x18\x03 \x01(\t\x12\x0f\n\x07user_id\x18\x04 \x01(\x05\x12\x12\n\nsession_id\x18\x05 \x01(\x05\x12\x1e\n\x05\x65rror\x18\x06 \x01(\x0b\x32\x0f.thoughts.Error\"J\n\nUserStatus\x12\x1c\n\x04user\x18\x01 \x01(\x0b\x32\x0e.thoughts.User\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"J\n\nPostStatus\x12\x1c\n\x04post\x18\x01 \x01(\x0b\x32\x0e.thoughts.Post\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"T\n\x0b\x43redentials\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\x12\x12\n\nuser_agent\x18\x03 \x01(\t\x12\r\n\x05\x65mail\x18\x04 \x01(\t\"\x1c\n\x0b\x41uthRequest\x12\r\n\x05token\x18\x01 \x01(\t\"?\n\x0bUserRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\x12\x10\n\x08username\x18\x02 \x01(\t\x12\r\n\x05token\x18\x03 \x01(\t\"&\n\x05Users\x12\x1d\n\x05users\x18\x01 \x03(\x0b\x32\x0e.thoughts.User\"\x80\x01\n\x0bUserUpdates\x12\x10\n\x08username\x18\x01 \x01(\t\x12\r\n\x05\x65mail\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x10\n\x08password\x18\x04 \x01(\t\x12\x0b\n\x03\x62io\x18\x05 \x01(\t\x12\x14\n\x0cold_password\x18\x06 \x01(\t\x12\r\n\x05token\x18\x07 \x01(\t\"\xb8\x01\n\x04User\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x10\n\x08username\x18\x02 \x01(\t\x12\r\n\x05\x65mail\x18\x03 \x01(\t\x12\x0c\n\x04name\x18\x04 \x01(\t\x12\x0b\n\x03\x62io\x18\x05 \x01(\t\x12\x0e\n\x06\x61vatar\x18\x06 \x01(\t\x12\r\n\x05posts\x18\x07 \x01(\x05\x12\r\n\x05likes\x18\x08 \x01(\x05\x12\x11\n\tfollowing\x18\t \x01(\x05\x12\x11\n\tfollowers\x18\n \x01(\x05\x12\x14\n\x0c\x64\x61te_created\x18\x0b \x01(\t\"^\n\x07Session\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x12\n\nuser_agent\x18\x03 \x01(\t\x12\x0f\n\x07user_id\x18\x04 \x01(\x05\x12\x14\n\x0c\x64\x61te_created\x18\x05 \x01(\t\"O\n\x08Sessions\x12#\n\x08sessions\x18\x01 \x03(\x0b\x32\x11.thoughts.Session\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"3\n\x0eSessionRequest\x12\x12\n\nsession_id\x18\x01 \x01(\x05\x12\r\n\x05token\x18\x02 \x01(\t\"\x8d\x01\n\x04Post\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0f\n\x07\x63ontent\x18\x02 \x01(\t\x12\x0f\n\x07user_id\x18\x03 \x01(\x05\x12\r\n\x05likes\x18\x04 \x01(\x05\x12\r\n\x05liked\x18\x05 \x01(\x08\x12\x10\n\x08retweets\x18\x06 \x01(\x05\x12\x11\n\tretweeted\x18\x07 \x01(\x08\x12\x14\n\x0c\x64\x61te_created\x18\x08 \x01(\t\">\n\x0bPostUpdates\x12\x0f\n\x07post_id\x18\x01 \x01(\x05\x12\x0f\n\x07\x63ontent\x18\x02 \x01(\t\x12\r\n\x05token\x18\x03 \x01(\t\"&\n\x05Posts\x12\x1d\n\x05posts\x18\x01 \x03(\x0b\x32\x0e.thoughts.Post\"-\n\x0bPostRequest\x12\x0f\n\x07post_id\x18\x01 \x01(\x05\x12\r\n\x05token\x18\x02 \x01(\t2\xea\x01\n\x0bUserService\x12\x35\n\nCreateUser\x12\x15.thoughts.UserUpdates\x1a\x10.thoughts.Status\x12\x36\n\x07GetUser\x12\x15.thoughts.UserRequest\x1a\x14.thoughts.UserStatus\x12\x35\n\nUpdateUser\x12\x15.thoughts.UserUpdates\x1a\x10.thoughts.Status\x12\x35\n\nDeleteUser\x12\x15.thoughts.UserRequest\x1a\x10.thoughts.Status2\xf1\x02\n\rFollowService\x12\x36\n\x0cGetFollowing\x12\x15.thoughts.DataRequest\x1a\x0f.thoughts.Users\x12?\n\x0fGetFollowingIds\x12\x15.thoughts.UserRequest\x1a\x15.thoughts.Identifiers\x12\x36\n\x0cGetFollowers\x12\x15.thoughts.DataRequest\x1a\x0f.thoughts.Users\x12?\n\x0fGetFollowersIds\x12\x15.thoughts.UserRequest\x1a\x15.thoughts.Identifiers\x12\x35\n\nFollowUser\x12\x15.thoughts.UserRequest\x1a\x10.thoughts.Status\x12\x37\n\x0cUnfollowUser\x12\x15.thoughts.UserRequest\x1a\x10.thoughts.Status2\xf1\x01\n\x0b\x41uthService\x12\x34\n\x05Login\x12\x15.thoughts.Credentials\x1a\x14.thoughts.AuthStatus\x12\x36\n\x07Refresh\x12\x15.thoughts.AuthRequest\x1a\x14.thoughts.AuthStatus\x12\x37\n\x08Validate\x12\x15.thoughts.AuthRequest\x1a\x14.thoughts.AuthStatus\x12;\n\x10ValidatePassword\x12\x15.thoughts.Credentials\x1a\x10.thoughts.Status2\x87\x01\n\x0eSessionService\x12\x38\n\x0bGetSessions\x12\x15.thoughts.AuthRequest\x1a\x12.thoughts.Sessions\x12;\n\rDeleteSession\x12\x18.thoughts.SessionRequest\x1a\x10.thoughts.Status2\xd7\x02\n\x0bPostService\x12\x39\n\nCreatePost\x12\x15.thoughts.PostUpdates\x1a\x14.thoughts.PostStatus\x12\x36\n\x07GetPost\x12\x15.thoughts.PostRequest\x1a\x14.thoughts.PostStatus\x12\x31\n\x07GetFeed\x12\x15.thoughts.DataRequest\x1a\x0f.thoughts.Posts\x12\x32\n\x08GetPosts\x12\x15.thoughts.DataRequest\x1a\x0f.thoughts.Posts\x12\x37\n\rGetLikedPosts\x12\x15.thoughts.DataRequest\x1a\x0f.thoughts.Posts\x12\x35\n\nDeletePost\x12\x15.thoughts.PostRequest\x1a\x10.thoughts.Status2\xed\x01\n\rActionService\x12\x33\n\x08LikePost\x12\x15.thoughts.PostRequest\x1a\x10.thoughts.Status\x12\x35\n\nUnlikePost\x12\x15.thoughts.PostRequest\x1a\x10.thoughts.Status\x12\x36\n\x0bRetweetPost\x12\x15.thoughts.PostRequest\x1a\x10.thoughts.Status\x12\x38\n\rRemoveRetweet\x12\x15.thoughts.PostRequest\x1a\x10.thoughts.Statusb\x06proto3')
+  serialized_pb=_b('\n\x0ethoughts.proto\x12\x08thoughts\"5\n\x05\x45rror\x12\x0c\n\x04\x63ode\x18\x01 \x01(\x05\x12\r\n\x05\x65rror\x18\x02 \x01(\t\x12\x0f\n\x07message\x18\x03 \x01(\t\"J\n\x0b\x44\x61taRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\x12\r\n\x05token\x18\x02 \x01(\t\x12\x0c\n\x04page\x18\x03 \x01(\x05\x12\r\n\x05limit\x18\x04 \x01(\x05\"\x1a\n\x0bIdentifiers\x12\x0b\n\x03ids\x18\x01 \x03(\x05\"9\n\x06Status\x12\x0f\n\x07message\x18\x01 \x01(\t\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"\x92\x01\n\nAuthStatus\x12\x12\n\ntoken_type\x18\x01 \x01(\t\x12\x14\n\x0c\x61\x63\x63\x65ss_token\x18\x02 \x01(\t\x12\x15\n\rrefresh_token\x18\x03 \x01(\t\x12\x0f\n\x07user_id\x18\x04 \x01(\x05\x12\x12\n\nsession_id\x18\x05 \x01(\x05\x12\x1e\n\x05\x65rror\x18\x06 \x01(\x0b\x32\x0f.thoughts.Error\"J\n\nUserStatus\x12\x1c\n\x04user\x18\x01 \x01(\x0b\x32\x0e.thoughts.User\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"J\n\nPostStatus\x12\x1c\n\x04post\x18\x01 \x01(\x0b\x32\x0e.thoughts.Post\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"T\n\x0b\x43redentials\x12\x10\n\x08username\x18\x01 \x01(\t\x12\x10\n\x08password\x18\x02 \x01(\t\x12\x12\n\nuser_agent\x18\x03 \x01(\t\x12\r\n\x05\x65mail\x18\x04 \x01(\t\"\x1c\n\x0b\x41uthRequest\x12\r\n\x05token\x18\x01 \x01(\t\"?\n\x0bUserRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\x12\x10\n\x08username\x18\x02 \x01(\t\x12\r\n\x05token\x18\x03 \x01(\t\"&\n\x05Users\x12\x1d\n\x05users\x18\x01 \x03(\x0b\x32\x0e.thoughts.User\"\x90\x01\n\x0bUserUpdates\x12\x10\n\x08username\x18\x01 \x01(\t\x12\r\n\x05\x65mail\x18\x02 \x01(\t\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x10\n\x08password\x18\x04 \x01(\t\x12\x0b\n\x03\x62io\x18\x05 \x01(\t\x12\x14\n\x0cold_password\x18\x06 \x01(\t\x12\x0e\n\x06\x61vatar\x18\x07 \x01(\t\x12\r\n\x05token\x18\x08 \x01(\t\"\xb8\x01\n\x04User\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x10\n\x08username\x18\x02 \x01(\t\x12\r\n\x05\x65mail\x18\x03 \x01(\t\x12\x0c\n\x04name\x18\x04 \x01(\t\x12\x0b\n\x03\x62io\x18\x05 \x01(\t\x12\x0e\n\x06\x61vatar\x18\x06 \x01(\t\x12\r\n\x05posts\x18\x07 \x01(\x05\x12\r\n\x05likes\x18\x08 \x01(\x05\x12\x11\n\tfollowing\x18\t \x01(\x05\x12\x11\n\tfollowers\x18\n \x01(\x05\x12\x14\n\x0c\x64\x61te_created\x18\x0b \x01(\t\"^\n\x07Session\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x12\n\nuser_agent\x18\x03 \x01(\t\x12\x0f\n\x07user_id\x18\x04 \x01(\x05\x12\x14\n\x0c\x64\x61te_created\x18\x05 \x01(\t\"O\n\x08Sessions\x12#\n\x08sessions\x18\x01 \x03(\x0b\x32\x11.thoughts.Session\x12\x1e\n\x05\x65rror\x18\x02 \x01(\x0b\x32\x0f.thoughts.Error\"3\n\x0eSessionRequest\x12\x12\n\nsession_id\x18\x01 \x01(\x05\x12\r\n\x05token\x18\x02 \x01(\t\"\x8d\x01\n\x04Post\x12\n\n\x02id\x18\x01 \x01(\x05\x12\x0f\n\x07\x63ontent\x18\x02 \x01(\t\x12\x0f\n\x07user_id\x18\x03 \x01(\x05\x12\r\n\x05likes\x18\x04 \x01(\x05\x12\r\n\x05liked\x18\x05 \x01(\x08\x12\x10\n\x08retweets\x18\x06 \x01(\x05\x12\x11\n\tretweeted\x18\x07 \x01(\x08\x12\x14\n\x0c\x64\x61te_created\x18\x08 \x01(\t\">\n\x0bPostUpdates\x12\x0f\n\x07post_id\x18\x01 \x01(\x05\x12\x0f\n\x07\x63ontent\x18\x02 \x01(\t\x12\r\n\x05token\x18\x03 \x01(\t\"&\n\x05Posts\x12\x1d\n\x05posts\x18\x01 \x03(\x0b\x32\x0e.thoughts.Post\"-\n\x0bPostRequest\x12\x0f\n\x07post_id\x18\x01 \x01(\x05\x12\r\n\x05token\x18\x02 \x01(\t2\xea\x01\n\x0bUserService\x12\x35\n\nCreateUser\x12\x15.thoughts.UserUpdates\x1a\x10.thoughts.Status\x12\x36\n\x07GetUser\x12\x15.thoughts.UserRequest\x1a\x14.thoughts.UserStatus\x12\x35\n\nUpdateUser\x12\x15.thoughts.UserUpdates\x1a\x10.thoughts.Status\x12\x35\n\nDeleteUser\x12\x15.thoughts.UserRequest\x1a\x10.thoughts.Status2\xf1\x02\n\rFollowService\x12\x36\n\x0cGetFollowing\x12\x15.thoughts.DataRequest\x1a\x0f.thoughts.Users\x12?\n\x0fGetFollowingIds\x12\x15.thoughts.UserRequest\x1a\x15.thoughts.Identifiers\x12\x36\n\x0cGetFollowers\x12\x15.thoughts.DataRequest\x1a\x0f.thoughts.Users\x12?\n\x0fGetFollowersIds\x12\x15.thoughts.UserRequest\x1a\x15.thoughts.Identifiers\x12\x35\n\nFollowUser\x12\x15.thoughts.UserRequest\x1a\x10.thoughts.Status\x12\x37\n\x0cUnfollowUser\x12\x15.thoughts.UserRequest\x1a\x10.thoughts.Status2\xf1\x01\n\x0b\x41uthService\x12\x34\n\x05Login\x12\x15.thoughts.Credentials\x1a\x14.thoughts.AuthStatus\x12\x36\n\x07Refresh\x12\x15.thoughts.AuthRequest\x1a\x14.thoughts.AuthStatus\x12\x37\n\x08Validate\x12\x15.thoughts.AuthRequest\x1a\x14.thoughts.AuthStatus\x12;\n\x10ValidatePassword\x12\x15.thoughts.Credentials\x1a\x10.thoughts.Status2\x87\x01\n\x0eSessionService\x12\x38\n\x0bGetSessions\x12\x15.thoughts.AuthRequest\x1a\x12.thoughts.Sessions\x12;\n\rDeleteSession\x12\x18.thoughts.SessionRequest\x1a\x10.thoughts.Status2\xd7\x02\n\x0bPostService\x12\x39\n\nCreatePost\x12\x15.thoughts.PostUpdates\x1a\x14.thoughts.PostStatus\x12\x36\n\x07GetPost\x12\x15.thoughts.PostRequest\x1a\x14.thoughts.PostStatus\x12\x31\n\x07GetFeed\x12\x15.thoughts.DataRequest\x1a\x0f.thoughts.Posts\x12\x32\n\x08GetPosts\x12\x15.thoughts.DataRequest\x1a\x0f.thoughts.Posts\x12\x37\n\rGetLikedPosts\x12\x15.thoughts.DataRequest\x1a\x0f.thoughts.Posts\x12\x35\n\nDeletePost\x12\x15.thoughts.PostRequest\x1a\x10.thoughts.Status2\xed\x01\n\rActionService\x12\x33\n\x08LikePost\x12\x15.thoughts.PostRequest\x1a\x10.thoughts.Status\x12\x35\n\nUnlikePost\x12\x15.thoughts.PostRequest\x1a\x10.thoughts.Status\x12\x36\n\x0bRetweetPost\x12\x15.thoughts.PostRequest\x1a\x10.thoughts.Status\x12\x38\n\rRemoveRetweet\x12\x15.thoughts.PostRequest\x1a\x10.thoughts.Statusb\x06proto3')
 )
 
 
@@ -543,8 +543,15 @@ _USERUPDATES = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='token', full_name='thoughts.UserUpdates.token', index=6,
+      name='avatar', full_name='thoughts.UserUpdates.avatar', index=6,
       number=7, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='token', full_name='thoughts.UserUpdates.token', index=7,
+      number=8, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -562,7 +569,7 @@ _USERUPDATES = _descriptor.Descriptor(
   oneofs=[
   ],
   serialized_start=769,
-  serialized_end=897,
+  serialized_end=913,
 )
 
 
@@ -662,8 +669,8 @@ _USER = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=900,
-  serialized_end=1084,
+  serialized_start=916,
+  serialized_end=1100,
 )
 
 
@@ -721,8 +728,8 @@ _SESSION = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1086,
-  serialized_end=1180,
+  serialized_start=1102,
+  serialized_end=1196,
 )
 
 
@@ -759,8 +766,8 @@ _SESSIONS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1182,
-  serialized_end=1261,
+  serialized_start=1198,
+  serialized_end=1277,
 )
 
 
@@ -797,8 +804,8 @@ _SESSIONREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1263,
-  serialized_end=1314,
+  serialized_start=1279,
+  serialized_end=1330,
 )
 
 
@@ -877,8 +884,8 @@ _POST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1317,
-  serialized_end=1458,
+  serialized_start=1333,
+  serialized_end=1474,
 )
 
 
@@ -922,8 +929,8 @@ _POSTUPDATES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1460,
-  serialized_end=1522,
+  serialized_start=1476,
+  serialized_end=1538,
 )
 
 
@@ -953,8 +960,8 @@ _POSTS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1524,
-  serialized_end=1562,
+  serialized_start=1540,
+  serialized_end=1578,
 )
 
 
@@ -991,8 +998,8 @@ _POSTREQUEST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=1564,
-  serialized_end=1609,
+  serialized_start=1580,
+  serialized_end=1625,
 )
 
 _STATUS.fields_by_name['error'].message_type = _ERROR
@@ -1175,8 +1182,8 @@ _USERSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=1612,
-  serialized_end=1846,
+  serialized_start=1628,
+  serialized_end=1862,
   methods=[
   _descriptor.MethodDescriptor(
     name='CreateUser',
@@ -1226,8 +1233,8 @@ _FOLLOWSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=1,
   serialized_options=None,
-  serialized_start=1849,
-  serialized_end=2218,
+  serialized_start=1865,
+  serialized_end=2234,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetFollowing',
@@ -1295,8 +1302,8 @@ _AUTHSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=2,
   serialized_options=None,
-  serialized_start=2221,
-  serialized_end=2462,
+  serialized_start=2237,
+  serialized_end=2478,
   methods=[
   _descriptor.MethodDescriptor(
     name='Login',
@@ -1346,8 +1353,8 @@ _SESSIONSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=3,
   serialized_options=None,
-  serialized_start=2465,
-  serialized_end=2600,
+  serialized_start=2481,
+  serialized_end=2616,
   methods=[
   _descriptor.MethodDescriptor(
     name='GetSessions',
@@ -1379,8 +1386,8 @@ _POSTSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=4,
   serialized_options=None,
-  serialized_start=2603,
-  serialized_end=2946,
+  serialized_start=2619,
+  serialized_end=2962,
   methods=[
   _descriptor.MethodDescriptor(
     name='CreatePost',
@@ -1448,8 +1455,8 @@ _ACTIONSERVICE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=5,
   serialized_options=None,
-  serialized_start=2949,
-  serialized_end=3186,
+  serialized_start=2965,
+  serialized_end=3202,
   methods=[
   _descriptor.MethodDescriptor(
     name='LikePost',

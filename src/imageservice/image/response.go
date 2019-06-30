@@ -15,7 +15,7 @@ func jsonResponse(w http.ResponseWriter, code int) {
 func SuccessResponse(w http.ResponseWriter, filename string) {
 	jsonResponse(w, http.StatusCreated)
 
-	res := map[string]string{"filename": filename}
+	res := map[string]string{"image": filename}
 	json, err := json.Marshal(res)
 	if err != nil {
 		log.Printf("Error converting to json %v", err)

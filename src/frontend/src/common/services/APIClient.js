@@ -70,32 +70,27 @@ class APIClient {
     return this.request(url, 'POST', body);
   }
 
-  updateUser(name, username, email, bio, password, oldPassword, avatar) {
+  updateUser(name, username, email, bio, avatar) {
     const url = `/users/${session.getUserId()}`;
 
-    const body = {};
+    const body = {
+      name,
+      username,
+      email,
+      bio,
+      avatar
+    };
 
-    if (name !== undefined) {
-      body.name = name;
-    }
-    if (username !== undefined) {
-      body.username = username;
-    }
-    if (email !== undefined) {
-      body.email = email;
-    }
-    if (bio !== undefined) {
-      body.bio = bio;
-    }
-    if (password !== undefined) {
-      body.password = password;
-    }
-    if (oldPassword !== undefined) {
-      body.old_password = oldPassword;
-    }
-    if (avatar !== undefined) {
-      body.avatar = avatar;
-    }
+    return this.request(url, 'PUT', body);
+  }
+
+  updatePassword(password, oldPassword) {
+    const url = `/users/${session.getUserId()}`;
+
+    const body = {
+      password,
+      old_password: oldPassword
+    };
 
     return this.request(url, 'PUT', body);
   }
@@ -195,6 +190,20 @@ class APIClient {
   deleteRetweet(postId) {
     const url = `/posts/${postId}/retweets`;
     return this.request(url, 'DELETE');
+  }
+
+  // Image
+
+  postImage(file) {
+    const url = `/images`;
+
+    const headers = this.headers();
+    headers.delete('Content-Type');
+
+    const formData = new FormData()
+    formData.append('image', file);
+
+    return this.request(url, 'POST', formData, headers);
   }
 }
 

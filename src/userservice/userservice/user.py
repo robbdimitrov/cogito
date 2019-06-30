@@ -76,7 +76,8 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
 
         response = self.auth_client.validate(request.token)
 
-        if response.error is not None:
+        if response.error.code != 0:
+            print(f'resp.error {response.error.code} is None: {response.error.message is None}')
             return thoughts_pb2.Status(error=response.error)
 
         user_id = response.user_id
@@ -99,7 +100,7 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
         error_message = None
         error_type = None
 
-        if password is not None:
+        if len(password) != 0:
             if old_password is None:
                 error_message = 'Current password is missing.'
                 error_type = 'MISSING_PASSWORD'
@@ -108,20 +109,23 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
 
                 result = self.auth_client.validate_password(user['email'], password)
 
-                if result.error is not None:
+                if result.error.code != 0:
                     error_message = 'Wrong password.'
                     error_type = 'WRONG_PASSWORD'
                 else:
                     password = make_password_hash(password)
                     changes['password'] = password
 
-        if email is not None and validate_email(email) == False:
-            error = 'Invalid email address.'
-            error_type = 'INVALID_EMAIL'
-        else:
-            changes['email'] = email
+        if len(email) != 0:
+            if validate_email(email) == False:
+                error_message = 'Invalid email address.'
+                error_type = 'INVALID_EMAIL'
+            else:
+                changes['email'] = email
 
-        if error is not None:
+        print(f'before error check last')
+
+        if error_type is not None:
             error = thoughts_pb2.Error(code=HTTPStatus.BAD_REQUEST,
                 error=error_type,
                 message=error_message)
@@ -142,7 +146,7 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
 
         response = self.auth_client.validate(request.token)
 
-        if response.error is not None:
+        if response.error.code != 0:
             return thoughts_pb2.Status(error=response.error)
 
         user_id = response.user_id

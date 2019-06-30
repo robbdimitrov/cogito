@@ -25,7 +25,7 @@ func (s *Service) uploadFile(w http.ResponseWriter, r *http.Request) {
 			"There was an error while validating the upload request."}
 		ErrorResponse(w, error)
 		return
-	} else if status.Error != nil {
+	} else if status.Error.Code != 0 {
 		error := Error{int(status.Error.Code), status.Error.Error, status.Error.Message}
 		ErrorResponse(w, error)
 		return
