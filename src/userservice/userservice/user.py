@@ -22,16 +22,16 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
         error_message = None
         error_type = None
 
-        if username is None or username == '':
+        if len(username) == 0:
             error_message = 'Username is missing.'
             error_type = 'MISSING_USERNAME'
-        elif email is None or email == '':
+        elif len(email) == 0:
             error_message = 'Email is missing.'
             error_type = 'MISSING_EMAIL'
         elif validate_email(email) == False:
             error_message = 'Invalid email address.'
             error_type = 'INVALID_EMAIL'
-        elif password is None:
+        elif len(password) == 0:
             error_message = 'Password is missing'
             error_type = 'MISSING_PASSWORD'
 

@@ -28,7 +28,7 @@ export class PostClient extends APIClient {
           return rej(err);
         }
         const error = response.getError();
-        if (error !== undefined) {
+        if (error) {
           return this.handleError(error, rej);
         }
         const post = itemToPost(response.getPost());
@@ -48,7 +48,7 @@ export class PostClient extends APIClient {
           return rej(err);
         }
         const error = response.getError();
-        if (error !== undefined) {
+        if (error) {
           return this.handleError(error, rej);
         }
         const post = itemToPost(response.getPost());
@@ -121,7 +121,7 @@ export class PostClient extends APIClient {
           return rej(err);
         }
         const error = response.getError();
-        if (error !== undefined) {
+        if (error) {
           return this.handleError(error, rej);
         }
         res({ message: response.getMessage() });
@@ -142,7 +142,7 @@ export class PostClient extends APIClient {
           return rej(err);
         }
         const error = response.getError();
-        if (error !== undefined) {
+        if (error) {
           return this.handleError(error, rej);
         }
         res({ message: response.getMessage() });
@@ -161,7 +161,7 @@ export class PostClient extends APIClient {
           return rej(err);
         }
         const error = response.getError();
-        if (error !== undefined) {
+        if (error) {
           return this.handleError(error, rej);
         }
         res({ message: response.getMessage() });
@@ -180,7 +180,7 @@ export class PostClient extends APIClient {
           return rej(err);
         }
         const error = response.getError();
-        if (error !== undefined) {
+        if (error) {
           return this.handleError(error, rej);
         }
         res({ message: response.getMessage() });
@@ -199,7 +199,7 @@ export class PostClient extends APIClient {
           return rej(err);
         }
         const error = response.getError();
-        if (error !== undefined) {
+        if (error) {
           return this.handleError(error, rej);
         }
         res({ message: response.getMessage() });

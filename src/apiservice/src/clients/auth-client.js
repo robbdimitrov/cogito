@@ -29,7 +29,7 @@ export class AuthClient extends APIClient {
           return rej(err);
         }
         const error = response.getError();
-        if (error !== undefined) {
+        if (error) {
           return this.handleError(error, rej);
         }
         const token = {
@@ -61,7 +61,7 @@ export class AuthClient extends APIClient {
           return rej(err);
         }
         const error = response.getError();
-        if (error !== undefined) {
+        if (error) {
           return this.handleError(error, rej);
         }
         const token = {
@@ -112,7 +112,7 @@ export class AuthClient extends APIClient {
           return rej(err);
         }
         const error = response.getError();
-        if (error !== undefined) {
+        if (error) {
           return this.handleError(error, rej);
         }
         res({ message: response.getMessage() });
