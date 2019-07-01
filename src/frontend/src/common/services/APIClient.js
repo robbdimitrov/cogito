@@ -10,7 +10,7 @@ class APIClient {
     });
 
     const token = session.getToken();
-    if (token !== undefined) {
+    if (token) {
       headers.set('Authorization', `Bearer ${token}`);
     }
 
@@ -24,7 +24,7 @@ class APIClient {
 
     const options = { method, headers };
 
-    if (body !== undefined) {
+    if (body) {
       if (headers.get('Content-Type') === 'application/json') {
         options.body = JSON.stringify(body);
       } else {

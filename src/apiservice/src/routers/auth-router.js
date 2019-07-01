@@ -8,7 +8,7 @@ export class AuthRouter extends APIRouter {
 
   connectRouter(router) {
     router.post('/', (req, res) => {
-      if (req.body.email !== undefined) {
+      if (req.body.email) {
         this.login(req, res);
       } else {
         this.refreshToken(req, res);

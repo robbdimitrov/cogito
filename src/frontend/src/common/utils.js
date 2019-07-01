@@ -35,7 +35,7 @@ export function getDevice(userAgent) {
  * the item is removed from localStorage.
  */
 export function setStorage(key, value) {
-  if (value !== undefined) {
+  if (value) {
     localStorage.setItem(key, value);
   } else {
     localStorage.removeItem(key);
