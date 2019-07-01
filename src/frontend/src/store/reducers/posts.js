@@ -6,7 +6,18 @@ import {
   LIKE_POST, UNLIKE_POST, RETWEET_POST, DELETE_RETWEET
 } from '../actions/action';
 import { FETCH_FEED } from '../actions/feed';
-import { deleteObject } from '../../common/utils';
+import { LOGOUT_USER } from '../actions/auth';
+import {
+  addId, addObjectsIds, removeId, addObject,
+  addObjects, updateObject, removeObject
+} from './helpers';
+
+// State
+
+const initialState = {
+  byId: {},
+  allIds: []
+};
 
 // Post
 
@@ -14,10 +25,17 @@ function addPost(state, action) {
   const { post } = action;
 
   return {
-    ...state,
-    [post.id]: {
-      ...post
-    }
+    byId: addObject(state.byId, post),
+    allIds: addId(state.allIds, post.id)
+  };
+}
+
+function addPosts(state, action) {
+  const { posts } = action;
+
+  return {
+    byId: addObjects(state.byId, posts),
+    allIds: addObjectsIds(state.allIds, posts)
   };
 }
 
@@ -25,7 +43,8 @@ function deletePost(state, action) {
   const { postId } = action;
 
   return {
-    ...deleteObject(state, postId)
+    byId: removeObject(state.byId, postId),
+    allIds: removeId(state.allIds, postId)
   };
 }
 
@@ -36,11 +55,10 @@ function likePost(state, action) {
 
   return {
     ...state,
-    [postId]: {
-      ...state[postId],
-      likes: state[postId].likes + 1,
+    byId: updateObject(state.byId, postId, {
+      likes: state.byId[postId].likes + 1,
       liked: true
-    }
+    })
   };
 }
 
@@ -49,11 +67,10 @@ function unlikePost(state, action) {
 
   return {
     ...state,
-    [postId]: {
-      ...state[postId],
-      likes: state[postId].likes - 1,
+    byId: updateObject(state.byId, postId, {
+      likes: state.byId[postId].likes - 1,
       liked: false
-    }
+    })
   };
 }
 
@@ -62,11 +79,10 @@ function retweetPost(state, action) {
 
   return {
     ...state,
-    [postId]: {
-      ...state[postId],
-      retweets: state[postId].retweets + 1,
+    byId: updateObject(state.byId, postId, {
+      retweets: state.byId[postId].retweets + 1,
       retweeted: true
-    }
+    })
   };
 }
 
@@ -75,34 +91,18 @@ function deleteRetweet(state, action) {
 
   return {
     ...state,
-    [postId]: {
-      ...state[postId],
-      retweets: state[postId].retweets - 1,
+    byId: updateObject(state.byId, postId, {
+      retweets: state.byId[postId].retweets - 1,
       retweeted: false
-    }
-  };
-}
-
-// Fetch
-
-function addPosts(state, action) {
-  const { posts } = action;
-
-  return {
-    ...state,
-    ...posts.reduce((obj, post) => {
-      obj[post.id] = {
-        ...post
-      };
-      return obj;
-    }),
+    })
   };
 }
 
 // Main
 
-function posts(state = {}, action) {
+function posts(state = initialState, action) {
   switch (action.type) {
+    case FETCH_POST:
     case CREATE_POST:
       return addPost(state, action);
     case DELETE_POST:
@@ -115,12 +115,12 @@ function posts(state = {}, action) {
       return retweetPost(state, action);
     case DELETE_RETWEET:
       return deleteRetweet(state, action);
-    case FETCH_POST:
-      return addPost(state, action);
     case FETCH_POSTS:
     case FETCH_LIKES:
     case FETCH_FEED:
       return addPosts(state, action);
+    case LOGOUT_USER:
+      return initialState;
     default:
       return state;
   }

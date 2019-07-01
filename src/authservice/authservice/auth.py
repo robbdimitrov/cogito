@@ -19,7 +19,8 @@ class AuthService(thoughts_pb2_grpc.AuthServiceServicer):
     def validate_password(self, email, password):
         current_user = self.db_client.get_user_password_hash(email)
 
-        if bcrypt.checkpw(password, current_user['password']) == False:
+        if current_user is None or bcrypt.checkpw(password.encode('utf-8'),
+            current_user['password'].encode('utf-8')) == False:
             raise AuthException(401, 'INVALID_CREDENTIALS', 'Wrong email or password.')
 
         return current_user
@@ -28,11 +29,11 @@ class AuthService(thoughts_pb2_grpc.AuthServiceServicer):
         if session is None:
             raise AuthException(401, 'INVALID_SESSION', 'Invalid session.')
 
-        access_payload = {'sub': session['user_id'],
+        access_payload = {'sub': session.user_id,
             'iat': datetime.datetime.utcnow(),
             'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=15)}
 
-        refresh_payload = {'sub': session['session_id'],
+        refresh_payload = {'sub': session.id,
             'iat': datetime.datetime.utcnow(),
             'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)}
 
@@ -88,7 +89,7 @@ class AuthService(thoughts_pb2_grpc.AuthServiceServicer):
             access_token=tokens['access_token'],
             refresh_token=tokens['refresh_token'],
             user_id=current_user['id'],
-            session_id=session['session_id']
+            session_id=session.id
         )
 
     def Refresh(self, request, context):
@@ -137,9 +138,9 @@ class AuthService(thoughts_pb2_grpc.AuthServiceServicer):
         except AuthException as e:
             error = thoughts_pb2.Error(code=e.code, error=e.error,
                 message=e.message)
-            return thoughts_pb2.Status(error=error)
+            return thoughts_pb2.AuthStatus(error=error)
 
-        return thoughts_pb2.AuthStatus(user_id=payload['user_id'])
+        return thoughts_pb2.AuthStatus(user_id=payload['sub'])
 
     def ValidatePassword(self, request, context):
         """Validate password"""

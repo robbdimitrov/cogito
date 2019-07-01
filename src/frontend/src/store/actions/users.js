@@ -1,19 +1,17 @@
-import apiClient from '../../common/APIClient';
-import session from '../../common/Session';
+import apiClient from '../../common/services/APIClient';
+import session from '../../common/services/Session';
 import { fetchFollowingIds, fetchFollowersIds } from './follow';
 import { loginUser } from './auth';
+import { handleError } from './errors';
 
 // Register
 
 export const REGISTER_USER = 'REGISTER_USER';
 export function registerUser(name, username, email, password) {
-  return (dispatch) => {
-    apiClient.registerUser(name, username, email, password).then((response) => {
-      if (!response.ok) {
-        dispatch({
-          type: REGISTER_USER,
-          error: response.error.message
-        });
+  return function(dispatch) {
+    apiClient.createUser(name, username, email, password).then((response) => {
+      if (response.error) {
+        dispatch(handleError(response.error));
         return;
       }
 
@@ -26,43 +24,63 @@ export function registerUser(name, username, email, password) {
 
 export const UPDATE_USER = 'UPDATE_USER';
 export function updateUser(name, username, email, bio, avatar) {
-  return (dispatch) => {
-    apiClient.updateUser(name, username, email, bio,
-      undefined, undefined, avatar).then((response) => {
-        if (!response.ok) {
-          dispatch({
-            type: UPDATE_USER,
-            error: response.error.message
-          });
+  return function(dispatch) {
+    apiClient.updateUser(name, username, email, bio, avatar)
+      .then((response) => {
+        if (response.error) {
+          dispatch(handleError(response.error));
           return;
         }
 
         dispatch({
           type: UPDATE_USER,
           userId: session.getUserId(),
-          name, username, email, bio, avatar
+          updates: {
+            name,
+            username,
+            email,
+            bio,
+            avatar
+          }
         });
       });
   };
 }
 
-export const UPDATE_PASSWORD = 'UPDATE_PASSWORD';
-export function updatePassword(password, oldPassword) {
-  return (dispatch) => {
-    apiClient.updateUser(undefined, undefined, undefined, undefined,
-      password, oldPassword).then((response) => {
-        if (!response.ok) {
-          dispatch({
-            type: UPDATE_PASSWORD,
-            error: response.error.message
-          });
-          return;
-        }
+export function updateAvatar(file) {
+  return function(dispatch) {
+    apiClient.postImage(file).then((response) => {
+      if (response.error) {
+        dispatch(handleError(response.error));
+        return;
+      }
 
-        dispatch({
-          type: UPDATE_PASSWORD
-        });
+      const avatar = response.image;
+
+      dispatch({
+        type: UPDATE_USER,
+        userId: session.getUserId(),
+        updates: {
+          avatar
+        }
       });
+    });
+  };
+}
+
+export function updatePassword(password, oldPassword) {
+  return function(dispatch) {
+    apiClient.updatePassword(password, oldPassword).then((response) => {
+      if (response.error) {
+        dispatch(handleError(response.error));
+        return;
+      }
+
+      dispatch({
+        type: UPDATE_USER,
+        userId: session.getUserId()
+      });
+    });
   };
 }
 
@@ -70,32 +88,32 @@ export function updatePassword(password, oldPassword) {
 
 export const FETCH_USER = 'FETCH_USER';
 export function fetchUser(userId, username) {
-  return (dispatch) => {
+  return function(dispatch) {
     apiClient.getUser(userId, username).then((response) => {
-      if (!response.ok) {
-        dispatch({
-          type: FETCH_USER,
-          userId,
-          error: response.error.message
-        });
+      if (response.error) {
+        dispatch(handleError(response.error));
       }
 
       dispatch({
         type: FETCH_USER,
         user: response.user
       });
+
+      if (userId === session.getUserId()) {
+        dispatch(fetchFollowingIds(userId));
+        dispatch(fetchFollowersIds(userId));
+      }
     });
   };
 }
 
 export function fetchUserIfNeeded(userId) {
   return function(dispatch, getState) {
-    if (!getState().users[userId]) {
-      if (userId === session.getUserId()) {
-        dispatch(fetchFollowingIds(userId));
-        dispatch(fetchFollowersIds(userId));
-      }
-      return dispatch(fetchUser(userId));
+    if (!userId) {
+      return;
+    }
+    if (!getState().users.byId[userId]) {
+      dispatch(fetchUser(userId));
     }
   };
 }
@@ -106,7 +124,7 @@ export const FOLLOW_USER = 'FOLLOW_USER';
 export function followUser(userId) {
   return function(dispatch) {
     apiClient.followUser(userId).then((response) => {
-      if (!response.ok) {
+      if (response.error) {
         return;
       }
       dispatch({
@@ -122,7 +140,7 @@ export const UNFOLLOW_USER = 'UNFOLLOW_USER';
 export function unfollowUser(userId) {
   return function(dispatch) {
     apiClient.unfollowUser(userId).then((response) => {
-      if (!response.ok) {
+      if (response.error) {
         return;
       }
       dispatch({

@@ -1,42 +1,79 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import PropType from 'prop-types';
+
+import { loginUser } from '../store/actions/auth';
 
 class Login extends React.Component {
-  handleLogin = (event) => {
+  constructor(props) {
+    super(props);
+    this.state = {
+      email: '',
+      password: ''
+    };
+
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleInputChange = this.handleInputChange.bind(this);
+  }
+
+  handleSubmit(event) {
     event.preventDefault();
-    console.log(`Logging in`);
-  };
+    const { email, password } = this.state;
+    this.props.loginUser(email, password);
+  }
+
+  handleInputChange(event) {
+    const target = event.target;
+    const value = target.value;
+    const name = target.name;
+
+    this.setState({
+      [name]: value
+    });
+  }
 
   render() {
     return (
       <div className="container">
         <div className="form-content main-content">
-          <h1 className="form-title">Login</h1>
-          <p className="form-message">Welcome back! Login to access your account.</p>
+          <h1 className="form-title">Log In</h1>
+          <p className="form-message">Welcome back! Log in to access your account.</p>
 
-          <form className="action-form" onSubmit={this.handleLogin}>
+          <form className="action-form" onSubmit={this.handleSubmit}>
             <div className="fieldset">
               <FontAwesomeIcon icon="envelope" className="input-icon" />
               <input
-                type="email" className="form-input"
-                id="email" placeholder="Email"
-                pattern="[^@]+@[^@]+\.[^@]+" required
+                className="form-input"
+                type="email"
+                name="email"
+                placeholder="Email"
+                pattern="[^@]+@[^@]+\.[^@]+"
+                onChange={this.handleInputChange}
+                value={this.state.email}
+                required
               />
             </div>
 
             <div className="fieldset">
               <FontAwesomeIcon icon="lock" className="input-icon" />
               <input
-                type="password" className="form-input"
-                id="password" placeholder="Password"
-                minLength="4" maxLength="30" required
+                className="form-input"
+                type="password"
+                name="password"
+                placeholder="Password"
+                minLength="4"
+                maxLength="30"
+                onChange={this.handleInputChange}
+                value={this.state.password}
+                required
               />
             </div>
 
             <input
-              type="submit"
               className="button form-button"
+              type="submit"
               value="Log In"
             />
           </form>
@@ -44,7 +81,7 @@ class Login extends React.Component {
           <div className="reference">
             <span className="reference-label">Don't have an accout?</span>
             <Link to="/signup" className="reference-button">
-              <span>Register</span>
+              <span>Sign Up</span>
             </Link>
           </div>
         </div>
@@ -53,4 +90,11 @@ class Login extends React.Component {
   }
 }
 
-export default Login;
+Login.propTypes = {
+  loginUser: PropType.func.isRequired
+};
+
+export default connect(
+  null,
+  { loginUser }
+)(Login);

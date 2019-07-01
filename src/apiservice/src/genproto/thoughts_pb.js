@@ -2281,7 +2281,8 @@ proto.thoughts.UserUpdates.toObject = function(includeInstance, msg) {
     password: jspb.Message.getFieldWithDefault(msg, 4, ""),
     bio: jspb.Message.getFieldWithDefault(msg, 5, ""),
     oldPassword: jspb.Message.getFieldWithDefault(msg, 6, ""),
-    token: jspb.Message.getFieldWithDefault(msg, 7, "")
+    avatar: jspb.Message.getFieldWithDefault(msg, 7, ""),
+    token: jspb.Message.getFieldWithDefault(msg, 8, "")
   };
 
   if (includeInstance) {
@@ -2343,6 +2344,10 @@ proto.thoughts.UserUpdates.deserializeBinaryFromReader = function(msg, reader) {
       msg.setOldPassword(value);
       break;
     case 7:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setAvatar(value);
+      break;
+    case 8:
       var value = /** @type {string} */ (reader.readString());
       msg.setToken(value);
       break;
@@ -2417,10 +2422,17 @@ proto.thoughts.UserUpdates.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getToken();
+  f = message.getAvatar();
   if (f.length > 0) {
     writer.writeString(
       7,
+      f
+    );
+  }
+  f = message.getToken();
+  if (f.length > 0) {
+    writer.writeString(
+      8,
       f
     );
   }
@@ -2518,17 +2530,32 @@ proto.thoughts.UserUpdates.prototype.setOldPassword = function(value) {
 
 
 /**
- * optional string token = 7;
+ * optional string avatar = 7;
  * @return {string}
  */
-proto.thoughts.UserUpdates.prototype.getToken = function() {
+proto.thoughts.UserUpdates.prototype.getAvatar = function() {
   return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 7, ""));
 };
 
 
 /** @param {string} value */
-proto.thoughts.UserUpdates.prototype.setToken = function(value) {
+proto.thoughts.UserUpdates.prototype.setAvatar = function(value) {
   jspb.Message.setProto3StringField(this, 7, value);
+};
+
+
+/**
+ * optional string token = 8;
+ * @return {string}
+ */
+proto.thoughts.UserUpdates.prototype.getToken = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 8, ""));
+};
+
+
+/** @param {string} value */
+proto.thoughts.UserUpdates.prototype.setToken = function(value) {
+  jspb.Message.setProto3StringField(this, 8, value);
 };
 
 

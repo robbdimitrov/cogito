@@ -76,11 +76,10 @@ func (c *DbClient) GetFeed(userID int32, page int32, limit int32) (pb.Posts, err
 		"ORDER BY posts.date_created DESC",
 		"OFFSET $2 LIMIT $3", "$1")
 	rows, err := conn.Query(query, userID, page*limit, limit)
-
+	defer rows.Close()
 	if err != nil {
 		return pb.Posts{}, errors.New("Error happened while reading from the database")
 	}
-	defer rows.Close()
 
 	posts, err := rowsToPosts(rows)
 	return posts, nil
@@ -96,11 +95,10 @@ func (c *DbClient) GetPosts(userID int32, page int32, limit int32, currentID int
 		"ORDER BY posts.date_created DESC",
 		"OFFSET $2 LIMIT $3", "$4")
 	rows, err := conn.Query(query, userID, page*limit, limit, currentID)
-
+	defer rows.Close()
 	if err != nil {
 		return pb.Posts{}, errors.New("Error happened while reading from the database")
 	}
-	defer rows.Close()
 
 	posts, err := rowsToPosts(rows)
 	return posts, nil
@@ -115,10 +113,10 @@ func (c *DbClient) GetLikedPosts(userID int32, page int32, limit int32, currentI
 		"ORDER BY posts.date_created DESC",
 		"OFFSET $2 LIMIT $3", "$4")
 	rows, err := conn.Query(query, userID, page*limit, limit, currentID)
+	defer rows.Close()
 	if err != nil {
 		return pb.Posts{}, errors.New("Error happened while reading from the database")
 	}
-	defer rows.Close()
 
 	posts, err := rowsToPosts(rows)
 	return posts, nil

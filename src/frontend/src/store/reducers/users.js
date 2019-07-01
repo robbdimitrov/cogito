@@ -1,6 +1,6 @@
 import { userProperties, addItem, removeItem, addItems } from './helpers';
 import {
-  REGISTER_USER, UPDATE_USER ,UPDATE_PASSWORD,
+  REGISTER_USER, UPDATE_USER,
   FETCH_USER, FOLLOW_USER, UNFOLLOW_USER
 } from '../actions/users';
 import { LOGIN_USER, LOGOUT_USER } from '../actions/auth';
@@ -18,30 +18,39 @@ import {
 import {
   CREATE_POST, DELETE_POST, FETCH_POSTS, FETCH_LIKES
 } from '../actions/posts';
+import { addId, addObject, updateObject } from './helpers';
+
+// State
+
+const initialState = {
+  byId: {},
+  allIds: []
+};
 
 // User
 
 function addUser(state, action) {
   const { user } = action;
 
+  if (!user) {
+    return state;
+  }
+
   return {
-    ...state,
-    [user.id]: {
-      ...user,
+    byId: addObject(state.byId, {
+      ...action.user,
       ...userProperties(user)
-    }
+    }),
+    allIds: addId(state.allIds, user.id)
   };
 }
 
 function updateUser(state, action) {
-  const { userId, name, username, email, bio, avatar } = action;
+  const { userId, updates } = action;
 
   return {
     ...state,
-    [userId]: {
-      ...state[userId],
-      name, username, email, bio, avatar
-    }
+    byId: updateObject(state.byId, userId, updates)
   };
 }
 
@@ -52,10 +61,9 @@ function likePost(state, action) {
 
   return {
     ...state,
-    [userId]: {
-      ...state[userId],
-      likes: addItem(state[userId].likes, postId)
-    }
+    byId: updateObject(state.byId, userId, {
+      likes: addItem(state.byId[userId].likes, postId)
+    })
   };
 }
 
@@ -63,11 +71,10 @@ function unlikePost(state, action, keys) {
   const { userId, postId } = action;
 
   return {
-    ...users,
-    [userId]: {
-      ...state[userId],
-      likes: removeItem(state[userId].likes, postId)
-    }
+    ...state,
+    byId: updateObject(state.byId, userId, {
+      likes: removeItem(state.byId[userId].likes, postId)
+    })
   };
 }
 
@@ -76,10 +83,9 @@ function retweetPost(state, action) {
 
   return {
     ...state,
-    [userId]: {
-      ...state[userId],
-      retweets: addItem(state[userId].retweets, postId)
-    }
+    byId: updateObject(state.byId, userId, {
+      retweets: addItem(state.byId[userId].retweets, postId)
+    })
   };
 }
 
@@ -87,11 +93,10 @@ function deleteRetweet(state, action) {
   const { userId, postId } = action;
 
   return {
-    ...users,
-    [userId]: {
-      ...state[userId],
-      retweets: removeItem(state[userId].retweets, postId)
-    }
+    ...state,
+    byId: updateObject(state.byId, userId, {
+      retweets: removeItem(state.byId[userId].retweets, postId)
+    })
   };
 }
 
@@ -101,11 +106,10 @@ function createPost(state, action) {
   const { userId, post } = action;
 
   return {
-    ...users,
-    [userId]: {
-      ...state[userId],
-      posts: addItem(state[userId].posts, post.id)
-    }
+    ...state,
+    byId: updateObject(state.byId, userId, {
+      posts: addItem(state.byId[userId].posts, post.id)
+    })
   };
 }
 
@@ -113,11 +117,10 @@ function deletePost(state, action) {
   const { userId, postId } = action;
 
   return {
-    ...users,
-    [userId]: {
-      ...state[userId],
-      posts: removeItem(state[userId].posts, postId)
-    }
+    ...state,
+    byId: updateObject(state.byId, userId, {
+      posts: removeItem(state.byId[userId].posts, postId)
+    })
   };
 }
 
@@ -127,11 +130,10 @@ function addPosts(state, action) {
   const { userId, posts, page } = action;
 
   return {
-    ...users,
-    [userId]: {
-      ...state[userId],
-      posts: addItems(state[userId].posts, posts, page)
-    }
+    ...state,
+    byId: updateObject(state.byId, userId, {
+      posts: addItems(state.byId[userId].posts, posts, page)
+    })
   };
 }
 
@@ -139,18 +141,18 @@ function addLikes(state, action) {
   const { userId, posts, page } = action;
 
   return {
-    ...users,
-    [userId]: {
-      ...state[userId],
-      likes: addItems(state[userId].likes, posts, page)
-    }
+    ...state,
+    byId: updateObject(state.byId, userId, {
+      likes: addItems(state.byId[userId].likes, posts, page)
+    })
   };
 }
 
 // Main
 
-function users(state = {}, action) {
+function users(state = initialState, action) {
   switch (action.type) {
+    case LOGIN_USER:
     case FETCH_USER:
       return addUser(state, action);
     case UPDATE_USER:
@@ -167,8 +169,6 @@ function users(state = {}, action) {
       return addFollowers(state, action);
     case FETCH_FOLLOWERS_IDS:
       return addFollowersIds(state, action);
-    case LOGIN_USER:
-      return addUser(state, action);
     case LIKE_POST:
       return likePost(state, action);
     case UNLIKE_POST:
@@ -186,7 +186,7 @@ function users(state = {}, action) {
     case FETCH_LIKES:
       return addLikes(state, action);
     case LOGOUT_USER:
-    case UPDATE_PASSWORD:
+      return initialState;
     case REGISTER_USER:
     default:
       return state;

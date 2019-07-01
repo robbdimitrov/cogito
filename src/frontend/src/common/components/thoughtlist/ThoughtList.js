@@ -1,7 +1,7 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import ThoughtItem from './ThoughtItem';
-
 import './ThoughtList.scss';
 
 function ThoughtList({ posts, users }) {
@@ -13,5 +13,10 @@ function ThoughtList({ posts, users }) {
     </ul>
   );
 }
+
+ThoughtList.propTypes = {
+  posts: PropTypes.array.isRequired,
+  users: PropTypes.array.isRequired
+};
 
 export default ThoughtList;

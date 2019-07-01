@@ -62,18 +62,37 @@ export class UserClient extends APIClient {
     });
   }
 
-  updateUser(username, email, name, password, bio, oldPassword, token) {
+  updateUser(username, email, name, bio, avatar, token) {
     const request = new messages.UserUpdates();
     request.setUsername(username);
     request.setEmail(email);
     request.setName(name);
-    request.setPassword(password);
     request.setBio(bio);
-    request.setOldPassword(oldPassword);
+    request.setAvatar(avatar);
     request.setToken(token);
 
     return new Promise((res, rej) => {
       this.userClient.updateUser(request, (err, response) => {
+        if (err) {
+          return rej(err);
+        }
+        const error = response.getError();
+        if (error !== undefined) {
+          return this.handleError(error, rej);
+        }
+        res({ message: response.getMessage() });
+      });
+    });
+  }
+
+  updatePassword(password, oldPassword, token) {
+    const request = new messages.UserUpdates();
+    request.setPassword(password);
+    request.setOldPassword(oldPassword);
+    request.setToken(token);
+
+    return new Promise((res, rej) => {
+      this.userClient.updatePassword(request, (err, response) => {
         if (err) {
           return rej(err);
         }
@@ -115,11 +134,11 @@ export class UserClient extends APIClient {
     request.setLimit(limit);
 
     return new Promise((res, rej) => {
-      this.userClient.getFollowing(request, (err, response) => {
+      this.followClient.getFollowing(request, (err, response) => {
         if (err) {
           return rej(err);
         }
-        const users = response.getIds();
+        const users = itemsToUsers(response.getUsers());
         res({ users });
       });
     });
@@ -131,11 +150,11 @@ export class UserClient extends APIClient {
     request.setToken(token);
 
     return new Promise((res, rej) => {
-      this.userClient.getFollowingIds(request, (err, response) => {
+      this.followClient.getFollowingIds(request, (err, response) => {
         if (err) {
           return rej(err);
         }
-        const users = itemsToUsers(response.getUsers());
+        const users = response.getIdsList();
         res({ users });
       });
     });
@@ -149,7 +168,7 @@ export class UserClient extends APIClient {
     request.setLimit(limit);
 
     return new Promise((res, rej) => {
-      this.userClient.getFollowers(request, (err, response) => {
+      this.followClient.getFollowers(request, (err, response) => {
         if (err) {
           return rej(err);
         }
@@ -165,11 +184,11 @@ export class UserClient extends APIClient {
     request.setToken(token);
 
     return new Promise((res, rej) => {
-      this.userClient.getFollowersIds(request, (err, response) => {
+      this.followClient.getFollowersIds(request, (err, response) => {
         if (err) {
           return rej(err);
         }
-        const users = response.getIds();
+        const users = response.getIdsList();
         res({ users });
       });
     });
@@ -181,7 +200,7 @@ export class UserClient extends APIClient {
     request.setToken(token);
 
     return new Promise((res, rej) => {
-      this.userClient.followUser(request, (err, response) => {
+      this.followClient.followUser(request, (err, response) => {
         if (err) {
           return rej(err);
         }
@@ -200,7 +219,7 @@ export class UserClient extends APIClient {
     request.setToken(token);
 
     return new Promise((res, rej) => {
-      this.userClient.unfollowUser(request, (err, response) => {
+      this.followClient.unfollowUser(request, (err, response) => {
         if (err) {
           return rej(err);
         }

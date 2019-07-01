@@ -1,7 +1,6 @@
 import grpc
 from concurrent import futures
 import time
-import logging
 
 from authservice import thoughts_pb2_grpc
 from authservice.auth import AuthService
@@ -41,7 +40,7 @@ class Server:
     def serve(self):
         server = self.create_server()
         server.start()
-        logging.info(f'Server running on port {self.port}')
+        print(f'Server running on port {self.port}')
         try:
             while True:
                 time.sleep(60 * 60 * 24)

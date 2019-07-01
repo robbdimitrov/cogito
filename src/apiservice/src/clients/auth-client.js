@@ -40,7 +40,7 @@ export class AuthClient extends APIClient {
         const session_id = response.getSessionId();
         this.userClient.getUser(response.getUserId())
           .then((result) => {
-            const user = result;
+            const user = result.user;
             res({
               user, token, session_id
             });
@@ -102,7 +102,7 @@ export class AuthClient extends APIClient {
   }
 
   deleteSession(sessionId, token) {
-    const request = new messages.AuthRequest();
+    const request = new messages.SessionRequest();
     request.setSessionId(sessionId);
     request.setToken(token);
 

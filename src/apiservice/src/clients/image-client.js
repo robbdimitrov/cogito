@@ -48,6 +48,8 @@ export class ImageClient extends APIClient {
     const request = http.request(options, (response) => {
       response.on('data', (chunk) => {
         res.write(chunk);
+      }).on('end', () => {
+        res.end();
       }).on('close', () => {
         res.end();
       });

@@ -1,8 +1,11 @@
+import { apiRoot } from '../config';
+
 /**
- * Goes through the userAgent and matches the OS to one of the existing.
+ * Goes through the userAgent and extracts the device information.
  */
-export function getDeviceName(userAgent) {
+export function getDevice(userAgent) {
   let name = 'Unknown';
+  let isDesktop = true;
 
   if (userAgent.indexOf('Windows') !== -1) {
     name = 'Windows';
@@ -14,15 +17,17 @@ export function getDeviceName(userAgent) {
     } else {
       name ='iPhone';
     }
+    isDesktop = false;
   } else if (userAgent.indexOf('Linux') !== -1) {
     if (userAgent.indexOf('Android') !== -1) {
       name = 'Android';
+      isDesktop = false;
     } else {
       name = 'Linux';
     }
   }
 
-  return name;
+  return { name, isDesktop };
 }
 
 /**
@@ -38,13 +43,8 @@ export function setStorage(key, value) {
 }
 
 /**
- * Deletes the object associated with the identifier.
+ * Creates an image url path using filename and api root path.
  */
-export function deleteObject(state, identifier) {
-  return Object.keys(state).reduce((obj, key) => {
-    if (key !== identifier) {
-      obj[key] = state[key];
-    }
-    return obj;
-  }, {})
+export function imageURI(filename) {
+  return `${apiRoot}/images/${filename}`;
 }

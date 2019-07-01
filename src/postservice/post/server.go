@@ -12,14 +12,14 @@ import (
 
 // Server is runing on a port and handling grpc requests
 type Server struct {
-	port    int32
+	port    string
 	dbURI   string
 	authURI string
 	userURI string
 }
 
 // NewServer is a constructor for new Server objects
-func NewServer(port int32, dbURI string, authURI string, userURI string) *Server {
+func NewServer(port string, dbURI string, authURI string, userURI string) *Server {
 	return &Server{port, dbURI, authURI, userURI}
 }
 
@@ -30,9 +30,9 @@ func (s *Server) createDbClient() *DbClient {
 
 // Start starts the server instance
 func (s *Server) Start() {
-	log.Printf("Starting server on port %d\n", s.port)
+	log.Printf("Starting server on port %s\n", s.port)
 
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", s.port))
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", s.port))
 	if err != nil {
 		log.Fatalf("Server failed to listen: %v", err)
 	}

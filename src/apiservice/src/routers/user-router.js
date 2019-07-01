@@ -23,7 +23,11 @@ export class UserRouter extends APIRouter {
     });
 
     router.put('/:id', (req, res) => {
-      this.updateUser(req, res);
+      if (req.body.password && req.body.old_password) {
+        this.updatePassword(req, res);
+      } else {
+        this.updateUser(req, res);
+      }
     });
 
     router.delete('/:id', (req, res) => {
@@ -94,14 +98,23 @@ export class UserRouter extends APIRouter {
     const username = req.body.username;
     const email = req.body.email;
     const name = req.body.name;
-    const password = req.body.password;
     const bio = req.body.bio;
-    const oldPassword = req.body.old_password;
+    const avatar = req.body.avatar;
     const token = this.getToken(req);
 
     this.handleResponse(
       this.userClient.updateUser(username, email,
-        name, password, bio, oldPassword, token), res
+        name, bio, avatar, token), res
+    );
+  }
+
+  updatePassword(req, res) {
+    const password = req.body.password;
+    const oldPassword = req.body.old_password;
+    const token = this.getToken(req);
+
+    this.handleResponse(
+      this.userClient.updateUser(password, oldPassword, token), res
     );
   }
 

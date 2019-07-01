@@ -20,7 +20,7 @@ button, select {
   font-size: inherit;
 }
 
-button, input:not([type='checkbox']) {
+button, textarea, input:not([type='checkbox']) {
   &:focus {
     outline: 0;
   }

@@ -1,5 +1,4 @@
 import psycopg2
-import logging
 
 from userservice import db, thoughts_pb2
 from userservice.exceptions import (
@@ -40,12 +39,12 @@ class DbClient:
                 (username, email, name, password))
             conn.commit()
         except psycopg2.Error as e:
-            logging.error(f'Error creating user: {str(e)}')
+            print(f'Error creating user: {str(e)}')
             raise DbException('Error while writing to the database.')
         finally:
             cur.close()
 
-    def create_user_query(self, where = ''):
+    def create_user_query(self, where=''):
         query = f'SELECT users.id, users.username, users.email, users.name, \
             users.bio, users.avatar, \
             (COUNT(DISTINCT posts.id) + COUNT(DISTINCT retweets.id)) AS posts, \
@@ -64,15 +63,15 @@ class DbClient:
             ORDER BY users.id'
         return query
 
-    def get_user(self, user_id, username):
+    def get_user(self, user_id, username=None):
         conn = self.db.get_conn()
         cur = conn.cursor()
 
-        if username is not None:
-            cur.execute(self.create_user_query('WHERE username = %s'),
+        if username:
+            cur.execute(self.create_user_query('WHERE users.username = %s'),
                 (username,))
         else:
-            cur.execute(self.create_user_query('WHERE id = %s')
+            cur.execute(self.create_user_query('WHERE users.id = %s'),
                 (user_id,))
         result = cur.fetchone()
         cur.close()
@@ -97,7 +96,7 @@ class DbClient:
             cur.execute(command, (user_id,))
             conn.commit()
         except psycopg2.Error as e:
-            logging.error(f'Error updating user: {str(e)}')
+            print(f'Error updating user: {str(e)}')
             raise DbException('Updating user failed.')
         finally:
             cur.close()
@@ -129,7 +128,7 @@ class DbClient:
         conn = self.db.get_conn()
         cur = conn.cursor()
 
-        cur.execute('SELECT user_id FROM thoughts.users \
+        cur.execute('SELECT id FROM thoughts.followings \
             WHERE follower_id = %s',
             (user_id,))
         results = cur.fetchall()
@@ -157,7 +156,7 @@ class DbClient:
         conn = self.db.get_conn()
         cur = conn.cursor()
 
-        cur.execute('SELECT follower_id FROM thoughts.users \
+        cur.execute('SELECT follower_id FROM thoughts.followings \
             WHERE user_id = %s',
             (user_id,))
         results = cur.fetchall()
@@ -185,7 +184,7 @@ class DbClient:
                 (user_id, follower_id))
             conn.commit()
         except psycopg2.Error as e:
-            logging.error(f'Error following user: {str(e)}')
+            print(f'Error following user: {str(e)}')
             raise DbException('Error following user.')
         finally:
             cur.close()

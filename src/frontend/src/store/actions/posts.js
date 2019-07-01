@@ -1,11 +1,12 @@
-import apiClient from '../../common/APIClient';
-import session from '../../common/Session';
+import apiClient from '../../common/services/APIClient';
+import session from '../../common/services/Session';
+import { handleError } from './errors';
 
 export const CREATE_POST = 'CREATE_POST';
 export function createPost(content) {
   return function(dispatch) {
     apiClient.createPost(content).then((response) => {
-      if (!response.ok) {
+      if (response.error) {
         return;
       }
       dispatch({
@@ -21,7 +22,7 @@ export const DELETE_POST = 'DELETE_POST';
 export function deletePost(postId) {
   return function(dispatch) {
     apiClient.deletePost(postId).then((response) => {
-      if (!response.ok) {
+      if (response.error) {
         return;
       }
       dispatch({
@@ -39,12 +40,8 @@ export const FETCH_POST = 'FETCH_POST';
 export function fetchPost(postId) {
   return function(dispatch) {
     apiClient.getPost(postId).then((response) => {
-      if (!response.ok) {
-        dispatch({
-          type: FETCH_POST,
-          postId,
-          error: response.error.message
-        });
+      if (response.error) {
+        dispatch(handleError(response.error));
         return;
       }
 
@@ -60,7 +57,7 @@ export const FETCH_POSTS = 'FETCH_POSTS';
 export function fetchPosts(userId, page) {
   return function(dispatch) {
     apiClient.getPosts(userId, page).then((response) => {
-      if (!response.ok) {
+      if (response.error) {
         return;
       }
       dispatch({
@@ -77,7 +74,7 @@ export const FETCH_LIKES = 'FETCH_LIKES';
 export function fetchLikes(userId, page, limit) {
   return function(dispatch) {
     apiClient.getLikes(userId, page).then((response) => {
-      if (!response.ok) {
+      if (response.error) {
         return;
       }
       dispatch({

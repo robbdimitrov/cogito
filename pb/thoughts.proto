@@ -87,7 +87,8 @@ message UserUpdates {
   string password = 4;
   string bio = 5;
   string old_password = 6;
-  string token = 7;
+  string avatar = 7;
+  string token = 8;
 }
 
 message User {
@@ -164,6 +165,7 @@ service UserService {
   rpc CreateUser(UserUpdates) returns (Status);
   rpc GetUser(UserRequest) returns (UserStatus);
   rpc UpdateUser(UserUpdates) returns (Status);
+  rpc UpdatePassword(UserUpdates) returns (Status);
   rpc DeleteUser(UserRequest) returns (Status);
 }
 

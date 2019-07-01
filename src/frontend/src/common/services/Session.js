@@ -1,4 +1,4 @@
-import { setStorage } from './utils';
+import { setStorage } from '../utils';
 
 class Session {
   getId() {
@@ -31,6 +31,10 @@ class Session {
 
   setRefreshToken(value) {
     setStorage('refreshToken', value);
+  }
+
+  isAuthenticated() {
+    return this.getUserId() !== null;
   }
 
   reset() {
