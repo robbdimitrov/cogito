@@ -56,7 +56,12 @@ class AuthService(thoughts_pb2_grpc.AuthServiceServicer):
         password = request.password
         user_agent = request.user_agent
 
-        if email is not None and password is not None:
+        if len(email) == 0 or len(password) == 0:
+            error = thoughts_pb2.Error(code=HTTPStatus.BAD_REQUEST,
+                error='MISSING_CREDENTIALS',
+                message='Missing credentials.')
+            return thoughts_pb2.AuthStatus(error=error)
+        else:
             if validate_email(email) == False:
                 error = thoughts_pb2.Error(code=HTTPStatus.BAD_REQUEST,
                     error='INVALID_EMAIL',
@@ -71,11 +76,6 @@ class AuthService(thoughts_pb2_grpc.AuthServiceServicer):
                 return thoughts_pb2.AuthStatus(error=error)
 
             session = self.db_client.create_session(current_user['id'], user_agent)
-        else:
-            error = thoughts_pb2.Error(code=HTTPStatus.BAD_REQUEST,
-                error='MISSING_CREDENTIALS',
-                message='Missing credentials.')
-            return thoughts_pb2.AuthStatus(error=error)
 
         try:
             tokens = self.generate_tokens(session)
@@ -99,7 +99,12 @@ class AuthService(thoughts_pb2_grpc.AuthServiceServicer):
 
         refresh_token = request.token
 
-        if refresh_token is not None:
+        if len(refresh_token) == 0:
+            error = thoughts_pb2.Error(code=HTTPStatus.BAD_REQUEST,
+                error='MISSING_CREDENTIALS',
+                message='Missing credentials.')
+            return thoughts_pb2.AuthStatus(error=error)
+        else:
             try:
                 payload = jwt.decode(refresh_token, self.secret, algorithms='HS256')
             except jwt.ExpiredSignatureError:
@@ -109,11 +114,6 @@ class AuthService(thoughts_pb2_grpc.AuthServiceServicer):
                 return thoughts_pb2.AuthStatus(error=error)
 
             session = self.db_client.get_session(payload['sub'])
-        else:
-            error = thoughts_pb2.Error(code=HTTPStatus.BAD_REQUEST,
-                error='MISSING_CREDENTIALS',
-                message='Missing credentials.')
-            return thoughts_pb2.AuthStatus(error=error)
 
         try:
             tokens = self.generate_tokens(session)
