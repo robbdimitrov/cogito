@@ -25,7 +25,7 @@ func (s *Service) uploadFile(w http.ResponseWriter, r *http.Request) {
 			"There was an error while validating the upload request."}
 		ErrorResponse(w, error)
 		return
-	} else if status.Error.Code != 0 {
+	} else if status.Error != nil {
 		error := Error{int(status.Error.Code), status.Error.Error, status.Error.Message}
 		ErrorResponse(w, error)
 		return
@@ -44,7 +44,6 @@ func (s *Service) uploadFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	file, _, err := r.FormFile("image")
-	defer file.Close()
 	if err != nil {
 		log.Printf("Error Retrieving File %v", err)
 
@@ -53,6 +52,7 @@ func (s *Service) uploadFile(w http.ResponseWriter, r *http.Request) {
 		ErrorResponse(w, error)
 		return
 	}
+	defer file.Close()
 
 	s.saveFile(w, file)
 }

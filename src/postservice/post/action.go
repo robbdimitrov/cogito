@@ -23,7 +23,7 @@ func (s *ActionService) LikePost(ctx context.Context, req *pb.PostRequest) (*pb.
 	status, err := s.authClient.Validate(req.Token)
 	if err != nil {
 		return nil, err
-	} else if status.Error.Code != 0 {
+	} else if status.Error != nil {
 		return &pb.Status{Error: status.Error}, nil
 	}
 
@@ -40,7 +40,7 @@ func (s *ActionService) UnlikePost(ctx context.Context, req *pb.PostRequest) (*p
 	status, err := s.authClient.Validate(req.Token)
 	if err != nil {
 		return nil, err
-	} else if status.Error.Code != 0 {
+	} else if status.Error != nil {
 		return &pb.Status{Error: status.Error}, nil
 	}
 
@@ -57,7 +57,7 @@ func (s *ActionService) RetweetPost(ctx context.Context, req *pb.PostRequest) (*
 	status, err := s.authClient.Validate(req.Token)
 	if err != nil {
 		return nil, err
-	} else if status.Error.Code != 0 {
+	} else if status.Error != nil {
 		return &pb.Status{Error: status.Error}, nil
 	}
 
@@ -74,7 +74,7 @@ func (s *ActionService) RemoveRetweet(ctx context.Context, req *pb.PostRequest) 
 	status, err := s.authClient.Validate(req.Token)
 	if err != nil {
 		return nil, err
-	} else if status.Error.Code != 0 {
+	} else if status.Error != nil {
 		return &pb.Status{Error: status.Error}, nil
 	}
 

@@ -31,6 +31,11 @@ class UserServiceStub(object):
         request_serializer=thoughts__pb2.UserUpdates.SerializeToString,
         response_deserializer=thoughts__pb2.Status.FromString,
         )
+    self.UpdatePassword = channel.unary_unary(
+        '/thoughts.UserService/UpdatePassword',
+        request_serializer=thoughts__pb2.UserUpdates.SerializeToString,
+        response_deserializer=thoughts__pb2.Status.FromString,
+        )
     self.DeleteUser = channel.unary_unary(
         '/thoughts.UserService/DeleteUser',
         request_serializer=thoughts__pb2.UserRequest.SerializeToString,
@@ -65,6 +70,13 @@ class UserServiceServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def UpdatePassword(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
   def DeleteUser(self, request, context):
     # missing associated documentation comment in .proto file
     pass
@@ -87,6 +99,11 @@ def add_UserServiceServicer_to_server(servicer, server):
       ),
       'UpdateUser': grpc.unary_unary_rpc_method_handler(
           servicer.UpdateUser,
+          request_deserializer=thoughts__pb2.UserUpdates.FromString,
+          response_serializer=thoughts__pb2.Status.SerializeToString,
+      ),
+      'UpdatePassword': grpc.unary_unary_rpc_method_handler(
+          servicer.UpdatePassword,
           request_deserializer=thoughts__pb2.UserUpdates.FromString,
           response_serializer=thoughts__pb2.Status.SerializeToString,
       ),

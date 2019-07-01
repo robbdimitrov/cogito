@@ -165,6 +165,7 @@ service UserService {
   rpc CreateUser(UserUpdates) returns (Status);
   rpc GetUser(UserRequest) returns (UserStatus);
   rpc UpdateUser(UserUpdates) returns (Status);
+  rpc UpdatePassword(UserUpdates) returns (Status);
   rpc DeleteUser(UserRequest) returns (Status);
 }
 

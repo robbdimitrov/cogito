@@ -77,31 +77,67 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
         response = self.auth_client.validate(request.token)
 
         if response.error.code != 0:
-            print(f'resp.error {response.error.code} is None: {response.error.message is None}')
             return thoughts_pb2.Status(error=response.error)
 
         user_id = response.user_id
 
         changes = {}
 
-        if request.username is not None:
-            changes['username'] = request.username
-        if request.name is not None:
-            changes['name'] = request.name
-        if request.bio is not None:
-            changes['bio'] = request.bio
-        if request.avatar is not None:
-            changes['avatar'] = request.avatar
+        changes['username'] = request.username
+        changes['name'] = request.name
+        changes['bio'] = request.bio
+        changes['avatar'] = request.avatar
 
         email = request.email
+
+        error_message = None
+        error_type = None
+
+        if validate_email(email) == False:
+            error_message = 'Invalid email address.'
+            error_type = 'INVALID_EMAIL'
+        else:
+            changes['email'] = email
+
+        if error_type is not None:
+            error = thoughts_pb2.Error(code=HTTPStatus.BAD_REQUEST,
+                error=error_type,
+                message=error_message)
+            return thoughts_pb2.Status(error=error)
+
+        try:
+            self.db_client.update_user(user_id, changes)
+        except:
+            error = thoughts_pb2.Error(code=HTTPStatus.BAD_REQUEST,
+                error='BAD_REQUEST',
+                message='User update failed.')
+            return thoughts_pb2.Status(error=error)
+        else:
+            return thoughts_pb2.Status(message=f'User updated.')
+
+    def UpdatePassword(self, request, context):
+        """Validate and update the user's password"""
+
+        response = self.auth_client.validate(request.token)
+
+        if response.error.code != 0:
+            return thoughts_pb2.Status(error=response.error)
+
+        user_id = response.user_id
+
+        changes = {}
+
         password = request.password
         old_password = request.old_password
 
         error_message = None
         error_type = None
 
-        if len(password) != 0:
-            if old_password is None:
+        if len(password) == 0:
+            error_message = 'Password is missing.'
+            error_type = 'MISSING_PASSWORD'
+        else:
+            if len(old_password) == 0:
                 error_message = 'Current password is missing.'
                 error_type = 'MISSING_PASSWORD'
             else:
@@ -115,15 +151,6 @@ class UserService(thoughts_pb2_grpc.UserServiceServicer):
                 else:
                     password = make_password_hash(password)
                     changes['password'] = password
-
-        if len(email) != 0:
-            if validate_email(email) == False:
-                error_message = 'Invalid email address.'
-                error_type = 'INVALID_EMAIL'
-            else:
-                changes['email'] = email
-
-        print(f'before error check last')
 
         if error_type is not None:
             error = thoughts_pb2.Error(code=HTTPStatus.BAD_REQUEST,

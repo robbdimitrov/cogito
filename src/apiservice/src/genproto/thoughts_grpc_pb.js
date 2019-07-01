@@ -218,6 +218,17 @@ var UserServiceService = exports.UserServiceService = {
     responseSerialize: serialize_thoughts_Status,
     responseDeserialize: deserialize_thoughts_Status,
   },
+  updatePassword: {
+    path: '/thoughts.UserService/UpdatePassword',
+    requestStream: false,
+    responseStream: false,
+    requestType: thoughts_pb.UserUpdates,
+    responseType: thoughts_pb.Status,
+    requestSerialize: serialize_thoughts_UserUpdates,
+    requestDeserialize: deserialize_thoughts_UserUpdates,
+    responseSerialize: serialize_thoughts_Status,
+    responseDeserialize: deserialize_thoughts_Status,
+  },
   deleteUser: {
     path: '/thoughts.UserService/DeleteUser',
     requestStream: false,

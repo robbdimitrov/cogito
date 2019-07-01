@@ -12,10 +12,11 @@ class EditProfile extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      avatar: '',
       name: '',
       username: '',
-      email: ''
+      email: '',
+      bio: '',
+      avatar: ''
     };
 
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -24,13 +25,14 @@ class EditProfile extends React.Component {
   }
 
   componentDidMount() {
-    const { avatar, name, username, email } = this.props.user;
+    const { name, username, email, bio, avatar } = this.props.user;
 
     this.setState({
-      avatar,
       name,
       username,
-      email
+      email,
+      bio,
+      avatar
     });
   }
 
@@ -47,8 +49,8 @@ class EditProfile extends React.Component {
   handleSubmit(event) {
     event.preventDefault();
 
-    const { name, username, email } = this.state;
-    this.props.updateUser(name, username, email);
+    const { name, username, email, bio, avatar } = this.state;
+    this.props.updateUser(name, username, email, bio, avatar);
   }
 
   handleImageChange(event) {

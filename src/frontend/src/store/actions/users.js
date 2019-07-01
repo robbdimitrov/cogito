@@ -25,8 +25,8 @@ export function registerUser(name, username, email, password) {
 export const UPDATE_USER = 'UPDATE_USER';
 export function updateUser(name, username, email, bio, avatar) {
   return function(dispatch) {
-    apiClient.updateUser(name, username, email, bio,
-      undefined, undefined, avatar).then((response) => {
+    apiClient.updateUser(name, username, email, bio, avatar)
+      .then((response) => {
         if (response.error) {
           dispatch(handleError(response.error));
           return;

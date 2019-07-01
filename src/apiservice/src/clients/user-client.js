@@ -62,19 +62,37 @@ export class UserClient extends APIClient {
     });
   }
 
-  updateUser(username, email, name, password, bio, oldPassword, avatar, token) {
+  updateUser(username, email, name, bio, avatar, token) {
     const request = new messages.UserUpdates();
     request.setUsername(username);
     request.setEmail(email);
     request.setName(name);
-    request.setPassword(password);
     request.setBio(bio);
-    request.setOldPassword(oldPassword);
     request.setAvatar(avatar);
     request.setToken(token);
 
     return new Promise((res, rej) => {
       this.userClient.updateUser(request, (err, response) => {
+        if (err) {
+          return rej(err);
+        }
+        const error = response.getError();
+        if (error !== undefined) {
+          return this.handleError(error, rej);
+        }
+        res({ message: response.getMessage() });
+      });
+    });
+  }
+
+  updatePassword(password, oldPassword, token) {
+    const request = new messages.UserUpdates();
+    request.setPassword(password);
+    request.setOldPassword(oldPassword);
+    request.setToken(token);
+
+    return new Promise((res, rej) => {
+      this.userClient.updatePassword(request, (err, response) => {
         if (err) {
           return rej(err);
         }

@@ -24,7 +24,7 @@ func (s *Service) CreatePost(ctx context.Context, req *pb.PostUpdates) (*pb.Post
 	status, err := s.authClient.Validate(req.Token)
 	if err != nil {
 		return nil, err
-	} else if status.Error.Code != 0 {
+	} else if status.Error != nil {
 		return &pb.PostStatus{Error: status.Error}, nil
 	}
 
@@ -41,7 +41,7 @@ func (s *Service) GetPost(ctx context.Context, req *pb.PostRequest) (*pb.PostSta
 	status, err := s.authClient.Validate(req.Token)
 	if err != nil {
 		return nil, err
-	} else if status.Error.Code != 0 {
+	} else if status.Error != nil {
 		return &pb.PostStatus{}, errors.New(status.Error.Message)
 	}
 
@@ -58,7 +58,7 @@ func (s *Service) GetFeed(ctx context.Context, req *pb.DataRequest) (*pb.Posts, 
 	status, err := s.authClient.Validate(req.Token)
 	if err != nil {
 		return nil, err
-	} else if status.Error.Code != 0 {
+	} else if status.Error != nil {
 		return &pb.Posts{}, errors.New(status.Error.Message)
 	}
 
@@ -74,7 +74,7 @@ func (s *Service) GetPosts(ctx context.Context, req *pb.DataRequest) (*pb.Posts,
 	status, err := s.authClient.Validate(req.Token)
 	if err != nil {
 		return nil, err
-	} else if status.Error.Code != 0 {
+	} else if status.Error != nil {
 		return &pb.Posts{}, nil
 	}
 
@@ -90,7 +90,7 @@ func (s *Service) GetLikedPosts(ctx context.Context, req *pb.DataRequest) (*pb.P
 	status, err := s.authClient.Validate(req.Token)
 	if err != nil {
 		return nil, err
-	} else if status.Error.Code != 0 {
+	} else if status.Error != nil {
 		return &pb.Posts{}, nil
 	}
 
@@ -106,7 +106,7 @@ func (s *Service) DeletePost(ctx context.Context, req *pb.PostRequest) (*pb.Stat
 	status, err := s.authClient.Validate(req.Token)
 	if err != nil {
 		return nil, err
-	} else if status.Error.Code != 0 {
+	} else if status.Error != nil {
 		return &pb.Status{Error: status.Error}, nil
 	}
 
