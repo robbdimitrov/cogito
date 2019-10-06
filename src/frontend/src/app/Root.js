@@ -25,7 +25,7 @@ class Root extends React.Component {
     this.dismissError = this.dismissError.bind(this);
   }
 
-  componentWillMount() {
+  componentDidMount() {
     const userId = session.getUserId();
     this.props.fetchUserIfNeeded(userId);
   }

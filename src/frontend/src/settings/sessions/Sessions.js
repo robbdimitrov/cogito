@@ -7,7 +7,7 @@ import { fetchSessions, deleteSession } from '../../store/actions/sessions';
 import './Sessions.scss';
 
 class Sessions extends React.Component {
-  componentWillMount() {
+  componentDidMount() {
     this.props.fetchSessions();
   }
 
