@@ -1,8 +1,8 @@
-import * as http from 'http';
+const http = require('http');
 
-import { APIClient } from './api-client';
+const APIClient = require('./api-client');
 
-export class ImageClient extends APIClient {
+class ImageClient extends APIClient {
   uploadImage(req, res) {
     const parts = this.serviceURI.split(':');
     const options = {
@@ -12,27 +12,8 @@ export class ImageClient extends APIClient {
       method: 'POST',
       headers: req.headers
     };
-
-    const request = http.request(options, (response) => {
-      response.setEncoding('utf8');
-      let rawData = '';
-
-      response.on('data', (chunk) => {
-        rawData += chunk;
-      }).on('end', () => {
-        res.status(response.statusCode).send(rawData);
-      }).on('close', () => {
-        res.end();
-      });
-    }).on('error', () => {
-      res.end();
-    });
-
-    req.on('data', (chunk) => {
-      request.write(chunk);
-    }).on('close', function(){
-      request.end();
-    });
+    const request = http.request(options);
+    req.pipe(request).pipe(res);
   }
 
   getImage(req, res) {
@@ -44,19 +25,9 @@ export class ImageClient extends APIClient {
       method: 'GET',
       headers: req.headers
     };
-
-    const request = http.request(options, (response) => {
-      response.on('data', (chunk) => {
-        res.write(chunk);
-      }).on('end', () => {
-        res.end();
-      }).on('close', () => {
-        res.end();
-      });
-    }).on('error', () => {
-      res.end();
-    });
-
-    request.end();
+    const request = http.request(options);
+    request.pipe(res);
   }
 }
+
+module.exports = ImageClient;

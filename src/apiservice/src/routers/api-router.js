@@ -1,6 +1,6 @@
-import { Router } from 'express';
+const Router = require('express').Router;
 
-export class APIRouter {
+class APIRouter {
   constructor() {
     this.router = new Router();
     this.connectRouter(this.router);
@@ -23,3 +23,5 @@ export class APIRouter {
     });
   }
 }
+
+module.exports = APIRouter;

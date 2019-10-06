@@ -1,4 +1,4 @@
-export class APIClient {
+class APIClient {
   constructor(serviceURI) {
     this.serviceURI = serviceURI;
   }
@@ -11,3 +11,5 @@ export class APIClient {
     });
   }
 }
+
+module.exports = APIClient;

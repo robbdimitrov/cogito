@@ -1,6 +1,6 @@
-import { APIRouter } from './api-router';
+const APIRouter = require('./api-router');
 
-export class AuthRouter extends APIRouter {
+class AuthRouter extends APIRouter {
   constructor(authClient) {
     super();
     this.authClient = authClient;
@@ -63,3 +63,5 @@ export class AuthRouter extends APIRouter {
     );
   }
 }
+
+module.exports = AuthRouter;

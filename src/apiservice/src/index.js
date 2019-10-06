@@ -1,4 +1,4 @@
-import { Server } from './server';
+const Server = require('./server');
 
 const port = process.env.PORT;
 const authURI = process.env.AUTH_SERVICE_ADDR;

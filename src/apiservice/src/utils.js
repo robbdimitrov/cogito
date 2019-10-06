@@ -1,4 +1,4 @@
-export function itemToUser(item) {
+function itemToUser(item) {
   const user = {
     id: item.getId(),
     username: item.getUsername(),
@@ -15,14 +15,14 @@ export function itemToUser(item) {
   return user;
 }
 
-export function itemsToUsers(items) {
+function itemsToUsers(items) {
   const users = [];
   for (const item of items) {
     users.push(this.itemToUser(item));
   }
 }
 
-export function itemToPost(item) {
+function itemToPost(item) {
   const post = {
     id: item.getId(),
     content: item.getContent(),
@@ -36,7 +36,7 @@ export function itemToPost(item) {
   return post;
 }
 
-export function itemsToPosts(items) {
+function itemsToPosts(items) {
   const posts = [];
   for (const item of items) {
     const post = this.itemToPost(item);
@@ -44,3 +44,10 @@ export function itemsToPosts(items) {
   }
   return posts;
 }
+
+module.exports = {
+  itemToUser,
+  itemsToUsers,
+  itemToPost,
+  itemsToPosts
+};
