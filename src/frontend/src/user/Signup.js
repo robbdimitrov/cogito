@@ -13,11 +13,13 @@ class Signup extends React.Component {
       name: '',
       username: '',
       email: '',
-      password: ''
+      password: '',
+      inputType: 'password'
     };
 
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.changeInputType = this.changeInputType.bind(this);
   }
 
   handleSubmit(event) {
@@ -34,6 +36,13 @@ class Signup extends React.Component {
 
     this.setState({
       [name]: value
+    });
+  }
+
+  changeInputType(event) {
+    const isHidden = this.state.inputType === 'password';
+    this.setState({
+      inputType: isHidden ? 'text' : 'password'
     });
   }
 
@@ -86,7 +95,7 @@ class Signup extends React.Component {
               <FontAwesomeIcon icon="lock" className="input-icon" />
               <input
                 className="form-input"
-                type="password"
+                type={this.state.inputType}
                 name="password"
                 placeholder="Password"
                 minLength="4"
@@ -94,7 +103,11 @@ class Signup extends React.Component {
                 onChange={this.handleInputChange}
                 required
               />
-              <button className="visibility-button">
+              <button
+                className="visibility-button"
+                onClick={this.changeInputType}
+                type="button"
+              >
                 <FontAwesomeIcon icon="eye" />
               </button>
             </div>
