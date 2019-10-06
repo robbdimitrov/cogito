@@ -1,10 +1,10 @@
-import * as grpc from 'grpc';
+const grpc = require('grpc');
 
-import * as services from '../genproto/thoughts_grpc_pb';
-import * as messages from '../genproto/thoughts_pb';
-import { APIClient } from './api-client';
+const services = require('../genproto/thoughts_grpc_pb');
+const messages = require('../genproto/thoughts_pb');
+const APIClient = require('./api-client');
 
-export class AuthClient extends APIClient {
+class AuthClient extends APIClient {
   constructor(serviceURI, userClient) {
     super(serviceURI);
 
@@ -120,3 +120,5 @@ export class AuthClient extends APIClient {
     });
   }
 }
+
+module.exports = AuthClient;

@@ -1,8 +1,8 @@
-import * as http from 'http';
+const http = require('http');
 
-import { APIClient } from './api-client';
+const APIClient = require('./api-client');
 
-export class ImageClient extends APIClient {
+class ImageClient extends APIClient {
   uploadImage(req, res) {
     const parts = this.serviceURI.split(':');
     const options = {
@@ -60,3 +60,5 @@ export class ImageClient extends APIClient {
     request.end();
   }
 }
+
+module.exports = ImageClient;

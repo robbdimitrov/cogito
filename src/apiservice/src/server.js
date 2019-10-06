@@ -1,17 +1,17 @@
-import * as bodyParser from 'body-parser';
-import * as express from 'express';
-import * as helmet from 'helmet';
+const bodyParser = require('body-parser');
+const express = require('express');
+const helmet = require('helmet');
 
-import { AuthClient } from './clients/auth-client';
-import { AuthRouter } from './routers/auth-router';
-import { PostClient } from './clients/post-client';
-import { PostRouter } from './routers/post-router';
-import { UserClient } from './clients/user-client';
-import { UserRouter } from './routers/user-router';
-import { ImageClient } from './clients/image-client';
-import { ImageRouter } from './routers/image-router';
+const AuthClient = require('./clients/auth-client');
+const AuthRouter = require('./routers/auth-router');
+const PostClient = require('./clients/post-client');
+const PostRouter = require('./routers/post-router');
+const UserClient = require('./clients/user-client');
+const UserRouter = require('./routers/user-router');
+const ImageClient = require('./clients/image-client');
+const ImageRouter = require('./routers/image-router');
 
-export class Server {
+class Server {
   constructor(port, authURI, userURI, postURI, imageURI) {
     this.port = port;
     this.authURI = authURI;
@@ -62,7 +62,7 @@ export class Server {
   connectRouters() {
     // Create and map express routers
     for (const key in this.routers) {
-      if (this.routers.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(this.routers, key)) {
         const value = this.routers[key];
         this.app.use(`/api/${key}`, value.router);
       }
@@ -78,3 +78,5 @@ export class Server {
     });
   }
 }
+
+module.exports = Server;
