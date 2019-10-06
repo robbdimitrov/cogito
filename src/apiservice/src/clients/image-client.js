@@ -12,27 +12,8 @@ class ImageClient extends APIClient {
       method: 'POST',
       headers: req.headers
     };
-
-    const request = http.request(options, (response) => {
-      response.setEncoding('utf8');
-      let rawData = '';
-
-      response.on('data', (chunk) => {
-        rawData += chunk;
-      }).on('end', () => {
-        res.status(response.statusCode).send(rawData);
-      }).on('close', () => {
-        res.end();
-      });
-    }).on('error', () => {
-      res.end();
-    });
-
-    req.on('data', (chunk) => {
-      request.write(chunk);
-    }).on('close', function(){
-      request.end();
-    });
+    const request = http.request(options);
+    req.pipe(request).pipe(res);
   }
 
   getImage(req, res) {
@@ -44,20 +25,8 @@ class ImageClient extends APIClient {
       method: 'GET',
       headers: req.headers
     };
-
-    const request = http.request(options, (response) => {
-      response.on('data', (chunk) => {
-        res.write(chunk);
-      }).on('end', () => {
-        res.end();
-      }).on('close', () => {
-        res.end();
-      });
-    }).on('error', () => {
-      res.end();
-    });
-
-    request.end();
+    const request = http.request(options);
+    request.pipe(res);
   }
 }
 
