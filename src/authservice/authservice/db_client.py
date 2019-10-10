@@ -17,7 +17,7 @@ class DbClient:
         cur = conn.cursor()
 
         try:
-            cur.execute('INSERT INTO thoughts.sessions(user_id, user_agent) \
+            cur.execute('INSERT INTO sessions(user_id, user_agent) \
                 VALUES(%s, %s) RETURNING id, user_id, user_agent, \
                 time_format(date_created) AS date_created',
                 (user_id, user_agent))
@@ -38,7 +38,7 @@ class DbClient:
 
         cur.execute('SELECT id, user_id, user_agent, \
             time_format(date_created) AS date_created \
-            FROM thoughts.sessions WHERE id = %s',
+            FROM sessions WHERE id = %s',
             (session_id,))
         result = cur.fetchone()
         cur.close()
@@ -55,7 +55,7 @@ class DbClient:
 
         cur.execute('SELECT id, user_id, user_agent, \
             time_format(date_created) AS date_created \
-            FROM thoughts.sessions WHERE user_id = %s',
+            FROM sessions WHERE user_id = %s',
             (user_id,))
         result = cur.fetchall()
         cur.close()
@@ -70,7 +70,7 @@ class DbClient:
         conn = self.db.get_conn()
         cur = conn.cursor()
 
-        cur.execute('DELETE FROM thoughts.sessions WHERE id = %s', (session_id,))
+        cur.execute('DELETE FROM sessions WHERE id = %s', (session_id,))
         conn.commit()
         cur.close()
 
@@ -78,7 +78,7 @@ class DbClient:
         conn = self.db.get_conn()
         cur = conn.cursor()
 
-        cur.execute('SELECT id, password FROM thoughts.users WHERE email = %s',
+        cur.execute('SELECT id, password FROM users WHERE email = %s',
             (email,))
         result = cur.fetchone()
         cur.close()
