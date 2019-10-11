@@ -5,7 +5,7 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"postservice/post"
+	"github.com/robbdimitrov/thoughts/src/postservice/post"
 )
 
 func main() {

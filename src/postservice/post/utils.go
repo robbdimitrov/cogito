@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 
-	pb "postservice/genproto"
+	pb "github.com/robbdimitrov/thoughts/src/postservice/genproto"
 )
 
 type scanner interface {

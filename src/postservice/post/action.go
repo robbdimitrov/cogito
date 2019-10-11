@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	pb "postservice/genproto"
+	pb "github.com/robbdimitrov/thoughts/src/postservice/genproto"
 )
 
 // ActionService is handling like and retweet actions of posts

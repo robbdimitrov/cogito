@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	pb "postservice/genproto"
+	pb "github.com/robbdimitrov/thoughts/src/postservice/genproto"
 )
 
 // DbClient manages the communication between services and database
