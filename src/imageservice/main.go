@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"imageservice/image"
+	"github.com/robbdimitrov/thoughts/src/imageservice/image"
 )
 
 func main() {

@@ -7,7 +7,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	pb "postservice/genproto"
+	pb "github.com/robbdimitrov/thoughts/src/postservice/genproto"
 )
 
 // AuthClient handles the connection to the authentication grpc service

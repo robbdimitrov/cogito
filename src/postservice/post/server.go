@@ -5,7 +5,7 @@ import (
 	"log"
 	"net"
 
-	pb "postservice/genproto"
+	pb "github.com/robbdimitrov/thoughts/src/postservice/genproto"
 
 	"google.golang.org/grpc"
 )

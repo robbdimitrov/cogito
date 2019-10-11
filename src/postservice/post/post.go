@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 
-	pb "postservice/genproto"
+	pb "github.com/robbdimitrov/thoughts/src/postservice/genproto"
 )
 
 // Service is handling post-related grpc calls
