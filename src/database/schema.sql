@@ -1,54 +1,54 @@
-CREATE SCHEMA IF NOT EXISTS thoughts;
+CREATE DATABASE thoughts;
 
 -- Users
 
-CREATE TABLE IF NOT EXISTS thoughts.users (
+CREATE TABLE IF NOT EXISTS users (
   id serial PRIMARY KEY,
-  username varchar(20) UNIQUE NOT NULL,
-  email varchar(100) UNIQUE NOT NULL,
-  name varchar(100) NOT NULL,
-  password varchar(100) NOT NULL,
-  bio varchar(250) DEFAULT '',
-  avatar varchar(100) DEFAULT '',
+  username text UNIQUE NOT NULL,
+  email text UNIQUE NOT NULL,
+  name text NOT NULL,
+  password text NOT NULL,
+  bio text DEFAULT '',
+  avatar text DEFAULT '',
   date_created timestamp NOT NULL DEFAULT localtimestamp
 );
 
-CREATE TABLE IF NOT EXISTS thoughts.followings (
-  id serial PRIMARY KEY,
-  user_id integer REFERENCES thoughts.users(id) ON DELETE CASCADE,
-  follower_id integer REFERENCES thoughts.users(id) ON DELETE CASCADE,
-  date_created timestamp NOT NULL DEFAULT localtimestamp
+CREATE TABLE IF NOT EXISTS followings (
+  user_id integer REFERENCES users ON DELETE CASCADE,
+  follower_id integer REFERENCES users ON DELETE CASCADE,
+  date_created timestamp NOT NULL DEFAULT localtimestamp,
+  UNIQUE(user_id, follower_id)
 );
 
 -- Posts
 
-CREATE TABLE IF NOT EXISTS thoughts.posts (
+CREATE TABLE IF NOT EXISTS posts (
   id serial PRIMARY KEY,
-  content varchar(250) NOT NULL,
-  user_id integer REFERENCES thoughts.users(id) ON DELETE CASCADE,
+  content text NOT NULL,
+  user_id integer REFERENCES users ON DELETE CASCADE,
   date_created timestamp NOT NULL DEFAULT localtimestamp
 );
 
-CREATE TABLE IF NOT EXISTS thoughts.likes (
-  id serial PRIMARY KEY,
-  post_id integer REFERENCES thoughts.posts(id) ON DELETE CASCADE,
-  user_id integer REFERENCES thoughts.users(id) ON DELETE CASCADE,
-  date_created timestamp NOT NULL DEFAULT localtimestamp
+CREATE TABLE IF NOT EXISTS likes (
+  post_id integer REFERENCES posts ON DELETE CASCADE,
+  user_id integer REFERENCES users ON DELETE CASCADE,
+  date_created timestamp NOT NULL DEFAULT localtimestamp,
+  UNIQUE(post_id, user_id)
 );
 
-CREATE TABLE IF NOT EXISTS thoughts.retweets (
-  id serial PRIMARY KEY,
-  post_id integer REFERENCES thoughts.posts(id) ON DELETE CASCADE,
-  user_id integer REFERENCES thoughts.users(id) ON DELETE CASCADE,
-  date_created timestamp NOT NULL DEFAULT localtimestamp
+CREATE TABLE IF NOT EXISTS retweets (
+  post_id integer REFERENCES posts ON DELETE CASCADE,
+  user_id integer REFERENCES users ON DELETE CASCADE,
+  date_created timestamp NOT NULL DEFAULT localtimestamp,
+  UNIQUE(post_id, user_id)
 );
 
 -- Sessions
 
-CREATE TABLE IF NOT EXISTS thoughts.sessions (
+CREATE TABLE IF NOT EXISTS sessions (
   id serial PRIMARY KEY,
-  user_id integer REFERENCES thoughts.users(id) ON DELETE CASCADE,
-  user_agent varchar(250) NOT NULL,
+  user_id integer REFERENCES users ON DELETE CASCADE,
+  user_agent text NOT NULL,
   date_created timestamp NOT NULL DEFAULT localtimestamp
 );
 

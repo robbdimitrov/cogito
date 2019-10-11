@@ -21,14 +21,14 @@ func (c *DbClient) createPostQuery(where string, order string,
 	limit string, userIDPos string) string {
 	query := fmt.Sprintf(`SELECT posts.id, posts.content, posts.user_id,
 		COUNT(DISTINCT likes.id) AS likes,
-		EXISTS(SELECT 1 FROM thoughts.likes AS likes
+		EXISTS(SELECT 1 FROM likes AS likes
 		WHERE likes.post_id = posts.id AND likes.user_id = %s) AS liked,
 		COUNT(DISTINCT retweets.id) AS retweets,
-		EXISTS(SELECT 1 FROM thoughts.retweets AS retweets
+		EXISTS(SELECT 1 FROM retweets AS retweets
 		WHERE retweets.post_id = posts.id AND retweets.user_id = %s) AS retweeted,
 		time_format(posts.date_created) AS date_created
-		FROM thoughts.posts AS posts LEFT JOIN thoughts.likes AS likes
-		ON likes.post_id = posts.id LEFT JOIN thoughts.retweets AS retweets
+		FROM posts AS posts LEFT JOIN likes AS likes
+		ON likes.post_id = posts.id LEFT JOIN retweets AS retweets
 		ON retweets.post_id = posts.id
 		%s
 		GROUP BY posts.id
@@ -40,7 +40,7 @@ func (c *DbClient) createPostQuery(where string, order string,
 func (c *DbClient) CreatePost(content string, userID int32) (pb.Post, error) {
 	conn := c.db.GetConn()
 
-	row := conn.QueryRow(`INSERT INTO thoughts.posts(content, user_id)
+	row := conn.QueryRow(`INSERT INTO posts(content, user_id)
 		VALUES($1, $2) RETURNING id`,
 		content, userID)
 
@@ -70,9 +70,9 @@ func (c *DbClient) GetFeed(userID int32, page int32, limit int32) (pb.Posts, err
 
 	query := c.createPostQuery(
 		`WHERE posts.user_id = $1 OR posts.id IN (SELECT post_id
-		FROM thoughts.retweets WHERE user_id = $1) OR
+		FROM retweets WHERE user_id = $1) OR
 		posts.user_id IN (SELECT user_id
-		FROM thoughts.followings WHERE follower_id = $1)`,
+		FROM followings WHERE follower_id = $1)`,
 		"ORDER BY posts.date_created DESC",
 		"OFFSET $2 LIMIT $3", "$1")
 	rows, err := conn.Query(query, userID, page*limit, limit)
@@ -91,7 +91,7 @@ func (c *DbClient) GetPosts(userID int32, page int32, limit int32, currentID int
 
 	query := c.createPostQuery(
 		`WHERE posts.user_id = $1 OR posts.id IN (SELECT post_id
-		FROM thoughts.retweets WHERE user_id = $1)`,
+		FROM retweets WHERE user_id = $1)`,
 		"ORDER BY posts.date_created DESC",
 		"OFFSET $2 LIMIT $3", "$4")
 	rows, err := conn.Query(query, userID, page*limit, limit, currentID)
@@ -109,7 +109,7 @@ func (c *DbClient) GetLikedPosts(userID int32, page int32, limit int32, currentI
 	conn := c.db.GetConn()
 
 	query := c.createPostQuery(
-		"WHERE posts.id IN (SELECT post_id FROM thoughts.likes WHERE user_id = $1)",
+		"WHERE posts.id IN (SELECT post_id FROM likes WHERE user_id = $1)",
 		"ORDER BY posts.date_created DESC",
 		"OFFSET $2 LIMIT $3", "$4")
 	rows, err := conn.Query(query, userID, page*limit, limit, currentID)
@@ -126,7 +126,7 @@ func (c *DbClient) GetLikedPosts(userID int32, page int32, limit int32, currentI
 func (c *DbClient) DeletePost(postID int32) error {
 	conn := c.db.GetConn()
 
-	_, err := conn.Exec("DELETE FROM thoughts.posts WHERE id = $1", postID)
+	_, err := conn.Exec("DELETE FROM posts WHERE id = $1", postID)
 	if err != nil {
 		return errors.New("Error happened while writing to the database")
 	}
@@ -138,7 +138,7 @@ func (c *DbClient) DeletePost(postID int32) error {
 func (c *DbClient) LikePost(postID int32, userID int32) error {
 	conn := c.db.GetConn()
 
-	_, err := conn.Exec(`INSERT INTO thoughts.likes (post_id, user_id)
+	_, err := conn.Exec(`INSERT INTO likes (post_id, user_id)
 	VALUES ($1, $2)`, postID, userID)
 	if err != nil {
 		return errors.New("Error happened while writing to the database")
@@ -151,7 +151,7 @@ func (c *DbClient) LikePost(postID int32, userID int32) error {
 func (c *DbClient) UnlikePost(postID int32, userID int32) error {
 	conn := c.db.GetConn()
 
-	_, err := conn.Exec(`DELETE FROM thoughts.likes
+	_, err := conn.Exec(`DELETE FROM likes
 	WHERE post_id = $1 AND user_id = $2`, postID, userID)
 	if err != nil {
 		return errors.New("Error happened while writing to the database")
@@ -164,7 +164,7 @@ func (c *DbClient) UnlikePost(postID int32, userID int32) error {
 func (c *DbClient) RetweetPost(postID int32, userID int32) error {
 	conn := c.db.GetConn()
 
-	_, err := conn.Exec(`INSERT INTO thoughts.retweets (post_id, user_id)
+	_, err := conn.Exec(`INSERT INTO retweets (post_id, user_id)
 	VALUES ($1, $2)`, postID, userID)
 	if err != nil {
 		return errors.New("Error happened while writing to the database")
@@ -177,7 +177,7 @@ func (c *DbClient) RetweetPost(postID int32, userID int32) error {
 func (c *DbClient) RemoveRetweet(postID int32, userID int32) error {
 	conn := c.db.GetConn()
 
-	_, err := conn.Exec(`DELETE FROM thoughts.retweets
+	_, err := conn.Exec(`DELETE FROM retweets
 	WHERE post_id = $1 AND user_id = $2`, postID, userID)
 	if err != nil {
 		return errors.New("Error happened while writing to the database")
