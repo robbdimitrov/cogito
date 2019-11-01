@@ -2,15 +2,9 @@ syntax = "proto3";
 
 package thoughts;
 
-/**
- * General
- */
+// ---------------- General ----------------
 
-message Error {
-  int32 code = 1;
-  string error = 2;
-  string message = 3;
-}
+message Empty {}
 
 message DataRequest {
   int32 user_id = 1;
@@ -23,37 +17,7 @@ message Identifiers {
   repeated int32 ids = 1;
 }
 
-/**
- * Status
- */
-
-message Status {
-  string message = 1;
-  Error error = 2;
-}
-
-message AuthStatus {
-  string token_type = 1;
-  string access_token = 2;
-  string refresh_token = 3;
-  int32 user_id = 4;
-  int32 session_id = 5;
-  Error error = 6;
-}
-
-message UserStatus {
-  User user = 1;
-  Error error = 2;
-}
-
-message PostStatus {
-  Post post = 1;
-  Error error = 2;
-}
-
-/**
- * Authentication
- */
+// ------------ Authentication ------------
 
 message Credentials {
   string username = 1;
@@ -66,9 +30,15 @@ message AuthRequest {
   string token = 1;
 }
 
-/**
- * Users
- */
+message AuthStatus {
+  string token_type = 1;
+  string access_token = 2;
+  string refresh_token = 3;
+  int32 user_id = 4;
+  int32 session_id = 5;
+}
+
+// ---------------- Users ----------------
 
 message UserRequest {
   int32 user_id = 1;
@@ -105,9 +75,7 @@ message User {
   string date_created = 11;
 }
 
-/**
- * Sessions
- */
+// ---------------- Sessions -----------------
 
 message Session {
   int32 id = 1;
@@ -119,13 +87,14 @@ message Session {
 
 message Sessions {
   repeated Session sessions = 1;
-  Error error = 2;
 }
 
 message SessionRequest {
   int32 session_id = 1;
   string token = 2;
 }
+
+// ---------------- Posts ----------------
 
 /**
  * Posts
@@ -157,16 +126,14 @@ message PostRequest {
   string token = 2;
 }
 
-/**
- * Services
- */
+// ---------------- Services ----------------
 
 service UserService {
-  rpc CreateUser(UserUpdates) returns (Status);
-  rpc GetUser(UserRequest) returns (UserStatus);
-  rpc UpdateUser(UserUpdates) returns (Status);
-  rpc UpdatePassword(UserUpdates) returns (Status);
-  rpc DeleteUser(UserRequest) returns (Status);
+  rpc CreateUser(UserUpdates) returns (User);
+  rpc GetUser(UserRequest) returns (User);
+  rpc UpdateUser(UserUpdates) returns (Empty);
+  rpc UpdatePassword(UserUpdates) returns (Empty);
+  rpc DeleteUser(UserRequest) returns (Empty);
 }
 
 service FollowService {
@@ -174,34 +141,34 @@ service FollowService {
   rpc GetFollowingIds(UserRequest) returns (Identifiers);
   rpc GetFollowers(DataRequest) returns (Users);
   rpc GetFollowersIds(UserRequest) returns (Identifiers);
-  rpc FollowUser(UserRequest) returns (Status);
-  rpc UnfollowUser(UserRequest) returns (Status);
+  rpc FollowUser(UserRequest) returns (Empty);
+  rpc UnfollowUser(UserRequest) returns (Empty);
 }
 
 service AuthService {
   rpc Login(Credentials) returns (AuthStatus);
   rpc Refresh(AuthRequest) returns (AuthStatus);
   rpc Validate(AuthRequest) returns (AuthStatus);
-  rpc ValidatePassword(Credentials) returns (Status);
+  rpc ValidatePassword(Credentials) returns (Empty);
 }
 
 service SessionService {
   rpc GetSessions(AuthRequest) returns (Sessions);
-  rpc DeleteSession(SessionRequest) returns (Status);
+  rpc DeleteSession(SessionRequest) returns (Empty);
 }
 
 service PostService {
-  rpc CreatePost(PostUpdates) returns (PostStatus);
-  rpc GetPost(PostRequest) returns (PostStatus);
+  rpc CreatePost(PostUpdates) returns (Post);
+  rpc GetPost(PostRequest) returns (Post);
   rpc GetFeed(DataRequest) returns (Posts);
   rpc GetPosts(DataRequest) returns (Posts);
   rpc GetLikedPosts(DataRequest) returns (Posts);
-  rpc DeletePost(PostRequest) returns (Status);
+  rpc DeletePost(PostRequest) returns (Empty);
 }
 
 service ActionService {
-  rpc LikePost(PostRequest) returns (Status);
-  rpc UnlikePost(PostRequest) returns (Status);
-  rpc RetweetPost(PostRequest) returns (Status);
-  rpc RemoveRetweet(PostRequest) returns (Status);
+  rpc LikePost(PostRequest) returns (Empty);
+  rpc UnlikePost(PostRequest) returns (Empty);
+  rpc RetweetPost(PostRequest) returns (Empty);
+  rpc RemoveRetweet(PostRequest) returns (Empty);
 }

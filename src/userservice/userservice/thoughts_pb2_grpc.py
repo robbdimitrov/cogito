@@ -5,8 +5,7 @@ import userservice.thoughts_pb2 as thoughts__pb2
 
 
 class UserServiceStub(object):
-  """*
-  Services
+  """---------------- Services ----------------
 
   """
 
@@ -19,33 +18,32 @@ class UserServiceStub(object):
     self.CreateUser = channel.unary_unary(
         '/thoughts.UserService/CreateUser',
         request_serializer=thoughts__pb2.UserUpdates.SerializeToString,
-        response_deserializer=thoughts__pb2.Status.FromString,
+        response_deserializer=thoughts__pb2.User.FromString,
         )
     self.GetUser = channel.unary_unary(
         '/thoughts.UserService/GetUser',
         request_serializer=thoughts__pb2.UserRequest.SerializeToString,
-        response_deserializer=thoughts__pb2.UserStatus.FromString,
+        response_deserializer=thoughts__pb2.User.FromString,
         )
     self.UpdateUser = channel.unary_unary(
         '/thoughts.UserService/UpdateUser',
         request_serializer=thoughts__pb2.UserUpdates.SerializeToString,
-        response_deserializer=thoughts__pb2.Status.FromString,
+        response_deserializer=thoughts__pb2.Empty.FromString,
         )
     self.UpdatePassword = channel.unary_unary(
         '/thoughts.UserService/UpdatePassword',
         request_serializer=thoughts__pb2.UserUpdates.SerializeToString,
-        response_deserializer=thoughts__pb2.Status.FromString,
+        response_deserializer=thoughts__pb2.Empty.FromString,
         )
     self.DeleteUser = channel.unary_unary(
         '/thoughts.UserService/DeleteUser',
         request_serializer=thoughts__pb2.UserRequest.SerializeToString,
-        response_deserializer=thoughts__pb2.Status.FromString,
+        response_deserializer=thoughts__pb2.Empty.FromString,
         )
 
 
 class UserServiceServicer(object):
-  """*
-  Services
+  """---------------- Services ----------------
 
   """
 
@@ -90,27 +88,27 @@ def add_UserServiceServicer_to_server(servicer, server):
       'CreateUser': grpc.unary_unary_rpc_method_handler(
           servicer.CreateUser,
           request_deserializer=thoughts__pb2.UserUpdates.FromString,
-          response_serializer=thoughts__pb2.Status.SerializeToString,
+          response_serializer=thoughts__pb2.User.SerializeToString,
       ),
       'GetUser': grpc.unary_unary_rpc_method_handler(
           servicer.GetUser,
           request_deserializer=thoughts__pb2.UserRequest.FromString,
-          response_serializer=thoughts__pb2.UserStatus.SerializeToString,
+          response_serializer=thoughts__pb2.User.SerializeToString,
       ),
       'UpdateUser': grpc.unary_unary_rpc_method_handler(
           servicer.UpdateUser,
           request_deserializer=thoughts__pb2.UserUpdates.FromString,
-          response_serializer=thoughts__pb2.Status.SerializeToString,
+          response_serializer=thoughts__pb2.Empty.SerializeToString,
       ),
       'UpdatePassword': grpc.unary_unary_rpc_method_handler(
           servicer.UpdatePassword,
           request_deserializer=thoughts__pb2.UserUpdates.FromString,
-          response_serializer=thoughts__pb2.Status.SerializeToString,
+          response_serializer=thoughts__pb2.Empty.SerializeToString,
       ),
       'DeleteUser': grpc.unary_unary_rpc_method_handler(
           servicer.DeleteUser,
           request_deserializer=thoughts__pb2.UserRequest.FromString,
-          response_serializer=thoughts__pb2.Status.SerializeToString,
+          response_serializer=thoughts__pb2.Empty.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
@@ -151,12 +149,12 @@ class FollowServiceStub(object):
     self.FollowUser = channel.unary_unary(
         '/thoughts.FollowService/FollowUser',
         request_serializer=thoughts__pb2.UserRequest.SerializeToString,
-        response_deserializer=thoughts__pb2.Status.FromString,
+        response_deserializer=thoughts__pb2.Empty.FromString,
         )
     self.UnfollowUser = channel.unary_unary(
         '/thoughts.FollowService/UnfollowUser',
         request_serializer=thoughts__pb2.UserRequest.SerializeToString,
-        response_deserializer=thoughts__pb2.Status.FromString,
+        response_deserializer=thoughts__pb2.Empty.FromString,
         )
 
 
@@ -232,12 +230,12 @@ def add_FollowServiceServicer_to_server(servicer, server):
       'FollowUser': grpc.unary_unary_rpc_method_handler(
           servicer.FollowUser,
           request_deserializer=thoughts__pb2.UserRequest.FromString,
-          response_serializer=thoughts__pb2.Status.SerializeToString,
+          response_serializer=thoughts__pb2.Empty.SerializeToString,
       ),
       'UnfollowUser': grpc.unary_unary_rpc_method_handler(
           servicer.UnfollowUser,
           request_deserializer=thoughts__pb2.UserRequest.FromString,
-          response_serializer=thoughts__pb2.Status.SerializeToString,
+          response_serializer=thoughts__pb2.Empty.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
@@ -273,7 +271,7 @@ class AuthServiceStub(object):
     self.ValidatePassword = channel.unary_unary(
         '/thoughts.AuthService/ValidatePassword',
         request_serializer=thoughts__pb2.Credentials.SerializeToString,
-        response_deserializer=thoughts__pb2.Status.FromString,
+        response_deserializer=thoughts__pb2.Empty.FromString,
         )
 
 
@@ -330,7 +328,7 @@ def add_AuthServiceServicer_to_server(servicer, server):
       'ValidatePassword': grpc.unary_unary_rpc_method_handler(
           servicer.ValidatePassword,
           request_deserializer=thoughts__pb2.Credentials.FromString,
-          response_serializer=thoughts__pb2.Status.SerializeToString,
+          response_serializer=thoughts__pb2.Empty.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
@@ -356,7 +354,7 @@ class SessionServiceStub(object):
     self.DeleteSession = channel.unary_unary(
         '/thoughts.SessionService/DeleteSession',
         request_serializer=thoughts__pb2.SessionRequest.SerializeToString,
-        response_deserializer=thoughts__pb2.Status.FromString,
+        response_deserializer=thoughts__pb2.Empty.FromString,
         )
 
 
@@ -389,7 +387,7 @@ def add_SessionServiceServicer_to_server(servicer, server):
       'DeleteSession': grpc.unary_unary_rpc_method_handler(
           servicer.DeleteSession,
           request_deserializer=thoughts__pb2.SessionRequest.FromString,
-          response_serializer=thoughts__pb2.Status.SerializeToString,
+          response_serializer=thoughts__pb2.Empty.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
@@ -410,12 +408,12 @@ class PostServiceStub(object):
     self.CreatePost = channel.unary_unary(
         '/thoughts.PostService/CreatePost',
         request_serializer=thoughts__pb2.PostUpdates.SerializeToString,
-        response_deserializer=thoughts__pb2.PostStatus.FromString,
+        response_deserializer=thoughts__pb2.Post.FromString,
         )
     self.GetPost = channel.unary_unary(
         '/thoughts.PostService/GetPost',
         request_serializer=thoughts__pb2.PostRequest.SerializeToString,
-        response_deserializer=thoughts__pb2.PostStatus.FromString,
+        response_deserializer=thoughts__pb2.Post.FromString,
         )
     self.GetFeed = channel.unary_unary(
         '/thoughts.PostService/GetFeed',
@@ -435,7 +433,7 @@ class PostServiceStub(object):
     self.DeletePost = channel.unary_unary(
         '/thoughts.PostService/DeletePost',
         request_serializer=thoughts__pb2.PostRequest.SerializeToString,
-        response_deserializer=thoughts__pb2.Status.FromString,
+        response_deserializer=thoughts__pb2.Empty.FromString,
         )
 
 
@@ -491,12 +489,12 @@ def add_PostServiceServicer_to_server(servicer, server):
       'CreatePost': grpc.unary_unary_rpc_method_handler(
           servicer.CreatePost,
           request_deserializer=thoughts__pb2.PostUpdates.FromString,
-          response_serializer=thoughts__pb2.PostStatus.SerializeToString,
+          response_serializer=thoughts__pb2.Post.SerializeToString,
       ),
       'GetPost': grpc.unary_unary_rpc_method_handler(
           servicer.GetPost,
           request_deserializer=thoughts__pb2.PostRequest.FromString,
-          response_serializer=thoughts__pb2.PostStatus.SerializeToString,
+          response_serializer=thoughts__pb2.Post.SerializeToString,
       ),
       'GetFeed': grpc.unary_unary_rpc_method_handler(
           servicer.GetFeed,
@@ -516,7 +514,7 @@ def add_PostServiceServicer_to_server(servicer, server):
       'DeletePost': grpc.unary_unary_rpc_method_handler(
           servicer.DeletePost,
           request_deserializer=thoughts__pb2.PostRequest.FromString,
-          response_serializer=thoughts__pb2.Status.SerializeToString,
+          response_serializer=thoughts__pb2.Empty.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
@@ -537,22 +535,22 @@ class ActionServiceStub(object):
     self.LikePost = channel.unary_unary(
         '/thoughts.ActionService/LikePost',
         request_serializer=thoughts__pb2.PostRequest.SerializeToString,
-        response_deserializer=thoughts__pb2.Status.FromString,
+        response_deserializer=thoughts__pb2.Empty.FromString,
         )
     self.UnlikePost = channel.unary_unary(
         '/thoughts.ActionService/UnlikePost',
         request_serializer=thoughts__pb2.PostRequest.SerializeToString,
-        response_deserializer=thoughts__pb2.Status.FromString,
+        response_deserializer=thoughts__pb2.Empty.FromString,
         )
     self.RetweetPost = channel.unary_unary(
         '/thoughts.ActionService/RetweetPost',
         request_serializer=thoughts__pb2.PostRequest.SerializeToString,
-        response_deserializer=thoughts__pb2.Status.FromString,
+        response_deserializer=thoughts__pb2.Empty.FromString,
         )
     self.RemoveRetweet = channel.unary_unary(
         '/thoughts.ActionService/RemoveRetweet',
         request_serializer=thoughts__pb2.PostRequest.SerializeToString,
-        response_deserializer=thoughts__pb2.Status.FromString,
+        response_deserializer=thoughts__pb2.Empty.FromString,
         )
 
 
@@ -594,22 +592,22 @@ def add_ActionServiceServicer_to_server(servicer, server):
       'LikePost': grpc.unary_unary_rpc_method_handler(
           servicer.LikePost,
           request_deserializer=thoughts__pb2.PostRequest.FromString,
-          response_serializer=thoughts__pb2.Status.SerializeToString,
+          response_serializer=thoughts__pb2.Empty.SerializeToString,
       ),
       'UnlikePost': grpc.unary_unary_rpc_method_handler(
           servicer.UnlikePost,
           request_deserializer=thoughts__pb2.PostRequest.FromString,
-          response_serializer=thoughts__pb2.Status.SerializeToString,
+          response_serializer=thoughts__pb2.Empty.SerializeToString,
       ),
       'RetweetPost': grpc.unary_unary_rpc_method_handler(
           servicer.RetweetPost,
           request_deserializer=thoughts__pb2.PostRequest.FromString,
-          response_serializer=thoughts__pb2.Status.SerializeToString,
+          response_serializer=thoughts__pb2.Empty.SerializeToString,
       ),
       'RemoveRetweet': grpc.unary_unary_rpc_method_handler(
           servicer.RemoveRetweet,
           request_deserializer=thoughts__pb2.PostRequest.FromString,
-          response_serializer=thoughts__pb2.Status.SerializeToString,
+          response_serializer=thoughts__pb2.Empty.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
