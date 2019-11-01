@@ -4,12 +4,12 @@ CREATE DATABASE thoughts;
 
 CREATE TABLE IF NOT EXISTS users (
   id serial PRIMARY KEY,
-  username text UNIQUE NOT NULL,
-  email text UNIQUE NOT NULL,
-  name text NOT NULL,
-  password text NOT NULL,
-  bio text DEFAULT '',
-  avatar text DEFAULT '',
+  username varchar(255) UNIQUE NOT NULL,
+  email varchar(255) UNIQUE NOT NULL,
+  name varchar(255) NOT NULL,
+  password varchar(255) NOT NULL,
+  bio varchar(255) DEFAULT '',
+  avatar varchar(255) DEFAULT '',
   date_created timestamp NOT NULL DEFAULT localtimestamp
 );
 
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS followings (
 
 CREATE TABLE IF NOT EXISTS posts (
   id serial PRIMARY KEY,
-  content text NOT NULL,
+  content varchar(255) NOT NULL,
   user_id integer REFERENCES users ON DELETE CASCADE,
   date_created timestamp NOT NULL DEFAULT localtimestamp
 );
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS retweets (
 CREATE TABLE IF NOT EXISTS sessions (
   id serial PRIMARY KEY,
   user_id integer REFERENCES users ON DELETE CASCADE,
-  user_agent text NOT NULL,
+  user_agent varchar(255) NOT NULL,
   date_created timestamp NOT NULL DEFAULT localtimestamp
 );
 
