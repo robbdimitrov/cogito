@@ -77,17 +77,10 @@ $ make imageservice
 
 ### Create deployments
 
-Create everything recursively
+Create deployments and volumes
 
 ```sh
-$ kubectl apply -f k8s --recursive
-```
-
-Or make deployments and volumes separately
-
-```sh
-$ kubectl apply -f k8s/deployment
-$ kubectl apply -f k8s/volume
+$ kubectl apply -f manifests
 ```
 
 ## Access the front end
@@ -103,7 +96,7 @@ $ kubectl port-forward service/frontend 8080:80
 Delete everything in the cluster
 
 ```sh
-$ kubectl delete -f k8s --recursive
+$ kubectl delete -f manifests
 ```
 
 Cleanup unused docker images
