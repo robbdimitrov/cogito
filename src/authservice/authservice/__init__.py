@@ -5,8 +5,8 @@ from authservice.server import Server
 
 def create_app():
     port = os.getenv('PORT')
-    db_uri = os.getenv('DATABASE_URI')
+    db_url = os.getenv('DATABASE_URL')
     secret = os.getenv('SECRET')
 
-    app = Server(port, db_uri, secret)
+    app = Server(port, db_url, secret)
     return app

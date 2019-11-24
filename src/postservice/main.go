@@ -10,7 +10,7 @@ import (
 
 func main() {
 	port := os.Getenv("PORT")
-	dbURI := os.Getenv("DATABASE_URI")
+	dbURI := os.Getenv("DATABASE_URL")
 	authURI := os.Getenv("AUTH_SERVICE_ADDR")
 	userURI := os.Getenv("USER_SERVICE_ADDR")
 

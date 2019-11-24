@@ -5,11 +5,11 @@ from userservice import thoughts_pb2_grpc, thoughts_pb2
 
 
 class AuthClient:
-    def __init__(self, auth_uri):
-        self.auth_uri = auth_uri
+    def __init__(self, auth_url):
+        self.auth_url = auth_url
 
     def get_auth_stub(self):
-        channel = grpc.insecure_channel(self.auth_uri)
+        channel = grpc.insecure_channel(self.auth_url)
         stub = thoughts_pb2_grpc.AuthServiceStub(channel)
         return stub
 

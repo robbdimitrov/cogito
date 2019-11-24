@@ -38,7 +38,7 @@ spec:
         env:
         - name: PORT
           value: "5010"
-        - name: DATABASE_URI
+        - name: DATABASE_URL
           value: postgresql://postgres:kubernetes@database:5432
         - name: AUTH_SERVICE_ADDR
           value: authservice:5010

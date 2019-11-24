@@ -11,19 +11,19 @@ from userservice.db_client import DbClient
 
 
 class Server:
-    def __init__(self, port, db_uri, auth_uri):
+    def __init__(self, port, db_url, auth_url):
         self.port = port
-        self.db_uri = db_uri
-        self.auth_uri = auth_uri
+        self.db_url = db_url
+        self.auth_url = auth_url
 
     def create_db_client(self):
-        db = Database(self.db_uri)
+        db = Database(self.db_url)
         db_client = DbClient(db)
         return db_client
 
     def create_server(self):
         db_client = self.create_db_client()
-        auth_client = AuthClient(self.auth_uri)
+        auth_client = AuthClient(self.auth_url)
         user_service = UserService(db_client, auth_client)
         follow_service = FollowService(db_client, auth_client)
 

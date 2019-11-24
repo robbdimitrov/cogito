@@ -5,8 +5,8 @@ from userservice.server import Server
 
 def create_app():
     port = os.getenv('PORT')
-    db_uri = os.getenv('DATABASE_URI')
-    auth_uri = os.getenv('AUTH_SERVICE_ADDR')
+    db_url = os.getenv('DATABASE_URL')
+    auth_url = os.getenv('AUTH_SERVICE_ADDR')
 
-    app = Server(port, db_uri, auth_uri)
+    app = Server(port, db_url, auth_url)
     return app

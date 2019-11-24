@@ -10,15 +10,15 @@ from authservice.db_client import DbClient
 
 
 class Server:
-    def __init__(self, port, db_uri, secret):
+    def __init__(self, port, db_url, secret):
         self.port = port
-        self.db_uri = db_uri
+        self.db_url = db_url
         self.secret = secret
         self.db_client = None
 
     def get_db_client(self):
         if self.db_client is None:
-            db = Database(self.db_uri)
+            db = Database(self.db_url)
             self.db_client = DbClient(db)
         return self.db_client
 
