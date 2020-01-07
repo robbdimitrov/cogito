@@ -1,5 +1,6 @@
 .PHONY: all
-all: apiservice frontend database authservice userservice postservice imageservice
+all: apiservice frontend database authservice
+	userservice postservice imageservice
 
 .PHONY: apiservice
 apiservice:
@@ -28,8 +29,3 @@ postservice:
 .PHONY: imageservice
 imageservice:
 	docker build -t thoughts/imageservice src/imageservice
-
-.PHONY: clean
-clean:
-	docker container prune --force
-	docker image prune --force

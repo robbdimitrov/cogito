@@ -80,7 +80,7 @@ $ make imageservice
 Create deployments and volumes
 
 ```sh
-$ kubectl apply -f manifests
+$ kubectl apply -f k8s
 ```
 
 ## Access the front end
@@ -96,7 +96,7 @@ $ kubectl port-forward service/frontend 8080:80
 Delete everything in the cluster
 
 ```sh
-$ kubectl delete -f manifests
+$ kubectl delete -f k8s
 ```
 
 Cleanup unused docker images
