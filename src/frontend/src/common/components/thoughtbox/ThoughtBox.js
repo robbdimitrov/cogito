@@ -1,7 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import PropTypes from 'prop-types';
 
 import session from '../../services/Session';
 import { createPost } from '../../../store/actions/posts';
@@ -90,12 +89,6 @@ class ThoughtBox extends React.Component {
     )
   }
 }
-
-ThoughtBox.propTypes = {
-  user: PropTypes.object.isRequired,
-  createPost: PropTypes.func.isRequired,
-  closePopup: PropTypes.func.isRequired
-};
 
 const mapStateToProps = (state) => {
   return {

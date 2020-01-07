@@ -1,6 +1,5 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import PropTypes from 'prop-types';
 
 import './ThoughtItem.scss';
 
@@ -41,10 +40,5 @@ function ThoughtItem({ post, user }) {
     </li>
   );
 }
-
-ThoughtItem.propTypes = {
-  post: PropTypes.object.isRequired,
-  user: PropTypes.object.isRequired
-};
 
 export default ThoughtItem;

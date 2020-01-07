@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 
 import UserItem from './UserItem';
 import './UserList.scss';
@@ -13,9 +12,5 @@ function UserList({ users }) {
     </ul>
   );
 }
-
-UserItem.propTypes = {
-  users: PropTypes.array.isRequired
-};
 
 export default UserList;

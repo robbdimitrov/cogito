@@ -1,6 +1,5 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import PropTypes from 'prop-types';
 import { withRouter } from 'react-router-dom';
 
 import Navigation from '../common/components/navigation/Navigation';
@@ -90,11 +89,6 @@ class Root extends React.Component {
     );
   }
 }
-
-Root.propTypes = {
-  dismissError: PropTypes.func.isRequired,
-  fetchUserIfNeeded: PropTypes.func.isRequired
-};
 
 const mapStateToProps = (state) => {
   const errorId = state.errors.allIds[0];

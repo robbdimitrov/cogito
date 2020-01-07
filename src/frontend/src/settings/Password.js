@@ -1,7 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import PropTypes from 'prop-types';
 
 import { updatePassword } from '../store/actions/users';
 
@@ -86,10 +85,6 @@ class Password extends React.Component {
     );
   }
 }
-
-Password.propTypes = {
-  updatePassword: PropTypes.func.isRequired
-};
 
 export default connect(
   null,

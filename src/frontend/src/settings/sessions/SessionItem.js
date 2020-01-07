@@ -1,6 +1,5 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import PropTypes from 'prop-types';
 import * as quartzite from 'quartzite';
 
 import { getDevice } from '../../common/utils';
@@ -30,10 +29,5 @@ function SessionItem({ session, deleteSession }) {
     </li>
   );
 }
-
-SessionItem.propTypes = {
-  session: PropTypes.object.isRequired,
-  deleteSession: PropTypes.func.isRequired
-};
 
 export default SessionItem;

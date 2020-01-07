@@ -1,6 +1,5 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import PropTypes from 'prop-types';
 
 import './ControlBar.scss';
 
@@ -33,10 +32,5 @@ function ControlBar({ user, path }) {
     </div>
   );
 }
-
-ControlBar.propTypes = {
-  user: PropTypes.object.isRequired,
-  path: PropTypes.string.isRequired
-};
 
 export default ControlBar;

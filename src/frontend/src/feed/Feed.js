@@ -1,6 +1,5 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import PropTypes from 'prop-types';
 
 import UserCard from './UserCard';
 import ThoughtList from '../common/components/thoughtlist/ThoughtList';
@@ -21,12 +20,6 @@ class Feed extends React.Component {
     );
   }
 }
-
-Feed.propTypes = {
-  user: PropTypes.object.isRequired,
-  fetchFeed: PropTypes.func.isRequired,
-  fetchUserIfNeeded: PropTypes.func.isRequired
-};
 
 const mapStateToProps = (state) => {
   return {

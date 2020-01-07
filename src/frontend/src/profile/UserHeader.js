@@ -1,6 +1,5 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import PropTypes from 'prop-types';
 
 import './UserHeader.scss';
 
@@ -34,9 +33,5 @@ function UserHeader({ user }) {
     </div>
   );
 }
-
-UserHeader.propTypes = {
-  user: PropTypes.object.isRequired
-};
 
 export default UserHeader;

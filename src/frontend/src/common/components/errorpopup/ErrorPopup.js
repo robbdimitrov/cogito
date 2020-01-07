@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import './ErrorPopup.scss';
@@ -15,10 +14,5 @@ function ErrorPopup({ error, dismiss }) {
     </div>
   );
 }
-
-ErrorPopup.propTypes = {
-  error: PropTypes.object.isRequired,
-  dismiss: PropTypes.func.isRequired
-};
 
 export default ErrorPopup;

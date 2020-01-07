@@ -1,7 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import PropTypes from 'prop-types';
 
 import { updateUser, updateAvatar } from '../store/actions/users';
 import session from '../common/services/Session';
@@ -160,12 +159,6 @@ class EditProfile extends React.Component {
     );
   }
 }
-
-EditProfile.propTypes = {
-  user: PropTypes.object.isRequired,
-  updateUser: PropTypes.func.isRequired,
-  updateAvatar: PropTypes.func.isRequired
-};
 
 const mapStateToProps = (state) => {
   return {

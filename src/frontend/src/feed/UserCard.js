@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
 import './UserCard.scss';
@@ -43,9 +42,5 @@ function UserCard({ user }) {
     </div>
   );
 }
-
-UserCard.propTypes = {
-  user: PropTypes.object.isRequired
-};
 
 export default UserCard;

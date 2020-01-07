@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 import SessionItem from './SessionItem';
@@ -29,10 +28,6 @@ class Sessions extends React.Component {
     );
   }
 }
-
-Sessions.propTypes = {
-  sessions: PropTypes.array.isRequired
-};
 
 const mapStateToProps = (state) => {
   return {

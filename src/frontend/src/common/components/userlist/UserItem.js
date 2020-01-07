@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
 import './UserItem.scss';
@@ -38,9 +37,5 @@ function UserItem({ user }) {
     </li>
   );
 }
-
-UserItem.propTypes = {
-  user: PropTypes.object.isRequired
-};
 
 export default UserItem;
