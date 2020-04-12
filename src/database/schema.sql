@@ -1,8 +1,9 @@
 CREATE DATABASE thoughts;
+\connect thoughts
 
 -- Users
 
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE users (
   id serial PRIMARY KEY,
   username varchar(255) UNIQUE NOT NULL,
   email varchar(255) UNIQUE NOT NULL,
@@ -10,46 +11,45 @@ CREATE TABLE IF NOT EXISTS users (
   password varchar(255) NOT NULL,
   bio varchar(255) DEFAULT '',
   avatar varchar(255) DEFAULT '',
-  created_at timestamp NOT NULL DEFAULT now()
+  created timestamp NOT NULL DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS followings (
+CREATE TABLE followings (
   user_id integer REFERENCES users ON DELETE CASCADE,
   follower_id integer REFERENCES users ON DELETE CASCADE,
-  created_at timestamp NOT NULL DEFAULT now(),
+  created timestamp NOT NULL DEFAULT now(),
   UNIQUE(user_id, follower_id)
 );
 
 -- Posts
 
-CREATE TABLE IF NOT EXISTS posts (
+CREATE TABLE posts (
   id serial PRIMARY KEY,
   content varchar(255) NOT NULL,
   user_id integer REFERENCES users ON DELETE CASCADE,
-  created_at timestamp NOT NULL DEFAULT now()
+  created timestamp NOT NULL DEFAULT now()
 );
 
-CREATE TABLE IF NOT EXISTS likes (
+CREATE TABLE likes (
   post_id integer REFERENCES posts ON DELETE CASCADE,
   user_id integer REFERENCES users ON DELETE CASCADE,
-  created_at timestamp NOT NULL DEFAULT now(),
+  created timestamp NOT NULL DEFAULT now(),
   UNIQUE(post_id, user_id)
 );
 
-CREATE TABLE IF NOT EXISTS retweets (
+CREATE TABLE retweets (
   post_id integer REFERENCES posts ON DELETE CASCADE,
   user_id integer REFERENCES users ON DELETE CASCADE,
-  created_at timestamp NOT NULL DEFAULT now(),
+  created timestamp NOT NULL DEFAULT now(),
   UNIQUE(post_id, user_id)
 );
 
 -- Sessions
 
-CREATE TABLE IF NOT EXISTS sessions (
-  id serial PRIMARY KEY,
+CREATE TABLE sessions (
+  id varchar(255) PRIMARY KEY,
   user_id integer REFERENCES users ON DELETE CASCADE,
-  user_agent varchar(255) NOT NULL,
-  created_at timestamp NOT NULL DEFAULT now()
+  created timestamp NOT NULL DEFAULT now()
 );
 
 -- Utils

@@ -3,10 +3,8 @@
 ## Table of contents
 
 * [Sessions](#sessions)
-  * [Create session](#create-session)
-  * [Refresh token](#refresh-token)
-  * [Get sessions](#get-sessions)
-  * [Delete session](#delete-session)
+  * [Login](#login)
+  * [Logout](#logout)
 * [Users](#users)
   * [Create user](#create-user)
   * [Update user](#update-user)
@@ -17,19 +15,22 @@
   * [Unfollow user](#unfollow-user)
 * [Posts](#posts)
   * [Create post](#create-post)
+  * [Get feed](#get-feed)
   * [Get post](#get-post)
   * [Delete post](#delete-post)
-  * [Get feed](#get-feed)
   * [Get posts](#get-posts)
   * [Get likes](#get-likes)
   * [Like post](#like-post)
   * [Unlike post](#unlike-post)
   * [Retweet post](#retweet-post)
   * [Delete retweet](#delete-retweet)
+* [Errors](#errors)
 
 ## Sessions
 
-### Create session
+### Login
+
+Sets an `SID` cookie with the session id.
 
 ```
 POST /sessions
@@ -42,122 +43,31 @@ email: string
 password: string
 ```
 
-Headers:
-
-```
-Content-Type: application/json
-```
-
 Response:
 
 ```json
 {
-  "user": {
-    "id": "5a0c11682ce7e1000f2a1f5a",
-    "username": "superman",
-    "email": "clark.kent@dailyplanet.com",
-    "name": "Clark Kent",
-    "bio": "Kryptonian hero",
-    "avatar": "d1d99db3ac32052b9dd66cb5914508dd",
-    "posts": 3,
-    "likes": 1,
-    "following": 0,
-    "followers": 10,
-    "date_created": "2017-11-15T10:05:28+00:00"
-  },
-  "session_id": "5a0c11682ce7e1000f2a1f5a",
-  "token": {
-    "token_type": "Bearer",
-    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
-    "refresh_token": "eyJ1c2VybmFtZSI6InN1cGVybWFuIiwiaWQi"
-  }
+  "id": 10,
+  "username": "superman",
+  "email": "clark.kent@dailyplanet.com",
+  "name": "Clark Kent",
+  "bio": "Kryptonian hero",
+  "avatar": "d1d99db3ac32052b9dd66cb5914508dd",
+  "posts": 3,
+  "likes": 1,
+  "followed": false,
+  "following": 0,
+  "followers": 10,
+  "created": "2017-11-15T10:05:28+00:00"
 }
 ```
 
-### Refresh token
+### Logout
+
+The active session is taken from the `SID` cookie.
 
 ```
-POST /sessions
-```
-
-Headers:
-
-```
-Content-Type: application/json
-Authorization: Bearer <refresh-token>
-```
-
-Response:
-
-```json
-{
-  "token": {
-    "token_type": "Bearer",
-    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
-    "refresh_token": "eyJ1c2VybmFtZSI6InN1cGVybWFuIiwiaWQi"
-  }
-}
-```
-
-### Get sessions
-
-```
-GET /sessions
-```
-
-Headers:
-
-```
-Content-Type: application/json
-Authorization: Bearer <access-token>
-```
-
-Response:
-
-```json
-{
-  "sessions": [
-    {
-      "id": "5a0c11682ce7e1000f2a1f5a",
-      "user_id": "5a0c11682cejsdhauqknan1f5a",
-      "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0",
-      "date_created": "2017-11-15T10:05:28+00:00"
-    },
-    {
-      "id": "5a0c11682ce7e1000f2a1f5a",
-      "user_id": "5a0c11682cejsdhauqknan1f5a",
-      "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0",
-      "date_created": "2017-11-15T10:05:28+00:00"
-    }
-  ]
-}
-```
-
-### Delete session
-
-```
-DELETE /sessions/<sessionId>
-```
-
-URL parameters:
-
-```
-sessionId - id of the session
-```
-
-Headers:
-
-```
-Content-Type: application/json
-Authorization: Bearer <access-token>
-```
-
-Response:
-
-```json
-{
-  "message": "Session deleted."
-}
+DELETE /sessions
 ```
 
 ## Users
@@ -177,17 +87,11 @@ email: string
 password: string
 ```
 
-Headers:
-
-```
-Content-Type: application/json
-```
-
 Response:
 
 ```json
 {
-  "message": "User created."
+  "id": 10
 }
 ```
 
@@ -197,7 +101,7 @@ Response:
 PUT /users/<userId>
 ```
 
-URL parameters:
+Path parameters:
 
 ```
 userId - id of the user
@@ -215,57 +119,34 @@ avatar: string (optional)
 bio: string (optional)
 ```
 
-Headers:
-
-```
-Content-Type: application/json
-Authorization: Bearer <access-token>
-```
-
-Response:
-
-```json
-{
-  "message": "User updated."
-}
-```
-
 ### Get user
 
 ```
 GET /users/<userId>
 ```
 
-URL parameters:
+Path parameters:
 
 ```
 userId - id of the user
-```
-
-Headers:
-
-```
-Content-Type: application/json
-Authorization: Bearer <access-token>
 ```
 
 Response:
 
 ```json
 {
-  "user": {
-    "id": "5a0c11682ce7e1000f2a1f5a",
-    "username": "superman",
-    "email": "clark.kent@dailyplanet.com",
-    "name": "Clark Kent",
-    "bio": "Kryptonian hero",
-    "avatar": "d1d99db3ac32052b9dd66cb5914508dd",
-    "posts": 3,
-    "likes": 1,
-    "following": 0,
-    "followers": 10,
-    "date_created": "2017-11-15T10:05:28+00:00"
-  }
+  "id": 10,
+  "username": "superman",
+  "email": "clark.kent@dailyplanet.com",
+  "name": "Clark Kent",
+  "bio": "Kryptonian hero",
+  "avatar": "d1d99db3ac32052b9dd66cb5914508dd",
+  "posts": 3,
+  "likes": 1,
+  "followed": false,
+  "following": 0,
+  "followers": 10,
+  "created": "2017-11-15T10:05:28+00:00"
 }
 ```
 
@@ -275,7 +156,7 @@ Response:
 GET /users/<userId>/following
 ```
 
-URL parameters:
+Path parameters:
 
 ```
 userId - id of the user
@@ -283,20 +164,13 @@ page - number of page with results
 limit - results per request
 ```
 
-Headers:
-
-```
-Content-Type: application/json
-Authorization: Bearer <access-token>
-```
-
 Response:
 
 ```json
 {
-  "users": [
+  "items": [
     {
-      "id": "5a0c11682ce7e1000f2a1f5a",
+      "id": 10,
       "username": "superman",
       "email": "clark.kent@dailyplanet.com",
       "name": "Clark Kent",
@@ -304,22 +178,10 @@ Response:
       "avatar": "d1d99db3ac32052b9dd66cb5914508dd",
       "posts": 3,
       "likes": 1,
+      "followed": false,
       "following": 0,
       "followers": 10,
-      "date_created": "2017-11-15T10:05:28+00:00"
-    },
-    {
-      "id": "5a0c11682ce7e1000f2a1f5a",
-      "username": "superman",
-      "email": "clark.kent@dailyplanet.com",
-      "name": "Clark Kent",
-      "bio": "Kryptonian hero",
-      "avatar": "d1d99db3ac32052b9dd66cb5914508dd",
-      "posts": 3,
-      "likes": 1,
-      "following": 0,
-      "followers": 10,
-      "date_created": "2017-11-15T10:05:28+00:00"
+      "created": "2017-11-15T10:05:28+00:00"
     }
   ]
 }
@@ -331,7 +193,7 @@ Response:
 GET /users/<userId>/followers
 ```
 
-URL parameters:
+Path parameters:
 
 ```
 userId - id of the user
@@ -339,20 +201,13 @@ page - number of page with results
 limit - results per request
 ```
 
-Headers:
-
-```
-Content-Type: application/json
-Authorization: Bearer <access-token>
-```
-
 Response:
 
 ```json
 {
-  "users": [
+  "items": [
     {
-      "id": "5a0c11682ce7e1000f2a1f5a",
+      "id": 10,
       "username": "superman",
       "email": "clark.kent@dailyplanet.com",
       "name": "Clark Kent",
@@ -360,22 +215,10 @@ Response:
       "avatar": "d1d99db3ac32052b9dd66cb5914508dd",
       "posts": 3,
       "likes": 1,
+      "followed": false,
       "following": 0,
       "followers": 10,
-      "date_created": "2017-11-15T10:05:28+00:00"
-    },
-    {
-      "id": "5a0c11682ce7e1000f2a1f5a",
-      "username": "superman",
-      "email": "clark.kent@dailyplanet.com",
-      "name": "Clark Kent",
-      "bio": "Kryptonian hero",
-      "avatar": "d1d99db3ac32052b9dd66cb5914508dd",
-      "posts": 3,
-      "likes": 1,
-      "following": 0,
-      "followers": 10,
-      "date_created": "2017-11-15T10:05:28+00:00"
+      "created": "2017-11-15T10:05:28+00:00"
     }
   ]
 }
@@ -387,25 +230,10 @@ Response:
 POST /users/<userId>/followers
 ```
 
-URL parameters:
+Path parameters:
 
 ```
 userId - id of the user
-```
-
-Headers:
-
-```
-Content-Type: application/json
-Authorization: Bearer <access-token>
-```
-
-Response:
-
-```json
-{
-  "message": "User followed."
-}
 ```
 
 ### Unfollow user
@@ -414,25 +242,10 @@ Response:
 DELETE /users/<userId>/followers
 ```
 
-URL parameters:
+Path parameters:
 
 ```
 userId - id of the user
-```
-
-Headers:
-
-```
-Content-Type: application/json
-Authorization: Bearer <access-token>
-```
-
-Response:
-
-```json
-{
-  "message": "User unfollowed."
-}
 ```
 
 ## Posts
@@ -449,27 +262,43 @@ Body parameters:
 content: string
 ```
 
-Headers:
+Response:
+
+```json
+{
+  "id": 12
+}
+```
+
+### Get feed
 
 ```
-Content-Type: application/json
-Authorization: Bearer <access-token>
+GET /posts
+```
+
+Path parameters:
+
+```
+page - number of page with results
+limit - results per request
 ```
 
 Response:
 
 ```json
 {
-  "post": {
-    "id": "5a0c11682ce7e1000f2a1f5a",
-    "content": "Some post content",
-    "user_id": "a12r11682ce7e1000f2a1f5a",
-    "likes": 0,
-    "liked": false,
-    "retweets": 0,
-    "retweeted": false,
-    "date_created": "2017-11-15T10:05:28+00:00"
-  }
+  "items": [
+    {
+      "id": 12,
+      "content": "Some post content",
+      "user_id": 10,
+      "likes": 10,
+      "liked": true,
+      "retweets": 2,
+      "retweeted": false,
+      "created": "2017-11-15T10:05:28+00:00"
+    }
+  ]
 }
 ```
 
@@ -479,33 +308,24 @@ Response:
 GET /posts/<postId>
 ```
 
-URL parameters:
+Path parameters:
 
 ```
 postId - id of the post
-```
-
-Headers:
-
-```
-Content-Type: application/json
-Authorization: Bearer <access-token>
 ```
 
 Response:
 
 ```json
 {
-  "post": {
-    "id": "5a0c11682ce7e1000f2a1f5a",
-    "content": "Some post content",
-    "user_id": "a12r11682ce7e1000f2a1f5a",
-    "likes": 10,
-    "liked": true,
-    "retweets": 2,
-    "retweeted": false,
-    "date_created": "2017-11-15T10:05:28+00:00"
-  }
+  "id": 12,
+  "content": "Some post content",
+  "user_id": 10,
+  "likes": 10,
+  "liked": true,
+  "retweets": 2,
+  "retweeted": false,
+  "created": "2017-11-15T10:05:28+00:00"
 }
 ```
 
@@ -515,74 +335,10 @@ Response:
 DELETE /posts/<postId>
 ```
 
-URL parameters:
+Path parameters:
 
 ```
 postId - id of the post
-```
-
-Headers:
-
-```
-Content-Type: application/json
-Authorization: Bearer <access-token>
-```
-
-Response:
-
-```json
-{
-  "message": "Post deleted."
-}
-```
-
-### Get feed
-
-```
-GET /posts/feed
-```
-
-URL parameters:
-
-```
-page - number of page with results
-limit - results per request
-```
-
-Headers:
-
-```
-Content-Type: application/json
-Authorization: Bearer <access-token>
-```
-
-Response:
-
-```json
-{
-  "posts": [
-    {
-      "id": "5a0c11682ce7e1000f2a1f5a",
-      "content": "Some post content",
-      "user_id": "a12r11682ce7e1000f2a1f5a",
-      "likes": 10,
-      "liked": true,
-      "retweets": 2,
-      "retweeted": false,
-      "date_created": "2017-11-15T10:05:28+00:00"
-    },
-    {
-      "id": "5a0c11682ce7e1000f2a1f5a",
-      "content": "Some post content",
-      "user_id": "a12r11682ce7e1000f2a1f5a",
-      "likes": 10,
-      "liked": true,
-      "retweets": 2,
-      "retweeted": false,
-      "date_created": "2017-11-15T10:05:28+00:00"
-    }
-  ]
-}
 ```
 
 ### Get posts
@@ -591,7 +347,7 @@ Response:
 GET /users/<userId>/posts
 ```
 
-URL parameters:
+Path parameters:
 
 ```
 userId - id of the user
@@ -599,37 +355,20 @@ page - number of page with results
 limit - results per request
 ```
 
-Headers:
-
-```
-Content-Type: application/json
-Authorization: Bearer <access-token>
-```
-
 Response:
 
 ```json
 {
-  "posts": [
+  "items": [
     {
-      "id": "5a0c11682ce7e1000f2a1f5a",
+      "id": 12,
       "content": "Some post content",
-      "user_id": "a12r11682ce7e1000f2a1f5a",
+      "user_id": 10,
       "likes": 10,
       "liked": true,
       "retweets": 2,
       "retweeted": false,
-      "date_created": "2017-11-15T10:05:28+00:00"
-    },
-    {
-      "id": "5a0c11682ce7e1000f2a1f5a",
-      "content": "Some post content",
-      "user_id": "a12r11682ce7e1000f2a1f5a",
-      "likes": 10,
-      "liked": true,
-      "retweets": 2,
-      "retweeted": false,
-      "date_created": "2017-11-15T10:05:28+00:00"
+      "created": "2017-11-15T10:05:28+00:00"
     }
   ]
 }
@@ -641,7 +380,7 @@ Response:
 GET /users/<userId>/likes
 ```
 
-URL parameters:
+Path parameters:
 
 ```
 userId - id of the user
@@ -649,37 +388,20 @@ page - number of page with results
 limit - results per request
 ```
 
-Headers:
-
-```
-Content-Type: application/json
-Authorization: Bearer <access-token>
-```
-
 Response:
 
 ```json
 {
-  "posts": [
+  "items": [
     {
-      "id": "5a0c11682ce7e1000f2a1f5a",
+      "id": 12,
       "content": "Some post content",
-      "user_id": "a12r11682ce7e1000f2a1f5a",
+      "user_id": 10,
       "likes": 10,
       "liked": true,
       "retweets": 2,
       "retweeted": false,
-      "date_created": "2017-11-15T10:05:28+00:00"
-    },
-    {
-      "id": "5a0c11682ce7e1000f2a1f5a",
-      "content": "Some post content",
-      "user_id": "a12r11682ce7e1000f2a1f5a",
-      "likes": 10,
-      "liked": true,
-      "retweets": 2,
-      "retweeted": false,
-      "date_created": "2017-11-15T10:05:28+00:00"
+      "created": "2017-11-15T10:05:28+00:00"
     }
   ]
 }
@@ -691,25 +413,10 @@ Response:
 POST /posts/<postId>/likes
 ```
 
-URL parameters:
+Path parameters:
 
 ```
 postId - id of the post
-```
-
-Headers:
-
-```
-Content-Type: application/json
-Authorization: Bearer <access-token>
-```
-
-Response:
-
-```json
-{
-  "message": "Post liked."
-}
 ```
 
 ### Unlike post
@@ -718,25 +425,10 @@ Response:
 DELETE /posts/<postId>/likes
 ```
 
-URL parameters:
+Path parameters:
 
 ```
 postId - id of the post
-```
-
-Headers:
-
-```
-Content-Type: application/json
-Authorization: Bearer <access-token>
-```
-
-Response:
-
-```json
-{
-  "message": "Post unliked."
-}
 ```
 
 ### Retweet post
@@ -745,25 +437,10 @@ Response:
 POST /posts/<postId>/retweets
 ```
 
-URL parameters:
+Path parameters:
 
 ```
 postId - id of the post
-```
-
-Headers:
-
-```
-Content-Type: application/json
-Authorization: Bearer <access-token>
-```
-
-Response:
-
-```json
-{
-  "message": "Post retweeted."
-}
 ```
 
 ### Delete retweet
@@ -772,23 +449,18 @@ Response:
 DELETE /posts/<postId>/retweets
 ```
 
-URL parameters:
+Path parameters:
 
 ```
 postId - id of the post
 ```
 
-Headers:
+## Errors
 
-```
-Content-Type: application/json
-Authorization: Bearer <access-token>
-```
-
-Response:
+Errors contain the message describing the error.
 
 ```json
 {
-  "message": "Retweet deleted."
+  "message": "Incorrect email or password."
 }
 ```

@@ -18,11 +18,12 @@ Thoughts is a message sharing service.
 
 ## Stack
 
-- React front end
-- Express API gateway
-- PostgreSQL database
-- Python services
-- Go services
+- React
+- Go
+- Python
+- PostgreSQL
+- Docker
+- Kubernetes
 
 ## Screenshots
 
@@ -36,7 +37,7 @@ Protobuf definitions can be found at the [`/pb` directory](/pb).
 
 Service | Language | Description
 --- | --- | ---
-[apiservice](/src/apiservice) | JavaScript | Express HTTP API Gateway between the front end and the back end services.
+[apiservice](/src/apiservice) | Go | API Gateway between the front end and the back end services.
 [authservice](/src/authservice) | Python | Authentication service for creation and validation of access and refresh tokens.
 [database](/src/database) | SQL | PostgreSQL database with tables, relationships and functions.
 [frontend](/src/frontend) | JavaScript | React front end of the app.
