@@ -1,8 +1,5 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
-import { updatePassword } from '../store/actions/users';
 
 class Password extends React.Component {
   constructor(props) {
@@ -86,7 +83,4 @@ class Password extends React.Component {
   }
 }
 
-export default connect(
-  null,
-  { updatePassword }
-)(Password);
+export default Password;

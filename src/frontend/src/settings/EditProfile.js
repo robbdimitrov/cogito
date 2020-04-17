@@ -1,5 +1,4 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { updateUser, updateAvatar } from '../store/actions/users';
@@ -160,13 +159,4 @@ class EditProfile extends React.Component {
   }
 }
 
-const mapStateToProps = (state) => {
-  return {
-    user: state.users.byId[session.getUserId()]
-  };
-};
-
-export default connect(
-  mapStateToProps,
-  { updateUser, updateAvatar }
-)(EditProfile);
+export default EditProfile;

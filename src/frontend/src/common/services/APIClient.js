@@ -1,5 +1,4 @@
 import session from './Session';
-import { apiRoot } from '../../config';
 
 class APIClient {
   // Internal
@@ -17,10 +16,8 @@ class APIClient {
     return headers;
   }
 
-  request(urlPath, method = 'GET', body, otherHeaders) {
+  request(url, method = 'GET', body, otherHeaders) {
     const headers = otherHeaders || this.headers();
-
-    const url = apiRoot + urlPath;
 
     const options = { method, headers };
 

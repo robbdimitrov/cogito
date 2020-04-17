@@ -1,5 +1,4 @@
 import React from 'react';
-import { connect } from 'react-redux';
 
 import UserCard from './UserCard';
 import ThoughtList from '../common/components/thoughtlist/ThoughtList';
@@ -21,13 +20,4 @@ class Feed extends React.Component {
   }
 }
 
-const mapStateToProps = (state) => {
-  return {
-    user: state.users.byId[session.getUserId()]
-  };
-};
-
-export default connect(
-  mapStateToProps,
-  { fetchFeed, fetchUserIfNeeded }
-)(Feed);
+export default Feed;

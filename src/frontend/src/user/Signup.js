@@ -1,9 +1,6 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
-import { registerUser } from '../store/actions/users';
 
 class Signup extends React.Component {
   constructor(props) {
@@ -131,7 +128,4 @@ class Signup extends React.Component {
   }
 }
 
-export default connect(
-  null,
-  { registerUser }
-)(Signup);
+export default Signup;

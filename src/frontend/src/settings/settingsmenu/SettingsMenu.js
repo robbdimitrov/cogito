@@ -6,8 +6,7 @@ import './SettingsMenu.scss';
 
 const menuItems = [
   { title: 'Edit profile', link: 'account' },
-  { title: 'Change password', link: 'password' },
-  { title: 'Sessions', link: 'sessions' }
+  { title: 'Change password', link: 'password' }
 ];
 
 function SettingsMenu(props) {
