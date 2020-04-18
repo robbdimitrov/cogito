@@ -10,18 +10,19 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^1.2.26",
-    "@fortawesome/free-solid-svg-icons": "^5.12.0",
-    "@fortawesome/react-fontawesome": "^0.1.8",
+    "@fortawesome/fontawesome-svg-core": "^1.2.28",
+    "@fortawesome/free-solid-svg-icons": "^5.13.0",
+    "@fortawesome/react-fontawesome": "^0.1.9",
     "quartzite": "^2.0.0",
-    "react": "^16.12.0",
-    "react-dom": "^16.12.0",
+    "react": "^16.13.0",
+    "react-dom": "^16.13.0",
     "react-router-dom": "^5.1.2",
-    "react-scripts": "^3.3.0"
+    "react-scripts": "^3.4.1"
   },
   "devDependencies": {
+    "http-proxy-middleware": "^1.0.3",
     "node-sass": "^4.13.1",
-    "typescript": "^3.7.4"
+    "typescript": "^3.8.3"
   },
   "eslintConfig": {
     "extends": "react-app"
