@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"time"
@@ -17,10 +18,10 @@ func main() {
 	postAddr := os.Getenv("POST_SERVICE_ADDR")
 	imageAddr := os.Getenv("IMAGE_SERVICE_ADDR")
 
-	e := api.CreateEcho(authAddr, userAddr, postAddr, imageAddr)
+	e := api.CreateServer(authAddr, userAddr, postAddr, imageAddr)
 
-	// Start server
 	go func() {
+		log.Printf("Starting server on port %s\n", port)
 		if err := e.Start(fmt.Sprintf(":%s", port)); err != nil {
 			e.Logger.Fatal(err)
 		}
@@ -31,6 +32,7 @@ func main() {
 	<-quit
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+	log.Println("Shutting down...")
 	if err := e.Shutdown(ctx); err != nil {
 		e.Logger.Fatal(err)
 	}
