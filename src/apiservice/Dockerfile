@@ -1,7 +1,10 @@
-FROM node:10.16-alpine
-RUN mkdir -p /usr/src/app
-WORKDIR /usr/src/app
-COPY package*.json ./
-RUN npm install --production
-COPY . .
-CMD ["npm", "start"]
+FROM golang:1.14 as builder
+WORKDIR /app
+COPY go.* ./
+RUN go mod download
+COPY . ./
+RUN go build -v -o service
+
+FROM scratch
+COPY --from=builder /app/service /service
+CMD ["/service"]

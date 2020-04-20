@@ -79,7 +79,7 @@ func (s *Service) saveFile(w http.ResponseWriter, file multipart.File) {
 	}
 
 	path := fmt.Sprintf("%s/", s.imagePath)
-	filename := RandToken(12)
+	filename := RandToken(16)
 	err = ioutil.WriteFile(path+filename, data, 0666)
 	if err != nil {
 		log.Printf("Error writing file %v", err)

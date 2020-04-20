@@ -24,6 +24,9 @@
   * [Unlike post](#unlike-post)
   * [Retweet post](#retweet-post)
   * [Delete retweet](#delete-retweet)
+* [Image assets](#image-assets)
+  * [Upload image](#upload-image)
+  * [Load image asset](#load-image-asset)
 * [Errors](#errors)
 
 ## Sessions
@@ -453,6 +456,48 @@ Path parameters:
 
 ```
 postId - id of the post
+```
+
+## Image assets
+
+### Upload image
+
+File size should be less than 1MB.
+
+```
+POST /uploads
+```
+
+Body parameters:
+
+```
+image: file sent as multipart/form-data
+```
+
+Response:
+
+```json
+{
+  "filename": "d4aab3fd72517522479c08520bc150a3"
+}
+```
+
+### Load image asset
+
+```
+GET /uploads/<filename>
+```
+
+Path parameters:
+
+```
+filename - filename returned from the upload function
+```
+
+Response:
+
+```
+The image data
 ```
 
 ## Errors
