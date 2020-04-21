@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 const maxFileSize = 1 << 20
@@ -22,16 +23,14 @@ func (s *service) uploadFile(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseMultipartForm(maxFileSize)
 	if err != nil {
 		log.Printf("Error Parsing File %v", err)
-		errorResponse(w, "File should be smaller than 1MB.",
-			http.StatusBadRequest)
+		errorResponse(w, "File should be smaller than 1MB.", 400)
 		return
 	}
 
 	file, _, err := r.FormFile("image")
 	if err != nil {
 		log.Printf("Error Retrieving File %v", err)
-		errorResponse(w, "There was an error while processing the image.",
-			http.StatusBadRequest)
+		errorResponse(w, "There was an error while processing the image.", 400)
 		return
 	}
 	defer file.Close()
@@ -43,8 +42,7 @@ func (s *service) saveFile(w http.ResponseWriter, file multipart.File) {
 	data, err := ioutil.ReadAll(file)
 	if err != nil {
 		log.Printf("Error reading file: %v", err)
-		errorResponse(w, "There was an error while processing the image.",
-			http.StatusBadRequest)
+		errorResponse(w, "There was an error while processing the image.", 400)
 		return
 	}
 
@@ -53,27 +51,21 @@ func (s *service) saveFile(w http.ResponseWriter, file multipart.File) {
 	case "image/jpeg", "image/jpg", "image/png":
 		break
 	default:
-		errorResponse(w, "The format file is not valid.", http.StatusBadRequest)
+		log.Printf("Error processing image: unsupported format %v", mimeType)
+		errorResponse(w, "The file type is not valid.", 400)
 		return
 	}
 
-	path := fmt.Sprintf("%s/", s.imagePath)
-	filename, err := randToken(16)
-	if err != nil {
-		log.Printf("Error generating filename %v", err)
-		errorResponse(w, "Internal Server Error",
-			http.StatusBadRequest)
-		return
-	}
+	filename := randToken(16)
+	path := strings.Join([]string{s.imagePath, filename}, "/")
 
-	err = ioutil.WriteFile(path+filename, data, 0666)
+	err = ioutil.WriteFile(path, data, 0666)
 	if err != nil {
-		log.Printf("Error writing file %v", err)
-		errorResponse(w, "There was an error while processing the image.",
-			http.StatusBadRequest)
+		log.Printf("Error writing file: %v", err)
+		errorResponse(w, "There was an error while processing the image.", 500)
 		return
 	}
-	jsonResponse(w, map[string]string{"image": filename}, http.StatusCreated)
+	jsonResponse(w, map[string]string{"image": filename}, 201)
 }
 
 func (s *service) getFile(w http.ResponseWriter, r *http.Request) {
@@ -81,7 +73,7 @@ func (s *service) getFile(w http.ResponseWriter, r *http.Request) {
 
 	_, err := os.Stat(filePath)
 	if err != nil {
-		errorResponse(w, "There is no such file.", http.StatusBadRequest)
+		errorResponse(w, "There is no such file.", 404)
 		return
 	}
 	http.ServeFile(w, r, filePath)

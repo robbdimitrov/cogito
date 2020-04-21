@@ -17,7 +17,7 @@ func main() {
 	s := image.CreateServer(port, imageDir)
 
 	go func() {
-		log.Printf("Starting server on port %s\n", port)
+		log.Printf("Server is starting on port %s\n", port)
 		if err := s.ListenAndServe(); err != nil {
 			log.Fatal(err)
 		}
@@ -28,7 +28,7 @@ func main() {
 	<-quit
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	log.Println("Shutting down...")
+	log.Println("Server is shutting down...")
 	if err := s.Shutdown(ctx); err != nil {
 		log.Fatal(err)
 	}

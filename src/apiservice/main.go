@@ -21,7 +21,7 @@ func main() {
 	e := api.CreateServer(authAddr, userAddr, postAddr, imageAddr)
 
 	go func() {
-		log.Printf("Starting server on port %s\n", port)
+		log.Printf("Server is starting on port %s\n", port)
 		if err := e.Start(fmt.Sprintf(":%s", port)); err != nil {
 			e.Logger.Fatal(err)
 		}
@@ -32,7 +32,7 @@ func main() {
 	<-quit
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	log.Println("Shutting down...")
+	log.Println("Server is shutting down...")
 	if err := e.Shutdown(ctx); err != nil {
 		e.Logger.Fatal(err)
 	}

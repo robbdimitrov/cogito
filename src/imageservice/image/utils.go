@@ -6,10 +6,10 @@ import (
 )
 
 // randToken generates a random string
-func randToken(len int) (string, error) {
+func randToken(len int) string {
 	bytes := make([]byte, len)
 	if _, err := rand.Read(bytes); err != nil {
-		return "", err
+		return ""
 	}
-	return hex.EncodeToString(bytes), nil
+	return hex.EncodeToString(bytes)
 }
