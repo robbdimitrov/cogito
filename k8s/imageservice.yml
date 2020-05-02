@@ -7,9 +7,7 @@ spec:
     app: thoughts
     tier: backend
   ports:
-  - protocol: TCP
-    port: 5000
-    targetPort: 5000
+  - port: 8080
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -34,12 +32,7 @@ spec:
         image: thoughts/imageservice
         imagePullPolicy: Never
         ports:
-        - containerPort: 5000
-        env:
-        - name: PORT
-          value: "5000"
-        - name: AUTH_SERVICE_ADDR
-          value: authservice:5010
+        - containerPort: 8080
         volumeMounts:
         - mountPath: /data/images
           name: image-storage

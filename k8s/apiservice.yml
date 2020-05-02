@@ -7,9 +7,7 @@ spec:
     app: thoughts
     tier: backend
   ports:
-  - protocol: TCP
-    port: 3000
-    targetPort: 3000
+  - port: 8080
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -34,15 +32,13 @@ spec:
         image: thoughts/apiservice
         imagePullPolicy: Never
         ports:
-        - containerPort: 3000
+        - containerPort: 8080
         env:
-        - name: PORT
-          value: "3000"
         - name: AUTH_SERVICE_ADDR
-          value: authservice:5010
+          value: authservice:5050
         - name: POST_SERVICE_ADDR
-          value: postservice:5000
+          value: postservice:5050
         - name: USER_SERVICE_ADDR
-          value: userservice:5010
+          value: userservice:5050
         - name: IMAGE_SERVICE_ADDR
-          value: imageservice:5000
+          value: imageservice:5050

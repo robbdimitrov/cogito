@@ -7,9 +7,7 @@ spec:
     app: thoughts
     tier: backend
   ports:
-  - protocol: TCP
-    port: 5010
-    targetPort: 5010
+  - port: 5050
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -34,11 +32,9 @@ spec:
         image: thoughts/userservice
         imagePullPolicy: Never
         ports:
-        - containerPort: 5010
+        - containerPort: 5050
         env:
-        - name: PORT
-          value: "5010"
         - name: DATABASE_URL
           value: postgresql://postgres:kubernetes@database:5432
         - name: AUTH_SERVICE_ADDR
-          value: authservice:5010
+          value: authservice:5050
