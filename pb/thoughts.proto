@@ -127,8 +127,13 @@ message PostRequest {
   int32 post_id = 1;
 }
 
+message GetFeedRequest {
+  int32 page = 1;
+  int32 limit = 2;
+}
+
 message GetPostsRequest {
-  int32 post_id = 1;
+  int32 user_id = 1;
   int32 page = 2;
   int32 limit = 3;
 }
@@ -136,9 +141,9 @@ message GetPostsRequest {
 service PostService {
   rpc CreatePost(CreatePostRequest) returns (CreatePostResponse);
   rpc GetPost(PostRequest) returns (Post);
-  rpc GetFeed(GetPostsRequest) returns (Posts);
-  rpc GetPosts(UserRequest) returns (Posts);
-  rpc GetLikedPosts(UserRequest) returns (Posts);
+  rpc GetFeed(GetFeedRequest) returns (Posts);
+  rpc GetPosts(GetPostsRequest) returns (Posts);
+  rpc GetLikedPosts(GetPostsRequest) returns (Posts);
   rpc DeletePost(PostRequest) returns (Empty);
 }
 

@@ -13,7 +13,7 @@ import (
 
 func main() {
 	port := "8080"
-	if value, ok := os.LookupEnv("PORT"); ok {
+	if value := os.Getenv("PORT"); value != "" {
 		port = value
 	}
 	authAddr := os.Getenv("AUTH_SERVICE_ADDR")
