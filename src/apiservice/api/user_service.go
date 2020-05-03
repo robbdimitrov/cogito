@@ -104,13 +104,91 @@ func (s *userService) getUser(c echo.Context) error {
 }
 
 func (s *userService) getFollowing(c echo.Context) error {
-	// path --> name := c.Param("name")
-	// query --> name := c.QueryParam("name")
-	return c.JSON(200, map[string][]user{"items": {}})
+	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		return echo.NewHTTPError(500, err.Error())
+	}
+	defer conn.Close()
+	client := pb.NewFollowServiceClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	userID, err := strconv.Atoi(c.Param("userId"))
+	if err != nil {
+		return echo.NewHTTPError(500, err.Error())
+	}
+	page, err := strconv.Atoi(c.QueryParam("page"))
+	if err != nil {
+		return echo.NewHTTPError(500, err.Error())
+	}
+	limit, err := strconv.Atoi(c.QueryParam("limit"))
+	if err != nil {
+		return echo.NewHTTPError(500, err.Error())
+	}
+
+	req := pb.GetUsersRequest{
+		UserId: int32(userID),
+		Page:   int32(page),
+		Limit:  int32(limit),
+	}
+
+	res, err := client.GetFollowing(ctx, &req)
+	if err != nil {
+		s := status.Convert(err)
+		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
+	}
+
+	users := make([]user, len(res.Users))
+	for i, v := range res.Users {
+		users[i] = mapUser(v)
+	}
+
+	return c.JSON(200, map[string][]user{"items": users})
 }
 
 func (s *userService) getFollowers(c echo.Context) error {
-	return c.JSON(200, map[string][]user{"items": {}})
+	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		return echo.NewHTTPError(500, err.Error())
+	}
+	defer conn.Close()
+	client := pb.NewFollowServiceClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	userID, err := strconv.Atoi(c.Param("userId"))
+	if err != nil {
+		return echo.NewHTTPError(500, err.Error())
+	}
+	page, err := strconv.Atoi(c.QueryParam("page"))
+	if err != nil {
+		return echo.NewHTTPError(500, err.Error())
+	}
+	limit, err := strconv.Atoi(c.QueryParam("limit"))
+	if err != nil {
+		return echo.NewHTTPError(500, err.Error())
+	}
+
+	req := pb.GetUsersRequest{
+		UserId: int32(userID),
+		Page:   int32(page),
+		Limit:  int32(limit),
+	}
+
+	res, err := client.GetFollowers(ctx, &req)
+	if err != nil {
+		s := status.Convert(err)
+		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
+	}
+
+	users := make([]user, len(res.Users))
+	for i, v := range res.Users {
+		users[i] = mapUser(v)
+	}
+
+	return c.JSON(200, map[string][]user{"items": users})
 }
 
 func (s *userService) followUser(c echo.Context) error {
