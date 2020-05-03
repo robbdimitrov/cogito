@@ -50,6 +50,30 @@ func (s *userService) createUser(c echo.Context) error {
 }
 
 func (s *userService) updateUser(c echo.Context) error {
+	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		return echo.NewHTTPError(500, err.Error())
+	}
+	defer conn.Close()
+	client := pb.NewUserServiceClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	req := pb.UpdateUserRequest{
+		Name:        c.FormValue("name"),
+		Username:    c.FormValue("username"),
+		Email:       c.FormValue("email"),
+		Password:    c.FormValue("password"),
+		OldPassword: c.FormValue("oldPassword"),
+	}
+
+	_, err = client.UpdateUser(ctx, &req)
+	if err != nil {
+		s := status.Convert(err)
+		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
+	}
+
 	return c.NoContent(204)
 }
 
@@ -90,9 +114,53 @@ func (s *userService) getFollowers(c echo.Context) error {
 }
 
 func (s *userService) followUser(c echo.Context) error {
+	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		return echo.NewHTTPError(500, err.Error())
+	}
+	defer conn.Close()
+	client := pb.NewFollowServiceClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	userID, err := strconv.Atoi(c.Param("userId"))
+	if err != nil {
+		return echo.NewHTTPError(500, err.Error())
+	}
+	req := pb.UserRequest{UserId: int32(userID)}
+
+	_, err = client.FollowUser(ctx, &req)
+	if err != nil {
+		s := status.Convert(err)
+		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
+	}
+
 	return c.NoContent(204)
 }
 
 func (s *userService) unfollowUser(c echo.Context) error {
+	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		return echo.NewHTTPError(500, err.Error())
+	}
+	defer conn.Close()
+	client := pb.NewFollowServiceClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	userID, err := strconv.Atoi(c.Param("userId"))
+	if err != nil {
+		return echo.NewHTTPError(500, err.Error())
+	}
+	req := pb.UserRequest{UserId: int32(userID)}
+
+	_, err = client.UnfollowUser(ctx, &req)
+	if err != nil {
+		s := status.Convert(err)
+		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
+	}
+
 	return c.NoContent(204)
 }
