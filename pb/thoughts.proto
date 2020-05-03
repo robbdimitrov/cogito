@@ -36,12 +36,10 @@ service AuthService {
 // ------------------- Users --------------------
 
 message CreateUserRequest {
-  string username = 1;
-  string email = 2;
-  string password = 3;
-  string name = 4;
-  string bio = 5;
-  string avatar = 6;
+  string name = 1;
+  string username = 2;
+  string email = 3;
+  string password = 4;
 }
 
 message CreateUserResponse {
@@ -49,13 +47,13 @@ message CreateUserResponse {
 }
 
 message UpdateUserRequest {
-  string username = 1;
-  string email = 2;
-  string password = 3;
-  string old_password = 4;
-  string name = 5;
-  string bio = 6;
-  string avatar = 7;
+  string name = 1;
+  string username = 2;
+  string email = 3;
+  string password = 4;
+  string old_password = 5;
+  string avatar = 6;
+  string bio = 7;
 }
 
 message UserRequest {
@@ -70,16 +68,17 @@ message GetUsersRequest {
 
 message User {
   int32 id = 1;
-  string username = 2;
-  string email = 3;
-  string name = 4;
-  string bio = 5;
-  string avatar = 6;
+  string name = 2;
+  string username = 3;
+  string email = 4;
+  string avatar = 5;
+  string bio = 6;
   int32 posts = 7;
   int32 likes = 8;
   int32 following = 9;
   int32 followers = 10;
-  string created = 11;
+  bool followed = 11;
+  string created = 12;
 }
 
 message Users {
@@ -103,8 +102,8 @@ service FollowService {
 
 message Post {
   int32 id = 1;
-  string content = 2;
-  int32 user_id = 3;
+  int32 user_id = 2;
+  string content = 3;
   int32 likes = 4;
   bool liked = 5;
   int32 retweets = 6;

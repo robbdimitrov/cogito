@@ -51,16 +51,16 @@ Response:
 ```json
 {
   "id": 10,
+  "name": "Clark Kent",
   "username": "superman",
   "email": "clark.kent@dailyplanet.com",
-  "name": "Clark Kent",
-  "bio": "Kryptonian hero",
   "avatar": "d1d99db3ac32052b9dd66cb5914508dd",
+  "bio": "Kryptonian hero",
   "posts": 3,
   "likes": 1,
-  "followed": false,
   "following": 0,
   "followers": 10,
+  "followed": false,
   "created": "2017-11-15T10:05:28+00:00"
 }
 ```
@@ -139,16 +139,16 @@ Response:
 ```json
 {
   "id": 10,
+  "name": "Clark Kent",
   "username": "superman",
   "email": "clark.kent@dailyplanet.com",
-  "name": "Clark Kent",
-  "bio": "Kryptonian hero",
   "avatar": "d1d99db3ac32052b9dd66cb5914508dd",
+  "bio": "Kryptonian hero",
   "posts": 3,
   "likes": 1,
-  "followed": false,
   "following": 0,
   "followers": 10,
+  "followed": false,
   "created": "2017-11-15T10:05:28+00:00"
 }
 ```
@@ -174,16 +174,16 @@ Response:
   "items": [
     {
       "id": 10,
+      "name": "Clark Kent",
       "username": "superman",
       "email": "clark.kent@dailyplanet.com",
-      "name": "Clark Kent",
-      "bio": "Kryptonian hero",
       "avatar": "d1d99db3ac32052b9dd66cb5914508dd",
+      "bio": "Kryptonian hero",
       "posts": 3,
       "likes": 1,
-      "followed": false,
       "following": 0,
       "followers": 10,
+      "followed": false,
       "created": "2017-11-15T10:05:28+00:00"
     }
   ]
@@ -211,16 +211,16 @@ Response:
   "items": [
     {
       "id": 10,
+      "name": "Clark Kent",
       "username": "superman",
       "email": "clark.kent@dailyplanet.com",
-      "name": "Clark Kent",
-      "bio": "Kryptonian hero",
       "avatar": "d1d99db3ac32052b9dd66cb5914508dd",
+      "bio": "Kryptonian hero",
       "posts": 3,
       "likes": 1,
-      "followed": false,
       "following": 0,
       "followers": 10,
+      "followed": false,
       "created": "2017-11-15T10:05:28+00:00"
     }
   ]
@@ -293,8 +293,8 @@ Response:
   "items": [
     {
       "id": 12,
+      "userId": 10,
       "content": "Some post content",
-      "user_id": 10,
       "likes": 10,
       "liked": true,
       "retweets": 2,
@@ -322,8 +322,8 @@ Response:
 ```json
 {
   "id": 12,
+  "userId": 10,
   "content": "Some post content",
-  "user_id": 10,
   "likes": 10,
   "liked": true,
   "retweets": 2,
@@ -365,8 +365,8 @@ Response:
   "items": [
     {
       "id": 12,
+      "userId": 10,
       "content": "Some post content",
-      "user_id": 10,
       "likes": 10,
       "liked": true,
       "retweets": 2,
@@ -398,8 +398,8 @@ Response:
   "items": [
     {
       "id": 12,
+      "userId": 10,
       "content": "Some post content",
-      "user_id": 10,
       "likes": 10,
       "liked": true,
       "retweets": 2,

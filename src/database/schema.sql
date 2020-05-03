@@ -5,12 +5,12 @@ CREATE DATABASE thoughts;
 
 CREATE TABLE users (
   id serial PRIMARY KEY,
+  name varchar(255) NOT NULL,
   username varchar(255) UNIQUE NOT NULL,
   email varchar(255) UNIQUE NOT NULL,
-  name varchar(255) NOT NULL,
   password varchar(255) NOT NULL,
-  bio varchar(255) DEFAULT '',
   avatar varchar(255) DEFAULT '',
+  bio varchar(255) DEFAULT '',
   created timestamp NOT NULL DEFAULT now()
 );
 
