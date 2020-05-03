@@ -1,8 +1,6 @@
 package api
 
 import (
-	"net/http"
-
 	"github.com/labstack/echo/v4"
 )
 
@@ -17,41 +15,41 @@ func newPostService(addr string) *postService {
 // Handlers
 
 func (ct *postService) createPost(c echo.Context) error {
-	return c.JSON(http.StatusOK, "CreatePost")
+	return c.JSON(201, map[string]int32{"id": 12})
 }
 
 func (ct *postService) getPosts(c echo.Context) error {
-	return c.JSON(http.StatusOK, "GetPosts")
+	return c.JSON(200, map[string][]post{"items": {}})
 }
 
 func (ct *postService) getPost(c echo.Context) error {
-	return c.JSON(http.StatusOK, "getPost")
+	return c.JSON(200, post{})
 }
 
 func (ct *postService) deletePost(c echo.Context) error {
-	return c.JSON(http.StatusOK, "deletePost")
+	return c.NoContent(204)
 }
 
 func (ct *postService) getPostsByUser(c echo.Context) error {
-	return c.JSON(http.StatusOK, "getPostsByUser")
+	return c.JSON(200, map[string][]post{"items": {}})
 }
 
 func (ct *postService) getPostsLikedByUser(c echo.Context) error {
-	return c.JSON(http.StatusOK, "getPostsLikedByUser")
+	return c.JSON(200, map[string][]post{"items": {}})
 }
 
 func (ct *postService) likePost(c echo.Context) error {
-	return c.JSON(http.StatusOK, "likePost")
+	return c.NoContent(204)
 }
 
 func (ct *postService) unlikePost(c echo.Context) error {
-	return c.JSON(http.StatusOK, "unlikePost")
+	return c.NoContent(204)
 }
 
 func (ct *postService) createRetweet(c echo.Context) error {
-	return c.JSON(http.StatusOK, "createRetweet")
+	return c.NoContent(204)
 }
 
 func (ct *postService) deleteRetweet(c echo.Context) error {
-	return c.JSON(http.StatusOK, "deleteRetweet")
+	return c.NoContent(204)
 }

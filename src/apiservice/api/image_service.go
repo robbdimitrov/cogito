@@ -1,8 +1,6 @@
 package api
 
 import (
-	"net/http"
-
 	"github.com/labstack/echo/v4"
 )
 
@@ -16,10 +14,12 @@ func newImageService(addr string) *imageService {
 
 // Handlers
 
-func (ct *imageService) createImage(c echo.Context) error {
-	return c.JSON(http.StatusOK, "CreateImage")
+func (s *imageService) createImage(c echo.Context) error {
+	// TODO: Proxy request and response to image service
+	return c.JSON(200, "CreateImage")
 }
 
-func (ct *imageService) getImage(c echo.Context) error {
-	return c.JSON(http.StatusOK, "GetImage")
+func (s *imageService) getImage(c echo.Context) error {
+	// TODO: Proxy request and response to image service
+	return c.JSON(200, "GetImage")
 }

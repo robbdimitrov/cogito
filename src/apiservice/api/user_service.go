@@ -1,9 +1,14 @@
 package api
 
 import (
-	"net/http"
+	"context"
+	"time"
 
 	"github.com/labstack/echo/v4"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/status"
+
+	pb "github.com/robbdimitrov/thoughts/src/apiservice/genproto"
 )
 
 type userService struct {
@@ -16,30 +21,55 @@ func newUserService(addr string) *userService {
 
 // Handlers
 
-func (ct *userService) createUser(c echo.Context) error {
-	return c.JSON(http.StatusOK, "CreateUser")
+func (s *userService) createUser(c echo.Context) error {
+	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		return echo.NewHTTPError(500, err.Error())
+	}
+	defer conn.Close()
+	client := pb.NewUserServiceClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	req := pb.CreateUserRequest{
+		Name:     c.FormValue("name"),
+		Username: c.FormValue("username"),
+		Email:    c.FormValue("email"),
+		Password: c.FormValue("password"),
+	}
+
+	res, err := client.CreateUser(ctx, &req)
+	if err != nil {
+		s := status.Convert(err)
+		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
+	}
+
+	return c.JSON(201, map[string]int32{"id": res.UserId})
 }
 
-func (ct *userService) updateUser(c echo.Context) error {
-	return c.JSON(http.StatusOK, "UpdateUser")
+func (s *userService) updateUser(c echo.Context) error {
+	return c.NoContent(204)
 }
 
-func (ct *userService) getUser(c echo.Context) error {
-	return c.JSON(http.StatusOK, "GetUser")
+func (s *userService) getUser(c echo.Context) error {
+	return c.JSON(200, user{})
 }
 
-func (ct *userService) getFollowing(c echo.Context) error {
-	return c.JSON(http.StatusOK, "GetFollowing")
+func (s *userService) getFollowing(c echo.Context) error {
+	// path --> name := c.Param("name")
+	// query --> name := c.QueryParam("name")
+	return c.JSON(200, map[string][]user{"items": {}})
 }
 
-func (ct *userService) getFollowers(c echo.Context) error {
-	return c.JSON(http.StatusOK, "GetFollowers")
+func (s *userService) getFollowers(c echo.Context) error {
+	return c.JSON(200, map[string][]user{"items": {}})
 }
 
-func (ct *userService) followUser(c echo.Context) error {
-	return c.JSON(http.StatusOK, "followUser")
+func (s *userService) followUser(c echo.Context) error {
+	return c.NoContent(204)
 }
 
-func (ct *userService) unfollowUser(c echo.Context) error {
-	return c.JSON(http.StatusOK, "unfollowUser")
+func (s *userService) unfollowUser(c echo.Context) error {
+	return c.NoContent(204)
 }
