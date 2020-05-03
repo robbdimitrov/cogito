@@ -13,10 +13,10 @@ type router struct {
 
 func newRouter(addrs ...string) *router {
 	return &router{
-		newAuthService(addrs[0]),
-		newUserService(addrs[1]),
-		newPostService(addrs[2]),
-		newImageService(addrs[3]),
+		auth:  newAuthService(addrs[0]),
+		user:  newUserService(addrs[1]),
+		post:  newPostService(addrs[2]),
+		image: newImageService(addrs[3]),
 	}
 }
 

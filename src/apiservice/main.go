@@ -12,7 +12,10 @@ import (
 )
 
 func main() {
-	port := os.Getenv("PORT")
+	port := "8080"
+	if value, ok := os.LookupEnv("PORT"); ok {
+		port = value
+	}
 	authAddr := os.Getenv("AUTH_SERVICE_ADDR")
 	userAddr := os.Getenv("USER_SERVICE_ADDR")
 	postAddr := os.Getenv("POST_SERVICE_ADDR")
