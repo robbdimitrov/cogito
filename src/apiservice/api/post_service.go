@@ -275,7 +275,7 @@ func (s *postService) unlikePost(c echo.Context) error {
 	return c.NoContent(204)
 }
 
-func (s *postService) createRetweet(c echo.Context) error {
+func (s *postService) createRepost(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return echo.NewHTTPError(500, err.Error())
@@ -292,7 +292,7 @@ func (s *postService) createRetweet(c echo.Context) error {
 	}
 	req := pb.PostRequest{PostId: int32(postID)}
 
-	_, err = client.RetweetPost(ctx, &req)
+	_, err = client.RepostPost(ctx, &req)
 	if err != nil {
 		s := status.Convert(err)
 		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
@@ -301,7 +301,7 @@ func (s *postService) createRetweet(c echo.Context) error {
 	return c.NoContent(204)
 }
 
-func (s *postService) deleteRetweet(c echo.Context) error {
+func (s *postService) deleteRepost(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		return echo.NewHTTPError(500, err.Error())
@@ -318,7 +318,7 @@ func (s *postService) deleteRetweet(c echo.Context) error {
 	}
 	req := pb.PostRequest{PostId: int32(postID)}
 
-	_, err = client.RemoveRetweet(ctx, &req)
+	_, err = client.RemoveRepost(ctx, &req)
 	if err != nil {
 		s := status.Convert(err)
 		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())

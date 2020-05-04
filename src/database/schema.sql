@@ -37,7 +37,7 @@ CREATE TABLE likes (
   UNIQUE(post_id, user_id)
 );
 
-CREATE TABLE retweets (
+CREATE TABLE reposts (
   post_id integer REFERENCES posts ON DELETE CASCADE,
   user_id integer REFERENCES users ON DELETE CASCADE,
   created timestamp NOT NULL DEFAULT now(),

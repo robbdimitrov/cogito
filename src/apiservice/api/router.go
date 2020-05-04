@@ -43,8 +43,8 @@ func (r *router) configureRoutes(e *echo.Echo) {
 	e.GET("/users/:userId/likes", r.post.getPostsLikedByUser)
 	e.POST("/posts/:postId/likes", r.post.likePost)
 	e.DELETE("/posts/:postId/likes", r.post.unlikePost)
-	e.POST("/posts/:postId/retweets", r.post.createRetweet)
-	e.DELETE("/posts/:postId/retweets", r.post.deleteRetweet)
+	e.POST("/posts/:postId/reposts", r.post.createRepost)
+	e.DELETE("/posts/:postId/reposts", r.post.deleteRepost)
 
 	// Images
 	e.POST("/uploads", r.image.createImage)

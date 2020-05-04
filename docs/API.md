@@ -22,8 +22,8 @@
   * [Get likes](#get-likes)
   * [Like post](#like-post)
   * [Unlike post](#unlike-post)
-  * [Retweet post](#retweet-post)
-  * [Delete retweet](#delete-retweet)
+  * [Repost post](#repost-post)
+  * [Delete repost](#delete-repost)
 * [Image assets](#image-assets)
   * [Upload image](#upload-image)
   * [Load image asset](#load-image-asset)
@@ -297,8 +297,8 @@ Response:
       "content": "Some post content",
       "likes": 10,
       "liked": true,
-      "retweets": 2,
-      "retweeted": false,
+      "reposts": 2,
+      "reposted": false,
       "created": "2017-11-15T10:05:28+00:00"
     }
   ]
@@ -326,8 +326,8 @@ Response:
   "content": "Some post content",
   "likes": 10,
   "liked": true,
-  "retweets": 2,
-  "retweeted": false,
+  "reposts": 2,
+  "reposted": false,
   "created": "2017-11-15T10:05:28+00:00"
 }
 ```
@@ -369,8 +369,8 @@ Response:
       "content": "Some post content",
       "likes": 10,
       "liked": true,
-      "retweets": 2,
-      "retweeted": false,
+      "reposts": 2,
+      "reposted": false,
       "created": "2017-11-15T10:05:28+00:00"
     }
   ]
@@ -402,8 +402,8 @@ Response:
       "content": "Some post content",
       "likes": 10,
       "liked": true,
-      "retweets": 2,
-      "retweeted": false,
+      "reposts": 2,
+      "reposted": false,
       "created": "2017-11-15T10:05:28+00:00"
     }
   ]
@@ -434,10 +434,10 @@ Path parameters:
 postId - id of the post
 ```
 
-### Retweet post
+### Repost post
 
 ```
-POST /posts/<postId>/retweets
+POST /posts/<postId>/reposts
 ```
 
 Path parameters:
@@ -446,10 +446,10 @@ Path parameters:
 postId - id of the post
 ```
 
-### Delete retweet
+### Delete repost
 
 ```
-DELETE /posts/<postId>/retweets
+DELETE /posts/<postId>/reposts
 ```
 
 Path parameters:

@@ -106,8 +106,8 @@ message Post {
   string content = 3;
   int32 likes = 4;
   bool liked = 5;
-  int32 retweets = 6;
-  bool retweeted = 7;
+  int32 reposts = 6;
+  bool reposted = 7;
   string created = 8;
 }
 
@@ -150,6 +150,6 @@ service PostService {
 service ActionService {
   rpc LikePost(PostRequest) returns (Empty);
   rpc UnlikePost(PostRequest) returns (Empty);
-  rpc RetweetPost(PostRequest) returns (Empty);
-  rpc RemoveRetweet(PostRequest) returns (Empty);
+  rpc RepostPost(PostRequest) returns (Empty);
+  rpc RemoveRepost(PostRequest) returns (Empty);
 }
