@@ -22,12 +22,8 @@ message Session {
   string created = 3;
 }
 
-message CreateSessionResponse {
-  int32 session_id = 1;
-}
-
 service AuthService {
-  rpc CreateSession(Credentials) returns (CreateSessionResponse);
+  rpc CreateSession(Credentials) returns (Session);
   rpc ValidateSession(AuthRequest) returns (Session);
   rpc ValidatePassword(Credentials) returns (Empty);
   rpc DeleteSession(AuthRequest) returns (Empty);

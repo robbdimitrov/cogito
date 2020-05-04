@@ -31,6 +31,7 @@ func (s *postService) createPost(c echo.Context) error {
 	client := pb.NewPostServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
 	req := pb.CreatePostRequest{Content: c.FormValue("content")}
@@ -53,6 +54,7 @@ func (s *postService) getPosts(c echo.Context) error {
 	client := pb.NewPostServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
 	page, err := strconv.Atoi(c.QueryParam("page"))
@@ -92,6 +94,7 @@ func (s *postService) getPost(c echo.Context) error {
 	client := pb.NewPostServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
 	postID, err := strconv.Atoi(c.Param("postId"))
@@ -118,6 +121,7 @@ func (s *postService) deletePost(c echo.Context) error {
 	client := pb.NewPostServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
 	postID, err := strconv.Atoi(c.Param("postId"))
@@ -144,6 +148,7 @@ func (s *postService) getPostsByUser(c echo.Context) error {
 	client := pb.NewPostServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
 	userID, err := strconv.Atoi(c.Param("userId"))
@@ -188,6 +193,7 @@ func (s *postService) getPostsLikedByUser(c echo.Context) error {
 	client := pb.NewPostServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
 	userID, err := strconv.Atoi(c.Param("userId"))
@@ -232,6 +238,7 @@ func (s *postService) likePost(c echo.Context) error {
 	client := pb.NewActionServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
 	postID, err := strconv.Atoi(c.Param("postId"))
@@ -258,6 +265,7 @@ func (s *postService) unlikePost(c echo.Context) error {
 	client := pb.NewActionServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
 	postID, err := strconv.Atoi(c.Param("postId"))
@@ -284,6 +292,7 @@ func (s *postService) createRepost(c echo.Context) error {
 	client := pb.NewActionServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
 	postID, err := strconv.Atoi(c.Param("postId"))
@@ -310,6 +319,7 @@ func (s *postService) deleteRepost(c echo.Context) error {
 	client := pb.NewActionServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
 	postID, err := strconv.Atoi(c.Param("postId"))

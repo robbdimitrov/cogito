@@ -57,7 +57,13 @@ func (s *userService) updateUser(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
 
+	currentUserID := getUserID(c)
+	if currentUserID != c.Param("userId") {
+		return echo.NewHTTPError(403)
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
 	req := pb.UpdateUserRequest{
@@ -85,13 +91,15 @@ func (s *userService) getUser(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
 	userID, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {
 		return echo.NewHTTPError(500, err.Error())
 	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx = appendUserIDHeader(ctx, c)
+	defer cancel()
+
 	req := pb.UserRequest{UserId: int32(userID)}
 
 	res, err := client.GetUser(ctx, &req)
@@ -112,6 +120,7 @@ func (s *userService) getFollowing(c echo.Context) error {
 	client := pb.NewFollowServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
 	userID, err := strconv.Atoi(c.Param("userId"))
@@ -156,6 +165,7 @@ func (s *userService) getFollowers(c echo.Context) error {
 	client := pb.NewFollowServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
 	userID, err := strconv.Atoi(c.Param("userId"))
@@ -200,6 +210,7 @@ func (s *userService) followUser(c echo.Context) error {
 	client := pb.NewFollowServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
 	userID, err := strconv.Atoi(c.Param("userId"))
@@ -226,6 +237,7 @@ func (s *userService) unfollowUser(c echo.Context) error {
 	client := pb.NewFollowServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
 	userID, err := strconv.Atoi(c.Param("userId"))
