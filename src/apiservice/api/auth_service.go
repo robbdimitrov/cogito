@@ -2,11 +2,11 @@ package api
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/labstack/echo/v4"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/status"
 
 	pb "github.com/robbdimitrov/thoughts/src/apiservice/genproto"
 )
@@ -24,10 +24,11 @@ func newAuthService(addr string) *authService {
 func (s *authService) validateSession() error {
 	// TODO: Use as middleware - set header and cookie
 
-	// cookie, err := c.Cookie("username")
+	// cookie, err := c.Cookie("session")
 	// if err != nil {
 	// 	return err
 	// }
+	// TODO: set updated session cookie
 
 	return nil
 }
@@ -37,6 +38,7 @@ func (s *authService) validateSession() error {
 func (s *authService) createSession(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
+		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500, err.Error())
 	}
 	defer conn.Close()
@@ -52,8 +54,8 @@ func (s *authService) createSession(c echo.Context) error {
 
 	res, err := client.CreateSession(ctx, &req)
 	if err != nil {
-		s := status.Convert(err)
-		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
+		log.Printf("Creating session failed: %v", err)
+		return newHTTPError(err)
 	}
 
 	createCookie(c, res.Id)
@@ -63,6 +65,7 @@ func (s *authService) createSession(c echo.Context) error {
 func (s *authService) deleteSession(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
+		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500, err.Error())
 	}
 	defer conn.Close()
@@ -75,8 +78,8 @@ func (s *authService) deleteSession(c echo.Context) error {
 
 	_, err = client.DeleteSession(ctx, &req)
 	if err != nil {
-		s := status.Convert(err)
-		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
+		log.Printf("Deleting session failed: %v", err)
+		return newHTTPError(err)
 	}
 
 	clearCookie(c)

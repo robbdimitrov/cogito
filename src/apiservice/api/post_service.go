@@ -2,12 +2,12 @@ package api
 
 import (
 	"context"
+	"log"
 	"strconv"
 	"time"
 
 	"github.com/labstack/echo/v4"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/status"
 
 	pb "github.com/robbdimitrov/thoughts/src/apiservice/genproto"
 )
@@ -25,6 +25,7 @@ func newPostService(addr string) *postService {
 func (s *postService) createPost(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
+		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500, err.Error())
 	}
 	defer conn.Close()
@@ -38,8 +39,8 @@ func (s *postService) createPost(c echo.Context) error {
 
 	res, err := client.CreatePost(ctx, &req)
 	if err != nil {
-		s := status.Convert(err)
-		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
+		log.Printf("Creating post failed: %v", err)
+		return newHTTPError(err)
 	}
 
 	return c.JSON(201, map[string]int32{"id": res.PostId})
@@ -48,6 +49,7 @@ func (s *postService) createPost(c echo.Context) error {
 func (s *postService) getPosts(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
+		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500, err.Error())
 	}
 	defer conn.Close()
@@ -73,8 +75,8 @@ func (s *postService) getPosts(c echo.Context) error {
 
 	res, err := client.GetFeed(ctx, &req)
 	if err != nil {
-		s := status.Convert(err)
-		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
+		log.Printf("Getting posts failed: %v", err)
+		return newHTTPError(err)
 	}
 
 	posts := make([]post, len(res.Posts))
@@ -88,6 +90,7 @@ func (s *postService) getPosts(c echo.Context) error {
 func (s *postService) getPost(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
+		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500, err.Error())
 	}
 	defer conn.Close()
@@ -105,8 +108,8 @@ func (s *postService) getPost(c echo.Context) error {
 
 	res, err := client.GetPost(ctx, &req)
 	if err != nil {
-		s := status.Convert(err)
-		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
+		log.Printf("Getting post failed: %v", err)
+		return newHTTPError(err)
 	}
 
 	return c.JSON(200, mapPost(res))
@@ -115,6 +118,7 @@ func (s *postService) getPost(c echo.Context) error {
 func (s *postService) deletePost(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
+		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500, err.Error())
 	}
 	defer conn.Close()
@@ -132,8 +136,8 @@ func (s *postService) deletePost(c echo.Context) error {
 
 	_, err = client.DeletePost(ctx, &req)
 	if err != nil {
-		s := status.Convert(err)
-		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
+		log.Printf("Deleting post failed: %v", err)
+		return newHTTPError(err)
 	}
 
 	return c.NoContent(204)
@@ -142,6 +146,7 @@ func (s *postService) deletePost(c echo.Context) error {
 func (s *postService) getPostsByUser(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
+		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500, err.Error())
 	}
 	defer conn.Close()
@@ -172,8 +177,8 @@ func (s *postService) getPostsByUser(c echo.Context) error {
 
 	res, err := client.GetPosts(ctx, &req)
 	if err != nil {
-		s := status.Convert(err)
-		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
+		log.Printf("Getting posts failed: %v", err)
+		return newHTTPError(err)
 	}
 
 	posts := make([]post, len(res.Posts))
@@ -187,6 +192,7 @@ func (s *postService) getPostsByUser(c echo.Context) error {
 func (s *postService) getPostsLikedByUser(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
+		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500, err.Error())
 	}
 	defer conn.Close()
@@ -217,8 +223,8 @@ func (s *postService) getPostsLikedByUser(c echo.Context) error {
 
 	res, err := client.GetLikedPosts(ctx, &req)
 	if err != nil {
-		s := status.Convert(err)
-		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
+		log.Printf("Getting liked posts failed: %v", err)
+		return newHTTPError(err)
 	}
 
 	posts := make([]post, len(res.Posts))
@@ -232,6 +238,7 @@ func (s *postService) getPostsLikedByUser(c echo.Context) error {
 func (s *postService) likePost(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
+		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500, err.Error())
 	}
 	defer conn.Close()
@@ -249,8 +256,8 @@ func (s *postService) likePost(c echo.Context) error {
 
 	_, err = client.LikePost(ctx, &req)
 	if err != nil {
-		s := status.Convert(err)
-		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
+		log.Printf("Liking post failed: %v", err)
+		return newHTTPError(err)
 	}
 
 	return c.NoContent(204)
@@ -259,6 +266,7 @@ func (s *postService) likePost(c echo.Context) error {
 func (s *postService) unlikePost(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
+		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500, err.Error())
 	}
 	defer conn.Close()
@@ -276,8 +284,8 @@ func (s *postService) unlikePost(c echo.Context) error {
 
 	_, err = client.UnlikePost(ctx, &req)
 	if err != nil {
-		s := status.Convert(err)
-		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
+		log.Printf("Unliking post failed: %v", err)
+		return newHTTPError(err)
 	}
 
 	return c.NoContent(204)
@@ -286,6 +294,7 @@ func (s *postService) unlikePost(c echo.Context) error {
 func (s *postService) createRepost(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
+		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500, err.Error())
 	}
 	defer conn.Close()
@@ -303,8 +312,8 @@ func (s *postService) createRepost(c echo.Context) error {
 
 	_, err = client.RepostPost(ctx, &req)
 	if err != nil {
-		s := status.Convert(err)
-		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
+		log.Printf("Creating repost failed: %v", err)
+		return newHTTPError(err)
 	}
 
 	return c.NoContent(204)
@@ -313,6 +322,7 @@ func (s *postService) createRepost(c echo.Context) error {
 func (s *postService) deleteRepost(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
+		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500, err.Error())
 	}
 	defer conn.Close()
@@ -330,8 +340,8 @@ func (s *postService) deleteRepost(c echo.Context) error {
 
 	_, err = client.RemoveRepost(ctx, &req)
 	if err != nil {
-		s := status.Convert(err)
-		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
+		log.Printf("Deleting repost failed: %v", err)
+		return newHTTPError(err)
 	}
 
 	return c.NoContent(204)

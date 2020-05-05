@@ -2,12 +2,12 @@ package api
 
 import (
 	"context"
+	"log"
 	"strconv"
 	"time"
 
 	"github.com/labstack/echo/v4"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/status"
 
 	pb "github.com/robbdimitrov/thoughts/src/apiservice/genproto"
 )
@@ -25,6 +25,7 @@ func newUserService(addr string) *userService {
 func (s *userService) createUser(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
+		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500, err.Error())
 	}
 	defer conn.Close()
@@ -42,8 +43,8 @@ func (s *userService) createUser(c echo.Context) error {
 
 	res, err := client.CreateUser(ctx, &req)
 	if err != nil {
-		s := status.Convert(err)
-		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
+		log.Printf("Creating user failed: %v", err)
+		return newHTTPError(err)
 	}
 
 	return c.JSON(201, map[string]int32{"id": res.UserId})
@@ -52,6 +53,7 @@ func (s *userService) createUser(c echo.Context) error {
 func (s *userService) updateUser(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
+		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500, err.Error())
 	}
 	defer conn.Close()
@@ -76,8 +78,8 @@ func (s *userService) updateUser(c echo.Context) error {
 
 	_, err = client.UpdateUser(ctx, &req)
 	if err != nil {
-		s := status.Convert(err)
-		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
+		log.Printf("Updating user failed: %v", err)
+		return newHTTPError(err)
 	}
 
 	return c.NoContent(204)
@@ -86,6 +88,7 @@ func (s *userService) updateUser(c echo.Context) error {
 func (s *userService) getUser(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
+		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500, err.Error())
 	}
 	defer conn.Close()
@@ -104,8 +107,8 @@ func (s *userService) getUser(c echo.Context) error {
 
 	res, err := client.GetUser(ctx, &req)
 	if err != nil {
-		s := status.Convert(err)
-		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
+		log.Printf("Getting user failed: %v", err)
+		return newHTTPError(err)
 	}
 
 	return c.JSON(200, mapUser(res))
@@ -114,6 +117,7 @@ func (s *userService) getUser(c echo.Context) error {
 func (s *userService) getFollowing(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
+		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500, err.Error())
 	}
 	defer conn.Close()
@@ -144,8 +148,8 @@ func (s *userService) getFollowing(c echo.Context) error {
 
 	res, err := client.GetFollowing(ctx, &req)
 	if err != nil {
-		s := status.Convert(err)
-		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
+		log.Printf("Getting following failed: %v", err)
+		return newHTTPError(err)
 	}
 
 	users := make([]user, len(res.Users))
@@ -159,6 +163,7 @@ func (s *userService) getFollowing(c echo.Context) error {
 func (s *userService) getFollowers(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
+		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500, err.Error())
 	}
 	defer conn.Close()
@@ -189,8 +194,8 @@ func (s *userService) getFollowers(c echo.Context) error {
 
 	res, err := client.GetFollowers(ctx, &req)
 	if err != nil {
-		s := status.Convert(err)
-		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
+		log.Printf("Getting followers failed: %v", err)
+		return newHTTPError(err)
 	}
 
 	users := make([]user, len(res.Users))
@@ -204,6 +209,7 @@ func (s *userService) getFollowers(c echo.Context) error {
 func (s *userService) followUser(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
+		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500, err.Error())
 	}
 	defer conn.Close()
@@ -221,8 +227,8 @@ func (s *userService) followUser(c echo.Context) error {
 
 	_, err = client.FollowUser(ctx, &req)
 	if err != nil {
-		s := status.Convert(err)
-		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
+		log.Printf("Following user failed: %v", err)
+		return newHTTPError(err)
 	}
 
 	return c.NoContent(204)
@@ -231,6 +237,7 @@ func (s *userService) followUser(c echo.Context) error {
 func (s *userService) unfollowUser(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
+		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500, err.Error())
 	}
 	defer conn.Close()
@@ -248,8 +255,8 @@ func (s *userService) unfollowUser(c echo.Context) error {
 
 	_, err = client.UnfollowUser(ctx, &req)
 	if err != nil {
-		s := status.Convert(err)
-		return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
+		log.Printf("Unfollowing user failed: %v", err)
+		return newHTTPError(err)
 	}
 
 	return c.NoContent(204)
