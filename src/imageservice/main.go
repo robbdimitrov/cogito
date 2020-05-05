@@ -11,7 +11,10 @@ import (
 )
 
 func main() {
-	port := os.Getenv("PORT")
+	port := "8080"
+	if value := os.Getenv("PORT"); value != "" {
+		port = value
+	}
 	imageDir := os.Getenv("IMAGE_DIR")
 
 	s := image.CreateServer(port, imageDir)
