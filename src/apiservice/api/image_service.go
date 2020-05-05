@@ -29,8 +29,8 @@ func (s *imageService) createImage(c echo.Context) error {
 		return echo.NewHTTPError(500)
 	}
 
-	copyHeader(c.Request(), req, "content-type")
-	copyHeader(c.Request(), req, "content-length")
+	copyHeader(c.Request().Header, req.Header, "content-type")
+	copyHeader(c.Request().Header, req.Header, "content-length")
 
 	res, err := s.client.Do(req)
 	if err != nil {
@@ -56,6 +56,11 @@ func (s *imageService) getImage(c echo.Context) error {
 		return echo.NewHTTPError(500)
 	}
 	defer res.Body.Close()
+
+	copyHeader(res.Header, c.Response().Header(), "content-type")
+	copyHeader(res.Header, c.Response().Header(), "content-length")
+	copyHeader(res.Header, c.Response().Header(), "last-modified")
+	copyHeader(res.Header, c.Response().Header(), "date")
 
 	return c.Stream(res.StatusCode, res.Header.Get("content-type"), res.Body)
 }
