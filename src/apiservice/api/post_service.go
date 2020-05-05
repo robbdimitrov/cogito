@@ -26,7 +26,7 @@ func (s *postService) createPost(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
 	client := pb.NewPostServiceClient(conn)
@@ -50,7 +50,7 @@ func (s *postService) getPosts(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
 	client := pb.NewPostServiceClient(conn)
@@ -61,11 +61,11 @@ func (s *postService) getPosts(c echo.Context) error {
 
 	page, err := strconv.Atoi(c.QueryParam("page"))
 	if err != nil {
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(400)
 	}
 	limit, err := strconv.Atoi(c.QueryParam("limit"))
 	if err != nil {
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(400)
 	}
 
 	req := pb.GetFeedRequest{
@@ -91,7 +91,7 @@ func (s *postService) getPost(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
 	client := pb.NewPostServiceClient(conn)
@@ -102,7 +102,7 @@ func (s *postService) getPost(c echo.Context) error {
 
 	postID, err := strconv.Atoi(c.Param("postId"))
 	if err != nil {
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(400)
 	}
 	req := pb.PostRequest{PostId: int32(postID)}
 
@@ -119,7 +119,7 @@ func (s *postService) deletePost(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
 	client := pb.NewPostServiceClient(conn)
@@ -130,7 +130,7 @@ func (s *postService) deletePost(c echo.Context) error {
 
 	postID, err := strconv.Atoi(c.Param("postId"))
 	if err != nil {
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(400)
 	}
 	req := pb.PostRequest{PostId: int32(postID)}
 
@@ -147,7 +147,7 @@ func (s *postService) getPostsByUser(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
 	client := pb.NewPostServiceClient(conn)
@@ -158,15 +158,15 @@ func (s *postService) getPostsByUser(c echo.Context) error {
 
 	userID, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(400)
 	}
 	page, err := strconv.Atoi(c.QueryParam("page"))
 	if err != nil {
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(400)
 	}
 	limit, err := strconv.Atoi(c.QueryParam("limit"))
 	if err != nil {
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(400)
 	}
 
 	req := pb.GetPostsRequest{
@@ -193,7 +193,7 @@ func (s *postService) getPostsLikedByUser(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
 	client := pb.NewPostServiceClient(conn)
@@ -204,15 +204,15 @@ func (s *postService) getPostsLikedByUser(c echo.Context) error {
 
 	userID, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(400)
 	}
 	page, err := strconv.Atoi(c.QueryParam("page"))
 	if err != nil {
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(400)
 	}
 	limit, err := strconv.Atoi(c.QueryParam("limit"))
 	if err != nil {
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(400)
 	}
 
 	req := pb.GetPostsRequest{
@@ -239,7 +239,7 @@ func (s *postService) likePost(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
 	client := pb.NewActionServiceClient(conn)
@@ -250,7 +250,7 @@ func (s *postService) likePost(c echo.Context) error {
 
 	postID, err := strconv.Atoi(c.Param("postId"))
 	if err != nil {
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(400)
 	}
 	req := pb.PostRequest{PostId: int32(postID)}
 
@@ -267,7 +267,7 @@ func (s *postService) unlikePost(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
 	client := pb.NewActionServiceClient(conn)
@@ -278,7 +278,7 @@ func (s *postService) unlikePost(c echo.Context) error {
 
 	postID, err := strconv.Atoi(c.Param("postId"))
 	if err != nil {
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(400)
 	}
 	req := pb.PostRequest{PostId: int32(postID)}
 
@@ -295,7 +295,7 @@ func (s *postService) createRepost(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
 	client := pb.NewActionServiceClient(conn)
@@ -306,7 +306,7 @@ func (s *postService) createRepost(c echo.Context) error {
 
 	postID, err := strconv.Atoi(c.Param("postId"))
 	if err != nil {
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(400)
 	}
 	req := pb.PostRequest{PostId: int32(postID)}
 
@@ -323,7 +323,7 @@ func (s *postService) deleteRepost(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
 	client := pb.NewActionServiceClient(conn)
@@ -334,7 +334,7 @@ func (s *postService) deleteRepost(c echo.Context) error {
 
 	postID, err := strconv.Atoi(c.Param("postId"))
 	if err != nil {
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(400)
 	}
 	req := pb.PostRequest{PostId: int32(postID)}
 

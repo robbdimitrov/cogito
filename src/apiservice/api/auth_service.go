@@ -39,7 +39,7 @@ func (s *authService) createSession(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
 	client := pb.NewAuthServiceClient(conn)
@@ -66,7 +66,7 @@ func (s *authService) deleteSession(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
 	client := pb.NewAuthServiceClient(conn)

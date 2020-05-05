@@ -26,7 +26,7 @@ func (s *userService) createUser(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
@@ -54,7 +54,7 @@ func (s *userService) updateUser(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
@@ -89,14 +89,14 @@ func (s *userService) getUser(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
 
 	userID, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(400)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
@@ -118,7 +118,7 @@ func (s *userService) getFollowing(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
 	client := pb.NewFollowServiceClient(conn)
@@ -129,15 +129,15 @@ func (s *userService) getFollowing(c echo.Context) error {
 
 	userID, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(400)
 	}
 	page, err := strconv.Atoi(c.QueryParam("page"))
 	if err != nil {
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(400)
 	}
 	limit, err := strconv.Atoi(c.QueryParam("limit"))
 	if err != nil {
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(400)
 	}
 
 	req := pb.GetUsersRequest{
@@ -164,7 +164,7 @@ func (s *userService) getFollowers(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
 	client := pb.NewFollowServiceClient(conn)
@@ -175,15 +175,15 @@ func (s *userService) getFollowers(c echo.Context) error {
 
 	userID, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(400)
 	}
 	page, err := strconv.Atoi(c.QueryParam("page"))
 	if err != nil {
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(400)
 	}
 	limit, err := strconv.Atoi(c.QueryParam("limit"))
 	if err != nil {
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(400)
 	}
 
 	req := pb.GetUsersRequest{
@@ -210,7 +210,7 @@ func (s *userService) followUser(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
 	client := pb.NewFollowServiceClient(conn)
@@ -221,7 +221,7 @@ func (s *userService) followUser(c echo.Context) error {
 
 	userID, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(400)
 	}
 	req := pb.UserRequest{UserId: int32(userID)}
 
@@ -238,7 +238,7 @@ func (s *userService) unfollowUser(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
 	client := pb.NewFollowServiceClient(conn)
@@ -249,7 +249,7 @@ func (s *userService) unfollowUser(c echo.Context) error {
 
 	userID, err := strconv.Atoi(c.Param("userId"))
 	if err != nil {
-		return echo.NewHTTPError(500, err.Error())
+		return echo.NewHTTPError(400)
 	}
 	req := pb.UserRequest{UserId: int32(userID)}
 
