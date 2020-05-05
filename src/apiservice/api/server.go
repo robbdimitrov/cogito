@@ -19,7 +19,7 @@ func CreateServer(addrs ...string) *echo.Echo {
 		return func(c echo.Context) (err error) {
 			req := c.Request()
 			log.Printf("Request %s %s", req.Method, req.RequestURI)
-			return
+			return next(c)
 		}
 	})
 
