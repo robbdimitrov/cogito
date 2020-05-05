@@ -12,7 +12,9 @@ func CreateServer(addrs ...string) *echo.Echo {
 
 	e.HideBanner = true
 	e.HidePort = true
-	e.Use(middleware.Logger())
+	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+		Format: "[${time_rfc3339}] Request ${method} ${uri}\n",
+	}))
 	e.Use(middleware.Recover())
 	r.configureRoutes(e)
 
