@@ -9,12 +9,15 @@ import (
 )
 
 func main() {
-	port := os.Getenv("PORT")
+	port := "5050"
+	if value := os.Getenv("PORT"); value != "" {
+		port = value
+	}
 	dbURI := os.Getenv("DATABASE_URL")
 	authURI := os.Getenv("AUTH_SERVICE_ADDR")
 	userURI := os.Getenv("USER_SERVICE_ADDR")
 
-	server := post.NewServer(port, dbURI, authURI, userURI)
+	s := post.NewServer(port, dbURI, authURI, userURI)
 
-	server.Start()
+	s.Start()
 }

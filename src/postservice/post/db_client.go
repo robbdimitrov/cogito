@@ -1,20 +1,41 @@
 package post
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"log"
+
+	"github.com/jackc/pgx/v4"
 
 	pb "github.com/robbdimitrov/thoughts/src/postservice/genproto"
 )
 
 // DbClient manages the communication between services and database
 type DbClient struct {
-	db *Database
+	dbURI string
+	conn  *pgx.Conn
 }
 
 // NewDbClient creates a new DbClient instance
-func NewDbClient(db *Database) *DbClient {
-	return &DbClient{db}
+func NewDbClient(dbURI string) *DbClient {
+	return &DbClient{dbURI: dbURI}
+}
+
+// GetConn establishes and returns a connection to the database
+func (c *DbClient) GetConn() *pgx.Conn {
+	var err error
+	c.conn, err = pgx.Connect(context.Background(), c.dbURI)
+	if err != nil {
+		log.Fatalf("Error connecting to the database: %v", err)
+	}
+	return c.conn
+}
+
+// Close closes the existing connection to the database
+func (c *DbClient) Close() {
+	c.conn.Close(context.Background())
+	c.conn = nil
 }
 
 func (c *DbClient) createPostQuery(where string, order string,

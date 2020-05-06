@@ -9,8 +9,7 @@ import (
 
 // ActionService is handling like and retweet actions of posts
 type ActionService struct {
-	dbClient   *DbClient
-	authClient *AuthClient
+	dbClient *DbClient
 }
 
 // NewActionService creates a new server instance

@@ -5,9 +5,9 @@ import (
 	"log"
 	"net"
 
-	pb "github.com/robbdimitrov/thoughts/src/postservice/genproto"
-
 	"google.golang.org/grpc"
+
+	pb "github.com/robbdimitrov/thoughts/src/postservice/genproto"
 )
 
 // Server is runing on a port and handling grpc requests
