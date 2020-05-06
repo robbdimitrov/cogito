@@ -13,7 +13,7 @@ func logger(next http.Handler) http.Handler {
 	})
 }
 
-func createRouter(s *service) *http.ServeMux {
+func createRouter(s *controller) *http.ServeMux {
 	router := http.NewServeMux()
 	router.Handle("/uploads", logger(http.HandlerFunc(s.uploadFile)))
 	router.Handle("/uploads/", logger(http.HandlerFunc(s.getFile)))
@@ -24,6 +24,6 @@ func createRouter(s *service) *http.ServeMux {
 func CreateServer(port string, imageDir string) *http.Server {
 	return &http.Server{
 		Addr:    fmt.Sprintf(":%s", port),
-		Handler: createRouter(newService(imageDir)),
+		Handler: createRouter(newController(imageDir)),
 	}
 }

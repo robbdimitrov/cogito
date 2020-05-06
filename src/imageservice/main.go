@@ -20,7 +20,7 @@ func main() {
 	s := image.CreateServer(port, imageDir)
 
 	go func() {
-		log.Printf("Server is starting on port %s\n", port)
+		log.Printf("Server is starting on port %s", port)
 		if err := s.ListenAndServe(); err != nil {
 			log.Fatal(err)
 		}

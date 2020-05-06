@@ -12,17 +12,17 @@ import (
 	pb "github.com/robbdimitrov/thoughts/src/apiservice/genproto"
 )
 
-type userService struct {
+type userController struct {
 	addr string
 }
 
-func newUserService(addr string) *userService {
-	return &userService{addr}
+func newUserController(addr string) *userController {
+	return &userController{addr}
 }
 
 // Handlers
 
-func (s *userService) createUser(c echo.Context) error {
+func (s *userController) createUser(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
@@ -50,7 +50,7 @@ func (s *userService) createUser(c echo.Context) error {
 	return c.JSON(201, map[string]int32{"id": res.UserId})
 }
 
-func (s *userService) updateUser(c echo.Context) error {
+func (s *userController) updateUser(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
@@ -85,7 +85,7 @@ func (s *userService) updateUser(c echo.Context) error {
 	return c.NoContent(204)
 }
 
-func (s *userService) getUser(c echo.Context) error {
+func (s *userController) getUser(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
@@ -114,7 +114,7 @@ func (s *userService) getUser(c echo.Context) error {
 	return c.JSON(200, mapUser(res))
 }
 
-func (s *userService) getFollowing(c echo.Context) error {
+func (s *userController) getFollowing(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
@@ -160,7 +160,7 @@ func (s *userService) getFollowing(c echo.Context) error {
 	return c.JSON(200, map[string][]user{"items": users})
 }
 
-func (s *userService) getFollowers(c echo.Context) error {
+func (s *userController) getFollowers(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
@@ -206,7 +206,7 @@ func (s *userService) getFollowers(c echo.Context) error {
 	return c.JSON(200, map[string][]user{"items": users})
 }
 
-func (s *userService) followUser(c echo.Context) error {
+func (s *userController) followUser(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
@@ -234,7 +234,7 @@ func (s *userService) followUser(c echo.Context) error {
 	return c.NoContent(204)
 }
 
-func (s *userService) unfollowUser(c echo.Context) error {
+func (s *userController) unfollowUser(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)

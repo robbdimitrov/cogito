@@ -12,23 +12,23 @@ import (
 	pb "github.com/robbdimitrov/thoughts/src/apiservice/genproto"
 )
 
-type authService struct {
+type authController struct {
 	addr string
 }
 
-func newAuthService(addr string) *authService {
-	return &authService{addr}
+func newAuthController(addr string) *authController {
+	return &authController{addr}
 }
 
 // Middleware
 
-func (s *authService) validateSession(c echo.Context) error {
+func (ac *authController) validateSession(c echo.Context) error {
 	cookie, err := c.Cookie("session")
 	if err != nil {
 		return echo.NewHTTPError(401, "Missing session cookie.")
 	}
 
-	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(ac.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500)
@@ -56,8 +56,8 @@ func (s *authService) validateSession(c echo.Context) error {
 
 // Handlers
 
-func (s *authService) createSession(c echo.Context) error {
-	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
+func (ac *authController) createSession(c echo.Context) error {
+	conn, err := grpc.Dial(ac.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500)
@@ -83,8 +83,8 @@ func (s *authService) createSession(c echo.Context) error {
 	return c.JSON(200, map[string]int32{"id": res.UserId})
 }
 
-func (s *authService) deleteSession(c echo.Context) error {
-	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
+func (ac *authController) deleteSession(c echo.Context) error {
+	conn, err := grpc.Dial(ac.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500)

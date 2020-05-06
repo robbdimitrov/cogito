@@ -5,18 +5,18 @@ import (
 )
 
 type router struct {
-	auth  *authService
-	user  *userService
-	post  *postService
-	image *imageService
+	auth  *authController
+	user  *userController
+	post  *postController
+	image *imageController
 }
 
 func newRouter(addrs ...string) *router {
 	return &router{
-		auth:  newAuthService(addrs[0]),
-		user:  newUserService(addrs[1]),
-		post:  newPostService(addrs[2]),
-		image: newImageService(addrs[3]),
+		auth:  newAuthController(addrs[0]),
+		user:  newUserController(addrs[1]),
+		post:  newPostController(addrs[2]),
+		image: newImageController(addrs[3]),
 	}
 }
 

@@ -24,7 +24,7 @@ func main() {
 	e := api.CreateServer(authAddr, userAddr, postAddr, imageAddr)
 
 	go func() {
-		log.Printf("Server is starting on port %s\n", port)
+		log.Printf("Server is starting on port %s", port)
 		if err := e.Start(fmt.Sprintf(":%s", port)); err != nil {
 			e.Logger.Fatal(err)
 		}

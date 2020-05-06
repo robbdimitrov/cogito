@@ -12,15 +12,15 @@ import (
 
 const maxFileSize = 1 << 20
 
-type service struct {
+type controller struct {
 	imageDir string
 }
 
-func newService(imageDir string) *service {
-	return &service{imageDir}
+func newController(imageDir string) *controller {
+	return &controller{imageDir}
 }
 
-func (s *service) uploadFile(w http.ResponseWriter, r *http.Request) {
+func (s *controller) uploadFile(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, maxFileSize)
 
 	if err := r.ParseMultipartForm(maxFileSize); err != nil {
@@ -67,7 +67,7 @@ func (s *service) uploadFile(w http.ResponseWriter, r *http.Request) {
 	jsonResponse(w, map[string]string{"image": filename}, 201)
 }
 
-func (s *service) getFile(w http.ResponseWriter, r *http.Request) {
+func (s *controller) getFile(w http.ResponseWriter, r *http.Request) {
 	filePath := fmt.Sprintf("%s/%s", s.imageDir, filepath.Base(r.URL.Path))
 
 	_, err := os.Stat(filePath)

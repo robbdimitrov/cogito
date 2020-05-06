@@ -13,7 +13,7 @@ var allowed = []route{
 	{method: "POST", path: "/users"},
 }
 
-func authGuard(s *authService) func(echo.HandlerFunc) echo.HandlerFunc {
+func authGuard(ac *authController) func(echo.HandlerFunc) echo.HandlerFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			req := c.Request()
@@ -22,7 +22,7 @@ func authGuard(s *authService) func(echo.HandlerFunc) echo.HandlerFunc {
 					return next(c)
 				}
 			}
-			if err := s.validateSession(c); err != nil {
+			if err := ac.validateSession(c); err != nil {
 				return err
 			}
 			return next(c)
