@@ -13,11 +13,11 @@ message Credentials {
 }
 
 message AuthRequest {
-  int32 session_id = 1;
+  string session_id = 1;
 }
 
 message Session {
-  int32 id = 1;
+  string id = 1;
   int32 user_id = 2;
   string created = 3;
 }

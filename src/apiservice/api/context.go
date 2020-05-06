@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -22,10 +21,10 @@ func appendUserIDHeader(ctx context.Context, c echo.Context) context.Context {
 	return metadata.AppendToOutgoingContext(ctx, "user-id", getUserID(c))
 }
 
-func createCookie(c echo.Context, sessionID int32) {
+func createCookie(c echo.Context, sessionID string) {
 	cookie := &http.Cookie{
 		Name:     "session",
-		Value:    strconv.Itoa(int(sessionID)),
+		Value:    sessionID,
 		Expires:  time.Now().Add(7 * 24 * time.Hour),
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,

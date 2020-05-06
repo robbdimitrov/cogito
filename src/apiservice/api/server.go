@@ -16,13 +16,14 @@ func CreateServer(addrs ...string) *echo.Echo {
 	e.HidePort = true
 
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) (err error) {
+		return func(c echo.Context) error {
 			req := c.Request()
 			log.Printf("Request %s %s", req.Method, req.RequestURI)
 			return next(c)
 		}
 	})
 
+	e.Use(authGuard(r.auth))
 	e.Use(middleware.Recover())
 	r.configureRoutes(e)
 

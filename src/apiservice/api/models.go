@@ -27,7 +27,7 @@ type post struct {
 }
 
 type session struct {
-	ID      int32  `json:"id"`
+	ID      string `json:"id"`
 	UserID  int32  `json:"userId"`
 	Created string `json:"created"`
 }
