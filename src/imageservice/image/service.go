@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -24,8 +23,7 @@ func newService(imageDir string) *service {
 func (s *service) uploadFile(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, maxFileSize)
 
-	err := r.ParseMultipartForm(maxFileSize)
-	if err != nil {
+	if err := r.ParseMultipartForm(maxFileSize); err != nil {
 		log.Printf("Parsing file failed: %v", err)
 		errorResponse(w, "File should be smaller than 1MB.", 400)
 		return
@@ -34,19 +32,15 @@ func (s *service) uploadFile(w http.ResponseWriter, r *http.Request) {
 	file, _, err := r.FormFile("image")
 	if err != nil {
 		log.Printf("Retrieving file failed: %v", err)
-		errorResponse(w, "There was an error while processing the image.", 400)
+		errorResponse(w, http.StatusText(400), 400)
 		return
 	}
 	defer file.Close()
 
-	s.saveFile(w, file)
-}
-
-func (s *service) saveFile(w http.ResponseWriter, file multipart.File) {
 	data, err := ioutil.ReadAll(file)
 	if err != nil {
 		log.Printf("Reading file failed: %v", err)
-		errorResponse(w, "There was an error while processing the image.", 400)
+		errorResponse(w, http.StatusText(400), 400)
 		return
 	}
 
@@ -66,7 +60,7 @@ func (s *service) saveFile(w http.ResponseWriter, file multipart.File) {
 	err = ioutil.WriteFile(path, data, 0666)
 	if err != nil {
 		log.Printf("Saving file failed: %v", err)
-		errorResponse(w, "There was an error while processing the image.", 500)
+		errorResponse(w, http.StatusText(500), 500)
 		return
 	}
 

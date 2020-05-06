@@ -22,9 +22,8 @@ func createRouter(s *service) *http.ServeMux {
 
 // CreateServer is a constructor for new Server objects
 func CreateServer(port string, imageDir string) *http.Server {
-	s := &http.Server{
+	return &http.Server{
 		Addr:    fmt.Sprintf(":%s", port),
 		Handler: createRouter(newService(imageDir)),
 	}
-	return s
 }

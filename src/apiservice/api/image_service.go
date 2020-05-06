@@ -15,7 +15,7 @@ type imageService struct {
 }
 
 func newImageService(addr string) *imageService {
-	var client = &http.Client{Timeout: time.Second * 10}
+	client := &http.Client{Timeout: time.Second * 10}
 	return &imageService{addr, client}
 }
 
@@ -57,7 +57,6 @@ func (s *imageService) getImage(c echo.Context) error {
 	}
 	defer res.Body.Close()
 
-	copyHeader(res.Header, c.Response().Header(), "content-type")
 	copyHeader(res.Header, c.Response().Header(), "content-length")
 	copyHeader(res.Header, c.Response().Header(), "last-modified")
 	copyHeader(res.Header, c.Response().Header(), "date")

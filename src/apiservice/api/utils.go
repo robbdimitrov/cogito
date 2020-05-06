@@ -32,7 +32,7 @@ func newHTTPError(err error) *echo.HTTPError {
 	return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
 }
 
-// copyHeader copies headers from src req to dest if they exist
+// copyHeader copies headers from src to dest if they exist
 func copyHeader(s http.Header, d http.Header, key string) {
 	if value := s.Get(key); value != "" {
 		d.Set(key, value)
