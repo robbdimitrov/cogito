@@ -1,6 +1,7 @@
 # Thoughts
 
-Thoughts is a message sharing service.
+**Thoughts** is a post-sharing application where users can create, browse, 
+like and repost posts and follow other users.
 
 ## Table of contents
 
@@ -11,7 +12,7 @@ Thoughts is a message sharing service.
   - [Clone the repository](#clone-the-repository)
   - [Build the images](#build-the-images)
   - [Create deployments](#create-deployments)
-- [Access the front end](#access-the-front-end)
+- [Access the frontend](#access-the-frontend)
 - [Cleanup](#cleanup)
 - [API](#api)
 - [License](#license)
@@ -37,12 +38,12 @@ Protobuf definitions can be found at the [`/pb` directory](/pb).
 
 Service | Language | Description
 --- | --- | ---
-[apiservice](/src/apiservice) | Go | API Gateway between the front end and the back end services.
+[apiservice](/src/apiservice) | Go | API Gateway between the frontend and the backend services.
 [authservice](/src/authservice) | Python | Authentication service for creation and validation of access and refresh tokens.
 [database](/src/database) | SQL | PostgreSQL database with tables, relationships and functions.
-[frontend](/src/frontend) | JavaScript | React front end of the app.
+[frontend](/src/frontend) | JavaScript | React frontend of the app.
 [imageservice](/src/imageservice) | Go | Image upload and delivery service used for storing and retrieving image assets.
-[postservice](/src/postservice) | Go | Service for creation, liking, retweeting and fetching of posts.
+[postservice](/src/postservice) | Go | Service for creation, liking, reposting and fetching of posts.
 [userservice](/src/userservice) | Python | Service for creation, following and fetching of users.
 
 ## Setup
@@ -58,13 +59,13 @@ $ cd thoughts
 
 ### Build the images
 
-There are couple of ways to build the images. The easiest would be to run `make` in the root directory
+Build all the images
 
 ```sh
 $ make
 ```
 
-Specific images can be built with `make` as well
+Or build specific images
 
 ```sh
 $ make apiservice
@@ -76,34 +77,44 @@ $ make postservice
 $ make imageservice
 ```
 
+### Create namespace
+
+Create namespace for the k8s resources
+
+```sh
+$ kubectl create namespace thoughts
+```
+
 ### Create deployments
 
 Create deployments and volumes
 
 ```sh
-$ kubectl apply -f k8s
+$ kubectl apply -f ./k8s -n thoughts
 ```
 
-## Access the front end
+## Access the frontend
 
-Enable port-forwarding for the front end and access it [here](http://localhost:8080/)
+Enable port forwarding
 
 ```sh
-$ kubectl port-forward service/frontend 8080:80
+$ kubectl port-forward service/frontend 8080:8080 -n thoughts
 ```
+
+Open the frontend [here](http://localhost:8080/).
 
 ## Cleanup
 
-Delete everything in the cluster
+Delete all resources
 
 ```sh
-$ kubectl delete -f k8s
+$ kubectl delete -f ./k8s -n thoughts
 ```
 
-Cleanup unused docker images
+Delete the namespace
 
 ```sh
-$ make clean
+$ kubectl delete namespace thoughts
 ```
 
 ## API

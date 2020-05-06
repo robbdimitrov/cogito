@@ -5,12 +5,12 @@ CREATE DATABASE thoughts;
 
 CREATE TABLE users (
   id serial PRIMARY KEY,
+  name varchar(255) NOT NULL,
   username varchar(255) UNIQUE NOT NULL,
   email varchar(255) UNIQUE NOT NULL,
-  name varchar(255) NOT NULL,
   password varchar(255) NOT NULL,
-  bio varchar(255) DEFAULT '',
   avatar varchar(255) DEFAULT '',
+  bio varchar(255) DEFAULT '',
   created timestamp NOT NULL DEFAULT now()
 );
 
@@ -37,7 +37,7 @@ CREATE TABLE likes (
   UNIQUE(post_id, user_id)
 );
 
-CREATE TABLE retweets (
+CREATE TABLE reposts (
   post_id integer REFERENCES posts ON DELETE CASCADE,
   user_id integer REFERENCES users ON DELETE CASCADE,
   created timestamp NOT NULL DEFAULT now(),

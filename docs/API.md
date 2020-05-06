@@ -22,15 +22,18 @@
   * [Get likes](#get-likes)
   * [Like post](#like-post)
   * [Unlike post](#unlike-post)
-  * [Retweet post](#retweet-post)
-  * [Delete retweet](#delete-retweet)
+  * [Repost post](#repost-post)
+  * [Delete repost](#delete-repost)
+* [Image assets](#image-assets)
+  * [Upload image](#upload-image)
+  * [Load image asset](#load-image-asset)
 * [Errors](#errors)
 
 ## Sessions
 
 ### Login
 
-Sets an `SID` cookie with the session id.
+Sets an `session` cookie with the session id.
 
 ```
 POST /sessions
@@ -47,24 +50,13 @@ Response:
 
 ```json
 {
-  "id": 10,
-  "username": "superman",
-  "email": "clark.kent@dailyplanet.com",
-  "name": "Clark Kent",
-  "bio": "Kryptonian hero",
-  "avatar": "d1d99db3ac32052b9dd66cb5914508dd",
-  "posts": 3,
-  "likes": 1,
-  "followed": false,
-  "following": 0,
-  "followers": 10,
-  "created": "2017-11-15T10:05:28+00:00"
+  "id": 10
 }
 ```
 
 ### Logout
 
-The active session is taken from the `SID` cookie.
+The active session is taken from the `session` cookie.
 
 ```
 DELETE /sessions
@@ -136,16 +128,16 @@ Response:
 ```json
 {
   "id": 10,
+  "name": "Clark Kent",
   "username": "superman",
   "email": "clark.kent@dailyplanet.com",
-  "name": "Clark Kent",
-  "bio": "Kryptonian hero",
   "avatar": "d1d99db3ac32052b9dd66cb5914508dd",
+  "bio": "Kryptonian hero",
   "posts": 3,
   "likes": 1,
-  "followed": false,
   "following": 0,
   "followers": 10,
+  "followed": false,
   "created": "2017-11-15T10:05:28+00:00"
 }
 ```
@@ -171,16 +163,16 @@ Response:
   "items": [
     {
       "id": 10,
+      "name": "Clark Kent",
       "username": "superman",
       "email": "clark.kent@dailyplanet.com",
-      "name": "Clark Kent",
-      "bio": "Kryptonian hero",
       "avatar": "d1d99db3ac32052b9dd66cb5914508dd",
+      "bio": "Kryptonian hero",
       "posts": 3,
       "likes": 1,
-      "followed": false,
       "following": 0,
       "followers": 10,
+      "followed": false,
       "created": "2017-11-15T10:05:28+00:00"
     }
   ]
@@ -208,16 +200,16 @@ Response:
   "items": [
     {
       "id": 10,
+      "name": "Clark Kent",
       "username": "superman",
       "email": "clark.kent@dailyplanet.com",
-      "name": "Clark Kent",
-      "bio": "Kryptonian hero",
       "avatar": "d1d99db3ac32052b9dd66cb5914508dd",
+      "bio": "Kryptonian hero",
       "posts": 3,
       "likes": 1,
-      "followed": false,
       "following": 0,
       "followers": 10,
+      "followed": false,
       "created": "2017-11-15T10:05:28+00:00"
     }
   ]
@@ -290,12 +282,12 @@ Response:
   "items": [
     {
       "id": 12,
+      "userId": 10,
       "content": "Some post content",
-      "user_id": 10,
       "likes": 10,
       "liked": true,
-      "retweets": 2,
-      "retweeted": false,
+      "reposts": 2,
+      "reposted": false,
       "created": "2017-11-15T10:05:28+00:00"
     }
   ]
@@ -319,12 +311,12 @@ Response:
 ```json
 {
   "id": 12,
+  "userId": 10,
   "content": "Some post content",
-  "user_id": 10,
   "likes": 10,
   "liked": true,
-  "retweets": 2,
-  "retweeted": false,
+  "reposts": 2,
+  "reposted": false,
   "created": "2017-11-15T10:05:28+00:00"
 }
 ```
@@ -362,12 +354,12 @@ Response:
   "items": [
     {
       "id": 12,
+      "userId": 10,
       "content": "Some post content",
-      "user_id": 10,
       "likes": 10,
       "liked": true,
-      "retweets": 2,
-      "retweeted": false,
+      "reposts": 2,
+      "reposted": false,
       "created": "2017-11-15T10:05:28+00:00"
     }
   ]
@@ -395,12 +387,12 @@ Response:
   "items": [
     {
       "id": 12,
+      "userId": 10,
       "content": "Some post content",
-      "user_id": 10,
       "likes": 10,
       "liked": true,
-      "retweets": 2,
-      "retweeted": false,
+      "reposts": 2,
+      "reposted": false,
       "created": "2017-11-15T10:05:28+00:00"
     }
   ]
@@ -431,10 +423,22 @@ Path parameters:
 postId - id of the post
 ```
 
-### Retweet post
+### Repost post
 
 ```
-POST /posts/<postId>/retweets
+POST /posts/<postId>/reposts
+```
+
+Path parameters:
+
+```
+postId - id of the post
+```
+
+### Delete repost
+
+```
+DELETE /posts/<postId>/reposts
 ```
 
 Path parameters:
@@ -443,16 +447,46 @@ Path parameters:
 postId - id of the post
 ```
 
-### Delete retweet
+## Image assets
+
+### Upload image
+
+File size should be less than 1MB.
 
 ```
-DELETE /posts/<postId>/retweets
+POST /uploads
+```
+
+Body parameters:
+
+```
+image: file sent as multipart/form-data
+```
+
+Response:
+
+```json
+{
+  "filename": "d4aab3fd72517522479c08520bc150a3"
+}
+```
+
+### Load image asset
+
+```
+GET /uploads/<filename>
 ```
 
 Path parameters:
 
 ```
-postId - id of the post
+filename - filename returned from the upload function
+```
+
+Response:
+
+```
+The image data
 ```
 
 ## Errors

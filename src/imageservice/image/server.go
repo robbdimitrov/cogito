@@ -6,29 +6,24 @@ import (
 	"net/http"
 )
 
-// Server is runing on a port and handling grpc requests
-type Server struct {
-	port    string
-	authURI string
+func logger(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("Request %s %s", r.Method, r.RequestURI)
+		next.ServeHTTP(w, r)
+	})
 }
 
-// NewServer is a constructor for new Server objects
-func NewServer(port string, authURI string) *Server {
-	return &Server{port, authURI}
+func createRouter(s *service) *http.ServeMux {
+	router := http.NewServeMux()
+	router.Handle("/uploads", logger(http.HandlerFunc(s.uploadFile)))
+	router.Handle("/uploads/", logger(http.HandlerFunc(s.getFile)))
+	return router
 }
 
-// Start starts the server instance
-func (s *Server) Start() {
-	log.Printf("Starting server on port %s\n", s.port)
-
-	authClient := NewAuthClient(s.authURI)
-	service := Service{"/data/images", authClient}
-
-	http.HandleFunc("/images", service.uploadFile)
-	http.HandleFunc("/images/", service.getFile)
-
-	err := http.ListenAndServe(fmt.Sprintf(":%s", s.port), nil)
-	if err != nil {
-		log.Fatalf("Error prevented the server from running: %v", err)
+// CreateServer is a constructor for new Server objects
+func CreateServer(port string, imageDir string) *http.Server {
+	return &http.Server{
+		Addr:    fmt.Sprintf(":%s", port),
+		Handler: createRouter(newService(imageDir)),
 	}
 }

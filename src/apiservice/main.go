@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
 	"time"
 
-	"github.com/robbdimitrov/thoughts/src/imageservice/image"
+	"github.com/robbdimitrov/thoughts/src/apiservice/api"
 )
 
 func main() {
@@ -15,14 +16,17 @@ func main() {
 	if value := os.Getenv("PORT"); value != "" {
 		port = value
 	}
-	imageDir := os.Getenv("IMAGE_DIR")
+	authAddr := os.Getenv("AUTH_SERVICE_ADDR")
+	userAddr := os.Getenv("USER_SERVICE_ADDR")
+	postAddr := os.Getenv("POST_SERVICE_ADDR")
+	imageAddr := os.Getenv("IMAGE_SERVICE_ADDR")
 
-	s := image.CreateServer(port, imageDir)
+	e := api.CreateServer(authAddr, userAddr, postAddr, imageAddr)
 
 	go func() {
 		log.Printf("Server is starting on port %s\n", port)
-		if err := s.ListenAndServe(); err != nil {
-			log.Fatal(err)
+		if err := e.Start(fmt.Sprintf(":%s", port)); err != nil {
+			e.Logger.Fatal(err)
 		}
 	}()
 
@@ -32,7 +36,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	log.Println("Server is shutting down...")
-	if err := s.Shutdown(ctx); err != nil {
-		log.Fatal(err)
+	if err := e.Shutdown(ctx); err != nil {
+		e.Logger.Fatal(err)
 	}
 }
