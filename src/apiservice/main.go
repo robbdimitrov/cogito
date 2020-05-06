@@ -33,8 +33,10 @@ func main() {
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt)
 	<-quit
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+
 	log.Println("Server is shutting down...")
 	if err := e.Shutdown(ctx); err != nil {
 		e.Logger.Fatal(err)

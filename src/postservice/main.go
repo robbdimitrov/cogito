@@ -1,9 +1,13 @@
 package main
 
 import (
+	"context"
+	"fmt"
+	"log"
+	"net"
 	"os"
-
-	_ "github.com/lib/pq"
+	"os/signal"
+	"time"
 
 	"github.com/robbdimitrov/thoughts/src/postservice/post"
 )
@@ -13,11 +17,31 @@ func main() {
 	if value := os.Getenv("PORT"); value != "" {
 		port = value
 	}
-	dbURI := os.Getenv("DATABASE_URL")
-	authURI := os.Getenv("AUTH_SERVICE_ADDR")
-	userURI := os.Getenv("USER_SERVICE_ADDR")
+	dbURL := os.Getenv("DATABASE_URL")
 
-	s := post.NewServer(port, dbURI, authURI, userURI)
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	s.Start()
+	d := post.NewDbClient(dbURL)
+	s := post.CreateServer(d)
+
+	go func() {
+		log.Printf("Server is starting on port %s", port)
+		if err := s.Serve(lis); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	quit := make(chan os.Signal)
+	signal.Notify(quit, os.Interrupt)
+	<-quit
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	log.Println("Server is shutting down...")
+	s.GracefulStop()
+	d.Close(ctx)
 }

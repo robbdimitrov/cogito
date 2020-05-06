@@ -25,7 +25,7 @@ func newAuthController(addr string) *authController {
 func (ac *authController) validateSession(c echo.Context) error {
 	cookie, err := c.Cookie("session")
 	if err != nil {
-		return echo.NewHTTPError(401, "Missing session cookie.")
+		return echo.NewHTTPError(401)
 	}
 
 	conn, err := grpc.Dial(ac.addr, grpc.WithInsecure(), grpc.WithBlock())
