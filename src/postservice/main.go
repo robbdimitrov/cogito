@@ -1,13 +1,11 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"net"
 	"os"
 	"os/signal"
-	"time"
 
 	"github.com/robbdimitrov/thoughts/src/postservice/post"
 )
@@ -24,12 +22,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	d := post.NewDbClient(dbURL)
-	s := post.CreateServer(d)
+	dbClient := post.NewDbClient(dbURL)
+	server := post.CreateServer(dbClient)
 
 	go func() {
 		log.Printf("Server is starting on port %s", port)
-		if err := s.Serve(lis); err != nil {
+		if err := server.Serve(lis); err != nil {
 			log.Fatal(err)
 		}
 	}()
@@ -38,10 +36,7 @@ func main() {
 	signal.Notify(quit, os.Interrupt)
 	<-quit
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
 	log.Println("Server is shutting down...")
-	s.GracefulStop()
-	d.Close(ctx)
+	server.GracefulStop()
+	dbClient.Close()
 }

@@ -21,12 +21,12 @@ func main() {
 	postAddr := os.Getenv("POST_SERVICE_ADDR")
 	imageAddr := os.Getenv("IMAGE_SERVICE_ADDR")
 
-	e := api.CreateServer(authAddr, userAddr, postAddr, imageAddr)
+	server := api.CreateServer(authAddr, userAddr, postAddr, imageAddr)
 
 	go func() {
 		log.Printf("Server is starting on port %s", port)
-		if err := e.Start(fmt.Sprintf(":%s", port)); err != nil {
-			e.Logger.Fatal(err)
+		if err := server.Start(fmt.Sprintf(":%s", port)); err != nil {
+			log.Fatal(err)
 		}
 	}()
 
@@ -38,7 +38,7 @@ func main() {
 	defer cancel()
 
 	log.Println("Server is shutting down...")
-	if err := e.Shutdown(ctx); err != nil {
-		e.Logger.Fatal(err)
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatal(err)
 	}
 }

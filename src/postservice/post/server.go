@@ -8,9 +8,9 @@ import (
 
 // CreateServer creates a new grpc server
 func CreateServer(dbClient *DbClient) *grpc.Server {
-	s := grpc.NewServer()
-	c := newController(dbClient)
-	pb.RegisterPostServiceServer(s, c)
-	pb.RegisterActionServiceServer(s, c)
-	return s
+	server := grpc.NewServer()
+	controller := newController(dbClient)
+	pb.RegisterPostServiceServer(server, controller)
+	pb.RegisterActionServiceServer(server, controller)
+	return server
 }

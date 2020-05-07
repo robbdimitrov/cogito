@@ -17,11 +17,11 @@ func main() {
 	}
 	imageDir := os.Getenv("IMAGE_DIR")
 
-	s := image.CreateServer(port, imageDir)
+	server := image.CreateServer(port, imageDir)
 
 	go func() {
 		log.Printf("Server is starting on port %s", port)
-		if err := s.ListenAndServe(); err != nil {
+		if err := server.ListenAndServe(); err != nil {
 			log.Fatal(err)
 		}
 	}()
@@ -34,7 +34,7 @@ func main() {
 	defer cancel()
 
 	log.Println("Server is shutting down...")
-	if err := s.Shutdown(ctx); err != nil {
+	if err := server.Shutdown(ctx); err != nil {
 		log.Fatal(err)
 	}
 }

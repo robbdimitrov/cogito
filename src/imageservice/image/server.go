@@ -13,10 +13,10 @@ func logger(next http.Handler) http.Handler {
 	})
 }
 
-func createRouter(s *controller) *http.ServeMux {
+func createRouter(c *controller) *http.ServeMux {
 	router := http.NewServeMux()
-	router.Handle("/uploads", logger(http.HandlerFunc(s.uploadFile)))
-	router.Handle("/uploads/", logger(http.HandlerFunc(s.getFile)))
+	router.Handle("/uploads", logger(http.HandlerFunc(c.uploadFile)))
+	router.Handle("/uploads/", logger(http.HandlerFunc(c.getFile)))
 	return router
 }
 
