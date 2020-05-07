@@ -25,8 +25,8 @@ CREATE TABLE followings (
 
 CREATE TABLE posts (
   id serial PRIMARY KEY,
-  content varchar(255) NOT NULL,
   user_id integer REFERENCES users ON DELETE CASCADE,
+  content varchar(255) NOT NULL,
   created timestamp NOT NULL DEFAULT now()
 );
 

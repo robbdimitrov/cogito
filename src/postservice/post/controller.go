@@ -64,7 +64,7 @@ func (c *controller) GetFeed(ctx context.Context, req *pb.GetFeedRequest) (*pb.P
 		return nil, newError(codes.Internal)
 	}
 
-	return res, nil
+	return &pb.Posts{Posts: res}, nil
 }
 
 // GetPosts returns posts and retweets of user
@@ -80,7 +80,7 @@ func (c *controller) GetPosts(ctx context.Context, req *pb.GetPostsRequest) (*pb
 		return nil, newError(codes.Internal)
 	}
 
-	return res, nil
+	return &pb.Posts{Posts: res}, nil
 }
 
 // GetLikedPosts returns posts liked by the user
@@ -96,7 +96,7 @@ func (c *controller) GetLikedPosts(ctx context.Context, req *pb.GetPostsRequest)
 		return nil, newError(codes.Internal)
 	}
 
-	return res, nil
+	return &pb.Posts{Posts: res}, nil
 }
 
 // DeletePost deletes a post owned by the user
