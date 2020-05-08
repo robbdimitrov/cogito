@@ -11,6 +11,5 @@ func CreateServer(dbClient *DbClient) *grpc.Server {
 	server := grpc.NewServer()
 	controller := newController(dbClient)
 	pb.RegisterPostServiceServer(server, controller)
-	pb.RegisterActionServiceServer(server, controller)
 	return server
 }

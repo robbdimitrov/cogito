@@ -43,10 +43,10 @@ func (pc *postController) createPost(c echo.Context) error {
 		return newHTTPError(err)
 	}
 
-	return c.JSON(201, map[string]int32{"id": res.PostId})
+	return c.JSON(201, map[string]int32{"id": res.Id})
 }
 
-func (pc *postController) getPosts(c echo.Context) error {
+func (pc *postController) getFeed(c echo.Context) error {
 	conn, err := grpc.Dial(pc.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
@@ -76,6 +76,97 @@ func (pc *postController) getPosts(c echo.Context) error {
 	res, err := client.GetFeed(ctx, &req)
 	if err != nil {
 		log.Printf("Getting posts failed: %v", err)
+		return newHTTPError(err)
+	}
+
+	posts := make([]post, len(res.Posts))
+	for i, v := range res.Posts {
+		posts[i] = mapPost(v)
+	}
+
+	return c.JSON(200, map[string][]post{"items": posts})
+}
+func (pc *postController) getPosts(c echo.Context) error {
+	conn, err := grpc.Dial(pc.addr, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		log.Printf("Connecting to service failed: %v", err)
+		return echo.NewHTTPError(500)
+	}
+	defer conn.Close()
+	client := pb.NewPostServiceClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx = appendUserIDHeader(ctx, c)
+	defer cancel()
+
+	userID, err := strconv.Atoi(c.Param("userId"))
+	if err != nil {
+		return echo.NewHTTPError(400)
+	}
+	page, err := strconv.Atoi(c.QueryParam("page"))
+	if err != nil {
+		return echo.NewHTTPError(400)
+	}
+	limit, err := strconv.Atoi(c.QueryParam("limit"))
+	if err != nil {
+		return echo.NewHTTPError(400)
+	}
+
+	req := pb.GetPostsRequest{
+		UserId: int32(userID),
+		Page:   int32(page),
+		Limit:  int32(limit),
+	}
+
+	res, err := client.GetPosts(ctx, &req)
+	if err != nil {
+		log.Printf("Getting posts failed: %v", err)
+		return newHTTPError(err)
+	}
+
+	posts := make([]post, len(res.Posts))
+	for i, v := range res.Posts {
+		posts[i] = mapPost(v)
+	}
+
+	return c.JSON(200, map[string][]post{"items": posts})
+}
+
+func (pc *postController) getLikedPosts(c echo.Context) error {
+	conn, err := grpc.Dial(pc.addr, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		log.Printf("Connecting to service failed: %v", err)
+		return echo.NewHTTPError(500)
+	}
+	defer conn.Close()
+	client := pb.NewPostServiceClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx = appendUserIDHeader(ctx, c)
+	defer cancel()
+
+	userID, err := strconv.Atoi(c.Param("userId"))
+	if err != nil {
+		return echo.NewHTTPError(400)
+	}
+	page, err := strconv.Atoi(c.QueryParam("page"))
+	if err != nil {
+		return echo.NewHTTPError(400)
+	}
+	limit, err := strconv.Atoi(c.QueryParam("limit"))
+	if err != nil {
+		return echo.NewHTTPError(400)
+	}
+
+	req := pb.GetPostsRequest{
+		UserId: int32(userID),
+		Page:   int32(page),
+		Limit:  int32(limit),
+	}
+
+	res, err := client.GetLikedPosts(ctx, &req)
+	if err != nil {
+		log.Printf("Getting liked posts failed: %v", err)
 		return newHTTPError(err)
 	}
 
@@ -143,98 +234,6 @@ func (pc *postController) deletePost(c echo.Context) error {
 	return c.NoContent(204)
 }
 
-func (pc *postController) getPostsByUser(c echo.Context) error {
-	conn, err := grpc.Dial(pc.addr, grpc.WithInsecure(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500)
-	}
-	defer conn.Close()
-	client := pb.NewPostServiceClient(conn)
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	ctx = appendUserIDHeader(ctx, c)
-	defer cancel()
-
-	userID, err := strconv.Atoi(c.Param("userId"))
-	if err != nil {
-		return echo.NewHTTPError(400)
-	}
-	page, err := strconv.Atoi(c.QueryParam("page"))
-	if err != nil {
-		return echo.NewHTTPError(400)
-	}
-	limit, err := strconv.Atoi(c.QueryParam("limit"))
-	if err != nil {
-		return echo.NewHTTPError(400)
-	}
-
-	req := pb.GetPostsRequest{
-		UserId: int32(userID),
-		Page:   int32(page),
-		Limit:  int32(limit),
-	}
-
-	res, err := client.GetPosts(ctx, &req)
-	if err != nil {
-		log.Printf("Getting posts failed: %v", err)
-		return newHTTPError(err)
-	}
-
-	posts := make([]post, len(res.Posts))
-	for i, v := range res.Posts {
-		posts[i] = mapPost(v)
-	}
-
-	return c.JSON(200, map[string][]post{"items": posts})
-}
-
-func (pc *postController) getPostsLikedByUser(c echo.Context) error {
-	conn, err := grpc.Dial(pc.addr, grpc.WithInsecure(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500)
-	}
-	defer conn.Close()
-	client := pb.NewPostServiceClient(conn)
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	ctx = appendUserIDHeader(ctx, c)
-	defer cancel()
-
-	userID, err := strconv.Atoi(c.Param("userId"))
-	if err != nil {
-		return echo.NewHTTPError(400)
-	}
-	page, err := strconv.Atoi(c.QueryParam("page"))
-	if err != nil {
-		return echo.NewHTTPError(400)
-	}
-	limit, err := strconv.Atoi(c.QueryParam("limit"))
-	if err != nil {
-		return echo.NewHTTPError(400)
-	}
-
-	req := pb.GetPostsRequest{
-		UserId: int32(userID),
-		Page:   int32(page),
-		Limit:  int32(limit),
-	}
-
-	res, err := client.GetLikedPosts(ctx, &req)
-	if err != nil {
-		log.Printf("Getting liked posts failed: %v", err)
-		return newHTTPError(err)
-	}
-
-	posts := make([]post, len(res.Posts))
-	for i, v := range res.Posts {
-		posts[i] = mapPost(v)
-	}
-
-	return c.JSON(200, map[string][]post{"items": posts})
-}
-
 func (pc *postController) likePost(c echo.Context) error {
 	conn, err := grpc.Dial(pc.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
@@ -242,7 +241,7 @@ func (pc *postController) likePost(c echo.Context) error {
 		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
-	client := pb.NewActionServiceClient(conn)
+	client := pb.NewPostServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	ctx = appendUserIDHeader(ctx, c)
@@ -270,7 +269,7 @@ func (pc *postController) unlikePost(c echo.Context) error {
 		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
-	client := pb.NewActionServiceClient(conn)
+	client := pb.NewPostServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	ctx = appendUserIDHeader(ctx, c)
@@ -291,14 +290,14 @@ func (pc *postController) unlikePost(c echo.Context) error {
 	return c.NoContent(204)
 }
 
-func (pc *postController) createRepost(c echo.Context) error {
+func (pc *postController) repostPost(c echo.Context) error {
 	conn, err := grpc.Dial(pc.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
-	client := pb.NewActionServiceClient(conn)
+	client := pb.NewPostServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	ctx = appendUserIDHeader(ctx, c)
@@ -319,14 +318,14 @@ func (pc *postController) createRepost(c echo.Context) error {
 	return c.NoContent(204)
 }
 
-func (pc *postController) deleteRepost(c echo.Context) error {
+func (pc *postController) removeRepost(c echo.Context) error {
 	conn, err := grpc.Dial(pc.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
-	client := pb.NewActionServiceClient(conn)
+	client := pb.NewPostServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	ctx = appendUserIDHeader(ctx, c)

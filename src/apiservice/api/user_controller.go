@@ -47,7 +47,36 @@ func (s *userController) createUser(c echo.Context) error {
 		return newHTTPError(err)
 	}
 
-	return c.JSON(201, map[string]int32{"id": res.UserId})
+	return c.JSON(201, map[string]int32{"id": res.Id})
+}
+
+func (s *userController) getUser(c echo.Context) error {
+	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
+	if err != nil {
+		log.Printf("Connecting to service failed: %v", err)
+		return echo.NewHTTPError(500)
+	}
+	defer conn.Close()
+	client := pb.NewUserServiceClient(conn)
+
+	userID, err := strconv.Atoi(c.Param("userId"))
+	if err != nil {
+		return echo.NewHTTPError(400)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx = appendUserIDHeader(ctx, c)
+	defer cancel()
+
+	req := pb.UserRequest{UserId: int32(userID)}
+
+	res, err := client.GetUser(ctx, &req)
+	if err != nil {
+		log.Printf("Getting user failed: %v", err)
+		return newHTTPError(err)
+	}
+
+	return c.JSON(200, mapUser(res))
 }
 
 func (s *userController) updateUser(c echo.Context) error {
@@ -85,35 +114,6 @@ func (s *userController) updateUser(c echo.Context) error {
 	return c.NoContent(204)
 }
 
-func (s *userController) getUser(c echo.Context) error {
-	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500)
-	}
-	defer conn.Close()
-	client := pb.NewUserServiceClient(conn)
-
-	userID, err := strconv.Atoi(c.Param("userId"))
-	if err != nil {
-		return echo.NewHTTPError(400)
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	ctx = appendUserIDHeader(ctx, c)
-	defer cancel()
-
-	req := pb.UserRequest{UserId: int32(userID)}
-
-	res, err := client.GetUser(ctx, &req)
-	if err != nil {
-		log.Printf("Getting user failed: %v", err)
-		return newHTTPError(err)
-	}
-
-	return c.JSON(200, mapUser(res))
-}
-
 func (s *userController) getFollowing(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
@@ -121,7 +121,7 @@ func (s *userController) getFollowing(c echo.Context) error {
 		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
-	client := pb.NewFollowServiceClient(conn)
+	client := pb.NewUserServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	ctx = appendUserIDHeader(ctx, c)
@@ -167,7 +167,7 @@ func (s *userController) getFollowers(c echo.Context) error {
 		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
-	client := pb.NewFollowServiceClient(conn)
+	client := pb.NewUserServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	ctx = appendUserIDHeader(ctx, c)
@@ -213,7 +213,7 @@ func (s *userController) followUser(c echo.Context) error {
 		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
-	client := pb.NewFollowServiceClient(conn)
+	client := pb.NewUserServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	ctx = appendUserIDHeader(ctx, c)
@@ -241,7 +241,7 @@ func (s *userController) unfollowUser(c echo.Context) error {
 		return echo.NewHTTPError(500)
 	}
 	defer conn.Close()
-	client := pb.NewFollowServiceClient(conn)
+	client := pb.NewUserServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	ctx = appendUserIDHeader(ctx, c)

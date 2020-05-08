@@ -27,8 +27,8 @@ func (r *router) configureRoutes(e *echo.Echo) {
 
 	// Users
 	e.POST("/users", r.user.createUser)
-	e.PUT("/users/:userId", r.user.updateUser)
 	e.GET("/users/:userId", r.user.getUser)
+	e.PUT("/users/:userId", r.user.updateUser)
 	e.GET("/users/:userId/following", r.user.getFollowing)
 	e.GET("/users/:userId/followers", r.user.getFollowers)
 	e.POST("/users/:userId/followers", r.user.followUser)
@@ -36,15 +36,15 @@ func (r *router) configureRoutes(e *echo.Echo) {
 
 	// Posts
 	e.POST("/posts", r.post.createPost)
-	e.GET("/posts", r.post.getPosts)
+	e.GET("/posts", r.post.getFeed)
+	e.GET("/users/:userId/posts", r.post.getPosts)
+	e.GET("/users/:userId/likes", r.post.getLikedPosts)
 	e.GET("/posts/:postId", r.post.getPost)
 	e.DELETE("/posts/:postId", r.post.deletePost)
-	e.GET("/users/:userId/posts", r.post.getPostsByUser)
-	e.GET("/users/:userId/likes", r.post.getPostsLikedByUser)
 	e.POST("/posts/:postId/likes", r.post.likePost)
 	e.DELETE("/posts/:postId/likes", r.post.unlikePost)
-	e.POST("/posts/:postId/reposts", r.post.createRepost)
-	e.DELETE("/posts/:postId/reposts", r.post.deleteRepost)
+	e.POST("/posts/:postId/reposts", r.post.repostPost)
+	e.DELETE("/posts/:postId/reposts", r.post.removeRepost)
 
 	// Images
 	e.POST("/uploads", r.image.createImage)
