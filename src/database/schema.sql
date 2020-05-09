@@ -14,7 +14,7 @@ CREATE TABLE users (
   created timestamp NOT NULL DEFAULT now()
 );
 
-CREATE TABLE followings (
+CREATE TABLE followers (
   user_id integer REFERENCES users ON DELETE CASCADE,
   follower_id integer REFERENCES users ON DELETE CASCADE,
   created timestamp NOT NULL DEFAULT now(),
