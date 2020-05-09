@@ -48,25 +48,21 @@ func (c *DbClient) createPost(content string, userID int32) (int32, error) {
 }
 
 func (c *DbClient) getFeed(page int32, limit int32, currentUserID int32) ([]*pb.Post, error) {
-	query := `SELECT posts.id, posts.content, posts.user_id,
-		COUNT(DISTINCT likes.id) AS likes,
-		EXISTS(SELECT 1 FROM likes AS likes
-		WHERE likes.post_id = posts.id AND likes.user_id = %s) AS liked,
-		COUNT(DISTINCT reposts.id) AS reposts,
-		EXISTS(SELECT 1 FROM reposts AS reposts
-		WHERE reposts.post_id = posts.id AND reposts.user_id = %s) AS reposted,
-		time_format(posts.date_created) AS date_created
-		FROM posts AS posts LEFT JOIN likes AS likes
-		ON likes.post_id = posts.id LEFT JOIN reposts AS reposts
-		ON reposts.post_id = posts.id
-		WHERE posts.user_id = $1 OR posts.id IN (SELECT post_id
-			FROM reposts WHERE user_id = $1) OR
-			posts.user_id IN (SELECT user_id
-			FROM followings WHERE follower_id = $1
-		)
-		ORDER BY posts.date_created DESC
-		GROUP BY posts.id
-		OFFSET $2 LIMIT $3`
+	query := `SELECT id, posts.user_id, content,
+		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
+		EXISTS (SELECT 1 FROM likes
+		WHERE post_id = id AND likes.user_id = $1) AS liked,
+		(SELECT count(*) FROM reposts WHERE post_id = id) AS reposts,
+		EXISTS (SELECT 1 FROM reposts
+		WHERE post_id = id AND reposts.user_id = $1) AS reposted,
+		time_format(posts.created) AS created
+		FROM posts
+		LEFT JOIN reposts ON reposts.post_id = id
+		LEFT JOIN followings ON followings.user_id = reposts.user_id
+		OR followings.user_id = posts.user_id
+		WHERE follower_id = $2 OR reposts.user_id = $2 OR posts.user_id = $2
+		ORDER BY coalesce(reposts.created, posts.created) DESC
+		OFFSET $3 LIMIT $4`
 
 	rows, err := c.db.Query(context.Background(), query, currentUserID, page*limit, limit)
 	if err != nil {
@@ -78,26 +74,21 @@ func (c *DbClient) getFeed(page int32, limit int32, currentUserID int32) ([]*pb.
 }
 
 func (c *DbClient) getPosts(userID int32, page int32, limit int32, currentUserID int32) ([]*pb.Post, error) {
-	query := `SELECT posts.id, posts.content, posts.user_id,
-		COUNT(DISTINCT likes.id) AS likes,
-		EXISTS(SELECT 1 FROM likes AS likes
-		WHERE likes.post_id = posts.id AND likes.user_id = %s) AS liked,
-		COUNT(DISTINCT reposts.id) AS reposts,
-		EXISTS(SELECT 1 FROM reposts AS reposts
-		WHERE reposts.post_id = posts.id AND reposts.user_id = %s) AS reposted,
-		time_format(posts.date_created) AS date_created
-		FROM posts AS posts LEFT JOIN likes AS likes
-		ON likes.post_id = posts.id LEFT JOIN reposts AS reposts
-		ON reposts.post_id = posts.id
-		WHERE posts.user_id = $1 OR posts.id IN (
-			SELECT post_id
-			FROM reposts WHERE user_id = $1
-		)
-		GROUP BY posts.id
-		ORDER BY posts.date_created DESC
-		OFFSET $2 LIMIT $3`
+	query := `SELECT id, posts.user_id, content,
+		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
+		EXISTS (SELECT 1 FROM likes
+		WHERE post_id = id AND likes.user_id = $1) AS liked,
+		(SELECT count(*) FROM reposts WHERE post_id = id) AS reposts,
+		EXISTS (SELECT 1 FROM reposts
+		WHERE post_id = id AND reposts.user_id = $1) AS reposted,
+		time_format(posts.created) AS created
+		FROM posts
+		LEFT JOIN reposts ON reposts.post_id = id
+		WHERE reposts.user_id = $2 OR posts.user_id = $2
+		ORDER BY coalesce(reposts.created, posts.created) DESC
+		OFFSET $3 LIMIT $4`
 
-	rows, err := c.db.Query(context.Background(), query, userID, page*limit, limit, currentUserID)
+	rows, err := c.db.Query(context.Background(), query, currentUserID, userID, page*limit, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -107,23 +98,21 @@ func (c *DbClient) getPosts(userID int32, page int32, limit int32, currentUserID
 }
 
 func (c *DbClient) getLikedPosts(userID int32, page int32, limit int32, currentUserID int32) ([]*pb.Post, error) {
-	query := `SELECT posts.id, posts.content, posts.user_id,
-		COUNT(DISTINCT likes.id) AS likes,
-		EXISTS(SELECT 1 FROM likes AS likes
-		WHERE likes.post_id = posts.id AND likes.user_id = %s) AS liked,
-		COUNT(DISTINCT reposts.id) AS reposts,
-		EXISTS(SELECT 1 FROM reposts AS reposts
-		WHERE reposts.post_id = posts.id AND reposts.user_id = %s) AS reposted,
-		time_format(posts.date_created) AS date_created
-		FROM posts AS posts LEFT JOIN likes AS likes
-		ON likes.post_id = posts.id LEFT JOIN reposts AS reposts
-		ON reposts.post_id = posts.id
-		WHERE posts.id IN (SELECT post_id FROM likes WHERE user_id = $1)
-		GROUP BY posts.id
-		ORDER BY posts.date_created DESC
-		OFFSET $2 LIMIT $3`
+	query := `SELECT id, posts.user_id, content,
+		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
+		EXISTS (SELECT 1 FROM likes
+		WHERE post_id = id AND likes.user_id = $1) AS liked,
+		(SELECT count(*) FROM reposts WHERE post_id = id) AS reposts,
+		EXISTS (SELECT 1 FROM reposts
+		WHERE post_id = id AND reposts.user_id = $1) AS reposted,
+		time_format(posts.created) AS created
+		FROM posts
+        INNER JOIN likes ON post_id = id
+        WHERE likes.user_id = $2
+		ORDER BY likes.created DESC
+		OFFSET $3 LIMIT $4`
 
-	rows, err := c.db.Query(context.Background(), query, userID, page*limit, limit, currentUserID)
+	rows, err := c.db.Query(context.Background(), query, currentUserID, userID, page*limit, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -134,18 +123,12 @@ func (c *DbClient) getLikedPosts(userID int32, page int32, limit int32, currentU
 
 func (c *DbClient) getPost(id int32, currentUserID int32) (*pb.Post, error) {
 	query := `SELECT id, user_id, content,
-		(
-			SELECT count(*) FROM likes WHERE post_id = id
-		) AS likes,
-		EXISTS (
-			SELECT 1 FROM likes WHERE post_id = id AND likes.user_id = $1
-		) AS liked,
-		(
-			SELECT count(*) FROM reposts WHERE post_id = id
-		) AS reposts,
-		EXISTS(
-			SELECT 1 FROM reposts WHERE post_id = id AND reposts.user_id = $1
-		) AS reposted,
+		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
+		EXISTS (SELECT 1 FROM likes
+		WHERE post_id = id AND likes.user_id = $1) AS liked,
+		(SELECT count(*) FROM reposts WHERE post_id = id) AS reposts,
+		EXISTS (SELECT 1 FROM reposts
+		WHERE post_id = id AND reposts.user_id = $1) AS reposted,
 		time_format(created) AS created
 		FROM posts WHERE id = $2`
 
@@ -154,7 +137,7 @@ func (c *DbClient) getPost(id int32, currentUserID int32) (*pb.Post, error) {
 }
 
 func (c *DbClient) deletePost(postID int32, userID int32) error {
-	query := "DELETE FROM posts WHERE id = $1"
+	query := "DELETE FROM posts WHERE id = $1 AND user_id = $2"
 	_, err := c.db.Exec(context.Background(), query, postID)
 	return err
 }
