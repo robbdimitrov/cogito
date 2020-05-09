@@ -32,21 +32,6 @@ func (c *controller) CreatePost(ctx context.Context, req *pb.CreatePostRequest) 
 	return &pb.Identifier{Id: res}, nil
 }
 
-func (c *controller) GetPost(ctx context.Context, req *pb.PostRequest) (*pb.Post, error) {
-	userID, err := getUserID(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	res, err := c.dbClient.getPost(req.PostId, userID)
-	if err != nil {
-		log.Printf("Getting post failed: %v", err)
-		return nil, newError(codes.NotFound)
-	}
-
-	return res, nil
-}
-
 func (c *controller) GetFeed(ctx context.Context, req *pb.GetFeedRequest) (*pb.Posts, error) {
 	userID, err := getUserID(ctx)
 	if err != nil {
@@ -90,6 +75,21 @@ func (c *controller) GetLikedPosts(ctx context.Context, req *pb.GetPostsRequest)
 	}
 
 	return &pb.Posts{Posts: res}, nil
+}
+
+func (c *controller) GetPost(ctx context.Context, req *pb.PostRequest) (*pb.Post, error) {
+	userID, err := getUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.dbClient.getPost(req.PostId, userID)
+	if err != nil {
+		log.Printf("Getting post failed: %v", err)
+		return nil, newError(codes.NotFound)
+	}
+
+	return res, nil
 }
 
 func (c *controller) DeletePost(ctx context.Context, req *pb.PostRequest) (*pb.Empty, error) {

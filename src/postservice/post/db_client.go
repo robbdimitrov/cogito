@@ -35,42 +35,19 @@ func (c *DbClient) Close() {
 	c.db.Close()
 }
 
-// CreatePost creates a new Post row in the database
-func (c *DbClient) CreatePost(content string, userID int32) (int32, error) {
+func (c *DbClient) createPost(content string, userID int32) (int32, error) {
 	query := "INSERT INTO posts(user_id, content) VALUES($1, $2) RETURNING id"
 	row := c.db.QueryRow(context.Background(), query, userID, content)
 
 	var id int32
-	err := row.Scan(&id)
-	if err != nil {
+	if err := row.Scan(&id); err != nil {
 		return 0, err
 	}
 
 	return id, nil
 }
 
-// GetPost returns a Post row with the passed id from the database
-func (c *DbClient) GetPost(id int32, userID int32) (*pb.Post, error) {
-	query := `SELECT posts.id, posts.content, posts.user_id,
-		COUNT(DISTINCT likes.id) AS likes,
-		EXISTS(SELECT 1 FROM likes AS likes
-		WHERE likes.post_id = posts.id AND likes.user_id = %s) AS liked,
-		COUNT(DISTINCT reposts.id) AS reposts,
-		EXISTS(SELECT 1 FROM reposts AS reposts
-		WHERE reposts.post_id = posts.id AND reposts.user_id = %s) AS reposted,
-		time_format(posts.date_created) AS date_created
-		FROM posts AS posts LEFT JOIN likes AS likes
-		ON likes.post_id = posts.id LEFT JOIN reposts AS reposts
-		ON reposts.post_id = posts.id
-		WHERE id = $1
-		GROUP BY posts.id`
-
-	row := c.db.QueryRow(context.Background(), query, id, userID)
-	return mapPost(row)
-}
-
-// GetFeed returns posts and reposts of users followed by the user
-func (c *DbClient) GetFeed(userID int32, page int32, limit int32) ([]*pb.Post, error) {
+func (c *DbClient) getFeed(page int32, limit int32, currentUserID int32) ([]*pb.Post, error) {
 	query := `SELECT posts.id, posts.content, posts.user_id,
 		COUNT(DISTINCT likes.id) AS likes,
 		EXISTS(SELECT 1 FROM likes AS likes
@@ -91,7 +68,7 @@ func (c *DbClient) GetFeed(userID int32, page int32, limit int32) ([]*pb.Post, e
 		GROUP BY posts.id
 		OFFSET $2 LIMIT $3`
 
-	rows, err := c.db.Query(context.Background(), query, userID, page*limit, limit)
+	rows, err := c.db.Query(context.Background(), query, currentUserID, page*limit, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -100,8 +77,7 @@ func (c *DbClient) GetFeed(userID int32, page int32, limit int32) ([]*pb.Post, e
 	return mapPosts(rows)
 }
 
-// GetPosts returns the posts and reposts of the user with userID
-func (c *DbClient) GetPosts(userID int32, page int32, limit int32, currentUserID int32) ([]*pb.Post, error) {
+func (c *DbClient) getPosts(userID int32, page int32, limit int32, currentUserID int32) ([]*pb.Post, error) {
 	query := `SELECT posts.id, posts.content, posts.user_id,
 		COUNT(DISTINCT likes.id) AS likes,
 		EXISTS(SELECT 1 FROM likes AS likes
@@ -130,8 +106,7 @@ func (c *DbClient) GetPosts(userID int32, page int32, limit int32, currentUserID
 	return mapPosts(rows)
 }
 
-// GetLikedPosts returns posts liked by the user
-func (c *DbClient) GetLikedPosts(userID int32, page int32, limit int32, currentUserID int32) ([]*pb.Post, error) {
+func (c *DbClient) getLikedPosts(userID int32, page int32, limit int32, currentUserID int32) ([]*pb.Post, error) {
 	query := `SELECT posts.id, posts.content, posts.user_id,
 		COUNT(DISTINCT likes.id) AS likes,
 		EXISTS(SELECT 1 FROM likes AS likes
@@ -157,36 +132,52 @@ func (c *DbClient) GetLikedPosts(userID int32, page int32, limit int32, currentU
 	return mapPosts(rows)
 }
 
-// DeletePost deletes a post with the passed postID
-func (c *DbClient) DeletePost(postID int32, userID int32) error {
+func (c *DbClient) getPost(id int32, currentUserID int32) (*pb.Post, error) {
+	query := `SELECT id, user_id, content,
+		(
+			SELECT count(*) FROM likes WHERE post_id = id
+		) AS likes,
+		EXISTS (
+			SELECT 1 FROM likes WHERE post_id = id AND likes.user_id = $1
+		) AS liked,
+		(
+			SELECT count(*) FROM reposts WHERE post_id = id
+		) AS reposts,
+		EXISTS(
+			SELECT 1 FROM reposts WHERE post_id = id AND reposts.user_id = $1
+		) AS reposted,
+		time_format(created) AS created
+		FROM posts WHERE id = $2`
+
+	row := c.db.QueryRow(context.Background(), query, currentUserID, id)
+	return mapPost(row)
+}
+
+func (c *DbClient) deletePost(postID int32, userID int32) error {
 	query := "DELETE FROM posts WHERE id = $1"
 	_, err := c.db.Exec(context.Background(), query, postID)
 	return err
 }
 
-// LikePost creates a like relationship between user and post
-func (c *DbClient) LikePost(postID int32, userID int32) error {
+func (c *DbClient) likePost(postID int32, userID int32) error {
 	query := "INSERT INTO likes (post_id, user_id) VALUES ($1, $2)"
 	_, err := c.db.Exec(context.Background(), query, postID, userID)
 	return err
 }
 
-// UnlikePost deletes a like relationship between user and post
-func (c *DbClient) UnlikePost(postID int32, userID int32) error {
+func (c *DbClient) unlikePost(postID int32, userID int32) error {
 	query := "DELETE FROM likes WHERE post_id = $1 AND user_id = $2"
 	_, err := c.db.Exec(context.Background(), query, postID, userID)
 	return err
 }
 
-// RepostPost creates a repost relationship between user and post
-func (c *DbClient) RepostPost(postID int32, userID int32) error {
+func (c *DbClient) repostPost(postID int32, userID int32) error {
 	query := "INSERT INTO reposts (post_id, user_id) VALUES ($1, $2)"
 	_, err := c.db.Exec(context.Background(), query, postID, userID)
 	return err
 }
 
-// RemoveRepost deletes a repost relationship between user and post
-func (c *DbClient) RemoveRepost(postID int32, userID int32) error {
+func (c *DbClient) removeRepost(postID int32, userID int32) error {
 	query := "DELETE FROM reposts WHERE post_id = $1 AND user_id = $2"
 	_, err := c.db.Exec(context.Background(), query, postID, userID)
 	return err

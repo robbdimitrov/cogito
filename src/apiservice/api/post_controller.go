@@ -86,6 +86,7 @@ func (pc *postController) getFeed(c echo.Context) error {
 
 	return c.JSON(200, map[string][]post{"items": posts})
 }
+
 func (pc *postController) getPosts(c echo.Context) error {
 	conn, err := grpc.Dial(pc.addr, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
