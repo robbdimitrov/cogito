@@ -303,16 +303,16 @@ func (x *CreateUserRequest) GetPassword() string {
 	return ""
 }
 
-type CreateUserResponse struct {
+type Identifier struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId int32 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Id int32 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 }
 
-func (x *CreateUserResponse) Reset() {
-	*x = CreateUserResponse{}
+func (x *Identifier) Reset() {
+	*x = Identifier{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_thoughts_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -320,13 +320,13 @@ func (x *CreateUserResponse) Reset() {
 	}
 }
 
-func (x *CreateUserResponse) String() string {
+func (x *Identifier) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*CreateUserResponse) ProtoMessage() {}
+func (*Identifier) ProtoMessage() {}
 
-func (x *CreateUserResponse) ProtoReflect() protoreflect.Message {
+func (x *Identifier) ProtoReflect() protoreflect.Message {
 	mi := &file_thoughts_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -338,111 +338,16 @@ func (x *CreateUserResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CreateUserResponse.ProtoReflect.Descriptor instead.
-func (*CreateUserResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use Identifier.ProtoReflect.Descriptor instead.
+func (*Identifier) Descriptor() ([]byte, []int) {
 	return file_thoughts_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *CreateUserResponse) GetUserId() int32 {
+func (x *Identifier) GetId() int32 {
 	if x != nil {
-		return x.UserId
+		return x.Id
 	}
 	return 0
-}
-
-type UpdateUserRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Name        string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Username    string `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
-	Email       string `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
-	Password    string `protobuf:"bytes,4,opt,name=password,proto3" json:"password,omitempty"`
-	OldPassword string `protobuf:"bytes,5,opt,name=old_password,json=oldPassword,proto3" json:"old_password,omitempty"`
-	Avatar      string `protobuf:"bytes,6,opt,name=avatar,proto3" json:"avatar,omitempty"`
-	Bio         string `protobuf:"bytes,7,opt,name=bio,proto3" json:"bio,omitempty"`
-}
-
-func (x *UpdateUserRequest) Reset() {
-	*x = UpdateUserRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_thoughts_proto_msgTypes[6]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *UpdateUserRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UpdateUserRequest) ProtoMessage() {}
-
-func (x *UpdateUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_thoughts_proto_msgTypes[6]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UpdateUserRequest.ProtoReflect.Descriptor instead.
-func (*UpdateUserRequest) Descriptor() ([]byte, []int) {
-	return file_thoughts_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *UpdateUserRequest) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-func (x *UpdateUserRequest) GetUsername() string {
-	if x != nil {
-		return x.Username
-	}
-	return ""
-}
-
-func (x *UpdateUserRequest) GetEmail() string {
-	if x != nil {
-		return x.Email
-	}
-	return ""
-}
-
-func (x *UpdateUserRequest) GetPassword() string {
-	if x != nil {
-		return x.Password
-	}
-	return ""
-}
-
-func (x *UpdateUserRequest) GetOldPassword() string {
-	if x != nil {
-		return x.OldPassword
-	}
-	return ""
-}
-
-func (x *UpdateUserRequest) GetAvatar() string {
-	if x != nil {
-		return x.Avatar
-	}
-	return ""
-}
-
-func (x *UpdateUserRequest) GetBio() string {
-	if x != nil {
-		return x.Bio
-	}
-	return ""
 }
 
 type UserRequest struct {
@@ -456,7 +361,7 @@ type UserRequest struct {
 func (x *UserRequest) Reset() {
 	*x = UserRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_thoughts_proto_msgTypes[7]
+		mi := &file_thoughts_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -469,7 +374,7 @@ func (x *UserRequest) String() string {
 func (*UserRequest) ProtoMessage() {}
 
 func (x *UserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_thoughts_proto_msgTypes[7]
+	mi := &file_thoughts_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -482,75 +387,12 @@ func (x *UserRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserRequest.ProtoReflect.Descriptor instead.
 func (*UserRequest) Descriptor() ([]byte, []int) {
-	return file_thoughts_proto_rawDescGZIP(), []int{7}
+	return file_thoughts_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *UserRequest) GetUserId() int32 {
 	if x != nil {
 		return x.UserId
-	}
-	return 0
-}
-
-type GetUsersRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	UserId int32 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Page   int32 `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
-	Limit  int32 `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
-}
-
-func (x *GetUsersRequest) Reset() {
-	*x = GetUsersRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_thoughts_proto_msgTypes[8]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *GetUsersRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetUsersRequest) ProtoMessage() {}
-
-func (x *GetUsersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_thoughts_proto_msgTypes[8]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetUsersRequest.ProtoReflect.Descriptor instead.
-func (*GetUsersRequest) Descriptor() ([]byte, []int) {
-	return file_thoughts_proto_rawDescGZIP(), []int{8}
-}
-
-func (x *GetUsersRequest) GetUserId() int32 {
-	if x != nil {
-		return x.UserId
-	}
-	return 0
-}
-
-func (x *GetUsersRequest) GetPage() int32 {
-	if x != nil {
-		return x.Page
-	}
-	return 0
-}
-
-func (x *GetUsersRequest) GetLimit() int32 {
-	if x != nil {
-		return x.Limit
 	}
 	return 0
 }
@@ -577,7 +419,7 @@ type User struct {
 func (x *User) Reset() {
 	*x = User{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_thoughts_proto_msgTypes[9]
+		mi := &file_thoughts_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -590,7 +432,7 @@ func (x *User) String() string {
 func (*User) ProtoMessage() {}
 
 func (x *User) ProtoReflect() protoreflect.Message {
-	mi := &file_thoughts_proto_msgTypes[9]
+	mi := &file_thoughts_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -603,7 +445,7 @@ func (x *User) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use User.ProtoReflect.Descriptor instead.
 func (*User) Descriptor() ([]byte, []int) {
-	return file_thoughts_proto_rawDescGZIP(), []int{9}
+	return file_thoughts_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *User) GetId() int32 {
@@ -690,6 +532,164 @@ func (x *User) GetCreated() string {
 	return ""
 }
 
+type UpdateUserRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Name        string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Username    string `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
+	Email       string `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
+	Password    string `protobuf:"bytes,4,opt,name=password,proto3" json:"password,omitempty"`
+	OldPassword string `protobuf:"bytes,5,opt,name=old_password,json=oldPassword,proto3" json:"old_password,omitempty"`
+	Avatar      string `protobuf:"bytes,6,opt,name=avatar,proto3" json:"avatar,omitempty"`
+	Bio         string `protobuf:"bytes,7,opt,name=bio,proto3" json:"bio,omitempty"`
+}
+
+func (x *UpdateUserRequest) Reset() {
+	*x = UpdateUserRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_thoughts_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UpdateUserRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateUserRequest) ProtoMessage() {}
+
+func (x *UpdateUserRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_thoughts_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateUserRequest.ProtoReflect.Descriptor instead.
+func (*UpdateUserRequest) Descriptor() ([]byte, []int) {
+	return file_thoughts_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *UpdateUserRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateUserRequest) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
+func (x *UpdateUserRequest) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+func (x *UpdateUserRequest) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
+func (x *UpdateUserRequest) GetOldPassword() string {
+	if x != nil {
+		return x.OldPassword
+	}
+	return ""
+}
+
+func (x *UpdateUserRequest) GetAvatar() string {
+	if x != nil {
+		return x.Avatar
+	}
+	return ""
+}
+
+func (x *UpdateUserRequest) GetBio() string {
+	if x != nil {
+		return x.Bio
+	}
+	return ""
+}
+
+type GetUsersRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	UserId int32 `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Page   int32 `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	Limit  int32 `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
+}
+
+func (x *GetUsersRequest) Reset() {
+	*x = GetUsersRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_thoughts_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetUsersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUsersRequest) ProtoMessage() {}
+
+func (x *GetUsersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_thoughts_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUsersRequest.ProtoReflect.Descriptor instead.
+func (*GetUsersRequest) Descriptor() ([]byte, []int) {
+	return file_thoughts_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *GetUsersRequest) GetUserId() int32 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *GetUsersRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetUsersRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
 type Users struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -737,6 +737,100 @@ func (x *Users) GetUsers() []*User {
 	return nil
 }
 
+type CreatePostRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Content string `protobuf:"bytes,1,opt,name=content,proto3" json:"content,omitempty"`
+}
+
+func (x *CreatePostRequest) Reset() {
+	*x = CreatePostRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_thoughts_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CreatePostRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreatePostRequest) ProtoMessage() {}
+
+func (x *CreatePostRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_thoughts_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreatePostRequest.ProtoReflect.Descriptor instead.
+func (*CreatePostRequest) Descriptor() ([]byte, []int) {
+	return file_thoughts_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *CreatePostRequest) GetContent() string {
+	if x != nil {
+		return x.Content
+	}
+	return ""
+}
+
+type PostRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	PostId int32 `protobuf:"varint,1,opt,name=post_id,json=postId,proto3" json:"post_id,omitempty"`
+}
+
+func (x *PostRequest) Reset() {
+	*x = PostRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_thoughts_proto_msgTypes[12]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PostRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PostRequest) ProtoMessage() {}
+
+func (x *PostRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_thoughts_proto_msgTypes[12]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PostRequest.ProtoReflect.Descriptor instead.
+func (*PostRequest) Descriptor() ([]byte, []int) {
+	return file_thoughts_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *PostRequest) GetPostId() int32 {
+	if x != nil {
+		return x.PostId
+	}
+	return 0
+}
+
 type Post struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -755,7 +849,7 @@ type Post struct {
 func (x *Post) Reset() {
 	*x = Post{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_thoughts_proto_msgTypes[11]
+		mi := &file_thoughts_proto_msgTypes[13]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -768,7 +862,7 @@ func (x *Post) String() string {
 func (*Post) ProtoMessage() {}
 
 func (x *Post) ProtoReflect() protoreflect.Message {
-	mi := &file_thoughts_proto_msgTypes[11]
+	mi := &file_thoughts_proto_msgTypes[13]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -781,7 +875,7 @@ func (x *Post) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Post.ProtoReflect.Descriptor instead.
 func (*Post) Descriptor() ([]byte, []int) {
-	return file_thoughts_proto_rawDescGZIP(), []int{11}
+	return file_thoughts_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *Post) GetId() int32 {
@@ -840,194 +934,6 @@ func (x *Post) GetCreated() string {
 	return ""
 }
 
-type Posts struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Posts []*Post `protobuf:"bytes,1,rep,name=posts,proto3" json:"posts,omitempty"`
-}
-
-func (x *Posts) Reset() {
-	*x = Posts{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_thoughts_proto_msgTypes[12]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *Posts) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Posts) ProtoMessage() {}
-
-func (x *Posts) ProtoReflect() protoreflect.Message {
-	mi := &file_thoughts_proto_msgTypes[12]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Posts.ProtoReflect.Descriptor instead.
-func (*Posts) Descriptor() ([]byte, []int) {
-	return file_thoughts_proto_rawDescGZIP(), []int{12}
-}
-
-func (x *Posts) GetPosts() []*Post {
-	if x != nil {
-		return x.Posts
-	}
-	return nil
-}
-
-type CreatePostRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Content string `protobuf:"bytes,1,opt,name=content,proto3" json:"content,omitempty"`
-}
-
-func (x *CreatePostRequest) Reset() {
-	*x = CreatePostRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_thoughts_proto_msgTypes[13]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *CreatePostRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CreatePostRequest) ProtoMessage() {}
-
-func (x *CreatePostRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_thoughts_proto_msgTypes[13]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CreatePostRequest.ProtoReflect.Descriptor instead.
-func (*CreatePostRequest) Descriptor() ([]byte, []int) {
-	return file_thoughts_proto_rawDescGZIP(), []int{13}
-}
-
-func (x *CreatePostRequest) GetContent() string {
-	if x != nil {
-		return x.Content
-	}
-	return ""
-}
-
-type CreatePostResponse struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	PostId int32 `protobuf:"varint,1,opt,name=post_id,json=postId,proto3" json:"post_id,omitempty"`
-}
-
-func (x *CreatePostResponse) Reset() {
-	*x = CreatePostResponse{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_thoughts_proto_msgTypes[14]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *CreatePostResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*CreatePostResponse) ProtoMessage() {}
-
-func (x *CreatePostResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_thoughts_proto_msgTypes[14]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use CreatePostResponse.ProtoReflect.Descriptor instead.
-func (*CreatePostResponse) Descriptor() ([]byte, []int) {
-	return file_thoughts_proto_rawDescGZIP(), []int{14}
-}
-
-func (x *CreatePostResponse) GetPostId() int32 {
-	if x != nil {
-		return x.PostId
-	}
-	return 0
-}
-
-type PostRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	PostId int32 `protobuf:"varint,1,opt,name=post_id,json=postId,proto3" json:"post_id,omitempty"`
-}
-
-func (x *PostRequest) Reset() {
-	*x = PostRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_thoughts_proto_msgTypes[15]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *PostRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*PostRequest) ProtoMessage() {}
-
-func (x *PostRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_thoughts_proto_msgTypes[15]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use PostRequest.ProtoReflect.Descriptor instead.
-func (*PostRequest) Descriptor() ([]byte, []int) {
-	return file_thoughts_proto_rawDescGZIP(), []int{15}
-}
-
-func (x *PostRequest) GetPostId() int32 {
-	if x != nil {
-		return x.PostId
-	}
-	return 0
-}
-
 type GetFeedRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -1040,7 +946,7 @@ type GetFeedRequest struct {
 func (x *GetFeedRequest) Reset() {
 	*x = GetFeedRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_thoughts_proto_msgTypes[16]
+		mi := &file_thoughts_proto_msgTypes[14]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1053,7 +959,7 @@ func (x *GetFeedRequest) String() string {
 func (*GetFeedRequest) ProtoMessage() {}
 
 func (x *GetFeedRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_thoughts_proto_msgTypes[16]
+	mi := &file_thoughts_proto_msgTypes[14]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1066,7 +972,7 @@ func (x *GetFeedRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFeedRequest.ProtoReflect.Descriptor instead.
 func (*GetFeedRequest) Descriptor() ([]byte, []int) {
-	return file_thoughts_proto_rawDescGZIP(), []int{16}
+	return file_thoughts_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *GetFeedRequest) GetPage() int32 {
@@ -1083,6 +989,53 @@ func (x *GetFeedRequest) GetLimit() int32 {
 	return 0
 }
 
+type Posts struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Posts []*Post `protobuf:"bytes,1,rep,name=posts,proto3" json:"posts,omitempty"`
+}
+
+func (x *Posts) Reset() {
+	*x = Posts{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_thoughts_proto_msgTypes[15]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *Posts) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Posts) ProtoMessage() {}
+
+func (x *Posts) ProtoReflect() protoreflect.Message {
+	mi := &file_thoughts_proto_msgTypes[15]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Posts.ProtoReflect.Descriptor instead.
+func (*Posts) Descriptor() ([]byte, []int) {
+	return file_thoughts_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *Posts) GetPosts() []*Post {
+	if x != nil {
+		return x.Posts
+	}
+	return nil
+}
+
 type GetPostsRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -1096,7 +1049,7 @@ type GetPostsRequest struct {
 func (x *GetPostsRequest) Reset() {
 	*x = GetPostsRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_thoughts_proto_msgTypes[17]
+		mi := &file_thoughts_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1109,7 +1062,7 @@ func (x *GetPostsRequest) String() string {
 func (*GetPostsRequest) ProtoMessage() {}
 
 func (x *GetPostsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_thoughts_proto_msgTypes[17]
+	mi := &file_thoughts_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1122,7 +1075,7 @@ func (x *GetPostsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPostsRequest.ProtoReflect.Descriptor instead.
 func (*GetPostsRequest) Descriptor() ([]byte, []int) {
-	return file_thoughts_proto_rawDescGZIP(), []int{17}
+	return file_thoughts_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *GetPostsRequest) GetUserId() int32 {
@@ -1170,79 +1123,75 @@ var file_thoughts_proto_rawDesc = []byte{
 	0x72, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x65, 0x6d, 0x61, 0x69, 0x6c, 0x18, 0x03,
 	0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x65, 0x6d, 0x61, 0x69, 0x6c, 0x12, 0x1a, 0x0a, 0x08, 0x70,
 	0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70,
-	0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x22, 0x2d, 0x0a, 0x12, 0x43, 0x72, 0x65, 0x61, 0x74,
-	0x65, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x17, 0x0a,
-	0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06,
-	0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x22, 0xc2, 0x01, 0x0a, 0x11, 0x55, 0x70, 0x64, 0x61, 0x74,
-	0x65, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x12, 0x0a, 0x04,
-	0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65,
-	0x12, 0x1a, 0x0a, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01,
-	0x28, 0x09, 0x52, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x14, 0x0a, 0x05,
-	0x65, 0x6d, 0x61, 0x69, 0x6c, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x65, 0x6d, 0x61,
-	0x69, 0x6c, 0x12, 0x1a, 0x0a, 0x08, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x18, 0x04,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x12, 0x21,
-	0x0a, 0x0c, 0x6f, 0x6c, 0x64, 0x5f, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x18, 0x05,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x6f, 0x6c, 0x64, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72,
-	0x64, 0x12, 0x16, 0x0a, 0x06, 0x61, 0x76, 0x61, 0x74, 0x61, 0x72, 0x18, 0x06, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x06, 0x61, 0x76, 0x61, 0x74, 0x61, 0x72, 0x12, 0x10, 0x0a, 0x03, 0x62, 0x69, 0x6f,
-	0x18, 0x07, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x62, 0x69, 0x6f, 0x22, 0x26, 0x0a, 0x0b, 0x55,
-	0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73,
-	0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x75, 0x73, 0x65,
-	0x72, 0x49, 0x64, 0x22, 0x54, 0x0a, 0x0f, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x73, 0x52,
-	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69,
-	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12,
-	0x12, 0x0a, 0x04, 0x70, 0x61, 0x67, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x04, 0x70,
-	0x61, 0x67, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x18, 0x03, 0x20, 0x01,
-	0x28, 0x05, 0x52, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x22, 0xa4, 0x02, 0x0a, 0x04, 0x55, 0x73,
-	0x65, 0x72, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x02,
-	0x69, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61,
-	0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61,
-	0x6d, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x65, 0x6d, 0x61, 0x69, 0x6c, 0x18, 0x04, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x05, 0x65, 0x6d, 0x61, 0x69, 0x6c, 0x12, 0x16, 0x0a, 0x06, 0x61, 0x76, 0x61, 0x74,
-	0x61, 0x72, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x61, 0x76, 0x61, 0x74, 0x61, 0x72,
-	0x12, 0x10, 0x0a, 0x03, 0x62, 0x69, 0x6f, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x62,
-	0x69, 0x6f, 0x12, 0x14, 0x0a, 0x05, 0x70, 0x6f, 0x73, 0x74, 0x73, 0x18, 0x07, 0x20, 0x01, 0x28,
-	0x05, 0x52, 0x05, 0x70, 0x6f, 0x73, 0x74, 0x73, 0x12, 0x14, 0x0a, 0x05, 0x6c, 0x69, 0x6b, 0x65,
-	0x73, 0x18, 0x08, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x6c, 0x69, 0x6b, 0x65, 0x73, 0x12, 0x1c,
-	0x0a, 0x09, 0x66, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x69, 0x6e, 0x67, 0x18, 0x09, 0x20, 0x01, 0x28,
-	0x05, 0x52, 0x09, 0x66, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x69, 0x6e, 0x67, 0x12, 0x1c, 0x0a, 0x09,
-	0x66, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x65, 0x72, 0x73, 0x18, 0x0a, 0x20, 0x01, 0x28, 0x05, 0x52,
-	0x09, 0x66, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x65, 0x72, 0x73, 0x12, 0x1a, 0x0a, 0x08, 0x66, 0x6f,
-	0x6c, 0x6c, 0x6f, 0x77, 0x65, 0x64, 0x18, 0x0b, 0x20, 0x01, 0x28, 0x08, 0x52, 0x08, 0x66, 0x6f,
-	0x6c, 0x6c, 0x6f, 0x77, 0x65, 0x64, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65,
-	0x64, 0x18, 0x0c, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64,
-	0x22, 0x2d, 0x0a, 0x05, 0x55, 0x73, 0x65, 0x72, 0x73, 0x12, 0x24, 0x0a, 0x05, 0x75, 0x73, 0x65,
-	0x72, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0e, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67,
-	0x68, 0x74, 0x73, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x52, 0x05, 0x75, 0x73, 0x65, 0x72, 0x73, 0x22,
-	0xc5, 0x01, 0x0a, 0x04, 0x50, 0x6f, 0x73, 0x74, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x05, 0x52, 0x02, 0x69, 0x64, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72,
-	0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49,
-	0x64, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x18, 0x03, 0x20, 0x01,
-	0x28, 0x09, 0x52, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x12, 0x14, 0x0a, 0x05, 0x6c,
-	0x69, 0x6b, 0x65, 0x73, 0x18, 0x04, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x6c, 0x69, 0x6b, 0x65,
-	0x73, 0x12, 0x14, 0x0a, 0x05, 0x6c, 0x69, 0x6b, 0x65, 0x64, 0x18, 0x05, 0x20, 0x01, 0x28, 0x08,
-	0x52, 0x05, 0x6c, 0x69, 0x6b, 0x65, 0x64, 0x12, 0x18, 0x0a, 0x07, 0x72, 0x65, 0x70, 0x6f, 0x73,
-	0x74, 0x73, 0x18, 0x06, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07, 0x72, 0x65, 0x70, 0x6f, 0x73, 0x74,
-	0x73, 0x12, 0x1a, 0x0a, 0x08, 0x72, 0x65, 0x70, 0x6f, 0x73, 0x74, 0x65, 0x64, 0x18, 0x07, 0x20,
-	0x01, 0x28, 0x08, 0x52, 0x08, 0x72, 0x65, 0x70, 0x6f, 0x73, 0x74, 0x65, 0x64, 0x12, 0x18, 0x0a,
-	0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x18, 0x08, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07,
-	0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x22, 0x2d, 0x0a, 0x05, 0x50, 0x6f, 0x73, 0x74, 0x73,
-	0x12, 0x24, 0x0a, 0x05, 0x70, 0x6f, 0x73, 0x74, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32,
-	0x0e, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x50, 0x6f, 0x73, 0x74, 0x52,
-	0x05, 0x70, 0x6f, 0x73, 0x74, 0x73, 0x22, 0x2d, 0x0a, 0x11, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65,
-	0x50, 0x6f, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x18, 0x0a, 0x07, 0x63,
-	0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x6f,
-	0x6e, 0x74, 0x65, 0x6e, 0x74, 0x22, 0x2d, 0x0a, 0x12, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x50,
-	0x6f, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x17, 0x0a, 0x07, 0x70,
-	0x6f, 0x73, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x70, 0x6f,
-	0x73, 0x74, 0x49, 0x64, 0x22, 0x26, 0x0a, 0x0b, 0x50, 0x6f, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75,
-	0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x70, 0x6f, 0x73, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x70, 0x6f, 0x73, 0x74, 0x49, 0x64, 0x22, 0x3a, 0x0a, 0x0e,
-	0x47, 0x65, 0x74, 0x46, 0x65, 0x65, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x12,
-	0x0a, 0x04, 0x70, 0x61, 0x67, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x04, 0x70, 0x61,
-	0x67, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28,
-	0x05, 0x52, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x22, 0x54, 0x0a, 0x0f, 0x47, 0x65, 0x74, 0x50,
+	0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x22, 0x1c, 0x0a, 0x0a, 0x49, 0x64, 0x65, 0x6e, 0x74,
+	0x69, 0x66, 0x69, 0x65, 0x72, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x05, 0x52, 0x02, 0x69, 0x64, 0x22, 0x26, 0x0a, 0x0b, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x22, 0xa4, 0x02,
+	0x0a, 0x04, 0x55, 0x73, 0x65, 0x72, 0x12, 0x0e, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x05, 0x52, 0x02, 0x69, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x75, 0x73,
+	0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x75, 0x73,
+	0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x65, 0x6d, 0x61, 0x69, 0x6c, 0x18,
+	0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x65, 0x6d, 0x61, 0x69, 0x6c, 0x12, 0x16, 0x0a, 0x06,
+	0x61, 0x76, 0x61, 0x74, 0x61, 0x72, 0x18, 0x05, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x61, 0x76,
+	0x61, 0x74, 0x61, 0x72, 0x12, 0x10, 0x0a, 0x03, 0x62, 0x69, 0x6f, 0x18, 0x06, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x03, 0x62, 0x69, 0x6f, 0x12, 0x14, 0x0a, 0x05, 0x70, 0x6f, 0x73, 0x74, 0x73, 0x18,
+	0x07, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x70, 0x6f, 0x73, 0x74, 0x73, 0x12, 0x14, 0x0a, 0x05,
+	0x6c, 0x69, 0x6b, 0x65, 0x73, 0x18, 0x08, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x6c, 0x69, 0x6b,
+	0x65, 0x73, 0x12, 0x1c, 0x0a, 0x09, 0x66, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x69, 0x6e, 0x67, 0x18,
+	0x09, 0x20, 0x01, 0x28, 0x05, 0x52, 0x09, 0x66, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x69, 0x6e, 0x67,
+	0x12, 0x1c, 0x0a, 0x09, 0x66, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x65, 0x72, 0x73, 0x18, 0x0a, 0x20,
+	0x01, 0x28, 0x05, 0x52, 0x09, 0x66, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x65, 0x72, 0x73, 0x12, 0x1a,
+	0x0a, 0x08, 0x66, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x65, 0x64, 0x18, 0x0b, 0x20, 0x01, 0x28, 0x08,
+	0x52, 0x08, 0x66, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x65, 0x64, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x72,
+	0x65, 0x61, 0x74, 0x65, 0x64, 0x18, 0x0c, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x72, 0x65,
+	0x61, 0x74, 0x65, 0x64, 0x22, 0xc2, 0x01, 0x0a, 0x11, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x55,
+	0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x12, 0x0a, 0x04, 0x6e, 0x61,
+	0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x1a,
+	0x0a, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x08, 0x75, 0x73, 0x65, 0x72, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x65, 0x6d,
+	0x61, 0x69, 0x6c, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x65, 0x6d, 0x61, 0x69, 0x6c,
+	0x12, 0x1a, 0x0a, 0x08, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x18, 0x04, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x08, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x12, 0x21, 0x0a, 0x0c,
+	0x6f, 0x6c, 0x64, 0x5f, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x18, 0x05, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x0b, 0x6f, 0x6c, 0x64, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x12,
+	0x16, 0x0a, 0x06, 0x61, 0x76, 0x61, 0x74, 0x61, 0x72, 0x18, 0x06, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x06, 0x61, 0x76, 0x61, 0x74, 0x61, 0x72, 0x12, 0x10, 0x0a, 0x03, 0x62, 0x69, 0x6f, 0x18, 0x07,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x62, 0x69, 0x6f, 0x22, 0x54, 0x0a, 0x0f, 0x47, 0x65, 0x74,
+	0x55, 0x73, 0x65, 0x72, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07,
+	0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x75,
+	0x73, 0x65, 0x72, 0x49, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x70, 0x61, 0x67, 0x65, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x05, 0x52, 0x04, 0x70, 0x61, 0x67, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x6c, 0x69, 0x6d,
+	0x69, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x22,
+	0x2d, 0x0a, 0x05, 0x55, 0x73, 0x65, 0x72, 0x73, 0x12, 0x24, 0x0a, 0x05, 0x75, 0x73, 0x65, 0x72,
+	0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x0e, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68,
+	0x74, 0x73, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x52, 0x05, 0x75, 0x73, 0x65, 0x72, 0x73, 0x22, 0x2d,
+	0x0a, 0x11, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x50, 0x6f, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e, 0x74, 0x22, 0x26, 0x0a,
+	0x0b, 0x50, 0x6f, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07,
+	0x70, 0x6f, 0x73, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x70,
+	0x6f, 0x73, 0x74, 0x49, 0x64, 0x22, 0xc5, 0x01, 0x0a, 0x04, 0x50, 0x6f, 0x73, 0x74, 0x12, 0x0e,
+	0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x02, 0x69, 0x64, 0x12, 0x17,
+	0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52,
+	0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65,
+	0x6e, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x6f, 0x6e, 0x74, 0x65, 0x6e,
+	0x74, 0x12, 0x14, 0x0a, 0x05, 0x6c, 0x69, 0x6b, 0x65, 0x73, 0x18, 0x04, 0x20, 0x01, 0x28, 0x05,
+	0x52, 0x05, 0x6c, 0x69, 0x6b, 0x65, 0x73, 0x12, 0x14, 0x0a, 0x05, 0x6c, 0x69, 0x6b, 0x65, 0x64,
+	0x18, 0x05, 0x20, 0x01, 0x28, 0x08, 0x52, 0x05, 0x6c, 0x69, 0x6b, 0x65, 0x64, 0x12, 0x18, 0x0a,
+	0x07, 0x72, 0x65, 0x70, 0x6f, 0x73, 0x74, 0x73, 0x18, 0x06, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07,
+	0x72, 0x65, 0x70, 0x6f, 0x73, 0x74, 0x73, 0x12, 0x1a, 0x0a, 0x08, 0x72, 0x65, 0x70, 0x6f, 0x73,
+	0x74, 0x65, 0x64, 0x18, 0x07, 0x20, 0x01, 0x28, 0x08, 0x52, 0x08, 0x72, 0x65, 0x70, 0x6f, 0x73,
+	0x74, 0x65, 0x64, 0x12, 0x18, 0x0a, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x18, 0x08,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x22, 0x3a, 0x0a,
+	0x0e, 0x47, 0x65, 0x74, 0x46, 0x65, 0x65, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12,
+	0x12, 0x0a, 0x04, 0x70, 0x61, 0x67, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x04, 0x70,
+	0x61, 0x67, 0x65, 0x12, 0x14, 0x0a, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x05, 0x52, 0x05, 0x6c, 0x69, 0x6d, 0x69, 0x74, 0x22, 0x2d, 0x0a, 0x05, 0x50, 0x6f, 0x73,
+	0x74, 0x73, 0x12, 0x24, 0x0a, 0x05, 0x70, 0x6f, 0x73, 0x74, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28,
+	0x0b, 0x32, 0x0e, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x50, 0x6f, 0x73,
+	0x74, 0x52, 0x05, 0x70, 0x6f, 0x73, 0x74, 0x73, 0x22, 0x54, 0x0a, 0x0f, 0x47, 0x65, 0x74, 0x50,
 	0x6f, 0x73, 0x74, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x75,
 	0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x06, 0x75, 0x73,
 	0x65, 0x72, 0x49, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x70, 0x61, 0x67, 0x65, 0x18, 0x02, 0x20, 0x01,
@@ -1263,74 +1212,71 @@ var file_thoughts_proto_rawDesc = []byte{
 	0x74, 0x79, 0x12, 0x37, 0x0a, 0x0d, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x53, 0x65, 0x73, 0x73,
 	0x69, 0x6f, 0x6e, 0x12, 0x15, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x41,
 	0x75, 0x74, 0x68, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0f, 0x2e, 0x74, 0x68, 0x6f,
-	0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x32, 0xc4, 0x01, 0x0a, 0x0b,
-	0x55, 0x73, 0x65, 0x72, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x47, 0x0a, 0x0a, 0x43,
+	0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x32, 0xa2, 0x03, 0x0a, 0x0b,
+	0x55, 0x73, 0x65, 0x72, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x3f, 0x0a, 0x0a, 0x43,
 	0x72, 0x65, 0x61, 0x74, 0x65, 0x55, 0x73, 0x65, 0x72, 0x12, 0x1b, 0x2e, 0x74, 0x68, 0x6f, 0x75,
 	0x67, 0x68, 0x74, 0x73, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x55, 0x73, 0x65, 0x72, 0x52,
-	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1c, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74,
-	0x73, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x30, 0x0a, 0x07, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x12,
-	0x15, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x52,
-	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0e, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74,
-	0x73, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x12, 0x3a, 0x0a, 0x0a, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65,
-	0x55, 0x73, 0x65, 0x72, 0x12, 0x1b, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e,
-	0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x1a, 0x0f, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x45, 0x6d, 0x70,
-	0x74, 0x79, 0x32, 0xf5, 0x01, 0x0a, 0x0d, 0x46, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x53, 0x65, 0x72,
-	0x76, 0x69, 0x63, 0x65, 0x12, 0x3a, 0x0a, 0x0c, 0x47, 0x65, 0x74, 0x46, 0x6f, 0x6c, 0x6c, 0x6f,
-	0x77, 0x69, 0x6e, 0x67, 0x12, 0x19, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e,
-	0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
-	0x0f, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x73,
-	0x12, 0x3a, 0x0a, 0x0c, 0x47, 0x65, 0x74, 0x46, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x65, 0x72, 0x73,
-	0x12, 0x19, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x47, 0x65, 0x74, 0x55,
-	0x73, 0x65, 0x72, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0f, 0x2e, 0x74, 0x68,
-	0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x73, 0x12, 0x34, 0x0a, 0x0a,
-	0x46, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x55, 0x73, 0x65, 0x72, 0x12, 0x15, 0x2e, 0x74, 0x68, 0x6f,
-	0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x1a, 0x0f, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x45, 0x6d, 0x70,
-	0x74, 0x79, 0x12, 0x36, 0x0a, 0x0c, 0x55, 0x6e, 0x66, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x55, 0x73,
-	0x65, 0x72, 0x12, 0x15, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x55, 0x73,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x14, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74,
+	0x73, 0x2e, 0x49, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x66, 0x69, 0x65, 0x72, 0x12, 0x30, 0x0a, 0x07,
+	0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x12, 0x15, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68,
+	0x74, 0x73, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0e,
+	0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x12, 0x3a,
+	0x0a, 0x0a, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x55, 0x73, 0x65, 0x72, 0x12, 0x1b, 0x2e, 0x74,
+	0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x55, 0x73,
 	0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0f, 0x2e, 0x74, 0x68, 0x6f, 0x75,
-	0x67, 0x68, 0x74, 0x73, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x32, 0xe9, 0x02, 0x0a, 0x0b, 0x50,
-	0x6f, 0x73, 0x74, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x47, 0x0a, 0x0a, 0x43, 0x72,
-	0x65, 0x61, 0x74, 0x65, 0x50, 0x6f, 0x73, 0x74, 0x12, 0x1b, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67,
-	0x68, 0x74, 0x73, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x50, 0x6f, 0x73, 0x74, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1c, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73,
-	0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x50, 0x6f, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f,
-	0x6e, 0x73, 0x65, 0x12, 0x30, 0x0a, 0x07, 0x47, 0x65, 0x74, 0x50, 0x6f, 0x73, 0x74, 0x12, 0x15,
-	0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x50, 0x6f, 0x73, 0x74, 0x52, 0x65,
-	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0e, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73,
-	0x2e, 0x50, 0x6f, 0x73, 0x74, 0x12, 0x34, 0x0a, 0x07, 0x47, 0x65, 0x74, 0x46, 0x65, 0x65, 0x64,
-	0x12, 0x18, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x47, 0x65, 0x74, 0x46,
-	0x65, 0x65, 0x64, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0f, 0x2e, 0x74, 0x68, 0x6f,
-	0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x50, 0x6f, 0x73, 0x74, 0x73, 0x12, 0x36, 0x0a, 0x08, 0x47,
-	0x65, 0x74, 0x50, 0x6f, 0x73, 0x74, 0x73, 0x12, 0x19, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68,
-	0x74, 0x73, 0x2e, 0x47, 0x65, 0x74, 0x50, 0x6f, 0x73, 0x74, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65,
-	0x73, 0x74, 0x1a, 0x0f, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x50, 0x6f,
-	0x73, 0x74, 0x73, 0x12, 0x3b, 0x0a, 0x0d, 0x47, 0x65, 0x74, 0x4c, 0x69, 0x6b, 0x65, 0x64, 0x50,
-	0x6f, 0x73, 0x74, 0x73, 0x12, 0x19, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e,
-	0x47, 0x65, 0x74, 0x50, 0x6f, 0x73, 0x74, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
-	0x0f, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x50, 0x6f, 0x73, 0x74, 0x73,
-	0x12, 0x34, 0x0a, 0x0a, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x50, 0x6f, 0x73, 0x74, 0x12, 0x15,
-	0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x50, 0x6f, 0x73, 0x74, 0x52, 0x65,
+	0x67, 0x68, 0x74, 0x73, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x12, 0x3a, 0x0a, 0x0c, 0x47, 0x65,
+	0x74, 0x46, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x69, 0x6e, 0x67, 0x12, 0x19, 0x2e, 0x74, 0x68, 0x6f,
+	0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x73, 0x52, 0x65,
 	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0f, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73,
-	0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x32, 0xe7, 0x01, 0x0a, 0x0d, 0x41, 0x63, 0x74, 0x69, 0x6f,
-	0x6e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x32, 0x0a, 0x08, 0x4c, 0x69, 0x6b, 0x65,
-	0x50, 0x6f, 0x73, 0x74, 0x12, 0x15, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e,
-	0x50, 0x6f, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0f, 0x2e, 0x74, 0x68,
-	0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x12, 0x34, 0x0a, 0x0a,
-	0x55, 0x6e, 0x6c, 0x69, 0x6b, 0x65, 0x50, 0x6f, 0x73, 0x74, 0x12, 0x15, 0x2e, 0x74, 0x68, 0x6f,
-	0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x50, 0x6f, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x1a, 0x0f, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x45, 0x6d, 0x70,
-	0x74, 0x79, 0x12, 0x34, 0x0a, 0x0a, 0x52, 0x65, 0x70, 0x6f, 0x73, 0x74, 0x50, 0x6f, 0x73, 0x74,
+	0x2e, 0x55, 0x73, 0x65, 0x72, 0x73, 0x12, 0x3a, 0x0a, 0x0c, 0x47, 0x65, 0x74, 0x46, 0x6f, 0x6c,
+	0x6c, 0x6f, 0x77, 0x65, 0x72, 0x73, 0x12, 0x19, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74,
+	0x73, 0x2e, 0x47, 0x65, 0x74, 0x55, 0x73, 0x65, 0x72, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x1a, 0x0f, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x55, 0x73, 0x65,
+	0x72, 0x73, 0x12, 0x34, 0x0a, 0x0a, 0x46, 0x6f, 0x6c, 0x6c, 0x6f, 0x77, 0x55, 0x73, 0x65, 0x72,
+	0x12, 0x15, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x55, 0x73, 0x65, 0x72,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0f, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68,
+	0x74, 0x73, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x12, 0x36, 0x0a, 0x0c, 0x55, 0x6e, 0x66, 0x6f,
+	0x6c, 0x6c, 0x6f, 0x77, 0x55, 0x73, 0x65, 0x72, 0x12, 0x15, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67,
+	0x68, 0x74, 0x73, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
+	0x0f, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79,
+	0x32, 0xb9, 0x04, 0x0a, 0x0b, 0x50, 0x6f, 0x73, 0x74, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65,
+	0x12, 0x3f, 0x0a, 0x0a, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x50, 0x6f, 0x73, 0x74, 0x12, 0x1b,
+	0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65,
+	0x50, 0x6f, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x14, 0x2e, 0x74, 0x68,
+	0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x49, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x66, 0x69, 0x65,
+	0x72, 0x12, 0x34, 0x0a, 0x07, 0x47, 0x65, 0x74, 0x46, 0x65, 0x65, 0x64, 0x12, 0x18, 0x2e, 0x74,
+	0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x47, 0x65, 0x74, 0x46, 0x65, 0x65, 0x64, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0f, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74,
+	0x73, 0x2e, 0x50, 0x6f, 0x73, 0x74, 0x73, 0x12, 0x36, 0x0a, 0x08, 0x47, 0x65, 0x74, 0x50, 0x6f,
+	0x73, 0x74, 0x73, 0x12, 0x19, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x47,
+	0x65, 0x74, 0x50, 0x6f, 0x73, 0x74, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0f,
+	0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x50, 0x6f, 0x73, 0x74, 0x73, 0x12,
+	0x3b, 0x0a, 0x0d, 0x47, 0x65, 0x74, 0x4c, 0x69, 0x6b, 0x65, 0x64, 0x50, 0x6f, 0x73, 0x74, 0x73,
+	0x12, 0x19, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x47, 0x65, 0x74, 0x50,
+	0x6f, 0x73, 0x74, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0f, 0x2e, 0x74, 0x68,
+	0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x50, 0x6f, 0x73, 0x74, 0x73, 0x12, 0x30, 0x0a, 0x07,
+	0x47, 0x65, 0x74, 0x50, 0x6f, 0x73, 0x74, 0x12, 0x15, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68,
+	0x74, 0x73, 0x2e, 0x50, 0x6f, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0e,
+	0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x50, 0x6f, 0x73, 0x74, 0x12, 0x34,
+	0x0a, 0x0a, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x50, 0x6f, 0x73, 0x74, 0x12, 0x15, 0x2e, 0x74,
+	0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x50, 0x6f, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x1a, 0x0f, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x45,
+	0x6d, 0x70, 0x74, 0x79, 0x12, 0x32, 0x0a, 0x08, 0x4c, 0x69, 0x6b, 0x65, 0x50, 0x6f, 0x73, 0x74,
 	0x12, 0x15, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x50, 0x6f, 0x73, 0x74,
 	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0f, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68,
-	0x74, 0x73, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x12, 0x36, 0x0a, 0x0c, 0x52, 0x65, 0x6d, 0x6f,
-	0x76, 0x65, 0x52, 0x65, 0x70, 0x6f, 0x73, 0x74, 0x12, 0x15, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67,
-	0x68, 0x74, 0x73, 0x2e, 0x50, 0x6f, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
-	0x0f, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79,
-	0x42, 0x0c, 0x5a, 0x0a, 0x2e, 0x3b, 0x67, 0x65, 0x6e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x06,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x74, 0x73, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x12, 0x34, 0x0a, 0x0a, 0x55, 0x6e, 0x6c, 0x69,
+	0x6b, 0x65, 0x50, 0x6f, 0x73, 0x74, 0x12, 0x15, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74,
+	0x73, 0x2e, 0x50, 0x6f, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0f, 0x2e,
+	0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x12, 0x34,
+	0x0a, 0x0a, 0x52, 0x65, 0x70, 0x6f, 0x73, 0x74, 0x50, 0x6f, 0x73, 0x74, 0x12, 0x15, 0x2e, 0x74,
+	0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x50, 0x6f, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x1a, 0x0f, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x45,
+	0x6d, 0x70, 0x74, 0x79, 0x12, 0x36, 0x0a, 0x0c, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x52, 0x65,
+	0x70, 0x6f, 0x73, 0x74, 0x12, 0x15, 0x2e, 0x74, 0x68, 0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e,
+	0x50, 0x6f, 0x73, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0f, 0x2e, 0x74, 0x68,
+	0x6f, 0x75, 0x67, 0x68, 0x74, 0x73, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x42, 0x0c, 0x5a, 0x0a,
+	0x2e, 0x3b, 0x67, 0x65, 0x6e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x33,
 }
 
 var (
@@ -1345,72 +1291,71 @@ func file_thoughts_proto_rawDescGZIP() []byte {
 	return file_thoughts_proto_rawDescData
 }
 
-var file_thoughts_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
+var file_thoughts_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_thoughts_proto_goTypes = []interface{}{
-	(*Empty)(nil),              // 0: thoughts.Empty
-	(*Credentials)(nil),        // 1: thoughts.Credentials
-	(*AuthRequest)(nil),        // 2: thoughts.AuthRequest
-	(*Session)(nil),            // 3: thoughts.Session
-	(*CreateUserRequest)(nil),  // 4: thoughts.CreateUserRequest
-	(*CreateUserResponse)(nil), // 5: thoughts.CreateUserResponse
-	(*UpdateUserRequest)(nil),  // 6: thoughts.UpdateUserRequest
-	(*UserRequest)(nil),        // 7: thoughts.UserRequest
-	(*GetUsersRequest)(nil),    // 8: thoughts.GetUsersRequest
-	(*User)(nil),               // 9: thoughts.User
-	(*Users)(nil),              // 10: thoughts.Users
-	(*Post)(nil),               // 11: thoughts.Post
-	(*Posts)(nil),              // 12: thoughts.Posts
-	(*CreatePostRequest)(nil),  // 13: thoughts.CreatePostRequest
-	(*CreatePostResponse)(nil), // 14: thoughts.CreatePostResponse
-	(*PostRequest)(nil),        // 15: thoughts.PostRequest
-	(*GetFeedRequest)(nil),     // 16: thoughts.GetFeedRequest
-	(*GetPostsRequest)(nil),    // 17: thoughts.GetPostsRequest
+	(*Empty)(nil),             // 0: thoughts.Empty
+	(*Credentials)(nil),       // 1: thoughts.Credentials
+	(*AuthRequest)(nil),       // 2: thoughts.AuthRequest
+	(*Session)(nil),           // 3: thoughts.Session
+	(*CreateUserRequest)(nil), // 4: thoughts.CreateUserRequest
+	(*Identifier)(nil),        // 5: thoughts.Identifier
+	(*UserRequest)(nil),       // 6: thoughts.UserRequest
+	(*User)(nil),              // 7: thoughts.User
+	(*UpdateUserRequest)(nil), // 8: thoughts.UpdateUserRequest
+	(*GetUsersRequest)(nil),   // 9: thoughts.GetUsersRequest
+	(*Users)(nil),             // 10: thoughts.Users
+	(*CreatePostRequest)(nil), // 11: thoughts.CreatePostRequest
+	(*PostRequest)(nil),       // 12: thoughts.PostRequest
+	(*Post)(nil),              // 13: thoughts.Post
+	(*GetFeedRequest)(nil),    // 14: thoughts.GetFeedRequest
+	(*Posts)(nil),             // 15: thoughts.Posts
+	(*GetPostsRequest)(nil),   // 16: thoughts.GetPostsRequest
 }
 var file_thoughts_proto_depIdxs = []int32{
-	9,  // 0: thoughts.Users.users:type_name -> thoughts.User
-	11, // 1: thoughts.Posts.posts:type_name -> thoughts.Post
+	7,  // 0: thoughts.Users.users:type_name -> thoughts.User
+	13, // 1: thoughts.Posts.posts:type_name -> thoughts.Post
 	1,  // 2: thoughts.AuthService.CreateSession:input_type -> thoughts.Credentials
 	2,  // 3: thoughts.AuthService.ValidateSession:input_type -> thoughts.AuthRequest
 	1,  // 4: thoughts.AuthService.ValidatePassword:input_type -> thoughts.Credentials
 	2,  // 5: thoughts.AuthService.DeleteSession:input_type -> thoughts.AuthRequest
 	4,  // 6: thoughts.UserService.CreateUser:input_type -> thoughts.CreateUserRequest
-	7,  // 7: thoughts.UserService.GetUser:input_type -> thoughts.UserRequest
-	6,  // 8: thoughts.UserService.UpdateUser:input_type -> thoughts.UpdateUserRequest
-	8,  // 9: thoughts.FollowService.GetFollowing:input_type -> thoughts.GetUsersRequest
-	8,  // 10: thoughts.FollowService.GetFollowers:input_type -> thoughts.GetUsersRequest
-	7,  // 11: thoughts.FollowService.FollowUser:input_type -> thoughts.UserRequest
-	7,  // 12: thoughts.FollowService.UnfollowUser:input_type -> thoughts.UserRequest
-	13, // 13: thoughts.PostService.CreatePost:input_type -> thoughts.CreatePostRequest
-	15, // 14: thoughts.PostService.GetPost:input_type -> thoughts.PostRequest
-	16, // 15: thoughts.PostService.GetFeed:input_type -> thoughts.GetFeedRequest
-	17, // 16: thoughts.PostService.GetPosts:input_type -> thoughts.GetPostsRequest
-	17, // 17: thoughts.PostService.GetLikedPosts:input_type -> thoughts.GetPostsRequest
-	15, // 18: thoughts.PostService.DeletePost:input_type -> thoughts.PostRequest
-	15, // 19: thoughts.ActionService.LikePost:input_type -> thoughts.PostRequest
-	15, // 20: thoughts.ActionService.UnlikePost:input_type -> thoughts.PostRequest
-	15, // 21: thoughts.ActionService.RepostPost:input_type -> thoughts.PostRequest
-	15, // 22: thoughts.ActionService.RemoveRepost:input_type -> thoughts.PostRequest
+	6,  // 7: thoughts.UserService.GetUser:input_type -> thoughts.UserRequest
+	8,  // 8: thoughts.UserService.UpdateUser:input_type -> thoughts.UpdateUserRequest
+	9,  // 9: thoughts.UserService.GetFollowing:input_type -> thoughts.GetUsersRequest
+	9,  // 10: thoughts.UserService.GetFollowers:input_type -> thoughts.GetUsersRequest
+	6,  // 11: thoughts.UserService.FollowUser:input_type -> thoughts.UserRequest
+	6,  // 12: thoughts.UserService.UnfollowUser:input_type -> thoughts.UserRequest
+	11, // 13: thoughts.PostService.CreatePost:input_type -> thoughts.CreatePostRequest
+	14, // 14: thoughts.PostService.GetFeed:input_type -> thoughts.GetFeedRequest
+	16, // 15: thoughts.PostService.GetPosts:input_type -> thoughts.GetPostsRequest
+	16, // 16: thoughts.PostService.GetLikedPosts:input_type -> thoughts.GetPostsRequest
+	12, // 17: thoughts.PostService.GetPost:input_type -> thoughts.PostRequest
+	12, // 18: thoughts.PostService.DeletePost:input_type -> thoughts.PostRequest
+	12, // 19: thoughts.PostService.LikePost:input_type -> thoughts.PostRequest
+	12, // 20: thoughts.PostService.UnlikePost:input_type -> thoughts.PostRequest
+	12, // 21: thoughts.PostService.RepostPost:input_type -> thoughts.PostRequest
+	12, // 22: thoughts.PostService.RemoveRepost:input_type -> thoughts.PostRequest
 	3,  // 23: thoughts.AuthService.CreateSession:output_type -> thoughts.Session
 	3,  // 24: thoughts.AuthService.ValidateSession:output_type -> thoughts.Session
 	0,  // 25: thoughts.AuthService.ValidatePassword:output_type -> thoughts.Empty
 	0,  // 26: thoughts.AuthService.DeleteSession:output_type -> thoughts.Empty
-	5,  // 27: thoughts.UserService.CreateUser:output_type -> thoughts.CreateUserResponse
-	9,  // 28: thoughts.UserService.GetUser:output_type -> thoughts.User
+	5,  // 27: thoughts.UserService.CreateUser:output_type -> thoughts.Identifier
+	7,  // 28: thoughts.UserService.GetUser:output_type -> thoughts.User
 	0,  // 29: thoughts.UserService.UpdateUser:output_type -> thoughts.Empty
-	10, // 30: thoughts.FollowService.GetFollowing:output_type -> thoughts.Users
-	10, // 31: thoughts.FollowService.GetFollowers:output_type -> thoughts.Users
-	0,  // 32: thoughts.FollowService.FollowUser:output_type -> thoughts.Empty
-	0,  // 33: thoughts.FollowService.UnfollowUser:output_type -> thoughts.Empty
-	14, // 34: thoughts.PostService.CreatePost:output_type -> thoughts.CreatePostResponse
-	11, // 35: thoughts.PostService.GetPost:output_type -> thoughts.Post
-	12, // 36: thoughts.PostService.GetFeed:output_type -> thoughts.Posts
-	12, // 37: thoughts.PostService.GetPosts:output_type -> thoughts.Posts
-	12, // 38: thoughts.PostService.GetLikedPosts:output_type -> thoughts.Posts
+	10, // 30: thoughts.UserService.GetFollowing:output_type -> thoughts.Users
+	10, // 31: thoughts.UserService.GetFollowers:output_type -> thoughts.Users
+	0,  // 32: thoughts.UserService.FollowUser:output_type -> thoughts.Empty
+	0,  // 33: thoughts.UserService.UnfollowUser:output_type -> thoughts.Empty
+	5,  // 34: thoughts.PostService.CreatePost:output_type -> thoughts.Identifier
+	15, // 35: thoughts.PostService.GetFeed:output_type -> thoughts.Posts
+	15, // 36: thoughts.PostService.GetPosts:output_type -> thoughts.Posts
+	15, // 37: thoughts.PostService.GetLikedPosts:output_type -> thoughts.Posts
+	13, // 38: thoughts.PostService.GetPost:output_type -> thoughts.Post
 	0,  // 39: thoughts.PostService.DeletePost:output_type -> thoughts.Empty
-	0,  // 40: thoughts.ActionService.LikePost:output_type -> thoughts.Empty
-	0,  // 41: thoughts.ActionService.UnlikePost:output_type -> thoughts.Empty
-	0,  // 42: thoughts.ActionService.RepostPost:output_type -> thoughts.Empty
-	0,  // 43: thoughts.ActionService.RemoveRepost:output_type -> thoughts.Empty
+	0,  // 40: thoughts.PostService.LikePost:output_type -> thoughts.Empty
+	0,  // 41: thoughts.PostService.UnlikePost:output_type -> thoughts.Empty
+	0,  // 42: thoughts.PostService.RepostPost:output_type -> thoughts.Empty
+	0,  // 43: thoughts.PostService.RemoveRepost:output_type -> thoughts.Empty
 	23, // [23:44] is the sub-list for method output_type
 	2,  // [2:23] is the sub-list for method input_type
 	2,  // [2:2] is the sub-list for extension type_name
@@ -1485,7 +1430,7 @@ func file_thoughts_proto_init() {
 			}
 		}
 		file_thoughts_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CreateUserResponse); i {
+			switch v := v.(*Identifier); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1497,18 +1442,6 @@ func file_thoughts_proto_init() {
 			}
 		}
 		file_thoughts_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*UpdateUserRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_thoughts_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*UserRequest); i {
 			case 0:
 				return &v.state
@@ -1520,8 +1453,20 @@ func file_thoughts_proto_init() {
 				return nil
 			}
 		}
+		file_thoughts_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*User); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 		file_thoughts_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetUsersRequest); i {
+			switch v := v.(*UpdateUserRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1533,7 +1478,7 @@ func file_thoughts_proto_init() {
 			}
 		}
 		file_thoughts_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*User); i {
+			switch v := v.(*GetUsersRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -1557,30 +1502,6 @@ func file_thoughts_proto_init() {
 			}
 		}
 		file_thoughts_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Post); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_thoughts_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Posts); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_thoughts_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*CreatePostRequest); i {
 			case 0:
 				return &v.state
@@ -1592,19 +1513,7 @@ func file_thoughts_proto_init() {
 				return nil
 			}
 		}
-		file_thoughts_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CreatePostResponse); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_thoughts_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
+		file_thoughts_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*PostRequest); i {
 			case 0:
 				return &v.state
@@ -1616,7 +1525,19 @@ func file_thoughts_proto_init() {
 				return nil
 			}
 		}
-		file_thoughts_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
+		file_thoughts_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Post); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_thoughts_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetFeedRequest); i {
 			case 0:
 				return &v.state
@@ -1628,7 +1549,19 @@ func file_thoughts_proto_init() {
 				return nil
 			}
 		}
-		file_thoughts_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
+		file_thoughts_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*Posts); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_thoughts_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*GetPostsRequest); i {
 			case 0:
 				return &v.state
@@ -1647,9 +1580,9 @@ func file_thoughts_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_thoughts_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   18,
+			NumMessages:   17,
 			NumExtensions: 0,
-			NumServices:   5,
+			NumServices:   3,
 		},
 		GoTypes:           file_thoughts_proto_goTypes,
 		DependencyIndexes: file_thoughts_proto_depIdxs,
@@ -1853,9 +1786,13 @@ var _AuthService_serviceDesc = grpc.ServiceDesc{
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type UserServiceClient interface {
-	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
+	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*Identifier, error)
 	GetUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*User, error)
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*Empty, error)
+	GetFollowing(ctx context.Context, in *GetUsersRequest, opts ...grpc.CallOption) (*Users, error)
+	GetFollowers(ctx context.Context, in *GetUsersRequest, opts ...grpc.CallOption) (*Users, error)
+	FollowUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*Empty, error)
+	UnfollowUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type userServiceClient struct {
@@ -1866,8 +1803,8 @@ func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 	return &userServiceClient{cc}
 }
 
-func (c *userServiceClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error) {
-	out := new(CreateUserResponse)
+func (c *userServiceClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*Identifier, error) {
+	out := new(Identifier)
 	err := c.cc.Invoke(ctx, "/thoughts.UserService/CreateUser", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -1893,18 +1830,58 @@ func (c *userServiceClient) UpdateUser(ctx context.Context, in *UpdateUserReques
 	return out, nil
 }
 
+func (c *userServiceClient) GetFollowing(ctx context.Context, in *GetUsersRequest, opts ...grpc.CallOption) (*Users, error) {
+	out := new(Users)
+	err := c.cc.Invoke(ctx, "/thoughts.UserService/GetFollowing", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetFollowers(ctx context.Context, in *GetUsersRequest, opts ...grpc.CallOption) (*Users, error) {
+	out := new(Users)
+	err := c.cc.Invoke(ctx, "/thoughts.UserService/GetFollowers", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) FollowUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, "/thoughts.UserService/FollowUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) UnfollowUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, "/thoughts.UserService/UnfollowUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 type UserServiceServer interface {
-	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
+	CreateUser(context.Context, *CreateUserRequest) (*Identifier, error)
 	GetUser(context.Context, *UserRequest) (*User, error)
 	UpdateUser(context.Context, *UpdateUserRequest) (*Empty, error)
+	GetFollowing(context.Context, *GetUsersRequest) (*Users, error)
+	GetFollowers(context.Context, *GetUsersRequest) (*Users, error)
+	FollowUser(context.Context, *UserRequest) (*Empty, error)
+	UnfollowUser(context.Context, *UserRequest) (*Empty, error)
 }
 
 // UnimplementedUserServiceServer can be embedded to have forward compatible implementations.
 type UnimplementedUserServiceServer struct {
 }
 
-func (*UnimplementedUserServiceServer) CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error) {
+func (*UnimplementedUserServiceServer) CreateUser(context.Context, *CreateUserRequest) (*Identifier, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
 }
 func (*UnimplementedUserServiceServer) GetUser(context.Context, *UserRequest) (*User, error) {
@@ -1912,6 +1889,18 @@ func (*UnimplementedUserServiceServer) GetUser(context.Context, *UserRequest) (*
 }
 func (*UnimplementedUserServiceServer) UpdateUser(context.Context, *UpdateUserRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateUser not implemented")
+}
+func (*UnimplementedUserServiceServer) GetFollowing(context.Context, *GetUsersRequest) (*Users, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFollowing not implemented")
+}
+func (*UnimplementedUserServiceServer) GetFollowers(context.Context, *GetUsersRequest) (*Users, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFollowers not implemented")
+}
+func (*UnimplementedUserServiceServer) FollowUser(context.Context, *UserRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FollowUser not implemented")
+}
+func (*UnimplementedUserServiceServer) UnfollowUser(context.Context, *UserRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UnfollowUser not implemented")
 }
 
 func RegisterUserServiceServer(s *grpc.Server, srv UserServiceServer) {
@@ -1972,6 +1961,78 @@ func _UserService_UpdateUser_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_GetFollowing_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUsersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetFollowing(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/thoughts.UserService/GetFollowing",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetFollowing(ctx, req.(*GetUsersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetFollowers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUsersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetFollowers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/thoughts.UserService/GetFollowers",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetFollowers(ctx, req.(*GetUsersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_FollowUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).FollowUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/thoughts.UserService/FollowUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).FollowUser(ctx, req.(*UserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_UnfollowUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).UnfollowUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/thoughts.UserService/UnfollowUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).UnfollowUser(ctx, req.(*UserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _UserService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "thoughts.UserService",
 	HandlerType: (*UserServiceServer)(nil),
@@ -1988,185 +2049,21 @@ var _UserService_serviceDesc = grpc.ServiceDesc{
 			MethodName: "UpdateUser",
 			Handler:    _UserService_UpdateUser_Handler,
 		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "thoughts.proto",
-}
-
-// FollowServiceClient is the client API for FollowService service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type FollowServiceClient interface {
-	GetFollowing(ctx context.Context, in *GetUsersRequest, opts ...grpc.CallOption) (*Users, error)
-	GetFollowers(ctx context.Context, in *GetUsersRequest, opts ...grpc.CallOption) (*Users, error)
-	FollowUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*Empty, error)
-	UnfollowUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*Empty, error)
-}
-
-type followServiceClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewFollowServiceClient(cc grpc.ClientConnInterface) FollowServiceClient {
-	return &followServiceClient{cc}
-}
-
-func (c *followServiceClient) GetFollowing(ctx context.Context, in *GetUsersRequest, opts ...grpc.CallOption) (*Users, error) {
-	out := new(Users)
-	err := c.cc.Invoke(ctx, "/thoughts.FollowService/GetFollowing", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *followServiceClient) GetFollowers(ctx context.Context, in *GetUsersRequest, opts ...grpc.CallOption) (*Users, error) {
-	out := new(Users)
-	err := c.cc.Invoke(ctx, "/thoughts.FollowService/GetFollowers", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *followServiceClient) FollowUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/thoughts.FollowService/FollowUser", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *followServiceClient) UnfollowUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/thoughts.FollowService/UnfollowUser", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// FollowServiceServer is the server API for FollowService service.
-type FollowServiceServer interface {
-	GetFollowing(context.Context, *GetUsersRequest) (*Users, error)
-	GetFollowers(context.Context, *GetUsersRequest) (*Users, error)
-	FollowUser(context.Context, *UserRequest) (*Empty, error)
-	UnfollowUser(context.Context, *UserRequest) (*Empty, error)
-}
-
-// UnimplementedFollowServiceServer can be embedded to have forward compatible implementations.
-type UnimplementedFollowServiceServer struct {
-}
-
-func (*UnimplementedFollowServiceServer) GetFollowing(context.Context, *GetUsersRequest) (*Users, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetFollowing not implemented")
-}
-func (*UnimplementedFollowServiceServer) GetFollowers(context.Context, *GetUsersRequest) (*Users, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetFollowers not implemented")
-}
-func (*UnimplementedFollowServiceServer) FollowUser(context.Context, *UserRequest) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method FollowUser not implemented")
-}
-func (*UnimplementedFollowServiceServer) UnfollowUser(context.Context, *UserRequest) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UnfollowUser not implemented")
-}
-
-func RegisterFollowServiceServer(s *grpc.Server, srv FollowServiceServer) {
-	s.RegisterService(&_FollowService_serviceDesc, srv)
-}
-
-func _FollowService_GetFollowing_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUsersRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(FollowServiceServer).GetFollowing(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/thoughts.FollowService/GetFollowing",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FollowServiceServer).GetFollowing(ctx, req.(*GetUsersRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _FollowService_GetFollowers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUsersRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(FollowServiceServer).GetFollowers(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/thoughts.FollowService/GetFollowers",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FollowServiceServer).GetFollowers(ctx, req.(*GetUsersRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _FollowService_FollowUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UserRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(FollowServiceServer).FollowUser(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/thoughts.FollowService/FollowUser",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FollowServiceServer).FollowUser(ctx, req.(*UserRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _FollowService_UnfollowUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UserRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(FollowServiceServer).UnfollowUser(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/thoughts.FollowService/UnfollowUser",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(FollowServiceServer).UnfollowUser(ctx, req.(*UserRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-var _FollowService_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "thoughts.FollowService",
-	HandlerType: (*FollowServiceServer)(nil),
-	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "GetFollowing",
-			Handler:    _FollowService_GetFollowing_Handler,
+			Handler:    _UserService_GetFollowing_Handler,
 		},
 		{
 			MethodName: "GetFollowers",
-			Handler:    _FollowService_GetFollowers_Handler,
+			Handler:    _UserService_GetFollowers_Handler,
 		},
 		{
 			MethodName: "FollowUser",
-			Handler:    _FollowService_FollowUser_Handler,
+			Handler:    _UserService_FollowUser_Handler,
 		},
 		{
 			MethodName: "UnfollowUser",
-			Handler:    _FollowService_UnfollowUser_Handler,
+			Handler:    _UserService_UnfollowUser_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -2177,12 +2074,16 @@ var _FollowService_serviceDesc = grpc.ServiceDesc{
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type PostServiceClient interface {
-	CreatePost(ctx context.Context, in *CreatePostRequest, opts ...grpc.CallOption) (*CreatePostResponse, error)
-	GetPost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Post, error)
+	CreatePost(ctx context.Context, in *CreatePostRequest, opts ...grpc.CallOption) (*Identifier, error)
 	GetFeed(ctx context.Context, in *GetFeedRequest, opts ...grpc.CallOption) (*Posts, error)
 	GetPosts(ctx context.Context, in *GetPostsRequest, opts ...grpc.CallOption) (*Posts, error)
 	GetLikedPosts(ctx context.Context, in *GetPostsRequest, opts ...grpc.CallOption) (*Posts, error)
+	GetPost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Post, error)
 	DeletePost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error)
+	LikePost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error)
+	UnlikePost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error)
+	RepostPost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error)
+	RemoveRepost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type postServiceClient struct {
@@ -2193,18 +2094,9 @@ func NewPostServiceClient(cc grpc.ClientConnInterface) PostServiceClient {
 	return &postServiceClient{cc}
 }
 
-func (c *postServiceClient) CreatePost(ctx context.Context, in *CreatePostRequest, opts ...grpc.CallOption) (*CreatePostResponse, error) {
-	out := new(CreatePostResponse)
+func (c *postServiceClient) CreatePost(ctx context.Context, in *CreatePostRequest, opts ...grpc.CallOption) (*Identifier, error) {
+	out := new(Identifier)
 	err := c.cc.Invoke(ctx, "/thoughts.PostService/CreatePost", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *postServiceClient) GetPost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Post, error) {
-	out := new(Post)
-	err := c.cc.Invoke(ctx, "/thoughts.PostService/GetPost", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -2238,6 +2130,15 @@ func (c *postServiceClient) GetLikedPosts(ctx context.Context, in *GetPostsReque
 	return out, nil
 }
 
+func (c *postServiceClient) GetPost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Post, error) {
+	out := new(Post)
+	err := c.cc.Invoke(ctx, "/thoughts.PostService/GetPost", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *postServiceClient) DeletePost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error) {
 	out := new(Empty)
 	err := c.cc.Invoke(ctx, "/thoughts.PostService/DeletePost", in, out, opts...)
@@ -2247,25 +2148,62 @@ func (c *postServiceClient) DeletePost(ctx context.Context, in *PostRequest, opt
 	return out, nil
 }
 
+func (c *postServiceClient) LikePost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, "/thoughts.PostService/LikePost", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *postServiceClient) UnlikePost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, "/thoughts.PostService/UnlikePost", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *postServiceClient) RepostPost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, "/thoughts.PostService/RepostPost", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *postServiceClient) RemoveRepost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, "/thoughts.PostService/RemoveRepost", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PostServiceServer is the server API for PostService service.
 type PostServiceServer interface {
-	CreatePost(context.Context, *CreatePostRequest) (*CreatePostResponse, error)
-	GetPost(context.Context, *PostRequest) (*Post, error)
+	CreatePost(context.Context, *CreatePostRequest) (*Identifier, error)
 	GetFeed(context.Context, *GetFeedRequest) (*Posts, error)
 	GetPosts(context.Context, *GetPostsRequest) (*Posts, error)
 	GetLikedPosts(context.Context, *GetPostsRequest) (*Posts, error)
+	GetPost(context.Context, *PostRequest) (*Post, error)
 	DeletePost(context.Context, *PostRequest) (*Empty, error)
+	LikePost(context.Context, *PostRequest) (*Empty, error)
+	UnlikePost(context.Context, *PostRequest) (*Empty, error)
+	RepostPost(context.Context, *PostRequest) (*Empty, error)
+	RemoveRepost(context.Context, *PostRequest) (*Empty, error)
 }
 
 // UnimplementedPostServiceServer can be embedded to have forward compatible implementations.
 type UnimplementedPostServiceServer struct {
 }
 
-func (*UnimplementedPostServiceServer) CreatePost(context.Context, *CreatePostRequest) (*CreatePostResponse, error) {
+func (*UnimplementedPostServiceServer) CreatePost(context.Context, *CreatePostRequest) (*Identifier, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePost not implemented")
-}
-func (*UnimplementedPostServiceServer) GetPost(context.Context, *PostRequest) (*Post, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetPost not implemented")
 }
 func (*UnimplementedPostServiceServer) GetFeed(context.Context, *GetFeedRequest) (*Posts, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetFeed not implemented")
@@ -2276,8 +2214,23 @@ func (*UnimplementedPostServiceServer) GetPosts(context.Context, *GetPostsReques
 func (*UnimplementedPostServiceServer) GetLikedPosts(context.Context, *GetPostsRequest) (*Posts, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetLikedPosts not implemented")
 }
+func (*UnimplementedPostServiceServer) GetPost(context.Context, *PostRequest) (*Post, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPost not implemented")
+}
 func (*UnimplementedPostServiceServer) DeletePost(context.Context, *PostRequest) (*Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeletePost not implemented")
+}
+func (*UnimplementedPostServiceServer) LikePost(context.Context, *PostRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LikePost not implemented")
+}
+func (*UnimplementedPostServiceServer) UnlikePost(context.Context, *PostRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UnlikePost not implemented")
+}
+func (*UnimplementedPostServiceServer) RepostPost(context.Context, *PostRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RepostPost not implemented")
+}
+func (*UnimplementedPostServiceServer) RemoveRepost(context.Context, *PostRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveRepost not implemented")
 }
 
 func RegisterPostServiceServer(s *grpc.Server, srv PostServiceServer) {
@@ -2298,24 +2251,6 @@ func _PostService_CreatePost_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PostServiceServer).CreatePost(ctx, req.(*CreatePostRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _PostService_GetPost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PostRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PostServiceServer).GetPost(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/thoughts.PostService/GetPost",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PostServiceServer).GetPost(ctx, req.(*PostRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -2374,6 +2309,24 @@ func _PostService_GetLikedPosts_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PostService_GetPost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PostRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).GetPost(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/thoughts.PostService/GetPost",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).GetPost(ctx, req.(*PostRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PostService_DeletePost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PostRequest)
 	if err := dec(in); err != nil {
@@ -2392,6 +2345,78 @@ func _PostService_DeletePost_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PostService_LikePost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PostRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).LikePost(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/thoughts.PostService/LikePost",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).LikePost(ctx, req.(*PostRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PostService_UnlikePost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PostRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).UnlikePost(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/thoughts.PostService/UnlikePost",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).UnlikePost(ctx, req.(*PostRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PostService_RepostPost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PostRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).RepostPost(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/thoughts.PostService/RepostPost",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).RepostPost(ctx, req.(*PostRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PostService_RemoveRepost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PostRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).RemoveRepost(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/thoughts.PostService/RemoveRepost",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).RemoveRepost(ctx, req.(*PostRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _PostService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "thoughts.PostService",
 	HandlerType: (*PostServiceServer)(nil),
@@ -2399,10 +2424,6 @@ var _PostService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreatePost",
 			Handler:    _PostService_CreatePost_Handler,
-		},
-		{
-			MethodName: "GetPost",
-			Handler:    _PostService_GetPost_Handler,
 		},
 		{
 			MethodName: "GetFeed",
@@ -2417,188 +2438,28 @@ var _PostService_serviceDesc = grpc.ServiceDesc{
 			Handler:    _PostService_GetLikedPosts_Handler,
 		},
 		{
+			MethodName: "GetPost",
+			Handler:    _PostService_GetPost_Handler,
+		},
+		{
 			MethodName: "DeletePost",
 			Handler:    _PostService_DeletePost_Handler,
 		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "thoughts.proto",
-}
-
-// ActionServiceClient is the client API for ActionService service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
-type ActionServiceClient interface {
-	LikePost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error)
-	UnlikePost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error)
-	RepostPost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error)
-	RemoveRepost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error)
-}
-
-type actionServiceClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewActionServiceClient(cc grpc.ClientConnInterface) ActionServiceClient {
-	return &actionServiceClient{cc}
-}
-
-func (c *actionServiceClient) LikePost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/thoughts.ActionService/LikePost", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *actionServiceClient) UnlikePost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/thoughts.ActionService/UnlikePost", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *actionServiceClient) RepostPost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/thoughts.ActionService/RepostPost", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *actionServiceClient) RemoveRepost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/thoughts.ActionService/RemoveRepost", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// ActionServiceServer is the server API for ActionService service.
-type ActionServiceServer interface {
-	LikePost(context.Context, *PostRequest) (*Empty, error)
-	UnlikePost(context.Context, *PostRequest) (*Empty, error)
-	RepostPost(context.Context, *PostRequest) (*Empty, error)
-	RemoveRepost(context.Context, *PostRequest) (*Empty, error)
-}
-
-// UnimplementedActionServiceServer can be embedded to have forward compatible implementations.
-type UnimplementedActionServiceServer struct {
-}
-
-func (*UnimplementedActionServiceServer) LikePost(context.Context, *PostRequest) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method LikePost not implemented")
-}
-func (*UnimplementedActionServiceServer) UnlikePost(context.Context, *PostRequest) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UnlikePost not implemented")
-}
-func (*UnimplementedActionServiceServer) RepostPost(context.Context, *PostRequest) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RepostPost not implemented")
-}
-func (*UnimplementedActionServiceServer) RemoveRepost(context.Context, *PostRequest) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RemoveRepost not implemented")
-}
-
-func RegisterActionServiceServer(s *grpc.Server, srv ActionServiceServer) {
-	s.RegisterService(&_ActionService_serviceDesc, srv)
-}
-
-func _ActionService_LikePost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PostRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ActionServiceServer).LikePost(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/thoughts.ActionService/LikePost",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ActionServiceServer).LikePost(ctx, req.(*PostRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ActionService_UnlikePost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PostRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ActionServiceServer).UnlikePost(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/thoughts.ActionService/UnlikePost",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ActionServiceServer).UnlikePost(ctx, req.(*PostRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ActionService_RepostPost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PostRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ActionServiceServer).RepostPost(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/thoughts.ActionService/RepostPost",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ActionServiceServer).RepostPost(ctx, req.(*PostRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ActionService_RemoveRepost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PostRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ActionServiceServer).RemoveRepost(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/thoughts.ActionService/RemoveRepost",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ActionServiceServer).RemoveRepost(ctx, req.(*PostRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-var _ActionService_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "thoughts.ActionService",
-	HandlerType: (*ActionServiceServer)(nil),
-	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "LikePost",
-			Handler:    _ActionService_LikePost_Handler,
+			Handler:    _PostService_LikePost_Handler,
 		},
 		{
 			MethodName: "UnlikePost",
-			Handler:    _ActionService_UnlikePost_Handler,
+			Handler:    _PostService_UnlikePost_Handler,
 		},
 		{
 			MethodName: "RepostPost",
-			Handler:    _ActionService_RepostPost_Handler,
+			Handler:    _PostService_RepostPost_Handler,
 		},
 		{
 			MethodName: "RemoveRepost",
-			Handler:    _ActionService_RemoveRepost_Handler,
+			Handler:    _PostService_RemoveRepost_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

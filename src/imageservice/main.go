@@ -17,11 +17,11 @@ func main() {
 	}
 	imageDir := os.Getenv("IMAGE_DIR")
 
-	s := image.CreateServer(port, imageDir)
+	server := image.CreateServer(port, imageDir)
 
 	go func() {
-		log.Printf("Server is starting on port %s\n", port)
-		if err := s.ListenAndServe(); err != nil {
+		log.Printf("Server is starting on port %s", port)
+		if err := server.ListenAndServe(); err != nil {
 			log.Fatal(err)
 		}
 	}()
@@ -29,10 +29,12 @@ func main() {
 	quit := make(chan os.Signal)
 	signal.Notify(quit, os.Interrupt)
 	<-quit
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+
 	log.Println("Server is shutting down...")
-	if err := s.Shutdown(ctx); err != nil {
+	if err := server.Shutdown(ctx); err != nil {
 		log.Fatal(err)
 	}
 }

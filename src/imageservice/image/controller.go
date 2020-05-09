@@ -12,15 +12,15 @@ import (
 
 const maxFileSize = 1 << 20
 
-type service struct {
+type controller struct {
 	imageDir string
 }
 
-func newService(imageDir string) *service {
-	return &service{imageDir}
+func newController(imageDir string) *controller {
+	return &controller{imageDir}
 }
 
-func (s *service) uploadFile(w http.ResponseWriter, r *http.Request) {
+func (c *controller) uploadFile(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, maxFileSize)
 
 	if err := r.ParseMultipartForm(maxFileSize); err != nil {
@@ -55,7 +55,7 @@ func (s *service) uploadFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	filename := randToken(16)
-	path := strings.Join([]string{s.imageDir, filename}, "/")
+	path := strings.Join([]string{c.imageDir, filename}, "/")
 
 	err = ioutil.WriteFile(path, data, 0666)
 	if err != nil {
@@ -67,8 +67,8 @@ func (s *service) uploadFile(w http.ResponseWriter, r *http.Request) {
 	jsonResponse(w, map[string]string{"image": filename}, 201)
 }
 
-func (s *service) getFile(w http.ResponseWriter, r *http.Request) {
-	filePath := fmt.Sprintf("%s/%s", s.imageDir, filepath.Base(r.URL.Path))
+func (c *controller) getFile(w http.ResponseWriter, r *http.Request) {
+	filePath := fmt.Sprintf("%s/%s", c.imageDir, filepath.Base(r.URL.Path))
 
 	_, err := os.Stat(filePath)
 	if err != nil {

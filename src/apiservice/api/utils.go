@@ -11,7 +11,6 @@ import (
 // getStatusCode converts grpc code to http status code
 func getStatusCode(s *status.Status) int {
 	c := s.Proto().GetCode()
-
 	switch codes.Code(c) {
 	case codes.InvalidArgument:
 		return 400

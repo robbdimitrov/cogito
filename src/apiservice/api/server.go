@@ -9,13 +9,13 @@ import (
 
 // CreateServer creates and setups new Echo instance
 func CreateServer(addrs ...string) *echo.Echo {
-	e := echo.New()
-	r := newRouter(addrs...)
+	server := echo.New()
+	router := newRouter(addrs...)
 
-	e.HideBanner = true
-	e.HidePort = true
+	server.HideBanner = true
+	server.HidePort = true
 
-	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+	server.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			req := c.Request()
 			log.Printf("Request %s %s", req.Method, req.RequestURI)
@@ -23,9 +23,9 @@ func CreateServer(addrs ...string) *echo.Echo {
 		}
 	})
 
-	e.Use(authGuard(r.auth))
-	e.Use(middleware.Recover())
-	r.configureRoutes(e)
+	server.Use(authGuard(router.auth))
+	server.Use(middleware.Recover())
+	router.configureRoutes(server)
 
-	return e
+	return server
 }
