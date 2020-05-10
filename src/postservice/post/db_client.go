@@ -24,7 +24,7 @@ func NewDbClient(dbURL string) *DbClient {
 
 	db, err := pgxpool.ConnectConfig(context.Background(), config)
 	if err != nil {
-		log.Fatalf("Unable to create connection pool: %v", err)
+		log.Fatalf("Unable to connect to database: %v", err)
 	}
 
 	return &DbClient{db}

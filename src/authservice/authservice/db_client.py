@@ -11,7 +11,7 @@ class DbClient:
         try:
             self.db = pool.ThreadedConnectionPool(1, 10, db_url)
         except DatabaseError as e:
-            logger.print(f'Unable to create connection pool: {e}')
+            logger.print(f'Unable to connect to database: {e}')
             sys.exit(1)
 
     def close(self):

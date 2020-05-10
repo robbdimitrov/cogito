@@ -1,22 +1,21 @@
-import psycopg2
+import sys
 
-from userservice import db, thoughts_pb2
-from userservice.exceptions import (
-    DbException,
-    ExistingUserException,
-    UserActionException,
-    UserNotFoundException
-)
-from userservice.utils import (
-    row_to_user,
-    rows_to_users,
-    rows_to_ids
-)
+from psycopg2 import pool, DatabaseError
+
+from userservice.mappers import map_user
+from userservice import logger
 
 
 class DbClient:
-    def __init__(self, db):
-        self.db = db
+    def __init__(self, db_url):
+        try:
+            self.db = pool.ThreadedConnectionPool(1, 10, db_url)
+        except DatabaseError as e:
+            logger.print(f'Unable to connect to database: {e}')
+            sys.exit(1)
+
+    def close(self):
+        self.db.closeall()
 
     def create_user(self, username, email, name, password):
         conn = self.db.get_conn()
@@ -29,13 +28,13 @@ class DbClient:
 
         if existing_user is not None:
             if existing_user[0] == username:
-                raise ExistingUserException('User with this username already exists.')
+                raise Exception('User with this username already exists.')
             else:
-                raise ExistingUserException('User with this email already exists.')
+                raise Exception('User with this email already exists.')
 
         try:
             cur.execute('INSERT INTO users (username, email, name, password) \
-                VALUES(%s, %s, %s, %s)',
+                VALUES (%s, %s, %s, %s)',
                 (username, email, name, password))
             conn.commit()
         except psycopg2.Error as e:
@@ -52,8 +51,8 @@ class DbClient:
             COUNT(DISTINCT following.id) AS following, \
             COUNT(DISTINCT followers.id) AS followers, \
             time_format(users.date_created) as date_created \
-            FROM users AS users LEFT JOIN followings AS following \
-            ON following.follower_id = users.id LEFT JOIN followings AS followers \
+            FROM users AS users LEFT JOIN followers AS following \
+            ON following.follower_id = users.id LEFT JOIN followers AS followers \
             ON followers.user_id = users.id LEFT JOIN posts as posts \
             ON posts.user_id = users.id LEFT JOIN likes as likes \
             ON likes.user_id = users.id  LEFT JOIN retweets as retweets \
@@ -114,7 +113,7 @@ class DbClient:
         cur = conn.cursor()
 
         cur.execute(self.create_user_query('WHERE users.id IN \
-            (SELECT user_id FROM followings \
+            (SELECT user_id FROM followers \
             WHERE follower_id = %s ORDER BY date_created DESC) \
             OFFSET %s LIMIT %s'),
             (user_id, page * limit, limit))
@@ -128,7 +127,7 @@ class DbClient:
         conn = self.db.get_conn()
         cur = conn.cursor()
 
-        cur.execute('SELECT id FROM followings \
+        cur.execute('SELECT id FROM followers \
             WHERE follower_id = %s',
             (user_id,))
         results = cur.fetchall()
@@ -142,7 +141,7 @@ class DbClient:
         cur = conn.cursor()
 
         cur.execute(self.create_user_query('WHERE users.id IN \
-            (SELECT follower_id FROM followings \
+            (SELECT follower_id FROM followers \
             WHERE user_id = %s ORDER BY date_created DESC) \
             OFFSET %s LIMIT %s'),
             (user_id, page * limit, limit))
@@ -156,7 +155,7 @@ class DbClient:
         conn = self.db.get_conn()
         cur = conn.cursor()
 
-        cur.execute('SELECT follower_id FROM followings \
+        cur.execute('SELECT follower_id FROM followers \
             WHERE user_id = %s',
             (user_id,))
         results = cur.fetchall()
@@ -180,7 +179,7 @@ class DbClient:
             raise UserNotFoundException('User not found.')
 
         try:
-            cur.execute('INSERT INTO followings VALUES(%s, %s)',
+            cur.execute('INSERT INTO followers VALUES (%s, %s)',
                 (user_id, follower_id))
             conn.commit()
         except psycopg2.Error as e:
@@ -193,7 +192,7 @@ class DbClient:
         conn = self.db.get_conn()
         cur = conn.cursor()
 
-        cur.execute('DELETE FROM followings \
+        cur.execute('DELETE FROM followers \
             WHERE user_id = %s AND follower_id = %s',
             (user_id, follower_id))
         conn.commit()

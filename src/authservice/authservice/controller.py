@@ -1,4 +1,4 @@
-from grpc import Status, StatusCode, ServicerContext
+from grpc import StatusCode
 
 from authservice import thoughts_pb2, thoughts_pb2_grpc
 from authservice.crypto import generate_key, validate_password
