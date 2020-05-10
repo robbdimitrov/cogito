@@ -1,4 +1,3 @@
-#!/bin/bash
+#!/bin/bash -e
 
-PROTODIR=../../pb
-protoc -I $PROTODIR --go_out=plugins=grpc:genproto $PROTODIR/thoughts.proto
+protoc -I../../pb --go_out=plugins=grpc:genproto ../../pb/thoughts.proto

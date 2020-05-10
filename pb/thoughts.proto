@@ -24,8 +24,7 @@ message Session {
 
 service AuthService {
   rpc CreateSession(Credentials) returns (Session);
-  rpc ValidateSession(AuthRequest) returns (Session);
-  rpc ValidatePassword(Credentials) returns (Empty);
+  rpc GetSession(AuthRequest) returns (Session);
   rpc DeleteSession(AuthRequest) returns (Empty);
 }
 

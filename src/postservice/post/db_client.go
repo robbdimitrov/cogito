@@ -36,7 +36,7 @@ func (c *DbClient) Close() {
 }
 
 func (c *DbClient) createPost(content string, userID int32) (int32, error) {
-	query := "INSERT INTO posts(user_id, content) VALUES($1, $2) RETURNING id"
+	query := "INSERT INTO posts(user_id, content) VALUES ($1, $2) RETURNING id"
 	row := c.db.QueryRow(context.Background(), query, userID, content)
 
 	var id int32
@@ -58,8 +58,8 @@ func (c *DbClient) getFeed(page int32, limit int32, currentUserID int32) ([]*pb.
 		time_format(posts.created) AS created
 		FROM posts
 		LEFT JOIN reposts ON reposts.post_id = id
-		LEFT JOIN followings ON followings.user_id = reposts.user_id
-		OR followings.user_id = posts.user_id
+		LEFT JOIN followers ON followers.user_id = reposts.user_id
+		OR followers.user_id = posts.user_id
 		WHERE follower_id = $2 OR reposts.user_id = $2 OR posts.user_id = $2
 		ORDER BY coalesce(reposts.created, posts.created) DESC
 		OFFSET $3 LIMIT $4`

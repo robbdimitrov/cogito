@@ -1,7 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
-PROTODIR=../../pb
-SRC_DIR=./authservice
-
-python -m grpc_tools.protoc -I $PROTODIR --python_out=$SRC_DIR \
---grpc_python_out=$SRC_DIR ../../pb/thoughts.proto
+python -m grpc_tools.protoc -I../../pb --python_out=./authservice \
+--grpc_python_out=./authservice ../../pb/thoughts.proto
