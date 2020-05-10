@@ -1,12 +1,17 @@
-import os
+from concurrent import futures
 
-from authservice.server import Server
+import grpc
+
+from authservice import thoughts_pb2_grpc
+from authservice.controller import Controller
 
 
-def create_app():
-    port = os.getenv('PORT')
-    db_url = os.getenv('DATABASE_URL')
-    secret = os.getenv('SECRET')
+def create_server(port, db_client):
+    controller = Controller(db_client)
 
-    app = Server(port, db_url, secret)
-    return app
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    thoughts_pb2_grpc.add_AuthServiceServicer_to_server(controller, server)
+
+    server.add_insecure_port(f'[::]:{port}')
+
+    return server

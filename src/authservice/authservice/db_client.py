@@ -1,93 +1,87 @@
-import psycopg2
+import sys
 
-from authservice.utils import row_to_session, rows_to_sessions
+from psycopg2 import pool, DatabaseError
 
-
-class DbException(Exception):
-    """Base class for database exceptions."""
-    pass
+from authservice.mappers import map_session
+from authservice import logger
 
 
 class DbClient:
-    def __init__(self, db):
-        self.db = db
+    def __init__(self, db_url):
+        try:
+            self.db = pool.ThreadedConnectionPool(1, 10, db_url)
+        except DatabaseError as e:
+            logger.print(f'Unable to create connection pool: {e}')
+            sys.exit(1)
 
-    def create_session(self, user_id, user_agent):
-        conn = self.db.get_conn()
+    def close(self):
+        self.db.closeall()
+
+    def get_user(self, email):
+        conn = self.db.getconn()
         cur = conn.cursor()
 
         try:
-            cur.execute('INSERT INTO sessions(user_id, user_agent) \
-                VALUES(%s, %s) RETURNING id, user_id, user_agent, \
-                time_format(date_created) AS date_created',
-                (user_id, user_agent))
+            query = 'SELECT id, password FROM users WHERE email = %s'
+            cur.execute(query, (email,))
             result = cur.fetchone()
-            conn.commit()
-        except psycopg2.Error as e:
-            print(f'Error creating user: {str(e)}')
-            raise DbException('Error while writing to the database.')
+            user = {
+                'id': result[0],
+                'password': result[1]
+            }
+            return user
+        except Exception:
+            raise
         finally:
             cur.close()
+            self.db.putconn(conn)
 
-        session = row_to_session(result)
-        return session
+    def create_session(self, session_id, user_id):
+        conn = self.db.getconn()
+        cur = conn.cursor()
+
+        try:
+            query = 'INSERT INTO sessions(id, user_id) VALUES (%s, %s)\
+                RETURNING id, user_id, time_format(created) AS created'
+            cur.execute(query, (session_id, user_id))
+            result = cur.fetchone()
+            conn.commit()
+            return map_session(result)
+        except Exception:
+            raise
+        finally:
+            cur.close()
+            self.db.putconn(conn)
 
     def get_session(self, session_id):
-        conn = self.db.get_conn()
+        conn = self.db.getconn()
         cur = conn.cursor()
 
-        cur.execute('SELECT id, user_id, user_agent, \
-            time_format(date_created) AS date_created \
-            FROM sessions WHERE id = %s',
-            (session_id,))
-        result = cur.fetchone()
-        cur.close()
+        try:
+            query = 'SELECT id, user_id, time_format(created) AS created\
+                FROM sessions WHERE id = %s'
+            cur.execute(query, (session_id,))
+            result = cur.fetchone()
+            if result is None:
+                return None
 
-        if result is None:
-            return None
-
-        session = row_to_session(result)
-        return session
-
-    def get_user_sessions(self, user_id):
-        conn = self.db.get_conn()
-        cur = conn.cursor()
-
-        cur.execute('SELECT id, user_id, user_agent, \
-            time_format(date_created) AS date_created \
-            FROM sessions WHERE user_id = %s',
-            (user_id,))
-        result = cur.fetchall()
-        cur.close()
-
-        if result is None:
-            return None
-
-        sessions = rows_to_sessions(result)
-        return sessions
+            return map_session(result)
+        except Exception:
+            raise
+        finally:
+            cur.close()
+            self.db.putconn(conn)
 
     def delete_session(self, session_id):
-        conn = self.db.get_conn()
+        conn = self.db.getconn()
         cur = conn.cursor()
 
-        cur.execute('DELETE FROM sessions WHERE id = %s', (session_id,))
-        conn.commit()
-        cur.close()
-
-    def get_user_password_hash(self, email):
-        conn = self.db.get_conn()
-        cur = conn.cursor()
-
-        cur.execute('SELECT id, password FROM users WHERE email = %s',
-            (email,))
-        result = cur.fetchone()
-        cur.close()
-
-        if result is None:
-            return None
-
-        user = {
-            'id': result[0],
-            'password': result[1]
-        }
-        return user
+        try:
+            query = 'DELETE FROM sessions WHERE id = %s'
+            cur.execute(query, (session_id,))
+            conn.commit()
+        except Exception:
+            raise
+        finally:
+            cur.close()
+            self.db.putconn(conn)
