@@ -41,7 +41,7 @@ func (ac *authController) validateSession(c echo.Context) error {
 
 	req := pb.AuthRequest{SessionId: cookie.Value}
 
-	res, err := client.ValidateSession(ctx, &req)
+	res, err := client.GetSession(ctx, &req)
 	if err != nil {
 		log.Printf("Validating session failed: %v", err)
 		clearCookie(c)
