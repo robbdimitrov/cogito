@@ -36,5 +36,3 @@ spec:
         env:
         - name: DATABASE_URL
           value: postgresql://postgres:kubernetes@database:5432
-        - name: AUTH_SERVICE_ADDR
-          value: authservice:5050

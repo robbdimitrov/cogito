@@ -36,7 +36,7 @@ func (c *DbClient) Close() {
 }
 
 func (c *DbClient) createPost(content string, userID int32) (int32, error) {
-	query := "INSERT INTO posts(user_id, content) VALUES($1, $2) RETURNING id"
+	query := "INSERT INTO posts(user_id, content) VALUES ($1, $2) RETURNING id"
 	row := c.db.QueryRow(context.Background(), query, userID, content)
 
 	var id int32

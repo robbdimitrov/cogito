@@ -18,15 +18,10 @@ class AuthServiceStub(object):
                 request_serializer=thoughts__pb2.Credentials.SerializeToString,
                 response_deserializer=thoughts__pb2.Session.FromString,
                 )
-        self.ValidateSession = channel.unary_unary(
-                '/thoughts.AuthService/ValidateSession',
+        self.GetSession = channel.unary_unary(
+                '/thoughts.AuthService/GetSession',
                 request_serializer=thoughts__pb2.AuthRequest.SerializeToString,
                 response_deserializer=thoughts__pb2.Session.FromString,
-                )
-        self.ValidatePassword = channel.unary_unary(
-                '/thoughts.AuthService/ValidatePassword',
-                request_serializer=thoughts__pb2.Credentials.SerializeToString,
-                response_deserializer=thoughts__pb2.Empty.FromString,
                 )
         self.DeleteSession = channel.unary_unary(
                 '/thoughts.AuthService/DeleteSession',
@@ -44,13 +39,7 @@ class AuthServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def ValidateSession(self, request, context):
-        """Missing associated documentation comment in .proto file"""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def ValidatePassword(self, request, context):
+    def GetSession(self, request, context):
         """Missing associated documentation comment in .proto file"""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -70,15 +59,10 @@ def add_AuthServiceServicer_to_server(servicer, server):
                     request_deserializer=thoughts__pb2.Credentials.FromString,
                     response_serializer=thoughts__pb2.Session.SerializeToString,
             ),
-            'ValidateSession': grpc.unary_unary_rpc_method_handler(
-                    servicer.ValidateSession,
+            'GetSession': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetSession,
                     request_deserializer=thoughts__pb2.AuthRequest.FromString,
                     response_serializer=thoughts__pb2.Session.SerializeToString,
-            ),
-            'ValidatePassword': grpc.unary_unary_rpc_method_handler(
-                    servicer.ValidatePassword,
-                    request_deserializer=thoughts__pb2.Credentials.FromString,
-                    response_serializer=thoughts__pb2.Empty.SerializeToString,
             ),
             'DeleteSession': grpc.unary_unary_rpc_method_handler(
                     servicer.DeleteSession,
@@ -112,7 +96,7 @@ class AuthService(object):
             call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def ValidateSession(request,
+    def GetSession(request,
             target,
             options=(),
             channel_credentials=None,
@@ -121,25 +105,9 @@ class AuthService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/thoughts.AuthService/ValidateSession',
+        return grpc.experimental.unary_unary(request, target, '/thoughts.AuthService/GetSession',
             thoughts__pb2.AuthRequest.SerializeToString,
             thoughts__pb2.Session.FromString,
-            options, channel_credentials,
-            call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def ValidatePassword(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/thoughts.AuthService/ValidatePassword',
-            thoughts__pb2.Credentials.SerializeToString,
-            thoughts__pb2.Empty.FromString,
             options, channel_credentials,
             call_credentials, compression, wait_for_ready, timeout, metadata)
 
