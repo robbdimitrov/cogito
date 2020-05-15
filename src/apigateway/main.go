@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/robbdimitrov/thoughts/src/apiservice/api"
+	"github.com/robbdimitrov/thoughts/src/apigateway/api"
 )
 
 func main() {

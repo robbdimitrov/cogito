@@ -19,8 +19,6 @@ func newImageController(addr string) *imageController {
 	return &imageController{addr, client}
 }
 
-// Handlers
-
 func (ic *imageController) createImage(c echo.Context) error {
 	url := fmt.Sprintf("http://%s/uploads", ic.addr)
 	req, err := http.NewRequest("POST", url, c.Request().Body)

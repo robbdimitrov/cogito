@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"google.golang.org/grpc"
 
-	pb "github.com/robbdimitrov/thoughts/src/apiservice/genproto"
+	pb "github.com/robbdimitrov/thoughts/src/apigateway/genproto"
 )
 
 type userController struct {
@@ -19,8 +19,6 @@ type userController struct {
 func newUserController(addr string) *userController {
 	return &userController{addr}
 }
-
-// Handlers
 
 func (s *userController) createUser(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())

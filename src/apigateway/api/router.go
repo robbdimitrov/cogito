@@ -21,10 +21,6 @@ func newRouter(addrs ...string) *router {
 }
 
 func (r *router) configureRoutes(e *echo.Echo) {
-	// Sessions
-	e.POST("/sessions", r.auth.createSession)
-	e.DELETE("/sessions", r.auth.deleteSession)
-
 	// Users
 	e.POST("/users", r.user.createUser)
 	e.GET("/users/:userId", r.user.getUser)
@@ -33,6 +29,10 @@ func (r *router) configureRoutes(e *echo.Echo) {
 	e.GET("/users/:userId/followers", r.user.getFollowers)
 	e.POST("/users/:userId/followers", r.user.followUser)
 	e.DELETE("/users/:userId/followers", r.user.unfollowUser)
+
+	// Sessions
+	e.POST("/sessions", r.auth.createSession)
+	e.DELETE("/sessions", r.auth.deleteSession)
 
 	// Posts
 	e.POST("/posts", r.post.createPost)
