@@ -1,26 +1,22 @@
 .PHONY: all
-all: apiservice frontend database authservice
-	userservice postservice imageservice
+all: apigateway authservice database frontend
+	postservice imageservice userservice
 
-.PHONY: apiservice
-apiservice:
-	docker build -t thoughts/apiservice src/apiservice
-
-.PHONY: frontend
-frontend:
-	docker build -t thoughts/frontend src/frontend
-
-.PHONY: database
-database:
-	docker build -t thoughts/database src/database
+.PHONY: apigateway
+apigateway:
+	docker build -t thoughts/apigateway src/apigateway
 
 .PHONY: authservice
 authservice:
 	docker build -t thoughts/authservice src/authservice
 
-.PHONY: userservice
-userservice:
-	docker build -t thoughts/userservice src/userservice
+.PHONY: database
+database:
+	docker build -t thoughts/database src/database
+
+.PHONY: frontend
+frontend:
+	docker build -t thoughts/frontend src/frontend
 
 .PHONY: postservice
 postservice:
@@ -29,3 +25,7 @@ postservice:
 .PHONY: imageservice
 imageservice:
 	docker build -t thoughts/imageservice src/imageservice
+
+.PHONY: userservice
+userservice:
+	docker build -t thoughts/userservice src/userservice

@@ -18,7 +18,7 @@ class DbClient:
         self.db.closeall()
 
     def create_user(self, username, email, name, password):
-        conn = self.db.get_conn()
+        conn = self.db.getconn()
         cur = conn.cursor()
 
         cur.execute('SELECT username, email FROM users \
@@ -44,6 +44,8 @@ class DbClient:
             cur.close()
 
     def create_user_query(self, where=''):
+        # id name username email avatar bio posts likes
+        # following followers followed created
         query = f'SELECT users.id, users.username, users.email, users.name, \
             users.bio, users.avatar, \
             (COUNT(DISTINCT posts.id) + COUNT(DISTINCT retweets.id)) AS posts, \
@@ -63,7 +65,7 @@ class DbClient:
         return query
 
     def get_user(self, user_id, username=None):
-        conn = self.db.get_conn()
+        conn = self.db.getconn()
         cur = conn.cursor()
 
         if username:
@@ -78,11 +80,10 @@ class DbClient:
         if result is None:
             return None
 
-        user = row_to_user(result)
-        return user
+        return  map_user(result)
 
     def update_user(self, user_id, updates):
-        conn = self.db.get_conn()
+        conn = self.db.getconn()
         cur = conn.cursor()
 
         values = []
@@ -100,16 +101,8 @@ class DbClient:
         finally:
             cur.close()
 
-    def delete_user(self, user_id):
-        conn = self.db.get_conn()
-        cur = conn.cursor()
-
-        cur.execute('DELETE FROM users WHERE id = %s', (user_id,))
-        conn.commit()
-        cur.close()
-
     def get_following(self, user_id, page, limit):
-        conn = self.db.get_conn()
+        conn = self.db.getconn()
         cur = conn.cursor()
 
         cur.execute(self.create_user_query('WHERE users.id IN \
@@ -123,21 +116,8 @@ class DbClient:
         users = rows_to_users(results)
         return users
 
-    def get_following_ids(self, user_id):
-        conn = self.db.get_conn()
-        cur = conn.cursor()
-
-        cur.execute('SELECT id FROM followers \
-            WHERE follower_id = %s',
-            (user_id,))
-        results = cur.fetchall()
-        cur.close()
-
-        users = rows_to_ids(results)
-        return users
-
     def get_followers(self, user_id, page, limit):
-        conn = self.db.get_conn()
+        conn = self.db.getconn()
         cur = conn.cursor()
 
         cur.execute(self.create_user_query('WHERE users.id IN \
@@ -151,21 +131,8 @@ class DbClient:
         users = rows_to_users(results)
         return users
 
-    def get_followers_ids(self, user_id):
-        conn = self.db.get_conn()
-        cur = conn.cursor()
-
-        cur.execute('SELECT follower_id FROM followers \
-            WHERE user_id = %s',
-            (user_id,))
-        results = cur.fetchall()
-        cur.close()
-
-        users = rows_to_ids(results)
-        return users
-
     def follow_user(self, user_id, follower_id):
-        conn = self.db.get_conn()
+        conn = self.db.getconn()
         cur = conn.cursor()
 
         if user_id == follower_id:
@@ -182,14 +149,13 @@ class DbClient:
             cur.execute('INSERT INTO followers VALUES (%s, %s)',
                 (user_id, follower_id))
             conn.commit()
-        except psycopg2.Error as e:
-            print(f'Error following user: {str(e)}')
-            raise DbException('Error following user.')
+        except Exception:
+            raise
         finally:
             cur.close()
 
     def unfollow_user(self, user_id, follower_id):
-        conn = self.db.get_conn()
+        conn = self.db.getconn()
         cur = conn.cursor()
 
         cur.execute('DELETE FROM followers \

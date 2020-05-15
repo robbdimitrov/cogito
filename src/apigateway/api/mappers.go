@@ -19,6 +19,14 @@ func mapUser(u *pb.User) user {
 	}
 }
 
+func mapSession(s *pb.Session) session {
+	return session{
+		ID:      s.Id,
+		UserID:  s.UserId,
+		Created: s.Created,
+	}
+}
+
 func mapPost(p *pb.Post) post {
 	return post{
 		ID:       p.Id,
@@ -29,13 +37,5 @@ func mapPost(p *pb.Post) post {
 		Reposts:  p.Reposts,
 		Reposted: p.Reposted,
 		Created:  p.Created,
-	}
-}
-
-func mapSession(s *pb.Session) session {
-	return session{
-		ID:      s.Id,
-		UserID:  s.UserId,
-		Created: s.Created,
 	}
 }

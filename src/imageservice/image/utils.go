@@ -2,14 +2,13 @@ package image
 
 import (
 	"crypto/rand"
-	"encoding/hex"
+	"encoding/base64"
 )
 
-// randToken generates a random string
-func randToken(len int) string {
-	bytes := make([]byte, len)
+func generateFilename() string {
+	bytes := make([]byte, 16)
 	if _, err := rand.Read(bytes); err != nil {
 		return ""
 	}
-	return hex.EncodeToString(bytes)
+	return base64.StdEncoding.EncodeToString(bytes)
 }

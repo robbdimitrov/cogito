@@ -6,17 +6,17 @@ import (
 
 type router struct {
 	auth  *authController
-	user  *userController
-	post  *postController
 	image *imageController
+	post  *postController
+	user  *userController
 }
 
 func newRouter(addrs ...string) *router {
 	return &router{
 		auth:  newAuthController(addrs[0]),
-		user:  newUserController(addrs[1]),
+		image: newImageController(addrs[1]),
 		post:  newPostController(addrs[2]),
-		image: newImageController(addrs[3]),
+		user:  newUserController(addrs[3]),
 	}
 }
 
