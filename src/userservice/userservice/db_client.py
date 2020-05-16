@@ -64,23 +64,39 @@ class DbClient:
             ORDER BY users.id'
         return query
 
-    def get_user(self, user_id, username=None):
+    def get_user_with_id(self, user_id):
+        # get user id and password
         conn = self.db.getconn()
         cur = conn.cursor()
 
-        if username:
-            cur.execute(self.create_user_query('WHERE users.username = %s'),
-                (username,))
-        else:
-            cur.execute(self.create_user_query('WHERE users.id = %s'),
-                (user_id,))
+        # const query =
+        # 'SELECT id, password FROM users WHERE id = $1';
+
+        cur.execute(self.create_user_query('WHERE users.id = %s'),
+            (user_id,))
+
         result = cur.fetchone()
         cur.close()
 
         if result is None:
             return None
 
-        return  map_user(result)
+        return map_user(result)
+
+    def get_user(self, user_id):
+        conn = self.db.getconn()
+        cur = conn.cursor()
+
+        cur.execute(self.create_user_query('WHERE users.id = %s'),
+            (user_id,))
+
+        result = cur.fetchone()
+        cur.close()
+
+        if result is None:
+            return None
+
+        return map_user(result)
 
     def update_user(self, user_id, updates):
         conn = self.db.getconn()
