@@ -40,11 +40,9 @@ func (c *DbClient) createPost(content string, userID int32) (int32, error) {
 	row := c.db.QueryRow(context.Background(), query, userID, content)
 
 	var id int32
-	if err := row.Scan(&id); err != nil {
-		return 0, err
-	}
+	err := row.Scan(&id)
 
-	return id, nil
+	return id, err
 }
 
 func (c *DbClient) getFeed(page int32, limit int32, currentUserID int32) ([]*pb.Post, error) {

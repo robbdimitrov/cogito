@@ -62,7 +62,7 @@ class DbClient:
             query = 'SELECT id, name, username, email, avatar, bio,\
                 (SELECT count(*) FROM posts WHERE user_id = id) AS posts,\
                 (SELECT count(*) FROM likes WHERE user_id = id) AS likes,\
-                (SELECT count(*) FROM followers WHERE user_id = id) AS following,\
+                (SELECT count(*) FROM followers WHERE follower_id = id) AS following,\
                 (SELECT count(*) FROM followers WHERE user_id = id) AS followers,\
                 EXISTS (SELECT 1 FROM followers\
                 WHERE user_id = id AND follower_id = %s) AS followed,\
@@ -84,7 +84,7 @@ class DbClient:
         cur = conn.cursor()
 
         try:
-            query = f'UPDATE users SET name = %s, username = %s, email = %s\
+            query = f'UPDATE users SET name = %s, username = %s,\
                 email = %s, avatar = %s, bio = %s WHERE id = %s'
             cur.execute(query, (name, username, email, avatar, bio, user_id))
             conn.commit()
@@ -116,7 +116,7 @@ class DbClient:
             query = 'SELECT id, name, username, email, avatar, bio,\
                 (SELECT count(*) FROM posts WHERE user_id = id) AS posts,\
                 (SELECT count(*) FROM likes WHERE user_id = id) AS likes,\
-                (SELECT count(*) FROM followers WHERE user_id = id) AS following,\
+                (SELECT count(*) FROM followers WHERE follower_id = id) AS following,\
                 (SELECT count(*) FROM followers WHERE user_id = id) AS followers,\
                 EXISTS (SELECT 1 FROM followers\
                 WHERE user_id = id AND follower_id = %s) AS followed,\
@@ -143,7 +143,7 @@ class DbClient:
             query = 'SELECT id, name, username, email, avatar, bio,\
                 (SELECT count(*) FROM posts WHERE user_id = id) AS posts,\
                 (SELECT count(*) FROM likes WHERE user_id = id) AS likes,\
-                (SELECT count(*) FROM followers WHERE user_id = id) AS following,\
+                (SELECT count(*) FROM followers WHERE follower_id = id) AS following,\
                 (SELECT count(*) FROM followers WHERE user_id = id) AS followers,\
                 EXISTS (SELECT 1 FROM followers\
                 WHERE user_id = id AND follower_id = %s) AS followed,\
