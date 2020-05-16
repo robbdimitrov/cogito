@@ -62,9 +62,9 @@ func (c *DbClient) getFeed(page int32, limit int32, currentUserID int32) ([]*pb.
 		OR followers.user_id = posts.user_id
 		WHERE follower_id = $2 OR reposts.user_id = $2 OR posts.user_id = $2
 		ORDER BY coalesce(reposts.created, posts.created) DESC
-		OFFSET $3 LIMIT $4`
+		LIMIT $3 OFFSET $4`
 
-	rows, err := c.db.Query(context.Background(), query, currentUserID, page*limit, limit)
+	rows, err := c.db.Query(context.Background(), query, currentUserID, limit, page*limit)
 	if err != nil {
 		return nil, err
 	}
@@ -86,9 +86,9 @@ func (c *DbClient) getPosts(userID int32, page int32, limit int32, currentUserID
 		LEFT JOIN reposts ON reposts.post_id = id
 		WHERE reposts.user_id = $2 OR posts.user_id = $2
 		ORDER BY coalesce(reposts.created, posts.created) DESC
-		OFFSET $3 LIMIT $4`
+		LIMIT $3 OFFSET $4`
 
-	rows, err := c.db.Query(context.Background(), query, currentUserID, userID, page*limit, limit)
+	rows, err := c.db.Query(context.Background(), query, currentUserID, userID, limit, page*limit)
 	if err != nil {
 		return nil, err
 	}
@@ -107,12 +107,12 @@ func (c *DbClient) getLikedPosts(userID int32, page int32, limit int32, currentU
 		WHERE post_id = id AND reposts.user_id = $1) AS reposted,
 		time_format(posts.created) AS created
 		FROM posts
-        INNER JOIN likes ON post_id = id
-        WHERE likes.user_id = $2
+		INNER JOIN likes ON post_id = id
+		WHERE likes.user_id = $2
 		ORDER BY likes.created DESC
-		OFFSET $3 LIMIT $4`
+		LIMIT $3 OFFSET $4`
 
-	rows, err := c.db.Query(context.Background(), query, currentUserID, userID, page*limit, limit)
+	rows, err := c.db.Query(context.Background(), query, currentUserID, userID, limit, page*limit)
 	if err != nil {
 		return nil, err
 	}

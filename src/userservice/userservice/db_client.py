@@ -126,7 +126,7 @@ class DbClient:
                 WHERE follower_id = $2\
                 ORDER BY followers.created DESC\
                 LIMIT %s OFFSET %s'
-            cur.execute(query, (current_user_id, user_id, page * limit, limit))
+            cur.execute(query, (current_user_id, user_id, limit, page * limit))
             result = cur.fetchall()
             return map(lambda user: map_user(user), result)
         except Exception:
@@ -153,7 +153,7 @@ class DbClient:
                 WHERE user_id = $2\
                 ORDER BY followers.created DESC\
                 LIMIT %s OFFSET %s'
-            cur.execute(query, (current_user_id, user_id, page * limit, limit))
+            cur.execute(query, (current_user_id, user_id, limit, page * limit))
             result = cur.fetchall()
             return map(lambda user: map_user(user), result)
         except Exception:
