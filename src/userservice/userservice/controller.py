@@ -24,12 +24,10 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
                 'Invalid email address.'
             )
 
-        password = generate_hash(request.password)
-
         try:
             user_id = self.db_client.create_user(
-                request.username, request.email,
-                request.name, password)
+                request.name, request.username,
+                request.email, generate_hash(request.password))
             return thoughts_pb2.Identifier(id=user_id)
         except Exception as e:
             logger.print(f'Creating user failed: {e}')
@@ -58,22 +56,16 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
         if len(request.password) != 0:
             return self.updatePassword(request, context)
 
-        changes = {
-            'name': request.name,
-            'username': request.username,
-            'email': request.email,
-            'avatar': request.avatar,
-            'bio': request.bio
-        }
-
-        if is_valid_email(changes['email']) == False:
+        if is_valid_email(request.email) == False:
             context.abort(
                 StatusCode.INVALID_ARGUMENT,
                 'Invalid email address.'
             )
 
         try:
-            self.db_client.update_user(user_id, changes)
+            self.db_client.update_user(
+                user_id, request.name, request.username,
+                request.email, request.avatar, request.bio)
             return thoughts_pb2.Empty()
         except Exception as e:
             logger.print(f'Updating user failed: {e}')
@@ -102,10 +94,9 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
                 'Wrong password. Enter the correct current password.'
             )
 
-        changes = {'password': generate_hash(request.password)}
-
         try:
-            self.db_client.update_user(user_id, changes)
+            self.db_client.update_password(
+                user_id, generate_hash(request.password))
             return thoughts_pb2.Empty()
         except Exception as e:
             logger.print(f'Updating user failed: {e}')

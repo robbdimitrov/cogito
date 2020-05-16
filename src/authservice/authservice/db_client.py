@@ -25,11 +25,10 @@ class DbClient:
             query = 'SELECT id, password FROM users WHERE email = %s'
             cur.execute(query, (email,))
             result = cur.fetchone()
-            user = {
+            return {
                 'id': result[0],
                 'password': result[1]
             }
-            return user
         except Exception:
             raise
         finally:
@@ -41,7 +40,7 @@ class DbClient:
         cur = conn.cursor()
 
         try:
-            query = 'INSERT INTO sessions(id, user_id) VALUES (%s, %s)\
+            query = 'INSERT INTO sessions (id, user_id) VALUES (%s, %s)\
                 RETURNING id, user_id, time_format(created) AS created'
             cur.execute(query, (session_id, user_id))
             result = cur.fetchone()
@@ -64,7 +63,6 @@ class DbClient:
             result = cur.fetchone()
             if result is None:
                 return None
-
             return map_session(result)
         except Exception:
             raise
