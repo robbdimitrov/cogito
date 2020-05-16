@@ -24,7 +24,7 @@ func NewDbClient(dbURL string) *DbClient {
 
 	db, err := pgxpool.ConnectConfig(context.Background(), config)
 	if err != nil {
-		log.Fatalf("Unable to create connection pool: %v", err)
+		log.Fatalf("Unable to connect to database: %v", err)
 	}
 
 	return &DbClient{db}
@@ -36,7 +36,7 @@ func (c *DbClient) Close() {
 }
 
 func (c *DbClient) createPost(content string, userID int32) (int32, error) {
-	query := "INSERT INTO posts(user_id, content) VALUES ($1, $2) RETURNING id"
+	query := "INSERT INTO posts (user_id, content) VALUES ($1, $2) RETURNING id"
 	row := c.db.QueryRow(context.Background(), query, userID, content)
 
 	var id int32

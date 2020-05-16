@@ -6,25 +6,21 @@ import (
 
 type router struct {
 	auth  *authController
-	user  *userController
-	post  *postController
 	image *imageController
+	post  *postController
+	user  *userController
 }
 
 func newRouter(addrs ...string) *router {
 	return &router{
 		auth:  newAuthController(addrs[0]),
-		user:  newUserController(addrs[1]),
+		image: newImageController(addrs[1]),
 		post:  newPostController(addrs[2]),
-		image: newImageController(addrs[3]),
+		user:  newUserController(addrs[3]),
 	}
 }
 
 func (r *router) configureRoutes(e *echo.Echo) {
-	// Sessions
-	e.POST("/sessions", r.auth.createSession)
-	e.DELETE("/sessions", r.auth.deleteSession)
-
 	// Users
 	e.POST("/users", r.user.createUser)
 	e.GET("/users/:userId", r.user.getUser)
@@ -33,6 +29,10 @@ func (r *router) configureRoutes(e *echo.Echo) {
 	e.GET("/users/:userId/followers", r.user.getFollowers)
 	e.POST("/users/:userId/followers", r.user.followUser)
 	e.DELETE("/users/:userId/followers", r.user.unfollowUser)
+
+	// Sessions
+	e.POST("/sessions", r.auth.createSession)
+	e.DELETE("/sessions", r.auth.deleteSession)
 
 	// Posts
 	e.POST("/posts", r.post.createPost)

@@ -3,32 +3,7 @@ syntax = "proto3";
 package thoughts;
 option go_package = ".;genproto";
 
-// -------------------- Auth --------------------
-
-message Empty {}
-
-message Credentials {
-  string email = 1;
-  string password = 2;
-}
-
-message AuthRequest {
-  string session_id = 1;
-}
-
-message Session {
-  string id = 1;
-  int32 user_id = 2;
-  string created = 3;
-}
-
-service AuthService {
-  rpc CreateSession(Credentials) returns (Session);
-  rpc GetSession(AuthRequest) returns (Session);
-  rpc DeleteSession(AuthRequest) returns (Empty);
-}
-
-// ------------------- Users --------------------
+// Users
 
 message CreateUserRequest {
   string name = 1;
@@ -90,7 +65,32 @@ service UserService {
   rpc UnfollowUser(UserRequest) returns (Empty);
 }
 
-// ------------------- Posts --------------------
+// Sessions
+
+message Empty {}
+
+message Credentials {
+  string email = 1;
+  string password = 2;
+}
+
+message SessionRequest {
+  string session_id = 1;
+}
+
+message Session {
+  string id = 1;
+  int32 user_id = 2;
+  string created = 3;
+}
+
+service AuthService {
+  rpc CreateSession(Credentials) returns (Session);
+  rpc GetSession(SessionRequest) returns (Session);
+  rpc DeleteSession(SessionRequest) returns (Empty);
+}
+
+// Posts
 
 message CreatePostRequest {
   string content = 1;

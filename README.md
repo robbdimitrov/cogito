@@ -19,9 +19,9 @@ like and repost posts and follow other users.
 
 ## Stack
 
-- React
 - Go
 - Python
+- React
 - PostgreSQL
 - Docker
 - Kubernetes
@@ -38,8 +38,8 @@ Protobuf definitions can be found at the [`/pb` directory](/pb).
 
 Service | Language | Description
 --- | --- | ---
-[apiservice](/src/apiservice) | Go | API Gateway between the frontend and the backend services.
-[authservice](/src/authservice) | Python | Authentication service for creation and validation of access and refresh tokens.
+[apigateway](/src/apigateway) | Go | API Gateway between the frontend and the backend services.
+[authservice](/src/authservice) | Python | Authentication service for creation and validation of sessions.
 [database](/src/database) | SQL | PostgreSQL database with tables, relationships and functions.
 [frontend](/src/frontend) | JavaScript | React frontend of the app.
 [imageservice](/src/imageservice) | Go | Image upload and delivery service used for storing and retrieving image assets.
@@ -68,13 +68,13 @@ $ make
 Or build specific images
 
 ```sh
-$ make apiservice
-$ make frontend
-$ make database
+$ make apigateway
 $ make authservice
-$ make userservice
-$ make postservice
+$ make database
+$ make frontend
 $ make imageservice
+$ make postservice
+$ make userservice
 ```
 
 ### Create namespace

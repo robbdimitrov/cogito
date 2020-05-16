@@ -20,7 +20,7 @@ func createRouter(c *controller) *http.ServeMux {
 	return router
 }
 
-// CreateServer is a constructor for new Server objects
+// CreateServer is creates and setups a new http.Server
 func CreateServer(port string, imageDir string) *http.Server {
 	return &http.Server{
 		Addr:    fmt.Sprintf(":%s", port),

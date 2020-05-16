@@ -4,130 +4,6 @@ import grpc
 import authservice.thoughts_pb2 as thoughts__pb2
 
 
-class AuthServiceStub(object):
-    """Missing associated documentation comment in .proto file"""
-
-    def __init__(self, channel):
-        """Constructor.
-
-        Args:
-            channel: A grpc.Channel.
-        """
-        self.CreateSession = channel.unary_unary(
-                '/thoughts.AuthService/CreateSession',
-                request_serializer=thoughts__pb2.Credentials.SerializeToString,
-                response_deserializer=thoughts__pb2.Session.FromString,
-                )
-        self.GetSession = channel.unary_unary(
-                '/thoughts.AuthService/GetSession',
-                request_serializer=thoughts__pb2.AuthRequest.SerializeToString,
-                response_deserializer=thoughts__pb2.Session.FromString,
-                )
-        self.DeleteSession = channel.unary_unary(
-                '/thoughts.AuthService/DeleteSession',
-                request_serializer=thoughts__pb2.AuthRequest.SerializeToString,
-                response_deserializer=thoughts__pb2.Empty.FromString,
-                )
-
-
-class AuthServiceServicer(object):
-    """Missing associated documentation comment in .proto file"""
-
-    def CreateSession(self, request, context):
-        """Missing associated documentation comment in .proto file"""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def GetSession(self, request, context):
-        """Missing associated documentation comment in .proto file"""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def DeleteSession(self, request, context):
-        """Missing associated documentation comment in .proto file"""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-
-def add_AuthServiceServicer_to_server(servicer, server):
-    rpc_method_handlers = {
-            'CreateSession': grpc.unary_unary_rpc_method_handler(
-                    servicer.CreateSession,
-                    request_deserializer=thoughts__pb2.Credentials.FromString,
-                    response_serializer=thoughts__pb2.Session.SerializeToString,
-            ),
-            'GetSession': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetSession,
-                    request_deserializer=thoughts__pb2.AuthRequest.FromString,
-                    response_serializer=thoughts__pb2.Session.SerializeToString,
-            ),
-            'DeleteSession': grpc.unary_unary_rpc_method_handler(
-                    servicer.DeleteSession,
-                    request_deserializer=thoughts__pb2.AuthRequest.FromString,
-                    response_serializer=thoughts__pb2.Empty.SerializeToString,
-            ),
-    }
-    generic_handler = grpc.method_handlers_generic_handler(
-            'thoughts.AuthService', rpc_method_handlers)
-    server.add_generic_rpc_handlers((generic_handler,))
-
-
- # This class is part of an EXPERIMENTAL API.
-class AuthService(object):
-    """Missing associated documentation comment in .proto file"""
-
-    @staticmethod
-    def CreateSession(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/thoughts.AuthService/CreateSession',
-            thoughts__pb2.Credentials.SerializeToString,
-            thoughts__pb2.Session.FromString,
-            options, channel_credentials,
-            call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def GetSession(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/thoughts.AuthService/GetSession',
-            thoughts__pb2.AuthRequest.SerializeToString,
-            thoughts__pb2.Session.FromString,
-            options, channel_credentials,
-            call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def DeleteSession(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/thoughts.AuthService/DeleteSession',
-            thoughts__pb2.AuthRequest.SerializeToString,
-            thoughts__pb2.Empty.FromString,
-            options, channel_credentials,
-            call_credentials, compression, wait_for_ready, timeout, metadata)
-
-
 class UserServiceStub(object):
     """Missing associated documentation comment in .proto file"""
 
@@ -375,6 +251,130 @@ class UserService(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/thoughts.UserService/UnfollowUser',
             thoughts__pb2.UserRequest.SerializeToString,
+            thoughts__pb2.Empty.FromString,
+            options, channel_credentials,
+            call_credentials, compression, wait_for_ready, timeout, metadata)
+
+
+class AuthServiceStub(object):
+    """Missing associated documentation comment in .proto file"""
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.CreateSession = channel.unary_unary(
+                '/thoughts.AuthService/CreateSession',
+                request_serializer=thoughts__pb2.Credentials.SerializeToString,
+                response_deserializer=thoughts__pb2.Session.FromString,
+                )
+        self.GetSession = channel.unary_unary(
+                '/thoughts.AuthService/GetSession',
+                request_serializer=thoughts__pb2.SessionRequest.SerializeToString,
+                response_deserializer=thoughts__pb2.Session.FromString,
+                )
+        self.DeleteSession = channel.unary_unary(
+                '/thoughts.AuthService/DeleteSession',
+                request_serializer=thoughts__pb2.SessionRequest.SerializeToString,
+                response_deserializer=thoughts__pb2.Empty.FromString,
+                )
+
+
+class AuthServiceServicer(object):
+    """Missing associated documentation comment in .proto file"""
+
+    def CreateSession(self, request, context):
+        """Missing associated documentation comment in .proto file"""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetSession(self, request, context):
+        """Missing associated documentation comment in .proto file"""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def DeleteSession(self, request, context):
+        """Missing associated documentation comment in .proto file"""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_AuthServiceServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'CreateSession': grpc.unary_unary_rpc_method_handler(
+                    servicer.CreateSession,
+                    request_deserializer=thoughts__pb2.Credentials.FromString,
+                    response_serializer=thoughts__pb2.Session.SerializeToString,
+            ),
+            'GetSession': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetSession,
+                    request_deserializer=thoughts__pb2.SessionRequest.FromString,
+                    response_serializer=thoughts__pb2.Session.SerializeToString,
+            ),
+            'DeleteSession': grpc.unary_unary_rpc_method_handler(
+                    servicer.DeleteSession,
+                    request_deserializer=thoughts__pb2.SessionRequest.FromString,
+                    response_serializer=thoughts__pb2.Empty.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'thoughts.AuthService', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+
+
+ # This class is part of an EXPERIMENTAL API.
+class AuthService(object):
+    """Missing associated documentation comment in .proto file"""
+
+    @staticmethod
+    def CreateSession(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/thoughts.AuthService/CreateSession',
+            thoughts__pb2.Credentials.SerializeToString,
+            thoughts__pb2.Session.FromString,
+            options, channel_credentials,
+            call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def GetSession(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/thoughts.AuthService/GetSession',
+            thoughts__pb2.SessionRequest.SerializeToString,
+            thoughts__pb2.Session.FromString,
+            options, channel_credentials,
+            call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def DeleteSession(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/thoughts.AuthService/DeleteSession',
+            thoughts__pb2.SessionRequest.SerializeToString,
             thoughts__pb2.Empty.FromString,
             options, channel_credentials,
             call_credentials, compression, wait_for_ready, timeout, metadata)

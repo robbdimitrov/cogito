@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"google.golang.org/grpc"
 
-	pb "github.com/robbdimitrov/thoughts/src/apiservice/genproto"
+	pb "github.com/robbdimitrov/thoughts/src/apigateway/genproto"
 )
 
 type postController struct {
@@ -19,8 +19,6 @@ type postController struct {
 func newPostController(addr string) *postController {
 	return &postController{addr}
 }
-
-// Handlers
 
 func (pc *postController) createPost(c echo.Context) error {
 	conn, err := grpc.Dial(pc.addr, grpc.WithInsecure(), grpc.WithBlock())

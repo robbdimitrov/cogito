@@ -1,200 +1,193 @@
-import psycopg2
+import sys
 
-from userservice import db, thoughts_pb2
-from userservice.exceptions import (
-    DbException,
-    ExistingUserException,
-    UserActionException,
-    UserNotFoundException
-)
-from userservice.utils import (
-    row_to_user,
-    rows_to_users,
-    rows_to_ids
-)
+from psycopg2 import pool, DatabaseError
+
+from userservice.mappers import map_user
+from userservice import logger
 
 
 class DbClient:
-    def __init__(self, db):
-        self.db = db
+    def __init__(self, db_url):
+        try:
+            self.db = pool.ThreadedConnectionPool(1, 10, db_url)
+        except DatabaseError as e:
+            logger.print(f'Unable to connect to database: {e}')
+            sys.exit(1)
 
-    def create_user(self, username, email, name, password):
-        conn = self.db.get_conn()
+    def close(self):
+        self.db.closeall()
+
+    def create_user(self, name, username, email, password):
+        conn = self.db.getconn()
         cur = conn.cursor()
-
-        cur.execute('SELECT username, email FROM users \
-            WHERE username = %s OR email = %s',
-            (username, email))
-        existing_user = cur.fetchone()
-
-        if existing_user is not None:
-            if existing_user[0] == username:
-                raise ExistingUserException('User with this username already exists.')
-            else:
-                raise ExistingUserException('User with this email already exists.')
 
         try:
-            cur.execute('INSERT INTO users (username, email, name, password) \
-                VALUES(%s, %s, %s, %s)',
-                (username, email, name, password))
+            query = 'INSERT INTO users (name, username, email, password)\
+                VALUES (%s, %s, %s, %s) RETURNING id'
+            cur.execute(query, (name, username, email, password))
+            result = cur.fetchone()
             conn.commit()
-        except psycopg2.Error as e:
-            print(f'Error creating user: {str(e)}')
-            raise DbException('Error while writing to the database.')
+            return result[0]
+        except Exception:
+            raise
         finally:
             cur.close()
+            self.db.putconn(conn)
 
-    def create_user_query(self, where=''):
-        query = f'SELECT users.id, users.username, users.email, users.name, \
-            users.bio, users.avatar, \
-            (COUNT(DISTINCT posts.id) + COUNT(DISTINCT retweets.id)) AS posts, \
-            COUNT(DISTINCT likes.id) AS likes, \
-            COUNT(DISTINCT following.id) AS following, \
-            COUNT(DISTINCT followers.id) AS followers, \
-            time_format(users.date_created) as date_created \
-            FROM users AS users LEFT JOIN followings AS following \
-            ON following.follower_id = users.id LEFT JOIN followings AS followers \
-            ON followers.user_id = users.id LEFT JOIN posts as posts \
-            ON posts.user_id = users.id LEFT JOIN likes as likes \
-            ON likes.user_id = users.id  LEFT JOIN retweets as retweets \
-            ON retweets.user_id = users.id \
-            {where} \
-            GROUP BY users.id \
-            ORDER BY users.id'
-        return query
-
-    def get_user(self, user_id, username=None):
-        conn = self.db.get_conn()
+    def get_user_with_id(self, user_id):
+        conn = self.db.getconn()
         cur = conn.cursor()
-
-        if username:
-            cur.execute(self.create_user_query('WHERE users.username = %s'),
-                (username,))
-        else:
-            cur.execute(self.create_user_query('WHERE users.id = %s'),
-                (user_id,))
-        result = cur.fetchone()
-        cur.close()
-
-        if result is None:
-            return None
-
-        user = row_to_user(result)
-        return user
-
-    def update_user(self, user_id, updates):
-        conn = self.db.get_conn()
-        cur = conn.cursor()
-
-        values = []
-        for key, value in updates.items():
-            values.append(f"{key} = '{value}'")
-
-        command = f"UPDATE users SET {', '.join(values)} WHERE id = %s"
 
         try:
-            cur.execute(command, (user_id,))
-            conn.commit()
-        except psycopg2.Error as e:
-            print(f'Error updating user: {str(e)}')
-            raise DbException('Updating user failed.')
+            query = 'SELECT id, password FROM users WHERE id = %s'
+            cur.execute(query, (user_id,))
+            result = cur.fetchone()
+            if result is None:
+                return None
+            return {
+                'id': result[0],
+                'password': result[1]
+            }
+        except Exception:
+            raise
         finally:
             cur.close()
+            self.db.putconn(conn)
 
-    def delete_user(self, user_id):
-        conn = self.db.get_conn()
+    def get_user(self, user_id, current_user_id):
+        conn = self.db.getconn()
         cur = conn.cursor()
 
-        cur.execute('DELETE FROM users WHERE id = %s', (user_id,))
-        conn.commit()
-        cur.close()
+        try:
+            query = 'SELECT id, name, username, email, avatar, bio,\
+                (SELECT count(*) FROM posts WHERE user_id = id) AS posts,\
+                (SELECT count(*) FROM likes WHERE user_id = id) AS likes,\
+                (SELECT count(*) FROM followers WHERE user_id = id) AS following,\
+                (SELECT count(*) FROM followers WHERE user_id = id) AS followers,\
+                EXISTS (SELECT 1 FROM followers\
+                WHERE user_id = id AND follower_id = %s) AS followed,\
+                time_format(created) AS created\
+                FROM users WHERE id = %s'
+            cur.execute(query, (current_user_id, user_id))
+            result = cur.fetchone()
+            if result is None:
+                return None
+            return map_user(result)
+        except Exception:
+            raise
+        finally:
+            cur.close()
+            self.db.putconn(conn)
 
-    def get_following(self, user_id, page, limit):
-        conn = self.db.get_conn()
+    def update_user(self, user_id, name, username, email, avatar, bio):
+        conn = self.db.getconn()
         cur = conn.cursor()
 
-        cur.execute(self.create_user_query('WHERE users.id IN \
-            (SELECT user_id FROM followings \
-            WHERE follower_id = %s ORDER BY date_created DESC) \
-            OFFSET %s LIMIT %s'),
-            (user_id, page * limit, limit))
-        results = cur.fetchall()
-        cur.close()
+        try:
+            query = f'UPDATE users SET name = %s, username = %s, email = %s\
+                email = %s, avatar = %s, bio = %s WHERE id = %s'
+            cur.execute(query, (name, username, email, avatar, bio, user_id))
+            conn.commit()
+        except Exception:
+            raise
+        finally:
+            cur.close()
+            self.db.putconn(conn)
 
-        users = rows_to_users(results)
-        return users
-
-    def get_following_ids(self, user_id):
-        conn = self.db.get_conn()
+    def update_password(self, user_id, password):
+        conn = self.db.getconn()
         cur = conn.cursor()
 
-        cur.execute('SELECT id FROM followings \
-            WHERE follower_id = %s',
-            (user_id,))
-        results = cur.fetchall()
-        cur.close()
+        try:
+            query = f'UPDATE users SET password = %s WHERE id = %s'
+            cur.execute(query, (password, user_id))
+            conn.commit()
+        except Exception:
+            raise
+        finally:
+            cur.close()
+            self.db.putconn(conn)
 
-        users = rows_to_ids(results)
-        return users
-
-    def get_followers(self, user_id, page, limit):
-        conn = self.db.get_conn()
+    def get_following(self, user_id, page, limit, current_user_id):
+        conn = self.db.getconn()
         cur = conn.cursor()
 
-        cur.execute(self.create_user_query('WHERE users.id IN \
-            (SELECT follower_id FROM followings \
-            WHERE user_id = %s ORDER BY date_created DESC) \
-            OFFSET %s LIMIT %s'),
-            (user_id, page * limit, limit))
-        results = cur.fetchall()
-        cur.close()
+        try:
+            query = 'SELECT id, name, username, email, avatar, bio,\
+                (SELECT count(*) FROM posts WHERE user_id = id) AS posts,\
+                (SELECT count(*) FROM likes WHERE user_id = id) AS likes,\
+                (SELECT count(*) FROM followers WHERE user_id = id) AS following,\
+                (SELECT count(*) FROM followers WHERE user_id = id) AS followers,\
+                EXISTS (SELECT 1 FROM followers\
+                WHERE user_id = id AND follower_id = %s) AS followed,\
+                time_format(created) AS created\
+                FROM users WHERE id = %s\
+                INNER JOIN followers ON user_id = id\
+                WHERE follower_id = $2\
+                ORDER BY followers.created DESC\
+                LIMIT %s OFFSET %s'
+            cur.execute(query, (current_user_id, user_id, page * limit, limit))
+            result = cur.fetchall()
+            return map(lambda user: map_user(user), result)
+        except Exception:
+            raise
+        finally:
+            cur.close()
+            self.db.putconn(conn)
 
-        users = rows_to_users(results)
-        return users
-
-    def get_followers_ids(self, user_id):
-        conn = self.db.get_conn()
+    def get_followers(self, user_id, page, limit, current_user_id):
+        conn = self.db.getconn()
         cur = conn.cursor()
 
-        cur.execute('SELECT follower_id FROM followings \
-            WHERE user_id = %s',
-            (user_id,))
-        results = cur.fetchall()
-        cur.close()
-
-        users = rows_to_ids(results)
-        return users
+        try:
+            query = 'SELECT id, name, username, email, avatar, bio,\
+                (SELECT count(*) FROM posts WHERE user_id = id) AS posts,\
+                (SELECT count(*) FROM likes WHERE user_id = id) AS likes,\
+                (SELECT count(*) FROM followers WHERE user_id = id) AS following,\
+                (SELECT count(*) FROM followers WHERE user_id = id) AS followers,\
+                EXISTS (SELECT 1 FROM followers\
+                WHERE user_id = id AND follower_id = %s) AS followed,\
+                time_format(created) AS created\
+                FROM users WHERE id = %s\
+                INNER JOIN followers ON follower_id = id\
+                WHERE user_id = $2\
+                ORDER BY followers.created DESC\
+                LIMIT %s OFFSET %s'
+            cur.execute(query, (current_user_id, user_id, page * limit, limit))
+            result = cur.fetchall()
+            return map(lambda user: map_user(user), result)
+        except Exception:
+            raise
+        finally:
+            cur.close()
+            self.db.putconn(conn)
 
     def follow_user(self, user_id, follower_id):
-        conn = self.db.get_conn()
+        conn = self.db.getconn()
         cur = conn.cursor()
-
-        if user_id == follower_id:
-            raise UserActionException('You can\'t follow yourself.')
-
-        cur.execute('SELECT EXISTS(SELECT 1 from users \
-            WHERE id = %s)', (user_id,))
-        exists = cur.fetchone()[0] == 't'
-
-        if not exists:
-            raise UserNotFoundException('User not found.')
 
         try:
-            cur.execute('INSERT INTO followings VALUES(%s, %s)',
-                (user_id, follower_id))
+            query = 'INSERT INTO followers (user_id, follower_id)\
+                VALUES (%s, %s)'
+            cur.execute(query, (user_id, follower_id))
             conn.commit()
-        except psycopg2.Error as e:
-            print(f'Error following user: {str(e)}')
-            raise DbException('Error following user.')
+        except Exception:
+            raise
         finally:
             cur.close()
+            self.db.putconn(conn)
 
     def unfollow_user(self, user_id, follower_id):
-        conn = self.db.get_conn()
+        conn = self.db.getconn()
         cur = conn.cursor()
 
-        cur.execute('DELETE FROM followings \
-            WHERE user_id = %s AND follower_id = %s',
-            (user_id, follower_id))
-        conn.commit()
-        cur.close()
+        try:
+            query = 'DELETE FROM followers\
+                WHERE user_id = %s AND follower_id = %s'
+            cur.execute(query, (user_id, follower_id))
+            conn.commit()
+        except Exception:
+            raise
+        finally:
+            cur.close()
+            self.db.putconn(conn)

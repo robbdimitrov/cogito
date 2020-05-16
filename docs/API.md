@@ -2,9 +2,6 @@
 
 ## Table of contents
 
-* [Sessions](#sessions)
-  * [Login](#login)
-  * [Logout](#logout)
 * [Users](#users)
   * [Create user](#create-user)
   * [Update user](#update-user)
@@ -13,6 +10,9 @@
   * [Get followers](#get-followers)
   * [Follow user](#follow-user)
   * [Unfollow user](#unfollow-user)
+* [Sessions](#sessions)
+  * [Login](#login)
+  * [Logout](#logout)
 * [Posts](#posts)
   * [Create post](#create-post)
   * [Get feed](#get-feed)
@@ -23,44 +23,10 @@
   * [Like post](#like-post)
   * [Unlike post](#unlike-post)
   * [Repost post](#repost-post)
-  * [Delete repost](#delete-repost)
+  * [Remove repost](#remove-repost)
 * [Image assets](#image-assets)
   * [Upload image](#upload-image)
   * [Load image asset](#load-image-asset)
-* [Errors](#errors)
-
-## Sessions
-
-### Login
-
-Sets an `session` cookie with the session id.
-
-```
-POST /sessions
-```
-
-Body parameters:
-
-```
-email: string
-password: string
-```
-
-Response:
-
-```json
-{
-  "id": 10
-}
-```
-
-### Logout
-
-The active session is taken from the `session` cookie.
-
-```
-DELETE /sessions
-```
 
 ## Users
 
@@ -238,6 +204,39 @@ Path parameters:
 
 ```
 userId - id of the user
+```
+
+## Sessions
+
+### Login
+
+Sets an `session` cookie with the session id.
+
+```
+POST /sessions
+```
+
+Body parameters:
+
+```
+email: string
+password: string
+```
+
+Response:
+
+```json
+{
+  "id": 10
+}
+```
+
+### Logout
+
+The active session is taken from the `session` cookie.
+
+```
+DELETE /sessions
 ```
 
 ## Posts
@@ -435,7 +434,7 @@ Path parameters:
 postId - id of the post
 ```
 
-### Delete repost
+### Remove repost
 
 ```
 DELETE /posts/<postId>/reposts
@@ -487,14 +486,4 @@ Response:
 
 ```
 The image data
-```
-
-## Errors
-
-Errors contain the message describing the error.
-
-```json
-{
-  "message": "Incorrect email or password."
-}
 ```

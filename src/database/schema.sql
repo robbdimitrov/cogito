@@ -21,6 +21,14 @@ CREATE TABLE followers (
   UNIQUE(user_id, follower_id)
 );
 
+-- Sessions
+
+CREATE TABLE sessions (
+  id varchar(255) PRIMARY KEY,
+  user_id integer REFERENCES users ON DELETE CASCADE,
+  created timestamp NOT NULL DEFAULT now()
+);
+
 -- Posts
 
 CREATE TABLE posts (
@@ -42,14 +50,6 @@ CREATE TABLE reposts (
   user_id integer REFERENCES users ON DELETE CASCADE,
   created timestamp NOT NULL DEFAULT now(),
   UNIQUE(post_id, user_id)
-);
-
--- Sessions
-
-CREATE TABLE sessions (
-  id varchar(255) PRIMARY KEY,
-  user_id integer REFERENCES users ON DELETE CASCADE,
-  created timestamp NOT NULL DEFAULT now()
 );
 
 -- Utils

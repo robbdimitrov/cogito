@@ -1,4 +1,4 @@
-module github.com/robbdimitrov/thoughts/src/apiservice
+module github.com/robbdimitrov/thoughts/src/apigateway
 
 go 1.14
 

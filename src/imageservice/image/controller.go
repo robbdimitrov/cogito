@@ -54,7 +54,7 @@ func (c *controller) uploadFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	filename := randToken(16)
+	filename := generateFilename()
 	path := strings.Join([]string{c.imageDir, filename}, "/")
 
 	err = ioutil.WriteFile(path, data, 0666)

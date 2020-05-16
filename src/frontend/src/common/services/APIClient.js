@@ -5,7 +5,7 @@ class APIClient {
 
   headers() {
     const headers = new Headers({
-      'Content-Type': 'application/json'
+      'content-type': 'application/json'
     });
 
     const token = session.getToken();
@@ -22,7 +22,7 @@ class APIClient {
     const options = { method, headers };
 
     if (body) {
-      if (headers.get('Content-Type') === 'application/json') {
+      if (headers.get('content-type') === 'application/json') {
         options.body = JSON.stringify(body);
       } else {
         options.body = body;
@@ -195,7 +195,7 @@ class APIClient {
     const url = `/images`;
 
     const headers = this.headers();
-    headers.delete('Content-Type');
+    headers.delete('content-type');
 
     const formData = new FormData()
     formData.append('image', file);
