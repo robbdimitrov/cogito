@@ -9,7 +9,7 @@ class APIClient {
     });
   }
 
-  request(url, method = 'GET', body, otherHeaders) {
+  request(url, method, body, otherHeaders) {
     const headers = otherHeaders || this.headers();
 
     const options = { method, headers };
@@ -26,164 +26,127 @@ class APIClient {
       .then((response) => response.json());
   }
 
-  // Session
-
-  createSession(email, password) {
-    const url = '/sessions';
-    const body = { email, password };
-    return this.request(url, 'POST', body);
-  }
-
-  refreshToken() {
-    const url = '/sessions';
-    const headers = this.headers();
-    const token = session.getRefreshToken();
-    headers.set('Authorization', `Bearer ${token}`);
-    return this.request(url, 'POST', undefined, headers);
-  }
-
-  getSessions() {
-    const url = '/sessions';
-    return this.request(url);
-  }
-
-  deleteSession(sessionId) {
-    const url = `/sessions/${sessionId}`;
-    return this.request(url, 'DELETE');
-  }
-
   // User
 
   createUser(name, username, email, password) {
-    const url = '/users';
+    const url = '/api/users';
     const body = { name, username, email, password };
     return this.request(url, 'POST', body);
   }
 
   updateUser(name, username, email, bio, avatar) {
-    const url = `/users/${session.getUserId()}`;
+    const url = `/api/users/${session.getUserId()}`;
     const body = { name, username, email, avatar, bio };
     return this.request(url, 'PUT', body);
   }
 
   updatePassword(password, oldPassword) {
-    const url = `/users/${session.getUserId()}`;
+    const url = `/api/users/${session.getUserId()}`;
     const body = { password, oldPassword };
     return this.request(url, 'PUT', body);
   }
 
-  getUser(userId, username) {
-    let url = `/users/${userId}`;
-
-    if (username) {
-      url = `/users?username=${username}`;
-    }
-
-    return this.request(url);
-  }
-
-  getFollowingIds(userId) {
-    const url = `/users/${userId}/following?ids=1`;
-    return this.request(url);
+  getUser(userId) {
+    let url = `/api/users/${userId}`;
+    return this.request(url, 'GET');
   }
 
   getFollowing(userId, page, limit = 20) {
-    const url = `/users/${userId}/following?page=${page}&limit=${limit}`;
-    return this.request(url);
-  }
-
-  getFollowersIds(userId) {
-    const url = `/users/${userId}/following?ids=1`;
-    return this.request(url);
+    const url = `/api/users/${userId}/following?page=${page}&limit=${limit}`;
+    return this.request(url, 'GET');
   }
 
   getFollowers(userId, page, limit = 20) {
-    const url = `/users/${userId}/followers?page=${page}&limit=${limit}`;
-    return this.request(url);
+    const url = `/api/users/${userId}/followers?page=${page}&limit=${limit}`;
+    return this.request(url, 'GET');
   }
 
-  // Users
-
   followUser(userId) {
-    const url = `/users/${userId}/following`;
+    const url = `/api/users/${userId}/following`;
     return this.request(url, 'POST');
   }
 
   unfollowUser(userId) {
-    const url = `/users/${userId}/following`;
+    const url = `/api/users/${userId}/following`;
+    return this.request(url, 'DELETE');
+  }
+
+  // Sessions
+
+  login(email, password) {
+    const url = '/api/sessions';
+    const body = { email, password };
+    return this.request(url, 'POST', body);
+  }
+
+  logout(sessionId) {
+    const url = `/api/sessions/${sessionId}`;
     return this.request(url, 'DELETE');
   }
 
   // Posts
 
   createPost(content) {
-    const url = '/posts';
+    const url = '/api/posts';
     const body = { content };
     return this.request(url, 'POST', body);
   }
 
   getPost(postId) {
-    const url = `/posts/${postId}`;
-    return this.request(url);
+    const url = `/api/posts/${postId}`;
+    return this.request(url, 'GET');
   }
 
   deletePost(postId) {
-    const url = `/posts/${postId}`;
+    const url = `/api/posts/${postId}`;
     return this.request(url, 'DELETE');
   }
 
   getFeed(page) {
-    const url = `/posts/feed?page=${page}`;
-    return this.request(url);
+    const url = `/api/posts/feed?page=${page}`;
+    return this.request(url, 'GET');
   }
 
   getPosts(userId, page) {
-    const url = `/users/${userId}/posts?page=${page}`;
-    return this.request(url);
+    const url = `/api/users/${userId}/posts?page=${page}`;
+    return this.request(url, 'GET');
   }
 
   getLikes(userId, page) {
-    const url = `/users/${userId}/likes?page=${page}`;
-    return this.request(url);
+    const url = `/api/users/${userId}/likes?page=${page}`;
+    return this.request(url, 'GET');
   }
 
   // Post actions
 
   likePost(postId) {
-    const url = `/posts/${postId}/likes`;
+    const url = `/api/posts/${postId}/likes`;
     return this.request(url, 'POST');
   }
 
   unlikePost(postId) {
-    const url = `/posts/${postId}/likes`;
+    const url = `/api/posts/${postId}/likes`;
     return this.request(url, 'DELETE');
   }
 
   repostPost(postId) {
-    const url = `/posts/${postId}/reposts`;
+    const url = `/api/posts/${postId}/reposts`;
     return this.request(url, 'POST');
   }
 
   removeRepost(postId) {
-    const url = `/posts/${postId}/reposts`;
+    const url = `/api/posts/${postId}/reposts`;
     return this.request(url, 'DELETE');
   }
 
   // Image
 
   postImage(file) {
-    const url = `/images`;
-
-    const headers = this.headers();
-    headers.delete('content-type');
-
+    const url = '/api/images';
     const formData = new FormData()
     formData.append('image', file);
-
     return this.request(url, 'POST', formData, headers);
   }
 }
 
-const apiClient = new APIClient();
-
-export default apiClient;
+export default APIClient;
