@@ -25,10 +25,10 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
             )
 
         try:
-            user_id = self.db_client.create_user(
+            result = self.db_client.create_user(
                 request.name, request.username,
                 request.email, generate_hash(request.password))
-            return thoughts_pb2.Identifier(id=user_id)
+            return thoughts_pb2.Identifier(id=result)
         except Exception as e:
             logger.print(f'Creating user failed: {e}')
             context.abort(
@@ -40,15 +40,15 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
         user_id = dict(context.invocation_metadata())['user-id']
 
         try:
-            user = self.db_client.get_user(
+            result = self.db_client.get_user(
                 request.user_id, request.username, user_id)
         except Exception as e:
             logger.print(f'Getting user failed: {e}')
             context.abort(StatusCode.INTERNAL)
-        else:
-            if user is None:
-                context.abort(StatusCode.NOT_FOUND)
-            return user
+
+        if result is None:
+            context.abort(StatusCode.NOT_FOUND)
+        return result
 
     def UpdateUser(self, request, context):
         user_id = dict(context.invocation_metadata())['user-id']
@@ -80,15 +80,13 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
                 'Both password and the current password are required.'
             )
 
-        user = None
-
         try:
-            user = self.db_client.get_user_with_id(user_id)
+            result = self.db_client.get_user_with_id(user_id)
         except Exception as e:
             logger.print(f'Getting user failed: {e}')
             context.abort(StatusCode.INTERNAL)
 
-        if validate_password(user['email'], request.password) == False:
+        if validate_password(result['email'], request.password) == False:
             context.abort(
                 StatusCode.INVALID_ARGUMENT,
                 'Wrong password. Enter the correct current password.'
@@ -106,10 +104,10 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
         user_id = dict(context.invocation_metadata())['user-id']
 
         try:
-            users = self.db_client.get_following(
+            result = self.db_client.get_following(
                 request.user_id, request.page,
                 request.limit, user_id)
-            return thoughts_pb2.Users(users=users)
+            return thoughts_pb2.Users(users=result)
         except Exception as e:
             logger.print(f'Getting users failed: {e}')
             context.abort(StatusCode.INTERNAL)
@@ -118,10 +116,10 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
         user_id = dict(context.invocation_metadata())['user-id']
 
         try:
-            users = self.db_client.get_followers(
+            result = self.db_client.get_followers(
                 request.user_id, request.page,
                 request.limit, user_id)
-            return thoughts_pb2.Users(users=users)
+            return thoughts_pb2.Users(users=result)
         except Exception as e:
             logger.print(f'Getting users failed: {e}')
             context.abort(StatusCode.INTERNAL)

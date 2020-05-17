@@ -16,36 +16,34 @@ class Controller(thoughts_pb2_grpc.AuthServiceServicer):
                 'Missing credentials.'
             )
 
-        user = None
-
         try:
-            user = self.db_client.get_user(request.email)
+            result = self.db_client.get_user(request.email)
         except Exception as e:
             logger.print(f'Getting user failed: {e}')
             context.abort(StatusCode.INTERNAL)
 
-        if validate_password(user, request.password) == False:
+        if validate_password(result, request.password) == False:
             context.abort(
                 StatusCode.UNAUTHENTICATED,
                 'Incorrect email or password.'
             )
 
         try:
-            return self.db_client.create_session(generate_key(), user['id'])
+            return self.db_client.create_session(generate_key(), result['id'])
         except Exception as e:
             logger.print(f'Creating session failed: {e}')
             context.abort(StatusCode.INTERNAL)
 
     def GetSession(self, request, context):
         try:
-            session = self.db_client.get_session(request.session_id)
+            result = self.db_client.get_session(request.session_id)
         except Exception as e:
             logger.print(f'Getting session failed: {e}')
             context.abort(StatusCode.INTERNAL)
-        else:
-            if session is None:
-                context.abort(StatusCode.UNAUTHENTICATED)
-            return session
+
+        if result is None:
+            context.abort(StatusCode.UNAUTHENTICATED)
+        return result
 
     def DeleteSession(self, request, context):
         try:
