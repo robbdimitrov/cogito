@@ -6,7 +6,6 @@ import './Settings.scss';
 
 const Password = React.lazy(() => import('./Password'));
 const EditProfile = React.lazy(() => import('./EditProfile'));
-const Sessions = React.lazy(() => import('./sessions/Sessions'));
 
 function Settings({ match }) {
   return (
@@ -17,7 +16,6 @@ function Settings({ match }) {
         <Switch>
           <Route path={`${match.path}/account`} exact component={EditProfile} />
           <Route path={`${match.path}/password`} exact component={Password} />
-          <Route path={`${match.path}/sessions`} exact component={Sessions} />
           <Route
             path={match.path} exact
             render={() => <Redirect to={`${match.path}/account`} />}

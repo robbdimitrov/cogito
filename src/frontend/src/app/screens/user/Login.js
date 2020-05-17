@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { loginUser } from '../store/actions/auth';
+// import { loginUser } from '../store/actions/auth';
 
 class Login extends React.Component {
   constructor(props) {

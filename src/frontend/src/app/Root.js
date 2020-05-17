@@ -1,11 +1,11 @@
 import React from 'react';
 import { withRouter } from 'react-router-dom';
 
-import Navigation from '../common/components/navigation/Navigation';
-import { dismissError } from '../store/actions/errors';
-import session from '../common/services/Session';
-import { fetchUserIfNeeded } from '../store/actions/users';
-import { logoutUser } from '../store/actions/auth';
+import Navigation from './shared/components/navigation/Navigation';
+// import { dismissError } from '../store/actions/errors';
+import session from './services/Session';
+// import { fetchUserIfNeeded } from '../store/actions/users';
+// import { logoutUser } from '../store/actions/auth';
 
 class Root extends React.Component {
   constructor(props) {

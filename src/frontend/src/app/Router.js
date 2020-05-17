@@ -1,13 +1,13 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter, Switch, Redirect } from 'react-router-dom';
 
-import AuthedRoute from '../common/components/AuthedRoute';
-import GuardRoute from '../common/components/GuardRoute';
-const Feed = React.lazy(() => import('../feed/Feed'));
-const Profile = React.lazy(() => import('../profile/Profile'));
-const Login = React.lazy(() => import('../user/Login'));
-const Signup = React.lazy(() => import('../user/Signup'));
-const Settings = React.lazy(() => import('../settings/Settings'));
+import AuthedRoute from './shared/components/AuthedRoute';
+import GuardRoute from './shared/components/GuardRoute';
+const Feed = React.lazy(() => import('./screens/feed/Feed'));
+const Profile = React.lazy(() => import('./screens/profile/Profile'));
+const Login = React.lazy(() => import('./screens/user/Login'));
+const Signup = React.lazy(() => import('./screens/user/Signup'));
+const Settings = React.lazy(() => import('./screens/settings/Settings'));
 
 function AppRouter(props) {
   return (

@@ -1,8 +1,8 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 
-import ThoughtList from '../../common/components/thoughtlist/ThoughtList';
-import UserList from '../../common/components/userlist/UserList';
+import ThoughtList from '../../shared/components/thoughtlist/ThoughtList';
+import UserList from '../../shared/components/userlist/UserList';
 import ControlBar from './ControlBar';
 import UserHeader from './UserHeader';
 import './Profile.scss';

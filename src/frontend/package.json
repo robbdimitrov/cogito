@@ -16,13 +16,12 @@
     "quartzite": "^2.0.0",
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
-    "react-router-dom": "^5.1.2",
     "react-scripts": "^3.4.1"
   },
   "devDependencies": {
     "http-proxy-middleware": "^1.0.3",
-    "node-sass": "^4.13.1",
-    "typescript": "^3.8.3"
+    "node-sass": "^4.14.1",
+    "typescript": "^3.9.2"
   },
   "eslintConfig": {
     "extends": "react-app"

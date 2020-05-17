@@ -4,16 +4,9 @@ class APIClient {
   // Internal
 
   headers() {
-    const headers = new Headers({
+    return new Headers({
       'content-type': 'application/json'
     });
-
-    const token = session.getToken();
-    if (token) {
-      headers.set('Authorization', `Bearer ${token}`);
-    }
-
-    return headers;
   }
 
   request(url, method = 'GET', body, otherHeaders) {
@@ -69,26 +62,13 @@ class APIClient {
 
   updateUser(name, username, email, bio, avatar) {
     const url = `/users/${session.getUserId()}`;
-
-    const body = {
-      name,
-      username,
-      email,
-      bio,
-      avatar
-    };
-
+    const body = { name, username, email, avatar, bio };
     return this.request(url, 'PUT', body);
   }
 
   updatePassword(password, oldPassword) {
     const url = `/users/${session.getUserId()}`;
-
-    const body = {
-      password,
-      old_password: oldPassword
-    };
-
+    const body = { password, oldPassword };
     return this.request(url, 'PUT', body);
   }
 
@@ -122,7 +102,7 @@ class APIClient {
     return this.request(url);
   }
 
-  // User actions
+  // Users
 
   followUser(userId) {
     const url = `/users/${userId}/following`;
@@ -134,7 +114,7 @@ class APIClient {
     return this.request(url, 'DELETE');
   }
 
-  // Post
+  // Posts
 
   createPost(content) {
     const url = '/posts';
@@ -152,18 +132,18 @@ class APIClient {
     return this.request(url, 'DELETE');
   }
 
-  getFeed(page, limit = 20) {
-    const url = `/posts/feed?page=${page}&limit=${limit}`;
+  getFeed(page) {
+    const url = `/posts/feed?page=${page}`;
     return this.request(url);
   }
 
-  getPosts(userId, page, limit = 20) {
-    const url = `/users/${userId}/posts?page=${page}&limit=${limit}`;
+  getPosts(userId, page) {
+    const url = `/users/${userId}/posts?page=${page}`;
     return this.request(url);
   }
 
-  getLikes(userId, page, limit = 20) {
-    const url = `/users/${userId}/likes?page=${page}&limit=${limit}`;
+  getLikes(userId, page) {
+    const url = `/users/${userId}/likes?page=${page}`;
     return this.request(url);
   }
 
@@ -179,13 +159,13 @@ class APIClient {
     return this.request(url, 'DELETE');
   }
 
-  retweetPost(postId) {
-    const url = `/posts/${postId}/retweets`;
+  repostPost(postId) {
+    const url = `/posts/${postId}/reposts`;
     return this.request(url, 'POST');
   }
 
-  deleteRetweet(postId) {
-    const url = `/posts/${postId}/retweets`;
+  removeRepost(postId) {
+    const url = `/posts/${postId}/reposts`;
     return this.request(url, 'DELETE');
   }
 

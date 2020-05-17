@@ -1,9 +1,9 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { updateUser, updateAvatar } from '../store/actions/users';
-import session from '../common/services/Session';
-import { imageURI } from '../common/utils';
+// import { updateUser, updateAvatar } from '../store/actions/users';
+import session from '../../services/Session';
+import { imageURI } from '../../shared/utils';
 import './EditProfile.scss';
 
 class EditProfile extends React.Component {
