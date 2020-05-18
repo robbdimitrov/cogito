@@ -1,11 +1,10 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Link, NavLink } from 'react-router-dom';
 
 import UserDropdown from './UserDropdown';
-import './Navigation.scss';
+import './Navbar.scss';
 
-class Navigation extends React.Component {
+class Navbar extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -42,7 +41,7 @@ class Navigation extends React.Component {
 
           <FontAwesomeIcon icon="brain" className="icon" size="2x" />
 
-          {this.props.isLoggedIn ? (
+          {this.props.user ? (
             <div className="right-items">
               <div className="profile-button" onClick={this.handleClick}>
                 <img
@@ -58,13 +57,6 @@ class Navigation extends React.Component {
                   />
                 }
               </div>
-
-              <button
-                className="button create-button"
-                onClick={this.props.openPopup}
-              >
-                Create
-              </button>
             </div>
           ) : (
             <div className="right-items">
@@ -79,4 +71,4 @@ class Navigation extends React.Component {
   }
 }
 
-export default Navigation;
+export default Navbar;

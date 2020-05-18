@@ -4,7 +4,7 @@ import UserCard from './UserCard';
 import ThoughtList from '../../shared/components/thoughtlist/ThoughtList';
 // import { fetchFeed } from '../store/actions/feed';
 // import { fetchUserIfNeeded } from '../store/actions/users';
-import session from '../../services/Session';
+import session from '../../shared/services/Session';
 import './Feed.scss';
 
 class Feed extends React.Component {

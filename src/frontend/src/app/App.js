@@ -1,17 +1,16 @@
 import React from 'react';
 
-import Root from './Root';
-import AppRouter from './AppRouter';
-import IconLibrary from './services/IconLibrary';
+import Navbar from './shared/components/navbar/Navbar';
+import IconLibrary from './shared/services/IconLibrary';
 
 IconLibrary.configure();
 
 class App extends React.Component {
   render() {
     return (
-      <AppRouter>
-        <Root />
-      </AppRouter>
+      <div class="container">
+        <Navbar />
+      </div>
     );
   }
 }

@@ -1,8 +1,6 @@
 import session from './Session';
 
 class APIClient {
-  // Internal
-
   headers() {
     return new Headers({
       'content-type': 'application/json'
