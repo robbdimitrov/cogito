@@ -1,30 +1,21 @@
 import session from './Session';
 
 class APIClient {
-  headers() {
-    return new Headers({
-      'content-type': 'application/json'
-    });
-  }
-
   request(url, method, body, otherHeaders) {
-    const headers = otherHeaders || this.headers();
-
-    const options = { method, headers };
-
+    let options = { method };
     if (body) {
-      if (headers.get('content-type') === 'application/json') {
+      if (typeof body !== FormData) {
+        options.headers = { 'content-type': 'application/json' };
         options.body = JSON.stringify(body);
       } else {
         options.body = body;
       }
     }
-
     return fetch(url, options)
       .then((response) => response.json());
   }
 
-  // User
+  // Users
 
   createUser(name, username, email, password) {
     const url = '/api/users';
@@ -115,8 +106,6 @@ class APIClient {
     return this.request(url, 'GET');
   }
 
-  // Post actions
-
   likePost(postId) {
     const url = `/api/posts/${postId}/likes`;
     return this.request(url, 'POST');
@@ -137,13 +126,13 @@ class APIClient {
     return this.request(url, 'DELETE');
   }
 
-  // Image
+  // Upload
 
-  postImage(file) {
-    const url = '/api/images';
+  uploadImage(file) {
+    const url = '/api/uploads';
     const formData = new FormData()
     formData.append('image', file);
-    return this.request(url, 'POST', formData, headers);
+    return this.request(url, 'POST', formData);
   }
 }
 

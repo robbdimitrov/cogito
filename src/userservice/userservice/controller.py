@@ -86,7 +86,7 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
             logger.print(f'Getting user failed: {e}')
             context.abort(StatusCode.INTERNAL)
 
-        if validate_password(result['email'], request.password) == False:
+        if validate_password(request.password, result['password']) == False:
             context.abort(
                 StatusCode.INVALID_ARGUMENT,
                 'Wrong password. Enter the correct current password.'
