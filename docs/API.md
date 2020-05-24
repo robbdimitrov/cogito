@@ -56,7 +56,7 @@ Response:
 ### Update user
 
 ```
-PUT /users/<userId>
+PUT /users/:userId
 ```
 
 Path parameters:
@@ -80,7 +80,7 @@ bio: string (optional)
 ### Get user
 
 ```
-GET /users/<userId>
+GET /users/:userId
 ```
 
 Path parameters:
@@ -111,7 +111,7 @@ Response:
 ### Get following
 
 ```
-GET /users/<userId>/following
+GET /users/:userId/following
 ```
 
 Path parameters:
@@ -148,7 +148,7 @@ Response:
 ### Get followers
 
 ```
-GET /users/<userId>/followers
+GET /users/:userId/followers
 ```
 
 Path parameters:
@@ -185,7 +185,7 @@ Response:
 ### Follow user
 
 ```
-POST /users/<userId>/followers
+POST /users/:userId/followers
 ```
 
 Path parameters:
@@ -197,7 +197,7 @@ userId - id of the user
 ### Unfollow user
 
 ```
-DELETE /users/<userId>/followers
+DELETE /users/:userId/followers
 ```
 
 Path parameters:
@@ -296,7 +296,7 @@ Response:
 ### Get post
 
 ```
-GET /posts/<postId>
+GET /posts/:postId
 ```
 
 Path parameters:
@@ -323,7 +323,7 @@ Response:
 ### Delete post
 
 ```
-DELETE /posts/<postId>
+DELETE /posts/:postId
 ```
 
 Path parameters:
@@ -335,7 +335,7 @@ postId - id of the post
 ### Get posts
 
 ```
-GET /users/<userId>/posts
+GET /users/:userId/posts
 ```
 
 Path parameters:
@@ -368,7 +368,7 @@ Response:
 ### Get likes
 
 ```
-GET /users/<userId>/likes
+GET /users/:userId/likes
 ```
 
 Path parameters:
@@ -401,7 +401,7 @@ Response:
 ### Like post
 
 ```
-POST /posts/<postId>/likes
+POST /posts/:postId/likes
 ```
 
 Path parameters:
@@ -413,7 +413,7 @@ postId - id of the post
 ### Unlike post
 
 ```
-DELETE /posts/<postId>/likes
+DELETE /posts/:postId/likes
 ```
 
 Path parameters:
@@ -425,7 +425,7 @@ postId - id of the post
 ### Repost post
 
 ```
-POST /posts/<postId>/reposts
+POST /posts/:postId/reposts
 ```
 
 Path parameters:
@@ -437,7 +437,7 @@ postId - id of the post
 ### Remove repost
 
 ```
-DELETE /posts/<postId>/reposts
+DELETE /posts/:postId/reposts
 ```
 
 Path parameters:
@@ -473,7 +473,7 @@ Response:
 ### Load image asset
 
 ```
-GET /uploads/<filename>
+GET /uploads/:filename
 ```
 
 Path parameters:
