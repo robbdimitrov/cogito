@@ -8,8 +8,9 @@ IconLibrary.configure();
 class App extends React.Component {
   render() {
     return (
-      <div class="container">
+      <div className="app">
         <Navbar />
+        <Router />
       </div>
     );
   }

@@ -44,81 +44,81 @@ class Signup extends React.Component {
 
   render() {
     return (
-      <div className="container">
-        <div className="form-content main-content">
-          <h1 className="form-title">Sign Up</h1>
-          <p className="form-message">Create an account and join in!</p>
+      <div className='container'>
+        <div className='form-content main-content'>
+          <h1 className='form-title'>Sign Up</h1>
+          <p className='form-message'>Create an account and join in!</p>
 
-          <form className="action-form" onSubmit={this.handleSubmit}>
-            <div className="fieldset">
-              <FontAwesomeIcon icon="passport" className="input-icon" />
+          <form className='action-form' onSubmit={this.handleSubmit}>
+            <div className='fieldset'>
+              <FontAwesomeIcon icon='passport' className='input-icon' />
               <input
-                className="form-input"
-                type="text"
-                name="name"
-                placeholder="Name"
+                className='form-input'
+                type='text'
+                name='name'
+                placeholder='Name'
                 onChange={this.handleInputChange}
                 required
               />
             </div>
 
-            <div className="fieldset">
-              <FontAwesomeIcon icon="user" className="input-icon" />
+            <div className='fieldset'>
+              <FontAwesomeIcon icon='user' className='input-icon' />
               <input
-                className="form-input"
-                type="text"
-                name="username"
-                placeholder="Username"
+                className='form-input'
+                type='text'
+                name='username'
+                placeholder='Username'
                 onChange={this.handleInputChange}
                 required
               />
             </div>
 
-            <div className="fieldset">
-              <FontAwesomeIcon icon="envelope" className="input-icon" />
+            <div className='fieldset'>
+              <FontAwesomeIcon icon='envelope' className='input-icon' />
               <input
-                className="form-input"
-                type="email"
-                name="email"
-                placeholder="Email"
-                pattern="[^@]+@[^@]+\.[^@]+"
+                className='form-input'
+                type='email'
+                name='email'
+                placeholder='Email'
+                pattern='[^@]+@[^@]+\.[^@]+'
                 onChange={this.handleInputChange}
                 required
               />
             </div>
 
-            <div className="fieldset">
-              <FontAwesomeIcon icon="lock" className="input-icon" />
+            <div className='fieldset'>
+              <FontAwesomeIcon icon='lock' className='input-icon' />
               <input
-                className="form-input"
+                className='form-input'
                 type={this.state.inputType}
-                name="password"
-                placeholder="Password"
-                minLength="4"
-                maxLength="30"
+                name='password'
+                placeholder='Password'
+                minLength='4'
+                maxLength='30'
                 onChange={this.handleInputChange}
                 required
               />
               <button
-                className="visibility-button"
+                className='visibility-button'
                 onClick={this.changeInputType}
-                type="button"
+                type='button'
               >
-                <FontAwesomeIcon icon="eye" />
+                <FontAwesomeIcon icon='eye' />
               </button>
             </div>
 
             <input
-              className="button form-button"
-              type="submit"
-              value="Create Account"
+              className='button form-button'
+              type='submit'
+              value='Create Account'
             />
           </form>
 
-          <div className="reference">
-            <span className="reference-label">Already have an accout?</span>
+          <div className='reference'>
+            <span className='reference-label'>Already have an accout?</span>
 
-            <Link to="/login" className="reference-button">
+            <Link to='/login' className='reference-button'>
               <span>Log In</span>
             </Link>
           </div>

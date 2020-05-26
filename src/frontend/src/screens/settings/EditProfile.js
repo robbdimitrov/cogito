@@ -75,83 +75,83 @@ class EditProfile extends React.Component {
 
   render() {
     return (
-      <div className="form-content">
-        <h1 className="form-title">Edit Profile</h1>
+      <div className='form-content'>
+        <h1 className='form-title'>Edit Profile</h1>
 
-        <div className="avatar-section">
+        <div className='avatar-section'>
           <img
-            className="avatar"
+            className='avatar'
             src={this.profileImage()}
             alt={this.props.user.name}
           />
 
-          <label htmlFor="file" className="icon-button">
-            <FontAwesomeIcon icon="image" className="input-icon" />
+          <label htmlFor='file' className='icon-button'>
+            <FontAwesomeIcon icon='image' className='input-icon' />
           </label>
           <input
-            id="file"
-            type="file"
-            accept="image/*"
+            id='file'
+            type='file'
+            accept='image/*'
             onChange={this.handleImageChange}
           />
         </div>
 
-        <form className="action-form" onSubmit={this.handleSubmit}>
-          <div className="fieldset">
-            <FontAwesomeIcon icon="passport" className="input-icon" />
+        <form className='action-form' onSubmit={this.handleSubmit}>
+          <div className='fieldset'>
+            <FontAwesomeIcon icon='passport' className='input-icon' />
             <input
-              className="form-input"
-              type="text"
-              name="name"
-              placeholder="Name"
+              className='form-input'
+              type='text'
+              name='name'
+              placeholder='Name'
               onChange={this.handleInputChange}
               value={this.state.name}
             />
           </div>
 
-          <div className="fieldset">
-            <FontAwesomeIcon icon="user" className="input-icon" />
+          <div className='fieldset'>
+            <FontAwesomeIcon icon='user' className='input-icon' />
             <input
-              className="form-input"
-              type="text"
-              name="username"
-              placeholder="Username"
+              className='form-input'
+              type='text'
+              name='username'
+              placeholder='Username'
               onChange={this.handleInputChange}
               value={this.state.username}
               required
             />
           </div>
 
-          <div className="fieldset">
-            <FontAwesomeIcon icon="envelope" className="input-icon" />
+          <div className='fieldset'>
+            <FontAwesomeIcon icon='envelope' className='input-icon' />
             <input
-              className="form-input"
-              type="email"
-              name="email"
-              placeholder="Email"
-              pattern="[^@]+@[^@]+\.[^@]+"
+              className='form-input'
+              type='email'
+              name='email'
+              placeholder='Email'
+              pattern='[^@]+@[^@]+\.[^@]+'
               onChange={this.handleInputChange}
               value={this.state.email}
               required
             />
           </div>
 
-          <div className="fieldset long">
-            <FontAwesomeIcon icon="file-alt" className="input-icon" />
+          <div className='fieldset long'>
+            <FontAwesomeIcon icon='file-alt' className='input-icon' />
             <textarea
-              className="form-input"
-              type="text"
-              name="bio"
-              placeholder="Add your bio"
+              className='form-input'
+              type='text'
+              name='bio'
+              placeholder='Add your bio'
               onChange={this.handleInputChange}
               value={this.state.bio}
             />
           </div>
 
           <input
-            type="submit"
-            className="button form-button"
-            value="Save changes"
+            type='submit'
+            className='button form-button'
+            value='Save changes'
           />
         </form>
       </div>

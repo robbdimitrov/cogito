@@ -5,7 +5,7 @@ function getUserId() {
 }
 
 function setUserId(value) {
-  setStorage('userId', value);
+  localStorage.setItem('userId', value);
 }
 
 function reset() {

@@ -1,7 +1,7 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import UserDropdown from './UserDropdown';
+import Dropdown from './Dropdown';
 import './Navbar.scss';
 
 class Navbar extends React.Component {
@@ -22,32 +22,32 @@ class Navbar extends React.Component {
 
   render() {
     return (
-      <header className="navigation-container bottom-shadow">
-        <div className="navigation-content main-container">
+      <header className='navigation-container bottom-shadow'>
+        <div className='navigation-content main-container'>
           {this.props.isLoggedIn ? (
-            <div className="left-items">
-              <NavLink to="/feed" className="nav-button">
+            <div className='left-items'>
+              <NavLink to='/feed' className='nav-button'>
                 <FontAwesomeIcon
-                  icon="home"
-                  className="nav-button-icon"
-                  size="2x"
+                  icon='home'
+                  className='nav-button-icon'
+                  size='2x'
                 />
-                <span className="nav-button-label">Home</span>
+                <span className='nav-button-label'>Home</span>
               </NavLink>
             </div>
           ) : (
-            <div className="left-items"></div>
+            <div className='left-items'></div>
           )}
 
-          <FontAwesomeIcon icon="brain" className="icon" size="2x" />
+          <FontAwesomeIcon icon='brain' className='icon' size='2x' />
 
           {this.props.user ? (
-            <div className="right-items">
-              <div className="profile-button" onClick={this.handleClick}>
+            <div className='right-items'>
+              <div className='profile-button' onClick={this.handleClick}>
                 <img
-                  className="profile-button-image"
-                  src="https://via.placeholder.com/300.png"
-                  alt="Profile"
+                  className='profile-button-image'
+                  src='https://via.placeholder.com/300.png'
+                  alt='Profile'
                 />
 
                 {this.state.isDropdownShown &&
@@ -59,8 +59,8 @@ class Navbar extends React.Component {
               </div>
             </div>
           ) : (
-            <div className="right-items">
-              <Link to="/login" className="button login-button">
+            <div className='right-items'>
+              <Link to='/login' className='button login-button'>
                 Log In
               </Link>
             </div>

@@ -1,5 +1,3 @@
-import session from './Session';
-
 class APIClient {
   request(url, method, body, otherHeaders) {
     let options = { method };
@@ -23,14 +21,14 @@ class APIClient {
     return this.request(url, 'POST', body);
   }
 
-  updateUser(name, username, email, bio, avatar) {
-    const url = `/api/users/${session.getUserId()}`;
+  updateUser(userId, name, username, email, bio, avatar) {
+    const url = `/api/users/${userId}`;
     const body = { name, username, email, avatar, bio };
     return this.request(url, 'PUT', body);
   }
 
-  updatePassword(password, oldPassword) {
-    const url = `/api/users/${session.getUserId()}`;
+  updatePassword(userId, password, oldPassword) {
+    const url = `/api/users/${userId}`;
     const body = { password, oldPassword };
     return this.request(url, 'PUT', body);
   }
