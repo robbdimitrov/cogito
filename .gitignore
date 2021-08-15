@@ -20,4 +20,5 @@ npm-debug.log*
 
 # Editors
 .vscode
+*.code-workspace
 *.sw*

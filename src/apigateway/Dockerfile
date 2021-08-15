@@ -1,10 +1,10 @@
 FROM golang:1.14 as builder
-WORKDIR /app
-COPY go.* ./
+WORKDIR /usr/src/app
+COPY go.* .
 RUN go mod download
-COPY . ./
+COPY . .
 RUN go build -v -o service
 
 FROM scratch
-COPY --from=builder /app/service /service
+COPY --from=builder /usr/src/app/service /service
 CMD ["/service"]

@@ -3,37 +3,15 @@
 **Thoughts** is a post-sharing application where users can create, browse, 
 like and repost posts and follow other users.
 
-## Table of contents
-
-- [Stack](#stack)
-- [Screenshots](#screenshots)
-- [Architecture](#architecture)
-- [Setup](#setup)
-  - [Clone the repository](#clone-the-repository)
-  - [Build the images](#build-the-images)
-  - [Create deployments](#create-deployments)
-- [Access the frontend](#access-the-frontend)
-- [Cleanup](#cleanup)
-- [API](#api)
-- [License](#license)
-
-## Stack
-
-- Go
-- Python
-- React
-- PostgreSQL
-- Docker
-- Kubernetes
-
 ## Screenshots
+
+Feed | Profile
+--- | ---
+[![Screenshot of feed screen](/docs/img/01_feed.png)](/docs/img/01_feed.png) | [![Screenshot of profile screen](/docs/img/02_profile.png)](/docs/img/02_profile.png)
 
 ## Architecture
 
 **Thoughts** is composed of microservices written in Go, Python and JavaScript, communicating over [gRPC](https://github.com/grpc/grpc).
-
-[![Architecture diagram](/docs/img/architecture-diagram.png)](/docs/img/architecture-diagram.png)
-
 Protobuf definitions can be found at the [`/pb` directory](/pb).
 
 Service | Language | Description

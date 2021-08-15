@@ -1,33 +1,5 @@
 # API
 
-## Table of contents
-
-* [Users](#users)
-  * [Create user](#create-user)
-  * [Update user](#update-user)
-  * [Get user](#get-user)
-  * [Get following](#get-following)
-  * [Get followers](#get-followers)
-  * [Follow user](#follow-user)
-  * [Unfollow user](#unfollow-user)
-* [Sessions](#sessions)
-  * [Login](#login)
-  * [Logout](#logout)
-* [Posts](#posts)
-  * [Create post](#create-post)
-  * [Get feed](#get-feed)
-  * [Get post](#get-post)
-  * [Delete post](#delete-post)
-  * [Get posts](#get-posts)
-  * [Get likes](#get-likes)
-  * [Like post](#like-post)
-  * [Unlike post](#unlike-post)
-  * [Repost post](#repost-post)
-  * [Remove repost](#remove-repost)
-* [Image assets](#image-assets)
-  * [Upload image](#upload-image)
-  * [Load image asset](#load-image-asset)
-
 ## Users
 
 ### Create user

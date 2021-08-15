@@ -13,7 +13,7 @@
     "@fortawesome/fontawesome-svg-core": "^1.2.30",
     "@fortawesome/free-solid-svg-icons": "^5.14.0",
     "@fortawesome/react-fontawesome": "^0.1.11",
-    "corniche": "0.1.0-alpha.2",
+    "corniche": "0.1.0-alpha.3",
     "quartzite": "^2.0.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",

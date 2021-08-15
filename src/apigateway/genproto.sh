@@ -1,3 +1,3 @@
 #!/bin/bash -e
 
-protoc -I../../pb --go_out=plugins=grpc:genproto ../../pb/thoughts.proto
+protoc -I../../pb --go_out=./api --go-grpc_out=./api ../../pb/thoughts.proto
