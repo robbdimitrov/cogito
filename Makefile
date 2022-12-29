@@ -4,28 +4,28 @@ all: apigateway authservice database frontend
 
 .PHONY: apigateway
 apigateway:
-	docker build -t thoughts/apigateway src/apigateway
+	docker build -t localhost:5000/thoughts/apigateway src/apigateway
 
 .PHONY: authservice
 authservice:
-	docker build -t thoughts/authservice src/authservice
+	docker build -t localhost:5000thoughts/authservice src/authservice
 
 .PHONY: database
 database:
-	docker build -t thoughts/database src/database
+	docker build -t localhost:5000thoughts/database src/database
 
 .PHONY: frontend
 frontend:
-	docker build -t thoughts/frontend src/frontend
+	docker build -t localhost:5000thoughts/frontend src/frontend
 
 .PHONY: postservice
 postservice:
-	docker build -t thoughts/postservice src/postservice
+	docker build -t localhost:5000thoughts/postservice src/postservice
 
 .PHONY: imageservice
 imageservice:
-	docker build -t thoughts/imageservice src/imageservice
+	docker build -t localhost:5000thoughts/imageservice src/imageservice
 
 .PHONY: userservice
 userservice:
-	docker build -t thoughts/userservice src/userservice
+	docker build -t localhost:5000thoughts/userservice src/userservice
