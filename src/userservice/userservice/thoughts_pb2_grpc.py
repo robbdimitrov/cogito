@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-import thoughts_pb2 as thoughts__pb2
+import userservice.thoughts_pb2 as thoughts__pb2
 
 
 class UserServiceStub(object):
