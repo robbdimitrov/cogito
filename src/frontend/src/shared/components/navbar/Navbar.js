@@ -1,7 +1,8 @@
 import React from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import {NavLink, Link} from 'react-router-dom';
 
-import Dropdown from './Dropdown';
+import UserDropdown from './Dropdown';
 import './Navbar.scss';
 
 class Navbar extends React.Component {

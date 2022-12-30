@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-import './UserDropdown.scss';
+import './Dropdown.scss';
 
-function UserDropdown({ user, logoutUser }) {
+function Dropdown({ user, logoutUser }) {
   return (
     <div className="dropdown">
       <ul className="dropdown-list">
@@ -31,4 +31,4 @@ function UserDropdown({ user, logoutUser }) {
   );
 }
 
-export default UserDropdown;
+export default Dropdown;
