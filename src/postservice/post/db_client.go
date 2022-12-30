@@ -5,6 +5,8 @@ import (
 	"log"
 
 	"github.com/jackc/pgx/v4/pgxpool"
+
+	pb "github.com/robbdimitrov/thoughts/src/postservice/genproto"
 )
 
 // DbClient manages the communication between services and database
@@ -43,7 +45,7 @@ func (c *DbClient) createPost(content string, userID int32) (int32, error) {
 	return id, err
 }
 
-func (c *DbClient) getFeed(page int32, limit int32, currentUserID int32) ([]*Post, error) {
+func (c *DbClient) getFeed(page int32, limit int32, currentUserID int32) ([]*pb.Post, error) {
 	query := `SELECT id, posts.user_id, content,
 		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
 		EXISTS (SELECT 1 FROM likes
@@ -69,7 +71,7 @@ func (c *DbClient) getFeed(page int32, limit int32, currentUserID int32) ([]*Pos
 	return mapPosts(rows)
 }
 
-func (c *DbClient) getPosts(userID int32, page int32, limit int32, currentUserID int32) ([]*Post, error) {
+func (c *DbClient) getPosts(userID int32, page int32, limit int32, currentUserID int32) ([]*pb.Post, error) {
 	query := `SELECT id, posts.user_id, content,
 		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
 		EXISTS (SELECT 1 FROM likes
@@ -93,7 +95,7 @@ func (c *DbClient) getPosts(userID int32, page int32, limit int32, currentUserID
 	return mapPosts(rows)
 }
 
-func (c *DbClient) getLikedPosts(userID int32, page int32, limit int32, currentUserID int32) ([]*Post, error) {
+func (c *DbClient) getLikedPosts(userID int32, page int32, limit int32, currentUserID int32) ([]*pb.Post, error) {
 	query := `SELECT id, posts.user_id, content,
 		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
 		EXISTS (SELECT 1 FROM likes
@@ -117,7 +119,7 @@ func (c *DbClient) getLikedPosts(userID int32, page int32, limit int32, currentU
 	return mapPosts(rows)
 }
 
-func (c *DbClient) getPost(id int32, currentUserID int32) (*Post, error) {
+func (c *DbClient) getPost(id int32, currentUserID int32) (*pb.Post, error) {
 	query := `SELECT id, user_id, content,
 		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
 		EXISTS (SELECT 1 FROM likes

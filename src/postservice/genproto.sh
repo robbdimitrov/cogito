@@ -1,3 +1,3 @@
 #!/bin/bash -e
 
-protoc -I../../pb --go_out=./post --go-grpc_out=./post ../../pb/thoughts.proto
+protoc -I../../pb --go_out=./ --go-grpc_out=./ ../../pb/thoughts.proto

@@ -2,7 +2,7 @@ package image
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -37,7 +37,7 @@ func (c *controller) uploadFile(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	data, err := ioutil.ReadAll(file)
+	data, err := io.ReadAll(file)
 	if err != nil {
 		log.Printf("Reading file failed: %v", err)
 		errorResponse(w, http.StatusText(400), 400)
@@ -57,7 +57,7 @@ func (c *controller) uploadFile(w http.ResponseWriter, r *http.Request) {
 	filename := generateFilename()
 	path := strings.Join([]string{c.imageDir, filename}, "/")
 
-	err = ioutil.WriteFile(path, data, 0666)
+	err = os.WriteFile(path, data, 0666)
 	if err != nil {
 		log.Printf("Saving file failed: %v", err)
 		errorResponse(w, http.StatusText(500), 500)

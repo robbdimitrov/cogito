@@ -5,17 +5,21 @@ import (
 	"log"
 
 	"google.golang.org/grpc/codes"
+
+	pb "github.com/robbdimitrov/thoughts/src/postservice/genproto"
 )
 
 type controller struct {
+	pb.UnsafePostServiceServer
+
 	dbClient *DbClient
 }
 
 func newController(dbClient *DbClient) *controller {
-	return &controller{dbClient}
+	return &controller{dbClient: dbClient}
 }
 
-func (c *controller) CreatePost(ctx context.Context, req *CreatePostRequest) (*Identifier, error) {
+func (c *controller) CreatePost(ctx context.Context, req *pb.CreatePostRequest) (*pb.Identifier, error) {
 	userID, err := getUserID(ctx)
 	if err != nil {
 		return nil, err
@@ -27,10 +31,10 @@ func (c *controller) CreatePost(ctx context.Context, req *CreatePostRequest) (*I
 		return nil, newError(codes.Internal)
 	}
 
-	return &Identifier{Id: res}, nil
+	return &pb.Identifier{Id: res}, nil
 }
 
-func (c *controller) GetFeed(ctx context.Context, req *GetFeedRequest) (*Posts, error) {
+func (c *controller) GetFeed(ctx context.Context, req *pb.GetFeedRequest) (*pb.Posts, error) {
 	userID, err := getUserID(ctx)
 	if err != nil {
 		return nil, err
@@ -42,10 +46,10 @@ func (c *controller) GetFeed(ctx context.Context, req *GetFeedRequest) (*Posts, 
 		return nil, newError(codes.Internal)
 	}
 
-	return &Posts{Posts: res}, nil
+	return &pb.Posts{Posts: res}, nil
 }
 
-func (c *controller) GetPosts(ctx context.Context, req *GetPostsRequest) (*Posts, error) {
+func (c *controller) GetPosts(ctx context.Context, req *pb.GetPostsRequest) (*pb.Posts, error) {
 	userID, err := getUserID(ctx)
 	if err != nil {
 		return nil, err
@@ -57,10 +61,10 @@ func (c *controller) GetPosts(ctx context.Context, req *GetPostsRequest) (*Posts
 		return nil, newError(codes.Internal)
 	}
 
-	return &Posts{Posts: res}, nil
+	return &pb.Posts{Posts: res}, nil
 }
 
-func (c *controller) GetLikedPosts(ctx context.Context, req *GetPostsRequest) (*Posts, error) {
+func (c *controller) GetLikedPosts(ctx context.Context, req *pb.GetPostsRequest) (*pb.Posts, error) {
 	userID, err := getUserID(ctx)
 	if err != nil {
 		return nil, err
@@ -72,10 +76,10 @@ func (c *controller) GetLikedPosts(ctx context.Context, req *GetPostsRequest) (*
 		return nil, newError(codes.Internal)
 	}
 
-	return &Posts{Posts: res}, nil
+	return &pb.Posts{Posts: res}, nil
 }
 
-func (c *controller) GetPost(ctx context.Context, req *PostRequest) (*Post, error) {
+func (c *controller) GetPost(ctx context.Context, req *pb.PostRequest) (*pb.Post, error) {
 	userID, err := getUserID(ctx)
 	if err != nil {
 		return nil, err
@@ -90,7 +94,7 @@ func (c *controller) GetPost(ctx context.Context, req *PostRequest) (*Post, erro
 	return res, nil
 }
 
-func (c *controller) DeletePost(ctx context.Context, req *PostRequest) (*Empty, error) {
+func (c *controller) DeletePost(ctx context.Context, req *pb.PostRequest) (*pb.Empty, error) {
 	userID, err := getUserID(ctx)
 	if err != nil {
 		return nil, err
@@ -101,10 +105,10 @@ func (c *controller) DeletePost(ctx context.Context, req *PostRequest) (*Empty, 
 		return nil, newError(codes.Internal)
 	}
 
-	return &Empty{}, nil
+	return &pb.Empty{}, nil
 }
 
-func (c *controller) LikePost(ctx context.Context, req *PostRequest) (*Empty, error) {
+func (c *controller) LikePost(ctx context.Context, req *pb.PostRequest) (*pb.Empty, error) {
 	userID, err := getUserID(ctx)
 	if err != nil {
 		return nil, err
@@ -115,10 +119,10 @@ func (c *controller) LikePost(ctx context.Context, req *PostRequest) (*Empty, er
 		return nil, newError(codes.Internal)
 	}
 
-	return &Empty{}, nil
+	return &pb.Empty{}, nil
 }
 
-func (c *controller) UnlikePost(ctx context.Context, req *PostRequest) (*Empty, error) {
+func (c *controller) UnlikePost(ctx context.Context, req *pb.PostRequest) (*pb.Empty, error) {
 	userID, err := getUserID(ctx)
 	if err != nil {
 		return nil, err
@@ -129,10 +133,10 @@ func (c *controller) UnlikePost(ctx context.Context, req *PostRequest) (*Empty, 
 		return nil, newError(codes.Internal)
 	}
 
-	return &Empty{}, nil
+	return &pb.Empty{}, nil
 }
 
-func (c *controller) RepostPost(ctx context.Context, req *PostRequest) (*Empty, error) {
+func (c *controller) RepostPost(ctx context.Context, req *pb.PostRequest) (*pb.Empty, error) {
 	userID, err := getUserID(ctx)
 	if err != nil {
 		return nil, err
@@ -143,10 +147,10 @@ func (c *controller) RepostPost(ctx context.Context, req *PostRequest) (*Empty, 
 		return nil, newError(codes.Internal)
 	}
 
-	return &Empty{}, nil
+	return &pb.Empty{}, nil
 }
 
-func (c *controller) RemoveRepost(ctx context.Context, req *PostRequest) (*Empty, error) {
+func (c *controller) RemoveRepost(ctx context.Context, req *pb.PostRequest) (*pb.Empty, error) {
 	userID, err := getUserID(ctx)
 	if err != nil {
 		return nil, err
@@ -157,5 +161,5 @@ func (c *controller) RemoveRepost(ctx context.Context, req *PostRequest) (*Empty
 		return nil, newError(codes.Internal)
 	}
 
-	return &Empty{}, nil
+	return &pb.Empty{}, nil
 }
