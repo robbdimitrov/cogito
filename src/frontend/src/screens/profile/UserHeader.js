@@ -9,12 +9,6 @@ function UserHeader({ user }) {
       <div className='cover'></div>
 
       <div className='content main-content'>
-        <img
-          className='avatar'
-          src={user.avatar}
-          alt={user.name}
-        />
-
         <button className='follow-button outline-button'>
           Follow
         </button>

@@ -13,15 +13,15 @@ func getStatusCode(s *status.Status) int {
 	c := s.Proto().GetCode()
 	switch codes.Code(c) {
 	case codes.InvalidArgument:
-		return 400
+		return http.StatusBadRequest
 	case codes.Unauthenticated:
-		return 401
+		return http.StatusUnauthorized
 	case codes.PermissionDenied:
-		return 403
+		return http.StatusForbidden
 	case codes.NotFound:
-		return 404
+		return http.StatusNotFound
 	default:
-		return 500
+		return http.StatusInternalServerError
 	}
 }
 

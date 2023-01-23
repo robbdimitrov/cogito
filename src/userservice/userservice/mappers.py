@@ -7,12 +7,11 @@ def map_user(row):
         name=row[1],
         username=row[2],
         email=row[3],
-        avatar=row[4],
-        bio=row[5],
-        posts=row[6],
-        likes=row[7],
-        following=row[8],
-        followers=row[9],
-        followed=row[10],
-        created=row[11]
+        bio=row[4],
+        posts=row[5],
+        likes=row[6],
+        following=row[7],
+        followers=row[8],
+        followed=row[9],
+        created=row[10]
     )

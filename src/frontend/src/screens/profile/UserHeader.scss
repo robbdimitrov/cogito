@@ -12,14 +12,6 @@ $cover-height: 100px;
     height: $cover-height * 1.5;
   }
 
-  .avatar {
-    margin-top: -$avatar-width-md * 0.8;
-    margin-left: $spacing-sm;
-    border: $border-width-lg solid $primary-color;
-    width: $avatar-width-md;
-    height: $avatar-width-md;
-  }
-
   .texts {
     font-size: rem(15);
     margin: $spacing-md;
@@ -70,11 +62,5 @@ $cover-height: 100px;
 @media screen and (max-width: $break-sm) {
   .user-header .cover {
     height: $cover-height;
-  }
-
-  .user-header .avatar {
-    margin-top: -$avatar-width-sm * 0.5;
-    width: $avatar-width-sm;
-    height: $avatar-width-sm;
   }
 }

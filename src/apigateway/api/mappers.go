@@ -8,7 +8,6 @@ func mapUser(u *pb.User) user {
 		Name:      u.Name,
 		Username:  u.Username,
 		Email:     u.Email,
-		Avatar:    u.Avatar,
 		Bio:       u.Bio,
 		Posts:     u.Posts,
 		Likes:     u.Likes,

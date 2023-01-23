@@ -1,18 +1,9 @@
 # Thoughts
 
-**Thoughts** is a post-sharing application where users can create, browse, 
+**Thoughts** is a post-sharing application where users can create, browse,
 like and repost posts and follow other users.
 
-## Screenshots
-
-Feed | Profile
---- | ---
-[![Screenshot of feed screen](/docs/img/01_feed.png)](/docs/img/01_feed.png) | [![Screenshot of profile screen](/docs/img/02_profile.png)](/docs/img/02_profile.png)
-
 ## Architecture
-
-**Thoughts** is composed of microservices written in Go, Python and JavaScript, communicating over [gRPC](https://github.com/grpc/grpc).
-Protobuf definitions can be found at the [`/pb` directory](/pb).
 
 Service | Language | Description
 --- | --- | ---
@@ -20,7 +11,6 @@ Service | Language | Description
 [authservice](/src/authservice) | Python | Authentication service for creation and validation of sessions.
 [database](/src/database) | SQL | PostgreSQL database with tables, relationships and functions.
 [frontend](/src/frontend) | JavaScript | React frontend of the app.
-[imageservice](/src/imageservice) | Go | Image upload and delivery service used for storing and retrieving image assets.
 [postservice](/src/postservice) | Go | Service for creation, liking, reposting and fetching of posts.
 [userservice](/src/userservice) | Python | Service for creation, following and fetching of users.
 
@@ -50,7 +40,6 @@ $ make apigateway
 $ make authservice
 $ make database
 $ make frontend
-$ make imageservice
 $ make postservice
 $ make userservice
 ```
@@ -97,7 +86,7 @@ $ kubectl delete namespace thoughts
 
 ## API
 
-The API documentation is available [here](/docs/API.md).
+The API documentation is available [here](/API.md).
 
 ## License
 

@@ -5,18 +5,16 @@ import (
 )
 
 type router struct {
-	auth  *authController
-	image *imageController
-	post  *postController
-	user  *userController
+	auth *authController
+	post *postController
+	user *userController
 }
 
 func newRouter(addrs ...string) *router {
 	return &router{
-		auth:  newAuthController(addrs[0]),
-		image: newImageController(addrs[1]),
-		post:  newPostController(addrs[2]),
-		user:  newUserController(addrs[3]),
+		auth: newAuthController(addrs[0]),
+		post: newPostController(addrs[1]),
+		user: newUserController(addrs[2]),
 	}
 }
 
@@ -45,8 +43,4 @@ func (r *router) configureRoutes(e *echo.Echo) {
 	e.DELETE("/posts/:postId/likes", r.post.unlikePost)
 	e.POST("/posts/:postId/reposts", r.post.repostPost)
 	e.DELETE("/posts/:postId/reposts", r.post.removeRepost)
-
-	// Images
-	e.POST("/uploads", r.image.createImage)
-	e.GET("/uploads/:filename", r.image.getImage)
 }

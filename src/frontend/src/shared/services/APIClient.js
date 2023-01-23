@@ -21,9 +21,9 @@ class APIClient {
     return this.request(url, 'POST', body);
   }
 
-  updateUser(userId, name, username, email, bio, avatar) {
+  updateUser(userId, name, username, email, bio) {
     const url = `/api/users/${userId}`;
-    const body = { name, username, email, avatar, bio };
+    const body = { name, username, email, bio };
     return this.request(url, 'PUT', body);
   }
 

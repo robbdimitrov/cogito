@@ -65,7 +65,7 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
         try:
             self.db_client.update_user(
                 user_id, request.name, request.username,
-                request.email, request.avatar, request.bio)
+                request.email, request.bio)
             return thoughts_pb2.Empty()
         except Exception as e:
             logger.print(f'Updating user failed: {e}')

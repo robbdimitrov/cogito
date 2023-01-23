@@ -4,7 +4,6 @@ function mapUser(user) {
     name: user.name,
     username: user.username,
     email: user.email,
-    avatar: user.avatar,
     bio: user.bio,
     posts: user.posts,
     likes: user.likes,

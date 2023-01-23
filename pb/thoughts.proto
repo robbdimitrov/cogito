@@ -25,14 +25,13 @@ message User {
   string name = 2;
   string username = 3;
   string email = 4;
-  string avatar = 5;
-  string bio = 6;
-  int32 posts = 7;
-  int32 likes = 8;
-  int32 following = 9;
-  int32 followers = 10;
-  bool followed = 11;
-  string created = 12;
+  string bio = 5;
+  int32 posts = 6;
+  int32 likes = 7;
+  int32 following = 8;
+  int32 followers = 9;
+  bool followed = 10;
+  string created = 11;
 }
 
 message UpdateUserRequest {
@@ -41,8 +40,7 @@ message UpdateUserRequest {
   string email = 3;
   string password = 4;
   string old_password = 5;
-  string avatar = 6;
-  string bio = 7;
+  string bio = 6;
 }
 
 message GetUsersRequest {

@@ -9,14 +9,6 @@ body {
   color: $primary-text-color;
 }
 
-.avatar {
-  width: $avatar-width-md;
-  height: $avatar-width-md;
-  border-radius: 50%;
-  display: block;
-  object-fit: cover;
-}
-
 .bottom-shadow {
   border-bottom: $border-width-sm solid $shadow-color;
 }
@@ -121,12 +113,6 @@ $button-background-color: $active-color;
 .user-card .cover {
   height: $cover-height;
   background: lightblue;
-}
-
-.user-card .avatar {
-  margin: $padding;
-  margin-top: -$spacing-md;
-  border: $border-width-md solid $primary-color;
 }
 
 .user-card .subtitle {

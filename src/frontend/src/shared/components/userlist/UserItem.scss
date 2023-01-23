@@ -3,8 +3,6 @@
 @import '../../../styles/helpers';
 @import '../../../styles/colors';
 
-$avatar-width-sm: 40px;
-
 .user-item.container {
   box-sizing: border-box;
 
@@ -15,10 +13,6 @@ $avatar-width-sm: 40px;
   .header {
     display: flex;
     justify-content: space-between;
-  }
-
-  .avatar {
-    margin-left: $spacing-sm;
   }
 
   .follow-button {
@@ -35,8 +29,6 @@ $avatar-width-sm: 40px;
   }
 }
 
-
-
 @media screen and (max-width: $break-sm) {
   .user-item.container {
     .cover {
@@ -49,12 +41,6 @@ $avatar-width-sm: 40px;
 
     .content {
       display: flex;
-    }
-
-    .avatar {
-      width: $avatar-width-sm;
-      height: $avatar-width-sm;
-      margin-top: $spacing-sm;
     }
 
     .title, .subtitle {

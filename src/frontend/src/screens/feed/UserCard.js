@@ -9,14 +9,6 @@ function UserCard({ user }) {
       <div className="cover"></div>
 
       <div className="content">
-        <Link to={`/${user.username}`}>
-          <img
-            className="avatar"
-            src={user.avatar}
-            alt={user.name}
-          />
-        </Link>
-
         <Link to={`/${user.username}`} className="texts">
           <p className="title semibold">{user.name}</p>
           <p className="subtitle light">@{user.username}</p>

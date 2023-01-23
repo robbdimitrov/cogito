@@ -45,7 +45,6 @@ username: string (optional)
 email: string (optional)
 password: string (optional)
 old_password: string (optional, required if password is present)
-avatar: string (optional)
 bio: string (optional)
 ```
 
@@ -69,7 +68,6 @@ Response:
   "name": "Clark Kent",
   "username": "superman",
   "email": "clark.kent@dailyplanet.com",
-  "avatar": "d1d99db3ac32052b9dd66cb5914508dd",
   "bio": "Kryptonian hero",
   "posts": 3,
   "likes": 1,
@@ -104,7 +102,6 @@ Response:
       "name": "Clark Kent",
       "username": "superman",
       "email": "clark.kent@dailyplanet.com",
-      "avatar": "d1d99db3ac32052b9dd66cb5914508dd",
       "bio": "Kryptonian hero",
       "posts": 3,
       "likes": 1,
@@ -141,7 +138,6 @@ Response:
       "name": "Clark Kent",
       "username": "superman",
       "email": "clark.kent@dailyplanet.com",
-      "avatar": "d1d99db3ac32052b9dd66cb5914508dd",
       "bio": "Kryptonian hero",
       "posts": 3,
       "likes": 1,
@@ -416,46 +412,4 @@ Path parameters:
 
 ```
 postId - id of the post
-```
-
-## Image assets
-
-### Upload image
-
-File size should be less than 1MB.
-
-```
-POST /uploads
-```
-
-Body parameters:
-
-```
-image: file sent as multipart/form-data
-```
-
-Response:
-
-```json
-{
-  "filename": "d4aab3fd72517522479c08520bc150a3"
-}
-```
-
-### Load image asset
-
-```
-GET /uploads/:filename
-```
-
-Path parameters:
-
-```
-filename - filename returned from the upload function
-```
-
-Response:
-
-```
-The image data
 ```

@@ -1,9 +1,6 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-// import { updateUser, updateAvatar } from '../store/actions/users';
-import session from '../../services/Session';
-import { imageURI } from '../../shared/utils';
 import './EditProfile.scss';
 
 class EditProfile extends React.Component {
@@ -14,7 +11,6 @@ class EditProfile extends React.Component {
       username: '',
       email: '',
       bio: '',
-      avatar: ''
     };
 
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -23,36 +19,21 @@ class EditProfile extends React.Component {
   }
 
   componentDidMount() {
-    const { name, username, email, bio, avatar } = this.props.user;
+    const { name, username, email, bio } = this.props.user;
 
     this.setState({
       name,
       username,
       email,
       bio,
-      avatar
     });
-  }
-
-  componentDidUpdate() {
-    const { avatar } = this.props.user;
-
-    if (avatar !== this.state.avatar) {
-      this.setState({
-        avatar
-      });
-    }
   }
 
   handleSubmit(event) {
     event.preventDefault();
 
-    const { name, username, email, bio, avatar } = this.state;
-    this.props.updateUser(name, username, email, bio, avatar);
-  }
-
-  handleImageChange(event) {
-    this.props.updateAvatar(event.target.files[0]);
+    const { name, username, email, bio } = this.state;
+    this.props.updateUser(name, username, email, bio);
   }
 
   handleInputChange(event) {
@@ -65,36 +46,10 @@ class EditProfile extends React.Component {
     });
   }
 
-  profileImage() {
-    if (this.props.user.avatar) {
-      return imageURI(this.props.user.avatar);
-    } else {
-      return '';
-    }
-  }
-
   render() {
     return (
       <div className='form-content'>
         <h1 className='form-title'>Edit Profile</h1>
-
-        <div className='avatar-section'>
-          <img
-            className='avatar'
-            src={this.profileImage()}
-            alt={this.props.user.name}
-          />
-
-          <label htmlFor='file' className='icon-button'>
-            <FontAwesomeIcon icon='image' className='input-icon' />
-          </label>
-          <input
-            id='file'
-            type='file'
-            accept='image/*'
-            onChange={this.handleImageChange}
-          />
-        </div>
 
         <form className='action-form' onSubmit={this.handleSubmit}>
           <div className='fieldset'>

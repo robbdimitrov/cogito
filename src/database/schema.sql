@@ -9,7 +9,6 @@ CREATE TABLE users (
   username varchar(255) UNIQUE NOT NULL,
   email varchar(255) UNIQUE NOT NULL,
   password varchar(255) NOT NULL,
-  avatar varchar(255) DEFAULT '',
   bio varchar(255) DEFAULT '',
   created timestamp NOT NULL DEFAULT now()
 );

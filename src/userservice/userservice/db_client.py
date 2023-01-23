@@ -59,7 +59,7 @@ class DbClient:
         cur = conn.cursor()
 
         try:
-            query = 'SELECT id, name, username, email, avatar, bio,\
+            query = 'SELECT id, name, username, email, bio,\
                 (SELECT count(*) FROM posts WHERE user_id = id) AS posts,\
                 (SELECT count(*) FROM likes WHERE user_id = id) AS likes,\
                 (SELECT count(*) FROM followers WHERE follower_id = id) AS following,\
@@ -79,14 +79,13 @@ class DbClient:
             cur.close()
             self.db.putconn(conn)
 
-    def update_user(self, user_id, name, username, email, avatar, bio):
+    def update_user(self, user_id, name, username, email, bio):
         conn = self.db.getconn()
         cur = conn.cursor()
 
         try:
-            query = f'UPDATE users SET name = %s, username = %s,\
-                email = %s, avatar = %s, bio = %s WHERE id = %s'
-            cur.execute(query, (name, username, email, avatar, bio, user_id))
+            query = f'UPDATE users SET name = %s, username = %s, email = %s, bio = %s WHERE id = %s'
+            cur.execute(query, (name, username, email, bio, user_id))
             conn.commit()
         except Exception:
             raise
@@ -113,7 +112,7 @@ class DbClient:
         cur = conn.cursor()
 
         try:
-            query = 'SELECT id, name, username, email, avatar, bio,\
+            query = 'SELECT id, name, username, email, bio,\
                 (SELECT count(*) FROM posts WHERE user_id = id) AS posts,\
                 (SELECT count(*) FROM likes WHERE user_id = id) AS likes,\
                 (SELECT count(*) FROM followers WHERE follower_id = id) AS following,\
@@ -140,7 +139,7 @@ class DbClient:
         cur = conn.cursor()
 
         try:
-            query = 'SELECT id, name, username, email, avatar, bio,\
+            query = 'SELECT id, name, username, email, bio,\
                 (SELECT count(*) FROM posts WHERE user_id = id) AS posts,\
                 (SELECT count(*) FROM likes WHERE user_id = id) AS likes,\
                 (SELECT count(*) FROM followers WHERE follower_id = id) AS following,\

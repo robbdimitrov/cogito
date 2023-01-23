@@ -5,7 +5,6 @@ type user struct {
 	Name      string `json:"name"`
 	Username  string `json:"username"`
 	Email     string `json:"email"`
-	Avatar    string `json:"avatar"`
 	Bio       string `json:"bio"`
 	Posts     int32  `json:"posts"`
 	Likes     int32  `json:"likes"`

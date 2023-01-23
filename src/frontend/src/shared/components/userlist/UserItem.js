@@ -10,14 +10,6 @@ function UserItem({ user }) {
 
       <div className="content">
         <div className="header">
-          <Link to={`/${user.username}`}>
-            <img
-              className="avatar"
-              src={user.avatar}
-              alt={user.name}
-            />
-          </Link>
-
           <button className="follow-button outline-button">
             Follow
           </button>
