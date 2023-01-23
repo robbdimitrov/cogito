@@ -1,14 +1,12 @@
 import React from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 import './ThoughtItem.scss';
 
-function ThoughtItem({ post, user }) {
+function ThoughtItem({post, user}) {
   return (
     <li className="thought-item">
       <article className="container">
-
-
         <p className="profile-action">
           <strong className="name">{user.name}</strong>
           <small className="username">@{user.username}</small>

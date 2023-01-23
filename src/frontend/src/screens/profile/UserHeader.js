@@ -1,9 +1,9 @@
 import React from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 import './UserHeader.scss';
 
-function UserHeader({ user }) {
+function UserHeader({user}) {
   return (
     <div className='user-header container'>
       <div className='cover'></div>

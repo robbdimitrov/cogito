@@ -5,11 +5,11 @@ import SettingsMenuHeader from './SettingsMenuHeader';
 import './SettingsMenu.scss';
 
 const menuItems = [
-  { title: 'Edit profile', link: 'account' },
-  { title: 'Change password', link: 'password' }
+  {title: 'Edit profile', link: 'account'},
+  {title: 'Change password', link: 'password'},
 ];
 
-function SettingsMenu(props) {
+function SettingsMenu() {
   return (
     <div className='settings-menu'>
       <ul className='settings-menu-list'>

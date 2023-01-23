@@ -3,7 +3,7 @@ import React from 'react';
 import ThoughtItem from './ThoughtItem';
 import './ThoughtList.scss';
 
-function ThoughtList({ posts, users }) {
+function ThoughtList({posts, users}) {
   return (
     <ul className="thought-list">
       {posts.map((post) =>

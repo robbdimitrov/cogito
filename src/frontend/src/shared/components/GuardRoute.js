@@ -1,9 +1,9 @@
 import React from 'react';
-import { Route, Redirect } from 'react-router-dom';
+import {Route, Redirect} from 'react-router-dom';
 
 import session from '../services/Session';
 
-function GuardRoute({ component: Component, ...rest }) {
+function GuardRoute({component: Component, ...rest}) {
   return (
     <Route {...rest} render={(props) => (
       session.isAuthenticated()

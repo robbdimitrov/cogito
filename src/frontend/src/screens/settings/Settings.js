@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, Redirect, Switch } from 'react-router-dom';
+import {Route, Redirect, Switch} from 'react-router-dom';
 
 import SettingsMenu from './settingsmenu/SettingsMenu';
 import './Settings.scss';
@@ -7,7 +7,7 @@ import './Settings.scss';
 const Password = React.lazy(() => import('./Password'));
 const EditProfile = React.lazy(() => import('./EditProfile'));
 
-function Settings({ match }) {
+function Settings({match}) {
   return (
     <div className='settings-container'>
       <SettingsMenu />

@@ -3,7 +3,7 @@ import {NavLink} from 'react-router-dom';
 
 import './ControlBar.scss';
 
-function ControlBar({ user, path }) {
+function ControlBar({path,user}) {
   return (
     <div className="control-bar-container bottom-shadow">
       <div className="control-bar main-content">

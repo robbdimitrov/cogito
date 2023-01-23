@@ -1,75 +1,69 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {NavLink, Link} from 'react-router-dom';
 
 import UserDropdown from './Dropdown';
 import './Navbar.scss';
 
-class Navbar extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isDropdownShown: false
-    };
+function Navbar(props) {
+  const [state, setState] = useState({
+    isDropdownShown: false
+  });
 
-    this.handleClick = this.handleClick.bind(this);
-  }
-
-  handleClick() {
-    this.setState((state) => ({
+  function handleClick() {
+    setState((state) => ({
+      ...state,
       isDropdownShown: !state.isDropdownShown
     }));
   }
 
-  render() {
-    return (
-      <header className='navigation-container bottom-shadow'>
-        <div className='navigation-content main-container'>
-          {this.props.isLoggedIn ? (
-            <div className='left-items'>
-              <NavLink to='/feed' className='nav-button'>
-                <FontAwesomeIcon
-                  icon='home'
-                  className='nav-button-icon'
-                  size='2x'
+  return (
+    <header className='navigation-container bottom-shadow'>
+      <div className='navigation-content main-container'>
+        {props.isLoggedIn ? (
+          <div className='left-items'>
+            <NavLink to='/feed' className='nav-button'>
+              <FontAwesomeIcon
+                icon='home'
+                className='nav-button-icon'
+                size='2x'
+              />
+              <span className='nav-button-label'>Home</span>
+            </NavLink>
+          </div>
+        ) : (
+          <div className='left-items'></div>
+        )}
+
+        <FontAwesomeIcon icon='brain' className='icon' size='2x' />
+
+        {props.user ? (
+          <div className='right-items'>
+            <div className='profile-button' onClick={handleClick}>
+              <img
+                className='profile-button-image'
+                src='https://via.placeholder.com/300.png'
+                alt='Profile'
+              />
+
+              {state.isDropdownShown &&
+                <UserDropdown
+                  user={props.user}
+                  logoutUser={props.logoutUser}
                 />
-                <span className='nav-button-label'>Home</span>
-              </NavLink>
+              }
             </div>
-          ) : (
-            <div className='left-items'></div>
-          )}
-
-          <FontAwesomeIcon icon='brain' className='icon' size='2x' />
-
-          {this.props.user ? (
-            <div className='right-items'>
-              <div className='profile-button' onClick={this.handleClick}>
-                <img
-                  className='profile-button-image'
-                  src='https://via.placeholder.com/300.png'
-                  alt='Profile'
-                />
-
-                {this.state.isDropdownShown &&
-                  <UserDropdown
-                    user={this.props.user}
-                    logoutUser={this.props.logoutUser}
-                  />
-                }
-              </div>
-            </div>
-          ) : (
-            <div className='right-items'>
-              <Link to='/login' className='button login-button'>
-                Log In
-              </Link>
-            </div>
-          )}
-        </div>
-      </header>
-    );
-  }
+          </div>
+        ) : (
+          <div className='right-items'>
+            <Link to='/login' className='button login-button'>
+              Log In
+            </Link>
+          </div>
+        )}
+      </div>
+    </header>
+  );
 }
 
 export default Navbar;

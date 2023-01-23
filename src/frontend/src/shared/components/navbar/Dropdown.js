@@ -1,9 +1,9 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import {Link} from 'react-router-dom';
 
 import './Dropdown.scss';
 
-function Dropdown({ user, logoutUser }) {
+function Dropdown({user, logoutUser}) {
   return (
     <div className="dropdown">
       <ul className="dropdown-list">

@@ -14,15 +14,13 @@ const router = createBrowserRouter([
   },
 ]);
 
-class App extends React.Component {
-  render() {
-    return (
-      <div className="app">
-        <Navbar />
-        <RouterProvider router={router} />
-      </div>
-    );
-  }
+function App() {
+  return (
+    <div className="app">
+      <Navbar />
+      <RouterProvider router={router} />
+    </div>
+  );
 }
 
 export default App;

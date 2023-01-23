@@ -1,9 +1,9 @@
 class APIClient {
   request(url, method, body, otherHeaders) {
-    let options = { method };
+    let options = {method};
     if (body) {
       if (typeof body !== FormData) {
-        options.headers = { 'content-type': 'application/json' };
+        options.headers = {'content-type': 'application/json'};
         options.body = JSON.stringify(body);
       } else {
         options.body = body;
@@ -17,19 +17,19 @@ class APIClient {
 
   createUser(name, username, email, password) {
     const url = '/api/users';
-    const body = { name, username, email, password };
+    const body = {name, username, email, password};
     return this.request(url, 'POST', body);
   }
 
   updateUser(userId, name, username, email, bio) {
     const url = `/api/users/${userId}`;
-    const body = { name, username, email, bio };
+    const body = {name, username, email, bio};
     return this.request(url, 'PUT', body);
   }
 
   updatePassword(userId, password, oldPassword) {
     const url = `/api/users/${userId}`;
-    const body = { password, oldPassword };
+    const body = {password, oldPassword};
     return this.request(url, 'PUT', body);
   }
 
@@ -62,7 +62,7 @@ class APIClient {
 
   login(email, password) {
     const url = '/api/sessions';
-    const body = { email, password };
+    const body = {email, password};
     return this.request(url, 'POST', body);
   }
 
@@ -75,7 +75,7 @@ class APIClient {
 
   createPost(content) {
     const url = '/api/posts';
-    const body = { content };
+    const body = {content};
     return this.request(url, 'POST', body);
   }
 
@@ -122,15 +122,6 @@ class APIClient {
   removeRepost(postId) {
     const url = `/api/posts/${postId}/reposts`;
     return this.request(url, 'DELETE');
-  }
-
-  // Upload
-
-  uploadImage(file) {
-    const url = '/api/uploads';
-    const formData = new FormData()
-    formData.append('image', file);
-    return this.request(url, 'POST', formData);
   }
 }
 

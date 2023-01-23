@@ -1,9 +1,9 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import {Link} from 'react-router-dom';
 
 import './UserItem.scss';
 
-function UserItem({ user }) {
+function UserItem({user}) {
   return (
     <li className="user-item container user-card">
       <div className="cover"></div>
