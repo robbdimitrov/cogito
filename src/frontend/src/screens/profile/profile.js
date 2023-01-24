@@ -1,37 +1,35 @@
 import React from 'react';
-import {Route, Switch} from 'react-router-dom';
 
-import ThoughtList from '../../shared/components/thoughtlist/ThoughtList';
-import UserList from '../../shared/components/userlist/UserList';
 import ControlBar from './controlbar';
-import UserHeader from './UserHeader';
+import UserHeader from './userheader';
+import {useRouter} from '../../shared/router/router';
 import './profile.scss';
 
-function Profile({match}) {
+const ThoughtList = React.lazy(() => import('../../shared/components/thoughtlist/thoughtlist'));
+const UserList = React.lazy(() => import('../../shared/components/userlist/userlist'));
+
+function Profile() {
+  const router = useRouter();
+  const user = {name: 'John', username: 'john', email: 'email@mail.com'};
+
+  const resolveComponent = () => {
+    if (router.path.endsWith('/following')) {
+      return <UserList users={[user]} />;
+    } else if (router.path.endsWith('/followers')) {
+      return <UserList users={[user]} />;
+    } else if (router.path.endsWith('/likes')) {
+      return <ThoughtList posts={[]} />;
+    }
+    return <ThoughtList posts={[]} />;
+  };
+
   return (
     <div className='profile-container'>
-      <UserHeader />
-      <ControlBar path={match.url} />
+      <UserHeader user={user} />
+      <ControlBar user={user} />
 
       <div className='profile-content main-content'>
-        <Switch>
-          <Route
-            path={`${match.path}/`} exact
-            render={() => <ThoughtList items={3} />}
-          />
-          <Route
-            path={`${match.path}/following`} exact
-            render={() => <UserList items={5} />}
-          />
-          <Route
-            path={`${match.path}/followers`} exact
-            render={() => <UserList items={3} />}
-          />
-          <Route
-            path={`${match.path}/likes`} exact
-            render={() => <ThoughtList items={3} />}
-          />
-        </Switch>
+        {resolveComponent()}
       </div>
     </div>
   );

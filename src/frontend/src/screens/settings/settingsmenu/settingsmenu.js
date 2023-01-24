@@ -5,7 +5,7 @@ import SettingsMenuHeader from './settingsmenuheader';
 import './settingsmenu.scss';
 
 const menuItems = [
-  {title: 'Edit profile', link: 'account'},
+  {title: 'Edit profile', link: 'profile'},
   {title: 'Change password', link: 'password'},
 ];
 

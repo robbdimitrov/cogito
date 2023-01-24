@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {NavLink, Link} from 'react-router-dom';
 
+import Link from '../../router/link';
 import UserDropdown from './dropdown';
 import './navbar.scss';
 
@@ -22,14 +22,14 @@ function Navbar(props) {
       <div className='navigation-content main-container'>
         {props.isLoggedIn ? (
           <div className='left-items'>
-            <NavLink to='/feed' className='nav-button'>
+            <Link href='/feed' className='nav-button'>
               <FontAwesomeIcon
                 icon='home'
                 className='nav-button-icon'
                 size='2x'
               />
               <span className='nav-button-label'>Home</span>
-            </NavLink>
+            </Link>
           </div>
         ) : (
           <div className='left-items'></div>
@@ -56,7 +56,7 @@ function Navbar(props) {
           </div>
         ) : (
           <div className='right-items'>
-            <Link to='/login' className='button login-button'>
+            <Link href='/login' className='button login-button'>
               Log In
             </Link>
           </div>

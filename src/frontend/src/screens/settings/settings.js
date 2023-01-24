@@ -1,26 +1,35 @@
-import React from 'react';
-import {Route, Redirect, Switch} from 'react-router-dom';
+import React, {useState} from 'react';
 
 import SettingsMenu from './settingsmenu/settingsmenu';
 import './settings.scss';
+import {useRouter} from '../../shared/router/router';
 
 const Password = React.lazy(() => import('./password'));
 const EditProfile = React.lazy(() => import('./editprofile'));
 
-function Settings({match}) {
+function Settings() {
+  const router = useRouter();
+  const [user, setUser] = useState({
+    name: 'John Doe',
+    username: 'username',
+    email: 'mail@mail.com',
+    bio: 'Awesome bio',
+  });
+
+  const updatePassword = () => {};
+  const updateUser = (name, username, email, bio) => {
+    setUser({name, username, email, bio});
+  };
+
   return (
     <div className='settings-container'>
       <SettingsMenu />
 
       <div className='settings-content main-content'>
-        <Switch>
-          <Route path={`${match.path}/account`} exact component={EditProfile} />
-          <Route path={`${match.path}/password`} exact component={Password} />
-          <Route
-            path={match.path} exact
-            render={() => <Redirect to={`${match.path}/account`} />}
-          />
-        </Switch>
+        {router.path.endsWith('/password')
+          ? <Password updatePassword={updatePassword} />
+          : <EditProfile user={user} setUser={updateUser} />
+        }
       </div>
     </div>
   );

@@ -1,17 +1,15 @@
-function getUserId() {
-  return localStorage.getItem('userId');
-}
+const Session = {
+  getUserId() {
+    return localStorage.getItem('userId');
+  },
 
-function setUserId(value) {
-  localStorage.setItem('userId', value);
-}
+  setUserId(value) {
+    localStorage.setItem('userId', value);
+  },
 
-function reset() {
-  localStorage.clear();
-}
-
-export default {
-  getUserId,
-  setUserId,
-  reset
+  reset() {
+    localStorage.clear();
+  }
 };
+
+export default Session;

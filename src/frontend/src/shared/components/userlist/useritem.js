@@ -1,7 +1,7 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
 
-import './UserItem.scss';
+import Link from '../../router/link';
+import './useritem.scss';
 
 function UserItem({user}) {
   return (
@@ -16,7 +16,7 @@ function UserItem({user}) {
         </div>
 
         <div className="texts">
-          <Link to={`/${user.username}`}>
+          <Link href={`/${user.username}`}>
             <p className="title semibold">{user.name}</p>
             <p className="subtitle light">@{user.username}</p>
           </Link>

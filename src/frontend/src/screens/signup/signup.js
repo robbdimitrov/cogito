@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
-import {Link} from 'react-router-dom';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+
+import Link from '../../shared/router/link';
 
 function Signup(props) {
   const [state, setState] = useState({
@@ -112,7 +113,7 @@ function Signup(props) {
         <div className='reference'>
           <span className='reference-label'>Already have an accout?</span>
 
-          <Link to='/login' className='reference-button'>
+          <Link href='/login' className='reference-button'>
             <span>Log In</span>
           </Link>
         </div>

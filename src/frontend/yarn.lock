@@ -1505,11 +1505,6 @@
     schema-utils "^2.6.5"
     source-map "^0.7.3"
 
-"@remix-run/router@1.2.1":
-  version "1.2.1"
-  resolved "https://registry.npmjs.org/@remix-run/router/-/router-1.2.1.tgz"
-  integrity sha512-XiY0IsyHR+DXYS5vBxpoBe/8veTeoRpMHP+vDosLZxL5bnpetzI0igkxkLZS235ldLzyfkxF+2divEwWHP3vMQ==
-
 "@rollup/plugin-node-resolve@^7.1.1":
   version "7.1.3"
   resolved "https://registry.npmjs.org/@rollup/plugin-node-resolve/-/plugin-node-resolve-7.1.3.tgz"
@@ -9498,21 +9493,6 @@ react-refresh@^0.8.3:
   version "0.8.3"
   resolved "https://registry.npmjs.org/react-refresh/-/react-refresh-0.8.3.tgz"
   integrity sha512-X8jZHc7nCMjaCqoU+V2I0cOhNW+QMBwSUkeXnTi8IPe6zaRWfn60ZzvFDZqWPfmSJfjub7dDW1SP0jaHWLu/hg==
-
-react-router-dom@^6.6.1:
-  version "6.6.1"
-  resolved "https://registry.npmjs.org/react-router-dom/-/react-router-dom-6.6.1.tgz"
-  integrity sha512-u+8BKUtelStKbZD5UcY0NY90WOzktrkJJhyhNg7L0APn9t1qJNLowzrM9CHdpB6+rcPt6qQrlkIXsTvhuXP68g==
-  dependencies:
-    "@remix-run/router" "1.2.1"
-    react-router "6.6.1"
-
-react-router@6.6.1:
-  version "6.6.1"
-  resolved "https://registry.npmjs.org/react-router/-/react-router-6.6.1.tgz"
-  integrity sha512-YkvlYRusnI/IN0kDtosUCgxqHeulN5je+ew8W+iA1VvFhf86kA+JEI/X/8NqYcr11hCDDp906S+SGMpBheNeYQ==
-  dependencies:
-    "@remix-run/router" "1.2.1"
 
 react-scripts@^4.0.3:
   version "4.0.3"

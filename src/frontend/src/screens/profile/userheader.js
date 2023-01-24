@@ -3,7 +3,7 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 import './userheader.scss';
 
-function UserHeader({user}) {
+function UserHeader(props) {
   return (
     <div className='user-header container'>
       <div className='cover'></div>
@@ -14,9 +14,9 @@ function UserHeader({user}) {
         </button>
 
         <div className='texts'>
-          <span className='name bold'>{user.name}</span>
-          <span className='username'>@{user.username}</span>
-          <p className='bio'>{user.bio}</p>
+          <span className='name bold'>{props.user.name}</span>
+          <span className='username'>@{props.user.username}</span>
+          <p className='bio'>{props.user.bio}</p>
 
           <div className='join-date'>
             <FontAwesomeIcon icon='calendar-alt' className='join-date-icon' />

@@ -1,7 +1,7 @@
 import React from 'react';
 
-import ThoughtItem from './ThoughtItem';
-import './ThoughtList.scss';
+import ThoughtItem from './thoughtitem';
+import './thoughtlist.scss';
 
 function ThoughtList({posts, users}) {
   return (

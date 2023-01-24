@@ -1,6 +1,6 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
 
+import Link from '../../router/link';
 import './dropdown.scss';
 
 function Dropdown({user, logoutUser}) {
@@ -8,7 +8,7 @@ function Dropdown({user, logoutUser}) {
     <div className="dropdown">
       <ul className="dropdown-list">
         <li className="dropdown-item">
-          <Link to={`/${user.id}`} className="dropdown-button">
+          <Link href={`/${user.id}`} className="dropdown-button">
             <span className="dropdown-item-title">
               Profile
             </span>
@@ -16,7 +16,7 @@ function Dropdown({user, logoutUser}) {
         </li>
 
         <li className="dropdown-item">
-          <Link to="/settings" className="dropdown-button">
+          <Link href="/settings" className="dropdown-button">
             <span>Settings</span>
           </Link>
         </li>

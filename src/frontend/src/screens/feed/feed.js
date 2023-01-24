@@ -4,12 +4,14 @@ import UserCard from './usercard';
 import ThoughtList from '../../shared/components/thoughtlist/thoughtlist';
 import './feed.scss';
 
-function Feed({user}) {
+function Feed() {
+  const user = {name: 'John', username: 'john', email: 'email@mail.com'};
+
   return (
     <div className="feed-container">
       <UserCard className="user-card" user={user} />
       <div className="content">
-        <ThoughtList items={3} />
+        <ThoughtList posts={[]} />
       </div>
     </div>
   );

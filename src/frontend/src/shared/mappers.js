@@ -1,4 +1,4 @@
-function mapUser(user) {
+export function mapUser(user) {
   return {
     id: user.id,
     name: user.name,
@@ -14,7 +14,7 @@ function mapUser(user) {
   };
 }
 
-function mapPost(post) {
+export function mapPost(post) {
   return {
     id: post.id,
     user_id: post.user_id,
@@ -26,8 +26,3 @@ function mapPost(post) {
     created: new Date(post.created)
   };
 }
-
-export default {
-  mapUser,
-  mapPost
-};

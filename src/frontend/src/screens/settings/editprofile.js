@@ -11,7 +11,6 @@ function EditProfile(props) {
 
   function handleSubmit(event) {
     event.preventDefault();
-
     const {name, username, email, bio} = state;
     props.updateUser(name, username, email, bio);
   }
@@ -20,11 +19,7 @@ function EditProfile(props) {
     const target = event.target;
     const value = target.value;
     const name = target.name;
-
-    setState({
-      ...state,
-      [name]: value
-    });
+    setState({...state, [name]: value});
   }
 
   return (

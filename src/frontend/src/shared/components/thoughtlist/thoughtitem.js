@@ -1,7 +1,7 @@
 import React from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
-import './ThoughtItem.scss';
+import './thoughtitem.scss';
 
 function ThoughtItem({post, user}) {
   return (

@@ -1,6 +1,6 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
 
+import Link from '../../shared/router/link';
 import './usercard.scss';
 
 function UserCard({user}) {
@@ -9,7 +9,7 @@ function UserCard({user}) {
       <div className="cover"></div>
 
       <div className="content">
-        <Link to={`/${user.username}`} className="texts">
+        <Link href={`/@${user.username}`} className="texts">
           <p className="title semibold">{user.name}</p>
           <p className="subtitle light">@{user.username}</p>
         </Link>
