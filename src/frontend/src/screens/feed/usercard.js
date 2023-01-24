@@ -1,7 +1,7 @@
 import React from 'react';
 import {Link} from 'react-router-dom';
 
-import './UserCard.scss';
+import './usercard.scss';
 
 function UserCard({user}) {
   return (

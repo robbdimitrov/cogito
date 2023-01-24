@@ -1,7 +1,7 @@
 import React from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
-import './UserHeader.scss';
+import './userheader.scss';
 
 function UserHeader({user}) {
   return (

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import UserItem from './UserItem';
-import './UserList.scss';
+import './userlist.scss';
 
 function UserList({users}) {
   return (

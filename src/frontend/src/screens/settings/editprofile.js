@@ -1,8 +1,6 @@
 import React, {useState} from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
-import './EditProfile.scss';
-
 function EditProfile(props) {
   const [state, setState] = useState({
     name: props.user.name,

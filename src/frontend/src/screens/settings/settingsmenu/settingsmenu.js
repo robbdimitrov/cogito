@@ -1,8 +1,8 @@
 import React from 'react';
 
-import SettingsMenuItem from './SettingsMenuItem';
-import SettingsMenuHeader from './SettingsMenuHeader';
-import './SettingsMenu.scss';
+import SettingsMenuItem from './settingsmenuitem';
+import SettingsMenuHeader from './settingsmenuheader';
+import './settingsmenu.scss';
 
 const menuItems = [
   {title: 'Edit profile', link: 'account'},

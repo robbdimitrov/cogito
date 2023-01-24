@@ -2,8 +2,8 @@ import React, {useState} from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {NavLink, Link} from 'react-router-dom';
 
-import UserDropdown from './Dropdown';
-import './Navbar.scss';
+import UserDropdown from './dropdown';
+import './navbar.scss';
 
 function Navbar(props) {
   const [state, setState] = useState({

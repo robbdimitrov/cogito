@@ -1,8 +1,8 @@
 import React from 'react';
 
-import UserCard from './UserCard';
-import ThoughtList from '../../shared/components/thoughtlist/ThoughtList';
-import './Feed.scss';
+import UserCard from './usercard';
+import ThoughtList from '../../shared/components/thoughtlist/thoughtlist';
+import './feed.scss';
 
 function Feed({user}) {
   return (

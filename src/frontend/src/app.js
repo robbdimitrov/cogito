@@ -1,7 +1,7 @@
 import React from 'react';
 
-import Navbar from './shared/components/navbar/Navbar';
-import IconLibrary from './shared/services/IconLibrary';
+import Navbar from './shared/components/navbar/navbar';
+import IconLibrary from './shared/services/iconlibrary';
 
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
 

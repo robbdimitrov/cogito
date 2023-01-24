@@ -3,9 +3,9 @@ import {Route, Switch} from 'react-router-dom';
 
 import ThoughtList from '../../shared/components/thoughtlist/ThoughtList';
 import UserList from '../../shared/components/userlist/UserList';
-import ControlBar from './ControlBar';
+import ControlBar from './controlbar';
 import UserHeader from './UserHeader';
-import './Profile.scss';
+import './profile.scss';
 
 function Profile({match}) {
   return (

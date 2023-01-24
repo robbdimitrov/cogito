@@ -1,7 +1,7 @@
 import React from 'react';
 import {NavLink} from 'react-router-dom';
 
-import './ControlBar.scss';
+import './controlbar.scss';
 
 function ControlBar({path,user}) {
   return (

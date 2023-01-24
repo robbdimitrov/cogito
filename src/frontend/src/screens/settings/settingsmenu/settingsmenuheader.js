@@ -1,6 +1,6 @@
 import React from 'react';
 
-import './SettingsMenuHeader.scss'
+import './settingsmenuheader.scss'
 
 function SettingsMenuHeader(props) {
   return (

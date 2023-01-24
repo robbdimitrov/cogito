@@ -1,11 +1,11 @@
 import React from 'react';
 import {Route, Redirect, Switch} from 'react-router-dom';
 
-import SettingsMenu from './settingsmenu/SettingsMenu';
-import './Settings.scss';
+import SettingsMenu from './settingsmenu/settingsmenu';
+import './settings.scss';
 
-const Password = React.lazy(() => import('./Password'));
-const EditProfile = React.lazy(() => import('./EditProfile'));
+const Password = React.lazy(() => import('./password'));
+const EditProfile = React.lazy(() => import('./editprofile'));
 
 function Settings({match}) {
   return (
