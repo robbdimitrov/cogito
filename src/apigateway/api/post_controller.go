@@ -21,7 +21,7 @@ func newPostController(addr string) *postController {
 }
 
 func (pc *postController) createPost(c echo.Context) error {
-	conn, err := grpc.Dial(pc.addr, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(pc.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500)
@@ -45,7 +45,7 @@ func (pc *postController) createPost(c echo.Context) error {
 }
 
 func (pc *postController) getFeed(c echo.Context) error {
-	conn, err := grpc.Dial(pc.addr, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(pc.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500)
@@ -86,7 +86,7 @@ func (pc *postController) getFeed(c echo.Context) error {
 }
 
 func (pc *postController) getPosts(c echo.Context) error {
-	conn, err := grpc.Dial(pc.addr, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(pc.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500)
@@ -132,7 +132,7 @@ func (pc *postController) getPosts(c echo.Context) error {
 }
 
 func (pc *postController) getLikedPosts(c echo.Context) error {
-	conn, err := grpc.Dial(pc.addr, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(pc.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500)
@@ -178,7 +178,7 @@ func (pc *postController) getLikedPosts(c echo.Context) error {
 }
 
 func (pc *postController) getPost(c echo.Context) error {
-	conn, err := grpc.Dial(pc.addr, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(pc.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500)
@@ -206,7 +206,7 @@ func (pc *postController) getPost(c echo.Context) error {
 }
 
 func (pc *postController) deletePost(c echo.Context) error {
-	conn, err := grpc.Dial(pc.addr, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(pc.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500)
@@ -234,7 +234,7 @@ func (pc *postController) deletePost(c echo.Context) error {
 }
 
 func (pc *postController) likePost(c echo.Context) error {
-	conn, err := grpc.Dial(pc.addr, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(pc.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500)
@@ -262,7 +262,7 @@ func (pc *postController) likePost(c echo.Context) error {
 }
 
 func (pc *postController) unlikePost(c echo.Context) error {
-	conn, err := grpc.Dial(pc.addr, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(pc.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500)
@@ -290,7 +290,7 @@ func (pc *postController) unlikePost(c echo.Context) error {
 }
 
 func (pc *postController) repostPost(c echo.Context) error {
-	conn, err := grpc.Dial(pc.addr, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(pc.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500)
@@ -318,7 +318,7 @@ func (pc *postController) repostPost(c echo.Context) error {
 }
 
 func (pc *postController) removeRepost(c echo.Context) error {
-	conn, err := grpc.Dial(pc.addr, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(pc.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500)

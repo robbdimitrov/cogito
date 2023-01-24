@@ -21,7 +21,7 @@ func newUserController(addr string) *userController {
 }
 
 func (s *userController) createUser(c echo.Context) error {
-	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500)
@@ -49,7 +49,7 @@ func (s *userController) createUser(c echo.Context) error {
 }
 
 func (s *userController) getUser(c echo.Context) error {
-	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500)
@@ -78,7 +78,7 @@ func (s *userController) getUser(c echo.Context) error {
 }
 
 func (s *userController) updateUser(c echo.Context) error {
-	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500)
@@ -113,7 +113,7 @@ func (s *userController) updateUser(c echo.Context) error {
 }
 
 func (s *userController) getFollowing(c echo.Context) error {
-	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500)
@@ -159,7 +159,7 @@ func (s *userController) getFollowing(c echo.Context) error {
 }
 
 func (s *userController) getFollowers(c echo.Context) error {
-	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500)
@@ -205,7 +205,7 @@ func (s *userController) getFollowers(c echo.Context) error {
 }
 
 func (s *userController) followUser(c echo.Context) error {
-	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500)
@@ -233,7 +233,7 @@ func (s *userController) followUser(c echo.Context) error {
 }
 
 func (s *userController) unfollowUser(c echo.Context) error {
-	conn, err := grpc.Dial(s.addr, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500)

@@ -14,12 +14,6 @@ type user struct {
 	Created   string `json:"created"`
 }
 
-type session struct {
-	ID      string `json:"id"`
-	UserID  int32  `json:"userId"`
-	Created string `json:"created"`
-}
-
 type post struct {
 	ID       int32  `json:"id"`
 	UserID   int32  `json:"userId"`

@@ -4,7 +4,9 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
 )
 
@@ -31,9 +33,6 @@ func newHTTPError(err error) *echo.HTTPError {
 	return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
 }
 
-// copyHeader copies headers from src to dest if they exist
-func copyHeader(s http.Header, d http.Header, key string) {
-	if value := s.Get(key); value != "" {
-		d.Set(key, value)
-	}
+func insecureCredentials() grpc.DialOption {
+	return grpc.WithTransportCredentials(insecure.NewCredentials())
 }

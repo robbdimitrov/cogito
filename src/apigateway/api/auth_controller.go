@@ -21,7 +21,7 @@ func newAuthController(addr string) *authController {
 }
 
 func (ac *authController) createSession(c echo.Context) error {
-	conn, err := grpc.Dial(ac.addr, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(ac.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500)
@@ -53,7 +53,7 @@ func (ac *authController) validateSession(c echo.Context) error {
 		return echo.NewHTTPError(401)
 	}
 
-	conn, err := grpc.Dial(ac.addr, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(ac.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500)
@@ -85,7 +85,7 @@ func (ac *authController) deleteSession(c echo.Context) error {
 		return echo.NewHTTPError(401)
 	}
 
-	conn, err := grpc.Dial(ac.addr, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(ac.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
 		return echo.NewHTTPError(500)
