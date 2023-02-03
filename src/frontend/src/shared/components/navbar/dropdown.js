@@ -8,7 +8,7 @@ function Dropdown({user, logoutUser}) {
     <div className="dropdown">
       <ul className="dropdown-list">
         <li className="dropdown-item">
-          <Link href={`/${user.id}`} className="dropdown-button">
+          <Link href={`/@${user.id}`} className="dropdown-button">
             <span className="dropdown-item-title">
               Profile
             </span>

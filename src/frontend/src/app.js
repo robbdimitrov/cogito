@@ -14,13 +14,11 @@ const Settings = React.lazy(() => import('./screens/settings/settings'));
 IconLibrary.configure();
 
 const routes = [
-  {path: '/', component: Feed, canAccess: authGuard},
+  {path: /\//, component: Feed, canAccess: authGuard},
   {path: /\/(@\w+)(\/(following|followers|likes))?/, component: Profile, canAccess: authGuard},
-  {path: /\/(@\w+)\/([\w\d]+)/, component: Feed, canAccess: authGuard},
-  {path: /\/(@\w+)/, component: Profile, canAccess: authGuard},
   {path: /\/settings\/(profile|password)\/?/, component: Settings, canAccess: authGuard},
-  {path: '/login', component: Login, canAccess: unauthGuard},
-  {path: '/signup', component: Signup, canAccess: unauthGuard},
+  {path: /\/login/, component: Login, canAccess: unauthGuard},
+  {path: /\/signup/, component: Signup, canAccess: unauthGuard},
   {path: /.?/, component: Login, canAccess: unauthGuard},
 ];
 

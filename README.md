@@ -21,8 +21,8 @@ Service | Language | Description
 Clone the repository to your filesystem
 
 ```sh
-$ git clone git@github.com:robbdimitrov/thoughts.git
-$ cd thoughts
+git clone git@github.com:robbdimitrov/thoughts.git
+cd thoughts
 ```
 
 ### Build the images
@@ -30,18 +30,18 @@ $ cd thoughts
 Build all the images
 
 ```sh
-$ make
+make
 ```
 
 Or build specific images
 
 ```sh
-$ make apigateway
-$ make authservice
-$ make database
-$ make frontend
-$ make postservice
-$ make userservice
+make apigateway
+make authservice
+make database
+make frontend
+make postservice
+make userservice
 ```
 
 ### Create namespace
@@ -49,7 +49,7 @@ $ make userservice
 Create namespace for the k8s resources
 
 ```sh
-$ kubectl create namespace thoughts
+kubectl create namespace thoughts
 ```
 
 ### Create deployments
@@ -57,7 +57,7 @@ $ kubectl create namespace thoughts
 Create deployments and volumes
 
 ```sh
-$ kubectl apply -f ./k8s -n thoughts
+kubectl apply -f ./k8s -n thoughts
 ```
 
 ## Access the frontend
@@ -65,7 +65,7 @@ $ kubectl apply -f ./k8s -n thoughts
 Enable port forwarding
 
 ```sh
-$ kubectl port-forward service/frontend 8080:8080 -n thoughts
+kubectl port-forward service/frontend 8080:8080 -n thoughts
 ```
 
 Open the frontend [here](http://localhost:8080/).
@@ -75,13 +75,13 @@ Open the frontend [here](http://localhost:8080/).
 Delete all resources
 
 ```sh
-$ kubectl delete -f ./k8s -n thoughts
+kubectl delete -f ./k8s -n thoughts
 ```
 
 Delete the namespace
 
 ```sh
-$ kubectl delete namespace thoughts
+kubectl delete namespace thoughts
 ```
 
 ## API
