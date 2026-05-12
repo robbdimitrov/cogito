@@ -32,10 +32,6 @@ The script builds the Docker images, loads them into the kind cluster, creates t
 kind delete cluster --name thoughts
 ```
 
-## API
-
-The API documentation is available [here](/API.md).
-
 ## License
 
 Licensed under the [MIT](LICENSE) License.
