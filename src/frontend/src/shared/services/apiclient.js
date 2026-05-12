@@ -64,8 +64,8 @@ class APIClient {
     return this.request(url, httpMethod.post, body);
   }
 
-  logout(sessionId) {
-    const url = `/api/sessions/${sessionId}`;
+  logout() {
+    const url = '/api/sessions';
     return this.request(url, httpMethod.delete);
   }
 

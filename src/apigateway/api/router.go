@@ -25,8 +25,8 @@ func (r *router) configureRoutes(e *echo.Echo) {
 	e.PUT("/users/:userId", r.user.updateUser)
 	e.GET("/users/:userId/following", r.user.getFollowing)
 	e.GET("/users/:userId/followers", r.user.getFollowers)
-	e.POST("/users/:userId/followers", r.user.followUser)
-	e.DELETE("/users/:userId/followers", r.user.unfollowUser)
+	e.POST("/users/:userId/following", r.user.followUser)
+	e.DELETE("/users/:userId/following", r.user.unfollowUser)
 
 	// Sessions
 	e.POST("/sessions", r.auth.createSession)
@@ -35,6 +35,7 @@ func (r *router) configureRoutes(e *echo.Echo) {
 	// Posts
 	e.POST("/posts", r.post.createPost)
 	e.GET("/posts", r.post.getFeed)
+	e.GET("/posts/feed", r.post.getFeed)
 	e.GET("/users/:userId/posts", r.post.getPosts)
 	e.GET("/users/:userId/likes", r.post.getLikedPosts)
 	e.GET("/posts/:postId", r.post.getPost)
