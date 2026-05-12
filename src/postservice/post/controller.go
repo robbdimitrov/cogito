@@ -40,7 +40,7 @@ func (c *controller) GetFeed(ctx context.Context, req *pb.GetFeedRequest) (*pb.P
 		return nil, err
 	}
 
-	res, err := c.dbClient.getFeed(userID, req.Page, req.Limit)
+	res, err := c.dbClient.getFeed(req.Page, req.Limit, userID)
 	if err != nil {
 		log.Printf("Getting posts failed: %v", err)
 		return nil, newError(codes.Internal)

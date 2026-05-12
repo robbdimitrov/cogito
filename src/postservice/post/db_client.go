@@ -62,7 +62,7 @@ func (c *DbClient) getFeed(page int32, limit int32, currentUserID int32) ([]*pb.
 		ORDER BY coalesce(reposts.created, posts.created) DESC
 		LIMIT $3 OFFSET $4`
 
-	rows, err := c.db.Query(context.Background(), query, currentUserID, limit, page*limit)
+	rows, err := c.db.Query(context.Background(), query, currentUserID, currentUserID, limit, page*limit)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func (c *DbClient) getPost(id int32, currentUserID int32) (*pb.Post, error) {
 
 func (c *DbClient) deletePost(postID int32, userID int32) error {
 	query := "DELETE FROM posts WHERE id = $1 AND user_id = $2"
-	_, err := c.db.Exec(context.Background(), query, postID)
+	_, err := c.db.Exec(context.Background(), query, postID, userID)
 	return err
 }
 

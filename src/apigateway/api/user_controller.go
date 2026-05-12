@@ -99,6 +99,7 @@ func (s *userController) updateUser(c echo.Context) error {
 		Name:        c.FormValue("name"),
 		Username:    c.FormValue("username"),
 		Email:       c.FormValue("email"),
+		Bio:         c.FormValue("bio"),
 		Password:    c.FormValue("password"),
 		OldPassword: c.FormValue("oldPassword"),
 	}

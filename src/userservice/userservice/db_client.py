@@ -120,9 +120,9 @@ class DbClient:
                 EXISTS (SELECT 1 FROM followers\
                 WHERE user_id = id AND follower_id = %s) AS followed,\
                 time_format(created) AS created\
-                FROM users WHERE id = %s\
+                FROM users\
                 INNER JOIN followers ON user_id = id\
-                WHERE follower_id = $2\
+                WHERE follower_id = %s\
                 ORDER BY followers.created DESC\
                 LIMIT %s OFFSET %s'
             cur.execute(query, (current_user_id, user_id, limit, page * limit))
@@ -147,9 +147,9 @@ class DbClient:
                 EXISTS (SELECT 1 FROM followers\
                 WHERE user_id = id AND follower_id = %s) AS followed,\
                 time_format(created) AS created\
-                FROM users WHERE id = %s\
+                FROM users\
                 INNER JOIN followers ON follower_id = id\
-                WHERE user_id = $2\
+                WHERE user_id = %s\
                 ORDER BY followers.created DESC\
                 LIMIT %s OFFSET %s'
             cur.execute(query, (current_user_id, user_id, limit, page * limit))

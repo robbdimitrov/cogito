@@ -41,7 +41,7 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
 
         try:
             result = self.db_client.get_user(
-                request.user_id, request.username, user_id)
+                request.user_id, user_id)
         except Exception as e:
             logger.print(f'Getting user failed: {e}')
             context.abort(StatusCode.INTERNAL)
