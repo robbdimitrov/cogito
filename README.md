@@ -14,74 +14,22 @@ Service | Language | Description
 [postservice](/src/postservice) | Go | Service for creation, liking, reposting and fetching of posts.
 [userservice](/src/userservice) | Python | Service for creation, following and fetching of users.
 
-## Setup
+## Deploy
 
-### Clone the repository
-
-Clone the repository to your filesystem
+Deploy the application to a local [kind](https://kind.sigs.k8s.io/) cluster using the provided script:
 
 ```sh
-git clone git@github.com:robbdimitrov/thoughts.git
-cd thoughts
+./scripts/deploy.sh
 ```
 
-### Build the images
+The script builds the Docker images, loads them into the kind cluster, creates the Kubernetes namespace and resources, waits for pods to be ready, and starts a port-forward to the frontend at http://localhost:8080/.
 
-Build all the images
+**Prerequisites:** `kind`, `kubectl`, `docker`, and `make` must be installed.
 
-```sh
-make
-```
-
-Or build specific images
+**Cleanup:**
 
 ```sh
-make apigateway
-make authservice
-make database
-make frontend
-make postservice
-make userservice
-```
-
-### Create namespace
-
-Create namespace for the k8s resources
-
-```sh
-kubectl create namespace thoughts
-```
-
-### Create deployments
-
-Create deployments and volumes
-
-```sh
-kubectl apply -f ./k8s -n thoughts
-```
-
-## Access the frontend
-
-Enable port forwarding
-
-```sh
-kubectl port-forward service/frontend 8080:8080 -n thoughts
-```
-
-Open the frontend [here](http://localhost:8080/).
-
-## Cleanup
-
-Delete all resources
-
-```sh
-kubectl delete -f ./k8s -n thoughts
-```
-
-Delete the namespace
-
-```sh
-kubectl delete namespace thoughts
+kind delete cluster --name thoughts
 ```
 
 ## API
