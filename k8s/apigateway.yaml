@@ -42,8 +42,6 @@ spec:
         env:
         - name: AUTH_SERVICE_ADDR
           value: authservice:5050
-        - name: IMAGE_SERVICE_ADDR
-          value: imageservice:8080
         - name: POST_SERVICE_ADDR
           value: postservice:5050
         - name: USER_SERVICE_ADDR

@@ -41,4 +41,4 @@ spec:
             cpu: 200m
         env:
         - name: DATABASE_URL
-          value: postgresql://postgres:kubernetes@database:5432
+          value: postgresql://postgres:kubernetes@database:5432/thoughts
