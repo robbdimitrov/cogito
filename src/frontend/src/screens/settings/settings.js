@@ -7,19 +7,9 @@ import {useRouter} from '../../shared/router/router';
 const Password = React.lazy(() => import('./password'));
 const EditProfile = React.lazy(() => import('./editprofile'));
 
-function Settings() {
+function Settings(props) {
   const router = useRouter();
-  const [user, setUser] = useState({
-    name: 'John Doe',
-    username: 'username',
-    email: 'mail@mail.com',
-    bio: 'Awesome bio',
-  });
-
-  const updatePassword = () => {};
-  const updateUser = (name, username, email, bio) => {
-    setUser({name, username, email, bio});
-  };
+  const user = props.user || {name: '', username: '', email: '', bio: ''};
 
   return (
     <div className='settings-container'>
@@ -27,8 +17,8 @@ function Settings() {
 
       <div className='settings-content main-content'>
         {router.path.endsWith('/password')
-          ? <Password updatePassword={updatePassword} />
-          : <EditProfile user={user} setUser={updateUser} />
+          ? <Password updatePassword={props.updatePassword || (() => {})} />
+          : <EditProfile user={user} updateUser={props.updateUser || (() => {})} />
         }
       </div>
     </div>

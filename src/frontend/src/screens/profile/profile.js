@@ -8,19 +8,21 @@ import './profile.scss';
 const ThoughtList = React.lazy(() => import('../../shared/components/thoughtlist/thoughtlist'));
 const UserList = React.lazy(() => import('../../shared/components/userlist/userlist'));
 
-function Profile() {
+function Profile(props) {
   const router = useRouter();
-  const user = {name: 'John', username: 'john', email: 'email@mail.com'};
+  const user = props.user || {name: '', username: '', email: '', posts: 0, following: 0, followers: 0, likes: 0};
+  const posts = props.posts || [];
+  const users = props.users || [];
 
   const resolveComponent = () => {
     if (router.path.endsWith('/following')) {
-      return <UserList users={[user]} />;
+      return <UserList users={users} />;
     } else if (router.path.endsWith('/followers')) {
-      return <UserList users={[user]} />;
+      return <UserList users={users} />;
     } else if (router.path.endsWith('/likes')) {
-      return <ThoughtList posts={[]} />;
+      return <ThoughtList posts={posts} users={[user]} />;
     }
-    return <ThoughtList posts={[]} />;
+    return <ThoughtList posts={posts} users={[user]} />;
   };
 
   return (
