@@ -111,7 +111,7 @@ function Signup(props) {
         </form>
 
         <div className='reference'>
-          <span className='reference-label'>Already have an accout?</span>
+          <span className='reference-label'>Already have an account?</span>
 
           <Link href='/login' className='reference-button'>
             <span>Log In</span>

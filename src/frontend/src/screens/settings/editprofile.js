@@ -70,7 +70,6 @@ function EditProfile(props) {
           <FontAwesomeIcon icon='file-alt' className='input-icon' />
           <textarea
             className='form-input'
-            type='text'
             name='bio'
             placeholder='Add your bio'
             onChange={handleInputChange}

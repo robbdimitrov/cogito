@@ -100,6 +100,20 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
             logger.print(f'Updating user failed: {e}')
             context.abort(StatusCode.INTERNAL)
 
+    def GetUserByUsername(self, request, context):
+        user_id = dict(context.invocation_metadata())['user-id']
+
+        try:
+            result = self.db_client.get_user_by_username(
+                request.username, user_id)
+        except Exception as e:
+            logger.print(f'Getting user by username failed: {e}')
+            context.abort(StatusCode.INTERNAL)
+
+        if result is None:
+            context.abort(StatusCode.NOT_FOUND)
+        return result
+
     def GetFollowing(self, request, context):
         user_id = dict(context.invocation_metadata())['user-id']
 

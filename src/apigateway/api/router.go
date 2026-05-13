@@ -21,6 +21,7 @@ func newRouter(addrs ...string) *router {
 func (r *router) configureRoutes(e *echo.Echo) {
 	// Users
 	e.POST("/users", r.user.createUser)
+	e.GET("/users", r.user.getUserByUsername)
 	e.GET("/users/:userId", r.user.getUser)
 	e.PUT("/users/:userId", r.user.updateUser)
 	e.GET("/users/:userId/following", r.user.getFollowing)

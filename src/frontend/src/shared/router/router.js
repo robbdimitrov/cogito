@@ -16,6 +16,7 @@ export function useRoutes(routes) {
   React.useEffect(() => {
     const handlePopState = () => {
       setPath(window.location.pathname);
+      window.scrollTo(0, 0);
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
@@ -28,6 +29,7 @@ export function useRoutes(routes) {
     const method = rewrite ? 'replace' : 'push';
     window.history[`${method}State`](null, '', url);
     setPath(url);
+    window.scrollTo(0, 0);
   };
 
   if (route.canAccess) {
@@ -39,6 +41,7 @@ export function useRoutes(routes) {
 
   return {
     navigate, path,
+    id: route.id,
     component: route.component,
   };
 }

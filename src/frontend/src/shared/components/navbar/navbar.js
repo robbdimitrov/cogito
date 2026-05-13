@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 import Link from '../../router/link';
@@ -10,6 +10,8 @@ function Navbar(props) {
     isDropdownShown: false
   });
 
+  const dropdownRef = useRef(null);
+
   function handleClick() {
     setState((state) => ({
       ...state,
@@ -17,12 +19,25 @@ function Navbar(props) {
     }));
   }
 
+  useEffect(() => {
+    function handleOutsideClick(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setState(s => ({...s, isDropdownShown: false}));
+      }
+    }
+
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, []);
+
   return (
     <header className='navigation-container bottom-shadow'>
       <div className='navigation-content main-container'>
         {props.isLoggedIn ? (
           <div className='left-items'>
-            <Link href='/feed' className='nav-button'>
+            <Link href='/' className='nav-button'>
               <FontAwesomeIcon
                 icon='home'
                 className='nav-button-icon'
@@ -39,7 +54,7 @@ function Navbar(props) {
 
         {props.user ? (
           <div className='right-items'>
-            <div className='profile-button' onClick={handleClick}>
+            <div className='profile-button' onClick={handleClick} ref={dropdownRef}>
               <img
                 className='profile-button-image'
                 src='https://via.placeholder.com/300.png'

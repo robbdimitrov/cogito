@@ -79,6 +79,31 @@ class DbClient:
             cur.close()
             self.db.putconn(conn)
 
+    def get_user_by_username(self, username, current_user_id):
+        conn = self.db.getconn()
+        cur = conn.cursor()
+
+        try:
+            query = 'SELECT id, name, username, email, bio,\
+                (SELECT count(*) FROM posts WHERE user_id = id) AS posts,\
+                (SELECT count(*) FROM likes WHERE user_id = id) AS likes,\
+                (SELECT count(*) FROM followers WHERE follower_id = id) AS following,\
+                (SELECT count(*) FROM followers WHERE user_id = id) AS followers,\
+                EXISTS (SELECT 1 FROM followers\
+                WHERE user_id = id AND follower_id = %s) AS followed,\
+                time_format(created) AS created\
+                FROM users WHERE username = %s'
+            cur.execute(query, (current_user_id, username))
+            result = cur.fetchone()
+            if result is None:
+                return None
+            return map_user(result)
+        except Exception:
+            raise
+        finally:
+            cur.close()
+            self.db.putconn(conn)
+
     def update_user(self, user_id, name, username, email, bio):
         conn = self.db.getconn()
         cur = conn.cursor()

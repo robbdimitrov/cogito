@@ -5,6 +5,8 @@ function Password(props) {
   const [state, setState] = useState({
     password: '',
     oldPassword: '',
+    passwordVisible: false,
+    oldPasswordVisible: false,
   });
 
   function handleSubmit(event) {
@@ -25,6 +27,13 @@ function Password(props) {
     });
   }
 
+  function changeInputType(field) {
+    setState({
+      ...state,
+      [field]: !state[field]
+    });
+  }
+
   return (
     <div className='form-content'>
       <h1 className='form-title'>Change Password</h1>
@@ -34,7 +43,7 @@ function Password(props) {
           <FontAwesomeIcon icon='lock' className='input-icon' />
           <input
             className='form-input'
-            type='password'
+            type={state.passwordVisible ? 'text' : 'password'}
             name='password'
             placeholder='New Password'
             minLength='4'
@@ -43,7 +52,11 @@ function Password(props) {
             value={state.password}
             required
           />
-          <button className='visibility-button'>
+          <button
+            className='visibility-button'
+            onClick={() => changeInputType('passwordVisible')}
+            type='button'
+          >
             <FontAwesomeIcon icon='eye' />
           </button>
         </div>
@@ -52,7 +65,7 @@ function Password(props) {
           <FontAwesomeIcon icon='lock' className='input-icon' />
           <input
             className='form-input'
-            type='password'
+            type={state.oldPasswordVisible ? 'text' : 'password'}
             name='oldPassword'
             placeholder='Current Password'
             minLength='4'
@@ -61,7 +74,11 @@ function Password(props) {
             value={state.oldPassword}
             required
           />
-          <button className='visibility-button'>
+          <button
+            className='visibility-button'
+            onClick={() => changeInputType('oldPasswordVisible')}
+            type='button'
+          >
             <FontAwesomeIcon icon='eye' />
           </button>
         </div>

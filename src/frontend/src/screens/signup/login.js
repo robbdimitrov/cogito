@@ -70,7 +70,7 @@ function Login(props) {
         </form>
 
         <div className='reference'>
-          <span className='reference-label'>Don't have an accout?</span>
+          <span className='reference-label'>Don't have an account?</span>
           <Link href='/signup' className='reference-button'>
             <span>Sign Up</span>
           </Link>

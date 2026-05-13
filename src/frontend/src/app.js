@@ -1,6 +1,7 @@
 import React, {useState, useEffect, useCallback} from 'react';
 
 import Navbar from './shared/components/navbar/navbar';
+import ErrorBoundary from './shared/components/errorboundary/errorboundary';
 import IconLibrary from './shared/services/iconlibrary';
 import {useRoutes, RouterContext} from './shared/router/router';
 import {authGuard, unauthGuard} from './shared/router/guards';
@@ -31,7 +32,7 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(Session.getUserId() !== null);
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
-  const [profileData] = useState({user: null, posts: [], users: []});
+  const [profileData, setProfileData] = useState({user: null, posts: [], users: []});
 
   const refreshUser = useCallback(() => {
     const userId = Session.getUserId();
@@ -55,6 +56,49 @@ function App() {
       refreshFeed();
     }
   }, [isLoggedIn, refreshUser, refreshFeed]);
+
+  useEffect(() => {
+    if (route.id !== 'profile' || !isLoggedIn) {
+      return;
+    }
+    const match = route.path.match(/\/@(\w+)(\/\w+)?/);
+    if (!match) {
+      return;
+    }
+    const [_, username, subroute] = match;
+
+    const fetchProfile = async () => {
+      try {
+        let profileUser;
+        if (user && user.username === username) {
+          profileUser = user;
+        } else {
+          profileUser = await apiClient.getUserByUsername(username);
+        }
+        if (!profileUser) {
+          setProfileData({user: null, posts: [], users: []});
+          return;
+        }
+        if (subroute === '/likes') {
+          const data = await apiClient.getLikes(profileUser.id, 0);
+          setProfileData({user: profileUser, posts: data.items || [], users: []});
+        } else if (subroute === '/following') {
+          const data = await apiClient.getFollowing(profileUser.id, 0);
+          setProfileData({user: profileUser, posts: [], users: data.items || []});
+        } else if (subroute === '/followers') {
+          const data = await apiClient.getFollowers(profileUser.id, 0);
+          setProfileData({user: profileUser, posts: [], users: data.items || []});
+        } else {
+          const data = await apiClient.getPosts(profileUser.id, 0);
+          setProfileData({user: profileUser, posts: data.items || [], users: []});
+        }
+      } catch {
+        setProfileData({user: null, posts: [], users: []});
+      }
+    };
+
+    fetchProfile();
+  }, [route.id, route.path, isLoggedIn, user]);
 
   const loginUser = (email, password) => {
     apiClient.login(email, password)
@@ -123,9 +167,11 @@ function App() {
     <RouterContext.Provider value={route}>
       <Navbar isLoggedIn={isLoggedIn} user={user} logoutUser={logoutUser} />
 
-      <React.Suspense fallback={<div>Loading...</div>}>
-        {renderComponent()}
-      </React.Suspense>
+      <ErrorBoundary>
+        <React.Suspense fallback={<div>Loading...</div>}>
+          {renderComponent()}
+        </React.Suspense>
+      </ErrorBoundary>
     </RouterContext.Provider>
   );
 }

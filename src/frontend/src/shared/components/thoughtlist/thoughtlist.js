@@ -7,7 +7,7 @@ function ThoughtList({posts, users}) {
   return (
     <ul className="thought-list">
       {posts.map((post) =>
-        <ThoughtItem key={post.id} post={post} user={users[0]} />
+        <ThoughtItem key={post.id} post={post} user={post.user || users[0]} />
       )}
     </ul>
   );

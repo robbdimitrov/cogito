@@ -36,6 +36,11 @@ class APIClient {
     return this.request(url, httpMethod.get);
   }
 
+  getUserByUsername(username) {
+    let url = `/api/users?username=${username}`;
+    return this.request(url, httpMethod.get);
+  }
+
   getFollowing(userId, page, limit = 20) {
     const url = `/api/users/${userId}/following?page=${page}&limit=${limit}`;
     return this.request(url, httpMethod.get);

@@ -53,9 +53,14 @@ message Users {
   repeated User users = 1;
 }
 
+message GetUserByUsernameRequest {
+  string username = 1;
+}
+
 service UserService {
   rpc CreateUser(CreateUserRequest) returns (Identifier);
   rpc GetUser(UserRequest) returns (User);
+  rpc GetUserByUsername(GetUserByUsernameRequest) returns (User);
   rpc UpdateUser(UpdateUserRequest) returns (Empty);
   rpc GetFollowing(GetUsersRequest) returns (Users);
   rpc GetFollowers(GetUsersRequest) returns (Users);

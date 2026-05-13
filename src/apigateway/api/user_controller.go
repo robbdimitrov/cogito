@@ -77,6 +77,30 @@ func (s *userController) getUser(c echo.Context) error {
 	return c.JSON(200, mapUser(res))
 }
 
+func (s *userController) getUserByUsername(c echo.Context) error {
+	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
+	if err != nil {
+		log.Printf("Connecting to service failed: %v", err)
+		return echo.NewHTTPError(500)
+	}
+	defer conn.Close()
+	client := pb.NewUserServiceClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx = appendUserIDHeader(ctx, c)
+	defer cancel()
+
+	req := pb.GetUserByUsernameRequest{Username: c.QueryParam("username")}
+
+	res, err := client.GetUserByUsername(ctx, &req)
+	if err != nil {
+		log.Printf("Getting user by username failed: %v", err)
+		return newHTTPError(err)
+	}
+
+	return c.JSON(200, mapUser(res))
+}
+
 func (s *userController) updateUser(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
