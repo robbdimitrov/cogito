@@ -52,22 +52,24 @@ function Navbar(props) {
 
         <FontAwesomeIcon icon='brain' className='icon' size='2x' />
 
-        {props.user ? (
+        {props.isLoggedIn ? (
           <div className='right-items'>
-            <div className='profile-button' onClick={handleClick} ref={dropdownRef}>
-              <img
-                className='profile-button-image'
-                src='https://via.placeholder.com/300.png'
-                alt='Profile'
-              />
-
-              {state.isDropdownShown &&
-                <UserDropdown
-                  user={props.user}
-                  logoutUser={props.logoutUser}
+            {props.user && (
+              <div className='profile-button' onClick={handleClick} ref={dropdownRef}>
+                <img
+                  className='profile-button-image'
+                  src='https://via.placeholder.com/300.png'
+                  alt='Profile'
                 />
-              }
-            </div>
+
+                {state.isDropdownShown &&
+                  <UserDropdown
+                    user={props.user}
+                    logoutUser={props.logoutUser}
+                  />
+                }
+              </div>
+            )}
           </div>
         ) : (
           <div className='right-items'>
