@@ -25,6 +25,8 @@ class DbClient:
             query = 'SELECT id, password FROM users WHERE email = %s'
             cur.execute(query, (email,))
             result = cur.fetchone()
+            if result is None:
+                return None
             return {
                 'id': result[0],
                 'password': result[1]

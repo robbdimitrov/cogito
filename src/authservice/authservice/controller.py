@@ -22,7 +22,7 @@ class Controller(thoughts_pb2_grpc.AuthServiceServicer):
             logger.print(f'Getting user failed: {e}')
             context.abort(StatusCode.INTERNAL, 'Internal server error.')
 
-        if validate_password(request.password, result['password']) == False:
+        if result is None or validate_password(request.password, result['password']) == False:
             context.abort(
                 StatusCode.UNAUTHENTICATED,
                 'Incorrect email or password.'
