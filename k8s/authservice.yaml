@@ -2,10 +2,15 @@ apiVersion: v1
 kind: Service
 metadata:
   name: authservice
+  labels:
+    app: thoughts
+    tier: backend
+    component: authservice
 spec:
   selector:
     app: thoughts
     tier: backend
+    component: authservice
   ports:
   - port: 5050
 ---
@@ -16,20 +21,24 @@ metadata:
   labels:
     app: thoughts
     tier: backend
+    component: authservice
 spec:
   selector:
     matchLabels:
       app: thoughts
       tier: backend
+      component: authservice
   template:
     metadata:
       labels:
         app: thoughts
         tier: backend
+        component: authservice
     spec:
       containers:
       - name: authservice
         image: localhost:5000/thoughts/authservice
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5050
         resources:

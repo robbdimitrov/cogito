@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "http-proxy-middleware": "^3.0.5",
-    "node-sass": "^8.0.0"
+    "sass": "^1.87.0"
   },
   "eslintConfig": {
     "extends": "react-app"

@@ -26,7 +26,7 @@ make                  # builds apigateway, authservice, database, frontend
 make <service>        # individual service
 ```
 
-**Known Makefile issues:** several targets are missing a `/` in the registry path (`localhost:5000thoughts/...` instead of `localhost:5000/thoughts/...`). There is also an `imageservice` target and a k8s env var for it, but `src/imageservice/` does **not** exist.
+**Known Makefile issues (fixed):** registry paths and `imageservice` references were corrected.
 
 ### Frontend dev server
 
@@ -48,7 +48,8 @@ go mod download
 go build -v -o service
 ```
 
-Dockerfiles use multi-stage builds: `golang:1.19` builder → `scratch` runtime.
+Dockerfiles use multi-stage builds: `golang:1.19` builder → `scratch` runtime.  
+**Build note:** `CGO_ENABLED=0` must be set when building for the `scratch` stage, otherwise the binary will fail at runtime with a linker error (`exec /service: no such file or directory`).
 
 ### Python services
 
@@ -90,6 +91,8 @@ kubectl delete -f ./k8s -n thoughts
 kubectl delete namespace thoughts
 ```
 
+**Deployment fixes applied:** each backend Deployment and Service now uses a unique `component` label so Services route only to their intended pods. `imagePullPolicy: IfNotPresent` is set on all containers so `kind` clusters can use locally loaded images without a registry.
+
 ## Testing
 
 There are **no tests** in this repo. Do not try to run a test suite.
@@ -97,11 +100,11 @@ There are **no tests** in this repo. Do not try to run a test suite.
 ## Database Notes
 
 - `src/database/schema.sql` is copied to `/docker-entrypoint-initdb.d/` in the Postgres image and executes on first container start.
-- The schema runs `CREATE DATABASE thoughts;` then `\connect thoughts` before creating tables. However, the `DATABASE_URL` env vars in k8s do not specify a database name, so services will connect to the default `postgres` database unless the URL is updated to end with `/thoughts`.
+- The schema runs `CREATE DATABASE thoughts;` then `\connect thoughts` before creating tables. The `DATABASE_URL` env vars now end with `/thoughts` so services connect to the correct database.
 
 ## Constraints & Gotchas
 
-- `react-scripts` is pinned to **4.0.3** and `node-sass` to **8.x** — do not upgrade lightly.
+- `react-scripts` is pinned to **4.0.3** and `node-sass` was replaced with **`sass`** (Dart Sass) because `node-sass` 8.x prebuilt binaries are unavailable for Node 20 on arm64. The custom SCSS `rem()` mixin was renamed to `to-rem()` to avoid clashing with Dart Sass’s built-in `rem()` function.
 - No CI workflows, pre-commit hooks, or lint configs for Go/Python.
 - The `deletePost` query in `postservice/post/db_client.go` only checks `post_id` in the `WHERE` clause despite accepting `userID` as a parameter (potential bug if you modify that area).
 

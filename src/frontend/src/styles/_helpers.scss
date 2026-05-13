@@ -1,7 +1,7 @@
 @import 'colors';
 @import 'variables';
 
-@function rem($pixels, $browser-context: 16) {
+@function to-rem($pixels, $browser-context: 16) {
   @return ($pixels / $browser-context) * 1rem;
 }
 

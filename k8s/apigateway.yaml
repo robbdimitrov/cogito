@@ -2,10 +2,15 @@ apiVersion: v1
 kind: Service
 metadata:
   name: apigateway
+  labels:
+    app: thoughts
+    tier: backend
+    component: apigateway
 spec:
   selector:
     app: thoughts
     tier: backend
+    component: apigateway
   ports:
   - port: 8080
 ---
@@ -16,20 +21,24 @@ metadata:
   labels:
     app: thoughts
     tier: backend
+    component: apigateway
 spec:
   selector:
     matchLabels:
       app: thoughts
       tier: backend
+      component: apigateway
   template:
     metadata:
       labels:
         app: thoughts
         tier: backend
+        component: apigateway
     spec:
       containers:
       - name: apigateway
         image: localhost:5000/thoughts/apigateway
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
         resources:

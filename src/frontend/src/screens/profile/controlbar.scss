@@ -7,7 +7,7 @@
   background: $primary-color;
 
   .control-bar {
-    height: rem(50);
+    height: to-rem(50);
     align-items: center;
   }
 
@@ -28,12 +28,12 @@
     }
 
     .counter-label {
-      font-size: rem(14);
+      font-size: to-rem(14);
       font-weight: $font-weight-semibold;
     }
 
     .counter-value {
-      font-size: rem(17);
+      font-size: to-rem(17);
       font-weight: $font-weight-bold;
     }
   }

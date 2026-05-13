@@ -13,13 +13,13 @@ $cover-height: 100px;
   }
 
   .texts {
-    font-size: rem(15);
+    font-size: to-rem(15);
     margin: $spacing-md;
     color: $primary-text-color;
   }
 
   .name {
-    font-size: rem(21);
+    font-size: to-rem(21);
     margin-bottom: $padding / 2;
   }
 
@@ -40,7 +40,7 @@ $cover-height: 100px;
   .join-date {
     .join-date-icon {
       display: inline-block;
-      margin-right: rem(8);
+      margin-right: to-rem(8);
     }
 
     .join-date-text {

@@ -35,7 +35,7 @@ $button-background-color: $active-color;
   background: $button-background-color;
   text-decoration: none;
   padding: $padding * 0.7 $padding;
-  font-size: rem(15);
+  font-size: to-rem(15);
   color: $primary-color;
   border-radius: 25%/50%;
 
@@ -97,7 +97,7 @@ $button-background-color: $active-color;
 }
 
 .counter-label {
-  font-size: rem(14);
+  font-size: to-rem(14);
 }
 
 .counter-value {
@@ -116,8 +116,8 @@ $button-background-color: $active-color;
 }
 
 .user-card .subtitle {
-  font-size: rem(14);
-  margin-top: rem(4);
+  font-size: to-rem(14);
+  margin-top: to-rem(4);
 }
 
 // Form

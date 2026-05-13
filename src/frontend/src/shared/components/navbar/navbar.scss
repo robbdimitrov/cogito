@@ -55,7 +55,7 @@ $icon-font-size: 21px;
 
 .nav-button-label {
   font-weight: $font-weight-semibold;
-  font-size: rem(15);
+  font-size: to-rem(15);
   margin-left: $padding / 2;
 }
 

@@ -24,7 +24,7 @@
 }
 
 .dropdown-item {
-  font-size: rem(17);
+  font-size: to-rem(17);
   @include separator;
 
   &:last-child {

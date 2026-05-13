@@ -4,7 +4,7 @@
 .settings-menu-button {
   display: block;
   color: $primary-text-color;
-  font-size: rem(17);
+  font-size: to-rem(17);
 
   &:hover {
     background: $selected-color;
