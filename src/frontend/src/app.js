@@ -31,7 +31,7 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(Session.getUserId() !== null);
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
-  const [profileData, setProfileData] = useState({user: null, posts: [], users: []});
+  const [profileData] = useState({user: null, posts: [], users: []});
 
   const refreshUser = useCallback(() => {
     const userId = Session.getUserId();

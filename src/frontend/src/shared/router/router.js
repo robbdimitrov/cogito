@@ -14,10 +14,12 @@ export function useRoutes(routes) {
   const route = match(routes, path);
 
   React.useEffect(() => {
-    window.onpopstate = () => {
+    const handlePopState = () => {
       setPath(window.location.pathname);
-    }
-  });
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const navigate = (url, rewrite) => {
     if (url === path) {

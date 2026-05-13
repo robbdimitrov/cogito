@@ -10,19 +10,19 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@fortawesome/fontawesome-svg-core": "^6.2.1",
-    "@fortawesome/free-solid-svg-icons": "^6.2.1",
-    "@fortawesome/react-fontawesome": "^0.2.0",
+    "@fortawesome/fontawesome-svg-core": "^7.2.0",
+    "@fortawesome/free-solid-svg-icons": "^7.2.0",
+    "@fortawesome/react-fontawesome": "^3.3.1",
     "localforage": "^1.10.0",
-    "match-sorter": "^6.3.1",
+    "match-sorter": "^8.3.0",
     "quartzite": "^2.0.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
     "react-scripts": "^4.0.3",
     "sort-by": "^1.2.0"
   },
   "devDependencies": {
-    "http-proxy-middleware": "^2.0.6",
+    "http-proxy-middleware": "^3.0.5",
     "node-sass": "^8.0.0"
   },
   "eslintConfig": {
