@@ -3,13 +3,15 @@ $shadow-color: rgba(0, 0, 0, 0.25);
 
 $dark-background-color: rgba(0, 0, 0, 0.5);
 
+@use 'sass:color';
+
 $primary-color: white;
-$secondary-color: darken($primary-color, 5%);
-$selected-color: darken($primary-color, 3%);
+$secondary-color: color.adjust($primary-color, $lightness: -5%);
+$selected-color: color.adjust($primary-color, $lightness: -3%);
 $active-color: #1DA1F2;
 $error-color: #CB2431;
-$active-button-color: darken($active-color, 25%);
+$active-button-color: color.adjust($active-color, $lightness: -25%);
 
 $primary-text-color: #333333;
-$detail-text-color: lighten($primary-text-color, 50%);
+$detail-text-color: color.adjust($primary-text-color, $lightness: 50%);
 $text-placeholder-color: gray;

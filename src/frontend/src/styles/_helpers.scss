@@ -1,8 +1,10 @@
+@use 'sass:math';
+
 @import 'colors';
 @import 'variables';
 
 @function to-rem($pixels, $browser-context: 16) {
-  @return ($pixels / $browser-context) * 1rem;
+  @return math.div($pixels, $browser-context) * 1rem;
 }
 
 @mixin border-dark {

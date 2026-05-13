@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 @import 'colors';
 @import 'variables';
 @import 'fonts';
@@ -41,17 +43,17 @@ $button-background-color: $active-color;
 
   &:not(:disabled) {
     &:hover, &:focus {
-      background: darken($button-background-color, 8%);
+      background: color.adjust($button-background-color, $lightness: -8%);
       transition: all 0.3s ease;
     }
 
     &:active {
-      background: darken($button-background-color, 25%);
+      background: color.adjust($button-background-color, $lightness: -25%);
     }
   }
 
   &:disabled {
-    background: lighten($button-background-color, 25%);
+    background: color.adjust($button-background-color, $lightness: 25%);
   }
 }
 
@@ -68,16 +70,16 @@ $button-background-color: $active-color;
 
   &:not(:disabled) {
     &:hover, &:focus {
-      border-color: darken($button-background-color,8%);
-      color: darken($primary-text-color, 8%);
-      background: darken($primary-color, 8%);
+      border-color: color.adjust($button-background-color, $lightness: -8%);
+      color: color.adjust($primary-text-color, $lightness: -8%);
+      background: color.adjust($primary-color, $lightness: -8%);
       transition: all 0.3s ease;
     }
 
     &:active {
-      border-color: darken($button-background-color, 25%);
-      color: darken($primary-text-color, 25%);
-      background: darken($primary-color, 25%);
+      border-color: color.adjust($button-background-color, $lightness: -25%);
+      color: color.adjust($primary-text-color, $lightness: -25%);
+      background: color.adjust($primary-color, $lightness: -25%);
     }
   }
 }
@@ -141,10 +143,10 @@ $button-background-color: $active-color;
   }
 
   .visibility-button {
-    color: lighten(black, 30%);
+    color: color.adjust(black, $lightness: 30%);
 
     &:active {
-      color: lighten(black, 70%);
+      color: color.adjust(black, $lightness: 70%);
     }
   }
 

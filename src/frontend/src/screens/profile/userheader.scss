@@ -20,7 +20,7 @@ $cover-height: 100px;
 
   .name {
     font-size: to-rem(21);
-    margin-bottom: $padding / 2;
+    margin-bottom: $padding * 0.5;
   }
 
   .username {

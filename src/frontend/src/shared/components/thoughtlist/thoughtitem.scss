@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 @import '../../../styles/variables';
 @import '../../../styles/helpers';
 @import '../../../styles/fonts';
@@ -21,7 +23,7 @@ $context-icon-width: 16px;
   background-color: white;
 
   &:active {
-    color: lighten($primary-text-color, 30%);
+    color: color.adjust($primary-text-color, $lightness: 30%);
   }
 }
 
