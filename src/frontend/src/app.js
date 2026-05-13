@@ -21,7 +21,7 @@ IconLibrary.configure();
 const apiClient = new APIClient();
 
 const routes = [
-  {id: 'feed', path: /\//, component: Feed, canAccess: authGuard, title: 'Feed'},
+  {id: 'feed', path: /^\/$/, component: Feed, canAccess: authGuard, title: 'Feed'},
   {id: 'profile', path: /\/@\w+(\/(following|followers|likes))?/, component: Profile, canAccess: authGuard, title: 'Profile'},
   {id: 'settings', path: /\/settings\/(profile|password)\/?/, component: Settings, canAccess: authGuard, title: 'Settings'},
   {id: 'login', path: /\/login/, component: Login, canAccess: unauthGuard, title: 'Log In'},
