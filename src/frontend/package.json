@@ -13,13 +13,9 @@
     "@fortawesome/fontawesome-svg-core": "^7.2.0",
     "@fortawesome/free-solid-svg-icons": "^7.2.0",
     "@fortawesome/react-fontawesome": "^3.3.1",
-    "localforage": "^1.10.0",
-    "match-sorter": "^8.3.0",
-    "quartzite": "^2.0.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "react-scripts": "^4.0.3",
-    "sort-by": "^1.2.0"
+    "react-scripts": "^4.0.3"
   },
   "devDependencies": {
     "http-proxy-middleware": "^3.0.5",
