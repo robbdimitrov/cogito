@@ -43,5 +43,6 @@ export function useRoutes(routes) {
     navigate, path,
     id: route.id,
     component: route.component,
+    title: route.title,
   };
 }

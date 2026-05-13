@@ -2,6 +2,7 @@ import React from 'react';
 
 import ControlBar from './controlbar';
 import UserHeader from './userheader';
+import Loading from '../../shared/components/loading/loading';
 import {useRouter} from '../../shared/router/router';
 import './profile.scss';
 
@@ -13,6 +14,7 @@ function Profile(props) {
   const user = props.user || {name: '', username: '', email: '', posts: 0, following: 0, followers: 0, likes: 0};
   const posts = props.posts || [];
   const users = props.users || [];
+  const { isLoading, onLike, onRepost } = props;
 
   const resolveComponent = () => {
     if (router.path.endsWith('/following')) {
@@ -20,9 +22,9 @@ function Profile(props) {
     } else if (router.path.endsWith('/followers')) {
       return <UserList users={users} />;
     } else if (router.path.endsWith('/likes')) {
-      return <ThoughtList posts={posts} users={[user]} />;
+      return <ThoughtList posts={posts} users={[user]} onLike={onLike} onRepost={onRepost} />;
     }
-    return <ThoughtList posts={posts} users={[user]} />;
+    return <ThoughtList posts={posts} users={[user]} onLike={onLike} onRepost={onRepost} />;
   };
 
   return (
@@ -31,7 +33,7 @@ function Profile(props) {
       <ControlBar user={user} />
 
       <div className='profile-content main-content'>
-        {resolveComponent()}
+        {isLoading ? <Loading /> : resolveComponent()}
       </div>
     </div>
   );

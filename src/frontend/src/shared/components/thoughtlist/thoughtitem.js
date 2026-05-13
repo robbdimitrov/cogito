@@ -23,7 +23,7 @@ function formatRelativeTime(dateString) {
   }
 }
 
-function ThoughtItem({post, user}) {
+function ThoughtItem({post, user, onLike, onRepost}) {
   const author = post.user || user;
   return (
     <li className="thought-item">
@@ -37,12 +37,18 @@ function ThoughtItem({post, user}) {
         <p className="text">{post.content}</p>
 
         <div className="buttons">
-          <button className="retweet-button">
+          <button
+            type="button"
+            className={post.reposted ? 'retweet-button active' : 'retweet-button'}
+            onClick={() => onRepost(post)}>
             <FontAwesomeIcon icon="retweet" className="button-icon" />
             <span className="button-label">{post.retweets}</span>
           </button>
 
-          <button className="like-button">
+          <button
+            type="button"
+            className={post.liked ? 'like-button active' : 'like-button'}
+            onClick={() => onLike(post)}>
             <FontAwesomeIcon icon="heart" className="button-icon" />
             <span className="button-label">{post.likes}</span>
           </button>
