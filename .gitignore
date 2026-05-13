@@ -16,10 +16,10 @@ pkg
 vendor
 
 # Compiled binaries
-apigateway
-postservice
-userservice
-authservice
+/apigateway
+/postservice
+/userservice
+/authservice
 
 # Logs
 npm-debug.log*
