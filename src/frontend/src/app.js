@@ -124,7 +124,7 @@ function App() {
     setLoginError(null);
     apiClient.login(email, password)
       .then((data) => {
-        Session.setUserId(data.user_id);
+        Session.setUserId(data.id);
         setIsLoggedIn(true);
         route.navigate('/');
       })

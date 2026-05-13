@@ -20,7 +20,7 @@ class Controller(thoughts_pb2_grpc.AuthServiceServicer):
             result = self.db_client.get_user(request.email)
         except Exception as e:
             logger.print(f'Getting user failed: {e}')
-            context.abort(StatusCode.INTERNAL)
+            context.abort(StatusCode.INTERNAL, 'Internal server error.')
 
         if validate_password(request.password, result['password']) == False:
             context.abort(
@@ -32,17 +32,17 @@ class Controller(thoughts_pb2_grpc.AuthServiceServicer):
             return self.db_client.create_session(generate_key(), result['id'])
         except Exception as e:
             logger.print(f'Creating session failed: {e}')
-            context.abort(StatusCode.INTERNAL)
+            context.abort(StatusCode.INTERNAL, 'Internal server error.')
 
     def GetSession(self, request, context):
         try:
             result = self.db_client.get_session(request.session_id)
         except Exception as e:
             logger.print(f'Getting session failed: {e}')
-            context.abort(StatusCode.INTERNAL)
+            context.abort(StatusCode.INTERNAL, 'Internal server error.')
 
         if result is None:
-            context.abort(StatusCode.UNAUTHENTICATED)
+            context.abort(StatusCode.UNAUTHENTICATED, 'Session not found.')
         return result
 
     def DeleteSession(self, request, context):
@@ -51,4 +51,4 @@ class Controller(thoughts_pb2_grpc.AuthServiceServicer):
             return thoughts_pb2.Empty()
         except Exception as e:
             logger.print(f'Deleting session failed: {e}')
-            context.abort(StatusCode.INTERNAL)
+            context.abort(StatusCode.INTERNAL, 'Internal server error.')

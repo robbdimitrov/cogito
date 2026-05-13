@@ -44,10 +44,10 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
                 request.user_id, user_id)
         except Exception as e:
             logger.print(f'Getting user failed: {e}')
-            context.abort(StatusCode.INTERNAL)
+            context.abort(StatusCode.INTERNAL, 'Internal server error.')
 
         if result is None:
-            context.abort(StatusCode.NOT_FOUND)
+            context.abort(StatusCode.NOT_FOUND, 'Resource not found.')
         return result
 
     def UpdateUser(self, request, context):
@@ -69,7 +69,7 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
             return thoughts_pb2.Empty()
         except Exception as e:
             logger.print(f'Updating user failed: {e}')
-            context.abort(StatusCode.INTERNAL)
+            context.abort(StatusCode.INTERNAL, 'Internal server error.')
 
     def updatePassword(self, request, context):
         user_id = dict(context.invocation_metadata())['user-id']
@@ -84,7 +84,7 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
             result = self.db_client.get_user_with_id(user_id)
         except Exception as e:
             logger.print(f'Getting user failed: {e}')
-            context.abort(StatusCode.INTERNAL)
+            context.abort(StatusCode.INTERNAL, 'Internal server error.')
 
         if validate_password(request.old_password, result['password']) == False:
             context.abort(
@@ -98,7 +98,7 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
             return thoughts_pb2.Empty()
         except Exception as e:
             logger.print(f'Updating user failed: {e}')
-            context.abort(StatusCode.INTERNAL)
+            context.abort(StatusCode.INTERNAL, 'Internal server error.')
 
     def GetUserByUsername(self, request, context):
         user_id = dict(context.invocation_metadata())['user-id']
@@ -108,10 +108,10 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
                 request.username, user_id)
         except Exception as e:
             logger.print(f'Getting user by username failed: {e}')
-            context.abort(StatusCode.INTERNAL)
+            context.abort(StatusCode.INTERNAL, 'Internal server error.')
 
         if result is None:
-            context.abort(StatusCode.NOT_FOUND)
+            context.abort(StatusCode.NOT_FOUND, 'Resource not found.')
         return result
 
     def GetFollowing(self, request, context):
@@ -124,7 +124,7 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
             return thoughts_pb2.Users(users=result)
         except Exception as e:
             logger.print(f'Getting users failed: {e}')
-            context.abort(StatusCode.INTERNAL)
+            context.abort(StatusCode.INTERNAL, 'Internal server error.')
 
     def GetFollowers(self, request, context):
         user_id = dict(context.invocation_metadata())['user-id']
@@ -136,7 +136,7 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
             return thoughts_pb2.Users(users=result)
         except Exception as e:
             logger.print(f'Getting users failed: {e}')
-            context.abort(StatusCode.INTERNAL)
+            context.abort(StatusCode.INTERNAL, 'Internal server error.')
 
     def FollowUser(self, request, context):
         user_id = dict(context.invocation_metadata())['user-id']
@@ -146,7 +146,7 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
             return thoughts_pb2.Empty()
         except Exception as e:
             logger.print(f'Following user failed: {e}')
-            context.abort(StatusCode.INTERNAL)
+            context.abort(StatusCode.INTERNAL, 'Internal server error.')
 
     def UnfollowUser(self, request, context):
         user_id = dict(context.invocation_metadata())['user-id']
@@ -156,4 +156,4 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
             return thoughts_pb2.Empty()
         except Exception as e:
             logger.print(f'Unfollowing user failed: {e}')
-            context.abort(StatusCode.INTERNAL)
+            context.abort(StatusCode.INTERNAL, 'Internal server error.')
