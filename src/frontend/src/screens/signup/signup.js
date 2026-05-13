@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 import Link from '../../shared/router/link';
@@ -12,8 +12,17 @@ function Signup(props) {
     inputType: 'password',
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (props.error) {
+      setIsSubmitting(false);
+    }
+  }, [props.error]);
+
   function handleSubmit(event) {
     event.preventDefault();
+    setIsSubmitting(true);
 
     const {name, username, email, password} = state;
     props.registerUser(name, username, email, password);
@@ -44,6 +53,8 @@ function Signup(props) {
         <h1 className='form-title'>Sign Up</h1>
         <p className='form-message'>Create an account and join in!</p>
 
+        {props.error && <p className="form-error">{props.error}</p>}
+
         <form className='action-form' onSubmit={handleSubmit}>
           <div className='fieldset'>
             <FontAwesomeIcon icon='passport' className='input-icon' />
@@ -68,6 +79,10 @@ function Signup(props) {
               required
             />
           </div>
+
+          {state.username && !/^[a-zA-Z0-9_]+$/.test(state.username) && (
+            <p className="form-error">Username must contain only letters, numbers, and underscores.</p>
+          )}
 
           <div className='fieldset'>
             <FontAwesomeIcon icon='envelope' className='input-icon' />
@@ -103,10 +118,15 @@ function Signup(props) {
             </button>
           </div>
 
+          {state.password && state.password.length < 4 && (
+            <p className="form-error">Password must be at least 4 characters.</p>
+          )}
+
           <input
             className='button form-button'
             type='submit'
             value='Create Account'
+            disabled={isSubmitting}
           />
         </form>
 

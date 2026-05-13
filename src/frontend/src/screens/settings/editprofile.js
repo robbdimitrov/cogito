@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 function EditProfile(props) {
@@ -9,8 +9,17 @@ function EditProfile(props) {
     bio: props.user.bio,
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (props.error) {
+      setIsSubmitting(false);
+    }
+  }, [props.error]);
+
   function handleSubmit(event) {
     event.preventDefault();
+    setIsSubmitting(true);
     const {name, username, email, bio} = state;
     props.updateUser(name, username, email, bio);
   }
@@ -26,6 +35,8 @@ function EditProfile(props) {
     <div className='form-content'>
       <h1 className='form-title'>Edit Profile</h1>
 
+      {props.error && <p className="form-error">{props.error}</p>}
+
       <form className='action-form' onSubmit={handleSubmit}>
         <div className='fieldset'>
           <FontAwesomeIcon icon='passport' className='input-icon' />
@@ -36,6 +47,7 @@ function EditProfile(props) {
             placeholder='Name'
             onChange={handleInputChange}
             value={state.name}
+            required
           />
         </div>
 
@@ -81,6 +93,7 @@ function EditProfile(props) {
           type='submit'
           className='button form-button'
           value='Save changes'
+          disabled={isSubmitting}
         />
       </form>
     </div>

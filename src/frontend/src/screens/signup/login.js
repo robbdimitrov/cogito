@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 import Link from '../../shared/router/link';
@@ -9,8 +9,17 @@ function Login(props) {
     password: '',
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (props.error) {
+      setIsSubmitting(false);
+    }
+  }, [props.error]);
+
   function handleSubmit(event) {
     event.preventDefault();
+    setIsSubmitting(true);
     const {email, password} = state;
     props.loginUser(email, password);
   }
@@ -31,6 +40,8 @@ function Login(props) {
       <div className='form-content main-content'>
         <h1 className='form-title'>Log In</h1>
         <p className='form-message'>Welcome back! Log in to access your account.</p>
+
+        {props.error && <p className="form-error">{props.error}</p>}
 
         <form className='action-form' onSubmit={handleSubmit}>
           <div className='fieldset'>
@@ -66,6 +77,7 @@ function Login(props) {
             className='button form-button'
             type='submit'
             value='Log In'
+            disabled={isSubmitting}
           />
         </form>
 

@@ -17,8 +17,8 @@ function Settings(props) {
 
       <div className='settings-content main-content'>
         {router.path.endsWith('/password')
-          ? <Password updatePassword={props.updatePassword || (() => {})} />
-          : <EditProfile user={user} updateUser={props.updateUser || (() => {})} />
+          ? <Password updatePassword={props.updatePassword || (() => {})} error={props.passwordError} />
+          : <EditProfile user={user} updateUser={props.updateUser || (() => {})} error={props.updateError} />
         }
       </div>
     </div>

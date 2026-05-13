@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
 function Password(props) {
@@ -9,8 +9,17 @@ function Password(props) {
     oldPasswordVisible: false,
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (props.error) {
+      setIsSubmitting(false);
+    }
+  }, [props.error]);
+
   function handleSubmit(event) {
     event.preventDefault();
+    setIsSubmitting(true);
 
     const {password, oldPassword} = state;
     props.updatePassword(password, oldPassword);
@@ -38,6 +47,8 @@ function Password(props) {
     <div className='form-content'>
       <h1 className='form-title'>Change Password</h1>
 
+      {props.error && <p className="form-error">{props.error}</p>}
+
       <form className='action-form' onSubmit={handleSubmit}>
         <div className='fieldset'>
           <FontAwesomeIcon icon='lock' className='input-icon' />
@@ -61,6 +72,10 @@ function Password(props) {
           </button>
         </div>
 
+        {state.password && state.password.length < 4 && (
+          <p className="form-error">Password must be at least 4 characters.</p>
+        )}
+
         <div className='fieldset'>
           <FontAwesomeIcon icon='lock' className='input-icon' />
           <input
@@ -83,10 +98,15 @@ function Password(props) {
           </button>
         </div>
 
+        {state.oldPassword && state.oldPassword.length < 4 && (
+          <p className="form-error">Current password must be at least 4 characters.</p>
+        )}
+
         <input
           type='submit'
           className='button form-button'
           value='Save'
+          disabled={isSubmitting}
         />
       </form>
     </div>
