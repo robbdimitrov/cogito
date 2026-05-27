@@ -1,8 +1,5 @@
 import React from 'react';
-
 import SettingsMenuItem from './settingsmenuitem';
-import SettingsMenuHeader from './settingsmenuheader';
-import './settingsmenu.scss';
 
 const menuItems = [
   {title: 'Edit profile', link: 'profile'},
@@ -11,18 +8,15 @@ const menuItems = [
 
 function SettingsMenu() {
   return (
-    <div className='settings-menu'>
-      <ul className='settings-menu-list'>
-        <SettingsMenuHeader title='Settings' />
-
-        {menuItems.map((item) =>
-          <SettingsMenuItem
-            key={item.link}
-            link={item.link}
-            title={item.title}
-          />
-        )}
-      </ul>
+    <div className="card bg-base-100 shadow-sm border border-base-200">
+      <div className="card-body p-0">
+        <div className="px-4 py-3 border-b border-base-200 font-semibold">Settings</div>
+        <ul className="menu menu-sm">
+          {menuItems.map((item) => (
+            <SettingsMenuItem key={item.link} link={item.link} title={item.title} />
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

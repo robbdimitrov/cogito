@@ -1,10 +1,8 @@
 import React from 'react';
-
 import ControlBar from './controlbar';
 import UserHeader from './userheader';
 import Loading from '../../shared/components/loading/loading';
 import {useRouter} from '../../shared/router/router';
-import './profile.scss';
 
 const ThoughtList = React.lazy(() => import('../../shared/components/thoughtlist/thoughtlist'));
 const UserList = React.lazy(() => import('../../shared/components/userlist/userlist'));
@@ -28,11 +26,10 @@ function Profile(props) {
   };
 
   return (
-    <div className='profile-container'>
+    <div className="container mx-auto px-4 py-6 max-w-3xl">
       <UserHeader user={user} currentUser={currentUser} onFollow={onFollow} onUnfollow={onUnfollow} />
       <ControlBar user={user} />
-
-      <div className='profile-content main-content'>
+      <div className="mt-4">
         {isLoading ? <Loading /> : resolveComponent()}
       </div>
     </div>

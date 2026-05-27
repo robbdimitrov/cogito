@@ -1,141 +1,68 @@
-import React, {useState, useEffect} from 'react';
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-
+import React, {useState} from 'react';
 import Link from '../../shared/router/link';
 
-function Signup(props) {
-  const [state, setState] = useState({
-    name: '',
-    username: '',
-    email: '',
-    password: '',
-    inputType: 'password',
-  });
-
+function Signup({registerUser, error}) {
+  const [state, setState] = useState({name: '', username: '', email: '', password: ''});
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (props.error) {
-      setIsSubmitting(false);
-    }
-  }, [props.error]);
 
   function handleSubmit(event) {
     event.preventDefault();
     setIsSubmitting(true);
-
     const {name, username, email, password} = state;
-    props.registerUser(name, username, email, password);
+    registerUser(name, username, email, password);
   }
 
   function handleInputChange(event) {
-    const target = event.target;
-    const value = target.value;
-    const name = target.name;
-
-    setState({
-      ...state,
-      [name]: value
-    });
+    const {name, value} = event.target;
+    setState((s) => ({...s, [name]: value}));
   }
 
-  function changeInputType(event) {
-    const isHidden = state.inputType === 'password';
-    setState({
-      ...state,
-      inputType: isHidden ? 'text' : 'password'
-    });
-  }
+  const usernameValid = !state.username || /^[a-zA-Z0-9_]+$/.test(state.username);
+  const passwordValid = !state.password || state.password.length >= 4;
 
   return (
-    <div className='container'>
-      <div className='form-content main-content'>
-        <h1 className='form-title'>Sign Up</h1>
-        <p className='form-message'>Create an account and join in!</p>
+    <div className="min-h-[80vh] flex items-center justify-center px-4">
+      <div className="card w-full max-w-md bg-base-100 shadow-xl border border-base-200">
+        <div className="card-body">
+          <h1 className="card-title text-2xl justify-center mb-2">Create Account</h1>
+          <p className="text-center text-base-content/60 mb-6">Join the conversation</p>
 
-        {props.error && <p className="form-error">{props.error}</p>}
-
-        <form className='action-form' onSubmit={handleSubmit}>
-          <div className='fieldset'>
-            <FontAwesomeIcon icon='passport' className='input-icon' />
-            <input
-              className='form-input'
-              type='text'
-              name='name'
-              placeholder='Name'
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-
-          <div className='fieldset'>
-            <FontAwesomeIcon icon='user' className='input-icon' />
-            <input
-              className='form-input'
-              type='text'
-              name='username'
-              placeholder='Username'
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-
-          {state.username && !/^[a-zA-Z0-9_]+$/.test(state.username) && (
-            <p className="form-error">Username must contain only letters, numbers, and underscores.</p>
+          {error && (
+            <div className="alert alert-error mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <span>{error}</span>
+            </div>
           )}
 
-          <div className='fieldset'>
-            <FontAwesomeIcon icon='envelope' className='input-icon' />
-            <input
-              className='form-input'
-              type='email'
-              name='email'
-              placeholder='Email'
-              pattern='[^@]+@[^@]+\.[^@]+'
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-
-          <div className='fieldset'>
-            <FontAwesomeIcon icon='lock' className='input-icon' />
-            <input
-              className='form-input'
-              type={state.inputType}
-              name='password'
-              placeholder='Password'
-              minLength='4'
-              maxLength='30'
-              onChange={handleInputChange}
-              required
-            />
-            <button
-              className='visibility-button'
-              onClick={changeInputType}
-              type='button'
-            >
-              <FontAwesomeIcon icon='eye' />
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="form-control">
+              <label className="label"><span className="label-text">Name</span></label>
+              <input className="input input-bordered" type="text" name="name" placeholder="Your name" onChange={handleInputChange} value={state.name} required />
+            </div>
+            <div className="form-control">
+              <label className="label"><span className="label-text">Username</span></label>
+              <input className="input input-bordered" type="text" name="username" placeholder="@username" onChange={handleInputChange} value={state.username} required />
+              {!usernameValid && <span className="label-text-alt text-error mt-1">Letters, numbers, underscores only</span>}
+            </div>
+            <div className="form-control">
+              <label className="label"><span className="label-text">Email</span></label>
+              <input className="input input-bordered" type="email" name="email" placeholder="you@example.com" onChange={handleInputChange} value={state.email} required />
+            </div>
+            <div className="form-control">
+              <label className="label"><span className="label-text">Password</span></label>
+              <input className="input input-bordered" type="password" name="password" placeholder="••••••••" minLength="4" onChange={handleInputChange} value={state.password} required />
+              {!passwordValid && <span className="label-text-alt text-error mt-1">At least 4 characters</span>}
+            </div>
+            <button type="submit" className="btn btn-primary w-full" disabled={isSubmitting || !usernameValid || !passwordValid}>
+              {isSubmitting ? <span className="loading loading-spinner"></span> : 'Create Account'}
             </button>
-          </div>
+          </form>
 
-          {state.password && state.password.length < 4 && (
-            <p className="form-error">Password must be at least 4 characters.</p>
-          )}
+          <div className="divider">or</div>
 
-          <input
-            className='button form-button'
-            type='submit'
-            value='Create Account'
-            disabled={isSubmitting}
-          />
-        </form>
-
-        <div className='reference'>
-          <span className='reference-label'>Already have an account?</span>
-
-          <Link href='/login' className='reference-button'>
-            <span>Log In</span>
-          </Link>
+          <p className="text-center text-sm">
+            Already have an account? <Link href="/login" className="link link-primary">Log In</Link>
+          </p>
         </div>
       </div>
     </div>

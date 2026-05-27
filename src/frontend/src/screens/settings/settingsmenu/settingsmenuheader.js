@@ -1,7 +1,5 @@
 import React from 'react';
 
-import './settingsmenuheader.scss'
-
 function SettingsMenuHeader(props) {
   return (
     <li className='settings-menu-item header'>

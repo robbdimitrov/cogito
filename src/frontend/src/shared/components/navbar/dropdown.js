@@ -1,7 +1,6 @@
 import React from 'react';
 
 import Link from '../../router/link';
-import './dropdown.scss';
 
 function Dropdown({user, logoutUser}) {
   return (
@@ -14,13 +13,11 @@ function Dropdown({user, logoutUser}) {
             </span>
           </Link>
         </li>
-
         <li className="dropdown-item">
           <Link href="/settings/profile" className="dropdown-button">
             <span>Settings</span>
           </Link>
         </li>
-
         <li className="dropdown-item">
           <div className="dropdown-button" onClick={logoutUser}>
             <span>Sign out</span>

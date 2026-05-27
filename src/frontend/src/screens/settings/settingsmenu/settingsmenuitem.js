@@ -1,15 +1,12 @@
 import React from 'react';
-
 import Link from '../../../shared/router/link';
-import './settingsmenuitem.scss';
 
 function SettingsMenuItem(props) {
+  const isActive = window.location.pathname.endsWith(props.link);
   return (
-    <li className='settings-menu-item'>
-      <Link href={`/settings/${props.link}`} className='settings-menu-button'>
-        <span className='settings-menu-item-title'>
-          {props.title}
-        </span>
+    <li>
+      <Link href={`/settings/${props.link}`} className={isActive ? 'active' : ''}>
+        {props.title}
       </Link>
     </li>
   );

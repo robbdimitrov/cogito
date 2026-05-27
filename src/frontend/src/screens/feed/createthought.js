@@ -16,30 +16,30 @@ function CreateThought({user, onCreatePost}) {
       .catch(() => setIsSubmitting(false));
   }
 
-  const author = user || {name: '', username: ''};
-
   return (
-    <div className="create-thought">
-      <form className="create-thought-form" onSubmit={handleSubmit}>
-        <textarea
-          className="create-thought-input"
-          placeholder="What's on your mind?"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          rows={3}
-          maxLength={255}
-        />
-        <div className="create-thought-actions">
-          <span className="create-thought-counter">{content.length}/255</span>
-          <button
-            type="submit"
-            className="button create-thought-button"
-            disabled={isSubmitting || !content.trim()}
-          >
-            Post
-          </button>
-        </div>
-      </form>
+    <div className="card bg-base-100 shadow-sm border border-base-200">
+      <div className="card-body p-4">
+        <form onSubmit={handleSubmit}>
+          <textarea
+            className="textarea textarea-bordered w-full resize-none"
+            placeholder="What's on your mind?"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={3}
+            maxLength={255}
+          />
+          <div className="flex justify-between items-center mt-3">
+            <span className="text-sm text-base-content/60">{content.length}/255</span>
+            <button
+              type="submit"
+              className="btn btn-primary btn-sm"
+              disabled={isSubmitting || !content.trim()}
+            >
+              Post
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

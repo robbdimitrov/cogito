@@ -3,7 +3,6 @@ import React, {useState, useEffect, useCallback} from 'react';
 import Navbar from './shared/components/navbar/navbar';
 import ErrorBoundary from './shared/components/errorboundary/errorboundary';
 import Loading from './shared/components/loading/loading';
-import IconLibrary from './shared/services/iconlibrary';
 import {useRoutes, RouterContext} from './shared/router/router';
 import {authGuard, unauthGuard} from './shared/router/guards';
 import APIClient from './shared/services/apiclient';
@@ -15,8 +14,6 @@ const Profile = React.lazy(() => import('./screens/profile/profile'));
 const Login = React.lazy(() => import('./screens/signup/login'));
 const Signup = React.lazy(() => import('./screens/signup/signup'));
 const Settings = React.lazy(() => import('./screens/settings/settings'));
-
-IconLibrary.configure();
 
 const apiClient = new APIClient();
 
