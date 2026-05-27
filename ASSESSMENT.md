@@ -306,22 +306,16 @@ This section tracks what has been done and what remains. A fresh agent should re
 - [x] **A1-A3:** Backend controller fixes (JSON body parsing + default `limit=20` + Go build verified)
 - [x] **B1-B11:** Frontend integration fixes (credentials + 401 interceptor, create post, profile links, follow/unfollow, display bugs, author mapping)
 - [x] **C1-C5:** UI Redesign — Tailwind + DaisyUI tooling, theme system (light/dark toggle + localStorage), page redesigns, SCSS cleanup, FontAwesome replacement
-- [x] **D:** Verification — frontend production build succeeds
+- [x] **D:** Verification — frontend production build succeeds, Docker builds succeed
 
 ### Remaining
-- [ ] Docker build verification (`make` should build all images)
+- [ ] None — project meets minimum viable goal
 
-### Next Tasks (Priority Order)
-1. **B1-B2:** APIClient — `credentials: 'include'` + 401 interceptor
-2. **B3-B11:** Frontend integration fixes (display bugs, create post, follow/unfollow, author mapping)
-3. **C1-C5:** UI Redesign — Tooling setup, Tailwind + DaisyUI, theme system, page redesigns, icon swap, SCSS cleanup
-4. **D:** Verification — build and test
-
-### Key Context for Fresh Agent
-- Backend controllers use `c.Bind(&req)` with local structs to parse JSON (already fixed).
-- Paginated endpoints use `getIntQuery(c, key, default)` helper with default `limit=20`.
-- The frontend `fetch` calls lack `credentials: 'include'` — the most critical frontend fix.
-- Post authors are resolved purely in the frontend (by fetching users per `userId`). Don't touch proto files.
-- React version should stay on 18.x (downgrade from 19 if needed).
-- Use DaisyUI + Tailwind for all UI. Delete all `.scss` files.
-- See Sections 1-8 above for detailed discovery, decisions, and file lists.
+### Fresh Agent Handoff
+If you're picking this up, the project is in a working state. Key things to know:
+- Backend controllers parse JSON bodies (`c.Bind`) with default `limit=20` on paginated endpoints.
+- Frontend `fetch` includes `credentials: 'include'` and has a 401 interceptor.
+- UI is fully DaisyUI + Tailwind with light/dark theme toggle.
+- All SCSS and FontAwesome have been removed.
+- React is pinned to 18.2.0 to match `react-scripts@4`.
+- If you need to make changes, check `AGENTS.md` for build commands and architecture notes.
