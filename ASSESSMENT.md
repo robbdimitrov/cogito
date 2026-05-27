@@ -305,9 +305,11 @@ This section tracks what has been done and what remains. A fresh agent should re
 - [x] Updated AGENTS.md with decisions
 - [x] **A1-A3:** Backend controller fixes (JSON body parsing + default `limit=20` + Go build verified)
 - [x] **B1-B11:** Frontend integration fixes (credentials + 401 interceptor, create post, profile links, follow/unfollow, display bugs, author mapping)
+- [x] **C1-C5:** UI Redesign — Tailwind + DaisyUI tooling, theme system (light/dark toggle + localStorage), page redesigns, SCSS cleanup, FontAwesome replacement
+- [x] **D:** Verification — frontend production build succeeds
 
-### In Progress
-- [ ] **C1-C5:** UI Redesign — Tailwind + DaisyUI tooling, theme system, page redesigns, SCSS cleanup, FontAwesome replacement
+### Remaining
+- [ ] Docker build verification (`make` should build all images)
 
 ### Next Tasks (Priority Order)
 1. **B1-B2:** APIClient — `credentials: 'include'` + 401 interceptor

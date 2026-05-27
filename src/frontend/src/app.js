@@ -19,7 +19,7 @@ const apiClient = new APIClient();
 
 const routes = [
   {id: 'feed', path: /^\/$/, component: Feed, canAccess: authGuard, title: 'Feed'},
-  {id: 'profile', path: /\/\@\w+(\/(following|followers|likes))?/, component: Profile, canAccess: authGuard, title: 'Profile'},
+  {id: 'profile', path: /\/@\w+(\/(following|followers|likes))?/, component: Profile, canAccess: authGuard, title: 'Profile'},
   {id: 'settings', path: /\/settings\/(profile|password)\/?/, component: Settings, canAccess: authGuard, title: 'Settings'},
   {id: 'login', path: /\/login/, component: Login, canAccess: unauthGuard, title: 'Log In'},
   {id: 'signup', path: /\/signup/, component: Signup, canAccess: unauthGuard, title: 'Sign Up'},
@@ -207,7 +207,7 @@ function App() {
       }
       refreshFeed();
       if (route.id === 'profile') {
-        const match = route.path.match(/\/\@(\w+)(\/\w+)?/);
+    const match = route.path.match(/\/@(\w+)(\/\w+)?/);
         if (match) {
           const [, username, subroute] = match;
           if (!subroute || subroute === '/likes') {
@@ -229,24 +229,24 @@ function App() {
       }
       refreshFeed();
       if (route.id === 'profile') {
-        const match = route.path.match(/\/\@(\w+)(\/\w+)?/);
-        if (match) {
-          const [, username, subroute] = match;
-          if (!subroute) {
-            fetchProfile(username, subroute);
+        const match = route.path.match(/\/@(\w+)(\/\w+)?/);
+          if (match) {
+            const [, username, subroute] = match;
+            if (!subroute) {
+              fetchProfile(username, subroute);
+            }
           }
         }
+      } catch (e) {
+        console.error('Repost action failed', e);
       }
-    } catch (e) {
-      console.error('Repost action failed', e);
-    }
-  }, [refreshFeed, route.id, route.path, fetchProfile]);
+    }, [refreshFeed, route.id, route.path, fetchProfile]);
 
-  const handleFollow = useCallback((userId) => {
-    apiClient.followUser(userId)
-      .then(() => {
-        if (route.id === 'profile') {
-          const match = route.path.match(/\/\@(\w+)(\/\w+)?/);
+    const handleFollow = useCallback((userId) => {
+      apiClient.followUser(userId)
+        .then(() => {
+          if (route.id === 'profile') {
+            const match = route.path.match(/\/@(\w+)(\/\w+)?/);
           if (match) {
             fetchProfile(match[1], match[2]);
           }
@@ -256,11 +256,11 @@ function App() {
       .catch((e) => console.error('Follow failed', e));
   }, [route.id, route.path, fetchProfile, refreshUser]);
 
-  const handleUnfollow = useCallback((userId) => {
-    apiClient.unfollowUser(userId)
-      .then(() => {
-        if (route.id === 'profile') {
-          const match = route.path.match(/\/\@(\w+)(\/\w+)?/);
+    const handleUnfollow = useCallback((userId) => {
+      apiClient.unfollowUser(userId)
+        .then(() => {
+          if (route.id === 'profile') {
+            const match = route.path.match(/\/@(\w+)(\/\w+)?/);
           if (match) {
             fetchProfile(match[1], match[2]);
           }

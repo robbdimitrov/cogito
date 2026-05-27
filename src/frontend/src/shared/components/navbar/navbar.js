@@ -23,8 +23,6 @@ function ThemeToggle() {
 }
 
 function Navbar({isLoggedIn, user, logoutUser}) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-
   return (
     <nav className="navbar bg-base-100 shadow-md sticky top-0 z-50">
       <div className="navbar-start">
