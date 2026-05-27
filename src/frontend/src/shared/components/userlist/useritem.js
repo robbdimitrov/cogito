@@ -16,7 +16,7 @@ function UserItem({user}) {
         </div>
 
         <div className="texts">
-          <Link href={`/${user.username}`}>
+          <Link href={`/@${user.username}`}>
             <p className="title semibold">{user.name}</p>
             <p className="subtitle light">@{user.username}</p>
           </Link>

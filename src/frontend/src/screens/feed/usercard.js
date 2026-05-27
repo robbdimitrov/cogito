@@ -18,7 +18,7 @@ function UserCard({user}) {
       <div className="counters">
         <div className="counter">
           <span className="counter-label light">Thoughts</span>
-          <span className="counter-value">{user.thoughts}</span>
+          <span className="counter-value">{user.posts}</span>
         </div>
 
         <div className="counter">

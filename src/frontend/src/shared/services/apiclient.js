@@ -1,14 +1,28 @@
 import {httpMethod} from '../constants';
+import Session from './session';
 
 class APIClient {
   request(url, method, body) {
-    let options = {method};
+    let options = {
+      method,
+      credentials: 'include',
+    };
     if (body) {
       options.headers = {'content-type': 'application/json'};
       options.body = JSON.stringify(body);
     }
     return fetch(url, options)
-      .then((response) => response.json());
+      .then((response) => {
+        if (response.status === 401) {
+          Session.reset();
+          window.location.reload();
+          return Promise.reject(new Error('Unauthorized'));
+        }
+        if (response.status === 204) {
+          return Promise.resolve();
+        }
+        return response.json();
+      });
   }
 
   // Users

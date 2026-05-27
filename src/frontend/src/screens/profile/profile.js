@@ -14,7 +14,7 @@ function Profile(props) {
   const user = props.user || {name: '', username: '', email: '', posts: 0, following: 0, followers: 0, likes: 0};
   const posts = props.posts || [];
   const users = props.users || [];
-  const { isLoading, onLike, onRepost } = props;
+  const { isLoading, onLike, onRepost, currentUser, onFollow, onUnfollow } = props;
 
   const resolveComponent = () => {
     if (router.path.endsWith('/following')) {
@@ -29,7 +29,7 @@ function Profile(props) {
 
   return (
     <div className='profile-container'>
-      <UserHeader user={user} />
+      <UserHeader user={user} currentUser={currentUser} onFollow={onFollow} onUnfollow={onUnfollow} />
       <ControlBar user={user} />
 
       <div className='profile-content main-content'>

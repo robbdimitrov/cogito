@@ -1,6 +1,7 @@
 import React from 'react';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 
+import Link from '../../router/link';
 import './thoughtitem.scss';
 
 function formatRelativeTime(dateString) {
@@ -29,8 +30,10 @@ function ThoughtItem({post, user, onLike, onRepost}) {
     <li className="thought-item">
       <article className="container">
         <p className="profile-action">
-          <strong className="name">{author.name}</strong>
-          <small className="username">@{author.username}</small>
+          <Link href={`/@${author.username}`} className="author-link">
+            <strong className="name">{author.name}</strong>
+            <small className="username">@{author.username}</small>
+          </Link>
           <small className="time">{formatRelativeTime(post.created)}</small>
         </p>
 
@@ -42,7 +45,7 @@ function ThoughtItem({post, user, onLike, onRepost}) {
             className={post.reposted ? 'retweet-button active' : 'retweet-button'}
             onClick={() => onRepost(post)}>
             <FontAwesomeIcon icon="retweet" className="button-icon" />
-            <span className="button-label">{post.retweets}</span>
+            <span className="button-label">{post.reposts}</span>
           </button>
 
           <button

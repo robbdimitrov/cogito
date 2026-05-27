@@ -22,7 +22,7 @@ const apiClient = new APIClient();
 
 const routes = [
   {id: 'feed', path: /^\/$/, component: Feed, canAccess: authGuard, title: 'Feed'},
-  {id: 'profile', path: /\/@\w+(\/(following|followers|likes))?/, component: Profile, canAccess: authGuard, title: 'Profile'},
+  {id: 'profile', path: /\/\@\w+(\/(following|followers|likes))?/, component: Profile, canAccess: authGuard, title: 'Profile'},
   {id: 'settings', path: /\/settings\/(profile|password)\/?/, component: Settings, canAccess: authGuard, title: 'Settings'},
   {id: 'login', path: /\/login/, component: Login, canAccess: unauthGuard, title: 'Log In'},
   {id: 'signup', path: /\/signup/, component: Signup, canAccess: unauthGuard, title: 'Sign Up'},
@@ -61,10 +61,39 @@ function App() {
   const refreshFeed = useCallback(() => {
     if (!isLoggedIn) return;
     setIsFeedLoading(true);
-    apiClient.getFeed(0)
-      .then((data) => setPosts(data.items || []))
-      .catch(() => setPosts([]))
-      .finally(() => setIsFeedLoading(false));
+
+    const doRefresh = async () => {
+      try {
+        const data = await apiClient.getFeed(0);
+        const rawPosts = data.items || [];
+
+        // Resolve authors by userId
+        const userIds = [...new Set(rawPosts.map((p) => p.userId))];
+        const userMap = {};
+        await Promise.all(
+          userIds.map(async (uid) => {
+            try {
+              const u = await apiClient.getUser(uid);
+              userMap[uid] = u;
+            } catch {
+              userMap[uid] = null;
+            }
+          })
+        );
+
+        const postsWithAuthors = rawPosts.map((p) => ({
+          ...p,
+          user: userMap[p.userId],
+        }));
+        setPosts(postsWithAuthors);
+      } catch {
+        setPosts([]);
+      } finally {
+        setIsFeedLoading(false);
+      }
+    };
+
+    doRefresh();
   }, [isLoggedIn]);
 
   const fetchProfile = useCallback(async (username, subroute) => {
@@ -112,7 +141,7 @@ function App() {
     if (route.id !== 'profile' || !isLoggedIn) {
       return;
     }
-    const match = route.path.match(/\/@(\w+)(\/\w+)?/);
+    const match = route.path.match(/\/\@(\w+)(\/\w+)?/);
     if (!match) {
       return;
     }
@@ -167,6 +196,11 @@ function App() {
       .catch(() => setPasswordError('Password update failed. Please try again.'));
   };
 
+  const createPost = (content) => {
+    return apiClient.createPost(content)
+      .then(() => refreshFeed());
+  };
+
   const handleLike = useCallback(async (post) => {
     try {
       if (post.liked) {
@@ -176,7 +210,7 @@ function App() {
       }
       refreshFeed();
       if (route.id === 'profile') {
-        const match = route.path.match(/\/@(\w+)(\/\w+)?/);
+        const match = route.path.match(/\/\@(\w+)(\/\w+)?/);
         if (match) {
           const [, username, subroute] = match;
           if (!subroute || subroute === '/likes') {
@@ -198,7 +232,7 @@ function App() {
       }
       refreshFeed();
       if (route.id === 'profile') {
-        const match = route.path.match(/\/@(\w+)(\/\w+)?/);
+        const match = route.path.match(/\/\@(\w+)(\/\w+)?/);
         if (match) {
           const [, username, subroute] = match;
           if (!subroute) {
@@ -211,13 +245,41 @@ function App() {
     }
   }, [refreshFeed, route.id, route.path, fetchProfile]);
 
+  const handleFollow = useCallback((userId) => {
+    apiClient.followUser(userId)
+      .then(() => {
+        if (route.id === 'profile') {
+          const match = route.path.match(/\/\@(\w+)(\/\w+)?/);
+          if (match) {
+            fetchProfile(match[1], match[2]);
+          }
+        }
+        refreshUser();
+      })
+      .catch((e) => console.error('Follow failed', e));
+  }, [route.id, route.path, fetchProfile, refreshUser]);
+
+  const handleUnfollow = useCallback((userId) => {
+    apiClient.unfollowUser(userId)
+      .then(() => {
+        if (route.id === 'profile') {
+          const match = route.path.match(/\/\@(\w+)(\/\w+)?/);
+          if (match) {
+            fetchProfile(match[1], match[2]);
+          }
+        }
+        refreshUser();
+      })
+      .catch((e) => console.error('Unfollow failed', e));
+  }, [route.id, route.path, fetchProfile, refreshUser]);
+
   const renderComponent = () => {
     const routeId = route.id || 'fallback';
     if (routeId === 'feed') {
-      return <Feed posts={posts} user={user} isLoading={isFeedLoading} onLike={handleLike} onRepost={handleRepost} />;
+      return <Feed posts={posts} user={user} isLoading={isFeedLoading} onLike={handleLike} onRepost={handleRepost} onCreatePost={createPost} />;
     }
     if (routeId === 'profile') {
-      return <Profile user={profileData.user} posts={profileData.posts} users={profileData.users} isLoading={isProfileLoading} onLike={handleLike} onRepost={handleRepost} />;
+      return <Profile user={profileData.user} posts={profileData.posts} users={profileData.users} isLoading={isProfileLoading} onLike={handleLike} onRepost={handleRepost} currentUser={user} onFollow={handleFollow} onUnfollow={handleUnfollow} />;
     }
     if (routeId === 'settings') {
       return <Settings user={user} updateUser={updateUser} updatePassword={updatePassword} updateError={updateError} passwordError={passwordError} />;

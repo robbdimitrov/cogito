@@ -303,55 +303,20 @@ This section tracks what has been done and what remains. A fresh agent should re
 ### Completed
 - [x] Expanded assessment with API route audit (Section 2)
 - [x] Updated AGENTS.md with decisions
+- [x] **A1-A3:** Backend controller fixes (JSON body parsing + default `limit=20` + Go build verified)
 
 ### In Progress
-- [ ] **A1-A2:** Backend controller fixes (JSON body parsing + default `limit=20`)
-  - `auth_controller.go` — needs `c.Bind(&req)` instead of `c.FormValue`
-  - `user_controller.go` — same for `createUser`, `updateUser`; default limit helper
-  - `post_controller.go` — same for `createPost`; default limit helper
+- [ ] **B1-B11:** Frontend integration fixes
 
 ### Next Tasks (Priority Order)
-1. **A3:** Verify Go builds after controller edits
-2. **B1-B2:** Frontend `APIClient` — add `credentials: 'include'` and 401 interceptor
-3. **B3-B11:** Frontend integration fixes (display bugs, create post, follow/unfollow, author mapping)
-4. **C1-C5:** UI Redesign — Tooling setup, Tailwind + DaisyUI, theme system, page redesigns, icon swap, SCSS cleanup
-5. **D:** Verification — build and test
+1. **B1-B2:** APIClient — `credentials: 'include'` + 401 interceptor
+2. **B3-B11:** Frontend integration fixes (display bugs, create post, follow/unfollow, author mapping)
+3. **C1-C5:** UI Redesign — Tooling setup, Tailwind + DaisyUI, theme system, page redesigns, icon swap, SCSS cleanup
+4. **D:** Verification — build and test
 
 ### Key Context for Fresh Agent
-- Backend controllers currently read `c.FormValue(...)` but frontend sends `application/json`. Use `c.Bind(&req)` with local structs to parse JSON.
-- Add a small helper `getIntQuery(c, key, default)` for paginated endpoints to avoid repeating `strconv.Atoi` + default logic everywhere.
-- The frontend `fetch` calls lack `credentials: 'include'` — the most critical frontend fix.
-- Post authors are resolved purely in the frontend (by fetching users per `userId`). Don't touch proto files.
-- React version should stay on 18.x (downgrade from 19 if needed).
-- Use DaisyUI + Tailwind for all UI. Delete all `.scss` files.
-- See Sections 1-8 above for detailed discovery, decisions, and file lists.
-
----
-
-## 9. Implementation Progress
-
-This section tracks what has been done and what remains. A fresh agent should read this file first, then continue with the `Next Task` below.
-
-### Completed
-- [x] Expanded assessment with API route audit (Section 2)
-- [x] Updated AGENTS.md with decisions
-
-### In Progress
-- [ ] **A1-A2:** Backend controller fixes (JSON body parsing + default `limit=20`)
-  - `auth_controller.go` — needs `c.Bind(&req)` instead of `c.FormValue`
-  - `user_controller.go` — same for `createUser`, `updateUser`; default limit helper
-  - `post_controller.go` — same for `createPost`; default limit helper
-
-### Next Tasks (Priority Order)
-1. **A3:** Verify Go builds after controller edits
-2. **B1-B2:** Frontend `APIClient` — add `credentials: 'include'` and 401 interceptor
-3. **B3-B11:** Frontend integration fixes (display bugs, create post, follow/unfollow, author mapping)
-4. **C1-C5:** UI Redesign — Tooling setup, Tailwind + DaisyUI, theme system, page redesigns, icon swap, SCSS cleanup
-5. **D:** Verification — build and test
-
-### Key Context for Fresh Agent
-- Backend controllers currently read `c.FormValue(...)` but frontend sends `application/json`. Use `c.Bind(&req)` with local structs to parse JSON.
-- Add a small helper `getIntQuery(c, key, default)` for paginated endpoints to avoid repeating `strconv.Atoi` + default logic everywhere.
+- Backend controllers use `c.Bind(&req)` with local structs to parse JSON (already fixed).
+- Paginated endpoints use `getIntQuery(c, key, default)` helper with default `limit=20`.
 - The frontend `fetch` calls lack `credentials: 'include'` — the most critical frontend fix.
 - Post authors are resolved purely in the frontend (by fetching users per `userId`). Don't touch proto files.
 - React version should stay on 18.x (downgrade from 19 if needed).
