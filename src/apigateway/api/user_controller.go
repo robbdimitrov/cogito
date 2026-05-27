@@ -29,7 +29,7 @@ func (s *userController) createUser(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 	defer cancel()
 
 	var body struct {
@@ -72,7 +72,7 @@ func (s *userController) getUser(c echo.Context) error {
 		return echo.NewHTTPError(400)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
@@ -96,7 +96,7 @@ func (s *userController) getUserByUsername(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
@@ -125,7 +125,7 @@ func (s *userController) updateUser(c echo.Context) error {
 		return echo.NewHTTPError(403)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
@@ -168,7 +168,7 @@ func (s *userController) getFollowing(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
@@ -214,7 +214,7 @@ func (s *userController) getFollowers(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
@@ -260,7 +260,7 @@ func (s *userController) followUser(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
@@ -288,7 +288,7 @@ func (s *userController) unfollowUser(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 

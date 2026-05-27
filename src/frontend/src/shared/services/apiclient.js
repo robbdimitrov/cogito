@@ -21,6 +21,9 @@ class APIClient {
         if (response.status === 204) {
           return Promise.resolve();
         }
+        if (!response.ok) {
+          return response.json().then((data) => Promise.reject(new Error(data.message || 'Request failed')));
+        }
         return response.json();
       });
   }

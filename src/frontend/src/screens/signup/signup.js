@@ -9,7 +9,7 @@ function Signup({registerUser, error}) {
     event.preventDefault();
     setIsSubmitting(true);
     const {name, username, email, password} = state;
-    registerUser(name, username, email, password);
+    registerUser(name, username, email, password).finally(() => setIsSubmitting(false));
   }
 
   function handleInputChange(event) {

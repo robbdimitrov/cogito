@@ -48,7 +48,7 @@ go mod download
 go build -v -o service
 ```
 
-Dockerfiles use multi-stage builds: `golang:1.19` builder → `scratch` runtime.  
+Dockerfiles use multi-stage builds: `golang:1.19` builder → `scratch` runtime.
 **Build note:** `CGO_ENABLED=0` must be set when building for the `scratch` stage, otherwise the binary will fail at runtime with a linker error (`exec /service: no such file or directory`).
 
 ### Python services
@@ -112,52 +112,3 @@ There are **no tests** in this repo. Do not try to run a test suite.
 
 - Use **single-line commits** (summary only, no body). Keep the message under 72 characters when possible.
 
-## Project Health & Redesign Decisions
-
-*(Added after assessment on 2026-05-27. Full details in `ASSESSMENT.md`.)*
-
-### Known Bugs Affecting Core Features
-
-1. **API Gateway body parsing mismatch (CRITICAL):** Controllers read `c.FormValue(...)`, but the frontend sends JSON. Every mutating request (login, signup, create post, update profile) sends empty values to gRPC, causing failures.
-2. **Missing default `limit` query param (CRITICAL):** Paginated endpoints (`/posts/feed`, `/users/:id/posts`, etc.) require both `page` and `limit`. The frontend only sends `page`, so all list endpoints return `400`.
-3. **Frontend `fetch` missing `credentials: 'include'` (CRITICAL):** The API gateway uses HttpOnly `session` cookies, but the browser never sends them back. Authenticated API calls get `401` even though the frontend thinks the user is logged in (it checks `localStorage`).
-4. **No "create post" UI:** The `Feed` screen has no input for writing thoughts.
-5. **Feed shows wrong authors:** `Post` responses do not include author info; `ThoughtItem` falls back to the current user, so every post looks like it was written by the viewer.
-6. **No clickable profile links:** Usernames in posts/user lists are plain text, not navigation links.
-
-### Decisions
-
-- Fix backend controllers to parse **JSON bodies** rather than changing the frontend to `FormData`.
-- Add **default `limit=20`** in backend controllers instead of updating every frontend call.
-- Keep the **custom router** (do not migrate to React Router) to minimize risk.
-- Resolve post authors in the **frontend** (fetch users per `userId`) rather than modifying the `Post` protobuf and regenerating across all services.
-- Stay on **React 18.x** (downgrade from 19 if necessary) to match `react-scripts@4` and AGENTS.md documentation.
-- Replace all custom **SCSS** with **Tailwind CSS + DaisyUI**. Remove `sass` and all `*.scss` files.
-- Support **light and dark themes** via DaisyUI's theme system; add a toggle in the navbar and persist to `localStorage`.
-- Replace **FontAwesome** with a lighter icon set (Heroicons or Lucide) for consistency with Tailwind/DaisyUI.
-- No database schema changes are needed for login/posting/profiles.
-
-## Project Health & Redesign Decisions
-
-*(Added after assessment on 2026-05-27. Full details in `ASSESSMENT.md`.)*
-
-### Known Bugs Affecting Core Features
-
-1. **API Gateway body parsing mismatch (CRITICAL):** Controllers read `c.FormValue(...)`, but the frontend sends JSON. Every mutating request (login, signup, create post, update profile) sends empty values to gRPC, causing failures.
-2. **Missing default `limit` query param (CRITICAL):** Paginated endpoints (`/posts/feed`, `/users/:id/posts`, etc.) require both `page` and `limit`. The frontend only sends `page`, so all list endpoints return `400`.
-3. **Frontend `fetch` missing `credentials: 'include'` (CRITICAL):** The API gateway uses HttpOnly `session` cookies, but the browser never sends them back. Authenticated API calls get `401` even though the frontend thinks the user is logged in (it checks `localStorage`).
-4. **No "create post" UI:** The `Feed` screen has no input for writing thoughts.
-5. **Feed shows wrong authors:** `Post` responses do not include author info; `ThoughtItem` falls back to the current user, so every post looks like it was written by the viewer.
-6. **No clickable profile links:** Usernames in posts/user lists are plain text, not navigation links.
-
-### Decisions
-
-- Fix backend controllers to parse **JSON bodies** rather than changing the frontend to `FormData`.
-- Add **default `limit=20`** in backend controllers instead of updating every frontend call.
-- Keep the **custom router** (do not migrate to React Router) to minimize risk.
-- Resolve post authors in the **frontend** (fetch users per `userId`) rather than modifying the `Post` protobuf and regenerating across all services.
-- Stay on **React 18.x** (downgrade from 19 if necessary) to match `react-scripts@4` and AGENTS.md documentation.
-- Replace all custom **SCSS** with **Tailwind CSS + DaisyUI**. Remove `sass` and all `*.scss` files.
-- Support **light and dark themes** via DaisyUI's theme system; add a toggle in the navbar and persist to `localStorage`.
-- Replace **FontAwesome** with a lighter icon set (Heroicons or Lucide) for consistency with Tailwind/DaisyUI.
-- No database schema changes are needed for login/posting/profiles.

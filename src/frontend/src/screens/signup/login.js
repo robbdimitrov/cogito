@@ -9,7 +9,7 @@ function Login({loginUser, error}) {
     event.preventDefault();
     setIsSubmitting(true);
     const {email, password} = state;
-    loginUser(email, password);
+    loginUser(email, password).finally(() => setIsSubmitting(false));
   }
 
   function handleInputChange(event) {

@@ -138,7 +138,7 @@ function App() {
     if (route.id !== 'profile' || !isLoggedIn) {
       return;
     }
-    const match = route.path.match(/\/\@(\w+)(\/\w+)?/);
+    const match = route.path.match(/\/@(\w+)(\/\w+)?/);
     if (!match) {
       return;
     }

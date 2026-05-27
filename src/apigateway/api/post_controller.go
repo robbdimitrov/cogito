@@ -29,7 +29,7 @@ func (pc *postController) createPost(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewPostServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
@@ -60,7 +60,7 @@ func (pc *postController) getFeed(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewPostServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
@@ -101,7 +101,7 @@ func (pc *postController) getPosts(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewPostServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
@@ -147,7 +147,7 @@ func (pc *postController) getLikedPosts(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewPostServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
@@ -193,7 +193,7 @@ func (pc *postController) getPost(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewPostServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
@@ -221,7 +221,7 @@ func (pc *postController) deletePost(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewPostServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
@@ -249,7 +249,7 @@ func (pc *postController) likePost(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewPostServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
@@ -277,7 +277,7 @@ func (pc *postController) unlikePost(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewPostServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
@@ -305,7 +305,7 @@ func (pc *postController) repostPost(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewPostServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
@@ -333,7 +333,7 @@ func (pc *postController) removeRepost(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewPostServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
 	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 

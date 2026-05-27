@@ -2,7 +2,7 @@ import bcrypt
 
 
 def generate_hash(password):
-    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
 
 def validate_password(password, password_hash):

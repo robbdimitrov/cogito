@@ -33,10 +33,20 @@ for svc in apigateway authservice database frontend postservice userservice; do
   kind load docker-image "${REGISTRY}/${svc}" --name "${CLUSTER_NAME}"
 done
 
+# --- set kubectl context ---
+echo "Setting kubectl context to kind-${CLUSTER_NAME}..."
+kubectl config use-context "kind-${CLUSTER_NAME}"
+
 # --- deploy ---
 echo "Creating namespace and applying manifests..."
 kubectl create namespace "${NAMESPACE}" 2>/dev/null || true
 kubectl apply -f ./k8s -n "${NAMESPACE}"
+
+# --- restart deployments to pick up new images ---
+echo "Restarting deployments to pick up new images..."
+for svc in apigateway authservice database frontend postservice userservice; do
+  kubectl rollout restart deployment "${svc}" -n "${NAMESPACE}"
+done
 
 # --- wait ---
 echo "Waiting for pods to be ready..."
