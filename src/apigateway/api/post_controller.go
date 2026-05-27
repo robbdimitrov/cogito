@@ -33,7 +33,14 @@ func (pc *postController) createPost(c echo.Context) error {
 	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
-	req := pb.CreatePostRequest{Content: c.FormValue("content")}
+	var body struct {
+		Content string `json:"content"`
+	}
+	if err := c.Bind(&body); err != nil {
+		return echo.NewHTTPError(400, "Invalid request body")
+	}
+
+	req := pb.CreatePostRequest{Content: body.Content}
 
 	res, err := client.CreatePost(ctx, &req)
 	if err != nil {
@@ -57,11 +64,11 @@ func (pc *postController) getFeed(c echo.Context) error {
 	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
-	page, err := strconv.Atoi(c.QueryParam("page"))
+	page, err := getIntQuery(c, "page", 0)
 	if err != nil {
 		return echo.NewHTTPError(400)
 	}
-	limit, err := strconv.Atoi(c.QueryParam("limit"))
+	limit, err := getIntQuery(c, "limit", 20)
 	if err != nil {
 		return echo.NewHTTPError(400)
 	}
@@ -102,11 +109,11 @@ func (pc *postController) getPosts(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(400)
 	}
-	page, err := strconv.Atoi(c.QueryParam("page"))
+	page, err := getIntQuery(c, "page", 0)
 	if err != nil {
 		return echo.NewHTTPError(400)
 	}
-	limit, err := strconv.Atoi(c.QueryParam("limit"))
+	limit, err := getIntQuery(c, "limit", 20)
 	if err != nil {
 		return echo.NewHTTPError(400)
 	}
@@ -148,11 +155,11 @@ func (pc *postController) getLikedPosts(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(400)
 	}
-	page, err := strconv.Atoi(c.QueryParam("page"))
+	page, err := getIntQuery(c, "page", 0)
 	if err != nil {
 		return echo.NewHTTPError(400)
 	}
-	limit, err := strconv.Atoi(c.QueryParam("limit"))
+	limit, err := getIntQuery(c, "limit", 20)
 	if err != nil {
 		return echo.NewHTTPError(400)
 	}

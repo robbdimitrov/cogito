@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"google.golang.org/grpc"
@@ -35,4 +36,17 @@ func newHTTPError(err error) *echo.HTTPError {
 
 func insecureCredentials() grpc.DialOption {
 	return grpc.WithTransportCredentials(insecure.NewCredentials())
+}
+
+// getIntQuery parses an integer query parameter with a fallback default value.
+func getIntQuery(c echo.Context, key string, defaultValue int) (int, error) {
+	value := c.QueryParam(key)
+	if value == "" {
+		return defaultValue, nil
+	}
+	parsed, err := strconv.Atoi(value)
+	if err != nil {
+		return 0, err
+	}
+	return parsed, nil
 }

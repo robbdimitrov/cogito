@@ -32,9 +32,17 @@ func (ac *authController) createSession(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
+	var body struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	if err := c.Bind(&body); err != nil {
+		return echo.NewHTTPError(400, "Invalid request body")
+	}
+
 	req := pb.Credentials{
-		Email:    c.FormValue("email"),
-		Password: c.FormValue("password"),
+		Email:    body.Email,
+		Password: body.Password,
 	}
 
 	res, err := client.CreateSession(ctx, &req)

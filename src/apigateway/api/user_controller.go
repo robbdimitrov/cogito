@@ -32,11 +32,21 @@ func (s *userController) createUser(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
+	var body struct {
+		Name     string `json:"name"`
+		Username string `json:"username"`
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+	if err := c.Bind(&body); err != nil {
+		return echo.NewHTTPError(400, "Invalid request body")
+	}
+
 	req := pb.CreateUserRequest{
-		Name:     c.FormValue("name"),
-		Username: c.FormValue("username"),
-		Email:    c.FormValue("email"),
-		Password: c.FormValue("password"),
+		Name:     body.Name,
+		Username: body.Username,
+		Email:    body.Email,
+		Password: body.Password,
 	}
 
 	res, err := client.CreateUser(ctx, &req)
@@ -119,13 +129,25 @@ func (s *userController) updateUser(c echo.Context) error {
 	ctx = appendUserIDHeader(ctx, c)
 	defer cancel()
 
+	var body struct {
+		Name        string `json:"name"`
+		Username    string `json:"username"`
+		Email       string `json:"email"`
+		Bio         string `json:"bio"`
+		Password    string `json:"password"`
+		OldPassword string `json:"oldPassword"`
+	}
+	if err := c.Bind(&body); err != nil {
+		return echo.NewHTTPError(400, "Invalid request body")
+	}
+
 	req := pb.UpdateUserRequest{
-		Name:        c.FormValue("name"),
-		Username:    c.FormValue("username"),
-		Email:       c.FormValue("email"),
-		Bio:         c.FormValue("bio"),
-		Password:    c.FormValue("password"),
-		OldPassword: c.FormValue("oldPassword"),
+		Name:        body.Name,
+		Username:    body.Username,
+		Email:       body.Email,
+		Bio:         body.Bio,
+		Password:    body.Password,
+		OldPassword: body.OldPassword,
 	}
 
 	_, err = client.UpdateUser(ctx, &req)
@@ -154,11 +176,11 @@ func (s *userController) getFollowing(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(400)
 	}
-	page, err := strconv.Atoi(c.QueryParam("page"))
+	page, err := getIntQuery(c, "page", 0)
 	if err != nil {
 		return echo.NewHTTPError(400)
 	}
-	limit, err := strconv.Atoi(c.QueryParam("limit"))
+	limit, err := getIntQuery(c, "limit", 20)
 	if err != nil {
 		return echo.NewHTTPError(400)
 	}
@@ -200,11 +222,11 @@ func (s *userController) getFollowers(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(400)
 	}
-	page, err := strconv.Atoi(c.QueryParam("page"))
+	page, err := getIntQuery(c, "page", 0)
 	if err != nil {
 		return echo.NewHTTPError(400)
 	}
-	limit, err := strconv.Atoi(c.QueryParam("limit"))
+	limit, err := getIntQuery(c, "limit", 20)
 	if err != nil {
 		return echo.NewHTTPError(400)
 	}
