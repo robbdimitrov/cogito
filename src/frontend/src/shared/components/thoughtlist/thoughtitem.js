@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from '../../router/link';
+import Avatar from '../../components/avatar/avatar';
 
 function formatRelativeTime(dateString) {
   const date = new Date(dateString);
@@ -22,11 +23,7 @@ function ThoughtItem({post, user, onLike, onRepost}) {
     <li className="card bg-base-100 border border-base-200 hover:border-base-300 transition-colors duration-150 cursor-default">
       <div className="card-body p-4">
         <div className="flex items-start gap-3">
-          <div className="avatar shrink-0">
-            <div className="w-10 h-10 rounded-full bg-primary text-primary-content flex items-center justify-center text-sm font-bold">
-              {author?.name?.charAt(0)?.toUpperCase() || '?'}
-            </div>
-          </div>
+          <Avatar name={author?.name} size="md" />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <Link href={`/@${author?.username}`} className="font-semibold hover:underline truncate">

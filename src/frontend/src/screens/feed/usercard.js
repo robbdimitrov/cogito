@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from '../../shared/router/link';
+import Avatar from '../../shared/components/avatar/avatar';
 
 function UserCard({user}) {
   return (
@@ -8,11 +9,7 @@ function UserCard({user}) {
       <div className="card-body p-4 -mt-8">
         <Link href={`/@${user.username}`}>
           <div className="flex items-center gap-3">
-            <div className="avatar placeholder">
-            <div className="w-14 h-14 rounded-full bg-primary text-primary-content flex items-center justify-center text-xl font-bold ring-4 ring-base-100">
-                {user.name?.charAt(0)?.toUpperCase() || '?'}
-              </div>
-            </div>
+            <Avatar name={user.name} size="lg" />
             <div className="min-w-0 pt-6">
               <p className="font-bold truncate">{user.name}</p>
               <p className="text-sm text-base-content/60">@{user.username}</p>
