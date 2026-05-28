@@ -33,6 +33,8 @@ func (r *router) configureRoutes(e *echo.Echo) {
 	e.POST("/sessions", r.auth.createSession)
 	e.GET("/sessions", r.auth.getSessions)
 	e.DELETE("/sessions", r.auth.deleteSession)
+	e.DELETE("/sessions/:sessionId", r.auth.deleteSessionByID)
+	e.DELETE("/sessions/:sessionId", r.auth.deleteSessionByID)
 
 	// Posts
 	e.POST("/posts", r.post.createPost)
