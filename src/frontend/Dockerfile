@@ -5,7 +5,6 @@ ENV NODE_OPTIONS=--openssl-legacy-provider
 COPY package*.json ./
 RUN npm install --no-optional
 COPY . .
-RUN npx tailwindcss -i src/tailwind-source.css -o src/index.css
 RUN npm run build
 
 FROM nginx:1.27-alpine
