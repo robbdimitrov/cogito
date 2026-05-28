@@ -1,8 +1,10 @@
 import React, {useState, useEffect, useCallback} from 'react';
 
 import Navbar from './shared/components/navbar/navbar';
+import BottomNav from './shared/components/bottomnav/bottomnav';
 import ErrorBoundary from './shared/components/errorboundary/errorboundary';
 import Loading from './shared/components/loading/loading';
+import ToastProvider, {useToast} from './shared/components/toast/toast';
 import {useRoutes, RouterContext} from './shared/router/router';
 import {authGuard, unauthGuard} from './shared/router/guards';
 import APIClient from './shared/services/apiclient';
@@ -14,19 +16,24 @@ const Profile = React.lazy(() => import('./screens/profile/profile'));
 const Login = React.lazy(() => import('./screens/signup/login'));
 const Signup = React.lazy(() => import('./screens/signup/signup'));
 const Settings = React.lazy(() => import('./screens/settings/settings'));
+const PostDetail = React.lazy(() => import('./screens/post/post'));
+const Search = React.lazy(() => import('./screens/search/search'));
 
 const apiClient = new APIClient();
 
 const routes = [
   {id: 'feed', path: /^\/$/, component: Feed, canAccess: authGuard, title: 'Feed'},
   {id: 'profile', path: /\/@\w+(\/(following|followers|likes))?/, component: Profile, canAccess: authGuard, title: 'Profile'},
+  {id: 'post', path: /\/posts\/(\d+)/, component: PostDetail, canAccess: authGuard, title: 'Post'},
+  {id: 'search', path: /\/search/, component: Search, canAccess: authGuard, title: 'Search'},
   {id: 'settings', path: /\/settings\/(profile|password|sessions)\/?/, component: Settings, canAccess: authGuard, title: 'Settings'},
   {id: 'login', path: /\/login/, component: Login, canAccess: unauthGuard, title: 'Log In'},
   {id: 'signup', path: /\/signup/, component: Signup, canAccess: unauthGuard, title: 'Sign Up'},
   {id: 'fallback', path: /.?/, component: Login, canAccess: unauthGuard, title: 'Log In'},
 ];
 
-function App() {
+function AppContent() {
+  const toast = useToast();
   const route = useRoutes(routes);
   const pageTitle = route.title
     ? (route.id === 'profile' && route.path.match(/\/(@\w+)/))
@@ -73,7 +80,6 @@ function App() {
         const data = await apiClient.getFeed(0);
         const rawPosts = data.items || [];
 
-        // Resolve authors by userId
         const userIds = [...new Set(rawPosts.map((p) => p.userId))];
         const userMap = {};
         await Promise.all(
@@ -161,6 +167,7 @@ function App() {
       .then((data) => {
         Session.setUserId(data.id);
         setIsLoggedIn(true);
+        toast.success('Welcome back!');
         route.navigate('/');
       })
       .catch(() => setLoginError('Invalid email or password. Please try again.'));
@@ -181,6 +188,7 @@ function App() {
     setSignupError(null);
     return apiClient.createUser(name, username, email, password)
       .then(() => {
+        toast.success('Account created! Please log in.');
         route.navigate('/login');
       })
       .catch(() => setSignupError('Registration failed. Please try again.'));
@@ -190,7 +198,10 @@ function App() {
     if (!user) return Promise.resolve();
     setUpdateError(null);
     return apiClient.updateUser(user.id, name, username, email, bio)
-      .then(() => refreshUser())
+      .then(() => {
+        refreshUser();
+        toast.success('Profile updated.');
+      })
       .catch(() => setUpdateError('Profile update failed. Please try again.'));
   };
 
@@ -198,19 +209,27 @@ function App() {
     if (!user) return Promise.resolve();
     setPasswordError(null);
     return apiClient.updatePassword(user.id, password, oldPassword)
-      .then(() => route.navigate('/settings/profile'))
+      .then(() => {
+        toast.success('Password updated.');
+        route.navigate('/settings/profile');
+      })
       .catch(() => setPasswordError('Password update failed. Please try again.'));
   };
 
-  const deleteSession = (sessionId) => {
+  const deleteSessionHandler = (sessionId) => {
     setSessionsError(null);
     return apiClient.deleteSession(sessionId)
+      .then(() => toast.success('Session terminated.'))
       .catch(() => setSessionsError('Failed to delete session.'));
   };
 
   const createPost = (content) => {
     return apiClient.createPost(content)
-      .then(() => refreshFeed());
+      .then(() => {
+        toast.success('Thought posted.');
+        refreshFeed();
+      })
+      .catch(() => toast.error('Failed to post. Try again.'));
   };
 
   const handleLike = useCallback(async (post) => {
@@ -231,9 +250,9 @@ function App() {
         }
       }
     } catch (e) {
-      console.error('Like action failed', e);
+      toast.error('Action failed. Try again.');
     }
-  }, [refreshFeed, route.id, route.path, fetchProfile]);
+  }, [refreshFeed, route.id, route.path, fetchProfile, toast]);
 
   const handleRepost = useCallback(async (post) => {
     try {
@@ -253,13 +272,14 @@ function App() {
         }
       }
     } catch (e) {
-      console.error('Repost action failed', e);
+      toast.error('Action failed. Try again.');
     }
-  }, [refreshFeed, route.id, route.path, fetchProfile]);
+  }, [refreshFeed, route.id, route.path, fetchProfile, toast]);
 
   const handleFollow = useCallback((userId) => {
     apiClient.followUser(userId)
       .then(() => {
+        toast.success('Following!');
         if (route.id === 'profile') {
           const match = route.path.match(/\/@(\w+)(\/\w+)?/);
           if (match) {
@@ -268,12 +288,13 @@ function App() {
         }
         refreshUser();
       })
-      .catch((e) => console.error('Follow failed', e));
-  }, [route.id, route.path, fetchProfile, refreshUser]);
+      .catch(() => toast.error('Follow failed. Try again.'));
+  }, [route.id, route.path, fetchProfile, refreshUser, toast]);
 
   const handleUnfollow = useCallback((userId) => {
     apiClient.unfollowUser(userId)
       .then(() => {
+        toast.info('Unfollowed.');
         if (route.id === 'profile') {
           const match = route.path.match(/\/@(\w+)(\/\w+)?/);
           if (match) {
@@ -282,19 +303,43 @@ function App() {
         }
         refreshUser();
       })
-      .catch((e) => console.error('Unfollow failed', e));
-  }, [route.id, route.path, fetchProfile, refreshUser]);
+      .catch(() => toast.error('Unfollow failed. Try again.'));
+  }, [route.id, route.path, fetchProfile, refreshUser, toast]);
+
+  const handleDeletePost = useCallback(async (postId) => {
+    try {
+      await apiClient.deletePost(postId);
+      toast.success('Post deleted.');
+      refreshFeed();
+      if (route.id === 'profile') {
+        const match = route.path.match(/\/@(\w+)(\/\w+)?/);
+        if (match) {
+          fetchProfile(match[1], match[2]);
+        }
+      }
+    } catch (e) {
+      toast.error('Delete failed. Try again.');
+    }
+  }, [refreshFeed, route.id, route.path, fetchProfile, toast]);
 
   const renderComponent = () => {
     const routeId = route.id || 'fallback';
     if (routeId === 'feed') {
-      return <Feed posts={posts} user={user} isLoading={isFeedLoading} onLike={handleLike} onRepost={handleRepost} onCreatePost={createPost} />;
+      return <Feed posts={posts} user={user} isLoading={isFeedLoading} onLike={handleLike} onRepost={handleRepost} onCreatePost={createPost} onDeletePost={handleDeletePost} currentUserId={user?.id} />;
     }
     if (routeId === 'profile') {
-      return <Profile user={profileData.user} posts={profileData.posts} users={profileData.users} isLoading={isProfileLoading} onLike={handleLike} onRepost={handleRepost} currentUser={user} onFollow={handleFollow} onUnfollow={handleUnfollow} />;
+      return <Profile user={profileData.user} posts={profileData.posts} users={profileData.users} isLoading={isProfileLoading} onLike={handleLike} onRepost={handleRepost} currentUser={user} onFollow={handleFollow} onUnfollow={handleUnfollow} onDeletePost={handleDeletePost} />;
+    }
+    if (routeId === 'post') {
+      const match = route.path.match(/\/posts\/(\d+)/);
+      const postId = match ? match[1] : null;
+      return <PostDetail postId={postId} onDeleted={() => route.navigate('/')} />;
+    }
+    if (routeId === 'search') {
+      return <Search />;
     }
     if (routeId === 'settings') {
-      return <Settings user={user} updateUser={updateUser} updatePassword={updatePassword} updateError={updateError} passwordError={passwordError} sessions={sessions} fetchSessions={fetchSessions} sessionsError={sessionsError} deleteSession={deleteSession} />;
+      return <Settings user={user} updateUser={updateUser} updatePassword={updatePassword} updateError={updateError} passwordError={passwordError} sessions={sessions} fetchSessions={fetchSessions} sessionsError={sessionsError} deleteSession={deleteSessionHandler} />;
     }
     if (routeId === 'login') {
       return <Login loginUser={loginUser} error={loginError} />;
@@ -313,7 +358,16 @@ function App() {
           {renderComponent()}
         </React.Suspense>
       </ErrorBoundary>
+      {isLoggedIn && <BottomNav user={user} />}
     </RouterContext.Provider>
+  );
+}
+
+function App() {
+  return (
+    <ToastProvider>
+      <AppContent />
+    </ToastProvider>
   );
 }
 
