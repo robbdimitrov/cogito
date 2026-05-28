@@ -72,7 +72,7 @@ function Navbar({isLoggedIn, user, logoutUser}) {
       </div>
 
       <div className="navbar-center">
-        <span className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Thoughts</span>
+        <span className="text-2xl font-extrabold tracking-tight text-primary">Thoughts</span>
       </div>
 
       <div className="navbar-end gap-2">
@@ -85,7 +85,7 @@ function Navbar({isLoggedIn, user, logoutUser}) {
               aria-label="User menu"
               aria-expanded={isDropdownOpen}
             >
-              <div className="w-10 rounded-full bg-gradient-to-br from-primary to-secondary text-primary-content flex items-center justify-center text-lg font-bold ring-2 ring-base-300/50 ring-offset-2 ring-offset-base-100">
+              <div className="w-10 h-10 rounded-full bg-primary text-primary-content flex items-center justify-center text-lg font-bold ring-2 ring-base-300/30 ring-offset-2 ring-offset-base-100">
                 {user?.name?.charAt(0)?.toUpperCase() || 'U'}
               </div>
             </button>

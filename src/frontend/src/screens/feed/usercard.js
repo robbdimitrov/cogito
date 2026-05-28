@@ -3,14 +3,14 @@ import Link from '../../shared/router/link';
 
 function UserCard({user}) {
   return (
-    <div className="card bg-base-100/90 backdrop-blur-sm border border-base-200/80 shadow-sm sticky top-20 overflow-hidden">
-      <div className="h-16 bg-gradient-to-r from-primary/80 to-secondary/80"></div>
+    <div className="card bg-base-100 border border-base-200 shadow-sm sticky top-20 overflow-hidden">
+      <div className="h-16 bg-primary/80"></div>
       <div className="card-body p-4 -mt-8">
         <Link href={`/@${user.username}`}>
           <div className="flex items-center gap-3">
             <div className="avatar placeholder">
-              <div className="bg-gradient-to-br from-primary to-secondary text-primary-content rounded-full w-14 ring-4 ring-base-100 shadow-md">
-                <span className="text-xl font-bold">{user.name?.charAt(0)?.toUpperCase() || '?'}</span>
+            <div className="w-14 h-14 rounded-full bg-primary text-primary-content flex items-center justify-center text-xl font-bold ring-4 ring-base-100">
+                {user.name?.charAt(0)?.toUpperCase() || '?'}
               </div>
             </div>
             <div className="min-w-0 pt-6">

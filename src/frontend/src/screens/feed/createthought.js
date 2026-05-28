@@ -17,7 +17,7 @@ function CreateThought({user, onCreatePost}) {
   }
 
   return (
-    <div className="card bg-base-100/90 backdrop-blur-sm border border-base-200/80 shadow-sm hover:shadow-md transition-shadow duration-200">
+    <div className="card bg-base-100 border border-base-200 shadow-sm">
       <div className="card-body p-4">
         <form onSubmit={handleSubmit}>
           <div className="relative">
@@ -32,10 +32,10 @@ function CreateThought({user, onCreatePost}) {
             />
           </div>
           <div className="flex justify-between items-center mt-3">
-            <span className={`text-sm transition-colors ${content.length > 240 ? 'text-warning' : 'text-base-content/50'}`}>{content.length}/255</span>
+              <span className={`text-sm ${content.length > 240 ? 'text-warning' : 'text-base-content/50'}`}>{content.length}/255</span>
             <button
               type="submit"
-              className="btn btn-primary btn-sm gap-1 rounded-full px-5 shadow-sm hover:shadow-md hover:scale-105 transition-all duration-200"
+              className="btn btn-primary btn-sm gap-1 rounded-full px-5"
               disabled={isSubmitting || !content.trim()}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>

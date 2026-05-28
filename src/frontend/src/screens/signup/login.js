@@ -18,16 +18,10 @@ function Login({loginUser, error}) {
   }
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 pointer-events-none"></div>
-      <div className="card w-full max-w-md bg-base-100/95 backdrop-blur-sm shadow-2xl border border-base-200/60 relative z-10">
+    <div className="min-h-[80vh] flex items-center justify-center px-4">
+      <div className="card w-full max-w-md bg-base-100 shadow-xl border border-base-200">
         <div className="card-body">
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-primary-content" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
-            </div>
-          </div>
-          <h1 className="card-title text-2xl justify-center mb-1">Welcome Back</h1>
+          <h1 className="card-title text-2xl justify-center mb-2">Welcome Back</h1>
           <p className="text-center text-base-content/60 mb-6">Log in to access your account</p>
 
           {error && (

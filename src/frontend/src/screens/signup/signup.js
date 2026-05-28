@@ -21,16 +21,10 @@ function Signup({registerUser, error}) {
   const passwordValid = !state.password || state.password.length >= 4;
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 pointer-events-none"></div>
-      <div className="card w-full max-w-md bg-base-100/95 backdrop-blur-sm shadow-2xl border border-base-200/60 relative z-10">
+    <div className="min-h-[80vh] flex items-center justify-center px-4">
+      <div className="card w-full max-w-md bg-base-100 shadow-xl border border-base-200">
         <div className="card-body">
-          <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-primary-content" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
-            </div>
-          </div>
-          <h1 className="card-title text-2xl justify-center mb-1">Create Account</h1>
+          <h1 className="card-title text-2xl justify-center mb-2">Create Account</h1>
           <p className="text-center text-base-content/60 mb-6">Join the conversation</p>
 
           {error && (
