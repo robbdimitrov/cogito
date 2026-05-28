@@ -1,5 +1,6 @@
 import React, {useState, useEffect, useRef} from 'react';
 import Link from '../../router/link';
+import Avatar from '../../components/avatar/avatar';
 
 function ThemeToggle() {
   const getInitialTheme = () => {
@@ -75,7 +76,12 @@ function Navbar({isLoggedIn, user, logoutUser}) {
         <span className="text-2xl font-extrabold tracking-tight text-primary">Thoughts</span>
       </div>
 
-      <div className="navbar-end gap-2">
+      <div className="navbar-end gap-1">
+        {isLoggedIn && (
+          <Link href="/search" className="btn btn-ghost btn-circle" aria-label="Search">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+          </Link>
+        )}
         <ThemeToggle />
         {isLoggedIn ? (
           <div ref={dropdownRef} className="dropdown dropdown-end">
@@ -85,9 +91,7 @@ function Navbar({isLoggedIn, user, logoutUser}) {
               aria-label="User menu"
               aria-expanded={isDropdownOpen}
             >
-              <div className="w-10 h-10 rounded-full bg-primary text-primary-content flex items-center justify-center text-lg font-bold ring-2 ring-base-300/30 ring-offset-2 ring-offset-base-100">
-                {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-              </div>
+              <Avatar name={user?.name} size="md" />
             </button>
             {isDropdownOpen && (
               <ul className="mt-3 z-[1] p-2 shadow-xl shadow-base-content/10 menu menu-sm dropdown-content bg-base-100 rounded-box w-56 border border-base-200/80 backdrop-blur-sm">
