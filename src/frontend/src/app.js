@@ -157,7 +157,7 @@ function App() {
 
   const loginUser = (email, password) => {
     setLoginError(null);
-    apiClient.login(email, password)
+    return apiClient.login(email, password)
       .then((data) => {
         Session.setUserId(data.id);
         setIsLoggedIn(true);
@@ -179,7 +179,7 @@ function App() {
 
   const registerUser = (name, username, email, password) => {
     setSignupError(null);
-    apiClient.createUser(name, username, email, password)
+    return apiClient.createUser(name, username, email, password)
       .then(() => {
         route.navigate('/login');
       })
