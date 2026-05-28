@@ -20,7 +20,7 @@ const apiClient = new APIClient();
 const routes = [
   {id: 'feed', path: /^\/$/, component: Feed, canAccess: authGuard, title: 'Feed'},
   {id: 'profile', path: /\/@\w+(\/(following|followers|likes))?/, component: Profile, canAccess: authGuard, title: 'Profile'},
-  {id: 'settings', path: /\/settings\/(profile|password)\/?/, component: Settings, canAccess: authGuard, title: 'Settings'},
+  {id: 'settings', path: /\/settings\/(profile|password|sessions)\/?/, component: Settings, canAccess: authGuard, title: 'Settings'},
   {id: 'login', path: /\/login/, component: Login, canAccess: unauthGuard, title: 'Log In'},
   {id: 'signup', path: /\/signup/, component: Signup, canAccess: unauthGuard, title: 'Sign Up'},
   {id: 'fallback', path: /.?/, component: Login, canAccess: unauthGuard, title: 'Log In'},
@@ -45,6 +45,8 @@ function App() {
   const [signupError, setSignupError] = useState(null);
   const [updateError, setUpdateError] = useState(null);
   const [passwordError, setPasswordError] = useState(null);
+  const [sessions, setSessions] = useState([]);
+  const [sessionsError, setSessionsError] = useState(null);
 
   const refreshUser = useCallback(() => {
     const userId = Session.getUserId();
@@ -53,6 +55,13 @@ function App() {
         .then((data) => setUser(data))
         .catch(() => setUser(null));
     }
+  }, []);
+
+  const fetchSessions = useCallback(() => {
+    setSessionsError(null);
+    return apiClient.getSessions()
+      .then((data) => setSessions(data.sessions || []))
+      .catch(() => setSessionsError('Failed to load sessions.'));
   }, []);
 
   const refreshFeed = useCallback(() => {
@@ -121,7 +130,7 @@ function App() {
         setProfileData({user: profileUser, posts: data.items || [], users: []});
       }
     } catch {
-      setProfileData({user: null, posts: [], users: []});
+      setProfileData((prev) => ({user: prev.user, posts: [], users: []}));
     } finally {
       setIsProfileLoading(false);
     }
@@ -178,19 +187,25 @@ function App() {
   };
 
   const updateUser = (name, username, email, bio) => {
-    if (!user) return;
+    if (!user) return Promise.resolve();
     setUpdateError(null);
-    apiClient.updateUser(user.id, name, username, email, bio)
+    return apiClient.updateUser(user.id, name, username, email, bio)
       .then(() => refreshUser())
       .catch(() => setUpdateError('Profile update failed. Please try again.'));
   };
 
   const updatePassword = (password, oldPassword) => {
-    if (!user) return;
+    if (!user) return Promise.resolve();
     setPasswordError(null);
-    apiClient.updatePassword(user.id, password, oldPassword)
+    return apiClient.updatePassword(user.id, password, oldPassword)
       .then(() => route.navigate('/settings/profile'))
       .catch(() => setPasswordError('Password update failed. Please try again.'));
+  };
+
+  const deleteSession = (sessionId) => {
+    setSessionsError(null);
+    return apiClient.deleteSession(sessionId)
+      .catch(() => setSessionsError('Failed to delete session.'));
   };
 
   const createPost = (content) => {
@@ -207,7 +222,7 @@ function App() {
       }
       refreshFeed();
       if (route.id === 'profile') {
-    const match = route.path.match(/\/@(\w+)(\/\w+)?/);
+        const match = route.path.match(/\/@(\w+)(\/\w+)?/);
         if (match) {
           const [, username, subroute] = match;
           if (!subroute || subroute === '/likes') {
@@ -230,23 +245,23 @@ function App() {
       refreshFeed();
       if (route.id === 'profile') {
         const match = route.path.match(/\/@(\w+)(\/\w+)?/);
-          if (match) {
-            const [, username, subroute] = match;
-            if (!subroute) {
-              fetchProfile(username, subroute);
-            }
+        if (match) {
+          const [, username, subroute] = match;
+          if (!subroute) {
+            fetchProfile(username, subroute);
           }
         }
-      } catch (e) {
-        console.error('Repost action failed', e);
       }
-    }, [refreshFeed, route.id, route.path, fetchProfile]);
+    } catch (e) {
+      console.error('Repost action failed', e);
+    }
+  }, [refreshFeed, route.id, route.path, fetchProfile]);
 
-    const handleFollow = useCallback((userId) => {
-      apiClient.followUser(userId)
-        .then(() => {
-          if (route.id === 'profile') {
-            const match = route.path.match(/\/@(\w+)(\/\w+)?/);
+  const handleFollow = useCallback((userId) => {
+    apiClient.followUser(userId)
+      .then(() => {
+        if (route.id === 'profile') {
+          const match = route.path.match(/\/@(\w+)(\/\w+)?/);
           if (match) {
             fetchProfile(match[1], match[2]);
           }
@@ -256,11 +271,11 @@ function App() {
       .catch((e) => console.error('Follow failed', e));
   }, [route.id, route.path, fetchProfile, refreshUser]);
 
-    const handleUnfollow = useCallback((userId) => {
-      apiClient.unfollowUser(userId)
-        .then(() => {
-          if (route.id === 'profile') {
-            const match = route.path.match(/\/@(\w+)(\/\w+)?/);
+  const handleUnfollow = useCallback((userId) => {
+    apiClient.unfollowUser(userId)
+      .then(() => {
+        if (route.id === 'profile') {
+          const match = route.path.match(/\/@(\w+)(\/\w+)?/);
           if (match) {
             fetchProfile(match[1], match[2]);
           }
@@ -279,7 +294,7 @@ function App() {
       return <Profile user={profileData.user} posts={profileData.posts} users={profileData.users} isLoading={isProfileLoading} onLike={handleLike} onRepost={handleRepost} currentUser={user} onFollow={handleFollow} onUnfollow={handleUnfollow} />;
     }
     if (routeId === 'settings') {
-      return <Settings user={user} updateUser={updateUser} updatePassword={updatePassword} updateError={updateError} passwordError={passwordError} />;
+      return <Settings user={user} updateUser={updateUser} updatePassword={updatePassword} updateError={updateError} passwordError={passwordError} sessions={sessions} fetchSessions={fetchSessions} sessionsError={sessionsError} deleteSession={deleteSession} />;
     }
     if (routeId === 'login') {
       return <Login loginUser={loginUser} error={loginError} />;

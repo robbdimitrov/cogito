@@ -14,7 +14,7 @@ function Password(props) {
     event.preventDefault();
     setIsSubmitting(true);
     const {password, oldPassword} = state;
-    props.updatePassword(password, oldPassword);
+    props.updatePassword(password, oldPassword).finally(() => setIsSubmitting(false));
   }
 
   function handleInputChange(event) {

@@ -45,6 +45,23 @@ class Controller(thoughts_pb2_grpc.AuthServiceServicer):
             context.abort(StatusCode.UNAUTHENTICATED, 'Session not found.')
         return result
 
+    def GetSessions(self, request, context):
+        try:
+            results = self.db_client.get_sessions(request.user_id)
+        except Exception as e:
+            logger.print(f'Getting sessions failed: {e}')
+            context.abort(StatusCode.INTERNAL, 'Internal server error.')
+
+        sessions = [
+            thoughts_pb2.Session(
+                id=row['id'],
+                user_id=row['user_id'],
+                created=row['created']
+            )
+            for row in results
+        ]
+        return thoughts_pb2.Sessions(sessions=sessions)
+
     def DeleteSession(self, request, context):
         try:
             self.db_client.delete_session(request.session_id)

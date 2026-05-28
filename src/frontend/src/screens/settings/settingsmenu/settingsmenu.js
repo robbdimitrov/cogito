@@ -4,6 +4,7 @@ import SettingsMenuItem from './settingsmenuitem';
 const menuItems = [
   {title: 'Edit profile', link: 'profile'},
   {title: 'Change password', link: 'password'},
+  {title: 'Sessions', link: 'sessions'},
 ];
 
 function SettingsMenu() {

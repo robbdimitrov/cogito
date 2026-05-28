@@ -4,6 +4,7 @@ import {useRouter} from '../../shared/router/router';
 
 const Password = React.lazy(() => import('./password'));
 const EditProfile = React.lazy(() => import('./editprofile'));
+const Sessions = React.lazy(() => import('./sessions'));
 
 function Settings(props) {
   const router = useRouter();
@@ -18,6 +19,8 @@ function Settings(props) {
         <div className="md:col-span-3">
           {router.path.endsWith('/password')
             ? <Password updatePassword={props.updatePassword || (() => {})} error={props.passwordError} />
+            : router.path.endsWith('/sessions')
+            ? <Sessions sessions={props.sessions || []} fetchSessions={props.fetchSessions || (() => Promise.resolve())} sessionsError={props.sessionsError} deleteSession={props.deleteSession || (() => Promise.resolve())} />
             : <EditProfile user={user} updateUser={props.updateUser || (() => {})} error={props.updateError} />
           }
         </div>

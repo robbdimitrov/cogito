@@ -24,3 +24,9 @@ type post struct {
 	Reposted bool   `json:"reposted"`
 	Created  string `json:"created"`
 }
+
+type session struct {
+	ID      string `json:"id"`
+	UserID  int32  `json:"userId"`
+	Created string `json:"created"`
+}

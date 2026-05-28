@@ -19,7 +19,7 @@ function EditProfile(props) {
     event.preventDefault();
     setIsSubmitting(true);
     const {name, username, email, bio} = state;
-    props.updateUser(name, username, email, bio);
+    props.updateUser(name, username, email, bio).finally(() => setIsSubmitting(false));
   }
 
   function handleInputChange(event) {

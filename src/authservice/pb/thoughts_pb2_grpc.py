@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from authservice import thoughts_pb2 as pb_dot_thoughts__pb2
+from pb import thoughts_pb2 as pb_dot_thoughts__pb2
 
 GRPC_GENERATED_VERSION = '1.80.0'
 GRPC_VERSION = grpc.__version__

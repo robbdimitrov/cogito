@@ -87,10 +87,15 @@ message Session {
   string created = 3;
 }
 
+message Sessions {
+  repeated Session sessions = 1;
+}
+
 service AuthService {
   rpc CreateSession(Credentials) returns (Session);
   rpc GetSession(SessionRequest) returns (Session);
   rpc DeleteSession(SessionRequest) returns (Empty);
+  rpc GetSessions(UserRequest) returns (Sessions);
 }
 
 // Posts

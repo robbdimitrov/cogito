@@ -91,6 +91,16 @@ class APIClient {
     return this.request(url, httpMethod.delete);
   }
 
+  getSessions() {
+    const url = '/api/sessions';
+    return this.request(url, httpMethod.get);
+  }
+
+  deleteSession(sessionId) {
+    const url = `/api/sessions/${sessionId}`;
+    return this.request(url, httpMethod.delete);
+  }
+
   // Posts
 
   createPost(content) {

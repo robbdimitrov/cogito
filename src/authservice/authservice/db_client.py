@@ -72,6 +72,29 @@ class DbClient:
             cur.close()
             self.db.putconn(conn)
 
+    def get_sessions(self, user_id):
+        conn = self.db.getconn()
+        cur = conn.cursor()
+
+        try:
+            query = 'SELECT id, user_id, time_format(created) AS created\
+                FROM sessions WHERE user_id = %s ORDER BY created DESC'
+            cur.execute(query, (user_id,))
+            results = cur.fetchall()
+            sessions = []
+            for row in results:
+                sessions.append({
+                    'id': row[0],
+                    'user_id': row[1],
+                    'created': row[2]
+                })
+            return sessions
+        except Exception:
+            raise
+        finally:
+            cur.close()
+            self.db.putconn(conn)
+
     def delete_session(self, session_id):
         conn = self.db.getconn()
         cur = conn.cursor()

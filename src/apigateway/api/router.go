@@ -31,6 +31,7 @@ func (r *router) configureRoutes(e *echo.Echo) {
 
 	// Sessions
 	e.POST("/sessions", r.auth.createSession)
+	e.GET("/sessions", r.auth.getSessions)
 	e.DELETE("/sessions", r.auth.deleteSession)
 
 	// Posts

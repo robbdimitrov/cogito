@@ -56,13 +56,10 @@ func (c *DbClient) getFeed(page int32, limit int32, currentUserID int32) ([]*pb.
 		time_format(posts.created) AS created
 		FROM posts
 		LEFT JOIN reposts ON reposts.post_id = id
-		LEFT JOIN followers ON followers.user_id = reposts.user_id
-		OR followers.user_id = posts.user_id
-		WHERE follower_id = $2 OR reposts.user_id = $2 OR posts.user_id = $2
 		ORDER BY coalesce(reposts.created, posts.created) DESC
-		LIMIT $3 OFFSET $4`
+		LIMIT $2 OFFSET $3`
 
-	rows, err := c.db.Query(context.Background(), query, currentUserID, currentUserID, limit, page*limit)
+	rows, err := c.db.Query(context.Background(), query, currentUserID, limit, page*limit)
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +107,7 @@ func (c *DbClient) getLikedPosts(userID int32, page int32, limit int32, currentU
 		ORDER BY likes.created DESC
 		LIMIT $3 OFFSET $4`
 
-	rows, err := c.db.Query(context.Background(), query, currentUserID, userID, limit, page*limit)
+	rows, err := c.db.Query(context.Background(), query, currentUserID, limit, page*limit)
 	if err != nil {
 		return nil, err
 	}
