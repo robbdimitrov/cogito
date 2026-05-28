@@ -1,7 +1,7 @@
 import React from 'react';
 import ThoughtItem from './thoughtitem';
 
-function ThoughtList({posts, users, onLike, onRepost}) {
+function ThoughtList({posts, users, onLike, onRepost, onDelete, currentUserId}) {
   if (!posts || posts.length === 0) {
     return (
       <div className="card bg-base-100 shadow-sm border border-base-200">
@@ -22,6 +22,8 @@ function ThoughtList({posts, users, onLike, onRepost}) {
           user={users[0]}
           onLike={onLike}
           onRepost={onRepost}
+          onDelete={onDelete || (() => {})}
+          currentUserId={currentUserId}
         />
       ))}
     </ul>

@@ -17,20 +17,42 @@ function formatRelativeTime(dateString) {
   return `${diffDay}d`;
 }
 
-function ThoughtItem({post, user, onLike, onRepost}) {
+function ThoughtItem({post, user, onLike, onRepost, onDelete, currentUserId}) {
   const author = post.user || user;
+  const isOwnPost = currentUserId && post.userId === currentUserId;
+
+  function handleDelete() {
+    if (window.confirm('Delete this post?')) {
+      onDelete(post.id);
+    }
+  }
+
   return (
     <li className="card bg-base-100 border border-base-200 hover:border-base-300 transition-colors duration-150 cursor-default">
       <div className="card-body p-4">
         <div className="flex items-start gap-3">
           <Avatar name={author?.name} size="md" />
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <Link href={`/@${author?.username}`} className="font-semibold hover:underline truncate">
-                {author?.name}
-              </Link>
-              <span className="text-sm text-base-content/50">@{author?.username}</span>
-              <span className="text-sm text-base-content/30">· {formatRelativeTime(post.created)}</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Link href={`/@${author?.username}`} className="font-semibold hover:underline truncate">
+                  {author?.name}
+                </Link>
+                <span className="text-sm text-base-content/50">@{author?.username}</span>
+                <Link href={`/posts/${post.id}`} className="text-sm text-base-content/30 hover:text-base-content/60 transition-colors">
+                  · {formatRelativeTime(post.created)}
+                </Link>
+              </div>
+              {isOwnPost && (
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-xs text-base-content/30 hover:text-error p-1 h-auto"
+                  onClick={handleDelete}
+                  aria-label="Delete post"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                </button>
+              )}
             </div>
             <p className="mt-2 whitespace-pre-wrap leading-relaxed">{post.content}</p>
             <div className="flex gap-6 mt-3">
