@@ -10,6 +10,15 @@ function EditProfile(props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    setState({
+      name: props.user.name,
+      username: props.user.username,
+      email: props.user.email,
+      bio: props.user.bio,
+    });
+  }, [props.user]);
+
+  useEffect(() => {
     if (props.error) {
       setIsSubmitting(false);
     }

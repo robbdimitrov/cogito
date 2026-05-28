@@ -73,7 +73,10 @@ func (s *userController) getUser(c echo.Context) error {
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
-	ctx = appendUserIDHeader(ctx, c)
+	ctx, err = appendUserIDHeader(ctx, c)
+	if err != nil {
+		return err
+	}
 	defer cancel()
 
 	req := pb.UserRequest{UserId: int32(userID)}
@@ -97,7 +100,10 @@ func (s *userController) getUserByUsername(c echo.Context) error {
 	client := pb.NewUserServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
-	ctx = appendUserIDHeader(ctx, c)
+	ctx, err = appendUserIDHeader(ctx, c)
+	if err != nil {
+		return err
+	}
 	defer cancel()
 
 	req := pb.GetUserByUsernameRequest{Username: c.QueryParam("username")}
@@ -126,7 +132,10 @@ func (s *userController) updateUser(c echo.Context) error {
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
-	ctx = appendUserIDHeader(ctx, c)
+	ctx, err = appendUserIDHeader(ctx, c)
+	if err != nil {
+		return err
+	}
 	defer cancel()
 
 	var body struct {
@@ -169,7 +178,10 @@ func (s *userController) getFollowing(c echo.Context) error {
 	client := pb.NewUserServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
-	ctx = appendUserIDHeader(ctx, c)
+	ctx, err = appendUserIDHeader(ctx, c)
+	if err != nil {
+		return err
+	}
 	defer cancel()
 
 	userID, err := strconv.Atoi(c.Param("userId"))
@@ -215,7 +227,10 @@ func (s *userController) getFollowers(c echo.Context) error {
 	client := pb.NewUserServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
-	ctx = appendUserIDHeader(ctx, c)
+	ctx, err = appendUserIDHeader(ctx, c)
+	if err != nil {
+		return err
+	}
 	defer cancel()
 
 	userID, err := strconv.Atoi(c.Param("userId"))
@@ -261,7 +276,10 @@ func (s *userController) followUser(c echo.Context) error {
 	client := pb.NewUserServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
-	ctx = appendUserIDHeader(ctx, c)
+	ctx, err = appendUserIDHeader(ctx, c)
+	if err != nil {
+		return err
+	}
 	defer cancel()
 
 	userID, err := strconv.Atoi(c.Param("userId"))
@@ -289,7 +307,10 @@ func (s *userController) unfollowUser(c echo.Context) error {
 	client := pb.NewUserServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
-	ctx = appendUserIDHeader(ctx, c)
+	ctx, err = appendUserIDHeader(ctx, c)
+	if err != nil {
+		return err
+	}
 	defer cancel()
 
 	userID, err := strconv.Atoi(c.Param("userId"))

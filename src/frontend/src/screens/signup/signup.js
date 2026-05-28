@@ -18,7 +18,7 @@ function Signup({registerUser, error}) {
   }
 
   const usernameValid = !state.username || /^[a-zA-Z0-9_]+$/.test(state.username);
-  const passwordValid = !state.password || state.password.length >= 4;
+  const passwordValid = !state.password || state.password.length >= 8;
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4">
@@ -63,7 +63,7 @@ function Signup({registerUser, error}) {
                 <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/40 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                 <input className="input input-bordered w-full pl-10" type="password" name="password" placeholder="••••••••" minLength="4" onChange={handleInputChange} value={state.password} required />
               </div>
-              {!passwordValid && <span className="label-text-alt text-error mt-1">At least 4 characters</span>}
+              {!passwordValid && <span className="label-text-alt text-error mt-1">At least 8 characters</span>}
             </div>
             <button type="submit" className="btn btn-primary w-full gap-1" disabled={isSubmitting || !usernameValid || !passwordValid}>
               {isSubmitting ? <span className="loading loading-spinner"></span> : (

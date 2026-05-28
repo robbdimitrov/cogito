@@ -8,7 +8,7 @@ const Session = {
   },
 
   reset() {
-    localStorage.clear();
+    localStorage.removeItem('userId');
   }
 };
 

@@ -133,9 +133,23 @@ func (ac *authController) deleteSessionByID(c echo.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	req := pb.SessionRequest{SessionId: sessionID}
+	sess, err := client.GetSession(ctx, &pb.SessionRequest{SessionId: sessionID})
+	if err != nil {
+		log.Printf("Getting session for ownership check failed: %v", err)
+		return newHTTPError(err)
+	}
 
-	_, err = client.DeleteSession(ctx, &req)
+	userIDStr := getUserID(c)
+	userID, err := strconv.ParseInt(userIDStr, 10, 32)
+	if err != nil || userID == 0 {
+		return echo.NewHTTPError(401)
+	}
+
+	if sess.UserId != int32(userID) {
+		return echo.NewHTTPError(403, "Cannot delete another user's session")
+	}
+
+	_, err = client.DeleteSession(ctx, &pb.SessionRequest{SessionId: sessionID})
 	if err != nil {
 		log.Printf("Deleting session by ID failed: %v", err)
 		return newHTTPError(err)

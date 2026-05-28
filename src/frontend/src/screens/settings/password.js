@@ -37,11 +37,11 @@ function Password(props) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="form-control">
             <label className="label"><span className="label-text">Current Password</span></label>
-            <input className="input input-bordered" type="password" name="oldPassword" placeholder="Current password" minLength="4" value={state.oldPassword} onChange={handleInputChange} required />
+                    <input className="input input-bordered" type="password" name="oldPassword" placeholder="Current password" minLength="8" value={state.oldPassword} onChange={handleInputChange} required />
           </div>
           <div className="form-control">
             <label className="label"><span className="label-text">New Password</span></label>
-            <input className="input input-bordered" type="password" name="password" placeholder="New password" minLength="4" value={state.password} onChange={handleInputChange} required />
+                    <input className="input input-bordered" type="password" name="password" placeholder="New password" minLength="8" value={state.password} onChange={handleInputChange} required />
           </div>
           <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
             {isSubmitting ? <span className="loading loading-spinner"></span> : 'Update Password'}

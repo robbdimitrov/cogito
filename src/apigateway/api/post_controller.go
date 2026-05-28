@@ -30,7 +30,10 @@ func (pc *postController) createPost(c echo.Context) error {
 	client := pb.NewPostServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
-	ctx = appendUserIDHeader(ctx, c)
+	ctx, err = appendUserIDHeader(ctx, c)
+	if err != nil {
+		return err
+	}
 	defer cancel()
 
 	var body struct {
@@ -61,7 +64,10 @@ func (pc *postController) getFeed(c echo.Context) error {
 	client := pb.NewPostServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
-	ctx = appendUserIDHeader(ctx, c)
+	ctx, err = appendUserIDHeader(ctx, c)
+	if err != nil {
+		return err
+	}
 	defer cancel()
 
 	page, err := getIntQuery(c, "page", 0)
@@ -102,7 +108,10 @@ func (pc *postController) getPosts(c echo.Context) error {
 	client := pb.NewPostServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
-	ctx = appendUserIDHeader(ctx, c)
+	ctx, err = appendUserIDHeader(ctx, c)
+	if err != nil {
+		return err
+	}
 	defer cancel()
 
 	userID, err := strconv.Atoi(c.Param("userId"))
@@ -148,7 +157,10 @@ func (pc *postController) getLikedPosts(c echo.Context) error {
 	client := pb.NewPostServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
-	ctx = appendUserIDHeader(ctx, c)
+	ctx, err = appendUserIDHeader(ctx, c)
+	if err != nil {
+		return err
+	}
 	defer cancel()
 
 	userID, err := strconv.Atoi(c.Param("userId"))
@@ -194,7 +206,10 @@ func (pc *postController) getPost(c echo.Context) error {
 	client := pb.NewPostServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
-	ctx = appendUserIDHeader(ctx, c)
+	ctx, err = appendUserIDHeader(ctx, c)
+	if err != nil {
+		return err
+	}
 	defer cancel()
 
 	postID, err := strconv.Atoi(c.Param("postId"))
@@ -222,7 +237,10 @@ func (pc *postController) deletePost(c echo.Context) error {
 	client := pb.NewPostServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
-	ctx = appendUserIDHeader(ctx, c)
+	ctx, err = appendUserIDHeader(ctx, c)
+	if err != nil {
+		return err
+	}
 	defer cancel()
 
 	postID, err := strconv.Atoi(c.Param("postId"))
@@ -250,7 +268,10 @@ func (pc *postController) likePost(c echo.Context) error {
 	client := pb.NewPostServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
-	ctx = appendUserIDHeader(ctx, c)
+	ctx, err = appendUserIDHeader(ctx, c)
+	if err != nil {
+		return err
+	}
 	defer cancel()
 
 	postID, err := strconv.Atoi(c.Param("postId"))
@@ -278,7 +299,10 @@ func (pc *postController) unlikePost(c echo.Context) error {
 	client := pb.NewPostServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
-	ctx = appendUserIDHeader(ctx, c)
+	ctx, err = appendUserIDHeader(ctx, c)
+	if err != nil {
+		return err
+	}
 	defer cancel()
 
 	postID, err := strconv.Atoi(c.Param("postId"))
@@ -306,7 +330,10 @@ func (pc *postController) repostPost(c echo.Context) error {
 	client := pb.NewPostServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
-	ctx = appendUserIDHeader(ctx, c)
+	ctx, err = appendUserIDHeader(ctx, c)
+	if err != nil {
+		return err
+	}
 	defer cancel()
 
 	postID, err := strconv.Atoi(c.Param("postId"))
@@ -334,7 +361,10 @@ func (pc *postController) removeRepost(c echo.Context) error {
 	client := pb.NewPostServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
-	ctx = appendUserIDHeader(ctx, c)
+	ctx, err = appendUserIDHeader(ctx, c)
+	if err != nil {
+		return err
+	}
 	defer cancel()
 
 	postID, err := strconv.Atoi(c.Param("postId"))
