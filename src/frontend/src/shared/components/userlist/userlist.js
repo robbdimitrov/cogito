@@ -16,7 +16,7 @@ function UserList(props) {
   return (
     <ul className="space-y-3">
       {props.users.map((user) => (
-        <UserItem key={user.id} user={user} />
+        <UserItem key={user.id} user={user} onFollow={props.onFollow} onUnfollow={props.onUnfollow} />
       ))}
     </ul>
   );
