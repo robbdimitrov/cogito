@@ -1,15 +1,145 @@
 import {httpMethod} from '../constants';
 import Session from './session';
 
+function getCsrfToken() {
+  const match = document.cookie.match(/(?:^|; )_csrf=([^;]*)/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
 class APIClient {
   request(url, method, body) {
     let options = {
       method,
       credentials: 'include',
     };
+    const headers = {};
     if (body) {
-      options.headers = {'content-type': 'application/json'};
+      headers['content-type'] = 'application/json';
       options.body = JSON.stringify(body);
+    }
+    const mutatingMethods = [httpMethod.post, httpMethod.put, httpMethod.delete, 'PATCH'];
+    if (mutatingMethods.includes(method)) {
+      const token = getCsrfToken();
+      if (token) {
+        headers['X-CSRF-Token'] = token;
+      }
+    }
+    if (Object.keys(headers).length > 0) {
+      options.headers = headers;
+    }
+    return fetch(url, options)
+      .then((response) => {
+        if (response.status === 401) {
+          Session.reset();
+          window.location.reload();
+          return Promise.reject(new Error('Unauthorized'));
+        }
+        if (response.status === 204) {
+          return Promise.resolve();
+        }
+        if (!response.ok) {
+          return response.json().then((data) => Promise.reject(new Error(data.message || 'Request failed')));
+        }
+        return response.json();
+      });
+  }
+
+class APIClient {
+  request(url, method, body) {
+    let options = {
+      method,
+      credentials: 'include',
+    };
+    const headers = {};
+    if (body) {
+      headers['content-type'] = 'application/json';
+      options.body = JSON.stringify(body);
+    }
+    const mutatingMethods = [httpMethod.post, httpMethod.put, httpMethod.delete, 'PATCH'];
+    if (mutatingMethods.includes(method)) {
+      const token = getCsrfToken();
+      if (token) {
+        headers['X-CSRF-Token'] = token;
+      }
+    }
+    if (Object.keys(headers).length > 0) {
+      options.headers = headers;
+    }
+    return fetch(url, options)
+      .then((response) => {
+        if (response.status === 401) {
+          Session.reset();
+          window.location.reload();
+          return Promise.reject(new Error('Unauthorized'));
+        }
+        if (response.status === 204) {
+          return Promise.resolve();
+        }
+        if (!response.ok) {
+          return response.json().then((data) => Promise.reject(new Error(data.message || 'Request failed')));
+        }
+        return response.json();
+      });
+  }
+
+class APIClient {
+  request(url, method, body) {
+    let options = {
+      method,
+      credentials: 'include',
+    };
+    const headers = {};
+    if (body) {
+      headers['content-type'] = 'application/json';
+      options.body = JSON.stringify(body);
+    }
+    const mutatingMethods = [httpMethod.post, httpMethod.put, httpMethod.delete, 'PATCH'];
+    if (mutatingMethods.includes(method)) {
+      const token = getCsrfToken();
+      if (token) {
+        headers['X-CSRF-Token'] = token;
+      }
+    }
+    if (Object.keys(headers).length > 0) {
+      options.headers = headers;
+    }
+    return fetch(url, options)
+      .then((response) => {
+        if (response.status === 401) {
+          Session.reset();
+          window.location.reload();
+          return Promise.reject(new Error('Unauthorized'));
+        }
+        if (response.status === 204) {
+          return Promise.resolve();
+        }
+        if (!response.ok) {
+          return response.json().then((data) => Promise.reject(new Error(data.message || 'Request failed')));
+        }
+        return response.json();
+      });
+  }
+
+class APIClient {
+  request(url, method, body) {
+    let options = {
+      method,
+      credentials: 'include',
+    };
+    const headers = {};
+    if (body) {
+      headers['content-type'] = 'application/json';
+      options.body = JSON.stringify(body);
+    }
+    const mutatingMethods = [httpMethod.post, httpMethod.put, httpMethod.delete, 'PATCH'];
+    if (mutatingMethods.includes(method)) {
+      const token = getCsrfToken();
+      if (token) {
+        headers['X-CSRF-Token'] = token;
+      }
+    }
+    if (Object.keys(headers).length > 0) {
+      options.headers = headers;
     }
     return fetch(url, options)
       .then((response) => {

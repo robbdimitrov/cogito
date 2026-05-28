@@ -42,10 +42,29 @@ spec:
             cpu: 200m
         env:
         - name: POSTGRES_PASSWORD
-          value: kubernetes
+          valueFrom:
+            secretKeyRef:
+              name: thoughts-db-secret
+              key: postgres-password
         volumeMounts:
         - mountPath: /var/lib/postgresql/data
           name: database-storage
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+          initialDelaySeconds: 5
+          periodSeconds: 5
       volumes:
         - name: database-storage
           persistentVolumeClaim:

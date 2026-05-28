@@ -107,7 +107,7 @@ func (c *DbClient) getLikedPosts(userID int32, page int32, limit int32, currentU
 		ORDER BY likes.created DESC
 		LIMIT $3 OFFSET $4`
 
-	rows, err := c.db.Query(context.Background(), query, currentUserID, limit, page*limit)
+	rows, err := c.db.Query(context.Background(), query, currentUserID, userID, limit, page*limit)
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +138,7 @@ func (c *DbClient) deletePost(postID int32, userID int32) error {
 }
 
 func (c *DbClient) likePost(postID int32, userID int32) error {
-	query := "INSERT INTO likes (post_id, user_id) VALUES ($1, $2)"
+	query := "INSERT INTO likes (post_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING"
 	_, err := c.db.Exec(context.Background(), query, postID, userID)
 	return err
 }
@@ -150,7 +150,7 @@ func (c *DbClient) unlikePost(postID int32, userID int32) error {
 }
 
 func (c *DbClient) repostPost(postID int32, userID int32) error {
-	query := "INSERT INTO reposts (post_id, user_id) VALUES ($1, $2)"
+	query := "INSERT INTO reposts (post_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING"
 	_, err := c.db.Exec(context.Background(), query, postID, userID)
 	return err
 }

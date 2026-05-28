@@ -2,6 +2,7 @@ package api
 
 import (
 	"log"
+	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -23,8 +24,15 @@ func CreateServer(addrs ...string) *echo.Echo {
 		}
 	})
 
-	server.Use(authGuard(router.auth))
 	server.Use(middleware.Recover())
+	server.Use(middleware.BodyLimit("2M"))
+	server.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
+		TokenLookup:    "header:X-CSRF-Token",
+		CookieName:     "_csrf",
+		CookieSameSite: http.SameSiteStrictMode,
+	}))
+
+	server.Use(authGuard(router.auth))
 	router.configureRoutes(server)
 
 	return server

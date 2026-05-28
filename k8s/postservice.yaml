@@ -50,4 +50,17 @@ spec:
             cpu: 200m
         env:
         - name: DATABASE_URL
-          value: postgresql://postgres:kubernetes@database:5432/thoughts
+          valueFrom:
+            secretKeyRef:
+              name: thoughts-db-secret
+              key: database-url
+        livenessProbe:
+          tcpSocket:
+            port: 5050
+          initialDelaySeconds: 10
+          periodSeconds: 15
+        readinessProbe:
+          tcpSocket:
+            port: 5050
+          initialDelaySeconds: 5
+          periodSeconds: 10

@@ -50,4 +50,20 @@ spec:
             cpu: 200m
         env:
         - name: DATABASE_URL
-          value: postgresql://postgres:kubernetes@database:5432/thoughts
+          valueFrom:
+            secretKeyRef:
+              name: thoughts-db-secret
+              key: database-url
+        livenessProbe:
+          exec:
+            command:
+            - python
+            - -c
+            - import grpc; from genproto import thoughts_pb2_grpc; c=grpc.insecure_channel('localhost:5050'); thoughts_pb2_grpc.AuthServiceStub(c).GetSession(thoughts_pb2_grpc.thoughts_pb2.SessionRequest(session_id='health')); c.close()
+          initialDelaySeconds: 10
+          periodSeconds: 15
+        readinessProbe:
+          tcpSocket:
+            port: 5050
+          initialDelaySeconds: 5
+          periodSeconds: 10

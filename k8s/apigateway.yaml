@@ -55,3 +55,15 @@ spec:
           value: postservice:5050
         - name: USER_SERVICE_ADDR
           value: userservice:5050
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 10
