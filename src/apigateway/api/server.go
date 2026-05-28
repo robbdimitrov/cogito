@@ -30,6 +30,19 @@ func CreateServer(addrs ...string) *echo.Echo {
 		TokenLookup:    "header:X-CSRF-Token",
 		CookieName:     "_csrf",
 		CookieSameSite: http.SameSiteStrictMode,
+		CookieHTTPOnly: false,
+		Skipper: func(c echo.Context) bool {
+			for _, v := range []route{
+				{method: "POST", path: "/sessions"},
+				{method: "DELETE", path: "/sessions"},
+				{method: "POST", path: "/users"},
+			} {
+				if c.Request().Method == v.method && c.Request().URL.Path == v.path {
+					return true
+				}
+			}
+			return false
+		},
 	}))
 
 	server.Use(authGuard(router.auth))
