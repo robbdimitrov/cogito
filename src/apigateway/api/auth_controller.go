@@ -144,34 +144,6 @@ func (ac *authController) deleteSessionByID(c echo.Context) error {
 	return c.NoContent(204)
 }
 
-func (ac *authController) deleteSessionByID(c echo.Context) error {
-	sessionID := c.Param("sessionId")
-	if sessionID == "" {
-		return echo.NewHTTPError(400, "Session ID is required")
-	}
-
-	conn, err := grpc.Dial(ac.addr, insecureCredentials(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500)
-	}
-	defer conn.Close()
-	client := pb.NewAuthServiceClient(conn)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	req := pb.SessionRequest{SessionId: sessionID}
-
-	_, err = client.DeleteSession(ctx, &req)
-	if err != nil {
-		log.Printf("Deleting session by ID failed: %v", err)
-		return newHTTPError(err)
-	}
-
-	return c.NoContent(204)
-}
-
 func (ac *authController) getSessions(c echo.Context) error {
 	cookie, err := c.Cookie("session")
 	if err != nil {
