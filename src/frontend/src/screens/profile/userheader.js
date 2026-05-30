@@ -64,22 +64,14 @@ function UserHeader({user, currentUser, onFollow, onUnfollow}) {
             <span>Joined {formatDate(user.created)}</span>
           </div>
         </div>
-        <div className="grid grid-cols-4 gap-2 mt-5 pt-5 border-t border-base-200/60 text-center">
-          <Link href={`/@${user.username}`} className="flex flex-col items-center py-2 px-1 rounded-xl hover:bg-base-200/30 transition-all duration-200 group">
-            <span className="text-lg font-extrabold text-base-content group-hover:text-primary transition-colors">{user.posts ?? 0}</span>
-            <span className="text-[10px] md:text-xs uppercase tracking-wider text-base-content/50 font-semibold mt-0.5">Thoughts</span>
+        <div className="flex gap-6 mt-5 pt-4 border-t border-base-300 dark:border-slate-700">
+          <Link href={`/@${user.username}/following`} className="flex items-baseline gap-1 hover:text-primary transition-colors group">
+            <span className="text-base font-bold text-base-content group-hover:text-primary transition-colors">{user.following ?? 0}</span>
+            <span className="text-sm text-base-content/50 font-medium">Following</span>
           </Link>
-          <Link href={`/@${user.username}/following`} className="flex flex-col items-center py-2 px-1 rounded-xl hover:bg-base-200/30 transition-all duration-200 group">
-            <span className="text-lg font-extrabold text-base-content group-hover:text-primary transition-colors">{user.following ?? 0}</span>
-            <span className="text-[10px] md:text-xs uppercase tracking-wider text-base-content/50 font-semibold mt-0.5">Following</span>
-          </Link>
-          <Link href={`/@${user.username}/followers`} className="flex flex-col items-center py-2 px-1 rounded-xl hover:bg-base-200/30 transition-all duration-200 group">
-            <span className="text-lg font-extrabold text-base-content group-hover:text-primary transition-colors">{user.followers ?? 0}</span>
-            <span className="text-[10px] md:text-xs uppercase tracking-wider text-base-content/50 font-semibold mt-0.5">Followers</span>
-          </Link>
-          <Link href={`/@${user.username}/likes`} className="flex flex-col items-center py-2 px-1 rounded-xl hover:bg-base-200/30 transition-all duration-200 group">
-            <span className="text-lg font-extrabold text-base-content group-hover:text-primary transition-colors">{user.likes ?? 0}</span>
-            <span className="text-[10px] md:text-xs uppercase tracking-wider text-base-content/50 font-semibold mt-0.5">Likes</span>
+          <Link href={`/@${user.username}/followers`} className="flex items-baseline gap-1 hover:text-primary transition-colors group">
+            <span className="text-base font-bold text-base-content group-hover:text-primary transition-colors">{user.followers ?? 0}</span>
+            <span className="text-sm text-base-content/50 font-medium">Followers</span>
           </Link>
         </div>
       </div>
