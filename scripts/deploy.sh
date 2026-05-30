@@ -28,10 +28,11 @@ echo "Building images..."
 make
 
 # --- load images into kind ---
-echo "Loading images into kind..."
+echo "Loading images into kind (in parallel)..."
 for svc in apigateway authservice database frontend postservice userservice; do
-  kind load docker-image "${REGISTRY}/${svc}" --name "${CLUSTER_NAME}"
+  kind load docker-image "${REGISTRY}/${svc}" --name "${CLUSTER_NAME}" &
 done
+wait
 
 # --- set kubectl context ---
 echo "Setting kubectl context to kind-${CLUSTER_NAME}..."
@@ -43,10 +44,11 @@ kubectl create namespace "${NAMESPACE}" 2>/dev/null || true
 kubectl apply -f ./k8s -n "${NAMESPACE}"
 
 # --- restart deployments to pick up new images ---
-echo "Restarting deployments to pick up new images..."
+echo "Restarting deployments to pick up new images (in parallel)..."
 for svc in apigateway authservice database frontend postservice userservice; do
-  kubectl rollout restart deployment "${svc}" -n "${NAMESPACE}"
+  kubectl rollout restart deployment "${svc}" -n "${NAMESPACE}" &
 done
+wait
 
 # --- wait ---
 echo "Waiting for pods to be ready..."
