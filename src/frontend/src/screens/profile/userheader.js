@@ -64,16 +64,7 @@ function UserHeader({user, currentUser, onFollow, onUnfollow}) {
             <span>Joined {formatDate(user.created)}</span>
           </div>
         </div>
-        <div className="flex gap-6 mt-5 pt-4 border-t border-base-300 dark:border-slate-700">
-          <Link href={`/@${user.username}/following`} className="flex items-baseline gap-1 hover:text-primary transition-colors group">
-            <span className="text-base font-bold text-base-content group-hover:text-primary transition-colors">{user.following ?? 0}</span>
-            <span className="text-sm text-base-content/50 font-medium">Following</span>
-          </Link>
-          <Link href={`/@${user.username}/followers`} className="flex items-baseline gap-1 hover:text-primary transition-colors group">
-            <span className="text-base font-bold text-base-content group-hover:text-primary transition-colors">{user.followers ?? 0}</span>
-            <span className="text-sm text-base-content/50 font-medium">Followers</span>
-          </Link>
-        </div>
+        <div className="border-t border-base-300 dark:border-slate-700 mt-5"></div>
       </div>
     </div>
   );
