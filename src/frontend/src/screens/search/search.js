@@ -4,10 +4,11 @@ import UserList from '../../shared/components/userlist/userlist';
 import Loading from '../../shared/components/loading/loading';
 import {useToast} from '../../shared/components/toast/toast';
 import APIClient from '../../shared/services/apiclient';
+import { Search } from 'lucide-react';
 
 const apiClient = new APIClient();
 
-function Search(props) {
+function SearchScreen(props) {
   const toast = useToast();
   const [query, setQuery] = useState('');
   const [userResults, setUserResults] = useState([]);
@@ -110,7 +111,7 @@ function Search(props) {
             {isLoading ? (
               <span className="loading loading-spinner loading-xs" />
             ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+              <Search className="h-4 w-4" />
             )}
             Search
           </button>
@@ -138,7 +139,7 @@ function Search(props) {
           {userResults.length === 0 && postResults.length === 0 && (
             <div className="card bg-base-100 border border-base-200">
               <div className="card-body items-center text-center py-12">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mb-4 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                <Search className="h-16 w-16 mb-4 opacity-30" />
                 <p className="text-base-content/60">No results for "{query}"</p>
                 <p className="text-sm text-base-content/40 mt-1">Try a different username or keyword</p>
               </div>
@@ -150,7 +151,7 @@ function Search(props) {
       {!isLoading && !hasSearched && (
         <div className="card bg-base-100 border border-base-200">
           <div className="card-body items-center text-center py-16">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-20 w-20 mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            <Search className="h-20 w-20 mb-4 opacity-20" />
             <h3 className="text-lg font-semibold mb-1">Discover people and thoughts</h3>
             <p className="text-sm text-base-content/50">Search by username or keyword</p>
           </div>
@@ -160,4 +161,4 @@ function Search(props) {
   );
 }
 
-export default Search;
+export default SearchScreen;

@@ -53,6 +53,7 @@ function AppContent() {
   const [updateError, setUpdateError] = useState(null);
   const [passwordError, setPasswordError] = useState(null);
   const [sessions, setSessions] = useState([]);
+  const [currentSessionId, setCurrentSessionId] = useState(null);
   const [sessionsError, setSessionsError] = useState(null);
 
   const refreshUser = useCallback(() => {
@@ -67,7 +68,10 @@ function AppContent() {
   const fetchSessions = useCallback(() => {
     setSessionsError(null);
     return apiClient.getSessions()
-      .then((data) => setSessions(data.sessions || []))
+      .then((data) => {
+        setSessions(data.sessions || []);
+        setCurrentSessionId(data.currentSessionId || null);
+      })
       .catch(() => setSessionsError('Failed to load sessions.'));
   }, []);
 
@@ -339,7 +343,7 @@ function AppContent() {
       return <Search />;
     }
     if (routeId === 'settings') {
-      return <Settings user={user} updateUser={updateUser} updatePassword={updatePassword} updateError={updateError} passwordError={passwordError} sessions={sessions} fetchSessions={fetchSessions} sessionsError={sessionsError} deleteSession={deleteSessionHandler} />;
+      return <Settings user={user} updateUser={updateUser} updatePassword={updatePassword} updateError={updateError} passwordError={passwordError} sessions={sessions} currentSessionId={currentSessionId} fetchSessions={fetchSessions} sessionsError={sessionsError} deleteSession={deleteSessionHandler} />;
     }
     if (routeId === 'login') {
       return <Login loginUser={loginUser} error={loginError} />;

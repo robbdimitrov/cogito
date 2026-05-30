@@ -45,9 +45,6 @@ func (pc *postController) createPost(c echo.Context) error {
 	if len(body.Content) == 0 || len(body.Content) > 255 {
 		return echo.NewHTTPError(400, "Content must be between 1 and 255 characters")
 	}
-	if len(body.Content) == 0 || len(body.Content) > 255 {
-		return echo.NewHTTPError(400, "Content must be between 1 and 255 characters")
-	}
 
 	req := pb.CreatePostRequest{Content: body.Content}
 

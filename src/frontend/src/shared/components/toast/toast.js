@@ -1,4 +1,5 @@
 import React, {createContext, useContext, useState, useCallback} from 'react';
+import { CheckCircle, AlertCircle, Info, X } from 'lucide-react';
 
 const ToastContext = createContext();
 
@@ -48,13 +49,13 @@ function Toast({toast, onRemove}) {
 
   const icon = {
     success: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+      <CheckCircle className="h-5 w-5" />
     ),
     error: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+      <AlertCircle className="h-5 w-5" />
     ),
     info: (
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+      <Info className="h-5 w-5" />
     ),
   }[toast.type];
 
@@ -63,7 +64,7 @@ function Toast({toast, onRemove}) {
       {icon}
       <span>{toast.message}</span>
       <button onClick={() => onRemove(toast.id)} className="btn btn-ghost btn-xs btn-circle opacity-50 hover:opacity-100">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+        <X className="h-4 w-4" />
       </button>
     </div>
   );

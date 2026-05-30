@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import Link from '../../shared/router/link';
+import { AlertCircle, User, Mail, Lock, UserPlus } from 'lucide-react';
 
 function Signup({registerUser, error}) {
   const [state, setState] = useState({name: '', username: '', email: '', password: ''});
@@ -29,7 +30,7 @@ function Signup({registerUser, error}) {
 
           {error && (
             <div className="alert alert-error mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <AlertCircle className="h-5 w-5" />
               <span>{error}</span>
             </div>
           )}
@@ -38,14 +39,14 @@ function Signup({registerUser, error}) {
             <div className="form-control">
               <label className="label"><span className="label-text">Name</span></label>
               <div className="relative">
-                <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/40 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/40 pointer-events-none" />
                 <input className="input input-bordered w-full pl-10" type="text" name="name" placeholder="Your name" onChange={handleInputChange} value={state.name} required />
               </div>
             </div>
             <div className="form-control">
               <label className="label"><span className="label-text">Username</span></label>
               <div className="relative">
-                <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/40 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/40 pointer-events-none" />
                 <input className="input input-bordered w-full pl-10" type="text" name="username" placeholder="@username" onChange={handleInputChange} value={state.username} required />
               </div>
               {!usernameValid && <span className="label-text-alt text-error mt-1">Letters, numbers, underscores only</span>}
@@ -53,14 +54,14 @@ function Signup({registerUser, error}) {
             <div className="form-control">
               <label className="label"><span className="label-text">Email</span></label>
               <div className="relative">
-                <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/40 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/40 pointer-events-none" />
                 <input className="input input-bordered w-full pl-10" type="email" name="email" placeholder="you@example.com" onChange={handleInputChange} value={state.email} required />
               </div>
             </div>
             <div className="form-control">
               <label className="label"><span className="label-text">Password</span></label>
               <div className="relative">
-                <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/40 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/40 pointer-events-none" />
                 <input className="input input-bordered w-full pl-10" type="password" name="password" placeholder="••••••••" minLength="4" onChange={handleInputChange} value={state.password} required />
               </div>
               {!passwordValid && <span className="label-text-alt text-error mt-1">At least 8 characters</span>}
@@ -68,7 +69,7 @@ function Signup({registerUser, error}) {
             <button type="submit" className="btn btn-primary w-full gap-1" disabled={isSubmitting || !usernameValid || !passwordValid}>
               {isSubmitting ? <span className="loading loading-spinner"></span> : (
                 <>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
+                  <UserPlus className="h-4 w-4" />
                   Create Account
                 </>
               )}

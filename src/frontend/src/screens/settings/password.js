@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import { AlertCircle } from 'lucide-react';
 
 function Password(props) {
   const [state, setState] = useState({password: '', oldPassword: ''});
@@ -29,7 +30,7 @@ function Password(props) {
 
         {props.error && (
           <div className="alert alert-error mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <AlertCircle className="h-5 w-5" />
             <span>{props.error}</span>
           </div>
         )}

@@ -3,6 +3,7 @@ import Link from '../../shared/router/link';
 import Avatar from '../../shared/components/avatar/avatar';
 import {useToast} from '../../shared/components/toast/toast';
 import APIClient from '../../shared/services/apiclient';
+import { AlertTriangle, ArrowLeft, Trash2, Repeat, Heart } from 'lucide-react';
 
 const apiClient = new APIClient();
 
@@ -117,7 +118,7 @@ function PostDetail(props) {
       <div className="container mx-auto px-4 py-6 max-w-2xl">
         <div className="card bg-base-100 border border-base-200">
           <div className="card-body items-center text-center py-12">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mb-4 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
+            <AlertTriangle className="h-16 w-16 mb-4 opacity-30" />
             <p className="text-base-content/60">Post not found.</p>
             <Link href="/" className="btn btn-primary btn-sm mt-4">Back to Feed</Link>
           </div>
@@ -132,7 +133,7 @@ function PostDetail(props) {
     <div className="container mx-auto px-4 py-6 max-w-2xl">
       <div className="mb-4">
         <Link href="/" className="btn btn-ghost btn-sm gap-1">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+          <ArrowLeft className="h-4 w-4" />
           Back
         </Link>
       </div>
@@ -153,28 +154,28 @@ function PostDetail(props) {
                 </div>
                 {isOwnPost && (
                   <button
-                    className="btn btn-ghost btn-xs text-base-content/30 hover:text-error p-1 h-auto"
+                    className="btn btn-ghost btn-xs text-base-content/30 hover:text-error p-1 h-auto hover:scale-110 active:scale-90 transition-transform duration-150"
                     onClick={handleDelete}
                     aria-label="Delete post"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    <Trash2 className="h-4 w-4" />
                   </button>
                 )}
               </div>
               <p className="mt-4 text-lg whitespace-pre-wrap leading-relaxed">{post.content}</p>
               <div className="flex items-center gap-6 mt-6 pt-4 border-t border-base-200">
                 <button
-                  className={`btn btn-ghost btn-sm gap-1 rounded-full px-4 ${post.reposted ? 'text-success' : 'text-base-content/40 hover:text-success'}`}
+                  className={`btn btn-ghost btn-sm gap-1 rounded-full px-4 hover:scale-105 active:scale-95 transition-all duration-150 ${post.reposted ? 'text-success' : 'text-base-content/40 hover:text-success'}`}
                   onClick={handleRepost}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                  <Repeat className="h-5 w-5" />
                   {post.reposts}
                 </button>
                 <button
-                  className={`btn btn-ghost btn-sm gap-1 rounded-full px-4 ${post.liked ? 'text-error' : 'text-base-content/40 hover:text-error'}`}
+                  className={`btn btn-ghost btn-sm gap-1 rounded-full px-4 hover:scale-105 active:scale-95 transition-all duration-150 ${post.liked ? 'text-error' : 'text-base-content/40 hover:text-error'}`}
                   onClick={handleLike}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill={post.liked ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                  <Heart className="h-5 w-5" fill={post.liked ? 'currentColor' : 'none'} />
                   {post.likes}
                 </button>
               </div>

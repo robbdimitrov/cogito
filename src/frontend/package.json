@@ -3,6 +3,11 @@
   "author": "Robert Dimitrov",
   "license": "MIT",
   "private": true,
+  "sideEffects": [
+    "src/index.css",
+    "src/tailwind-source.css",
+    "**/*.css"
+  ],
   "scripts": {
     "build:css": "tailwindcss -i src/tailwind-source.css -o src/index.css",
     "start": "react-scripts start",
@@ -11,9 +16,10 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-scripts": "^4.0.3"
+    "lucide-react": "^1.17.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-scripts": "^5.0.1"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.16",

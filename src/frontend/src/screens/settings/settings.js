@@ -20,7 +20,7 @@ function Settings(props) {
           {router.path.endsWith('/password')
             ? <Password updatePassword={props.updatePassword || (() => {})} error={props.passwordError} />
             : router.path.endsWith('/sessions')
-            ? <Sessions sessions={props.sessions || []} fetchSessions={props.fetchSessions || (() => Promise.resolve())} sessionsError={props.sessionsError} deleteSession={props.deleteSession || (() => Promise.resolve())} />
+            ? <Sessions sessions={props.sessions || []} currentSessionId={props.currentSessionId} fetchSessions={props.fetchSessions || (() => Promise.resolve())} sessionsError={props.sessionsError} deleteSession={props.deleteSession || (() => Promise.resolve())} />
             : <EditProfile user={user} updateUser={props.updateUser || (() => {})} error={props.updateError} />
           }
         </div>

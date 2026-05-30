@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import Link from '../../router/link';
 import Avatar from '../../components/avatar/avatar';
+import { Check, UserPlus } from 'lucide-react';
 
 function UserItem({user, onFollow, onUnfollow}) {
   const [isActionLoading, setIsActionLoading] = useState(false);
@@ -36,12 +37,12 @@ function UserItem({user, onFollow, onUnfollow}) {
                 <span className="loading loading-spinner loading-xs" />
               ) : user.followed ? (
                 <>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                  <Check className="h-4 w-4" />
                   Following
                 </>
               ) : (
                 <>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
+                  <UserPlus className="h-4 w-4" />
                   Follow
                 </>
               )}

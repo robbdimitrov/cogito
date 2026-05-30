@@ -117,7 +117,7 @@ Missing features (not required for MVP):
 - **Database schema:** Clean, correct, supports users, sessions, posts, likes, reposts, followers.
 - **gRPC service implementations:** Auth, User, and Post services have correct business logic, password hashing, validation, and DB queries.
 - **Kubernetes manifests:** Correctly structured with unique `component` labels, `imagePullPolicy: IfNotPresent`, and service discovery.
-- **Docker builds:** Multi-stage Dockerfiles are present. Frontend uses `node:20-alpine` with `NODE_OPTIONS=--openssl-legacy-provider` for CRA 4 compatibility.
+- **Docker builds:** Multi-stage Dockerfiles are present. Frontend uses `node:22-alpine` compatible with React-Scripts 5 and Webpack 5.
 - **API Gateway routing:** Echo routes are correctly mapped to gRPC backends.
 - **Session management (backend):** Cookies are HttpOnly, SameSite=Strict, 7-day expiry. Logout clears cookies.
 - **Like/Repost actions (frontend wiring):** Buttons exist in `ThoughtItem` and handlers are wired in `app.js`. They work once the cookie issue is fixed.
@@ -234,7 +234,7 @@ This is the bulk of the work. The user has explicitly requested a complete redes
 
 | Risk | Likelihood | Mitigation |
 |------|-----------|------------|
-| `react-scripts@4` fails with new dependencies | Medium | Pin compatible versions; use `NODE_OPTIONS=--openssl-legacy-provider` as already configured. |
+| Upgraded dependencies break Webpack compilation | Low | Upgraded to react-scripts@5.0.1 and Webpack 5 to support modern ESM and Node 22. |
 | Tailwind class purge removes DaisyUI classes | Low | Ensure `tailwind.config.js` `content` includes all JSX files and DaisyUI is in `plugins`. |
 | Cookie auth still fails after `credentials: 'include'` | Low | Verify API gateway and dev proxy do not strip cookies; ensure `SameSite=Strict` works on `localhost` (it does for same-origin). |
 | Frontend dev proxy path rewrite mismatch | Low | Proxy strips `/api` correctly. Verify after backend fixes. |
@@ -307,6 +307,10 @@ This section tracks what has been done and what remains. A fresh agent should re
 - [x] **B1-B11:** Frontend integration fixes (credentials + 401 interceptor, create post, profile links, follow/unfollow, display bugs, author mapping)
 - [x] **C1-C5:** UI Redesign — Tailwind + DaisyUI tooling, theme system (light/dark toggle + localStorage), page redesigns, SCSS cleanup, FontAwesome replacement
 - [x] **D:** Verification — frontend production build succeeds, Docker builds succeed
+- [x] **E:** Node, Webpack & React-Scripts Upgrade — Upgraded to react-scripts@5.0.1, react@18.3.1, Node 22 (in Dockerfile), and removed craco config.
+- [x] **F:** Session Endpoint Enhancement — Added currentSessionId and userId to GET /sessions, marked the active session in the settings view, and disabled termination of the active session.
+- [x] **G:** Final SVG & Lucide Migration — Replaced all remaining inline SVGs in shared lists, toasts, and headers.
+- [x] **H:** Interactive UI/UX Animations — Added modern hover and active scaling micro-animations on interactive action buttons (Like, Repost, Delete) across the feed and post detail screen.
 
 ### Remaining
 - [ ] None — project meets minimum viable goal
@@ -317,5 +321,5 @@ If you're picking this up, the project is in a working state. Key things to know
 - Frontend `fetch` includes `credentials: 'include'` and has a 401 interceptor.
 - UI is fully DaisyUI + Tailwind with light/dark theme toggle.
 - All SCSS and FontAwesome have been removed.
-- React is pinned to 18.2.0 to match `react-scripts@4`.
+- React and react-scripts have been upgraded to 18.3.1 and 5.0.1 respectively (running Webpack 5, fully tree-shaking).
 - If you need to make changes, check `AGENTS.md` for build commands and architecture notes.

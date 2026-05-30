@@ -199,5 +199,9 @@ func (ac *authController) getSessions(c echo.Context) error {
 		}
 	}
 
-	return c.JSON(200, map[string]interface{}{"sessions": sessions})
+	return c.JSON(200, map[string]interface{}{
+		"sessions":         sessions,
+		"currentSessionId": cookie.Value,
+		"userId":           validateRes.UserId,
+	})
 }
