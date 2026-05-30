@@ -12,8 +12,18 @@ const UserList = React.lazy(() => import('@/app/[username]/[[...tab]]/userlist')
 
 import { useAPI } from '@/shared/contexts/apicontext';
 import { useRouter } from 'next/navigation';
+import { User, Post } from '@/shared/types';
 
-function Profile(props: any) {
+interface ProfileProps {
+  user?: User | null;
+  posts?: Post[];
+  likes?: Post[];
+  following?: User[];
+  followers?: User[];
+  currentUser?: User | null;
+}
+
+function Profile(props: ProfileProps) {
   const apiClient = useAPI();
   const router = useRouter();
   const pathname = usePathname();
@@ -24,42 +34,42 @@ function Profile(props: any) {
   const followers = props.followers || [];
   const { currentUser } = props;
 
-  const handleLike = async (post) => {
+  const handleLike = async (post: Post) => {
     try {
       post.liked ? await apiClient.unlikePost(post.id) : await apiClient.likePost(post.id);
       router.refresh();
-    } catch {}
+    } catch (e: unknown) {}
   };
 
-  const handleRepost = async (post) => {
+  const handleRepost = async (post: Post) => {
     try {
       post.reposted ? await apiClient.removeRepost(post.id) : await apiClient.repostPost(post.id);
       router.refresh();
-    } catch {}
+    } catch (e: unknown) {}
   };
 
-  const handleDeletePost = async (postId) => {
+  const handleDeletePost = async (postId: string) => {
     try {
       await apiClient.deletePost(postId);
       router.refresh();
-    } catch {}
+    } catch (e: unknown) {}
   };
 
-  const handleFollow = async (userId) => {
+  const handleFollow = async (userId: string) => {
     try {
       await apiClient.followUser(userId);
       router.refresh();
-    } catch {}
+    } catch (e: unknown) {}
   };
 
-  const handleUnfollow = async (userId) => {
+  const handleUnfollow = async (userId: string) => {
     try {
       await apiClient.unfollowUser(userId);
       router.refresh();
-    } catch {}
+    } catch (e: unknown) {}
   };
 
-  const renderTabContent = (items, emptyMessage, renderFn) => {
+  const renderTabContent = (items: unknown[] | undefined, emptyMessage: string, renderFn: () => React.ReactNode) => {
     const isTabEmpty = !items || items.length === 0;
     if (isTabEmpty) {
       return (

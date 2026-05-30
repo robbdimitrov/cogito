@@ -8,40 +8,47 @@ import ThoughtList from '@/shared/components/thoughtlist/thoughtlist';
 
 import { useAPI } from '@/shared/contexts/apicontext';
 import { useRouter } from 'next/navigation';
+import { User, Post } from '@/shared/types';
 
-function Feed(props: any) {
+interface FeedProps {
+  user?: User | null;
+  posts?: Post[];
+  currentUserId?: string | null;
+}
+
+function Feed(props: FeedProps) {
   const apiClient = useAPI();
   const router = useRouter();
   const user = props.user || null;
   const posts = props.posts || [];
   const currentUserId = props.currentUserId || null;
 
-  const handleLike = async (post) => {
+  const handleLike = async (post: Post) => {
     try {
       post.liked ? await apiClient.unlikePost(post.id) : await apiClient.likePost(post.id);
       router.refresh();
-    } catch {}
+    } catch (e: unknown) {}
   };
 
-  const handleRepost = async (post) => {
+  const handleRepost = async (post: Post) => {
     try {
       post.reposted ? await apiClient.removeRepost(post.id) : await apiClient.repostPost(post.id);
       router.refresh();
-    } catch {}
+    } catch (e: unknown) {}
   };
 
-  const handleDeletePost = async (postId) => {
+  const handleDeletePost = async (postId: string) => {
     try {
       await apiClient.deletePost(postId);
       router.refresh();
-    } catch {}
+    } catch (e: unknown) {}
   };
 
-  const handleCreatePost = async (content) => {
+  const handleCreatePost = async (content: string) => {
     try {
       await apiClient.createPost(content);
       router.refresh();
-    } catch {}
+    } catch (e: unknown) {}
   };
 
   return (

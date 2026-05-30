@@ -49,8 +49,14 @@ function ThemeToggle() {
     </button>
   );
 }
+import { User } from '@/shared/types';
 
-function Navbar({isLoggedIn, user}: any) {
+interface NavbarProps {
+  isLoggedIn: boolean;
+  user?: User | null;
+}
+
+function Navbar({isLoggedIn, user}: NavbarProps) {
   const apiClient = useAPI();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);

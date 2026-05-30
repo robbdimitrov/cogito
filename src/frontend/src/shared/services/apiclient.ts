@@ -7,7 +7,7 @@ function getCsrfToken() {
 }
 
 class APIClient {
-  async request(url: string, method: string, body?: any): Promise<any> {
+  async request(url: string, method: string, body?: unknown): Promise<unknown> {
     let options: RequestInit = {
       method,
       credentials: 'include',

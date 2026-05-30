@@ -1,7 +1,7 @@
 import PostDetail from '@/app/posts/[id]/post';
 import { fetchServer, hydratePostAuthors, getCurrentUser } from '@/shared/services/serverapi';
 
-export default async function PostPage({ params }: any) {
+export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   
   let post = null;

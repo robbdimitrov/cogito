@@ -22,8 +22,15 @@ function formatRelativeTime(dateString: string) {
   if (diffHour < 24) return `${diffHour}h`;
   return `${diffDay}d`;
 }
+import { Post } from '@/shared/types';
 
-function PostDetail({ initialPost, currentUserId }: any) {
+interface PostDetailProps {
+  postId?: string;
+  initialPost?: Post | null;
+  currentUserId?: string | null;
+}
+
+function PostDetail({ initialPost, currentUserId }: PostDetailProps) {
   const apiClient = useAPI();
   const toast = useToast();
   const [post, setPost] = useState(initialPost);
@@ -45,7 +52,7 @@ function PostDetail({ initialPost, currentUserId }: any) {
       }
       const updated = await apiClient.getPost(post.id);
       setPost(updated);
-    } catch (e: any) {
+    } catch (e: unknown) {
       toast.error('Action failed.');
     }
   }, [post, toast]);
@@ -60,7 +67,7 @@ function PostDetail({ initialPost, currentUserId }: any) {
       }
       const updated = await apiClient.getPost(post.id);
       setPost(updated);
-    } catch (e: any) {
+    } catch (e: unknown) {
       toast.error('Action failed.');
     }
   }, [post, toast]);
@@ -71,7 +78,7 @@ function PostDetail({ initialPost, currentUserId }: any) {
       await apiClient.deletePost(post.id);
       toast.success('Post deleted.');
       router.push('/');
-    } catch (e: any) {
+    } catch (e: unknown) {
       toast.error('Delete failed.');
     }
   }, [post, toast, router]);

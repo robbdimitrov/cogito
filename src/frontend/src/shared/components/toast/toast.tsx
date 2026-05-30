@@ -3,7 +3,13 @@
 import React, {createContext, useContext, useState, useCallback} from 'react';
 import { CheckCircle, AlertCircle, Info, X } from 'lucide-react';
 
-const ToastContext = createContext<any>(null);
+interface ToastContextType {
+  success: (msg: string) => void;
+  error: (msg: string) => void;
+  info: (msg: string) => void;
+}
+
+const ToastContext = createContext<ToastContextType | null>(null);
 
 export function useToast() {
   const ctx = useContext(ToastContext);

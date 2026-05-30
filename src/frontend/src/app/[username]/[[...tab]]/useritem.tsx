@@ -3,8 +3,16 @@ import Link from 'next/link';
 import Avatar from '@/shared/components/avatar/avatar';
 import { Check, UserPlus } from 'lucide-react';
 import GlassCard from '@/shared/components/ui/surface';
+import { User } from '@/shared/types';
 
-function UserItem({user, onFollow, onUnfollow, currentUserId}: any) {
+interface UserItemProps {
+  user: User;
+  onFollow?: (userId: string) => Promise<void> | void;
+  onUnfollow?: (userId: string) => Promise<void> | void;
+  currentUserId?: string | null;
+}
+
+function UserItem({user, onFollow, onUnfollow, currentUserId}: UserItemProps) {
   const [isActionLoading, setIsActionLoading] = useState(false);
   const isCurrentUser = currentUserId && user.id === currentUserId;
 

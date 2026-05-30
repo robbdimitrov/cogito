@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers';
+import { User, Post } from '@/shared/types';
 
 const API_BASE = `${process.env.API_URL || 'http://localhost:8080'}`;
 
@@ -44,7 +45,7 @@ export async function getCurrentUser() {
   return null;
 }
 
-export async function hydratePostAuthors(rawPosts: any[], rethoughtByUser: any = null) {
+export async function hydratePostAuthors(rawPosts: Post[], rethoughtByUser: User | null = null) {
   if (!rawPosts) return [];
   const userIds: string[] = [
     ...new Set(
@@ -54,7 +55,7 @@ export async function hydratePostAuthors(rawPosts: any[], rethoughtByUser: any =
     ),
   ] as string[];
   
-  const userMap: Record<string, any> = {};
+  const userMap: Record<string, User | null> = {};
   await Promise.all(
     userIds.map(async (uid: string) => {
       try {
