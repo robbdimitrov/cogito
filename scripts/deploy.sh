@@ -1,18 +1,52 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-CLUSTER_NAME="thoughts"
-NAMESPACE="thoughts"
-REGISTRY="localhost:5000/thoughts"
+# Bring up the full Thoughts stack on a local kind cluster.
+# Idempotent: safe to re-run; reuses the cluster, namespace, and port-forward.
+
+CLUSTER="${CLUSTER:-thoughts}"
+NS="${NS:-thoughts}"
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+K8S_DIR="$ROOT/k8s"
+REGISTRY="${REGISTRY:-localhost:5000/thoughts}"
+APP_HOST="${APP_HOST:-thoughts.localhost}"
 LOCAL_PORT="${LOCAL_PORT:-8080}"
 REMOTE_PORT="${REMOTE_PORT:-8080}"
 PORT_FORWARD_LOG="${PORT_FORWARD_LOG:-/tmp/thoughts-port-forward-${LOCAL_PORT}.log}"
 PORT_FORWARD_PID_FILE="${PORT_FORWARD_PID_FILE:-/tmp/thoughts-port-forward-${LOCAL_PORT}.pid}"
 
-echo "=== Thoughts Kind Deploy Script ==="
+SERVICES=(apigateway authservice database frontend postservice userservice)
+ROLL_OUT_DATABASE=(deployment/database)
+ROLL_OUT_REST=(
+  deployment/apigateway
+  deployment/authservice
+  deployment/frontend
+  deployment/postservice
+  deployment/userservice
+)
+
+log() {
+  echo "==> $*"
+}
+
+die() {
+  echo "error: $*" >&2
+  exit 1
+}
+
+require_tools() {
+  local tool
+  for tool in kind kubectl docker make; do
+    command -v "$tool" >/dev/null || die "missing required tool: $tool"
+  done
+}
+
+require_docker() {
+  docker info >/dev/null 2>&1 || die "Docker daemon is not running. Start Docker and try again."
+}
 
 port_pids() {
-  if command -v lsof &>/dev/null; then
+  if command -v lsof >/dev/null; then
     lsof -nP -iTCP:"${LOCAL_PORT}" -sTCP:LISTEN -t 2>/dev/null || true
   fi
 }
@@ -25,29 +59,107 @@ is_frontend_port_forward() {
     [[ "${command}" == *"port-forward"* ]] &&
     [[ "${command}" == *"service/frontend"* ]] &&
     [[ "${command}" == *"${LOCAL_PORT}:${REMOTE_PORT}"* ]] &&
-    [[ "${command}" == *"${NAMESPACE}"* ]]
+    [[ "${command}" == *"${NS}"* ]]
 }
 
 handle_existing_port_forward() {
   local pids pid
   pids="$(port_pids)"
-  if [ -z "${pids}" ]; then
+  if [[ -z "${pids}" ]]; then
     return 1
   fi
 
   while IFS= read -r pid; do
     if is_frontend_port_forward "${pid}"; then
-      echo "Frontend port-forward is already running on http://localhost:${LOCAL_PORT}/ (pid ${pid})."
+      echo "Frontend port-forward is already running on http://${APP_HOST}:${LOCAL_PORT}/ (pid ${pid})."
       return 0
     fi
   done <<< "${pids}"
 
-  echo "Error: Local port ${LOCAL_PORT} is already in use by another process:" >&2
+  echo "error: local port ${LOCAL_PORT} is already in use by another process:" >&2
   while IFS= read -r pid; do
     ps -p "${pid}" -o pid=,command= >&2 || true
   done <<< "${pids}"
-  echo "Stop that process or rerun with a different port, for example: LOCAL_PORT=8081 $0" >&2
+  echo "Stop that process or rerun with a different port, for example:" >&2
+  echo "  LOCAL_PORT=8081 $0" >&2
   exit 1
+}
+
+create_cluster() {
+  if ! kind get clusters | grep -qx "${CLUSTER}"; then
+    log "creating kind cluster '${CLUSTER}'"
+    kind create cluster --name "${CLUSTER}"
+  else
+    log "using existing kind cluster '${CLUSTER}'"
+  fi
+  kubectl config use-context "kind-${CLUSTER}" >/dev/null
+}
+
+build_images() {
+  log "building images"
+  export DOCKER_BUILDKIT=1
+  make -C "${ROOT}"
+}
+
+load_images() {
+  local images=()
+  local service
+  for service in "${SERVICES[@]}"; do
+    images+=("${REGISTRY}/${service}")
+  done
+
+  log "loading images into kind"
+  kind load docker-image "${images[@]}" --name "${CLUSTER}"
+}
+
+apply_manifests() {
+  log "creating namespace and applying manifests"
+  kubectl create namespace "${NS}" 2>/dev/null || true
+  kubectl apply -f "${K8S_DIR}" -n "${NS}"
+}
+
+rollout_restart() {
+  local resource
+  for resource in "$@"; do
+    kubectl -n "${NS}" rollout restart "${resource}"
+  done
+}
+
+wait_for_rollouts() {
+  local failed=()
+  local resource
+  for resource in "$@"; do
+    if ! kubectl -n "${NS}" rollout status "${resource}" --timeout=180s; then
+      failed+=("${resource}")
+    fi
+  done
+
+  if [[ ${#failed[@]} -eq 0 ]]; then
+    return 0
+  fi
+
+  echo "error: rollout failed for: ${failed[*]}" >&2
+  echo "==> current pod statuses"
+  kubectl -n "${NS}" get pods
+  for resource in "${failed[@]}"; do
+    echo "==> recent logs for ${resource}"
+    kubectl -n "${NS}" logs "${resource}" --tail=40 || true
+  done
+  exit 1
+}
+
+restart_stack() {
+  log "restarting database"
+  rollout_restart "${ROLL_OUT_DATABASE[@]}"
+
+  log "waiting for database"
+  wait_for_rollouts "${ROLL_OUT_DATABASE[@]}"
+
+  log "restarting application services"
+  rollout_restart "${ROLL_OUT_REST[@]}"
+
+  log "waiting for application services"
+  wait_for_rollouts "${ROLL_OUT_REST[@]}"
 }
 
 start_port_forward_background() {
@@ -57,13 +169,14 @@ start_port_forward_background() {
     return 0
   fi
 
-  LOCAL_PORT="${LOCAL_PORT}" REMOTE_PORT="${REMOTE_PORT}" NAMESPACE="${NAMESPACE}" \
+  log "starting frontend port-forward in the background"
+  LOCAL_PORT="${LOCAL_PORT}" REMOTE_PORT="${REMOTE_PORT}" NS="${NS}" \
     nohup bash -c '
     set -u
     while true; do
-      kubectl port-forward service/frontend "${LOCAL_PORT}:${REMOTE_PORT}" -n "${NAMESPACE}"
+      kubectl -n "${NS}" port-forward service/frontend "${LOCAL_PORT}:${REMOTE_PORT}"
       status=$?
-      echo "Port-forward exited with status ${status}. Reconnecting in 3 seconds..." >&2
+      echo "port-forward exited with status ${status}; reconnecting in 3 seconds" >&2
       sleep 3
     done
   ' >> "${PORT_FORWARD_LOG}" 2>&1 &
@@ -75,136 +188,51 @@ start_port_forward_background() {
   sleep 2
   if handle_existing_port_forward; then
     echo "Background port-forward supervisor pid: ${supervisor_pid}"
-    echo "Logs: ${PORT_FORWARD_LOG}"
-    echo "PID file: ${PORT_FORWARD_PID_FILE}"
     return 0
   fi
 
   if ps -p "${supervisor_pid}" >/dev/null 2>&1; then
-    echo "Background port-forward is starting on http://localhost:${LOCAL_PORT}/ (supervisor pid ${supervisor_pid})."
-    echo "Logs: ${PORT_FORWARD_LOG}"
-    echo "PID file: ${PORT_FORWARD_PID_FILE}"
+    echo "Background port-forward is starting on http://${APP_HOST}:${LOCAL_PORT}/ (supervisor pid ${supervisor_pid})."
     return 0
   fi
 
-  echo "Error: Failed to start background port-forward. Recent logs:" >&2
+  echo "error: failed to start background port-forward. Recent logs:" >&2
   tail -30 "${PORT_FORWARD_LOG}" >&2 || true
   exit 1
 }
 
-# --- prerequisites ---
-for cmd in kind kubectl docker make; do
-  if ! command -v "$cmd" &> /dev/null; then
-    echo "Error: $cmd is not installed." >&2
-    exit 1
-  fi
-done
+print_summary() {
+  cat <<EOF
 
-# --- check if docker daemon is running ---
-if ! docker info &>/dev/null; then
-  echo "Error: Docker daemon is not running. Please start Docker and try again." >&2
-  exit 1
+==> thoughts is up
+
+  Frontend       http://${APP_HOST}:${LOCAL_PORT}
+  Gateway        in-cluster: http://apigateway:8080
+  Namespace      ${NS}
+  Context        kind-${CLUSTER}
+
+  Port-forward   supervisor pid: $(cat "${PORT_FORWARD_PID_FILE}" 2>/dev/null || echo "unknown")
+                 logs: ${PORT_FORWARD_LOG}
+                 stop: kill \$(cat ${PORT_FORWARD_PID_FILE})
+
+  Pods           kubectl -n ${NS} get pods
+  Logs           kubectl -n ${NS} logs deployment/<service> --tail=100
+  Tear down      kubectl delete -f ${K8S_DIR} -n ${NS}
+
+EOF
+}
+
+require_tools
+require_docker
+
+if [[ -n "$(port_pids)" ]]; then
+  echo "note: local port ${LOCAL_PORT} is already in use; deploy will reuse a frontend port-forward or report the conflict." >&2
 fi
 
-# --- check local port availability ---
-if [ -n "$(port_pids)" ]; then
-  echo "Note: Local port ${LOCAL_PORT} is already in use. The deploy will continue, then reuse or report it." >&2
-fi
-
-# --- kind cluster ---
-if ! kind get clusters | grep -q "^${CLUSTER_NAME}$"; then
-  echo "Creating kind cluster '${CLUSTER_NAME}'..."
-  kind create cluster --name "${CLUSTER_NAME}"
-else
-  echo "Using existing kind cluster '${CLUSTER_NAME}'."
-fi
-
-# --- build images ---
-echo "Building images..."
-make
-
-# --- load images into kind ---
-echo "Loading images into kind (in parallel)..."
-services=(apigateway authservice database frontend postservice userservice)
-load_pids=()
-for svc in "${services[@]}"; do
-  kind load docker-image "${REGISTRY}/${svc}" --name "${CLUSTER_NAME}" &
-  load_pids+=($!)
-done
-
-# Wait for all loads to complete and catch any failures
-failed_loads=()
-num_services=${#services[@]}
-for ((i=0; i<num_services; i++)); do
-  svc="${services[$i]}"
-  pid="${load_pids[$i]}"
-  if ! wait "$pid"; then
-    failed_loads+=("$svc")
-  fi
-done
-
-if [ ${#failed_loads[@]} -ne 0 ]; then
-  echo "Error: Failed to load the following images into kind: ${failed_loads[*]}" >&2
-  exit 1
-fi
-
-# --- set kubectl context ---
-echo "Setting kubectl context to kind-${CLUSTER_NAME}..."
-kubectl config use-context "kind-${CLUSTER_NAME}"
-
-# --- deploy ---
-echo "Creating namespace and applying manifests..."
-kubectl create namespace "${NAMESPACE}" 2>/dev/null || true
-kubectl apply -f ./k8s -n "${NAMESPACE}"
-
-# --- restart database first to avoid backend connection failures ---
-echo "Restarting database deployment..."
-kubectl rollout restart deployment/database -n "${NAMESPACE}"
-echo "Waiting for database to be ready..."
-if ! kubectl rollout status deployment/database -n "${NAMESPACE}" --timeout=60s; then
-  echo "Error: Database failed to start. Recent database pod logs:" >&2
-  kubectl logs -l tier=database -n "${NAMESPACE}" --tail=30 || true
-  exit 1
-fi
-
-# --- restart other deployments ---
-echo "Restarting service deployments to pick up new images..."
-restart_services=(apigateway authservice frontend postservice userservice)
-for svc in "${restart_services[@]}"; do
-  kubectl rollout restart deployment/"${svc}" -n "${NAMESPACE}"
-done
-
-# --- wait for services ---
-echo "Waiting for services to be ready..."
-rollout_pids=()
-for svc in "${restart_services[@]}"; do
-  kubectl rollout status deployment/"${svc}" -n "${NAMESPACE}" --timeout=120s &
-  rollout_pids+=($!)
-done
-
-failed_rollouts=()
-num_restart_services=${#restart_services[@]}
-for ((i=0; i<num_restart_services; i++)); do
-  svc="${restart_services[$i]}"
-  pid="${rollout_pids[$i]}"
-  if ! wait "$pid"; then
-    failed_rollouts+=("$svc")
-  fi
-done
-
-if [ ${#failed_rollouts[@]} -ne 0 ]; then
-  echo "Error: The following deployments failed to roll out: ${failed_rollouts[*]}" >&2
-  echo "=== Current Pod Statuses ==="
-  kubectl get pods -n "${NAMESPACE}"
-  for svc in "${failed_rollouts[@]}"; do
-    echo "=== Logs for failed service: ${svc} ==="
-    kubectl logs deployment/"${svc}" -n "${NAMESPACE}" --tail=30 || true
-  done
-  exit 1
-fi
-
-# --- port-forward ---
-echo ""
-echo "Setup complete. Starting port-forward in the background..."
-echo "Frontend will be available at http://localhost:${LOCAL_PORT}/"
+create_cluster
+build_images
+load_images
+apply_manifests
+restart_stack
 start_port_forward_background
+print_summary
