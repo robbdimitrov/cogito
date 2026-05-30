@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from '../../shared/router/link';
 import {useRouter} from '../../shared/router/router';
+import {glassSurfaceClasses} from '../../shared/components/ui/surface';
 
 function ControlBar({user}) {
   const router = useRouter();
@@ -35,7 +36,7 @@ function ControlBar({user}) {
   ];
 
   return (
-    <div className="tabs tabs-boxed mt-4 justify-around rounded-2xl border border-white/60 bg-base-100/80 p-1.5 shadow-xl shadow-slate-900/10 backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/70 dark:shadow-black/30">
+    <div className={`tabs tabs-boxed mt-4 justify-around rounded-2xl p-1.5 ${glassSurfaceClasses}`}>
       {tabs.map((tab) => (
         <Link
           key={tab.name}

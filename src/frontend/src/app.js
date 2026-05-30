@@ -21,7 +21,11 @@ const apiClient = new APIClient();
 
 async function hydratePostAuthors(rawPosts, rethoughtByUser = null) {
   const userIds = [
-    ...new Set(rawPosts.map((p) => p.userId).filter(Boolean)),
+    ...new Set(
+      rawPosts
+        .flatMap((p) => [p.userId, p.rethoughtByUserId])
+        .filter(Boolean)
+    ),
   ];
   const userMap = {};
 
@@ -42,7 +46,9 @@ async function hydratePostAuthors(rawPosts, rethoughtByUser = null) {
       user: userMap[p.userId],
     };
 
-    if (rethoughtByUser && p.userId !== rethoughtByUser.id) {
+    if (p.rethoughtByUserId) {
+      post.rethoughtByUser = userMap[p.rethoughtByUserId];
+    } else if (rethoughtByUser && p.userId !== rethoughtByUser.id) {
       post.rethoughtByUser = rethoughtByUser;
     }
 

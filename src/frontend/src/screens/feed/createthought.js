@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import Avatar from '../../shared/components/avatar/avatar';
 import { Pen, Send } from 'lucide-react';
+import GlassCard from '../../shared/components/ui/surface';
 
 function CreateThought({user, onCreatePost}) {
   const [content, setContent] = useState('');
@@ -19,7 +20,7 @@ function CreateThought({user, onCreatePost}) {
   }
 
   return (
-    <div className="card rounded-2xl border border-white/60 bg-base-100/80 shadow-xl shadow-slate-900/10 backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/70 dark:shadow-black/30">
+    <GlassCard>
       <div className="card-body p-4 sm:p-5">
         <form onSubmit={handleSubmit}>
           <div className="flex gap-3 sm:gap-4">
@@ -27,9 +28,9 @@ function CreateThought({user, onCreatePost}) {
               <Avatar name={user?.name} size="md" />
             </div>
             <div className="relative flex-1 min-w-0">
-              <Pen className="absolute top-3 left-3 h-5 w-5 text-slate-500 dark:text-slate-400 pointer-events-none" />
+              <Pen className="absolute left-3 top-3.5 h-5 w-5 text-slate-500 dark:text-slate-400 pointer-events-none" />
               <textarea
-                className="textarea textarea-bordered w-full resize-none rounded-2xl border-slate-200/70 bg-white/55 pl-10 shadow-inner shadow-slate-900/5 transition-all duration-300 focus:border-primary/60 focus:bg-white/80 focus:ring-4 focus:ring-primary/10 dark:border-slate-700/70 dark:bg-slate-950/35 dark:focus:bg-slate-950/60"
+                className="textarea textarea-bordered w-full resize-none rounded-2xl border-slate-200/70 bg-white/55 pl-10 text-base leading-relaxed shadow-inner shadow-slate-900/5 transition-all duration-300 focus:border-primary/60 focus:bg-white/80 focus:ring-4 focus:ring-primary/10 dark:border-slate-700/70 dark:bg-slate-950/35 dark:focus:bg-slate-950/60 sm:text-lg"
                 placeholder="What's on your mind?"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
@@ -51,7 +52,7 @@ function CreateThought({user, onCreatePost}) {
           </div>
         </form>
       </div>
-    </div>
+    </GlassCard>
   );
 }
 

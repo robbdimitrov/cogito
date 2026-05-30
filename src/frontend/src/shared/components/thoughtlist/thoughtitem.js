@@ -2,6 +2,7 @@ import React from 'react';
 import Link from '../../router/link';
 import Avatar from '../../components/avatar/avatar';
 import { Trash2, Repeat, Heart } from 'lucide-react';
+import GlassCard from '../ui/surface';
 
 function formatRelativeTime(dateString) {
   const date = new Date(dateString);
@@ -40,7 +41,7 @@ function ThoughtItem({post, user, onLike, onRepost, onDelete, currentUserId}) {
           <span>rethought</span>
         </div>
       )}
-      <article className={`card overflow-hidden border border-white/60 bg-base-100/80 shadow-xl shadow-slate-900/10 backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-2xl dark:border-white/10 dark:bg-slate-900/70 dark:shadow-black/30 ${rethoughtBy ? 'rounded-b-2xl rounded-t-none' : 'rounded-2xl'}`}>
+      <GlassCard as="article" interactive className={`overflow-hidden ${rethoughtBy ? 'rounded-b-2xl rounded-t-none' : ''}`}>
         <div className="card-body p-4 sm:p-5">
           <div className="flex items-start gap-3 sm:gap-4">
             <Link href={`/@${author?.username}`} className="shrink-0 transition-transform duration-200 hover:scale-105">
@@ -94,7 +95,7 @@ function ThoughtItem({post, user, onLike, onRepost, onDelete, currentUserId}) {
             </div>
           </div>
         </div>
-      </article>
+      </GlassCard>
     </li>
   );
 }

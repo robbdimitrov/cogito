@@ -858,17 +858,19 @@ func (x *PostRequest) GetPostId() int32 {
 }
 
 type Post struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	UserId        int32                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Content       string                 `protobuf:"bytes,3,opt,name=content,proto3" json:"content,omitempty"`
-	Likes         int32                  `protobuf:"varint,4,opt,name=likes,proto3" json:"likes,omitempty"`
-	Liked         bool                   `protobuf:"varint,5,opt,name=liked,proto3" json:"liked,omitempty"`
-	Reposts       int32                  `protobuf:"varint,6,opt,name=reposts,proto3" json:"reposts,omitempty"`
-	Reposted      bool                   `protobuf:"varint,7,opt,name=reposted,proto3" json:"reposted,omitempty"`
-	Created       string                 `protobuf:"bytes,8,opt,name=created,proto3" json:"created,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Id                int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	UserId            int32                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Content           string                 `protobuf:"bytes,3,opt,name=content,proto3" json:"content,omitempty"`
+	Likes             int32                  `protobuf:"varint,4,opt,name=likes,proto3" json:"likes,omitempty"`
+	Liked             bool                   `protobuf:"varint,5,opt,name=liked,proto3" json:"liked,omitempty"`
+	Reposts           int32                  `protobuf:"varint,6,opt,name=reposts,proto3" json:"reposts,omitempty"`
+	Reposted          bool                   `protobuf:"varint,7,opt,name=reposted,proto3" json:"reposted,omitempty"`
+	Created           string                 `protobuf:"bytes,8,opt,name=created,proto3" json:"created,omitempty"`
+	RethoughtByUserId int32                  `protobuf:"varint,9,opt,name=rethought_by_user_id,json=rethoughtByUserId,proto3" json:"rethought_by_user_id,omitempty"`
+	RethoughtCreated  string                 `protobuf:"bytes,10,opt,name=rethought_created,json=rethoughtCreated,proto3" json:"rethought_created,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *Post) Reset() {
@@ -953,6 +955,20 @@ func (x *Post) GetReposted() bool {
 func (x *Post) GetCreated() string {
 	if x != nil {
 		return x.Created
+	}
+	return ""
+}
+
+func (x *Post) GetRethoughtByUserId() int32 {
+	if x != nil {
+		return x.RethoughtByUserId
+	}
+	return 0
+}
+
+func (x *Post) GetRethoughtCreated() string {
+	if x != nil {
+		return x.RethoughtCreated
 	}
 	return ""
 }
@@ -1172,7 +1188,7 @@ const file_pb_thoughts_proto_rawDesc = "" +
 	"\x11CreatePostRequest\x12\x18\n" +
 	"\acontent\x18\x01 \x01(\tR\acontent\"&\n" +
 	"\vPostRequest\x12\x17\n" +
-	"\apost_id\x18\x01 \x01(\x05R\x06postId\"\xc5\x01\n" +
+	"\apost_id\x18\x01 \x01(\x05R\x06postId\"\xa3\x02\n" +
 	"\x04Post\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x05R\x06userId\x12\x18\n" +
@@ -1181,7 +1197,10 @@ const file_pb_thoughts_proto_rawDesc = "" +
 	"\x05liked\x18\x05 \x01(\bR\x05liked\x12\x18\n" +
 	"\areposts\x18\x06 \x01(\x05R\areposts\x12\x1a\n" +
 	"\breposted\x18\a \x01(\bR\breposted\x12\x18\n" +
-	"\acreated\x18\b \x01(\tR\acreated\":\n" +
+	"\acreated\x18\b \x01(\tR\acreated\x12/\n" +
+	"\x14rethought_by_user_id\x18\t \x01(\x05R\x11rethoughtByUserId\x12+\n" +
+	"\x11rethought_created\x18\n" +
+	" \x01(\tR\x10rethoughtCreated\":\n" +
 	"\x0eGetFeedRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
 	"\x05limit\x18\x02 \x01(\x05R\x05limit\"-\n" +

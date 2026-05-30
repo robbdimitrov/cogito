@@ -14,7 +14,8 @@ func mapPost(r row) (*pb.Post, error) {
 	post := pb.Post{}
 
 	err := r.Scan(&post.Id, &post.UserId, &post.Content, &post.Likes,
-		&post.Liked, &post.Reposts, &post.Reposted, &post.Created)
+		&post.Liked, &post.Reposts, &post.Reposted, &post.Created,
+		&post.RethoughtByUserId, &post.RethoughtCreated)
 	if err != nil {
 		return nil, err
 	}

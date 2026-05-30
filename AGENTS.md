@@ -104,6 +104,7 @@ There are **no tests** in this repo. Do not try to run a test suite.
 
 ## Constraints & Gotchas
 
+- Follow SOLID, KISS, and DRY principles in general when writing code and when refactoring.
 - `react-scripts` is pinned to **4.0.3** and `node-sass` was replaced with **`sass`** (Dart Sass) because `node-sass` 8.x prebuilt binaries are unavailable for Node 20 on arm64. The custom SCSS `rem()` mixin was renamed to `to-rem()` to avoid clashing with Dart Sass’s built-in `rem()` function.
 - Frontend styling should use Tailwind utilities and DaisyUI components. Add custom CSS only in EXTREME circumstances.
 - No CI workflows, pre-commit hooks, or lint configs for Go/Python.

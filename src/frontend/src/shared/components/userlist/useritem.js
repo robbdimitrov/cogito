@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import Link from '../../router/link';
 import Avatar from '../../components/avatar/avatar';
 import { Check, UserPlus } from 'lucide-react';
+import GlassCard from '../ui/surface';
 
 function UserItem({user, onFollow, onUnfollow, currentUserId}) {
   const [isActionLoading, setIsActionLoading] = useState(false);
@@ -15,7 +16,7 @@ function UserItem({user, onFollow, onUnfollow, currentUserId}) {
   }
 
   return (
-    <li className="card rounded-2xl border border-white/60 bg-base-100/80 shadow-xl shadow-slate-900/10 backdrop-blur-2xl transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.005] hover:shadow-2xl dark:border-white/10 dark:bg-slate-900/70 dark:shadow-black/30">
+    <GlassCard as="li" interactive className="hover:scale-[1.005]">
       <div className="card-body p-4 sm:p-5">
         <div className="flex items-start justify-between gap-3">
           <Link href={`/@${user.username}`} className="flex items-center gap-3 min-w-0 group">
@@ -61,7 +62,7 @@ function UserItem({user, onFollow, onUnfollow, currentUserId}) {
         </div>
         {user.bio && <p className="mt-3 text-sm text-slate-600 dark:text-slate-300 line-clamp-2 leading-relaxed sm:pl-14">{user.bio}</p>}
       </div>
-    </li>
+    </GlassCard>
   );
 }
 

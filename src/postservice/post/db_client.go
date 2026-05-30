@@ -46,16 +46,37 @@ func (c *DbClient) createPost(content string, userID int32) (int32, error) {
 }
 
 func (c *DbClient) getFeed(page int32, limit int32, currentUserID int32) ([]*pb.Post, error) {
-	query := `SELECT id, user_id, content,
-		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
-		EXISTS (SELECT 1 FROM likes
-		WHERE post_id = id AND likes.user_id = $1) AS liked,
-		(SELECT count(*) FROM reposts WHERE post_id = id) AS reposts,
-		EXISTS (SELECT 1 FROM reposts
-		WHERE post_id = id AND reposts.user_id = $1) AS reposted,
-		time_format(created) AS created
-		FROM posts
-		ORDER BY created DESC
+	query := `SELECT id, user_id, content, likes, liked, reposts, reposted, created,
+		rethought_by_user_id, rethought_created
+		FROM (
+			SELECT posts.id, posts.user_id, posts.content,
+			(SELECT count(*) FROM likes WHERE post_id = posts.id) AS likes,
+			EXISTS (SELECT 1 FROM likes
+			WHERE post_id = posts.id AND likes.user_id = $1) AS liked,
+			(SELECT count(*) FROM reposts WHERE post_id = posts.id) AS reposts,
+			EXISTS (SELECT 1 FROM reposts
+			WHERE post_id = posts.id AND reposts.user_id = $1) AS reposted,
+			time_format(posts.created) AS created,
+			0::integer AS rethought_by_user_id,
+			''::text AS rethought_created,
+			posts.created AS timeline_created
+			FROM posts
+			UNION ALL
+			SELECT posts.id, posts.user_id, posts.content,
+			(SELECT count(*) FROM likes WHERE post_id = posts.id) AS likes,
+			EXISTS (SELECT 1 FROM likes
+			WHERE post_id = posts.id AND likes.user_id = $1) AS liked,
+			(SELECT count(*) FROM reposts WHERE post_id = posts.id) AS reposts,
+			EXISTS (SELECT 1 FROM reposts AS current_user_reposts
+			WHERE current_user_reposts.post_id = posts.id AND current_user_reposts.user_id = $1) AS reposted,
+			time_format(posts.created) AS created,
+			reposts.user_id AS rethought_by_user_id,
+			time_format(reposts.created) AS rethought_created,
+			reposts.created AS timeline_created
+			FROM reposts
+			INNER JOIN posts ON posts.id = reposts.post_id
+		) feed
+		ORDER BY timeline_created DESC
 		LIMIT $2 OFFSET $3`
 
 	rows, err := c.db.Query(context.Background(), query, currentUserID, limit, page*limit)
@@ -75,7 +96,9 @@ func (c *DbClient) getPosts(userID int32, page int32, limit int32, currentUserID
 		(SELECT count(*) FROM reposts WHERE post_id = posts.id) AS reposts,
 		EXISTS (SELECT 1 FROM reposts
 		WHERE post_id = posts.id AND reposts.user_id = $1) AS reposted,
-		time_format(posts.created) AS created
+		time_format(posts.created) AS created,
+		CASE WHEN profile_reposts.user_id IS NULL THEN 0 ELSE profile_reposts.user_id END AS rethought_by_user_id,
+		CASE WHEN profile_reposts.user_id IS NULL THEN '' ELSE time_format(profile_reposts.created) END AS rethought_created
 		FROM posts
 		LEFT JOIN reposts AS profile_reposts
 		ON profile_reposts.post_id = posts.id AND profile_reposts.user_id = $2
@@ -100,7 +123,9 @@ func (c *DbClient) getLikedPosts(userID int32, page int32, limit int32, currentU
 		(SELECT count(*) FROM reposts WHERE post_id = id) AS reposts,
 		EXISTS (SELECT 1 FROM reposts
 		WHERE post_id = id AND reposts.user_id = $1) AS reposted,
-		time_format(posts.created) AS created
+		time_format(posts.created) AS created,
+		0::integer AS rethought_by_user_id,
+		''::text AS rethought_created
 		FROM posts
 		INNER JOIN likes ON post_id = id
 		WHERE likes.user_id = $2
@@ -124,7 +149,9 @@ func (c *DbClient) getPost(id int32, currentUserID int32) (*pb.Post, error) {
 		(SELECT count(*) FROM reposts WHERE post_id = id) AS reposts,
 		EXISTS (SELECT 1 FROM reposts
 		WHERE post_id = id AND reposts.user_id = $1) AS reposted,
-		time_format(created) AS created
+		time_format(created) AS created,
+		0::integer AS rethought_by_user_id,
+		''::text AS rethought_created
 		FROM posts WHERE id = $2`
 
 	row := c.db.QueryRow(context.Background(), query, currentUserID, id)

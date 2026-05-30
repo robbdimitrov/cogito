@@ -18,7 +18,7 @@ function ThoughtList({posts, users, onLike, onRepost, onDelete, currentUserId, e
     <ul className="space-y-3">
       {posts.map((post) => (
         <ThoughtItem
-          key={post.id}
+          key={post.rethoughtByUserId ? `${post.id}-rethought-${post.rethoughtByUserId}-${post.rethoughtCreated}` : post.id}
           post={post}
           user={users[0]}
           onLike={onLike}

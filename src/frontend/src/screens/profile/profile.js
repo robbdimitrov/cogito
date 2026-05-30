@@ -3,6 +3,7 @@ import ControlBar from './controlbar';
 import UserHeader from './userheader';
 import {ProfileSkeleton} from '../../shared/components/skeleton/skeleton';
 import {useRouter} from '../../shared/router/router';
+import GlassCard from '../../shared/components/ui/surface';
 
 const ThoughtList = React.lazy(() => import('../../shared/components/thoughtlist/thoughtlist'));
 const UserList = React.lazy(() => import('../../shared/components/userlist/userlist'));
@@ -20,10 +21,10 @@ function Profile(props) {
     const isTabEmpty = !items || items.length === 0;
     if (isLoading && isTabEmpty) {
       return (
-        <div className="flex flex-col items-center justify-center space-y-3 rounded-2xl border border-white/60 bg-base-100/80 py-12 shadow-xl shadow-slate-900/10 backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/70 dark:shadow-black/30">
+        <GlassCard className="flex flex-col items-center justify-center space-y-3 py-12">
           <span className="loading loading-spinner text-primary loading-lg"></span>
           <span className="text-sm text-base-content/50">Fetching details...</span>
-        </div>
+        </GlassCard>
       );
     }
     return (

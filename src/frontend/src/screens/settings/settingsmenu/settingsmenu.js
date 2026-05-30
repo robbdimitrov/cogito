@@ -2,6 +2,7 @@ import React from 'react';
 import Link from '../../../shared/router/link';
 import {useRouter} from '../../../shared/router/router';
 import {ChevronRight, Lock, Monitor, Settings, User} from 'lucide-react';
+import GlassCard from '../../../shared/components/ui/surface';
 
 const menuItems = [
   {title: 'Edit profile', link: 'profile', icon: User},
@@ -14,7 +15,7 @@ function SettingsMenu() {
   const currentPath = router ? router.path : window.location.pathname;
 
   return (
-    <nav className="card overflow-hidden rounded-2xl border border-white/60 bg-base-100/80 shadow-xl shadow-slate-900/10 backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/70 dark:shadow-black/30 md:sticky md:top-24" aria-labelledby="settings-nav-heading">
+    <GlassCard as="nav" className="overflow-hidden md:sticky md:top-24" aria-labelledby="settings-nav-heading">
       <div className="card-body p-0">
         <div className="border-b border-base-200/70 px-4 py-4">
           <h2 id="settings-nav-heading" className="flex min-h-8 items-center gap-3 text-lg font-semibold leading-6">
@@ -42,7 +43,7 @@ function SettingsMenu() {
           })}
         </ul>
       </div>
-    </nav>
+    </GlassCard>
   );
 }
 

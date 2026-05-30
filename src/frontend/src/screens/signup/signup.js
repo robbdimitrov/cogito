@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import Link from '../../shared/router/link';
 import { AlertCircle, User, Mail, Lock, UserPlus } from 'lucide-react';
+import GlassCard, {IconInput} from '../../shared/components/ui/surface';
 
 function Signup({registerUser, error}) {
   const [state, setState] = useState({name: '', username: '', email: '', password: ''});
@@ -23,7 +24,7 @@ function Signup({registerUser, error}) {
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4">
-      <div className="card w-full max-w-md rounded-2xl border border-white/60 bg-base-100/80 shadow-xl shadow-slate-900/10 backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/70 dark:shadow-black/30">
+      <GlassCard className="w-full max-w-md">
         <div className="card-body">
           <h1 className="card-title text-2xl justify-center mb-2">Create Account</h1>
           <p className="text-center text-base-content/60 mb-6">Join the conversation</p>
@@ -38,32 +39,20 @@ function Signup({registerUser, error}) {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="form-control">
               <label className="label"><span className="label-text">Name</span></label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/40 pointer-events-none" />
-                <input className="input input-bordered w-full rounded-xl bg-base-100/30 pl-10 transition-all duration-300 focus:border-primary/60 focus:ring-4 focus:ring-primary/10" type="text" name="name" placeholder="Your name" onChange={handleInputChange} value={state.name} required />
-              </div>
+              <IconInput icon={User} type="text" name="name" placeholder="Your name" onChange={handleInputChange} value={state.name} required />
             </div>
             <div className="form-control">
               <label className="label"><span className="label-text">Username</span></label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/40 pointer-events-none" />
-                <input className="input input-bordered w-full rounded-xl bg-base-100/30 pl-10 transition-all duration-300 focus:border-primary/60 focus:ring-4 focus:ring-primary/10" type="text" name="username" placeholder="@username" onChange={handleInputChange} value={state.username} required />
-              </div>
+              <IconInput icon={User} type="text" name="username" placeholder="@username" onChange={handleInputChange} value={state.username} required />
               {!usernameValid && <span className="label-text-alt text-error mt-1">Letters, numbers, underscores only</span>}
             </div>
             <div className="form-control">
               <label className="label"><span className="label-text">Email</span></label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/40 pointer-events-none" />
-                <input className="input input-bordered w-full rounded-xl bg-base-100/30 pl-10 transition-all duration-300 focus:border-primary/60 focus:ring-4 focus:ring-primary/10" type="email" name="email" placeholder="you@example.com" onChange={handleInputChange} value={state.email} required />
-              </div>
+              <IconInput icon={Mail} type="email" name="email" placeholder="you@example.com" onChange={handleInputChange} value={state.email} required />
             </div>
             <div className="form-control">
               <label className="label"><span className="label-text">Password</span></label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/40 pointer-events-none" />
-                <input className="input input-bordered w-full rounded-xl bg-base-100/30 pl-10 transition-all duration-300 focus:border-primary/60 focus:ring-4 focus:ring-primary/10" type="password" name="password" placeholder="••••••••" minLength="4" onChange={handleInputChange} value={state.password} required />
-              </div>
+              <IconInput icon={Lock} type="password" name="password" placeholder="••••••••" minLength="4" onChange={handleInputChange} value={state.password} required />
               {!passwordValid && <span className="label-text-alt text-error mt-1">At least 8 characters</span>}
             </div>
             <button type="submit" className="btn btn-primary w-full gap-1 rounded-xl" disabled={isSubmitting || !usernameValid || !passwordValid}>
@@ -82,7 +71,7 @@ function Signup({registerUser, error}) {
             Already have an account? <Link href="/login" className="link link-primary">Log In</Link>
           </p>
         </div>
-      </div>
+      </GlassCard>
     </div>
   );
 }

@@ -32,13 +32,15 @@ func mapUserWithEmail(u *pb.User, includeEmail bool) user {
 
 func mapPost(p *pb.Post) post {
 	return post{
-		ID:       p.Id,
-		UserID:   p.UserId,
-		Content:  p.Content,
-		Likes:    p.Likes,
-		Liked:    p.Liked,
-		Reposts:  p.Reposts,
-		Reposted: p.Reposted,
-		Created:  p.Created,
+		ID:                p.Id,
+		UserID:            p.UserId,
+		Content:           p.Content,
+		Likes:             p.Likes,
+		Liked:             p.Liked,
+		Reposts:           p.Reposts,
+		Reposted:          p.Reposted,
+		Created:           p.Created,
+		RethoughtByUserID: p.RethoughtByUserId,
+		RethoughtCreated:  p.RethoughtCreated,
 	}
 }

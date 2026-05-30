@@ -15,14 +15,16 @@ type user struct {
 }
 
 type post struct {
-	ID       int32  `json:"id"`
-	UserID   int32  `json:"userId"`
-	Content  string `json:"content"`
-	Likes    int32  `json:"likes"`
-	Liked    bool   `json:"liked"`
-	Reposts  int32  `json:"reposts"`
-	Reposted bool   `json:"reposted"`
-	Created  string `json:"created"`
+	ID                int32  `json:"id"`
+	UserID            int32  `json:"userId"`
+	Content           string `json:"content"`
+	Likes             int32  `json:"likes"`
+	Liked             bool   `json:"liked"`
+	Reposts           int32  `json:"reposts"`
+	Reposted          bool   `json:"reposted"`
+	Created           string `json:"created"`
+	RethoughtByUserID int32  `json:"rethoughtByUserId"`
+	RethoughtCreated  string `json:"rethoughtCreated"`
 }
 
 type session struct {

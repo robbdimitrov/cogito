@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import Link from '../../shared/router/link';
 import { MessageSquare, Check, AlertCircle, Mail, Lock } from 'lucide-react';
+import GlassCard, {IconInput} from '../../shared/components/ui/surface';
 
 function Login({loginUser, error}) {
   const [state, setState] = useState({email: '', password: ''});
@@ -53,7 +54,7 @@ function Login({loginUser, error}) {
           <div className="lg:hidden text-center mb-8">
             <span className="text-3xl font-extrabold text-primary">Thoughts</span>
           </div>
-          <div className="card rounded-2xl border border-white/60 bg-base-100/80 shadow-xl shadow-slate-900/10 backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/70 dark:shadow-black/30">
+          <GlassCard>
             <div className="card-body">
               <h1 className="card-title text-2xl mb-1">Welcome Back</h1>
               <p className="text-base-content/60 mb-6">Log in to continue the conversation</p>
@@ -68,17 +69,11 @@ function Login({loginUser, error}) {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="form-control">
                   <label className="label"><span className="label-text font-medium">Email</span></label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/40 pointer-events-none" />
-                    <input className="input input-bordered w-full rounded-xl bg-base-100/30 pl-10 transition-all duration-300 focus:border-primary/60 focus:ring-4 focus:ring-primary/10" type="email" name="email" placeholder="you@example.com" onChange={handleInputChange} value={state.email} required />
-                  </div>
+                  <IconInput icon={Mail} type="email" name="email" placeholder="you@example.com" onChange={handleInputChange} value={state.email} required />
                 </div>
                 <div className="form-control">
                   <label className="label"><span className="label-text font-medium">Password</span></label>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/40 pointer-events-none" />
-                    <input className="input input-bordered w-full rounded-xl bg-base-100/30 pl-10 transition-all duration-300 focus:border-primary/60 focus:ring-4 focus:ring-primary/10" type="password" name="password" placeholder="Enter your password" minLength="8" onChange={handleInputChange} value={state.password} required />
-                  </div>
+                  <IconInput icon={Lock} type="password" name="password" placeholder="Enter your password" minLength="8" onChange={handleInputChange} value={state.password} required />
                 </div>
                 <button type="submit" className="btn btn-primary w-full gap-1 rounded-xl" disabled={isSubmitting}>
                   {isSubmitting ? <span className="loading loading-spinner"></span> : 'Log In'}
@@ -91,7 +86,7 @@ function Login({loginUser, error}) {
                 Don't have an account? <Link href="/signup" className="link link-primary font-medium">Sign Up</Link>
               </p>
             </div>
-          </div>
+          </GlassCard>
         </div>
       </div>
     </div>
