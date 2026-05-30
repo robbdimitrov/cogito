@@ -12,7 +12,7 @@ const UserList = React.lazy(() => import('@/app/[username]/[[...tab]]/userlist')
 
 import { useAPI } from '@/shared/contexts/apicontext';
 import { useRouter } from 'next/navigation';
-import { User, Post } from '@/shared/types';
+import type { User, Post } from '@/shared/types';
 
 interface ProfileProps {
   user?: User | null;
@@ -21,6 +21,7 @@ interface ProfileProps {
   following?: User[];
   followers?: User[];
   currentUser?: User | null;
+  isLoading?: boolean;
 }
 
 function Profile(props: ProfileProps) {

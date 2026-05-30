@@ -22,7 +22,7 @@ function formatRelativeTime(dateString: string) {
   if (diffHour < 24) return `${diffHour}h`;
   return `${diffDay}d`;
 }
-import { Post } from '@/shared/types';
+import type { Post } from '@/shared/types';
 
 interface PostDetailProps {
   postId?: string;

@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Avatar from '@/shared/components/avatar/avatar';
 import { Check, UserPlus } from 'lucide-react';
 import GlassCard from '@/shared/components/ui/surface';
-import { User } from '@/shared/types';
+import type { User } from '@/shared/types';
 
 interface UserItemProps {
   user: User;

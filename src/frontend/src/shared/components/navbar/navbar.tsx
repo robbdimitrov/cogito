@@ -49,7 +49,7 @@ function ThemeToggle() {
     </button>
   );
 }
-import { User } from '@/shared/types';
+import type { User } from '@/shared/types';
 
 interface NavbarProps {
   isLoggedIn: boolean;

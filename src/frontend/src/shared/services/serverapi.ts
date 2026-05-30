@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { User, Post } from '@/shared/types';
+import type { User, Post } from '@/shared/types';
 
 const API_BASE = `${process.env.API_URL || 'http://localhost:8080'}`;
 

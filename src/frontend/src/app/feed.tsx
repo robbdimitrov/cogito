@@ -8,12 +8,13 @@ import ThoughtList from '@/shared/components/thoughtlist/thoughtlist';
 
 import { useAPI } from '@/shared/contexts/apicontext';
 import { useRouter } from 'next/navigation';
-import { User, Post } from '@/shared/types';
+import type { User, Post } from '@/shared/types';
 
 interface FeedProps {
   user?: User | null;
   posts?: Post[];
   currentUserId?: string | null;
+  isLoading?: boolean;
 }
 
 function Feed(props: FeedProps) {
