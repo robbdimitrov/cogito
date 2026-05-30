@@ -68,17 +68,19 @@ func (c *DbClient) getFeed(page int32, limit int32, currentUserID int32) ([]*pb.
 }
 
 func (c *DbClient) getPosts(userID int32, page int32, limit int32, currentUserID int32) ([]*pb.Post, error) {
-	query := `SELECT id, user_id, content,
-		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
+	query := `SELECT posts.id, posts.user_id, content,
+		(SELECT count(*) FROM likes WHERE post_id = posts.id) AS likes,
 		EXISTS (SELECT 1 FROM likes
-		WHERE post_id = id AND likes.user_id = $1) AS liked,
-		(SELECT count(*) FROM reposts WHERE post_id = id) AS reposts,
+		WHERE post_id = posts.id AND likes.user_id = $1) AS liked,
+		(SELECT count(*) FROM reposts WHERE post_id = posts.id) AS reposts,
 		EXISTS (SELECT 1 FROM reposts
-		WHERE post_id = id AND reposts.user_id = $1) AS reposted,
-		time_format(created) AS created
+		WHERE post_id = posts.id AND reposts.user_id = $1) AS reposted,
+		time_format(posts.created) AS created
 		FROM posts
-		WHERE user_id = $2 OR id IN (SELECT post_id FROM reposts WHERE user_id = $2)
-		ORDER BY created DESC
+		LEFT JOIN reposts AS profile_reposts
+		ON profile_reposts.post_id = posts.id AND profile_reposts.user_id = $2
+		WHERE posts.user_id = $2 OR profile_reposts.user_id = $2
+		ORDER BY COALESCE(profile_reposts.created, posts.created) DESC
 		LIMIT $3 OFFSET $4`
 
 	rows, err := c.db.Query(context.Background(), query, currentUserID, userID, limit, page*limit)

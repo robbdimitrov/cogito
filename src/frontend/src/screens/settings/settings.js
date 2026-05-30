@@ -11,8 +11,8 @@ function Settings(props) {
   const user = props.user || {name: '', username: '', email: '', bio: ''};
 
   return (
-    <main className="container mx-auto max-w-6xl px-4 py-6">
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[22rem_minmax(0,1fr)] xl:gap-6">
+    <main className="container mx-auto max-w-6xl px-3 sm:px-4 py-4 sm:py-6">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-[minmax(17rem,30%)_minmax(0,1fr)] md:gap-6 lg:gap-8">
         <div className="min-w-0">
           <SettingsMenu />
         </div>

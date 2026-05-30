@@ -10,17 +10,17 @@ function Feed(props) {
   const { isLoading, onLike, onRepost, onCreatePost, onDeletePost, currentUserId } = props;
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-3xl">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="hidden md:block">
+    <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-5xl">
+      <div className="grid grid-cols-1 lg:grid-cols-[18rem_minmax(0,1fr)] gap-4 sm:gap-6 lg:gap-8">
+        <aside className="hidden lg:block">
           <UserCard user={user} />
-        </div>
-        <div className="md:col-span-2 space-y-4">
+        </aside>
+        <section className="space-y-4 max-w-2xl w-full mx-auto lg:mx-0">
           <CreateThought user={user} onCreatePost={onCreatePost} />
           {isLoading && posts.length === 0 ? <FeedSkeleton count={3} /> : <ThoughtList posts={posts} users={[user]} onLike={onLike} onRepost={onRepost} onDelete={onDeletePost} currentUserId={currentUserId} />}
-        </div>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }
 

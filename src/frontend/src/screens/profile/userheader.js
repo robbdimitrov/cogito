@@ -21,7 +21,7 @@ function UserHeader({user, currentUser, onFollow, onUnfollow}) {
   }
 
   return (
-    <div className="card glass-card overflow-hidden rounded-2xl animate-slide-in">
+    <div className="card overflow-hidden rounded-2xl border border-white/60 bg-base-100/80 shadow-xl shadow-slate-900/10 backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/70 dark:shadow-black/30">
       <div className="h-32 bg-gradient-to-tr from-primary via-primary/80 to-secondary relative">
         <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 25% 25%, white 1px, transparent 1px)', backgroundSize: '24px 24px'}}></div>
       </div>

@@ -105,10 +105,10 @@ There are **no tests** in this repo. Do not try to run a test suite.
 ## Constraints & Gotchas
 
 - `react-scripts` is pinned to **4.0.3** and `node-sass` was replaced with **`sass`** (Dart Sass) because `node-sass` 8.x prebuilt binaries are unavailable for Node 20 on arm64. The custom SCSS `rem()` mixin was renamed to `to-rem()` to avoid clashing with Dart Sass’s built-in `rem()` function.
+- Frontend styling should use Tailwind utilities and DaisyUI components. Add custom CSS only in EXTREME circumstances.
 - No CI workflows, pre-commit hooks, or lint configs for Go/Python.
 - The `deletePost` query in `postservice/post/db_client.go` only checks `post_id` in the `WHERE` clause despite accepting `userID` as a parameter (potential bug if you modify that area).
 
 ## Git Conventions
 
 - Use **single-line commits** (summary only, no body). Keep the message under 72 characters when possible.
-

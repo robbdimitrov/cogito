@@ -60,7 +60,7 @@ function Toast({toast, onRemove}) {
   }[toast.type];
 
   return (
-    <div className={`alert ${alertClass} shadow-lg text-sm py-2 px-4 gap-2 animate-slide-in`}>
+    <div className={`alert ${alertClass} shadow-lg text-sm py-2 px-4 gap-2`}>
       {icon}
       <span>{toast.message}</span>
       <button onClick={() => onRemove(toast.id)} className="btn btn-ghost btn-xs btn-circle opacity-50 hover:opacity-100">

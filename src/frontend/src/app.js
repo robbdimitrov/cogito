@@ -19,6 +19,37 @@ const PostDetail = React.lazy(() => import('./screens/post/post'));
 
 const apiClient = new APIClient();
 
+async function hydratePostAuthors(rawPosts, rethoughtByUser = null) {
+  const userIds = [
+    ...new Set(rawPosts.map((p) => p.userId).filter(Boolean)),
+  ];
+  const userMap = {};
+
+  await Promise.all(
+    userIds.map(async (uid) => {
+      try {
+        const u = await apiClient.getUser(uid);
+        userMap[uid] = u;
+      } catch {
+        userMap[uid] = null;
+      }
+    })
+  );
+
+  return rawPosts.map((p) => {
+    const post = {
+      ...p,
+      user: userMap[p.userId],
+    };
+
+    if (rethoughtByUser && p.userId !== rethoughtByUser.id) {
+      post.rethoughtByUser = rethoughtByUser;
+    }
+
+    return post;
+  });
+}
+
 const routes = [
   {id: 'feed', path: /^\/$/, component: Feed, canAccess: authGuard, title: 'Feed'},
   {id: 'profile', path: /\/@\w+(\/(following|followers|likes))?/, component: Profile, canAccess: authGuard, title: 'Profile'},
@@ -89,23 +120,7 @@ function AppContent() {
         const data = await apiClient.getFeed(0);
         const rawPosts = data.items || [];
 
-        const userIds = [...new Set(rawPosts.map((p) => p.userId))];
-        const userMap = {};
-        await Promise.all(
-          userIds.map(async (uid) => {
-            try {
-              const u = await apiClient.getUser(uid);
-              userMap[uid] = u;
-            } catch {
-              userMap[uid] = null;
-            }
-          })
-        );
-
-        const postsWithAuthors = rawPosts.map((p) => ({
-          ...p,
-          user: userMap[p.userId],
-        }));
+        const postsWithAuthors = await hydratePostAuthors(rawPosts);
         setPosts(postsWithAuthors);
       } catch {
         setPosts([]);
@@ -153,22 +168,7 @@ function AppContent() {
       if (subroute === '/likes') {
         const data = await apiClient.getLikes(targetUser.id, 0);
         const rawPosts = data.items || [];
-        const userIds = [...new Set(rawPosts.map((p) => p.userId))];
-        const userMap = {};
-        await Promise.all(
-          userIds.map(async (uid) => {
-            try {
-              const u = await apiClient.getUser(uid);
-              userMap[uid] = u;
-            } catch {
-              userMap[uid] = null;
-            }
-          })
-        );
-        const postsWithAuthors = rawPosts.map((p) => ({
-          ...p,
-          user: userMap[p.userId],
-        }));
+        const postsWithAuthors = await hydratePostAuthors(rawPosts);
         setProfileLikes(postsWithAuthors);
       } else if (subroute === '/following') {
         const data = await apiClient.getFollowing(targetUser.id, 0);
@@ -178,7 +178,8 @@ function AppContent() {
         setProfileFollowers(data.items || []);
       } else {
         const data = await apiClient.getPosts(targetUser.id, 0);
-        setProfilePosts(data.items || []);
+        const postsWithAuthors = await hydratePostAuthors(data.items || [], targetUser);
+        setProfilePosts(postsWithAuthors);
       }
     } catch (err) {
       console.error('Fetch profile details failed:', err);
@@ -340,7 +341,7 @@ function AppContent() {
   }, [refreshFeed, refreshUser, route.id, route.path, fetchProfile, toast]);
 
   const handleFollow = useCallback((userId) => {
-    apiClient.followUser(userId)
+    return apiClient.followUser(userId)
       .then(() => {
         toast.success('Following!');
         if (route.id === 'profile') {
@@ -355,7 +356,7 @@ function AppContent() {
   }, [route.id, route.path, fetchProfile, refreshUser, toast]);
 
   const handleUnfollow = useCallback((userId) => {
-    apiClient.unfollowUser(userId)
+    return apiClient.unfollowUser(userId)
       .then(() => {
         toast.info('Unfollowed.');
         if (route.id === 'profile') {
@@ -428,9 +429,9 @@ function AppContent() {
 
   return (
     <RouterContext.Provider value={route}>
-      <div className="blob-container">
-        <div className="blob blob-1"></div>
-        <div className="blob blob-2"></div>
+      <div className="fixed inset-0 -z-10 overflow-hidden bg-gradient-to-br from-slate-50 via-indigo-50 to-slate-100 dark:from-slate-950 dark:via-indigo-950 dark:to-slate-950">
+        <div className="absolute -right-28 -top-28 h-[32rem] w-[32rem] rounded-full bg-fuchsia-400/20 blur-3xl dark:bg-fuchsia-500/10"></div>
+        <div className="absolute -bottom-40 -left-36 h-[38rem] w-[38rem] rounded-full bg-sky-400/20 blur-3xl dark:bg-sky-500/10"></div>
       </div>
       <Navbar isLoggedIn={isLoggedIn} user={user} logoutUser={logoutUser} />
       <ErrorBoundary>

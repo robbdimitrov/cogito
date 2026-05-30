@@ -20,14 +20,14 @@ function Profile(props) {
     const isTabEmpty = !items || items.length === 0;
     if (isLoading && isTabEmpty) {
       return (
-        <div className="py-12 flex flex-col items-center justify-center space-y-3 glass-panel rounded-2xl border border-base-200/50">
+        <div className="flex flex-col items-center justify-center space-y-3 rounded-2xl border border-white/60 bg-base-100/80 py-12 shadow-xl shadow-slate-900/10 backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/70 dark:shadow-black/30">
           <span className="loading loading-spinner text-primary loading-lg"></span>
           <span className="text-sm text-base-content/50">Fetching details...</span>
         </div>
       );
     }
     return (
-      <div className="relative animate-slide-in">
+      <div className="relative">
         {isLoading && !isTabEmpty && (
           <div className="flex justify-center mb-3">
             <div className="flex items-center gap-2 px-3 py-1.5 bg-base-100/80 backdrop-blur-md rounded-full shadow-sm border border-base-200/50 text-xs text-base-content/60">
@@ -46,13 +46,13 @@ function Profile(props) {
       return renderTabContent(
         following,
         'Not following anyone yet.',
-        () => <UserList users={following} onFollow={onFollow} onUnfollow={onUnfollow} emptyMessage="Not following anyone yet." />
+        () => <UserList users={following} onFollow={onFollow} onUnfollow={onUnfollow} currentUserId={currentUser?.id} emptyMessage="Not following anyone yet." />
       );
     } else if (router.path.endsWith('/followers')) {
       return renderTabContent(
         followers,
         'No followers yet.',
-        () => <UserList users={followers} onFollow={onFollow} onUnfollow={onUnfollow} emptyMessage="No followers yet." />
+        () => <UserList users={followers} onFollow={onFollow} onUnfollow={onUnfollow} currentUserId={currentUser?.id} emptyMessage="No followers yet." />
       );
     } else if (router.path.endsWith('/likes')) {
       return renderTabContent(
@@ -74,7 +74,7 @@ function Profile(props) {
   const showSkeleton = isLoading && !isSameUser;
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-3xl">
+    <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-3xl">
       {showSkeleton ? <ProfileSkeleton /> : (
         <>
           <UserHeader user={user} currentUser={currentUser} onFollow={onFollow} onUnfollow={onUnfollow} />
@@ -84,7 +84,7 @@ function Profile(props) {
           </div>
         </>
       )}
-    </div>
+    </main>
   );
 }
 

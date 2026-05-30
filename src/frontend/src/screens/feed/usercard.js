@@ -4,7 +4,7 @@ import Avatar from '../../shared/components/avatar/avatar';
 
 function UserCard({user}) {
   return (
-    <div className="card glass-card sticky top-20 overflow-hidden rounded-2xl">
+    <div className="card sticky top-20 overflow-hidden rounded-2xl border border-white/60 bg-base-100/80 shadow-xl shadow-slate-900/10 backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/70 dark:shadow-black/30">
       <div className="h-16 bg-gradient-to-r from-primary/70 to-secondary/70"></div>
       <div className="card-body p-4 -mt-8">
         <Link href={`/@${user.username}`}>

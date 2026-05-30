@@ -38,7 +38,7 @@ function EditProfile(props) {
   }
 
   return (
-    <div className="card glass-card rounded-2xl animate-slide-in">
+    <div className="card rounded-2xl border border-white/60 bg-base-100/80 shadow-xl shadow-slate-900/10 backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/70 dark:shadow-black/30">
       <div className="card-body gap-5 p-5 sm:p-6">
         <h1 className="text-2xl font-semibold leading-tight">Edit Profile</h1>
 
@@ -52,19 +52,19 @@ function EditProfile(props) {
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="form-control">
             <label className="label" htmlFor="settings-name"><span className="label-text text-sm font-medium">Name</span></label>
-            <input id="settings-name" className="input input-bordered min-h-12 w-full glow-input bg-base-100/30 rounded-xl text-base" type="text" name="name" placeholder="Name" value={state.name} onChange={handleInputChange} required autoComplete="name" />
+            <input id="settings-name" className="input input-bordered min-h-12 w-full rounded-xl bg-base-100/30 text-base transition-all duration-300 focus:border-primary/60 focus:ring-4 focus:ring-primary/10" type="text" name="name" placeholder="Name" value={state.name} onChange={handleInputChange} required autoComplete="name" />
           </div>
           <div className="form-control">
             <label className="label" htmlFor="settings-username"><span className="label-text text-sm font-medium">Username</span></label>
-            <input id="settings-username" className="input input-bordered min-h-12 w-full glow-input bg-base-100/30 rounded-xl text-base" type="text" name="username" placeholder="Username" value={state.username} onChange={handleInputChange} required autoComplete="username" />
+            <input id="settings-username" className="input input-bordered min-h-12 w-full rounded-xl bg-base-100/30 text-base transition-all duration-300 focus:border-primary/60 focus:ring-4 focus:ring-primary/10" type="text" name="username" placeholder="Username" value={state.username} onChange={handleInputChange} required autoComplete="username" />
           </div>
           <div className="form-control">
             <label className="label" htmlFor="settings-email"><span className="label-text text-sm font-medium">Email</span></label>
-            <input id="settings-email" className="input input-bordered min-h-12 w-full glow-input bg-base-100/30 rounded-xl text-base" type="email" name="email" placeholder="Email" value={state.email} onChange={handleInputChange} required autoComplete="email" />
+            <input id="settings-email" className="input input-bordered min-h-12 w-full rounded-xl bg-base-100/30 text-base transition-all duration-300 focus:border-primary/60 focus:ring-4 focus:ring-primary/10" type="email" name="email" placeholder="Email" value={state.email} onChange={handleInputChange} required autoComplete="email" />
           </div>
           <div className="form-control">
             <label className="label" htmlFor="settings-bio"><span className="label-text text-sm font-medium">Bio</span></label>
-            <textarea id="settings-bio" className="textarea textarea-bordered min-h-28 w-full glow-input bg-base-100/30 rounded-xl text-base leading-6" name="bio" placeholder="Tell us about yourself" value={state.bio} onChange={handleInputChange} rows={4} />
+            <textarea id="settings-bio" className="textarea textarea-bordered min-h-28 w-full rounded-xl bg-base-100/30 text-base leading-6 transition-all duration-300 focus:border-primary/60 focus:ring-4 focus:ring-primary/10" name="bio" placeholder="Tell us about yourself" value={state.bio} onChange={handleInputChange} rows={4} />
           </div>
           <button type="submit" className="btn btn-primary min-h-12 rounded-xl px-5 text-base" disabled={isSubmitting}>
             {isSubmitting ? <span className="loading loading-spinner" aria-label="Saving"></span> : 'Save Changes'}
