@@ -10,7 +10,9 @@
   ],
   "scripts": {
     "build:css": "tailwindcss -i src/tailwind-source.css -o src/index.css",
+    "prestart": "npm run build:css",
     "start": "react-scripts start",
+    "prebuild": "npm run build:css",
     "build": "react-scripts build",
     "eject": "react-scripts eject",
     "lint": "eslint src"

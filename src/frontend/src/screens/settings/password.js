@@ -25,27 +25,27 @@ function Password(props) {
 
   return (
     <div className="card glass-card rounded-2xl animate-slide-in">
-      <div className="card-body">
-        <h2 className="card-title text-xl mb-4">Change Password</h2>
+      <div className="card-body gap-5 p-5 sm:p-6">
+        <h1 className="text-2xl font-semibold leading-tight">Change Password</h1>
 
         {props.error && (
-          <div className="alert alert-error mb-4">
-            <AlertCircle className="h-5 w-5" />
+          <div className="alert alert-error" role="alert">
+            <AlertCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
             <span>{props.error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div className="form-control">
-            <label className="label"><span className="label-text">Current Password</span></label>
-            <input className="input input-bordered w-full glow-input bg-base-100/30 rounded-xl" type="password" name="oldPassword" placeholder="Current password" minLength="8" value={state.oldPassword} onChange={handleInputChange} required />
+            <label className="label" htmlFor="current-password"><span className="label-text text-sm font-medium">Current Password</span></label>
+            <input id="current-password" className="input input-bordered min-h-12 w-full glow-input bg-base-100/30 rounded-xl text-base" type="password" name="oldPassword" placeholder="Current password" minLength="8" value={state.oldPassword} onChange={handleInputChange} required autoComplete="current-password" />
           </div>
           <div className="form-control">
-            <label className="label"><span className="label-text">New Password</span></label>
-            <input className="input input-bordered w-full glow-input bg-base-100/30 rounded-xl" type="password" name="password" placeholder="New password" minLength="8" value={state.password} onChange={handleInputChange} required />
+            <label className="label" htmlFor="new-password"><span className="label-text text-sm font-medium">New Password</span></label>
+            <input id="new-password" className="input input-bordered min-h-12 w-full glow-input bg-base-100/30 rounded-xl text-base" type="password" name="password" placeholder="New password" minLength="8" value={state.password} onChange={handleInputChange} required autoComplete="new-password" />
           </div>
-          <button type="submit" className="btn btn-primary rounded-xl" disabled={isSubmitting}>
-            {isSubmitting ? <span className="loading loading-spinner"></span> : 'Update Password'}
+          <button type="submit" className="btn btn-primary min-h-12 rounded-xl px-5 text-base" disabled={isSubmitting}>
+            {isSubmitting ? <span className="loading loading-spinner" aria-label="Updating"></span> : 'Update Password'}
           </button>
         </form>
       </div>

@@ -11,12 +11,12 @@ function Settings(props) {
   const user = props.user || {name: '', username: '', email: '', bio: ''};
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-4xl">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="md:col-span-1">
+    <main className="container mx-auto max-w-6xl px-4 py-6">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[22rem_minmax(0,1fr)] xl:gap-6">
+        <div className="min-w-0">
           <SettingsMenu />
         </div>
-        <div className="md:col-span-3">
+        <div className="min-w-0">
           {router.path.endsWith('/password')
             ? <Password updatePassword={props.updatePassword || (() => {})} error={props.passwordError} />
             : router.path.endsWith('/sessions')
@@ -25,7 +25,7 @@ function Settings(props) {
           }
         </div>
       </div>
-    </div>
+    </main>
   );
 }
 
