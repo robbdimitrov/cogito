@@ -1,7 +1,6 @@
 import React, {useState, useEffect, useCallback} from 'react';
 
 import Navbar from './shared/components/navbar/navbar';
-import BottomNav from './shared/components/bottomnav/bottomnav';
 import ErrorBoundary from './shared/components/errorboundary/errorboundary';
 import Loading from './shared/components/loading/loading';
 import ToastProvider, {useToast} from './shared/components/toast/toast';
@@ -17,7 +16,6 @@ const Login = React.lazy(() => import('./screens/signup/login'));
 const Signup = React.lazy(() => import('./screens/signup/signup'));
 const Settings = React.lazy(() => import('./screens/settings/settings'));
 const PostDetail = React.lazy(() => import('./screens/post/post'));
-const Search = React.lazy(() => import('./screens/search/search'));
 
 const apiClient = new APIClient();
 
@@ -25,7 +23,6 @@ const routes = [
   {id: 'feed', path: /^\/$/, component: Feed, canAccess: authGuard, title: 'Feed'},
   {id: 'profile', path: /\/@\w+(\/(following|followers|likes))?/, component: Profile, canAccess: authGuard, title: 'Profile'},
   {id: 'post', path: /\/posts\/(\d+)/, component: PostDetail, canAccess: authGuard, title: 'Post'},
-  {id: 'search', path: /\/search/, component: Search, canAccess: authGuard, title: 'Search'},
   {id: 'settings', path: /\/settings\/(profile|password|sessions)\/?/, component: Settings, canAccess: authGuard, title: 'Settings'},
   {id: 'login', path: /\/login/, component: Login, canAccess: unauthGuard, title: 'Log In'},
   {id: 'signup', path: /\/signup/, component: Signup, canAccess: unauthGuard, title: 'Sign Up'},
@@ -417,9 +414,6 @@ function AppContent() {
       const postId = match ? match[1] : null;
       return <PostDetail postId={postId} onDeleted={() => route.navigate('/')} />;
     }
-    if (routeId === 'search') {
-      return <Search />;
-    }
     if (routeId === 'settings') {
       return <Settings user={user} updateUser={updateUser} updatePassword={updatePassword} updateError={updateError} passwordError={passwordError} sessions={sessions} currentSessionId={currentSessionId} fetchSessions={fetchSessions} sessionsError={sessionsError} deleteSession={deleteSessionHandler} />;
     }
@@ -444,7 +438,6 @@ function AppContent() {
           {renderComponent()}
         </React.Suspense>
       </ErrorBoundary>
-      {isLoggedIn && <BottomNav user={user} />}
     </RouterContext.Provider>
   );
 }

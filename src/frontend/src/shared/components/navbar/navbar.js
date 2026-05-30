@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useRef} from 'react';
 import Link from '../../router/link';
 import Avatar from '../../components/avatar/avatar';
-import { Sun, Moon, Home, Search, User, Settings, LogOut } from 'lucide-react';
+import { Sun, Moon, Home, User, Settings, LogOut } from 'lucide-react';
 
 function ThemeToggle() {
   const getInitialTheme = () => {
@@ -78,11 +78,6 @@ function Navbar({isLoggedIn, user, logoutUser}) {
       </div>
 
       <div className="navbar-end gap-1">
-        {isLoggedIn && (
-          <Link href="/search" className="btn btn-ghost btn-circle" aria-label="Search">
-            <Search className="h-5 w-5" />
-          </Link>
-        )}
         <ThemeToggle />
         {isLoggedIn ? (
           <div ref={dropdownRef} className="dropdown dropdown-end">
