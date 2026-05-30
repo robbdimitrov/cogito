@@ -1,14 +1,20 @@
+'use client';
+
 import React, {useState, useEffect, useRef} from 'react';
-import Link from '../../router/link';
-import Avatar from '../../components/avatar/avatar';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import Avatar from '@/shared/components/avatar/avatar';
 import { Sun, Moon, Home, User, Settings, LogOut } from 'lucide-react';
+import { useAPI } from '@/shared/contexts/apicontext';
 
 function ThemeToggle() {
   const getInitialTheme = () => {
-    const stored = localStorage.getItem('theme');
-    if (stored) return stored;
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('theme');
+      if (stored) return stored;
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark';
+      }
     }
     return 'light';
   };
@@ -44,7 +50,8 @@ function ThemeToggle() {
   );
 }
 
-function Navbar({isLoggedIn, user, logoutUser}) {
+function Navbar({isLoggedIn, user}: any) {
+  const apiClient = useAPI();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -61,6 +68,12 @@ function Navbar({isLoggedIn, user, logoutUser}) {
 
   const toggleDropdown = () => setIsDropdownOpen((v) => !v);
   const closeDropdown = () => setIsDropdownOpen(false);
+
+  const handleLogout = () => {
+    apiClient.logout().finally(() => {
+      window.location.href = '/login';
+    });
+  };
 
   return (
     <nav className="navbar sticky top-0 z-50 min-h-16 border-b border-white/50 bg-base-100/70 px-3 shadow-sm backdrop-blur-2xl transition-shadow duration-300 dark:border-white/10 dark:bg-slate-950/70 sm:px-4">
@@ -97,7 +110,7 @@ function Navbar({isLoggedIn, user, logoutUser}) {
                 <li onClick={closeDropdown}><Link href="/settings/profile" className="gap-2 py-2"><Settings className="h-4 w-4" />Settings</Link></li>
                 <div className="divider my-1 mx-2 h-px bg-base-200"></div>
                 <li onClick={closeDropdown}>
-                  <button onClick={logoutUser} className="text-error gap-2 py-2"><LogOut className="h-4 w-4" />Logout</button>
+                  <button onClick={handleLogout} className="text-error gap-2 py-2"><LogOut className="h-4 w-4" />Logout</button>
                 </li>
               </ul>
             )}

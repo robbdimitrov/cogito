@@ -1,13 +1,13 @@
 import React from 'react';
-import Link from '../../router/link';
-import Avatar from '../../components/avatar/avatar';
+import Link from 'next/link';
+import Avatar from '@/shared/components/avatar/avatar';
 import { Trash2, Repeat, Heart } from 'lucide-react';
-import GlassCard from '../ui/surface';
+import GlassCard from '@/shared/components/ui/surface';
 
 function formatRelativeTime(dateString) {
   const date = new Date(dateString);
   const now = new Date();
-  const diffMs = now - date;
+  const diffMs = now.getTime() - date.getTime();
   const diffSec = Math.floor(diffMs / 1000);
   const diffMin = Math.floor(diffSec / 60);
   const diffHour = Math.floor(diffMin / 60);

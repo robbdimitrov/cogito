@@ -1,5 +1,5 @@
-import {httpMethod} from '../constants';
-import Session from './session';
+import {httpMethod} from '@/shared/constants';
+import Session from '@/shared/services/session';
 
 function getCsrfToken() {
   const match = document.cookie.match(/(?:^|; )_csrf=([^;]*)/);
@@ -7,12 +7,12 @@ function getCsrfToken() {
 }
 
 class APIClient {
-  request(url, method, body) {
-    let options = {
+  request(url: string, method: string, body?: any): Promise<any> {
+    let options: RequestInit = {
       method,
       credentials: 'include',
     };
-    const headers = {};
+    const headers: Record<string, string> = {};
     if (body) {
       headers['content-type'] = 'application/json';
       options.body = JSON.stringify(body);

@@ -1,10 +1,10 @@
 import React, {useState} from 'react';
-import Link from '../../router/link';
-import Avatar from '../../components/avatar/avatar';
+import Link from 'next/link';
+import Avatar from '@/shared/components/avatar/avatar';
 import { Check, UserPlus } from 'lucide-react';
-import GlassCard from '../ui/surface';
+import GlassCard from '@/shared/components/ui/surface';
 
-function UserItem({user, onFollow, onUnfollow, currentUserId}) {
+function UserItem({user, onFollow, onUnfollow, currentUserId}: any) {
   const [isActionLoading, setIsActionLoading] = useState(false);
   const isCurrentUser = currentUserId && user.id === currentUserId;
 

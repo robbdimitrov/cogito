@@ -1,7 +1,9 @@
+'use client';
+
 import React, {createContext, useContext, useState, useCallback} from 'react';
 import { CheckCircle, AlertCircle, Info, X } from 'lucide-react';
 
-const ToastContext = createContext();
+const ToastContext = createContext<any>(null);
 
 export function useToast() {
   const ctx = useContext(ToastContext);

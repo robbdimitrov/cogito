@@ -1,5 +1,5 @@
 import React from 'react';
-import ThoughtItem from './thoughtitem';
+import ThoughtItem from '@/shared/components/thoughtlist/thoughtitem';
 import { MessageSquare } from 'lucide-react';
 
 function ThoughtList({posts, users, onLike, onRepost, onDelete, currentUserId, emptyMessage = "No thoughts yet. Share what's on your mind!"}) {

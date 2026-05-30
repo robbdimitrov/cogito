@@ -1,7 +1,7 @@
 import React from 'react';
 import UserItem from './useritem';
 import { Users } from 'lucide-react';
-import GlassCard from '../ui/surface';
+import GlassCard from '@/shared/components/ui/surface';
 
 function UserList({ users, onFollow, onUnfollow, currentUserId, emptyMessage = 'No users to show.' }) {
   if (!users || users.length === 0) {

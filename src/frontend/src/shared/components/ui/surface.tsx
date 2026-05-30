@@ -10,7 +10,7 @@ export const interactiveGlassCardClasses = `${glassCardClasses} transition-all d
 export const formInputClasses = 'input input-bordered min-h-12 w-full rounded-xl bg-base-100/30 text-base transition-all duration-300 focus:border-primary/60 focus:ring-4 focus:ring-primary/10';
 export const formTextareaClasses = 'textarea textarea-bordered min-h-28 w-full rounded-xl bg-base-100/30 text-base leading-6 transition-all duration-300 focus:border-primary/60 focus:ring-4 focus:ring-primary/10';
 
-function GlassCard({as: Component = 'div', interactive = false, className = '', children, ...props}) {
+function GlassCard({as: Component = 'div', interactive = false, className = '', children, ...props}: any) {
   return (
     <Component className={cx(interactive ? interactiveGlassCardClasses : glassCardClasses, className)} {...props}>
       {children}
@@ -29,15 +29,15 @@ export function Field({id, label, children}) {
   );
 }
 
-export function FormInput({className = '', ...props}) {
+export function FormInput({className = '', ...props}: any) {
   return <input className={cx(formInputClasses, className)} {...props} />;
 }
 
-export function FormTextArea({className = '', ...props}) {
+export function FormTextArea({className = '', ...props}: any) {
   return <textarea className={cx(formTextareaClasses, className)} {...props} />;
 }
 
-export function IconInput({icon: Icon, className = '', iconClassName = '', ...props}) {
+export function IconInput({icon: Icon, className = '', iconClassName = '', ...props}: any) {
   return (
     <div className="relative">
       <Icon className={cx('absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-base-content/40 pointer-events-none', iconClassName)} />
