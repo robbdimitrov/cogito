@@ -17,7 +17,7 @@ function Feed(props) {
         </div>
         <div className="md:col-span-2 space-y-4">
           <CreateThought user={user} onCreatePost={onCreatePost} />
-          {isLoading ? <FeedSkeleton count={3} /> : <ThoughtList posts={posts} users={[user]} onLike={onLike} onRepost={onRepost} onDelete={onDeletePost} currentUserId={currentUserId} />}
+          {isLoading && posts.length === 0 ? <FeedSkeleton count={3} /> : <ThoughtList posts={posts} users={[user]} onLike={onLike} onRepost={onRepost} onDelete={onDeletePost} currentUserId={currentUserId} />}
         </div>
       </div>
     </div>

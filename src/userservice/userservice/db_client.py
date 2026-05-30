@@ -60,12 +60,12 @@ class DbClient:
 
         try:
             query = 'SELECT id, name, username, email, bio,\
-                (SELECT count(*) FROM posts WHERE user_id = id) AS posts,\
-                (SELECT count(*) FROM likes WHERE user_id = id) AS likes,\
-                (SELECT count(*) FROM followers WHERE follower_id = id) AS following,\
-                (SELECT count(*) FROM followers WHERE user_id = id) AS followers,\
+                (SELECT count(*) FROM posts WHERE user_id = users.id) AS posts,\
+                (SELECT count(*) FROM likes WHERE user_id = users.id) AS likes,\
+                (SELECT count(*) FROM followers WHERE follower_id = users.id) AS following,\
+                (SELECT count(*) FROM followers WHERE user_id = users.id) AS followers,\
                 EXISTS (SELECT 1 FROM followers\
-                WHERE user_id = id AND follower_id = %s) AS followed,\
+                WHERE user_id = users.id AND follower_id = %s) AS followed,\
                 time_format(created) AS created\
                 FROM users WHERE id = %s'
             cur.execute(query, (current_user_id, user_id))
@@ -85,12 +85,12 @@ class DbClient:
 
         try:
             query = 'SELECT id, name, username, email, bio,\
-                (SELECT count(*) FROM posts WHERE user_id = id) AS posts,\
-                (SELECT count(*) FROM likes WHERE user_id = id) AS likes,\
-                (SELECT count(*) FROM followers WHERE follower_id = id) AS following,\
-                (SELECT count(*) FROM followers WHERE user_id = id) AS followers,\
+                (SELECT count(*) FROM posts WHERE user_id = users.id) AS posts,\
+                (SELECT count(*) FROM likes WHERE user_id = users.id) AS likes,\
+                (SELECT count(*) FROM followers WHERE follower_id = users.id) AS following,\
+                (SELECT count(*) FROM followers WHERE user_id = users.id) AS followers,\
                 EXISTS (SELECT 1 FROM followers\
-                WHERE user_id = id AND follower_id = %s) AS followed,\
+                WHERE user_id = users.id AND follower_id = %s) AS followed,\
                 time_format(created) AS created\
                 FROM users WHERE username = %s'
             cur.execute(query, (current_user_id, username))
@@ -138,15 +138,15 @@ class DbClient:
 
         try:
             query = 'SELECT id, name, username, email, bio,\
-                (SELECT count(*) FROM posts WHERE user_id = id) AS posts,\
-                (SELECT count(*) FROM likes WHERE user_id = id) AS likes,\
-                (SELECT count(*) FROM followers WHERE follower_id = id) AS following,\
-                (SELECT count(*) FROM followers WHERE user_id = id) AS followers,\
+                (SELECT count(*) FROM posts WHERE user_id = users.id) AS posts,\
+                (SELECT count(*) FROM likes WHERE user_id = users.id) AS likes,\
+                (SELECT count(*) FROM followers WHERE follower_id = users.id) AS following,\
+                (SELECT count(*) FROM followers WHERE user_id = users.id) AS followers,\
                 EXISTS (SELECT 1 FROM followers\
-                WHERE user_id = id AND follower_id = %s) AS followed,\
+                WHERE user_id = users.id AND follower_id = %s) AS followed,\
                 time_format(created) AS created\
                 FROM users\
-                INNER JOIN followers ON user_id = id\
+                INNER JOIN followers ON user_id = users.id\
                 WHERE follower_id = %s\
                 ORDER BY followers.created DESC\
                 LIMIT %s OFFSET %s'
@@ -165,15 +165,15 @@ class DbClient:
 
         try:
             query = 'SELECT id, name, username, email, bio,\
-                (SELECT count(*) FROM posts WHERE user_id = id) AS posts,\
-                (SELECT count(*) FROM likes WHERE user_id = id) AS likes,\
-                (SELECT count(*) FROM followers WHERE follower_id = id) AS following,\
-                (SELECT count(*) FROM followers WHERE user_id = id) AS followers,\
+                (SELECT count(*) FROM posts WHERE user_id = users.id) AS posts,\
+                (SELECT count(*) FROM likes WHERE user_id = users.id) AS likes,\
+                (SELECT count(*) FROM followers WHERE follower_id = users.id) AS following,\
+                (SELECT count(*) FROM followers WHERE user_id = users.id) AS followers,\
                 EXISTS (SELECT 1 FROM followers\
-                WHERE user_id = id AND follower_id = %s) AS followed,\
+                WHERE user_id = users.id AND follower_id = %s) AS followed,\
                 time_format(created) AS created\
                 FROM users\
-                INNER JOIN followers ON follower_id = id\
+                INNER JOIN followers ON follower_id = users.id\
                 WHERE user_id = %s\
                 ORDER BY followers.created DESC\
                 LIMIT %s OFFSET %s'

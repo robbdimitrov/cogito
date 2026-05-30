@@ -116,12 +116,7 @@ function AppContent() {
     if (!isLoggedIn) return;
     setIsProfileLoading(true);
     try {
-      let profileUser;
-      if (user && user.username === username) {
-        profileUser = user;
-      } else {
-        profileUser = await apiClient.getUserByUsername(username);
-      }
+      const profileUser = await apiClient.getUserByUsername(username);
       if (!profileUser) {
         setProfileData({user: null, posts: [], users: []});
         return;
@@ -144,7 +139,7 @@ function AppContent() {
     } finally {
       setIsProfileLoading(false);
     }
-  }, [isLoggedIn, user]);
+  }, [isLoggedIn]);
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -232,6 +227,7 @@ function AppContent() {
       .then(() => {
         toast.success('Thought posted.');
         refreshFeed();
+        refreshUser();
       })
       .catch(() => toast.error('Failed to post. Try again.'));
   };
@@ -244,6 +240,7 @@ function AppContent() {
         await apiClient.likePost(post.id);
       }
       refreshFeed();
+      refreshUser();
       if (route.id === 'profile') {
         const match = route.path.match(/\/@(\w+)(\/\w+)?/);
         if (match) {
@@ -256,7 +253,7 @@ function AppContent() {
     } catch (e) {
       toast.error('Action failed. Try again.');
     }
-  }, [refreshFeed, route.id, route.path, fetchProfile, toast]);
+  }, [refreshFeed, refreshUser, route.id, route.path, fetchProfile, toast]);
 
   const handleRepost = useCallback(async (post) => {
     try {
@@ -266,6 +263,7 @@ function AppContent() {
         await apiClient.repostPost(post.id);
       }
       refreshFeed();
+      refreshUser();
       if (route.id === 'profile') {
         const match = route.path.match(/\/@(\w+)(\/\w+)?/);
         if (match) {
@@ -278,7 +276,7 @@ function AppContent() {
     } catch (e) {
       toast.error('Action failed. Try again.');
     }
-  }, [refreshFeed, route.id, route.path, fetchProfile, toast]);
+  }, [refreshFeed, refreshUser, route.id, route.path, fetchProfile, toast]);
 
   const handleFollow = useCallback((userId) => {
     apiClient.followUser(userId)
@@ -315,6 +313,7 @@ function AppContent() {
       await apiClient.deletePost(postId);
       toast.success('Post deleted.');
       refreshFeed();
+      refreshUser();
       if (route.id === 'profile') {
         const match = route.path.match(/\/@(\w+)(\/\w+)?/);
         if (match) {
@@ -324,7 +323,7 @@ function AppContent() {
     } catch (e) {
       toast.error('Delete failed. Try again.');
     }
-  }, [refreshFeed, route.id, route.path, fetchProfile, toast]);
+  }, [refreshFeed, refreshUser, route.id, route.path, fetchProfile, toast]);
 
   const renderComponent = () => {
     const routeId = route.id || 'fallback';

@@ -25,9 +25,14 @@ function Profile(props) {
     return <ThoughtList posts={posts} users={[user]} onLike={onLike} onRepost={onRepost} onDelete={onDeletePost} currentUserId={currentUser?.id} />;
   };
 
+  const match = router.path.match(/\/@(\w+)/);
+  const pathUsername = match ? match[1] : '';
+  const isSameUser = user && user.username && user.username.toLowerCase() === pathUsername.toLowerCase();
+  const showSkeleton = isLoading && !isSameUser;
+
   return (
     <div className="container mx-auto px-4 py-6 max-w-3xl">
-      {isLoading ? <ProfileSkeleton /> : (
+      {showSkeleton ? <ProfileSkeleton /> : (
         <>
           <UserHeader user={user} currentUser={currentUser} onFollow={onFollow} onUnfollow={onUnfollow} />
           <ControlBar user={user} />
