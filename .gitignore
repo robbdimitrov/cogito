@@ -6,6 +6,13 @@ node_modules
 build
 dist
 
+# React
+.next/
+.eslintcache
+*.tsbuildinfo
+.env*.local
+coverage/
+
 # Python
 venv
 __pycache__
@@ -16,7 +23,6 @@ pkg
 vendor
 
 # Compiled binaries
-
 src/apigateway/apigateway
 src/authservice/authservice
 src/postservice/postservice
@@ -29,3 +35,4 @@ npm-debug.log*
 .vscode
 *.code-workspace
 *.sw*
+.antigravitycli

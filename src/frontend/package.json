@@ -9,26 +9,26 @@
     "**/*.css"
   ],
   "scripts": {
-    "build:css": "tailwindcss -i src/tailwind-source.css -o src/index.css",
-    "prestart": "npm run build:css",
-    "start": "react-scripts start",
-    "prebuild": "npm run build:css",
-    "build": "react-scripts build",
-    "eject": "react-scripts eject",
-    "lint": "eslint src"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
     "lucide-react": "^1.17.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-scripts": "^5.0.1"
+    "next": "^16.2.6",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
   },
   "devDependencies": {
+    "@types/node": "^25.9.1",
+    "@types/react": "^19.2.15",
+    "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.4.16",
     "daisyui": "^4.4.19",
-    "http-proxy-middleware": "^3.0.5",
     "postcss": "^8.4.32",
-    "tailwindcss": "^3.3.6"
+    "tailwindcss": "^3.3.6",
+    "typescript": "^6.0.3"
   },
   "eslintConfig": {
     "extends": "react-app"
