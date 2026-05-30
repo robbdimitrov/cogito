@@ -29,7 +29,8 @@ func (ac *authController) createSession(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewAuthServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx = appendInternalAuth(ctx)
 	defer cancel()
 
 	var body struct {
@@ -69,7 +70,8 @@ func (ac *authController) validateSession(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewAuthServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx = appendInternalAuth(ctx)
 	defer cancel()
 
 	req := pb.SessionRequest{SessionId: cookie.Value}
@@ -102,6 +104,7 @@ func (ac *authController) deleteSession(c echo.Context) error {
 	client := pb.NewAuthServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx = appendInternalAuth(ctx)
 	defer cancel()
 
 	req := pb.SessionRequest{SessionId: cookie.Value}
@@ -131,6 +134,7 @@ func (ac *authController) deleteSessionByID(c echo.Context) error {
 	client := pb.NewAuthServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx = appendInternalAuth(ctx)
 	defer cancel()
 
 	sess, err := client.GetSession(ctx, &pb.SessionRequest{SessionId: sessionID})
@@ -173,6 +177,7 @@ func (ac *authController) getSessions(c echo.Context) error {
 	client := pb.NewAuthServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx = appendInternalAuth(ctx)
 	defer cancel()
 
 	validateReq := pb.SessionRequest{SessionId: cookie.Value}

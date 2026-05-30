@@ -192,7 +192,7 @@ class DbClient:
 
         try:
             query = 'INSERT INTO followers (user_id, follower_id)\
-                VALUES (%s, %s)'
+                VALUES (%s, %s) ON CONFLICT DO NOTHING'
             cur.execute(query, (user_id, follower_id))
             conn.commit()
         except Exception:

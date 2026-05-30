@@ -29,7 +29,8 @@ func (s *userController) createUser(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx = appendInternalAuth(ctx)
 	defer cancel()
 
 	var body struct {
@@ -72,7 +73,7 @@ func (s *userController) getUser(c echo.Context) error {
 		return echo.NewHTTPError(400)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, err = appendUserIDHeader(ctx, c)
 	if err != nil {
 		return err
@@ -87,6 +88,9 @@ func (s *userController) getUser(c echo.Context) error {
 		return newHTTPError(err)
 	}
 
+	if getUserID(c) == c.Param("userId") {
+		return c.JSON(200, mapCurrentUser(res))
+	}
 	return c.JSON(200, mapUser(res))
 }
 
@@ -99,7 +103,7 @@ func (s *userController) getUserByUsername(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, err = appendUserIDHeader(ctx, c)
 	if err != nil {
 		return err
@@ -131,7 +135,7 @@ func (s *userController) updateUser(c echo.Context) error {
 		return echo.NewHTTPError(403)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, err = appendUserIDHeader(ctx, c)
 	if err != nil {
 		return err
@@ -177,7 +181,7 @@ func (s *userController) getFollowing(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, err = appendUserIDHeader(ctx, c)
 	if err != nil {
 		return err
@@ -188,13 +192,9 @@ func (s *userController) getFollowing(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(400)
 	}
-	page, err := getIntQuery(c, "page", 0)
+	page, limit, err := getPageAndLimit(c)
 	if err != nil {
-		return echo.NewHTTPError(400)
-	}
-	limit, err := getIntQuery(c, "limit", 20)
-	if err != nil {
-		return echo.NewHTTPError(400)
+		return err
 	}
 
 	req := pb.GetUsersRequest{
@@ -226,7 +226,7 @@ func (s *userController) getFollowers(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, err = appendUserIDHeader(ctx, c)
 	if err != nil {
 		return err
@@ -237,13 +237,9 @@ func (s *userController) getFollowers(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(400)
 	}
-	page, err := getIntQuery(c, "page", 0)
+	page, limit, err := getPageAndLimit(c)
 	if err != nil {
-		return echo.NewHTTPError(400)
-	}
-	limit, err := getIntQuery(c, "limit", 20)
-	if err != nil {
-		return echo.NewHTTPError(400)
+		return err
 	}
 
 	req := pb.GetUsersRequest{
@@ -275,7 +271,7 @@ func (s *userController) followUser(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, err = appendUserIDHeader(ctx, c)
 	if err != nil {
 		return err
@@ -306,7 +302,7 @@ func (s *userController) unfollowUser(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, err = appendUserIDHeader(ctx, c)
 	if err != nil {
 		return err

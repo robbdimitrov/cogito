@@ -29,7 +29,7 @@ func (pc *postController) createPost(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewPostServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, err = appendUserIDHeader(ctx, c)
 	if err != nil {
 		return err
@@ -66,20 +66,16 @@ func (pc *postController) getFeed(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewPostServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, err = appendUserIDHeader(ctx, c)
 	if err != nil {
 		return err
 	}
 	defer cancel()
 
-	page, err := getIntQuery(c, "page", 0)
+	page, limit, err := getPageAndLimit(c)
 	if err != nil {
-		return echo.NewHTTPError(400)
-	}
-	limit, err := getIntQuery(c, "limit", 20)
-	if err != nil {
-		return echo.NewHTTPError(400)
+		return err
 	}
 
 	req := pb.GetFeedRequest{
@@ -110,7 +106,7 @@ func (pc *postController) getPosts(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewPostServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, err = appendUserIDHeader(ctx, c)
 	if err != nil {
 		return err
@@ -121,13 +117,9 @@ func (pc *postController) getPosts(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(400)
 	}
-	page, err := getIntQuery(c, "page", 0)
+	page, limit, err := getPageAndLimit(c)
 	if err != nil {
-		return echo.NewHTTPError(400)
-	}
-	limit, err := getIntQuery(c, "limit", 20)
-	if err != nil {
-		return echo.NewHTTPError(400)
+		return err
 	}
 
 	req := pb.GetPostsRequest{
@@ -159,7 +151,7 @@ func (pc *postController) getLikedPosts(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewPostServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, err = appendUserIDHeader(ctx, c)
 	if err != nil {
 		return err
@@ -170,13 +162,9 @@ func (pc *postController) getLikedPosts(c echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(400)
 	}
-	page, err := getIntQuery(c, "page", 0)
+	page, limit, err := getPageAndLimit(c)
 	if err != nil {
-		return echo.NewHTTPError(400)
-	}
-	limit, err := getIntQuery(c, "limit", 20)
-	if err != nil {
-		return echo.NewHTTPError(400)
+		return err
 	}
 
 	req := pb.GetPostsRequest{
@@ -208,7 +196,7 @@ func (pc *postController) getPost(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewPostServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, err = appendUserIDHeader(ctx, c)
 	if err != nil {
 		return err
@@ -239,7 +227,7 @@ func (pc *postController) deletePost(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewPostServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, err = appendUserIDHeader(ctx, c)
 	if err != nil {
 		return err
@@ -270,7 +258,7 @@ func (pc *postController) likePost(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewPostServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, err = appendUserIDHeader(ctx, c)
 	if err != nil {
 		return err
@@ -301,7 +289,7 @@ func (pc *postController) unlikePost(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewPostServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, err = appendUserIDHeader(ctx, c)
 	if err != nil {
 		return err
@@ -332,7 +320,7 @@ func (pc *postController) repostPost(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewPostServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, err = appendUserIDHeader(ctx, c)
 	if err != nil {
 		return err
@@ -363,7 +351,7 @@ func (pc *postController) removeRepost(c echo.Context) error {
 	defer conn.Close()
 	client := pb.NewPostServiceClient(conn)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, err = appendUserIDHeader(ctx, c)
 	if err != nil {
 		return err

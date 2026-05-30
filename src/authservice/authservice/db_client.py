@@ -1,9 +1,19 @@
+import os
 import sys
 
 from psycopg2 import pool, DatabaseError
 
 from authservice.mappers import map_session
 from authservice import logger
+
+DEFAULT_SESSION_TTL_DAYS = 7
+
+
+def session_ttl_days():
+    try:
+        return max(1, int(os.getenv('SESSION_TTL_DAYS') or DEFAULT_SESSION_TTL_DAYS))
+    except ValueError:
+        return DEFAULT_SESSION_TTL_DAYS
 
 
 class DbClient:
@@ -59,10 +69,13 @@ class DbClient:
         cur = conn.cursor()
 
         try:
+            self.delete_expired_sessions(cur)
             query = 'SELECT id, user_id, time_format(created) AS created\
-                FROM sessions WHERE id = %s'
-            cur.execute(query, (session_id,))
+                FROM sessions\
+                WHERE id = %s AND created > now() - (%s * interval \'1 day\')'
+            cur.execute(query, (session_id, session_ttl_days()))
             result = cur.fetchone()
+            conn.commit()
             if result is None:
                 return None
             return map_session(result)
@@ -77,10 +90,14 @@ class DbClient:
         cur = conn.cursor()
 
         try:
+            self.delete_expired_sessions(cur)
             query = 'SELECT id, user_id, time_format(created) AS created\
-                FROM sessions WHERE user_id = %s ORDER BY created DESC'
-            cur.execute(query, (user_id,))
+                FROM sessions\
+                WHERE user_id = %s AND created > now() - (%s * interval \'1 day\')\
+                ORDER BY created DESC'
+            cur.execute(query, (user_id, session_ttl_days()))
             results = cur.fetchall()
+            conn.commit()
             sessions = []
             for row in results:
                 sessions.append({
@@ -94,6 +111,10 @@ class DbClient:
         finally:
             cur.close()
             self.db.putconn(conn)
+
+    def delete_expired_sessions(self, cur):
+        query = 'DELETE FROM sessions WHERE created <= now() - (%s * interval \'1 day\')'
+        cur.execute(query, (session_ttl_days(),))
 
     def delete_session(self, session_id):
         conn = self.db.getconn()

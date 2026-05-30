@@ -17,6 +17,7 @@ CREATE TABLE followers (
   user_id integer REFERENCES users ON DELETE CASCADE,
   follower_id integer REFERENCES users ON DELETE CASCADE,
   created timestamp NOT NULL DEFAULT now(),
+  CHECK (user_id <> follower_id),
   UNIQUE(user_id, follower_id)
 );
 

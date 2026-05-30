@@ -50,3 +50,21 @@ func getIntQuery(c echo.Context, key string, defaultValue int) (int, error) {
 	}
 	return parsed, nil
 }
+
+func getPageAndLimit(c echo.Context) (int, int, error) {
+	page, err := getIntQuery(c, "page", 0)
+	if err != nil {
+		return 0, 0, err
+	}
+	limit, err := getIntQuery(c, "limit", 20)
+	if err != nil {
+		return 0, 0, err
+	}
+	if page < 0 {
+		return 0, 0, echo.NewHTTPError(http.StatusBadRequest, "Page must be zero or greater")
+	}
+	if limit < 1 || limit > 100 {
+		return 0, 0, echo.NewHTTPError(http.StatusBadRequest, "Limit must be between 1 and 100")
+	}
+	return page, limit, nil
+}

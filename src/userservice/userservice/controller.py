@@ -2,7 +2,7 @@ from grpc import StatusCode
 
 from userservice import thoughts_pb2_grpc, thoughts_pb2
 from userservice.crypto import generate_hash, validate_password
-from userservice.utils import is_valid_email
+from userservice.utils import get_user_id, is_valid_email
 from userservice import logger
 
 
@@ -37,7 +37,7 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
             )
 
     def GetUser(self, request, context):
-        user_id = dict(context.invocation_metadata())['user-id']
+        user_id = get_user_id(context)
 
         try:
             result = self.db_client.get_user(
@@ -51,7 +51,7 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
         return result
 
     def UpdateUser(self, request, context):
-        user_id = dict(context.invocation_metadata())['user-id']
+        user_id = get_user_id(context)
 
         if len(request.password) != 0:
             return self.updatePassword(request, context)
@@ -72,7 +72,7 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
             context.abort(StatusCode.INTERNAL, 'Internal server error.')
 
     def updatePassword(self, request, context):
-        user_id = dict(context.invocation_metadata())['user-id']
+        user_id = get_user_id(context)
 
         if len(request.old_password) == 0:
             context.abort(
@@ -101,7 +101,7 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
             context.abort(StatusCode.INTERNAL, 'Internal server error.')
 
     def GetUserByUsername(self, request, context):
-        user_id = dict(context.invocation_metadata())['user-id']
+        user_id = get_user_id(context)
 
         try:
             result = self.db_client.get_user_by_username(
@@ -115,7 +115,7 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
         return result
 
     def GetFollowing(self, request, context):
-        user_id = dict(context.invocation_metadata())['user-id']
+        user_id = get_user_id(context)
 
         try:
             result = self.db_client.get_following(
@@ -127,7 +127,7 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
             context.abort(StatusCode.INTERNAL, 'Internal server error.')
 
     def GetFollowers(self, request, context):
-        user_id = dict(context.invocation_metadata())['user-id']
+        user_id = get_user_id(context)
 
         try:
             result = self.db_client.get_followers(
@@ -139,7 +139,12 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
             context.abort(StatusCode.INTERNAL, 'Internal server error.')
 
     def FollowUser(self, request, context):
-        user_id = dict(context.invocation_metadata())['user-id']
+        user_id = get_user_id(context)
+        if str(request.user_id) == str(user_id):
+            context.abort(
+                StatusCode.INVALID_ARGUMENT,
+                'Cannot follow yourself.'
+            )
 
         try:
             self.db_client.follow_user(request.user_id, user_id)
@@ -149,7 +154,7 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
             context.abort(StatusCode.INTERNAL, 'Internal server error.')
 
     def UnfollowUser(self, request, context):
-        user_id = dict(context.invocation_metadata())['user-id']
+        user_id = get_user_id(context)
 
         try:
             self.db_client.unfollow_user(request.user_id, user_id)

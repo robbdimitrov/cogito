@@ -54,6 +54,11 @@ spec:
             secretKeyRef:
               name: thoughts-db-secret
               key: database-url
+        - name: INTERNAL_GRPC_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: thoughts-db-secret
+              key: internal-grpc-token
         livenessProbe:
           tcpSocket:
             port: 5050

@@ -3,11 +3,23 @@ package api
 import pb "github.com/robbdimitrov/thoughts/src/apigateway/genproto"
 
 func mapUser(u *pb.User) user {
+	return mapUserWithEmail(u, false)
+}
+
+func mapCurrentUser(u *pb.User) user {
+	return mapUserWithEmail(u, true)
+}
+
+func mapUserWithEmail(u *pb.User, includeEmail bool) user {
+	email := ""
+	if includeEmail {
+		email = u.Email
+	}
 	return user{
 		ID:        u.Id,
 		Name:      u.Name,
 		Username:  u.Username,
-		Email:     u.Email,
+		Email:     email,
 		Bio:       u.Bio,
 		Posts:     u.Posts,
 		Likes:     u.Likes,
