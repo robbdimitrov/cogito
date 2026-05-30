@@ -63,7 +63,7 @@ function Navbar({isLoggedIn, user, logoutUser}) {
   const closeDropdown = () => setIsDropdownOpen(false);
 
   return (
-    <nav className="navbar bg-base-100/80 backdrop-blur-lg border-b border-base-200/60 sticky top-0 z-50 transition-shadow duration-300">
+    <nav className="navbar bg-base-100/70 backdrop-blur-md border-b border-base-200/40 sticky top-0 z-50 transition-shadow duration-300">
       <div className="navbar-start">
         {isLoggedIn && (
           <Link href="/" className="btn btn-ghost normal-case text-xl gap-2 hover:scale-105 transition-transform duration-200">
@@ -74,7 +74,7 @@ function Navbar({isLoggedIn, user, logoutUser}) {
       </div>
 
       <div className="navbar-center">
-        <span className="text-2xl font-extrabold tracking-tight text-primary">Thoughts</span>
+        <span className="text-2xl font-black bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent tracking-tight">Thoughts</span>
       </div>
 
       <div className="navbar-end gap-1">
@@ -95,7 +95,7 @@ function Navbar({isLoggedIn, user, logoutUser}) {
               <Avatar name={user?.name} size="md" />
             </button>
             {isDropdownOpen && (
-              <ul className="mt-3 z-[1] p-2 shadow-xl shadow-base-content/10 menu menu-sm dropdown-content bg-base-100 rounded-box w-56 border border-base-200/80 backdrop-blur-sm">
+              <ul className="mt-3 z-[1] p-2 shadow-xl menu menu-sm dropdown-content bg-base-100/80 backdrop-blur-lg rounded-2xl w-56 border border-base-200/50">
                 <li className="menu-title px-3 py-1 text-xs opacity-60">Signed in as @{user?.username || 'user'}</li>
                 <div className="divider my-1 mx-2 h-px bg-base-200"></div>
                 <li onClick={closeDropdown}><Link href={`/@${user?.username}`} className="gap-2 py-2"><User className="h-4 w-4" />Profile</Link></li>

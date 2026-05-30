@@ -137,17 +137,17 @@ class DbClient:
         cur = conn.cursor()
 
         try:
-            query = 'SELECT id, name, username, email, bio,\
+            query = 'SELECT users.id, name, username, email, bio,\
                 (SELECT count(*) FROM posts WHERE user_id = users.id) AS posts,\
                 (SELECT count(*) FROM likes WHERE user_id = users.id) AS likes,\
                 (SELECT count(*) FROM followers WHERE follower_id = users.id) AS following,\
                 (SELECT count(*) FROM followers WHERE user_id = users.id) AS followers,\
                 EXISTS (SELECT 1 FROM followers\
                 WHERE user_id = users.id AND follower_id = %s) AS followed,\
-                time_format(created) AS created\
+                time_format(users.created) AS created\
                 FROM users\
-                INNER JOIN followers ON user_id = users.id\
-                WHERE follower_id = %s\
+                INNER JOIN followers ON followers.user_id = users.id\
+                WHERE followers.follower_id = %s\
                 ORDER BY followers.created DESC\
                 LIMIT %s OFFSET %s'
             cur.execute(query, (current_user_id, user_id, limit, page * limit))
@@ -164,17 +164,17 @@ class DbClient:
         cur = conn.cursor()
 
         try:
-            query = 'SELECT id, name, username, email, bio,\
+            query = 'SELECT users.id, name, username, email, bio,\
                 (SELECT count(*) FROM posts WHERE user_id = users.id) AS posts,\
                 (SELECT count(*) FROM likes WHERE user_id = users.id) AS likes,\
                 (SELECT count(*) FROM followers WHERE follower_id = users.id) AS following,\
                 (SELECT count(*) FROM followers WHERE user_id = users.id) AS followers,\
                 EXISTS (SELECT 1 FROM followers\
                 WHERE user_id = users.id AND follower_id = %s) AS followed,\
-                time_format(created) AS created\
+                time_format(users.created) AS created\
                 FROM users\
-                INNER JOIN followers ON follower_id = users.id\
-                WHERE user_id = %s\
+                INNER JOIN followers ON followers.follower_id = users.id\
+                WHERE followers.user_id = %s\
                 ORDER BY followers.created DESC\
                 LIMIT %s OFFSET %s'
             cur.execute(query, (current_user_id, user_id, limit, page * limit))

@@ -45,7 +45,15 @@ function AppContent() {
   const [isLoggedIn, setIsLoggedIn] = useState(Session.getUserId() !== null);
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
-  const [profileData, setProfileData] = useState({user: null, posts: [], users: []});
+  const [profileUser, setProfileUser] = useState(null);
+  const [profilePosts, setProfilePosts] = useState([]);
+  const [profileLikes, setProfileLikes] = useState([]);
+  const [profileFollowing, setProfileFollowing] = useState([]);
+  const [profileFollowers, setProfileFollowers] = useState([]);
+  const profileUserRef = React.useRef(null);
+  useEffect(() => {
+    profileUserRef.current = profileUser;
+  }, [profileUser]);
   const [isFeedLoading, setIsFeedLoading] = useState(false);
   const [isProfileLoading, setIsProfileLoading] = useState(false);
   const [loginError, setLoginError] = useState(null);
@@ -114,28 +122,69 @@ function AppContent() {
 
   const fetchProfile = useCallback(async (username, subroute) => {
     if (!isLoggedIn) return;
-    setIsProfileLoading(true);
+    
+    const prevUser = profileUserRef.current;
+    const isDifferentUser = !prevUser || prevUser.username.toLowerCase() !== username.toLowerCase();
+    
+    if (isDifferentUser) {
+      setIsProfileLoading(true);
+      setProfileUser(null);
+      setProfilePosts([]);
+      setProfileLikes([]);
+      setProfileFollowing([]);
+      setProfileFollowers([]);
+    }
+
     try {
-      const profileUser = await apiClient.getUserByUsername(username);
-      if (!profileUser) {
-        setProfileData({user: null, posts: [], users: []});
-        return;
-      }
-      if (subroute === '/likes') {
-        const data = await apiClient.getLikes(profileUser.id, 0);
-        setProfileData({user: profileUser, posts: data.items || [], users: []});
-      } else if (subroute === '/following') {
-        const data = await apiClient.getFollowing(profileUser.id, 0);
-        setProfileData({user: profileUser, posts: [], users: data.items || []});
-      } else if (subroute === '/followers') {
-        const data = await apiClient.getFollowers(profileUser.id, 0);
-        setProfileData({user: profileUser, posts: [], users: data.items || []});
+      let targetUser = prevUser;
+      if (isDifferentUser) {
+        targetUser = await apiClient.getUserByUsername(username);
+        if (!targetUser) {
+          setProfileUser(null);
+          return;
+        }
+        setProfileUser(targetUser);
       } else {
-        const data = await apiClient.getPosts(profileUser.id, 0);
-        setProfileData({user: profileUser, posts: data.items || [], users: []});
+        // Fetch updated user in the background to update counts without flashing
+        apiClient.getUserByUsername(username)
+          .then((updatedUser) => {
+            if (updatedUser) setProfileUser(updatedUser);
+          })
+          .catch(() => {});
       }
-    } catch {
-      setProfileData((prev) => ({user: prev.user, posts: [], users: []}));
+
+      if (subroute === '/likes') {
+        const data = await apiClient.getLikes(targetUser.id, 0);
+        const rawPosts = data.items || [];
+        const userIds = [...new Set(rawPosts.map((p) => p.userId))];
+        const userMap = {};
+        await Promise.all(
+          userIds.map(async (uid) => {
+            try {
+              const u = await apiClient.getUser(uid);
+              userMap[uid] = u;
+            } catch {
+              userMap[uid] = null;
+            }
+          })
+        );
+        const postsWithAuthors = rawPosts.map((p) => ({
+          ...p,
+          user: userMap[p.userId],
+        }));
+        setProfileLikes(postsWithAuthors);
+      } else if (subroute === '/following') {
+        const data = await apiClient.getFollowing(targetUser.id, 0);
+        setProfileFollowing(data.items || []);
+      } else if (subroute === '/followers') {
+        const data = await apiClient.getFollowers(targetUser.id, 0);
+        setProfileFollowers(data.items || []);
+      } else {
+        const data = await apiClient.getPosts(targetUser.id, 0);
+        setProfilePosts(data.items || []);
+      }
+    } catch (err) {
+      console.error('Fetch profile details failed:', err);
     } finally {
       setIsProfileLoading(false);
     }
@@ -147,6 +196,21 @@ function AppContent() {
       refreshFeed();
     }
   }, [isLoggedIn, refreshUser, refreshFeed]);
+
+  useEffect(() => {
+    if (user && profileUser && user.id === profileUser.id) {
+      if (
+        user.posts !== profileUser.posts ||
+        user.likes !== profileUser.likes ||
+        user.following !== profileUser.following ||
+        user.followers !== profileUser.followers ||
+        user.name !== profileUser.name ||
+        user.bio !== profileUser.bio
+      ) {
+        setProfileUser(user);
+      }
+    }
+  }, [user, profileUser]);
 
   useEffect(() => {
     if (route.id !== 'profile' || !isLoggedIn) {
@@ -331,7 +395,22 @@ function AppContent() {
       return <Feed posts={posts} user={user} isLoading={isFeedLoading} onLike={handleLike} onRepost={handleRepost} onCreatePost={createPost} onDeletePost={handleDeletePost} currentUserId={user?.id} />;
     }
     if (routeId === 'profile') {
-      return <Profile user={profileData.user} posts={profileData.posts} users={profileData.users} isLoading={isProfileLoading} onLike={handleLike} onRepost={handleRepost} currentUser={user} onFollow={handleFollow} onUnfollow={handleUnfollow} onDeletePost={handleDeletePost} />;
+      return (
+        <Profile
+          user={profileUser}
+          posts={profilePosts}
+          likes={profileLikes}
+          following={profileFollowing}
+          followers={profileFollowers}
+          isLoading={isProfileLoading}
+          onLike={handleLike}
+          onRepost={handleRepost}
+          currentUser={user}
+          onFollow={handleFollow}
+          onUnfollow={handleUnfollow}
+          onDeletePost={handleDeletePost}
+        />
+      );
     }
     if (routeId === 'post') {
       const match = route.path.match(/\/posts\/(\d+)/);

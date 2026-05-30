@@ -11,18 +11,61 @@ function Profile(props) {
   const router = useRouter();
   const user = props.user || {name: '', username: '', email: '', posts: 0, following: 0, followers: 0, likes: 0};
   const posts = props.posts || [];
-  const users = props.users || [];
+  const likes = props.likes || [];
+  const following = props.following || [];
+  const followers = props.followers || [];
   const { isLoading, onLike, onRepost, currentUser, onFollow, onUnfollow, onDeletePost } = props;
+
+  const renderTabContent = (items, emptyMessage, renderFn) => {
+    const isTabEmpty = !items || items.length === 0;
+    if (isLoading && isTabEmpty) {
+      return (
+        <div className="py-12 flex flex-col items-center justify-center space-y-3 glass-panel rounded-2xl border border-base-200/50">
+          <span className="loading loading-spinner text-primary loading-lg"></span>
+          <span className="text-sm text-base-content/50">Fetching details...</span>
+        </div>
+      );
+    }
+    return (
+      <div className="relative animate-slide-in">
+        {isLoading && !isTabEmpty && (
+          <div className="flex justify-center mb-3">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-base-100/80 backdrop-blur-md rounded-full shadow-sm border border-base-200/50 text-xs text-base-content/60">
+              <span className="loading loading-spinner loading-xs text-primary"></span>
+              Updating...
+            </div>
+          </div>
+        )}
+        {renderFn()}
+      </div>
+    );
+  };
 
   const resolveComponent = () => {
     if (router.path.endsWith('/following')) {
-      return <UserList users={users} />;
+      return renderTabContent(
+        following,
+        'Not following anyone yet.',
+        () => <UserList users={following} onFollow={onFollow} onUnfollow={onUnfollow} emptyMessage="Not following anyone yet." />
+      );
     } else if (router.path.endsWith('/followers')) {
-      return <UserList users={users} />;
+      return renderTabContent(
+        followers,
+        'No followers yet.',
+        () => <UserList users={followers} onFollow={onFollow} onUnfollow={onUnfollow} emptyMessage="No followers yet." />
+      );
     } else if (router.path.endsWith('/likes')) {
-      return <ThoughtList posts={posts} users={[user]} onLike={onLike} onRepost={onRepost} onDelete={onDeletePost} currentUserId={currentUser?.id} />;
+      return renderTabContent(
+        likes,
+        'No liked thoughts yet.',
+        () => <ThoughtList posts={likes} users={[user]} onLike={onLike} onRepost={onRepost} onDelete={onDeletePost} currentUserId={currentUser?.id} emptyMessage="No liked thoughts yet." />
+      );
     }
-    return <ThoughtList posts={posts} users={[user]} onLike={onLike} onRepost={onRepost} onDelete={onDeletePost} currentUserId={currentUser?.id} />;
+    return renderTabContent(
+      posts,
+      'No thoughts posted yet.',
+      () => <ThoughtList posts={posts} users={[user]} onLike={onLike} onRepost={onRepost} onDelete={onDeletePost} currentUserId={currentUser?.id} emptyMessage="No thoughts yet. Share what's on your mind!" />
+    );
   };
 
   const match = router.path.match(/\/@(\w+)/);
@@ -36,7 +79,7 @@ function Profile(props) {
         <>
           <UserHeader user={user} currentUser={currentUser} onFollow={onFollow} onUnfollow={onUnfollow} />
           <ControlBar user={user} />
-          <div className="mt-4">
+          <div className="mt-6">
             {resolveComponent()}
           </div>
         </>

@@ -25,11 +25,11 @@ function UserHeader({user, currentUser, onFollow, onUnfollow}) {
       <div className="h-32 bg-gradient-to-tr from-primary via-primary/80 to-secondary relative">
         <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 25% 25%, white 1px, transparent 1px)', backgroundSize: '24px 24px'}}></div>
       </div>
-      <div className="card-body px-6 pb-6 -mt-12 relative">
+      <div className="card-body px-6 pb-6 -mt-14 relative">
         <div className="flex justify-between items-end">
-          <div className="relative">
+          <div className="relative p-1 bg-base-100 dark:bg-slate-800 rounded-full shadow-md border border-base-200/50">
             <Avatar name={user.name} size="xl" />
-            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-success rounded-full border-2 border-base-100"></div>
+            <div className="absolute bottom-1 right-1 w-4 h-4 bg-success rounded-full border-2 border-base-100 dark:border-slate-800"></div>
           </div>
           {isOwnProfile ? (
             <Link href="/settings/profile" className="btn btn-outline btn-sm gap-1 rounded-full px-4">
@@ -55,31 +55,31 @@ function UserHeader({user, currentUser, onFollow, onUnfollow}) {
             </button>
           )}
         </div>
-        <div className="mt-3">
+        <div className="mt-4">
           <h1 className="text-xl font-bold">{user.name}</h1>
-          <p className="text-base-content/60">@{user.username}</p>
-          {user.bio && <p className="mt-3 whitespace-pre-wrap text-base leading-relaxed">{user.bio}</p>}
-          <div className="flex items-center gap-2 mt-3 text-sm text-base-content/60">
+          <p className="text-base-content/60 text-sm">@{user.username}</p>
+          {user.bio && <p className="mt-3 whitespace-pre-wrap text-base-content/80 text-sm leading-relaxed">{user.bio}</p>}
+          <div className="flex items-center gap-2 mt-3 text-xs text-base-content/50">
             <Calendar className="h-4 w-4" />
             <span>Joined {formatDate(user.created)}</span>
           </div>
         </div>
-        <div className="flex gap-6 mt-4 pt-4 border-t border-base-200">
-          <Link href={`/@${user.username}`} className="flex gap-1 hover:opacity-80 transition-opacity">
-            <span className="font-bold">{user.posts ?? 0}</span>
-            <span className="text-base-content/60 text-sm">Thoughts</span>
+        <div className="grid grid-cols-4 gap-2 mt-5 pt-5 border-t border-base-200/60 text-center">
+          <Link href={`/@${user.username}`} className="flex flex-col items-center py-2 px-1 rounded-xl hover:bg-base-200/30 transition-all duration-200 group">
+            <span className="text-lg font-extrabold text-base-content group-hover:text-primary transition-colors">{user.posts ?? 0}</span>
+            <span className="text-[10px] md:text-xs uppercase tracking-wider text-base-content/50 font-semibold mt-0.5">Thoughts</span>
           </Link>
-          <Link href={`/@${user.username}/following`} className="flex gap-1 hover:opacity-80 transition-opacity">
-            <span className="font-bold">{user.following ?? 0}</span>
-            <span className="text-base-content/60 text-sm">Following</span>
+          <Link href={`/@${user.username}/following`} className="flex flex-col items-center py-2 px-1 rounded-xl hover:bg-base-200/30 transition-all duration-200 group">
+            <span className="text-lg font-extrabold text-base-content group-hover:text-primary transition-colors">{user.following ?? 0}</span>
+            <span className="text-[10px] md:text-xs uppercase tracking-wider text-base-content/50 font-semibold mt-0.5">Following</span>
           </Link>
-          <Link href={`/@${user.username}/followers`} className="flex gap-1 hover:opacity-80 transition-opacity">
-            <span className="font-bold">{user.followers ?? 0}</span>
-            <span className="text-base-content/60 text-sm">Followers</span>
+          <Link href={`/@${user.username}/followers`} className="flex flex-col items-center py-2 px-1 rounded-xl hover:bg-base-200/30 transition-all duration-200 group">
+            <span className="text-lg font-extrabold text-base-content group-hover:text-primary transition-colors">{user.followers ?? 0}</span>
+            <span className="text-[10px] md:text-xs uppercase tracking-wider text-base-content/50 font-semibold mt-0.5">Followers</span>
           </Link>
-          <Link href={`/@${user.username}/likes`} className="flex gap-1 hover:opacity-80 transition-opacity">
-            <span className="font-bold">{user.likes ?? 0}</span>
-            <span className="text-base-content/60 text-sm">Likes</span>
+          <Link href={`/@${user.username}/likes`} className="flex flex-col items-center py-2 px-1 rounded-xl hover:bg-base-200/30 transition-all duration-200 group">
+            <span className="text-lg font-extrabold text-base-content group-hover:text-primary transition-colors">{user.likes ?? 0}</span>
+            <span className="text-[10px] md:text-xs uppercase tracking-wider text-base-content/50 font-semibold mt-0.5">Likes</span>
           </Link>
         </div>
       </div>
