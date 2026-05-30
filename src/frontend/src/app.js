@@ -440,11 +440,13 @@ function AppContent() {
         <div className="absolute -bottom-40 -left-36 h-[38rem] w-[38rem] rounded-full bg-sky-400/20 blur-3xl dark:bg-sky-500/10"></div>
       </div>
       <Navbar isLoggedIn={isLoggedIn} user={user} logoutUser={logoutUser} />
-      <ErrorBoundary>
-        <React.Suspense fallback={<Loading />}>
-          {renderComponent()}
-        </React.Suspense>
-      </ErrorBoundary>
+      <div className="app-content">
+        <ErrorBoundary>
+          <React.Suspense fallback={<Loading />}>
+            {renderComponent()}
+          </React.Suspense>
+        </ErrorBoundary>
+      </div>
     </RouterContext.Provider>
   );
 }

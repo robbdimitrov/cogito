@@ -30,7 +30,7 @@ function CreateThought({user, onCreatePost}) {
             <div className="relative flex-1 min-w-0">
               <Pen className="absolute left-3 top-3.5 h-5 w-5 text-slate-500 dark:text-slate-400 pointer-events-none" />
               <textarea
-                className="textarea textarea-bordered w-full resize-none rounded-2xl border-slate-200/70 bg-white/55 pl-10 text-base leading-relaxed shadow-inner shadow-slate-900/5 transition-all duration-300 focus:border-primary/60 focus:bg-white/80 focus:ring-4 focus:ring-primary/10 dark:border-slate-700/70 dark:bg-slate-950/35 dark:focus:bg-slate-950/60 sm:text-lg"
+                className="textarea w-full resize-none rounded-2xl border-slate-200/70 bg-white/55 pl-10 text-base leading-relaxed shadow-inner shadow-slate-900/5 transition-all duration-300 focus:border-primary/60 focus:bg-white/80 focus:ring-4 focus:ring-primary/10 dark:border-slate-700/70 dark:bg-slate-950/35 dark:focus:bg-slate-950/60 sm:text-lg"
                 placeholder="What's on your mind?"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
@@ -43,7 +43,7 @@ function CreateThought({user, onCreatePost}) {
             <span className={`text-sm ${content.length > 240 ? 'text-warning' : 'text-slate-500 dark:text-slate-400'}`}>{content.length}/255</span>
             <button
               type="submit"
-              className="btn btn-primary btn-sm gap-1 rounded-full px-5 shadow-lg shadow-primary/20"
+              className={`btn btn-primary btn-sm gap-1 rounded-full px-5 ${!isSubmitting && content.trim() ? 'shadow-lg shadow-primary/20' : 'shadow-none'}`}
               disabled={isSubmitting || !content.trim()}
             >
               <Send className="h-4 w-4" />
