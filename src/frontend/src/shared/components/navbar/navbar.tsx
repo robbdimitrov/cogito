@@ -4,7 +4,7 @@ import React, {useState, useEffect, useRef} from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Avatar from '@/shared/components/avatar/avatar';
-import { Sun, Moon, Home, User, Settings, LogOut } from 'lucide-react';
+import { Sun, Moon, Home, User as UserIcon, Settings, LogOut } from 'lucide-react';
 import { useAPI } from '@/shared/contexts/apicontext';
 
 function ThemeToggle() {
@@ -112,7 +112,7 @@ function Navbar({isLoggedIn, user}: NavbarProps) {
               <ul className="menu menu-sm dropdown-content z-[1001] mt-3 w-56 rounded-2xl border border-white/70 bg-white/90 p-2 shadow-2xl shadow-slate-900/20 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/95 dark:shadow-black/50">
                 <li className="menu-title px-3 py-1 text-xs opacity-60">Signed in as @{user?.username || 'user'}</li>
                 <div className="divider my-1 mx-2 h-px bg-base-200"></div>
-                <li onClick={closeDropdown}><Link href={`/@${user?.username}`} className="gap-2 py-2"><User className="h-4 w-4" />Profile</Link></li>
+                <li onClick={closeDropdown}><Link href={`/@${user?.username}`} className="gap-2 py-2"><UserIcon className="h-4 w-4" />Profile</Link></li>
                 <li onClick={closeDropdown}><Link href="/settings/profile" className="gap-2 py-2"><Settings className="h-4 w-4" />Settings</Link></li>
                 <div className="divider my-1 mx-2 h-px bg-base-200"></div>
                 <li onClick={closeDropdown}>

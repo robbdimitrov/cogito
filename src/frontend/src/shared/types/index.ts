@@ -21,7 +21,8 @@ export interface Post {
   liked?: boolean;
   reposted?: boolean;
   user?: User;
-  rethought_by?: string;
+  rethoughtByUserId?: string;
+  rethoughtByUser?: User;
 }
 
 export interface Session {

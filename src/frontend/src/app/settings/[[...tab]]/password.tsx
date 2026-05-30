@@ -38,10 +38,10 @@ function Password(props) {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <Field id="current-password" label="Current Password">
-            <FormInput id="current-password" type="password" name="oldPassword" placeholder="Current password" minLength="8" value={state.oldPassword} onChange={handleInputChange} required autoComplete="current-password" />
+            <FormInput id="current-password" type="password" name="oldPassword" placeholder="Current password" minLength={8} value={state.oldPassword} onChange={handleInputChange} required autoComplete="current-password" />
           </Field>
           <Field id="new-password" label="New Password">
-            <FormInput id="new-password" type="password" name="password" placeholder="New password" minLength="8" value={state.password} onChange={handleInputChange} required autoComplete="new-password" />
+            <FormInput id="new-password" type="password" name="password" placeholder="New password" minLength={8} value={state.password} onChange={handleInputChange} required autoComplete="new-password" />
           </Field>
           <button type="submit" className="btn btn-primary min-h-12 rounded-xl px-5 text-base" disabled={isSubmitting}>
             {isSubmitting ? <span className="loading loading-spinner" aria-label="Updating"></span> : 'Update Password'}

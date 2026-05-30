@@ -51,7 +51,7 @@ function PostDetail({ initialPost, currentUserId }: PostDetailProps) {
         await apiClient.likePost(post.id);
       }
       const updated = await apiClient.getPost(post.id);
-      setPost(updated);
+      setPost(updated as Post);
     } catch (e: unknown) {
       toast.error('Action failed.');
     }
@@ -66,7 +66,7 @@ function PostDetail({ initialPost, currentUserId }: PostDetailProps) {
         await apiClient.repostPost(post.id);
       }
       const updated = await apiClient.getPost(post.id);
-      setPost(updated);
+      setPost(updated as Post);
     } catch (e: unknown) {
       toast.error('Action failed.');
     }

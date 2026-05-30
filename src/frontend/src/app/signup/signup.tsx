@@ -67,7 +67,7 @@ function Signup({error: initialError}: {error?: string | null}) {
             </div>
             <div className="form-control">
               <label className="label"><span className="label-text">Password</span></label>
-              <IconInput icon={Lock} type="password" name="password" placeholder="••••••••" minLength="4" onChange={handleInputChange} value={state.password} required />
+              <IconInput icon={Lock} type="password" name="password" placeholder="••••••••" minLength={4} onChange={handleInputChange} value={state.password} required />
               {!passwordValid && <span className="label-text-alt text-error mt-1">At least 8 characters</span>}
             </div>
             <button type="submit" className="btn btn-primary w-full gap-1 rounded-xl" disabled={isSubmitting || !usernameValid || !passwordValid}>

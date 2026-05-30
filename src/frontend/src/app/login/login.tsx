@@ -87,7 +87,7 @@ function Login({error: initialError}: {error?: string | null}) {
                 </div>
                 <div className="form-control">
                   <label className="label"><span className="label-text font-medium">Password</span></label>
-                  <IconInput icon={Lock} type="password" name="password" placeholder="Enter your password" minLength="8" onChange={handleInputChange} value={state.password} required />
+                  <IconInput icon={Lock} type="password" name="password" placeholder="Enter your password" minLength={8} onChange={handleInputChange} value={state.password} required />
                 </div>
                 <button type="submit" className="btn btn-primary w-full gap-1 rounded-xl" disabled={isSubmitting}>
                   {isSubmitting ? <span className="loading loading-spinner"></span> : 'Log In'}
