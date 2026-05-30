@@ -7,7 +7,7 @@ function getCsrfToken() {
 }
 
 class APIClient {
-  request(url: string, method: string, body?: any): Promise<any> {
+  async request(url: string, method: string, body?: any): Promise<any> {
     let options: RequestInit = {
       method,
       credentials: 'include',
@@ -19,7 +19,11 @@ class APIClient {
     }
     const mutatingMethods = [httpMethod.post, httpMethod.put, httpMethod.delete, 'PATCH'];
     if (mutatingMethods.includes(method)) {
-      const token = getCsrfToken();
+      let token = getCsrfToken();
+      if (!token) {
+        await fetch('/api/', { credentials: 'include' });
+        token = getCsrfToken();
+      }
       if (token) {
         headers['X-CSRF-Token'] = token;
       }

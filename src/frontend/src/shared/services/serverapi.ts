@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 
-const API_BASE = `${process.env.API_URL || 'http://localhost:8080'}/api`;
+const API_BASE = `${process.env.API_URL || 'http://localhost:8080'}`;
 
 export async function fetchServer(url: string, options: RequestInit = {}) {
   const cookieStore = await cookies();
