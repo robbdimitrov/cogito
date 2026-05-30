@@ -24,7 +24,7 @@ function Password(props) {
   }
 
   return (
-    <div className="card bg-base-100 shadow-sm border border-base-200">
+    <div className="card glass-card rounded-2xl animate-slide-in">
       <div className="card-body">
         <h2 className="card-title text-xl mb-4">Change Password</h2>
 
@@ -38,13 +38,13 @@ function Password(props) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="form-control">
             <label className="label"><span className="label-text">Current Password</span></label>
-                    <input className="input input-bordered" type="password" name="oldPassword" placeholder="Current password" minLength="8" value={state.oldPassword} onChange={handleInputChange} required />
+            <input className="input input-bordered w-full glow-input bg-base-100/30 rounded-xl" type="password" name="oldPassword" placeholder="Current password" minLength="8" value={state.oldPassword} onChange={handleInputChange} required />
           </div>
           <div className="form-control">
             <label className="label"><span className="label-text">New Password</span></label>
-                    <input className="input input-bordered" type="password" name="password" placeholder="New password" minLength="8" value={state.password} onChange={handleInputChange} required />
+            <input className="input input-bordered w-full glow-input bg-base-100/30 rounded-xl" type="password" name="password" placeholder="New password" minLength="8" value={state.password} onChange={handleInputChange} required />
           </div>
-          <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+          <button type="submit" className="btn btn-primary rounded-xl" disabled={isSubmitting}>
             {isSubmitting ? <span className="loading loading-spinner"></span> : 'Update Password'}
           </button>
         </form>

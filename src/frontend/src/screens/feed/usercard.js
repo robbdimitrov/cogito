@@ -4,8 +4,8 @@ import Avatar from '../../shared/components/avatar/avatar';
 
 function UserCard({user}) {
   return (
-    <div className="card bg-base-100 border border-base-200 shadow-sm sticky top-20 overflow-hidden">
-      <div className="h-16 bg-primary/80"></div>
+    <div className="card glass-card sticky top-20 overflow-hidden rounded-2xl">
+      <div className="h-16 bg-gradient-to-r from-primary/70 to-secondary/70"></div>
       <div className="card-body p-4 -mt-8">
         <Link href={`/@${user.username}`}>
           <div className="flex items-center gap-3">

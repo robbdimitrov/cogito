@@ -29,7 +29,7 @@ function ThoughtItem({post, user, onLike, onRepost, onDelete, currentUserId}) {
   }
 
   return (
-    <li className="card bg-base-100 border border-base-200 hover:border-base-300 transition-colors duration-150 cursor-default">
+    <li className="card glass-card rounded-2xl animate-slide-in">
       <div className="card-body p-4">
         <div className="flex items-start gap-3">
           <Avatar name={author?.name} size="md" />

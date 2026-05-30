@@ -14,7 +14,7 @@ function SettingsMenu() {
   const currentPath = router ? router.path : window.location.pathname;
 
   return (
-    <div className="card bg-base-100 shadow-sm border border-base-200">
+    <div className="card glass-card rounded-2xl overflow-hidden animate-slide-in">
       <div className="card-body p-0">
         <div className="px-4 py-3 border-b border-base-200">
           <h3 className="font-semibold flex items-center gap-2">

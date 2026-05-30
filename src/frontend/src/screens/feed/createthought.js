@@ -18,13 +18,13 @@ function CreateThought({user, onCreatePost}) {
   }
 
   return (
-    <div className="card bg-base-100 border border-base-200 shadow-sm">
+    <div className="card glass-card rounded-2xl">
       <div className="card-body p-4">
         <form onSubmit={handleSubmit}>
           <div className="relative">
             <Pen className="absolute top-3 left-3 h-5 w-5 text-base-content/30 pointer-events-none" />
             <textarea
-              className="textarea textarea-bordered w-full resize-none pl-10 bg-base-100/50 focus:bg-base-100 transition-colors"
+              className="textarea textarea-bordered w-full resize-none pl-10 bg-base-100/30 glow-input focus:bg-base-100/70 border-base-200/50 rounded-xl"
               placeholder="What's on your mind?"
               value={content}
               onChange={(e) => setContent(e.target.value)}

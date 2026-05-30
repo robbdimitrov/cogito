@@ -8,7 +8,7 @@ function ControlBar({user}) {
   const currentPath = router ? router.path : window.location.pathname;
 
   return (
-    <div className="tabs tabs-boxed bg-base-100 shadow-sm border border-base-200 mt-4 justify-around">
+    <div className="tabs tabs-boxed bg-base-100/40 backdrop-blur-lg border border-base-200/50 mt-4 justify-around rounded-2xl p-1.5 animate-slide-in">
       <Link href={path} className={`tab flex-1 ${!currentPath.match(/\/(following|followers|likes)$/) ? 'tab-active' : ''}`}>
         Thoughts <span className="ml-1 opacity-60">{user.posts}</span>
       </Link>

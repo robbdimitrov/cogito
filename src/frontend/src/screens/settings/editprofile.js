@@ -38,7 +38,7 @@ function EditProfile(props) {
   }
 
   return (
-    <div className="card bg-base-100 shadow-sm border border-base-200">
+    <div className="card glass-card rounded-2xl animate-slide-in">
       <div className="card-body">
         <h2 className="card-title text-xl mb-4">Edit Profile</h2>
 
@@ -52,21 +52,21 @@ function EditProfile(props) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="form-control">
             <label className="label"><span className="label-text">Name</span></label>
-            <input className="input input-bordered" type="text" name="name" placeholder="Name" value={state.name} onChange={handleInputChange} required />
+            <input className="input input-bordered w-full glow-input bg-base-100/30 rounded-xl" type="text" name="name" placeholder="Name" value={state.name} onChange={handleInputChange} required />
           </div>
           <div className="form-control">
             <label className="label"><span className="label-text">Username</span></label>
-            <input className="input input-bordered" type="text" name="username" placeholder="Username" value={state.username} onChange={handleInputChange} required />
+            <input className="input input-bordered w-full glow-input bg-base-100/30 rounded-xl" type="text" name="username" placeholder="Username" value={state.username} onChange={handleInputChange} required />
           </div>
           <div className="form-control">
             <label className="label"><span className="label-text">Email</span></label>
-            <input className="input input-bordered" type="email" name="email" placeholder="Email" value={state.email} onChange={handleInputChange} required />
+            <input className="input input-bordered w-full glow-input bg-base-100/30 rounded-xl" type="email" name="email" placeholder="Email" value={state.email} onChange={handleInputChange} required />
           </div>
           <div className="form-control">
             <label className="label"><span className="label-text">Bio</span></label>
-            <textarea className="textarea textarea-bordered" name="bio" placeholder="Tell us about yourself" value={state.bio} onChange={handleInputChange} rows={3} />
+            <textarea className="textarea textarea-bordered w-full glow-input bg-base-100/30 rounded-xl" name="bio" placeholder="Tell us about yourself" value={state.bio} onChange={handleInputChange} rows={3} />
           </div>
-          <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+          <button type="submit" className="btn btn-primary rounded-xl" disabled={isSubmitting}>
             {isSubmitting ? <span className="loading loading-spinner"></span> : 'Save Changes'}
           </button>
         </form>

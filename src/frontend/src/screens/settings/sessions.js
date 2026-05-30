@@ -12,7 +12,7 @@ function Sessions(props) {
 
   if (isLoading) {
     return (
-      <div className="card bg-base-100 shadow-sm border border-base-200">
+      <div className="card glass-card rounded-2xl animate-slide-in">
         <div className="card-body flex justify-center py-12">
           <span className="loading loading-spinner loading-lg"></span>
         </div>
@@ -22,7 +22,7 @@ function Sessions(props) {
 
   if (props.sessionsError) {
     return (
-      <div className="card bg-base-100 shadow-sm border border-base-200">
+      <div className="card glass-card rounded-2xl animate-slide-in">
         <div className="card-body">
           <div className="alert alert-error">
             <AlertCircle className="h-5 w-5" />
@@ -35,7 +35,7 @@ function Sessions(props) {
 
   if (!props.sessions || props.sessions.length === 0) {
     return (
-      <div className="card bg-base-100 shadow-sm border border-base-200">
+      <div className="card glass-card rounded-2xl animate-slide-in">
         <div className="card-body items-center text-center text-base-content/60 py-12">
           <XCircle className="h-12 w-12 mb-2 opacity-50" />
           <p>No active sessions found.</p>
@@ -45,7 +45,7 @@ function Sessions(props) {
   }
 
   return (
-    <div className="card bg-base-100 shadow-sm border border-base-200">
+    <div className="card glass-card rounded-2xl animate-slide-in">
       <div className="card-body">
         <h2 className="card-title mb-4">Active Sessions</h2>
         <div className="overflow-x-auto">

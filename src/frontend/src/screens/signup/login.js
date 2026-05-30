@@ -53,7 +53,7 @@ function Login({loginUser, error}) {
           <div className="lg:hidden text-center mb-8">
             <span className="text-3xl font-extrabold text-primary">Thoughts</span>
           </div>
-          <div className="card bg-base-100 shadow-xl border border-base-200">
+          <div className="card glass-card rounded-2xl animate-slide-in">
             <div className="card-body">
               <h1 className="card-title text-2xl mb-1">Welcome Back</h1>
               <p className="text-base-content/60 mb-6">Log in to continue the conversation</p>
@@ -70,17 +70,17 @@ function Login({loginUser, error}) {
                   <label className="label"><span className="label-text font-medium">Email</span></label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/40 pointer-events-none" />
-                    <input className="input input-bordered w-full pl-10" type="email" name="email" placeholder="you@example.com" onChange={handleInputChange} value={state.email} required />
+                    <input className="input input-bordered w-full pl-10 glow-input bg-base-100/30 rounded-xl" type="email" name="email" placeholder="you@example.com" onChange={handleInputChange} value={state.email} required />
                   </div>
                 </div>
                 <div className="form-control">
                   <label className="label"><span className="label-text font-medium">Password</span></label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-base-content/40 pointer-events-none" />
-                    <input className="input input-bordered w-full pl-10" type="password" name="password" placeholder="Enter your password" minLength="8" onChange={handleInputChange} value={state.password} required />
+                    <input className="input input-bordered w-full pl-10 glow-input bg-base-100/30 rounded-xl" type="password" name="password" placeholder="Enter your password" minLength="8" onChange={handleInputChange} value={state.password} required />
                   </div>
                 </div>
-                <button type="submit" className="btn btn-primary w-full gap-1" disabled={isSubmitting}>
+                <button type="submit" className="btn btn-primary w-full gap-1 rounded-xl" disabled={isSubmitting}>
                   {isSubmitting ? <span className="loading loading-spinner"></span> : 'Log In'}
                 </button>
               </form>

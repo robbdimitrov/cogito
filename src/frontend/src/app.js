@@ -355,6 +355,10 @@ function AppContent() {
 
   return (
     <RouterContext.Provider value={route}>
+      <div className="blob-container">
+        <div className="blob blob-1"></div>
+        <div className="blob blob-2"></div>
+      </div>
       <Navbar isLoggedIn={isLoggedIn} user={user} logoutUser={logoutUser} />
       <ErrorBoundary>
         <React.Suspense fallback={<Loading />}>

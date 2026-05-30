@@ -46,17 +46,16 @@ func (c *DbClient) createPost(content string, userID int32) (int32, error) {
 }
 
 func (c *DbClient) getFeed(page int32, limit int32, currentUserID int32) ([]*pb.Post, error) {
-	query := `SELECT id, posts.user_id, content,
+	query := `SELECT id, user_id, content,
 		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
 		EXISTS (SELECT 1 FROM likes
 		WHERE post_id = id AND likes.user_id = $1) AS liked,
 		(SELECT count(*) FROM reposts WHERE post_id = id) AS reposts,
 		EXISTS (SELECT 1 FROM reposts
 		WHERE post_id = id AND reposts.user_id = $1) AS reposted,
-		time_format(posts.created) AS created
+		time_format(created) AS created
 		FROM posts
-		LEFT JOIN reposts ON reposts.post_id = id
-		ORDER BY coalesce(reposts.created, posts.created) DESC
+		ORDER BY created DESC
 		LIMIT $2 OFFSET $3`
 
 	rows, err := c.db.Query(context.Background(), query, currentUserID, limit, page*limit)
@@ -69,18 +68,17 @@ func (c *DbClient) getFeed(page int32, limit int32, currentUserID int32) ([]*pb.
 }
 
 func (c *DbClient) getPosts(userID int32, page int32, limit int32, currentUserID int32) ([]*pb.Post, error) {
-	query := `SELECT id, posts.user_id, content,
+	query := `SELECT id, user_id, content,
 		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
 		EXISTS (SELECT 1 FROM likes
 		WHERE post_id = id AND likes.user_id = $1) AS liked,
 		(SELECT count(*) FROM reposts WHERE post_id = id) AS reposts,
 		EXISTS (SELECT 1 FROM reposts
 		WHERE post_id = id AND reposts.user_id = $1) AS reposted,
-		time_format(posts.created) AS created
+		time_format(created) AS created
 		FROM posts
-		LEFT JOIN reposts ON reposts.post_id = id
-		WHERE reposts.user_id = $2 OR posts.user_id = $2
-		ORDER BY coalesce(reposts.created, posts.created) DESC
+		WHERE user_id = $2 OR id IN (SELECT post_id FROM reposts WHERE user_id = $2)
+		ORDER BY created DESC
 		LIMIT $3 OFFSET $4`
 
 	rows, err := c.db.Query(context.Background(), query, currentUserID, userID, limit, page*limit)
