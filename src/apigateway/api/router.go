@@ -19,6 +19,11 @@ func newRouter(addrs ...string) *router {
 }
 
 func (r *router) configureRoutes(e *echo.Echo) {
+	// Health check
+	e.GET("/", func(c echo.Context) error {
+		return c.String(200, "OK")
+	})
+
 	// Users
 	e.POST("/users", r.user.createUser)
 	e.GET("/users", r.user.getUserByUsername)

@@ -11,6 +11,7 @@ var allowed = []route{
 	{method: "POST", path: "/sessions"},
 	{method: "DELETE", path: "/sessions"},
 	{method: "POST", path: "/users"},
+	{method: "GET", path: "/"},
 }
 
 func authGuard(ac *authController) func(echo.HandlerFunc) echo.HandlerFunc {

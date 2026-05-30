@@ -17,6 +17,8 @@ metadata:
     app: thoughts
     tier: database
 spec:
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: thoughts

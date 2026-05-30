@@ -3,6 +3,7 @@ kind: PersistentVolume
 metadata:
   name: database-pv
 spec:
+  storageClassName: manual
   capacity:
     storage: 5Gi
   accessModes:
@@ -15,6 +16,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: database-pv-claim
 spec:
+  storageClassName: manual
   accessModes:
   - ReadWriteOnce
   resources:

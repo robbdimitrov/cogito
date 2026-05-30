@@ -36,6 +36,7 @@ func CreateServer(addrs ...string) *echo.Echo {
 				{method: "POST", path: "/sessions"},
 				{method: "DELETE", path: "/sessions"},
 				{method: "POST", path: "/users"},
+				{method: "GET", path: "/"},
 			} {
 				if c.Request().Method == v.method && c.Request().URL.Path == v.path {
 					return true
