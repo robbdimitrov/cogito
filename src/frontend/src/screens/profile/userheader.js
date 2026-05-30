@@ -64,7 +64,6 @@ function UserHeader({user, currentUser, onFollow, onUnfollow}) {
             <span>Joined {formatDate(user.created)}</span>
           </div>
         </div>
-        <div className="border-t border-base-300 dark:border-slate-700 mt-5"></div>
       </div>
     </div>
   );
