@@ -9,7 +9,9 @@ function UserCard({user}) {
       <div className="card-body p-4 -mt-8">
         <Link href={`/@${user.username}`}>
           <div className="flex items-center gap-3">
-            <Avatar name={user.name} size="lg" />
+            <div className="rounded-full border border-base-200/50 bg-base-100 p-1 dark:bg-slate-800">
+              <Avatar name={user.name} size="lg" />
+            </div>
             <div className="min-w-0 pt-6">
               <p className="font-bold truncate">{user.name}</p>
               <p className="text-sm text-slate-500 dark:text-slate-400">@{user.username}</p>

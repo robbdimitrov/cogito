@@ -27,9 +27,8 @@ function UserHeader({user, currentUser, onFollow, onUnfollow}) {
       </div>
       <div className="card-body px-6 pb-6 -mt-14 relative">
         <div className="flex justify-between items-end">
-          <div className="relative p-1 bg-base-100 dark:bg-slate-800 rounded-full shadow-md border border-base-200/50">
+          <div className="relative rounded-full border border-base-200/50 bg-base-100 p-1 dark:bg-slate-800">
             <Avatar name={user.name} size="xl" />
-            <div className="absolute bottom-1 right-1 w-4 h-4 bg-success rounded-full border-2 border-base-100 dark:border-slate-800"></div>
           </div>
           {isOwnProfile ? (
             <Link href="/settings/profile" className="btn btn-outline btn-sm gap-1 rounded-full px-4">
