@@ -57,9 +57,9 @@ function UserHeader({user, currentUser, onFollow, onUnfollow}) {
         </div>
         <div className="mt-4">
           <h1 className="text-xl font-bold">{user.name}</h1>
-          <p className="text-base-content/60 text-sm">@{user.username}</p>
-          {user.bio && <p className="mt-3 whitespace-pre-wrap text-base-content/80 text-sm leading-relaxed">{user.bio}</p>}
-          <div className="flex items-center gap-2 mt-3 text-xs text-base-content/50">
+          <p className="text-slate-500 dark:text-slate-400 text-sm">@{user.username}</p>
+          {user.bio && <p className="mt-3 whitespace-pre-wrap text-slate-700 dark:text-slate-200 text-sm leading-relaxed">{user.bio}</p>}
+          <div className="flex items-center gap-2 mt-3 text-xs text-slate-500 dark:text-slate-400">
             <Calendar className="h-4 w-4" />
             <span>Joined {formatDate(user.created)}</span>
           </div>

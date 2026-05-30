@@ -119,7 +119,7 @@ function PostDetail(props) {
         <div className="card bg-base-100 border border-base-200">
           <div className="card-body items-center text-center py-12">
             <AlertTriangle className="h-16 w-16 mb-4 opacity-30" />
-            <p className="text-base-content/60">Post not found.</p>
+            <p className="text-slate-600 dark:text-slate-300">Post not found.</p>
             <Link href="/" className="btn btn-primary btn-sm mt-4">Back to Feed</Link>
           </div>
         </div>
@@ -149,12 +149,12 @@ function PostDetail(props) {
                   <Link href={`/@${author.username}`} className="font-bold text-lg hover:underline">
                     {author.name}
                   </Link>
-                  <span className="text-sm text-base-content/50">@{author.username}</span>
-                  <span className="text-sm text-base-content/30">· {formatRelativeTime(post.created)}</span>
+                  <span className="text-sm text-slate-500 dark:text-slate-400">@{author.username}</span>
+                  <span className="text-sm text-slate-500 dark:text-slate-400">· {formatRelativeTime(post.created)}</span>
                 </div>
                 {isOwnPost && (
                   <button
-                    className="btn btn-ghost btn-xs text-base-content/30 hover:text-error p-1 h-auto hover:scale-110 active:scale-90 transition-transform duration-150"
+                    className="btn btn-ghost btn-xs text-slate-500 dark:text-slate-400 hover:text-error p-1 h-auto hover:scale-110 active:scale-90 transition-transform duration-150"
                     onClick={handleDelete}
                     aria-label="Delete post"
                   >
@@ -163,16 +163,16 @@ function PostDetail(props) {
                 )}
               </div>
               <p className="mt-4 text-lg whitespace-pre-wrap leading-relaxed">{post.content}</p>
-              <div className="flex items-center gap-6 mt-6 pt-4 border-t border-base-200">
+              <div className="flex items-center gap-6 mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
                 <button
-                  className={`btn btn-ghost btn-sm gap-1 rounded-full px-4 hover:scale-105 active:scale-95 transition-all duration-150 ${post.reposted ? 'text-success' : 'text-base-content/40 hover:text-success'}`}
+                  className={`btn btn-ghost btn-sm gap-1 rounded-full px-4 hover:scale-105 active:scale-95 transition-all duration-150 ${post.reposted ? 'text-success' : 'text-slate-500 dark:text-slate-400 hover:text-success'}`}
                   onClick={handleRepost}
                 >
                   <Repeat className="h-5 w-5" />
                   {post.reposts}
                 </button>
                 <button
-                  className={`btn btn-ghost btn-sm gap-1 rounded-full px-4 hover:scale-105 active:scale-95 transition-all duration-150 ${post.liked ? 'text-error' : 'text-base-content/40 hover:text-error'}`}
+                  className={`btn btn-ghost btn-sm gap-1 rounded-full px-4 hover:scale-105 active:scale-95 transition-all duration-150 ${post.liked ? 'text-error' : 'text-slate-500 dark:text-slate-400 hover:text-error'}`}
                   onClick={handleLike}
                 >
                   <Heart className="h-5 w-5" fill={post.liked ? 'currentColor' : 'none'} />

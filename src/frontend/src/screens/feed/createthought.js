@@ -22,9 +22,9 @@ function CreateThought({user, onCreatePost}) {
       <div className="card-body p-4">
         <form onSubmit={handleSubmit}>
           <div className="relative">
-            <Pen className="absolute top-3 left-3 h-5 w-5 text-base-content/30 pointer-events-none" />
+            <Pen className="absolute top-3 left-3 h-5 w-5 text-slate-500 dark:text-slate-400 pointer-events-none" />
             <textarea
-              className="textarea textarea-bordered w-full resize-none pl-10 bg-base-100/30 glow-input focus:bg-base-100/70 border-base-200/50 rounded-xl"
+              className="textarea textarea-bordered w-full resize-none pl-10 bg-slate-50/80 dark:bg-slate-900/60 glow-input focus:bg-base-100 dark:focus:bg-slate-950 border-slate-300 dark:border-slate-700 rounded-xl"
               placeholder="What's on your mind?"
               value={content}
               onChange={(e) => setContent(e.target.value)}
@@ -33,7 +33,7 @@ function CreateThought({user, onCreatePost}) {
             />
           </div>
           <div className="flex justify-between items-center mt-3">
-              <span className={`text-sm ${content.length > 240 ? 'text-warning' : 'text-base-content/50'}`}>{content.length}/255</span>
+              <span className={`text-sm ${content.length > 240 ? 'text-warning' : 'text-slate-500 dark:text-slate-400'}`}>{content.length}/255</span>
             <button
               type="submit"
               className="btn btn-primary btn-sm gap-1 rounded-full px-5"

@@ -6,7 +6,7 @@ function UserList({ users, onFollow, onUnfollow, emptyMessage = 'No users to sho
   if (!users || users.length === 0) {
     return (
       <div className="card bg-base-100 shadow-sm border border-base-200">
-        <div className="card-body items-center text-center text-base-content/60 py-12">
+        <div className="card-body items-center text-center text-slate-600 dark:text-slate-300 py-12">
           <Users className="h-12 w-12 mb-2 opacity-50" />
           <p>{emptyMessage}</p>
         </div>

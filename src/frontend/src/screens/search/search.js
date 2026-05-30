@@ -124,14 +124,14 @@ function SearchScreen(props) {
         <>
           {userResults.length > 0 && (
             <div className="mb-6">
-              <h2 className="text-sm font-semibold text-base-content/60 uppercase tracking-wider mb-3">Users</h2>
+              <h2 className="text-sm font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-3">Users</h2>
               <UserList users={userResults} />
             </div>
           )}
 
           {postResults.length > 0 && (
             <div>
-              <h2 className="text-sm font-semibold text-base-content/60 uppercase tracking-wider mb-3">Thoughts</h2>
+              <h2 className="text-sm font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-3">Thoughts</h2>
               <ThoughtList posts={postResults} users={[{name: '', username: ''}]} onLike={handleLike} onRepost={handleRepost} currentUserId={currentUserId} />
             </div>
           )}
@@ -140,8 +140,8 @@ function SearchScreen(props) {
             <div className="card bg-base-100 border border-base-200">
               <div className="card-body items-center text-center py-12">
                 <Search className="h-16 w-16 mb-4 opacity-30" />
-                <p className="text-base-content/60">No results for "{query}"</p>
-                <p className="text-sm text-base-content/40 mt-1">Try a different username or keyword</p>
+                <p className="text-slate-600 dark:text-slate-300">No results for "{query}"</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Try a different username or keyword</p>
               </div>
             </div>
           )}
@@ -153,7 +153,7 @@ function SearchScreen(props) {
           <div className="card-body items-center text-center py-16">
             <Search className="h-20 w-20 mb-4 opacity-20" />
             <h3 className="text-lg font-semibold mb-1">Discover people and thoughts</h3>
-            <p className="text-sm text-base-content/50">Search by username or keyword</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Search by username or keyword</p>
           </div>
         </div>
       )}

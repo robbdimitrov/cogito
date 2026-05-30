@@ -39,15 +39,15 @@ function ThoughtItem({post, user, onLike, onRepost, onDelete, currentUserId}) {
                 <Link href={`/@${author?.username}`} className="font-semibold hover:underline truncate">
                   {author?.name}
                 </Link>
-                <span className="text-sm text-base-content/50">@{author?.username}</span>
-                <Link href={`/posts/${post.id}`} className="text-sm text-base-content/30 hover:text-base-content/60 transition-colors">
+                <span className="text-sm text-slate-500 dark:text-slate-400">@{author?.username}</span>
+                <Link href={`/posts/${post.id}`} className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors">
                   · {formatRelativeTime(post.created)}
                 </Link>
               </div>
               {isOwnPost && (
                 <button
                   type="button"
-                  className="btn btn-ghost btn-xs text-base-content/30 hover:text-error p-1 h-auto hover:scale-110 active:scale-90 transition-transform duration-150"
+                  className="btn btn-ghost btn-xs text-slate-500 dark:text-slate-400 hover:text-error p-1 h-auto hover:scale-110 active:scale-90 transition-transform duration-150"
                   onClick={handleDelete}
                   aria-label="Delete post"
                 >
@@ -59,7 +59,7 @@ function ThoughtItem({post, user, onLike, onRepost, onDelete, currentUserId}) {
             <div className="flex gap-6 mt-3">
               <button
                 type="button"
-                className={`btn btn-ghost btn-xs gap-1 rounded-full px-3 hover:scale-105 active:scale-95 transition-all duration-150 ${post.reposted ? 'text-success' : 'text-base-content/40 hover:text-success'}`}
+                className={`btn btn-ghost btn-xs gap-1 rounded-full px-3 hover:scale-105 active:scale-95 transition-all duration-150 ${post.reposted ? 'text-success' : 'text-slate-500 dark:text-slate-400 hover:text-success'}`}
                 onClick={() => onRepost(post)}
               >
                 <Repeat className="h-4 w-4" />
@@ -67,7 +67,7 @@ function ThoughtItem({post, user, onLike, onRepost, onDelete, currentUserId}) {
               </button>
               <button
                 type="button"
-                className={`btn btn-ghost btn-xs gap-1 rounded-full px-3 hover:scale-105 active:scale-95 transition-all duration-150 ${post.liked ? 'text-error' : 'text-base-content/40 hover:text-error'}`}
+                className={`btn btn-ghost btn-xs gap-1 rounded-full px-3 hover:scale-105 active:scale-95 transition-all duration-150 ${post.liked ? 'text-error' : 'text-slate-500 dark:text-slate-400 hover:text-error'}`}
                 onClick={() => onLike(post)}
               >
                 <Heart className="h-4 w-4" fill={post.liked ? 'currentColor' : 'none'} />

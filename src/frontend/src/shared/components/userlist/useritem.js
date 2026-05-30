@@ -24,7 +24,7 @@ function UserItem({user, onFollow, onUnfollow}) {
             <Avatar name={user.name} size="md" />
             <div className="min-w-0">
               <p className="font-semibold truncate">{user.name}</p>
-              <p className="text-sm text-base-content/60">@{user.username}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">@{user.username}</p>
             </div>
           </Link>
           {onFollow && onUnfollow && (
@@ -49,7 +49,7 @@ function UserItem({user, onFollow, onUnfollow}) {
             </button>
           )}
         </div>
-        {user.bio && <p className="mt-2 text-sm text-base-content/70 line-clamp-2">{user.bio}</p>}
+        {user.bio && <p className="mt-2 text-sm text-slate-600 dark:text-slate-300 line-clamp-2">{user.bio}</p>}
       </div>
     </li>
   );

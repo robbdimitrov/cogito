@@ -43,7 +43,7 @@ function ControlBar({user}) {
           className={`tab flex-1 group transition-all duration-300 rounded-xl h-10 px-4 text-sm font-medium items-center justify-center gap-1.5 ${
             tab.isActive
               ? 'tab-active !bg-primary !text-primary-content shadow-sm'
-              : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
+              : '!text-slate-600 dark:!text-slate-300 hover:!text-slate-950 dark:hover:!text-white hover:bg-black/5 dark:hover:bg-white/5'
           }`}
         >
           {tab.name}
