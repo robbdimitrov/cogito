@@ -32,8 +32,9 @@ export async function fetchServer(url: string, options: RequestInit = {}) {
 export async function getCurrentUser() {
   try {
     const sessionsData = await fetchServer('/sessions');
-    if (sessionsData && sessionsData.currentSessionId && sessionsData.items) {
-      const currentSession = sessionsData.items.find(s => s.id === sessionsData.currentSessionId);
+    const sessions = sessionsData ? (sessionsData.sessions || sessionsData.items) : null;
+    if (sessionsData && sessionsData.currentSessionId && sessions) {
+      const currentSession = sessions.find(s => s.id === sessionsData.currentSessionId);
       if (currentSession && currentSession.userId) {
         const user = await fetchServer(`/users/${currentSession.userId}`);
         return user;
