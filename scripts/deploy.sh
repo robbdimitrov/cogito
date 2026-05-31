@@ -165,6 +165,19 @@ restart_stack() {
 start_port_forward_background() {
   local supervisor_pid
 
+  # Terminate any existing frontend port-forward to this port to avoid stale connections
+  local pids pid
+  pids="$(port_pids)"
+  if [[ -n "${pids}" ]]; then
+    while IFS= read -r pid; do
+      if is_frontend_port_forward "${pid}"; then
+        log "stopping existing frontend port-forward (pid ${pid})"
+        kill "${pid}" 2>/dev/null || true
+      fi
+    done <<< "${pids}"
+    sleep 1
+  fi
+
   if handle_existing_port_forward; then
     return 0
   fi

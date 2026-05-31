@@ -1,13 +1,10 @@
 import '../index.css';
-import { Outfit } from 'next/font/google';
 import Navbar from '@/shared/components/navbar/navbar';
 import ToastProvider from '@/shared/components/toast/toast';
 import ErrorBoundary from '@/shared/components/errorboundary/errorboundary';
 import { getCurrentUser } from '@/shared/services/serverapi';
 
 import { APIProvider } from '@/shared/contexts/apicontext';
-
-const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' });
 
 export const metadata = {
   title: 'Thoughts',
@@ -21,7 +18,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${outfit.variable} font-sans antialiased text-slate-800 dark:text-slate-200 selection:bg-indigo-500/30 selection:text-indigo-900 dark:selection:text-indigo-100 transition-colors duration-300`}>
+      <body className="font-sans antialiased text-slate-800 dark:text-slate-200 selection:bg-indigo-500/30 selection:text-indigo-900 dark:selection:text-indigo-100 transition-colors duration-300">
         <ToastProvider>
           <APIProvider>
             <div className="fixed inset-0 -z-10 overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-sky-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
