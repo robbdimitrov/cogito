@@ -5,7 +5,6 @@ export async function proxy(request: NextRequest) {
   const session = request.cookies.get('session');
   const path = request.nextUrl.pathname;
 
-  const isProtectedRoute = path.startsWith('/settings');
   const isAuthRoute = path === '/login' || path === '/signup';
 
   let isValidSession = false;
@@ -20,13 +19,20 @@ export async function proxy(request: NextRequest) {
         isValidSession = true;
       }
     } catch (e) {
-      // In case of error (e.g. API down), we might just assume invalid or allow through.
-      // Assuming invalid to be safe.
       console.error('Middleware session validation failed:', e);
     }
   }
 
-  if (isProtectedRoute && !isValidSession) {
+  // If it's an auth route (/login or /signup) and session is valid, redirect to homepage
+  if (isAuthRoute) {
+    if (isValidSession) {
+      return NextResponse.redirect(new URL('/', request.url));
+    }
+    return NextResponse.next();
+  }
+
+  // For all other routes, if session is invalid, redirect to /login
+  if (!isValidSession) {
     const response = NextResponse.redirect(new URL('/login', request.url));
     if (session) {
       response.cookies.delete('session');
@@ -34,19 +40,11 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  if (isAuthRoute && isValidSession) {
-    return NextResponse.redirect(new URL('/', request.url));
-  }
-
-  if (session && !isValidSession) {
-    const response = NextResponse.next();
-    response.cookies.delete('session');
-    return response;
-  }
-
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/settings/:path*', '/login', '/signup'],
+  matcher: [
+    '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
+  ],
 };
