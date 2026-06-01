@@ -1,9 +1,15 @@
 import Profile from '@/app/[username]/[[...tab]]/profile';
 import { fetchServer, hydratePostAuthors, getCurrentUser } from '@/shared/services/serverapi';
+import { notFound } from 'next/navigation';
+
+function normalizeUsername(username: string) {
+  return decodeURIComponent(username).replace(/^@/, '');
+}
 
 export default async function ProfilePage({ params }) {
   const { username, tab } = await params;
   const currentTab = tab && tab.length > 0 ? tab[0] : '';
+  const profileUsername = normalizeUsername(username);
   
   let profileUser = null;
   let posts = [];
@@ -12,7 +18,7 @@ export default async function ProfilePage({ params }) {
   let likes = [];
   
   try {
-    profileUser = await fetchServer(`/users?username=${username}`);
+    profileUser = await fetchServer(`/users?username=${encodeURIComponent(profileUsername)}`);
     if (profileUser && profileUser.id) {
       if (currentTab === 'followers') {
         const data = await fetchServer(`/users/${profileUser.id}/followers?page=0&limit=20`);
@@ -32,6 +38,10 @@ export default async function ProfilePage({ params }) {
     }
   } catch (e) {
     console.error('Profile error:', e);
+  }
+
+  if (!profileUser) {
+    notFound();
   }
 
   const currentUser = await getCurrentUser();

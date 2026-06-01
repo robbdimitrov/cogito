@@ -14,6 +14,5 @@ COPY --from=builder /usr/src/app/public ./public
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 ENV NODE_ENV=production
 ENV PORT=8080
-ENV API_URL=http://apigateway:8080
 EXPOSE 8080
 CMD ["npm", "start"]
