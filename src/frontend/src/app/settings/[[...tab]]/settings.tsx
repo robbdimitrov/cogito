@@ -9,6 +9,7 @@ import { useToast } from '@/shared/components/toast/toast';
 const Password = React.lazy(() => import('@/app/settings/[[...tab]]/password'));
 const EditProfile = React.lazy(() => import('@/app/settings/[[...tab]]/editprofile'));
 const Sessions = React.lazy(() => import('@/app/settings/[[...tab]]/sessions'));
+const SettingsHome = React.lazy(() => import('@/app/settings/[[...tab]]/settingshome'));
 
 function Settings(props) {
   const pathname = usePathname();
@@ -74,6 +75,16 @@ function Settings(props) {
       throw e;
     }
   }, [apiClient, user.id, toast]);
+
+  const isSettingsHome = pathname === '/settings' || pathname === '/settings/';
+
+  if (isSettingsHome) {
+    return (
+      <main className="container mx-auto max-w-3xl px-3 py-3 sm:px-4 sm:py-6">
+        <SettingsHome />
+      </main>
+    );
+  }
 
   return (
     <main className="container mx-auto max-w-6xl px-3 py-3 sm:px-4 sm:py-6">
