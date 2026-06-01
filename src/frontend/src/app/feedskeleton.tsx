@@ -1,8 +1,9 @@
 import React from 'react';
+import GlassCard from '@/shared/components/ui/surface';
 
 export function PostSkeleton() {
   return (
-    <div className="card bg-base-100 border border-base-200 animate-pulse">
+    <GlassCard className="animate-pulse">
       <div className="card-body p-4">
         <div className="flex items-start gap-3">
           <div className="skeleton h-10 w-10 rounded-full shrink-0" />
@@ -23,7 +24,7 @@ export function PostSkeleton() {
           </div>
         </div>
       </div>
-    </div>
+    </GlassCard>
   );
 }
 

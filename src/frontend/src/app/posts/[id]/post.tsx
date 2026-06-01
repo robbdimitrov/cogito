@@ -8,6 +8,7 @@ import { useAPI } from '@/shared/contexts/apicontext';
 import { useRouter } from 'next/navigation';
 import { AlertTriangle, ArrowLeft, Trash2, Repeat, Heart } from 'lucide-react';
 import HashtagContent from '@/shared/components/postcontent/hashtagcontent';
+import GlassCard from '@/shared/components/ui/surface';
 
 function formatRelativeTime(dateString: string) {
   const date = new Date(dateString);
@@ -88,14 +89,14 @@ function PostDetail({ initialPost, currentUserId }: PostDetailProps) {
 
   if (!post || !author) {
     return (
-      <div className="container mx-auto px-4 py-6 max-w-2xl">
-        <div className="card bg-base-100 border border-base-200">
+      <div className="container mx-auto max-w-2xl px-3 py-3 sm:px-4 sm:py-6">
+        <GlassCard>
           <div className="card-body items-center text-center py-12">
             <AlertTriangle className="h-16 w-16 mb-4 opacity-30" />
             <p className="text-slate-600 dark:text-slate-300">Post not found.</p>
             <Link href="/" className="btn btn-primary btn-sm mt-4">Back to Feed</Link>
           </div>
-        </div>
+        </GlassCard>
       </div>
     );
   }
@@ -103,23 +104,23 @@ function PostDetail({ initialPost, currentUserId }: PostDetailProps) {
   const isOwnPost = currentUserId && post.userId === currentUserId;
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-2xl">
-      <div className="mb-4">
-        <Link href="/" className="btn btn-ghost btn-sm gap-1">
+    <div className="container mx-auto max-w-2xl px-3 py-3 sm:px-4 sm:py-6">
+      <div className="mb-3 sm:mb-4">
+        <Link href="/" className="btn btn-ghost btn-sm gap-1 rounded-full px-3">
           <ArrowLeft className="h-4 w-4" />
           Back
         </Link>
       </div>
-      <div className="card bg-base-100 border border-base-200 shadow-sm">
-        <div className="card-body p-6">
-          <div className="flex items-start gap-3">
-            <Link href={`/@${author.username}`}>
-              <Avatar name={author.name} size="lg" />
+      <GlassCard as="article" className="overflow-hidden">
+        <div className="card-body p-4 sm:p-5">
+          <div className="flex items-start gap-3 sm:gap-4">
+            <Link href={`/@${author.username}`} className="shrink-0">
+              <Avatar name={author.name} size="md" />
             </Link>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Link href={`/@${author.username}`} className="font-bold text-lg hover:underline">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-x-2 gap-y-1 flex-wrap">
+                  <Link href={`/@${author.username}`} className="font-semibold hover:underline truncate text-base-content">
                     {author.name}
                   </Link>
                   <span className="text-sm text-slate-500 dark:text-slate-400">@{author.username}</span>
@@ -135,27 +136,27 @@ function PostDetail({ initialPost, currentUserId }: PostDetailProps) {
                   </button>
                 )}
               </div>
-              <HashtagContent content={post.content} className="mt-4 text-lg whitespace-pre-wrap leading-relaxed" />
-              <div className="flex items-center gap-6 mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+              <HashtagContent content={post.content} className="mt-3 whitespace-pre-wrap text-[1.02rem] leading-relaxed sm:mt-4 sm:text-lg" />
+              <div className="mt-4 flex items-center gap-2 border-t border-slate-200 pt-3 dark:border-slate-700 sm:mt-6 sm:gap-6 sm:pt-4">
                 <button
-                  className={`btn btn-ghost btn-sm gap-1 rounded-full px-4 hover:scale-105 active:scale-95 transition-all duration-150 ${post.reposted ? 'text-success' : 'text-slate-500 dark:text-slate-400 hover:text-success'}`}
+                  className={`btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 transition-all duration-150 hover:scale-105 active:scale-95 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4 ${post.reposted ? 'text-success bg-success/10' : 'text-slate-500 dark:text-slate-400 hover:text-success hover:bg-success/10'}`}
                   onClick={handleRepost}
                 >
-                  <Repeat className="h-5 w-5" />
+                  <Repeat className="h-4 w-4 sm:h-5 sm:w-5" />
                   {post.reposts}
                 </button>
                 <button
-                  className={`btn btn-ghost btn-sm gap-1 rounded-full px-4 hover:scale-105 active:scale-95 transition-all duration-150 ${post.liked ? 'text-error' : 'text-slate-500 dark:text-slate-400 hover:text-error'}`}
+                  className={`btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 transition-all duration-150 hover:scale-105 active:scale-95 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4 ${post.liked ? 'text-error bg-error/10' : 'text-slate-500 dark:text-slate-400 hover:text-error hover:bg-error/10'}`}
                   onClick={handleLike}
                 >
-                  <Heart className="h-5 w-5" fill={post.liked ? 'currentColor' : 'none'} />
+                  <Heart className="h-4 w-4 sm:h-5 sm:w-5" fill={post.liked ? 'currentColor' : 'none'} />
                   {post.likes}
                 </button>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </GlassCard>
     </div>
   );
 }

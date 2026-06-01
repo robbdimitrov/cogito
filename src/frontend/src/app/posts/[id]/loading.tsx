@@ -2,9 +2,9 @@ import React from 'react';
 
 export default function Loading() {
   return (
-    <div className="container mx-auto px-4 py-6 max-w-2xl">
+    <div className="container mx-auto max-w-2xl px-3 py-3 sm:px-4 sm:py-6">
       <div className="card bg-base-100 border border-base-200 animate-pulse">
-        <div className="card-body p-6 space-y-4">
+        <div className="card-body space-y-4 p-4 sm:p-5">
           <div className="flex gap-3">
             <div className="skeleton h-12 w-12 rounded-full" />
             <div className="space-y-2 flex-1">

@@ -1,16 +1,17 @@
 import React from 'react';
 import ThoughtItem from '@/shared/components/thoughtlist/thoughtitem';
 import { MessageSquare } from 'lucide-react';
+import GlassCard from '@/shared/components/ui/surface';
 
 function ThoughtList({posts, users, onLike, onRepost, onDelete, currentUserId, emptyMessage = "No thoughts yet. Share what's on your mind!"}) {
   if (!posts || posts.length === 0) {
     return (
-      <div className="card bg-base-100 shadow-sm border border-base-200">
+      <GlassCard>
         <div className="card-body items-center text-center text-slate-600 dark:text-slate-300 py-12">
           <MessageSquare className="h-12 w-12 mb-2 opacity-50" />
           <p>{emptyMessage}</p>
         </div>
-      </div>
+      </GlassCard>
     );
   }
 
