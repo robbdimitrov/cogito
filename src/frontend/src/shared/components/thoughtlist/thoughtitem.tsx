@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Avatar from '@/shared/components/avatar/avatar';
 import { Trash2, Repeat, Heart } from 'lucide-react';
 import GlassCard from '@/shared/components/ui/surface';
 import HashtagContent from '@/shared/components/postcontent/hashtagcontent';
+import ConfirmModal from '@/shared/components/ui/confirmmodal';
 
 function formatRelativeTime(dateString) {
   const date = new Date(dateString);
@@ -24,11 +25,11 @@ function ThoughtItem({post, user, onLike, onRepost, onDelete, currentUserId}) {
   const author = post.user || user;
   const isOwnPost = currentUserId && post.userId === currentUserId;
   const rethoughtBy = post.rethoughtByUser;
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   function handleDelete() {
-    if (window.confirm('Delete this post?')) {
-      onDelete(post.id);
-    }
+    onDelete(post.id);
+    setShowDeleteModal(false);
   }
 
   return (
@@ -63,7 +64,7 @@ function ThoughtItem({post, user, onLike, onRepost, onDelete, currentUserId}) {
                   <button
                     type="button"
                     className="btn btn-ghost btn-xs text-slate-500 dark:text-slate-400 hover:text-error p-1 h-auto hover:scale-110 active:scale-90 transition-transform duration-150 shrink-0"
-                    onClick={handleDelete}
+                    onClick={() => setShowDeleteModal(true)}
                     aria-label="Delete post"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -98,6 +99,14 @@ function ThoughtItem({post, user, onLike, onRepost, onDelete, currentUserId}) {
           </div>
         </div>
       </GlassCard>
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        title="Delete Post"
+        message="Are you sure you want to delete this post? This action cannot be undone."
+        confirmText="Delete"
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteModal(false)}
+      />
     </li>
   );
 }

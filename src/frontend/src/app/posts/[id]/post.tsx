@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { AlertTriangle, ArrowLeft, Trash2, Repeat, Heart } from 'lucide-react';
 import HashtagContent from '@/shared/components/postcontent/hashtagcontent';
 import GlassCard from '@/shared/components/ui/surface';
+import ConfirmModal from '@/shared/components/ui/confirmmodal';
 
 function formatRelativeTime(dateString: string) {
   const date = new Date(dateString);
@@ -37,6 +38,7 @@ function PostDetail({ initialPost, currentUserId }: PostDetailProps) {
   const toast = useToast();
   const [post, setPost] = useState(initialPost);
   const router = useRouter();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     setPost(initialPost);
@@ -75,7 +77,7 @@ function PostDetail({ initialPost, currentUserId }: PostDetailProps) {
   }, [post, toast]);
 
   const handleDelete = useCallback(async () => {
-    if (!post || !window.confirm('Delete this post?')) return;
+    if (!post) return;
     try {
       await apiClient.deletePost(post.id);
       toast.success('Post deleted.');
@@ -83,7 +85,8 @@ function PostDetail({ initialPost, currentUserId }: PostDetailProps) {
     } catch (e: unknown) {
       toast.error('Delete failed.');
     }
-  }, [post, toast, router]);
+    setShowDeleteModal(false);
+  }, [post, toast, router, apiClient]);
 
 
 
@@ -129,7 +132,7 @@ function PostDetail({ initialPost, currentUserId }: PostDetailProps) {
                 {isOwnPost && (
                   <button
                     className="btn btn-ghost btn-xs text-slate-500 dark:text-slate-400 hover:text-error p-1 h-auto hover:scale-110 active:scale-90 transition-transform duration-150"
-                    onClick={handleDelete}
+                    onClick={() => setShowDeleteModal(true)}
                     aria-label="Delete post"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -157,6 +160,14 @@ function PostDetail({ initialPost, currentUserId }: PostDetailProps) {
           </div>
         </div>
       </GlassCard>
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        title="Delete Post"
+        message="Are you sure you want to delete this post? This action cannot be undone."
+        confirmText="Delete"
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteModal(false)}
+      />
     </div>
   );
 }

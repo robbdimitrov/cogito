@@ -58,7 +58,7 @@ function Feed(props: FeedProps) {
         <aside className="hidden lg:block">
           {user && <UserCard user={user} />}
         </aside>
-        <section className="w-full max-w-2xl space-y-3 sm:space-y-4 mx-auto lg:mx-0">
+        <section className="w-full max-w-2xl flex flex-col gap-3 sm:gap-4 mx-auto lg:mx-0">
           {user && (
             <div className="lg:hidden">
               <UserCard user={user} variant="compact" />
