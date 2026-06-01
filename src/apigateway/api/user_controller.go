@@ -217,6 +217,47 @@ func (s *userController) getFollowing(c echo.Context) error {
 	return c.JSON(200, map[string][]user{"items": users})
 }
 
+func (s *userController) searchUsers(c echo.Context) error {
+	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
+	if err != nil {
+		log.Printf("Connecting to service failed: %v", err)
+		return echo.NewHTTPError(500)
+	}
+	defer conn.Close()
+	client := pb.NewUserServiceClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, err = appendUserIDHeader(ctx, c)
+	if err != nil {
+		return err
+	}
+	defer cancel()
+
+	query := c.QueryParam("q")
+	_, limit, err := getPageAndLimit(c)
+	if err != nil {
+		return err
+	}
+
+	req := pb.SearchUsersRequest{
+		Query: query,
+		Limit: int32(limit),
+	}
+
+	res, err := client.SearchUsers(ctx, &req)
+	if err != nil {
+		log.Printf("Searching users failed: %v", err)
+		return newHTTPError(err)
+	}
+
+	users := make([]user, len(res.Users))
+	for i, v := range res.Users {
+		users[i] = mapUser(v)
+	}
+
+	return c.JSON(200, map[string][]user{"items": users})
+}
+
 func (s *userController) getFollowers(c echo.Context) error {
 	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {

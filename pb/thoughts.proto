@@ -57,6 +57,11 @@ message GetUserByUsernameRequest {
   string username = 1;
 }
 
+message SearchUsersRequest {
+  string query = 1;
+  int32 limit = 2;
+}
+
 service UserService {
   rpc CreateUser(CreateUserRequest) returns (Identifier);
   rpc GetUser(UserRequest) returns (User);
@@ -66,6 +71,7 @@ service UserService {
   rpc GetFollowers(GetUsersRequest) returns (Users);
   rpc FollowUser(UserRequest) returns (Empty);
   rpc UnfollowUser(UserRequest) returns (Empty);
+  rpc SearchUsers(SearchUsersRequest) returns (Users);
 }
 
 // Sessions

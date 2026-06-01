@@ -162,3 +162,14 @@ class Controller(thoughts_pb2_grpc.UserServiceServicer):
         except Exception as e:
             logger.print(f'Unfollowing user failed: {e}')
             context.abort(StatusCode.INTERNAL, 'Internal server error.')
+
+    def SearchUsers(self, request, context):
+        user_id = get_user_id(context)
+
+        try:
+            result = self.db_client.search_users(
+                request.query, request.limit, user_id)
+            return thoughts_pb2.Users(users=result)
+        except Exception as e:
+            logger.print(f'Searching users failed: {e}')
+            context.abort(StatusCode.INTERNAL, 'Internal server error.')

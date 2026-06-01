@@ -114,6 +114,11 @@ class APIClient {
     return this.request(url, httpMethod.get);
   }
 
+  searchUsers(query, limit = 5) {
+    const url = `/api/users/search?q=${encodeURIComponent(query)}&limit=${limit}`;
+    return this.request(url, httpMethod.get);
+  }
+
   getFollowing(userId, page, limit = 20) {
     const url = `/api/users/${userId}/following?page=${page}&limit=${limit}`;
     return this.request(url, httpMethod.get);

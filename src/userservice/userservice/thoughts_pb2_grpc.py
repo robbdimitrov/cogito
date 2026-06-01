@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from . import thoughts_pb2 as thoughts__pb2
+from userservice import thoughts_pb2 as thoughts__pb2
 
 GRPC_GENERATED_VERSION = '1.80.0'
 GRPC_VERSION = grpc.__version__
@@ -74,6 +74,11 @@ class UserServiceStub(object):
                 request_serializer=thoughts__pb2.UserRequest.SerializeToString,
                 response_deserializer=thoughts__pb2.Empty.FromString,
                 _registered_method=True)
+        self.SearchUsers = channel.unary_unary(
+                '/thoughts.UserService/SearchUsers',
+                request_serializer=thoughts__pb2.SearchUsersRequest.SerializeToString,
+                response_deserializer=thoughts__pb2.Users.FromString,
+                _registered_method=True)
 
 
 class UserServiceServicer(object):
@@ -127,6 +132,12 @@ class UserServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def SearchUsers(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_UserServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -169,6 +180,11 @@ def add_UserServiceServicer_to_server(servicer, server):
                     servicer.UnfollowUser,
                     request_deserializer=thoughts__pb2.UserRequest.FromString,
                     response_serializer=thoughts__pb2.Empty.SerializeToString,
+            ),
+            'SearchUsers': grpc.unary_unary_rpc_method_handler(
+                    servicer.SearchUsers,
+                    request_deserializer=thoughts__pb2.SearchUsersRequest.FromString,
+                    response_serializer=thoughts__pb2.Users.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -397,6 +413,33 @@ class UserService(object):
             metadata,
             _registered_method=True)
 
+    @staticmethod
+    def SearchUsers(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/thoughts.UserService/SearchUsers',
+            thoughts__pb2.SearchUsersRequest.SerializeToString,
+            thoughts__pb2.Users.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
 
 class AuthServiceStub(object):
     """Missing associated documentation comment in .proto file."""
@@ -422,6 +465,11 @@ class AuthServiceStub(object):
                 request_serializer=thoughts__pb2.SessionRequest.SerializeToString,
                 response_deserializer=thoughts__pb2.Empty.FromString,
                 _registered_method=True)
+        self.GetSessions = channel.unary_unary(
+                '/thoughts.AuthService/GetSessions',
+                request_serializer=thoughts__pb2.UserRequest.SerializeToString,
+                response_deserializer=thoughts__pb2.Sessions.FromString,
+                _registered_method=True)
 
 
 class AuthServiceServicer(object):
@@ -445,6 +493,12 @@ class AuthServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetSessions(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_AuthServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -462,6 +516,11 @@ def add_AuthServiceServicer_to_server(servicer, server):
                     servicer.DeleteSession,
                     request_deserializer=thoughts__pb2.SessionRequest.FromString,
                     response_serializer=thoughts__pb2.Empty.SerializeToString,
+            ),
+            'GetSessions': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetSessions,
+                    request_deserializer=thoughts__pb2.UserRequest.FromString,
+                    response_serializer=thoughts__pb2.Sessions.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -555,6 +614,33 @@ class AuthService(object):
             metadata,
             _registered_method=True)
 
+    @staticmethod
+    def GetSessions(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/thoughts.AuthService/GetSessions',
+            thoughts__pb2.UserRequest.SerializeToString,
+            thoughts__pb2.Sessions.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
 
 class PostServiceStub(object):
     """Missing associated documentation comment in .proto file."""
@@ -583,6 +669,11 @@ class PostServiceStub(object):
         self.GetLikedPosts = channel.unary_unary(
                 '/thoughts.PostService/GetLikedPosts',
                 request_serializer=thoughts__pb2.GetPostsRequest.SerializeToString,
+                response_deserializer=thoughts__pb2.Posts.FromString,
+                _registered_method=True)
+        self.GetHashtagPosts = channel.unary_unary(
+                '/thoughts.PostService/GetHashtagPosts',
+                request_serializer=thoughts__pb2.GetHashtagPostsRequest.SerializeToString,
                 response_deserializer=thoughts__pb2.Posts.FromString,
                 _registered_method=True)
         self.GetPost = channel.unary_unary(
@@ -639,6 +730,12 @@ class PostServiceServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def GetLikedPosts(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetHashtagPosts(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -701,6 +798,11 @@ def add_PostServiceServicer_to_server(servicer, server):
             'GetLikedPosts': grpc.unary_unary_rpc_method_handler(
                     servicer.GetLikedPosts,
                     request_deserializer=thoughts__pb2.GetPostsRequest.FromString,
+                    response_serializer=thoughts__pb2.Posts.SerializeToString,
+            ),
+            'GetHashtagPosts': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetHashtagPosts,
+                    request_deserializer=thoughts__pb2.GetHashtagPostsRequest.FromString,
                     response_serializer=thoughts__pb2.Posts.SerializeToString,
             ),
             'GetPost': grpc.unary_unary_rpc_method_handler(
@@ -841,6 +943,33 @@ class PostService(object):
             target,
             '/thoughts.PostService/GetLikedPosts',
             thoughts__pb2.GetPostsRequest.SerializeToString,
+            thoughts__pb2.Posts.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetHashtagPosts(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/thoughts.PostService/GetHashtagPosts',
+            thoughts__pb2.GetHashtagPostsRequest.SerializeToString,
             thoughts__pb2.Posts.FromString,
             options,
             channel_credentials,

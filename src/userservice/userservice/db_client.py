@@ -215,3 +215,26 @@ class DbClient:
         finally:
             cur.close()
             self.db.putconn(conn)
+
+    def search_users(self, query, limit, current_user_id):
+        conn = self.db.getconn()
+        cur = conn.cursor()
+
+        try:
+            sql = 'SELECT id, name, username, email, bio,\
+                0 AS posts,\
+                0 AS likes,\
+                0 AS following,\
+                0 AS followers,\
+                false AS followed,\
+                time_format(created) AS created\
+                FROM users WHERE username ILIKE %s\
+                LIMIT %s'
+            cur.execute(sql, (f"{query}%", limit))
+            result = cur.fetchall()
+            return map(lambda user: map_user(user), result)
+        except Exception:
+            raise
+        finally:
+            cur.close()
+            self.db.putconn(conn)
