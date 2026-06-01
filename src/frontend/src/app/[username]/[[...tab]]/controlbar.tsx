@@ -40,12 +40,12 @@ function ControlBar({user}) {
   ];
 
   return (
-    <div className={`tabs tabs-boxed mt-4 justify-around rounded-2xl p-1.5 ${glassSurfaceClasses}`}>
+    <div className={`tabs tabs-boxed mt-3 grid grid-cols-4 rounded-2xl p-1 sm:mt-4 sm:p-1.5 ${glassSurfaceClasses}`}>
       {tabs.map((tab) => (
         <Link
           key={tab.name}
           href={tab.href}
-          className={`tab flex-1 group transition-all duration-300 rounded-xl h-10 px-4 text-sm font-medium items-center justify-center gap-1.5 ${
+          className={`tab group h-10 min-w-0 rounded-xl px-1 text-xs font-medium transition-all duration-300 sm:px-4 sm:text-sm items-center justify-center gap-1 sm:gap-1.5 ${
             tab.isActive
               ? 'tab-active !bg-primary !text-primary-content shadow-sm'
               : '!text-slate-600 dark:!text-slate-300 hover:!text-slate-950 dark:hover:!text-white hover:bg-black/5 dark:hover:bg-white/5'
@@ -53,7 +53,7 @@ function ControlBar({user}) {
         >
           {tab.name}
           <span
-            className={`ml-1.5 px-2.5 py-0.5 text-[10px] rounded-full font-bold transition-all duration-300 ${
+            className={`ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold transition-all duration-300 sm:ml-1.5 sm:px-2.5 ${
               tab.isActive
                 ? 'bg-primary-content/25 text-primary-content'
                 : 'bg-primary/10 dark:bg-primary/20 text-primary dark:text-violet-300 group-hover:bg-primary/20 dark:group-hover:bg-primary/30'

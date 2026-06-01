@@ -5,7 +5,6 @@ import ControlBar from '@/app/[username]/[[...tab]]/controlbar';
 import UserHeader from '@/app/[username]/[[...tab]]/userheader';
 
 import {usePathname} from 'next/navigation';
-import GlassCard from '@/shared/components/ui/surface';
 
 const ThoughtList = React.lazy(() => import('@/shared/components/thoughtlist/thoughtlist'));
 const UserList = React.lazy(() => import('@/app/[username]/[[...tab]]/userlist'));
@@ -118,7 +117,7 @@ function Profile(props: ProfileProps) {
   const isSameUser = user && user.username && user.username.toLowerCase() === pathUsername.toLowerCase();
 
   return (
-    <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-3xl">
+    <main className="container mx-auto max-w-3xl px-3 py-3 sm:px-4 sm:py-6">
       <>
         <UserHeader 
           user={user} 
@@ -127,7 +126,7 @@ function Profile(props: ProfileProps) {
           onUnfollow={handleUnfollow} 
         />
         <ControlBar user={user} />
-        <div className="mt-6">
+        <div className="mt-3 sm:mt-4">
           {resolveComponent()}
         </div>
       </>

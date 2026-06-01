@@ -3,7 +3,7 @@ import { ProfileSkeleton } from './profileskeleton';
 
 export default function Loading() {
   return (
-    <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-3xl">
+    <main className="container mx-auto max-w-3xl px-3 py-3 sm:px-4 sm:py-6">
       <ProfileSkeleton />
     </main>
   );

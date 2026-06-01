@@ -23,22 +23,23 @@ function UserHeader({user, currentUser, onFollow, onUnfollow}) {
 
   return (
     <GlassCard className="overflow-hidden">
-      <div className="h-32 bg-gradient-to-tr from-primary via-primary/80 to-secondary relative">
+      <div className="relative h-24 bg-gradient-to-tr from-primary via-primary/80 to-secondary sm:h-32">
         <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 25% 25%, white 1px, transparent 1px)', backgroundSize: '24px 24px'}}></div>
       </div>
-      <div className="card-body px-6 pb-6 -mt-14 relative">
+      <div className="card-body relative -mt-11 px-4 pb-4 sm:-mt-14 sm:px-6 sm:pb-6">
         <div className="flex justify-between items-end">
           <div className="relative rounded-full border border-base-200/50 bg-base-100 p-1 dark:bg-slate-800">
-            <Avatar name={user.name} size="xl" />
+            <Avatar name={user.name} size="lg" />
           </div>
           {isOwnProfile ? (
-            <Link href="/settings/profile" className="btn btn-outline btn-sm gap-1 rounded-full px-4">
+            <Link href="/settings/profile" className="btn btn-outline btn-sm gap-1 rounded-full px-3 sm:px-4">
               <Pen className="h-4 w-4" />
-              Edit Profile
+              <span className="hidden xs:inline">Edit Profile</span>
+              <span className="xs:hidden">Edit</span>
             </Link>
           ) : (
             <button
-              className={`btn btn-sm gap-1 rounded-full px-4 ${user.followed ? 'btn-outline' : 'btn-primary'}`}
+              className={`btn btn-sm gap-1 rounded-full px-3 sm:px-4 ${user.followed ? 'btn-outline' : 'btn-primary'}`}
               onClick={handleFollowClick}
             >
               {user.followed ? (
@@ -55,7 +56,7 @@ function UserHeader({user, currentUser, onFollow, onUnfollow}) {
             </button>
           )}
         </div>
-        <div className="mt-4">
+        <div className="mt-3 sm:mt-4">
           <h1 className="text-xl font-bold">{user.name}</h1>
           <p className="text-slate-500 dark:text-slate-400 text-sm">@{user.username}</p>
           {user.bio && <p className="mt-3 whitespace-pre-wrap text-slate-700 dark:text-slate-200 text-sm leading-relaxed">{user.bio}</p>}
