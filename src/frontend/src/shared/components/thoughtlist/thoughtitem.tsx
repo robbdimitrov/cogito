@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Avatar from '@/shared/components/avatar/avatar';
 import { Trash2, Repeat, Heart } from 'lucide-react';
 import GlassCard from '@/shared/components/ui/surface';
+import HashtagContent from '@/shared/components/postcontent/hashtagcontent';
 
 function formatRelativeTime(dateString) {
   const date = new Date(dateString);
@@ -69,9 +70,10 @@ function ThoughtItem({post, user, onLike, onRepost, onDelete, currentUserId}) {
                   </button>
                 )}
               </div>
-              <Link href={`/posts/${post.id}`} className="block group">
-                <p className="mt-2.5 whitespace-pre-wrap leading-relaxed text-[0.97rem] sm:text-base group-hover:text-base-content/90">{post.content}</p>
-              </Link>
+              <HashtagContent
+                content={post.content}
+                className="mt-2.5 whitespace-pre-wrap leading-relaxed text-[0.97rem] sm:text-base"
+              />
               <div className="flex items-center gap-2 sm:gap-4 mt-4 pt-1">
                 <button
                   type="button"

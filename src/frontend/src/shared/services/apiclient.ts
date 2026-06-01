@@ -190,6 +190,11 @@ class APIClient {
     return this.request(url, httpMethod.get);
   }
 
+  getHashtagPosts(tag, page) {
+    const url = `/api/hashtags/${encodeURIComponent(tag)}/posts?page=${page}`;
+    return this.request(url, httpMethod.get);
+  }
+
   likePost(postId) {
     const url = `/api/posts/${postId}/likes`;
     return this.request(url, httpMethod.post);

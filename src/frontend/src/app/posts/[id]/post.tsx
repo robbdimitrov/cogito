@@ -7,6 +7,7 @@ import { useToast } from '@/shared/components/toast/toast';
 import { useAPI } from '@/shared/contexts/apicontext';
 import { useRouter } from 'next/navigation';
 import { AlertTriangle, ArrowLeft, Trash2, Repeat, Heart } from 'lucide-react';
+import HashtagContent from '@/shared/components/postcontent/hashtagcontent';
 
 function formatRelativeTime(dateString: string) {
   const date = new Date(dateString);
@@ -134,7 +135,7 @@ function PostDetail({ initialPost, currentUserId }: PostDetailProps) {
                   </button>
                 )}
               </div>
-              <p className="mt-4 text-lg whitespace-pre-wrap leading-relaxed">{post.content}</p>
+              <HashtagContent content={post.content} className="mt-4 text-lg whitespace-pre-wrap leading-relaxed" />
               <div className="flex items-center gap-6 mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
                 <button
                   className={`btn btn-ghost btn-sm gap-1 rounded-full px-4 hover:scale-105 active:scale-95 transition-all duration-150 ${post.reposted ? 'text-success' : 'text-slate-500 dark:text-slate-400 hover:text-success'}`}
