@@ -16,20 +16,21 @@ Service | Language | Description
 
 ## Deploy
 
-Deploy the application to a local [kind](https://kind.sigs.k8s.io/) cluster using the provided script:
+Deploy the application to your active Kubernetes cluster using the provided script:
 
 ```sh
 ./scripts/deploy.sh
 ```
 
-The script builds the Docker images, loads them into the kind cluster, creates the Kubernetes namespace and resources, waits for pods to be ready, and starts a port-forward to the frontend at http://localhost:8080/.
+The script builds the Docker images, creates the Kubernetes namespace (`thoughts` by default) and resources, waits for pods to be ready, and starts a port-forward to the frontend at http://localhost:8080/. It is idempotent and safe to re-run for updates.
 
-**Prerequisites:** `kind`, `kubectl`, `docker`, and `make` must be installed.
+**Prerequisites:** `kubectl`, `docker`, and `make` must be installed.
 
 **Cleanup:**
 
 ```sh
-kind delete cluster --name thoughts
+kubectl delete -f ./k8s -n thoughts
+kubectl delete namespace thoughts
 ```
 
 ## License

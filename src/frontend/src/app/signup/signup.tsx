@@ -52,9 +52,7 @@ function Signup({error: initialError}: {error?: string | null}) {
       />
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
-          <div className="lg:hidden text-center mb-8">
-            <span className="text-3xl font-extrabold text-primary">Thoughts</span>
-          </div>
+
           <GlassCard>
             <div className="card-body">
               <h1 className="card-title text-2xl mb-1">Create your account</h1>

@@ -36,7 +36,7 @@ die() {
 
 require_tools() {
   local tool
-  for tool in kind kubectl docker make; do
+  for tool in kubectl docker make; do
     command -v "$tool" >/dev/null || die "missing required tool: $tool"
   done
 }
@@ -85,31 +85,10 @@ handle_existing_port_forward() {
   exit 1
 }
 
-create_cluster() {
-  if ! kind get clusters | grep -qx "${CLUSTER}"; then
-    log "creating kind cluster '${CLUSTER}'"
-    kind create cluster --name "${CLUSTER}"
-  else
-    log "using existing kind cluster '${CLUSTER}'"
-  fi
-  kubectl config use-context "kind-${CLUSTER}" >/dev/null
-}
-
 build_images() {
   log "building images"
   export DOCKER_BUILDKIT=1
   make -C "${ROOT}"
-}
-
-load_images() {
-  local images=()
-  local service
-  for service in "${SERVICES[@]}"; do
-    images+=("${REGISTRY}/${service}")
-  done
-
-  log "loading images into kind"
-  kind load docker-image "${images[@]}" --name "${CLUSTER}"
 }
 
 apply_manifests() {
@@ -221,7 +200,7 @@ print_summary() {
   Frontend       http://${APP_HOST}:${LOCAL_PORT}
   Gateway        in-cluster: http://apigateway:8080
   Namespace      ${NS}
-  Context        kind-${CLUSTER}
+  Context        $(kubectl config current-context 2>/dev/null || echo "unknown")
 
   Port-forward   supervisor pid: $(cat "${PORT_FORWARD_PID_FILE}" 2>/dev/null || echo "unknown")
                  logs: ${PORT_FORWARD_LOG}
@@ -241,9 +220,7 @@ if [[ -n "$(port_pids)" ]]; then
   echo "note: local port ${LOCAL_PORT} is already in use; deploy will reuse a frontend port-forward or report the conflict." >&2
 fi
 
-create_cluster
 build_images
-load_images
 apply_manifests
 restart_stack
 start_port_forward_background
