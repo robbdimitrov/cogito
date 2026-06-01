@@ -149,14 +149,13 @@ wait_for_rollouts() {
 }
 
 restart_stack() {
-  log "restarting database"
-  rollout_restart "${ROLL_OUT_DATABASE[@]}"
+  log "restarting all services"
+  # Restarting them together ensures the backends drop their DB connections,
+  # allowing the database's graceful shutdown to complete instantly.
+  rollout_restart "${ROLL_OUT_DATABASE[@]}" "${ROLL_OUT_REST[@]}"
 
   log "waiting for database"
   wait_for_rollouts "${ROLL_OUT_DATABASE[@]}"
-
-  log "restarting application services"
-  rollout_restart "${ROLL_OUT_REST[@]}"
 
   log "waiting for application services"
   wait_for_rollouts "${ROLL_OUT_REST[@]}"
