@@ -55,7 +55,7 @@ function Navbar({isLoggedIn, user}: NavbarProps) {
   };
 
   return (
-    <nav className="navbar sticky top-0 z-50 min-h-16 border-b border-white/50 bg-base-100/70 px-3 shadow-sm backdrop-blur-2xl transition-shadow duration-300 dark:border-white/10 dark:bg-slate-950/70 sm:px-4">
+    <nav className="navbar sticky top-0 z-50 min-h-16 border-b border-white/40 bg-white/35 px-3 shadow-none backdrop-blur-2xl backdrop-saturate-150 transition-colors duration-300 dark:border-white/10 dark:bg-slate-950/35 sm:px-4 supports-[backdrop-filter]:bg-white/25 dark:supports-[backdrop-filter]:bg-slate-950/25">
       <div className="navbar-start">
         {isLoggedIn && (
           <Link href="/" className="btn btn-ghost normal-case text-base sm:text-lg gap-2 hover:scale-105 hover:bg-white/40 dark:hover:bg-white/10 transition-transform duration-200">
