@@ -36,9 +36,9 @@ func (c *DbClient) Close() {
 	c.db.Close()
 }
 
-func (c *DbClient) createPost(content string, userID int32) (int32, error) {
-	query := "INSERT INTO posts (user_id, content) VALUES ($1, $2) RETURNING id"
-	row := c.db.QueryRow(context.Background(), query, userID, content)
+func (c *DbClient) createPost(content string, tags []string, userID int32) (int32, error) {
+	query := "INSERT INTO posts (user_id, content, hashtags) VALUES ($1, $2, $3) RETURNING id"
+	row := c.db.QueryRow(context.Background(), query, userID, content, tags)
 
 	var id int32
 	err := row.Scan(&id)
@@ -172,7 +172,7 @@ func (c *DbClient) getHashtagPosts(tag string, page int32, limit int32, currentU
 		0::integer AS rethought_by_user_id,
 		''::text AS rethought_created
 		FROM posts
-		WHERE lower(content) ~ ('(^|[^A-Za-z0-9_])#' || $2 || '([^A-Za-z0-9_]|$)')
+		WHERE hashtags @> ARRAY[$2]::varchar[]
 		ORDER BY created DESC
 		LIMIT $3 OFFSET $4`
 

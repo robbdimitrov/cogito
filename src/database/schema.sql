@@ -35,8 +35,11 @@ CREATE TABLE posts (
   id serial PRIMARY KEY,
   user_id integer REFERENCES users ON DELETE CASCADE,
   content varchar(255) NOT NULL,
+  hashtags varchar(50)[] DEFAULT '{}',
   created timestamp NOT NULL DEFAULT now()
 );
+
+CREATE INDEX posts_hashtags_idx ON posts USING GIN (hashtags);
 
 CREATE TABLE likes (
   post_id integer REFERENCES posts ON DELETE CASCADE,

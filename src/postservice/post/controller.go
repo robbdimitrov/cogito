@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"regexp"
+	"strings"
 
 	"google.golang.org/grpc/codes"
 
@@ -11,6 +12,26 @@ import (
 )
 
 var hashtagPattern = regexp.MustCompile(`^[A-Za-z0-9_]{1,50}$`)
+var extractHashtagsPattern = regexp.MustCompile(`(?:^|[^A-Za-z0-9_])#([A-Za-z0-9_]{1,50})`)
+
+func extractHashtags(content string) []string {
+	matches := extractHashtagsPattern.FindAllStringSubmatch(content, -1)
+	tagSet := make(map[string]bool)
+	var tags []string
+	for _, match := range matches {
+		if len(match) > 1 {
+			tag := strings.ToLower(match[1])
+			if !tagSet[tag] {
+				tagSet[tag] = true
+				tags = append(tags, tag)
+			}
+		}
+	}
+	if tags == nil {
+		tags = []string{}
+	}
+	return tags
+}
 
 type controller struct {
 	pb.UnsafePostServiceServer
@@ -28,7 +49,9 @@ func (c *controller) CreatePost(ctx context.Context, req *pb.CreatePostRequest) 
 		return nil, err
 	}
 
-	res, err := c.dbClient.createPost(req.Content, userID)
+	tags := extractHashtags(req.Content)
+
+	res, err := c.dbClient.createPost(req.Content, tags, userID)
 	if err != nil {
 		log.Printf("Creating post failed: %v", err)
 		return nil, newError(codes.Internal)
