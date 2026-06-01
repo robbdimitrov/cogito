@@ -603,16 +603,17 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	PostService_CreatePost_FullMethodName    = "/thoughts.PostService/CreatePost"
-	PostService_GetFeed_FullMethodName       = "/thoughts.PostService/GetFeed"
-	PostService_GetPosts_FullMethodName      = "/thoughts.PostService/GetPosts"
-	PostService_GetLikedPosts_FullMethodName = "/thoughts.PostService/GetLikedPosts"
-	PostService_GetPost_FullMethodName       = "/thoughts.PostService/GetPost"
-	PostService_DeletePost_FullMethodName    = "/thoughts.PostService/DeletePost"
-	PostService_LikePost_FullMethodName      = "/thoughts.PostService/LikePost"
-	PostService_UnlikePost_FullMethodName    = "/thoughts.PostService/UnlikePost"
-	PostService_RepostPost_FullMethodName    = "/thoughts.PostService/RepostPost"
-	PostService_RemoveRepost_FullMethodName  = "/thoughts.PostService/RemoveRepost"
+	PostService_CreatePost_FullMethodName      = "/thoughts.PostService/CreatePost"
+	PostService_GetFeed_FullMethodName         = "/thoughts.PostService/GetFeed"
+	PostService_GetPosts_FullMethodName        = "/thoughts.PostService/GetPosts"
+	PostService_GetLikedPosts_FullMethodName   = "/thoughts.PostService/GetLikedPosts"
+	PostService_GetHashtagPosts_FullMethodName = "/thoughts.PostService/GetHashtagPosts"
+	PostService_GetPost_FullMethodName         = "/thoughts.PostService/GetPost"
+	PostService_DeletePost_FullMethodName      = "/thoughts.PostService/DeletePost"
+	PostService_LikePost_FullMethodName        = "/thoughts.PostService/LikePost"
+	PostService_UnlikePost_FullMethodName      = "/thoughts.PostService/UnlikePost"
+	PostService_RepostPost_FullMethodName      = "/thoughts.PostService/RepostPost"
+	PostService_RemoveRepost_FullMethodName    = "/thoughts.PostService/RemoveRepost"
 )
 
 // PostServiceClient is the client API for PostService service.
@@ -623,6 +624,7 @@ type PostServiceClient interface {
 	GetFeed(ctx context.Context, in *GetFeedRequest, opts ...grpc.CallOption) (*Posts, error)
 	GetPosts(ctx context.Context, in *GetPostsRequest, opts ...grpc.CallOption) (*Posts, error)
 	GetLikedPosts(ctx context.Context, in *GetPostsRequest, opts ...grpc.CallOption) (*Posts, error)
+	GetHashtagPosts(ctx context.Context, in *GetHashtagPostsRequest, opts ...grpc.CallOption) (*Posts, error)
 	GetPost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Post, error)
 	DeletePost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error)
 	LikePost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error)
@@ -673,6 +675,16 @@ func (c *postServiceClient) GetLikedPosts(ctx context.Context, in *GetPostsReque
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Posts)
 	err := c.cc.Invoke(ctx, PostService_GetLikedPosts_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *postServiceClient) GetHashtagPosts(ctx context.Context, in *GetHashtagPostsRequest, opts ...grpc.CallOption) (*Posts, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Posts)
+	err := c.cc.Invoke(ctx, PostService_GetHashtagPosts_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -747,6 +759,7 @@ type PostServiceServer interface {
 	GetFeed(context.Context, *GetFeedRequest) (*Posts, error)
 	GetPosts(context.Context, *GetPostsRequest) (*Posts, error)
 	GetLikedPosts(context.Context, *GetPostsRequest) (*Posts, error)
+	GetHashtagPosts(context.Context, *GetHashtagPostsRequest) (*Posts, error)
 	GetPost(context.Context, *PostRequest) (*Post, error)
 	DeletePost(context.Context, *PostRequest) (*Empty, error)
 	LikePost(context.Context, *PostRequest) (*Empty, error)
@@ -774,6 +787,9 @@ func (UnimplementedPostServiceServer) GetPosts(context.Context, *GetPostsRequest
 }
 func (UnimplementedPostServiceServer) GetLikedPosts(context.Context, *GetPostsRequest) (*Posts, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetLikedPosts not implemented")
+}
+func (UnimplementedPostServiceServer) GetHashtagPosts(context.Context, *GetHashtagPostsRequest) (*Posts, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetHashtagPosts not implemented")
 }
 func (UnimplementedPostServiceServer) GetPost(context.Context, *PostRequest) (*Post, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetPost not implemented")
@@ -882,6 +898,24 @@ func _PostService_GetLikedPosts_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PostServiceServer).GetLikedPosts(ctx, req.(*GetPostsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PostService_GetHashtagPosts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetHashtagPostsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).GetHashtagPosts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PostService_GetHashtagPosts_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).GetHashtagPosts(ctx, req.(*GetHashtagPostsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1016,6 +1050,10 @@ var PostService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetLikedPosts",
 			Handler:    _PostService_GetLikedPosts_Handler,
+		},
+		{
+			MethodName: "GetHashtagPosts",
+			Handler:    _PostService_GetHashtagPosts_Handler,
 		},
 		{
 			MethodName: "GetPost",

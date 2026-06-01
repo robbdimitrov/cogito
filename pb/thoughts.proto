@@ -136,11 +136,18 @@ message GetPostsRequest {
   int32 limit = 3;
 }
 
+message GetHashtagPostsRequest {
+  string tag = 1;
+  int32 page = 2;
+  int32 limit = 3;
+}
+
 service PostService {
   rpc CreatePost(CreatePostRequest) returns (Identifier);
   rpc GetFeed(GetFeedRequest) returns (Posts);
   rpc GetPosts(GetPostsRequest) returns (Posts);
   rpc GetLikedPosts(GetPostsRequest) returns (Posts);
+  rpc GetHashtagPosts(GetHashtagPostsRequest) returns (Posts);
   rpc GetPost(PostRequest) returns (Post);
   rpc DeletePost(PostRequest) returns (Empty);
   rpc LikePost(PostRequest) returns (Empty);

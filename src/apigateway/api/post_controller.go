@@ -187,6 +187,47 @@ func (pc *postController) getLikedPosts(c echo.Context) error {
 	return c.JSON(200, map[string][]post{"items": posts})
 }
 
+func (pc *postController) getHashtagPosts(c echo.Context) error {
+	conn, err := grpc.Dial(pc.addr, insecureCredentials(), grpc.WithBlock())
+	if err != nil {
+		log.Printf("Connecting to service failed: %v", err)
+		return echo.NewHTTPError(500)
+	}
+	defer conn.Close()
+	client := pb.NewPostServiceClient(conn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, err = appendUserIDHeader(ctx, c)
+	if err != nil {
+		return err
+	}
+	defer cancel()
+
+	page, limit, err := getPageAndLimit(c)
+	if err != nil {
+		return err
+	}
+
+	req := pb.GetHashtagPostsRequest{
+		Tag:   c.Param("tag"),
+		Page:  int32(page),
+		Limit: int32(limit),
+	}
+
+	res, err := client.GetHashtagPosts(ctx, &req)
+	if err != nil {
+		log.Printf("Getting hashtag posts failed: %v", err)
+		return newHTTPError(err)
+	}
+
+	posts := make([]post, len(res.Posts))
+	for i, v := range res.Posts {
+		posts[i] = mapPost(v)
+	}
+
+	return c.JSON(200, map[string][]post{"items": posts})
+}
+
 func (pc *postController) getPost(c echo.Context) error {
 	conn, err := grpc.Dial(pc.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {

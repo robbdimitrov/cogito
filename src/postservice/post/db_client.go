@@ -3,6 +3,7 @@ package post
 import (
 	"context"
 	"log"
+	"strings"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 
@@ -151,6 +152,31 @@ func (c *DbClient) getLikedPosts(userID int32, page int32, limit int32, currentU
 		LIMIT $3 OFFSET $4`
 
 	rows, err := c.db.Query(context.Background(), query, currentUserID, userID, limit, page*limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return mapPosts(rows)
+}
+
+func (c *DbClient) getHashtagPosts(tag string, page int32, limit int32, currentUserID int32) ([]*pb.Post, error) {
+	query := `SELECT id, user_id, content,
+		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
+		EXISTS (SELECT 1 FROM likes
+		WHERE post_id = id AND likes.user_id = $1) AS liked,
+		(SELECT count(*) FROM reposts WHERE post_id = id) AS reposts,
+		EXISTS (SELECT 1 FROM reposts
+		WHERE post_id = id AND reposts.user_id = $1) AS reposted,
+		time_format(created) AS created,
+		0::integer AS rethought_by_user_id,
+		''::text AS rethought_created
+		FROM posts
+		WHERE lower(content) ~ ('(^|[^A-Za-z0-9_])#' || $2 || '([^A-Za-z0-9_]|$)')
+		ORDER BY created DESC
+		LIMIT $3 OFFSET $4`
+
+	rows, err := c.db.Query(context.Background(), query, currentUserID, strings.ToLower(tag), limit, page*limit)
 	if err != nil {
 		return nil, err
 	}

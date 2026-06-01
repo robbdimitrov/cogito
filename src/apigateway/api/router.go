@@ -46,6 +46,7 @@ func (r *router) configureRoutes(e *echo.Echo) {
 	e.GET("/posts/feed", r.post.getFeed)
 	e.GET("/users/:userId/posts", r.post.getPosts)
 	e.GET("/users/:userId/likes", r.post.getLikedPosts)
+	e.GET("/hashtags/:tag/posts", r.post.getHashtagPosts)
 	e.GET("/posts/:postId", r.post.getPost)
 	e.DELETE("/posts/:postId", r.post.deletePost)
 	e.POST("/posts/:postId/likes", r.post.likePost)

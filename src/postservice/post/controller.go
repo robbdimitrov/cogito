@@ -3,11 +3,14 @@ package post
 import (
 	"context"
 	"log"
+	"regexp"
 
 	"google.golang.org/grpc/codes"
 
 	pb "github.com/robbdimitrov/thoughts/src/postservice/genproto"
 )
+
+var hashtagPattern = regexp.MustCompile(`^[A-Za-z0-9_]{1,50}$`)
 
 type controller struct {
 	pb.UnsafePostServiceServer
@@ -73,6 +76,24 @@ func (c *controller) GetLikedPosts(ctx context.Context, req *pb.GetPostsRequest)
 	res, err := c.dbClient.getLikedPosts(req.UserId, req.Page, req.Limit, userID)
 	if err != nil {
 		log.Printf("Getting posts failed: %v", err)
+		return nil, newError(codes.Internal)
+	}
+
+	return &pb.Posts{Posts: res}, nil
+}
+
+func (c *controller) GetHashtagPosts(ctx context.Context, req *pb.GetHashtagPostsRequest) (*pb.Posts, error) {
+	userID, err := getUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !hashtagPattern.MatchString(req.Tag) {
+		return nil, newError(codes.InvalidArgument)
+	}
+
+	res, err := c.dbClient.getHashtagPosts(req.Tag, req.Page, req.Limit, userID)
+	if err != nil {
+		log.Printf("Getting hashtag posts failed: %v", err)
 		return nil, newError(codes.Internal)
 	}
 
