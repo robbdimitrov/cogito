@@ -6,42 +6,15 @@ import { useRouter } from 'next/navigation';
 import Avatar from '@/shared/components/avatar/avatar';
 import { Sun, Moon, Home, User as UserIcon, Settings, LogOut } from 'lucide-react';
 import { useAPI } from '@/shared/contexts/apicontext';
+import { useTheme } from '@/shared/hooks/usetheme';
 
 function ThemeToggle() {
-  const getInitialTheme = () => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('theme');
-      if (stored) return stored;
-      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        return 'dark';
-      }
-    }
-    return 'light';
-  };
-
-  const [theme, setTheme] = useState(getInitialTheme);
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  useEffect(() => {
-    const media = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (e) => {
-      if (!localStorage.getItem('theme')) {
-        setTheme(e.matches ? 'dark' : 'light');
-      }
-    };
-    media.addEventListener('change', handleChange);
-    return () => media.removeEventListener('change', handleChange);
-  }, []);
-
-  const toggle = () => setTheme((t) => (t === 'light' ? 'dark' : 'light'));
+  const {resolvedTheme, setTheme} = useTheme();
+  const toggle = () => setTheme(resolvedTheme === 'light' ? 'dark' : 'light');
 
   return (
     <button onClick={toggle} className="btn btn-ghost btn-circle hover:bg-white/40 dark:hover:bg-white/10" aria-label="Toggle theme">
-      {theme === 'light' ? (
+      {resolvedTheme === 'light' ? (
         <Sun className="h-5 w-5" />
       ) : (
         <Moon className="h-5 w-5" />
@@ -113,7 +86,7 @@ function Navbar({isLoggedIn, user}: NavbarProps) {
                 <li className="menu-title px-3 py-1 text-xs opacity-60">Signed in as @{user?.username || 'user'}</li>
                 <div className="divider my-1 mx-2 h-px bg-base-200"></div>
                 <li onClick={closeDropdown}><Link href={`/@${user?.username}`} className="gap-2 py-2"><UserIcon className="h-4 w-4" />Profile</Link></li>
-                <li onClick={closeDropdown}><Link href="/settings/profile" className="gap-2 py-2"><Settings className="h-4 w-4" />Settings</Link></li>
+                <li onClick={closeDropdown}><Link href="/settings" className="gap-2 py-2"><Settings className="h-4 w-4" />Settings</Link></li>
                 <div className="divider my-1 mx-2 h-px bg-base-200"></div>
                 <li onClick={closeDropdown}>
                   <button onClick={handleLogout} className="text-error gap-2 py-2"><LogOut className="h-4 w-4" />Logout</button>
