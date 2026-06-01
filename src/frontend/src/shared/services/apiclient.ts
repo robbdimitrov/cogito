@@ -6,6 +6,42 @@ function getCsrfToken() {
   return match ? decodeURIComponent(match[1]) : null;
 }
 
+async function parseResponseBody(response: Response): Promise<unknown> {
+  const text = await response.text();
+  if (!text) {
+    return {};
+  }
+
+  return parseJsonResponseText(text);
+}
+
+function parseJsonResponseText(text: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error('Received non-JSON response from server');
+  }
+}
+
+async function getErrorMessage(response: Response): Promise<string> {
+  const fallbackMessage = `Request failed with status ${response.status}`;
+  const text = await response.text();
+  if (!text) {
+    return fallbackMessage;
+  }
+
+  try {
+    const data = parseJsonResponseText(text);
+    if (data && typeof data === 'object' && 'message' in data && typeof data.message === 'string') {
+      return data.message;
+    }
+  } catch {
+    return fallbackMessage;
+  }
+
+  return fallbackMessage;
+}
+
 class APIClient {
   async request(url: string, method: string, body?: unknown): Promise<unknown> {
     let options: RequestInit = {
@@ -42,9 +78,9 @@ class APIClient {
           return Promise.resolve();
         }
         if (!response.ok) {
-          return response.json().then((data) => Promise.reject(new Error(data.message || 'Request failed')));
+          return getErrorMessage(response).then((message) => Promise.reject(new Error(message)));
         }
-        return response.json();
+        return parseResponseBody(response);
       });
   }
 

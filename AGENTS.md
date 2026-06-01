@@ -10,7 +10,7 @@ Microservices app with an HTTP gateway calling gRPC backends.
 | `postservice` | Go 1.19 | gRPC — posts, likes, reposts | `main.go` |
 | `authservice` | Python 3.11 | gRPC — sessions | `main.py` |
 | `userservice` | Python 3.11 | gRPC — users, follows | `main.py` |
-| `frontend` | React 18 (CRA 4.x) | SPA + nginx | `src/index.js` |
+| `frontend` | Next.js 16 / React 19 | App Router frontend | `src/app/` |
 | `database` | PostgreSQL 14 | Schema init via `schema.sql` | — |
 
 - Proto contract: `pb/thoughts.proto`
@@ -33,12 +33,14 @@ make <service>        # individual service
 ```sh
 cd src/frontend
 npm install --no-optional
-npm start               # dev server on :3000, /api proxied to localhost:8080
-npm run lint            # eslint src
+npm run dev             # dev server on :3000
 npm run build           # production build
+npm start               # serve the production build
 ```
 
-`setupProxy.js` proxies `/api` → `http://localhost:8080` and strips the `/api` prefix. The production nginx config (`nginx.conf`) proxies `/api/` → `http://apigateway:8080/`.
+`next.config.mjs` rewrites `/api/:path*` to `${API_URL || 'http://localhost:8080'}/:path*`, preserving same-origin browser requests while the gateway receives paths without the `/api` prefix. Client-side API calls should use `/api/...` with `credentials: 'include'`; server components/helpers should call the gateway directly via `API_URL` and forward cookies from `next/headers`.
+
+`src/proxy.ts` is the Next Proxy route guard. Keep `/api`, `_next/static`, `_next/image`, and metadata files excluded from its matcher so API rewrites and static assets are not session-gated. Do not put broad data fetching in Proxy beyond lightweight route/session checks.
 
 ### Go services
 
@@ -104,9 +106,9 @@ There are **no tests** in this repo. Do not try to run a test suite.
 
 ## Constraints & Gotchas
 
-- Follow SOLID, KISS, and DRY principles in general when writing code and when refactoring.
-- `react-scripts` is pinned to **4.0.3** and `node-sass` was replaced with **`sass`** (Dart Sass) because `node-sass` 8.x prebuilt binaries are unavailable for Node 20 on arm64. The custom SCSS `rem()` mixin was renamed to `to-rem()` to avoid clashing with Dart Sass’s built-in `rem()` function.
+- Follow **SOLID**, **KISS**, and **DRY** when writing code and refactoring: keep changes focused, prefer simple local patterns, avoid duplicated logic, and add abstractions only when they remove real complexity.
 - Frontend styling should use Tailwind utilities and DaisyUI components. Add custom CSS only in EXTREME circumstances.
+- Frontend API response handling must tolerate `204 No Content` and non-JSON gateway error bodies; avoid calling `response.json()` unconditionally.
 - No CI workflows, pre-commit hooks, or lint configs for Go/Python.
 - The `deletePost` query in `postservice/post/db_client.go` only checks `post_id` in the `WHERE` clause despite accepting `userID` as a parameter (potential bug if you modify that area).
 

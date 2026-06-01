@@ -5,6 +5,10 @@ export async function proxy(request: NextRequest) {
   const session = request.cookies.get('session');
   const path = request.nextUrl.pathname;
 
+  if (path.startsWith('/api/')) {
+    return NextResponse.next();
+  }
+
   const isAuthRoute = path === '/login' || path === '/signup';
 
   let isValidSession = false;
@@ -28,7 +32,11 @@ export async function proxy(request: NextRequest) {
     if (isValidSession) {
       return NextResponse.redirect(new URL('/', request.url));
     }
-    return NextResponse.next();
+    const response = NextResponse.next();
+    if (session) {
+      response.cookies.delete('session');
+    }
+    return response;
   }
 
   // For all other routes, if session is invalid, redirect to /login

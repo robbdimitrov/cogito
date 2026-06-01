@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 .app-content {
-  min-height: 100vh;
+  min-height: calc(100vh - 4rem);
   display: flex;
   flex-direction: column;
 }
