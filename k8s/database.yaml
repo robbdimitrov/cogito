@@ -37,36 +37,45 @@ spec:
         - containerPort: 5432
         resources:
           limits:
-            memory: 200Mi
-            cpu: 500m
+            memory: 512Mi
+            cpu: 1000m
           requests:
-            memory: 100Mi
-            cpu: 200m
+            memory: 256Mi
+            cpu: 500m
         env:
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
               name: thoughts-db-secret
               key: postgres-password
+        - name: POSTGRES_DB
+          value: thoughts
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
         volumeMounts:
         - mountPath: /var/lib/postgresql/data
           name: database-storage
-        livenessProbe:
+        startupProbe:
           exec:
             command:
             - pg_isready
             - -U
             - postgres
-          initialDelaySeconds: 10
-          periodSeconds: 10
+            - -d
+            - thoughts
+          failureThreshold: 30
+          periodSeconds: 2
         readinessProbe:
           exec:
             command:
             - pg_isready
             - -U
             - postgres
+            - -d
+            - thoughts
           initialDelaySeconds: 5
           periodSeconds: 5
+          timeoutSeconds: 3
       volumes:
         - name: database-storage
           persistentVolumeClaim:
