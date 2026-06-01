@@ -46,35 +46,57 @@ function PostDetail({ initialPost, currentUserId }: PostDetailProps) {
 
   const author = post?.user;
 
+  const [isLiking, setIsLiking] = useState(false);
+  const [isReposting, setIsReposting] = useState(false);
+
   const handleLike = useCallback(async () => {
-    if (!post) return;
+    if (!post || isLiking) return;
+    setIsLiking(true);
+    const prevPost = post;
+    setPost(prev => ({
+      ...prev!,
+      liked: !prev!.liked,
+      likes: prev!.liked ? Math.max(0, prev!.likes - 1) : prev!.likes + 1
+    }));
     try {
-      if (post.liked) {
-        await apiClient.unlikePost(post.id);
+      if (prevPost.liked) {
+        await apiClient.unlikePost(prevPost.id);
       } else {
-        await apiClient.likePost(post.id);
+        await apiClient.likePost(prevPost.id);
       }
-      const updated = await apiClient.getPost(post.id);
-      setPost(updated as Post);
+      // Re-fetch in background to ensure sync
+      apiClient.getPost(prevPost.id).then(updated => setPost(updated as Post)).catch(() => {});
     } catch (e: unknown) {
       toast.error('Action failed.');
+      setPost(prevPost);
+    } finally {
+      setIsLiking(false);
     }
-  }, [post, toast]);
+  }, [post, toast, isLiking, apiClient]);
 
   const handleRepost = useCallback(async () => {
-    if (!post) return;
+    if (!post || isReposting) return;
+    setIsReposting(true);
+    const prevPost = post;
+    setPost(prev => ({
+      ...prev!,
+      reposted: !prev!.reposted,
+      reposts: prev!.reposted ? Math.max(0, prev!.reposts - 1) : prev!.reposts + 1
+    }));
     try {
-      if (post.reposted) {
-        await apiClient.removeRepost(post.id);
+      if (prevPost.reposted) {
+        await apiClient.removeRepost(prevPost.id);
       } else {
-        await apiClient.repostPost(post.id);
+        await apiClient.repostPost(prevPost.id);
       }
-      const updated = await apiClient.getPost(post.id);
-      setPost(updated as Post);
+      apiClient.getPost(prevPost.id).then(updated => setPost(updated as Post)).catch(() => {});
     } catch (e: unknown) {
       toast.error('Action failed.');
+      setPost(prevPost);
+    } finally {
+      setIsReposting(false);
     }
-  }, [post, toast]);
+  }, [post, toast, isReposting, apiClient]);
 
   const handleDelete = useCallback(async () => {
     if (!post) return;
@@ -144,6 +166,7 @@ function PostDetail({ initialPost, currentUserId }: PostDetailProps) {
                 <button
                   className={`btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 transition-all duration-150 hover:scale-105 active:scale-95 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4 ${post.reposted ? 'text-success bg-success/10' : 'text-slate-500 dark:text-slate-400 hover:text-success hover:bg-success/10'}`}
                   onClick={handleRepost}
+                  disabled={isReposting}
                 >
                   <Repeat className="h-4 w-4 sm:h-5 sm:w-5" />
                   {post.reposts}
@@ -151,6 +174,7 @@ function PostDetail({ initialPost, currentUserId }: PostDetailProps) {
                 <button
                   className={`btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 transition-all duration-150 hover:scale-105 active:scale-95 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4 ${post.liked ? 'text-error bg-error/10' : 'text-slate-500 dark:text-slate-400 hover:text-error hover:bg-error/10'}`}
                   onClick={handleLike}
+                  disabled={isLiking}
                 >
                   <Heart className="h-4 w-4 sm:h-5 sm:w-5" fill={post.liked ? 'currentColor' : 'none'} />
                   {post.likes}

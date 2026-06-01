@@ -18,14 +18,56 @@ function formatPostDate(dateString) {
 }
 
 function ThoughtItem({post, user, onLike, onRepost, onDelete, currentUserId}) {
-  const author = post.user || user;
-  const isOwnPost = currentUserId && post.userId === currentUserId;
-  const rethoughtBy = post.rethoughtByUser;
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isLiking, setIsLiking] = useState(false);
+  const [isReposting, setIsReposting] = useState(false);
+  const [optimisticPost, setOptimisticPost] = useState(post);
+
+  React.useEffect(() => {
+    setOptimisticPost(post);
+  }, [post]);
+
+  const author = optimisticPost.user || user;
+  const isOwnPost = currentUserId && optimisticPost.userId === currentUserId;
+  const rethoughtBy = optimisticPost.rethoughtByUser;
 
   function handleDelete() {
-    onDelete(post.id);
+    onDelete(optimisticPost.id);
     setShowDeleteModal(false);
+  }
+
+  async function handleLike() {
+    if (isLiking) return;
+    setIsLiking(true);
+    setOptimisticPost(prev => ({
+      ...prev,
+      liked: !prev.liked,
+      likes: prev.liked ? Math.max(0, prev.likes - 1) : prev.likes + 1
+    }));
+    try {
+      await onLike(post); // pass original post to parent to use its ID and current status
+    } catch (e) {
+      setOptimisticPost(post);
+    } finally {
+      setIsLiking(false);
+    }
+  }
+
+  async function handleRepost() {
+    if (isReposting) return;
+    setIsReposting(true);
+    setOptimisticPost(prev => ({
+      ...prev,
+      reposted: !prev.reposted,
+      reposts: prev.reposted ? Math.max(0, prev.reposts - 1) : prev.reposts + 1
+    }));
+    try {
+      await onRepost(post);
+    } catch (e) {
+      setOptimisticPost(post);
+    } finally {
+      setIsReposting(false);
+    }
   }
 
   return (
@@ -67,32 +109,34 @@ function ThoughtItem({post, user, onLike, onRepost, onDelete, currentUserId}) {
                 )}
               </div>
               <FormattedContent
-                content={post.content}
+                content={optimisticPost.content}
                 className="mt-3 sm:mt-3.5 whitespace-pre-wrap break-words text-[15px] sm:text-[1.05rem] leading-relaxed text-slate-800 dark:text-slate-200"
               />
               <div className="mt-3">
-                <Link href={`/posts/${post.id}`} className="text-[0.8rem] sm:text-sm font-medium text-slate-400 dark:text-slate-500 hover:text-primary transition-colors">
-                  {formatPostDate(post.created)}
+                <Link href={`/posts/${optimisticPost.id}`} className="text-[0.8rem] sm:text-sm font-medium text-slate-400 dark:text-slate-500 hover:text-primary transition-colors">
+                  {formatPostDate(optimisticPost.created)}
                 </Link>
               </div>
               <div className="mt-3 sm:mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60 flex items-center gap-2 sm:gap-3">
                 <button
                   type="button"
-                  className={`btn btn-ghost btn-sm gap-2 rounded-full px-4 hover:scale-105 active:scale-95 transition-all duration-150 ${post.reposted ? 'text-success bg-success/10' : 'text-slate-500 dark:text-slate-400 hover:text-success hover:bg-success/5'}`}
-                  onClick={() => onRepost(post)}
-                  aria-label={post.reposted ? 'Remove rethought' : 'Rethink thought'}
+                  className={`btn btn-ghost btn-sm gap-2 rounded-full px-4 hover:scale-105 active:scale-95 transition-all duration-150 ${optimisticPost.reposted ? 'text-success bg-success/10' : 'text-slate-500 dark:text-slate-400 hover:text-success hover:bg-success/5'}`}
+                  onClick={handleRepost}
+                  disabled={isReposting}
+                  aria-label={optimisticPost.reposted ? 'Remove rethought' : 'Rethink thought'}
                 >
-                  <Repeat className={`h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] ${post.reposted ? 'rotate-180 scale-110' : 'rotate-0 scale-100'}`} />
-                  <span className="text-xs sm:text-sm font-semibold tracking-wide">{post.reposts}</span>
+                  <Repeat className={`h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] ${optimisticPost.reposted ? 'rotate-180 scale-110' : 'rotate-0 scale-100'}`} />
+                  <span className="text-xs sm:text-sm font-semibold tracking-wide">{optimisticPost.reposts}</span>
                 </button>
                 <button
                   type="button"
-                  className={`btn btn-ghost btn-sm gap-2 rounded-full px-4 hover:scale-105 active:scale-95 transition-all duration-150 ${post.liked ? 'text-error bg-error/10' : 'text-slate-500 dark:text-slate-400 hover:text-error hover:bg-error/5'}`}
-                  onClick={() => onLike(post)}
-                  aria-label={post.liked ? 'Unlike thought' : 'Like thought'}
+                  className={`btn btn-ghost btn-sm gap-2 rounded-full px-4 hover:scale-105 active:scale-95 transition-all duration-150 ${optimisticPost.liked ? 'text-error bg-error/10' : 'text-slate-500 dark:text-slate-400 hover:text-error hover:bg-error/5'}`}
+                  onClick={handleLike}
+                  disabled={isLiking}
+                  aria-label={optimisticPost.liked ? 'Unlike thought' : 'Like thought'}
                 >
-                  <Heart className={`h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] ${post.liked ? 'scale-125' : 'scale-100'}`} fill={post.liked ? 'currentColor' : 'none'} />
-                  <span className="text-xs sm:text-sm font-semibold tracking-wide">{post.likes}</span>
+                  <Heart className={`h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] ${optimisticPost.liked ? 'scale-125' : 'scale-100'}`} fill={optimisticPost.liked ? 'currentColor' : 'none'} />
+                  <span className="text-xs sm:text-sm font-semibold tracking-wide">{optimisticPost.likes}</span>
                 </button>
               </div>
             </div>
