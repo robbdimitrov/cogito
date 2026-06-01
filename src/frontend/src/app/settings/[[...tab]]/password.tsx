@@ -26,8 +26,8 @@ function Password(props) {
 
   return (
     <GlassCard>
-      <div className="card-body gap-5 p-5 sm:p-6">
-        <h1 className="text-2xl font-semibold leading-tight">Change Password</h1>
+      <div className="card-body gap-4 p-4 sm:gap-5 sm:p-6">
+        <h1 className="text-xl font-semibold leading-tight sm:text-2xl">Change Password</h1>
 
         {props.error && (
           <div className="alert alert-error" role="alert">
@@ -36,7 +36,7 @@ function Password(props) {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
           <Field id="current-password" label="Current Password">
             <FormInput id="current-password" type="password" name="oldPassword" placeholder="Current password" minLength={8} value={state.oldPassword} onChange={handleInputChange} required autoComplete="current-password" />
           </Field>

@@ -25,10 +25,10 @@ export default async function HashtagPage({ params }: { params: Promise<{ tag: s
   const currentUser = await getCurrentUser();
 
   return (
-    <main className="container mx-auto max-w-2xl px-3 py-4 sm:px-4 sm:py-6">
-      <header className="mb-5">
+    <main className="container mx-auto max-w-2xl px-3 py-3 sm:px-4 sm:py-6">
+      <header className="mb-3 sm:mb-5">
         <p className="text-sm font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">Hashtag</p>
-        <h1 className="mt-1 text-3xl font-bold text-base-content">#{tag || rawTag}</h1>
+        <h1 className="mt-1 text-2xl font-bold text-base-content sm:text-3xl">#{tag || rawTag}</h1>
       </header>
       <HashtagFeed tag={tag || rawTag} posts={initialPosts} currentUserId={currentUser?.id} />
     </main>

@@ -40,8 +40,8 @@ function EditProfile(props) {
 
   return (
     <GlassCard>
-      <div className="card-body gap-5 p-5 sm:p-6">
-        <h1 className="text-2xl font-semibold leading-tight">Edit Profile</h1>
+      <div className="card-body gap-4 p-4 sm:gap-5 sm:p-6">
+        <h1 className="text-xl font-semibold leading-tight sm:text-2xl">Edit Profile</h1>
 
         {props.error && (
           <div className="alert alert-error" role="alert">
@@ -50,7 +50,7 @@ function EditProfile(props) {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
           <Field id="settings-name" label="Name">
             <FormInput id="settings-name" type="text" name="name" placeholder="Name" value={state.name} onChange={handleInputChange} required autoComplete="name" />
           </Field>

@@ -24,7 +24,7 @@ function Sessions(props) {
   if (props.sessionsError) {
     return (
       <GlassCard>
-        <div className="card-body p-5 sm:p-6">
+        <div className="card-body p-4 sm:p-6">
           <div className="alert alert-error" role="alert">
             <AlertCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
             <span>{props.sessionsError}</span>
@@ -47,8 +47,8 @@ function Sessions(props) {
 
   return (
     <GlassCard>
-      <div className="card-body gap-5 p-5 sm:p-6">
-        <h1 className="text-2xl font-semibold leading-tight">Active Sessions</h1>
+      <div className="card-body gap-4 p-4 sm:gap-5 sm:p-6">
+        <h1 className="text-xl font-semibold leading-tight sm:text-2xl">Active Sessions</h1>
         <div className="overflow-x-auto">
           <table className="table w-full">
             <caption className="sr-only">Active browser sessions for your account</caption>
