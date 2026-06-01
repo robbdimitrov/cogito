@@ -7,7 +7,7 @@ import { useToast } from '@/shared/components/toast/toast';
 import { useAPI } from '@/shared/contexts/apicontext';
 import { useRouter } from 'next/navigation';
 import { AlertTriangle, ArrowLeft, Trash2, Repeat, Heart } from 'lucide-react';
-import HashtagContent from '@/shared/components/postcontent/hashtagcontent';
+import FormattedContent from '@/shared/components/postcontent/formattedcontent';
 import GlassCard from '@/shared/components/ui/surface';
 import ConfirmModal from '@/shared/components/ui/confirmmodal';
 
@@ -139,7 +139,7 @@ function PostDetail({ initialPost, currentUserId }: PostDetailProps) {
                   </button>
                 )}
               </div>
-              <HashtagContent content={post.content} className="mt-3 whitespace-pre-wrap text-[1.02rem] leading-relaxed sm:mt-4 sm:text-lg" />
+              <FormattedContent content={post.content} className="mt-3 whitespace-pre-wrap break-words text-[1.02rem] leading-relaxed sm:mt-4 sm:text-lg" />
               <div className="mt-4 flex items-center gap-2 border-t border-slate-200 pt-3 dark:border-slate-700 sm:mt-6 sm:gap-6 sm:pt-4">
                 <button
                   className={`btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 transition-all duration-150 hover:scale-105 active:scale-95 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4 ${post.reposted ? 'text-success bg-success/10' : 'text-slate-500 dark:text-slate-400 hover:text-success hover:bg-success/10'}`}
