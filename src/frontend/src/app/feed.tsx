@@ -53,12 +53,17 @@ function Feed(props: FeedProps) {
   };
 
   return (
-    <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-5xl">
+    <main className="container mx-auto max-w-5xl px-3 py-3 sm:px-4 sm:py-6">
       <div className="grid grid-cols-1 lg:grid-cols-[18rem_minmax(0,1fr)] gap-4 sm:gap-6 lg:gap-8">
         <aside className="hidden lg:block">
           {user && <UserCard user={user} />}
         </aside>
-        <section className="space-y-4 max-w-2xl w-full mx-auto lg:mx-0">
+        <section className="w-full max-w-2xl space-y-3 sm:space-y-4 mx-auto lg:mx-0">
+          {user && (
+            <div className="lg:hidden">
+              <UserCard user={user} variant="compact" />
+            </div>
+          )}
           {user && <CreateThought user={user} onCreatePost={handleCreatePost} />}
           {posts.length === 0 ? <p className="text-center text-slate-500 mt-8">No thoughts yet. Be the first to share!</p> : <ThoughtList posts={posts} users={user ? [user] : []} onLike={handleLike} onRepost={handleRepost} onDelete={handleDeletePost} currentUserId={currentUserId} />}
         </section>
