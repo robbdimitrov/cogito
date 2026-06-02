@@ -1,4 +1,4 @@
-use bcrypt::{verify, DEFAULT_COST};
+use bcrypt::verify;
 use tonic::{Request, Response, Status};
 use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine as _};
 use rand::RngCore;
@@ -111,6 +111,7 @@ impl<D: AuthDb> AuthService for Controller<D> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use bcrypt::DEFAULT_COST;
 
     struct MockAuthDb;
 
