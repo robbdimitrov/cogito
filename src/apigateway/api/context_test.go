@@ -1,0 +1,85 @@
+package api
+
+import (
+	"context"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"testing"
+
+	"github.com/labstack/echo/v4"
+)
+
+func TestUserContext(t *testing.T) {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	c := e.NewContext(req, httptest.NewRecorder())
+
+	if uid := getUserID(c); uid != "" {
+		t.Errorf("expected empty user id, got %s", uid)
+	}
+
+	setUserID(c, "123")
+	if uid := getUserID(c); uid != "123" {
+		t.Errorf("expected 123, got %s", uid)
+	}
+}
+
+func TestAppendUserIDHeader(t *testing.T) {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	c := e.NewContext(req, httptest.NewRecorder())
+
+	ctx, err := appendUserIDHeader(context.Background(), c)
+	if err == nil {
+		t.Errorf("expected error when user id is missing")
+	}
+
+	setUserID(c, "456")
+	ctx, err = appendUserIDHeader(context.Background(), c)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if ctx == nil {
+		t.Errorf("expected context, got nil")
+	}
+}
+
+func TestCookies(t *testing.T) {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	os.Setenv("COOKIE_SECURE", "true")
+	defer os.Unsetenv("COOKIE_SECURE")
+
+	createCookie(c, "session-123")
+	
+	var found bool
+	for _, cookie := range rec.Result().Cookies() {
+		if cookie.Name == "session" {
+			found = true
+			if cookie.Value != "session-123" {
+				t.Errorf("expected session-123, got %s", cookie.Value)
+			}
+			if !cookie.Secure {
+				t.Errorf("expected cookie to be secure")
+			}
+		}
+	}
+	if !found {
+		t.Errorf("cookie not found")
+	}
+
+	rec2 := httptest.NewRecorder()
+	c2 := e.NewContext(req, rec2)
+	clearCookie(c2)
+	for _, cookie := range rec2.Result().Cookies() {
+		if cookie.Name == "session" {
+			if cookie.Value != "" {
+				t.Errorf("expected empty value for cleared cookie")
+			}
+		}
+	}
+}

@@ -95,7 +95,7 @@ kubectl delete namespace thoughts
 
 ## Testing
 
-Unit tests exist for the Rust services. Run `cargo test` inside the respective service directory. There are no tests for the Go frontend or backend services.
+Unit tests exist for the Rust services. Run `cargo test` inside the respective service directory. For Go services, follow the 80/20 rule for test coverage (aim for ~80% coverage focusing on the most critical 20% of code).
 
 ## Database Notes
 
