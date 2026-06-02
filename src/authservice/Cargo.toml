@@ -6,10 +6,11 @@ edition = "2021"
 [dependencies]
 tonic = "0.11"
 prost = "0.12"
-tokio = { version = "1.36", features = ["macros", "rt-multi-thread"] }
-sqlx = { version = "0.7", features = ["postgres", "runtime-tokio", "uuid", "chrono"] }
+tokio = { version = "1.36", features = ["macros", "rt-multi-thread", "signal"] }
+sqlx = { version = "0.7", features = ["postgres", "runtime-tokio", "chrono"] }
 bcrypt = "0.15"
-uuid = { version = "1.8", features = ["v4", "fast-rng", "macro-diagnostics"] }
+rand = "0.8"
+base64 = "0.22"
 
 [build-dependencies]
 tonic-build = "0.11"

@@ -8,7 +8,7 @@ like and repost posts and follow other users.
 Service | Language | Description
 --- | --- | ---
 [apigateway](/src/apigateway) | Go | API Gateway between the frontend and the backend services.
-[authservice](/src/authservice) | Python | Authentication service for creation and validation of sessions.
+[authservice](/src/authservice) | Rust | Authentication service for creation and validation of sessions.
 [database](/src/database) | SQL | PostgreSQL database with tables, relationships and functions.
 [frontend](/src/frontend) | JavaScript | React frontend of the app.
 [postservice](/src/postservice) | Go | Service for creation, liking, reposting and fetching of posts.

@@ -18,12 +18,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Server is starting on port {}", port);
 
     let db_client = db_client::DbClient::new(&db_url).await?;
+    let pool = db_client.pool.clone();
     let controller = controller::Controller::new(db_client);
+
+    let shutdown_signal = async {
+        tokio::signal::ctrl_c()
+            .await
+            .expect("Failed to install Ctrl+C signal handler");
+        println!("Server is shutting down...");
+    };
 
     Server::builder()
         .add_service(AuthServiceServer::new(controller))
-        .serve(addr)
+        .serve_with_shutdown(addr, shutdown_signal)
         .await?;
+
+    pool.close().await;
 
     Ok(())
 }

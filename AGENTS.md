@@ -6,9 +6,9 @@ Microservices app with an HTTP gateway calling gRPC backends.
 
 | Service | Language | Role | Entrypoint |
 |---|---|---|---|
-| `apigateway` | Go 1.19 | Echo HTTP API gateway | `main.go` |
-| `postservice` | Go 1.19 | gRPC — posts, likes, reposts | `main.go` |
-| `authservice` | Python 3.11 | gRPC — sessions | `main.py` |
+| `apigateway` | Go 1.26 | Echo HTTP API gateway | `main.go` |
+| `postservice` | Go 1.26 | gRPC — posts, likes, reposts | `main.go` |
+| `authservice` | Rust | gRPC — sessions | `src/main.rs` |
 | `userservice` | Python 3.11 | gRPC — users, follows | `main.py` |
 | `frontend` | Next.js 16 / React 19 | App Router frontend | `src/app/` |
 | `database` | PostgreSQL 14 | Schema init via `schema.sql` | — |
@@ -50,15 +50,22 @@ go mod download
 go build -v -o service
 ```
 
-Dockerfiles use multi-stage builds: `golang:1.19` builder → `scratch` runtime.
+Dockerfiles use multi-stage builds: `golang:1.26` builder → `scratch` runtime.
 **Build note:** `CGO_ENABLED=0` must be set when building for the `scratch` stage, otherwise the binary will fail at runtime with a linker error (`exec /service: no such file or directory`).
 
 ### Python services
 
 ```sh
-cd src/authservice   # or src/userservice
+cd src/userservice
 pip install -r requirements.txt
 python main.py
+```
+
+### Rust services
+
+```sh
+cd src/authservice
+cargo run
 ```
 
 ## Protobuf / Codegen
@@ -74,10 +81,12 @@ The `go_package` option is `./genproto`, so outputs land in `<service>/genproto/
 
 **Python** (run from inside the service dir):
 ```sh
-cd src/authservice
+cd src/userservice
 python -m grpc_tools.protoc -I../.. --python_out=. --grpc_python_out=. pb/thoughts.proto
-# then move/adjust thoughts_pb2.py and thoughts_pb2_grpc.py into the authservice/ package
+# then move/adjust thoughts_pb2.py and thoughts_pb2_grpc.py into the userservice/ package
 ```
+
+**Rust** is handled automatically via `build.rs` and `tonic-build` during `cargo build`.
 
 ## Kubernetes / Local Deploy
 
