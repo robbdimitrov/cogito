@@ -13,7 +13,7 @@ apigateway: proto
 
 .PHONY: authservice
 authservice:
-	docker build -t localhost:5000/thoughts/authservice src/authservice
+	docker build -t localhost:5000/thoughts/authservice -f src/authservice/Dockerfile .
 
 .PHONY: database
 database:
