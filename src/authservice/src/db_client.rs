@@ -4,10 +4,11 @@ use std::env;
 const DEFAULT_SESSION_TTL_DAYS: i32 = 7;
 
 fn session_ttl_days() -> i32 {
-    env::var("SESSION_TTL_DAYS")
+    let days: i32 = env::var("SESSION_TTL_DAYS")
         .unwrap_or_else(|_| DEFAULT_SESSION_TTL_DAYS.to_string())
         .parse()
-        .unwrap_or(DEFAULT_SESSION_TTL_DAYS)
+        .unwrap_or(DEFAULT_SESSION_TTL_DAYS);
+    std::cmp::max(1, days)
 }
 
 #[derive(Debug, Clone)]
@@ -34,7 +35,7 @@ impl DbClient {
     pub async fn create_session(&self, session_id: &str, user_id: i32) -> Result<crate::thoughts::Session, sqlx::Error> {
         let row = sqlx::query_as::<_, (String, i32, String)>(
             r#"INSERT INTO sessions (id, user_id) VALUES ($1, $2)
-               RETURNING id, user_id, to_char(created, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') as created"#
+               RETURNING id, user_id, time_format(created) as created"#
         )
         .bind(session_id)
         .bind(user_id)
@@ -63,7 +64,7 @@ impl DbClient {
         self.delete_expired_sessions().await?;
         let ttl = session_ttl_days();
         let row = sqlx::query_as::<_, (String, i32, String)>(
-            r#"SELECT id, user_id, to_char(created, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') as created
+            r#"SELECT id, user_id, time_format(created) as created
                FROM sessions
                WHERE id = $1 AND created > now() - ($2 * interval '1 day')"#
         )
@@ -83,7 +84,7 @@ impl DbClient {
         self.delete_expired_sessions().await?;
         let ttl = session_ttl_days();
         let rows = sqlx::query_as::<_, (String, i32, String)>(
-            r#"SELECT id, user_id, to_char(created, 'YYYY-MM-DD"T"HH24:MI:SS"Z"') as created
+            r#"SELECT id, user_id, time_format(created) as created
                FROM sessions
                WHERE user_id = $1 AND created > now() - ($2 * interval '1 day')
                ORDER BY created DESC"#
