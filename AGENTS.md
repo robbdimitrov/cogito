@@ -9,7 +9,7 @@ Microservices app with an HTTP gateway calling gRPC backends.
 | `apigateway` | Go 1.26 | Echo HTTP API gateway | `main.go` |
 | `postservice` | Go 1.26 | gRPC — posts, likes, reposts | `main.go` |
 | `authservice` | Rust | gRPC — sessions | `src/main.rs` |
-| `userservice` | Python 3.11 | gRPC — users, follows | `main.py` |
+| `userservice` | Rust | gRPC — users, follows | `src/main.rs` |
 | `frontend` | Next.js 16 / React 19 | App Router frontend | `src/app/` |
 | `database` | PostgreSQL 14 | Schema init via `schema.sql` | — |
 
@@ -53,18 +53,12 @@ go build -v -o service
 Dockerfiles use multi-stage builds: `golang:1.26` builder → `scratch` runtime.
 **Build note:** `CGO_ENABLED=0` must be set when building for the `scratch` stage, otherwise the binary will fail at runtime with a linker error (`exec /service: no such file or directory`).
 
-### Python services
 
-```sh
-cd src/userservice
-pip install -r requirements.txt
-python main.py
-```
 
 ### Rust services
 
 ```sh
-cd src/authservice
+cd src/authservice   # or src/userservice
 cargo run
 ```
 
@@ -79,12 +73,7 @@ protoc --go_out=. --go-grpc_out=. ../../pb/thoughts.proto
 ```
 The `go_package` option is `./genproto`, so outputs land in `<service>/genproto/`.
 
-**Python** (run from inside the service dir):
-```sh
-cd src/userservice
-python -m grpc_tools.protoc -I../.. --python_out=. --grpc_python_out=. pb/thoughts.proto
-# then move/adjust thoughts_pb2.py and thoughts_pb2_grpc.py into the userservice/ package
-```
+
 
 **Rust** is handled automatically via `build.rs` and `tonic-build` during `cargo build`.
 
@@ -106,7 +95,7 @@ kubectl delete namespace thoughts
 
 ## Testing
 
-There are **no tests** in this repo. Do not try to run a test suite.
+Unit tests exist for the Rust services. Run `cargo test` inside the respective service directory. There are no tests for the Go frontend or backend services.
 
 ## Database Notes
 

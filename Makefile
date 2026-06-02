@@ -29,5 +29,5 @@ postservice: proto
 
 .PHONY: userservice
 userservice:
-	docker build -t localhost:5000/thoughts/userservice src/userservice
+	docker build -t localhost:5000/thoughts/userservice -f src/userservice/Dockerfile .
 

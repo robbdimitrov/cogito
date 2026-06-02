@@ -1,12 +1,19 @@
 #[allow(clippy::all)]
 pub mod thoughts;
+pub mod controller;
+pub mod crypto;
+pub mod db_client;
+pub mod utils;
 
-mod db_client;
-mod controller;
+#[cfg(test)]
+mod tests;
 
 use std::env;
 use tonic::transport::Server;
-use thoughts::auth_service_server::AuthServiceServer;
+use tokio::signal;
+
+use thoughts::user_service_server::UserServiceServer;
+use controller::Controller;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -18,18 +25,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let db_client = db_client::DbClient::new(&db_url).await?;
     let pool = db_client.pool.clone();
-    let controller = controller::Controller::new(db_client);
+    let controller = Controller::new(db_client);
 
-    let shutdown_signal = async {
-        tokio::signal::ctrl_c()
-            .await
-            .expect("Failed to install Ctrl+C signal handler");
+    // Graceful shutdown handler
+    let shutdown = async {
+        signal::ctrl_c().await.expect("failed to install CTRL+C signal handler");
         println!("Server is shutting down...");
     };
 
     Server::builder()
-        .add_service(AuthServiceServer::new(controller))
-        .serve_with_shutdown(addr, shutdown_signal)
+        .add_service(UserServiceServer::new(controller))
+        .serve_with_shutdown(addr, shutdown)
         .await?;
 
     pool.close().await;

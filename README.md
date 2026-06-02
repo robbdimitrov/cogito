@@ -12,7 +12,7 @@ Service | Language | Description
 [database](/src/database) | SQL | PostgreSQL database with tables, relationships and functions.
 [frontend](/src/frontend) | JavaScript | React frontend of the app.
 [postservice](/src/postservice) | Go | Service for creation, liking, reposting and fetching of posts.
-[userservice](/src/userservice) | Python | Service for creation, following and fetching of users.
+[userservice](/src/userservice) | Rust | Service for creation, following and fetching of users.
 
 ## Deploy
 
