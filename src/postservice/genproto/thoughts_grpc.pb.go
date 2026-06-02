@@ -27,6 +27,7 @@ const (
 	UserService_GetFollowers_FullMethodName      = "/thoughts.UserService/GetFollowers"
 	UserService_FollowUser_FullMethodName        = "/thoughts.UserService/FollowUser"
 	UserService_UnfollowUser_FullMethodName      = "/thoughts.UserService/UnfollowUser"
+	UserService_SearchUsers_FullMethodName       = "/thoughts.UserService/SearchUsers"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -41,6 +42,7 @@ type UserServiceClient interface {
 	GetFollowers(ctx context.Context, in *GetUsersRequest, opts ...grpc.CallOption) (*Users, error)
 	FollowUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*Empty, error)
 	UnfollowUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*Empty, error)
+	SearchUsers(ctx context.Context, in *SearchUsersRequest, opts ...grpc.CallOption) (*Users, error)
 }
 
 type userServiceClient struct {
@@ -131,6 +133,16 @@ func (c *userServiceClient) UnfollowUser(ctx context.Context, in *UserRequest, o
 	return out, nil
 }
 
+func (c *userServiceClient) SearchUsers(ctx context.Context, in *SearchUsersRequest, opts ...grpc.CallOption) (*Users, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Users)
+	err := c.cc.Invoke(ctx, UserService_SearchUsers_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
@@ -143,6 +155,7 @@ type UserServiceServer interface {
 	GetFollowers(context.Context, *GetUsersRequest) (*Users, error)
 	FollowUser(context.Context, *UserRequest) (*Empty, error)
 	UnfollowUser(context.Context, *UserRequest) (*Empty, error)
+	SearchUsers(context.Context, *SearchUsersRequest) (*Users, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -176,6 +189,9 @@ func (UnimplementedUserServiceServer) FollowUser(context.Context, *UserRequest) 
 }
 func (UnimplementedUserServiceServer) UnfollowUser(context.Context, *UserRequest) (*Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method UnfollowUser not implemented")
+}
+func (UnimplementedUserServiceServer) SearchUsers(context.Context, *SearchUsersRequest) (*Users, error) {
+	return nil, status.Error(codes.Unimplemented, "method SearchUsers not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 func (UnimplementedUserServiceServer) testEmbeddedByValue()                     {}
@@ -342,6 +358,24 @@ func _UserService_UnfollowUser_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_SearchUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchUsersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).SearchUsers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_SearchUsers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).SearchUsers(ctx, req.(*SearchUsersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -380,6 +414,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UnfollowUser",
 			Handler:    _UserService_UnfollowUser_Handler,
+		},
+		{
+			MethodName: "SearchUsers",
+			Handler:    _UserService_SearchUsers_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

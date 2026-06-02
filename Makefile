@@ -1,8 +1,10 @@
+export PATH := $(PATH):$(shell go env GOPATH)/bin
+
 .PHONY: proto
 proto:
 	@echo "Generating protobufs for Go services..."
-	@cd src/apigateway && protoc --go_out=. --go-grpc_out=. ../../pb/thoughts.proto
-	@cd src/postservice && protoc --go_out=. --go-grpc_out=. ../../pb/thoughts.proto
+	@cd src/apigateway && protoc -I../.. --go_out=. --go-grpc_out=. ../../pb/thoughts.proto
+	@cd src/postservice && protoc -I../.. --go_out=. --go-grpc_out=. ../../pb/thoughts.proto
 
 .PHONY: all
 all: apigateway authservice database frontend postservice userservice
