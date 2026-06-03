@@ -18,24 +18,28 @@ import (
 )
 
 type userController struct {
-	addr      string
-	authAddr  string
-	imageAddr string
+	client     pb.UserServiceClient
+	authClient pb.AuthServiceClient
+	imgClient  pb.ImageServiceClient
 }
 
 func newUserController(addr string, authAddr string, imageAddr string) *userController {
-	return &userController{addr, authAddr, imageAddr}
+	conn, _ := grpc.Dial(addr, insecureCredentials())
+	authConn, _ := grpc.Dial(authAddr, insecureCredentials())
+	var imgClient pb.ImageServiceClient
+	if imageAddr != "" {
+		imgConn, _ := grpc.Dial(imageAddr, insecureCredentials())
+		imgClient = pb.NewImageServiceClient(imgConn)
+	}
+	return &userController{
+		client:     pb.NewUserServiceClient(conn),
+		authClient: pb.NewAuthServiceClient(authConn),
+		imgClient:  imgClient,
+	}
 }
 
 func (s *userController) createUser(w http.ResponseWriter, r *http.Request) {
-	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	defer conn.Close()
-	client := pb.NewUserServiceClient(conn)
+	client := s.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx = appendInternalAuth(ctx)
@@ -70,14 +74,7 @@ func (s *userController) createUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *userController) getUser(w http.ResponseWriter, r *http.Request) {
-	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	defer conn.Close()
-	client := pb.NewUserServiceClient(conn)
+	client := s.client
 
 	userID, err := strconv.Atoi(r.PathValue("userId"))
 	if err != nil {
@@ -86,8 +83,8 @@ func (s *userController) getUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, r)
-	if err != nil {
+	ctx, errCtx := appendUserIDHeader(ctx, r)
+	if errCtx != nil {
 		http.Error(w, "Unauthorized", 401)
 		cancel()
 		return
@@ -111,18 +108,11 @@ func (s *userController) getUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *userController) getUserByUsername(w http.ResponseWriter, r *http.Request) {
-	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	defer conn.Close()
-	client := pb.NewUserServiceClient(conn)
+	client := s.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, r)
-	if err != nil {
+	ctx, errCtx := appendUserIDHeader(ctx, r)
+	if errCtx != nil {
 		http.Error(w, "Unauthorized", 401)
 		cancel()
 		return
@@ -142,14 +132,7 @@ func (s *userController) getUserByUsername(w http.ResponseWriter, r *http.Reques
 }
 
 func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
-	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	defer conn.Close()
-	client := pb.NewUserServiceClient(conn)
+	client := s.client
 
 	currentUserID := getUserID(r)
 	if currentUserID != r.PathValue("userId") {
@@ -158,8 +141,8 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, r)
-	if err != nil {
+	ctx, errCtx := appendUserIDHeader(ctx, r)
+	if errCtx != nil {
 		http.Error(w, "Unauthorized", 401)
 		cancel()
 		return
@@ -192,13 +175,8 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var imgClient pb.ImageServiceClient
-	var imgConn *grpc.ClientConn
-	if body.ProfilePhotoKey != nil || body.CoverPhotoKey != nil {
-		imgConn, err = grpc.Dial(s.imageAddr, insecureCredentials(), grpc.WithBlock())
-		if err == nil {
-			imgClient = pb.NewImageServiceClient(imgConn)
-			defer imgConn.Close()
+	imgClient := s.imgClient
+	if (body.ProfilePhotoKey != nil || body.CoverPhotoKey != nil) && imgClient != nil {
 
 			if body.ProfilePhotoKey != nil && *body.ProfilePhotoKey != "" {
 				_, err = imgClient.VerifyUpload(ctx, &pb.VerifyUploadRequest{Filename: *body.ProfilePhotoKey, UserId: int32(userIDInt)})
@@ -215,8 +193,6 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 		}
-	}
-
 	req := pb.UpdateUserRequest{
 		Name:        body.Name,
 		Username:    body.Username,
@@ -259,10 +235,8 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if body.Password != "" {
-		authConn, err := grpc.Dial(s.authAddr, insecureCredentials(), grpc.WithBlock())
-		if err == nil {
-			defer authConn.Close()
-			authClient := pb.NewAuthServiceClient(authConn)
+		authClient := s.authClient
+		if authClient != nil {
 			
 			var currentSessionID string
 			if cookie, err := r.Cookie("session"); err == nil {
@@ -292,18 +266,11 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *userController) getFollowing(w http.ResponseWriter, r *http.Request) {
-	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	defer conn.Close()
-	client := pb.NewUserServiceClient(conn)
+	client := s.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, r)
-	if err != nil {
+	ctx, errCtx := appendUserIDHeader(ctx, r)
+	if errCtx != nil {
 		http.Error(w, "Unauthorized", 401)
 		cancel()
 		return
@@ -343,18 +310,11 @@ func (s *userController) getFollowing(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *userController) searchUsers(w http.ResponseWriter, r *http.Request) {
-	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	defer conn.Close()
-	client := pb.NewUserServiceClient(conn)
+	client := s.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, r)
-	if err != nil {
+	ctx, errCtx := appendUserIDHeader(ctx, r)
+	if errCtx != nil {
 		http.Error(w, "Unauthorized", 401)
 		cancel()
 		return
@@ -389,18 +349,11 @@ func (s *userController) searchUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *userController) getFollowers(w http.ResponseWriter, r *http.Request) {
-	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	defer conn.Close()
-	client := pb.NewUserServiceClient(conn)
+	client := s.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, r)
-	if err != nil {
+	ctx, errCtx := appendUserIDHeader(ctx, r)
+	if errCtx != nil {
 		http.Error(w, "Unauthorized", 401)
 		cancel()
 		return
@@ -440,18 +393,11 @@ func (s *userController) getFollowers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *userController) followUser(w http.ResponseWriter, r *http.Request) {
-	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	defer conn.Close()
-	client := pb.NewUserServiceClient(conn)
+	client := s.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, r)
-	if err != nil {
+	ctx, errCtx := appendUserIDHeader(ctx, r)
+	if errCtx != nil {
 		http.Error(w, "Unauthorized", 401)
 		cancel()
 		return
@@ -476,18 +422,11 @@ func (s *userController) followUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *userController) unfollowUser(w http.ResponseWriter, r *http.Request) {
-	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	defer conn.Close()
-	client := pb.NewUserServiceClient(conn)
+	client := s.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, r)
-	if err != nil {
+	ctx, errCtx := appendUserIDHeader(ctx, r)
+	if errCtx != nil {
 		http.Error(w, "Unauthorized", 401)
 		cancel()
 		return

@@ -14,27 +14,26 @@ import (
 )
 
 type postController struct {
-	addr      string
-	imageAddr string
+	client    pb.PostServiceClient
+	imgClient pb.ImageServiceClient
 }
 
 func newPostController(addr string, imageAddr string) *postController {
-	return &postController{addr, imageAddr}
+	conn, _ := grpc.Dial(addr, insecureCredentials())
+	var imgClient pb.ImageServiceClient
+	if imageAddr != "" {
+		imgConn, _ := grpc.Dial(imageAddr, insecureCredentials())
+		imgClient = pb.NewImageServiceClient(imgConn)
+	}
+	return &postController{pb.NewPostServiceClient(conn), imgClient}
 }
 
 func (pc *postController) createPost(w http.ResponseWriter, r *http.Request) {
-	conn, err := grpc.Dial(pc.addr, insecureCredentials(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	defer conn.Close()
-	client := pb.NewPostServiceClient(conn)
+	client := pc.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, r)
-	if err != nil {
+	ctx, errCtx := appendUserIDHeader(ctx, r)
+	if errCtx != nil {
 		http.Error(w, "Unauthorized", 401)
 		cancel()
 		return
@@ -70,18 +69,11 @@ func (pc *postController) createPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (pc *postController) getFeed(w http.ResponseWriter, r *http.Request) {
-	conn, err := grpc.Dial(pc.addr, insecureCredentials(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	defer conn.Close()
-	client := pb.NewPostServiceClient(conn)
+	client := pc.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, r)
-	if err != nil {
+	ctx, errCtx := appendUserIDHeader(ctx, r)
+	if errCtx != nil {
 		http.Error(w, "Unauthorized", 401)
 		cancel()
 		return
@@ -115,18 +107,11 @@ func (pc *postController) getFeed(w http.ResponseWriter, r *http.Request) {
 }
 
 func (pc *postController) getPosts(w http.ResponseWriter, r *http.Request) {
-	conn, err := grpc.Dial(pc.addr, insecureCredentials(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	defer conn.Close()
-	client := pb.NewPostServiceClient(conn)
+	client := pc.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, r)
-	if err != nil {
+	ctx, errCtx := appendUserIDHeader(ctx, r)
+	if errCtx != nil {
 		http.Error(w, "Unauthorized", 401)
 		cancel()
 		return
@@ -166,18 +151,11 @@ func (pc *postController) getPosts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (pc *postController) getLikedPosts(w http.ResponseWriter, r *http.Request) {
-	conn, err := grpc.Dial(pc.addr, insecureCredentials(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	defer conn.Close()
-	client := pb.NewPostServiceClient(conn)
+	client := pc.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, r)
-	if err != nil {
+	ctx, errCtx := appendUserIDHeader(ctx, r)
+	if errCtx != nil {
 		http.Error(w, "Unauthorized", 401)
 		cancel()
 		return
@@ -217,18 +195,11 @@ func (pc *postController) getLikedPosts(w http.ResponseWriter, r *http.Request) 
 }
 
 func (pc *postController) getHashtagPosts(w http.ResponseWriter, r *http.Request) {
-	conn, err := grpc.Dial(pc.addr, insecureCredentials(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	defer conn.Close()
-	client := pb.NewPostServiceClient(conn)
+	client := pc.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, r)
-	if err != nil {
+	ctx, errCtx := appendUserIDHeader(ctx, r)
+	if errCtx != nil {
 		http.Error(w, "Unauthorized", 401)
 		cancel()
 		return
@@ -263,18 +234,11 @@ func (pc *postController) getHashtagPosts(w http.ResponseWriter, r *http.Request
 }
 
 func (pc *postController) getPost(w http.ResponseWriter, r *http.Request) {
-	conn, err := grpc.Dial(pc.addr, insecureCredentials(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	defer conn.Close()
-	client := pb.NewPostServiceClient(conn)
+	client := pc.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, r)
-	if err != nil {
+	ctx, errCtx := appendUserIDHeader(ctx, r)
+	if errCtx != nil {
 		http.Error(w, "Unauthorized", 401)
 		cancel()
 		return
@@ -299,18 +263,11 @@ func (pc *postController) getPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (pc *postController) deletePost(w http.ResponseWriter, r *http.Request) {
-	conn, err := grpc.Dial(pc.addr, insecureCredentials(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	defer conn.Close()
-	client := pb.NewPostServiceClient(conn)
+	client := pc.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, r)
-	if err != nil {
+	ctx, errCtx := appendUserIDHeader(ctx, r)
+	if errCtx != nil {
 		http.Error(w, "Unauthorized", 401)
 		cancel()
 		return
@@ -340,14 +297,10 @@ func (pc *postController) deletePost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Gateway Orchestration for Images: delete image if one exists
-	if postRes.MediaKey != "" {
-		imgConn, err := grpc.Dial(pc.imageAddr, insecureCredentials(), grpc.WithBlock())
-		if err == nil {
-			imgClient := pb.NewImageServiceClient(imgConn)
-			_, _ = imgClient.DeleteImage(ctx, &pb.DeleteImageRequest{Filename: postRes.MediaKey})
-			imgConn.Close()
-		} else {
-			log.Printf("Connecting to image service failed: %v", err)
+	if postRes.MediaKey != "" && pc.imgClient != nil {
+		_, err := pc.imgClient.DeleteImage(ctx, &pb.DeleteImageRequest{Filename: postRes.MediaKey})
+		if err != nil {
+			log.Printf("Deleting image failed: %v", err)
 		}
 	}
 
@@ -355,18 +308,11 @@ func (pc *postController) deletePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (pc *postController) likePost(w http.ResponseWriter, r *http.Request) {
-	conn, err := grpc.Dial(pc.addr, insecureCredentials(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	defer conn.Close()
-	client := pb.NewPostServiceClient(conn)
+	client := pc.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, r)
-	if err != nil {
+	ctx, errCtx := appendUserIDHeader(ctx, r)
+	if errCtx != nil {
 		http.Error(w, "Unauthorized", 401)
 		cancel()
 		return
@@ -391,18 +337,11 @@ func (pc *postController) likePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (pc *postController) unlikePost(w http.ResponseWriter, r *http.Request) {
-	conn, err := grpc.Dial(pc.addr, insecureCredentials(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	defer conn.Close()
-	client := pb.NewPostServiceClient(conn)
+	client := pc.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, r)
-	if err != nil {
+	ctx, errCtx := appendUserIDHeader(ctx, r)
+	if errCtx != nil {
 		http.Error(w, "Unauthorized", 401)
 		cancel()
 		return
@@ -427,18 +366,11 @@ func (pc *postController) unlikePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (pc *postController) repostPost(w http.ResponseWriter, r *http.Request) {
-	conn, err := grpc.Dial(pc.addr, insecureCredentials(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	defer conn.Close()
-	client := pb.NewPostServiceClient(conn)
+	client := pc.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, r)
-	if err != nil {
+	ctx, errCtx := appendUserIDHeader(ctx, r)
+	if errCtx != nil {
 		http.Error(w, "Unauthorized", 401)
 		cancel()
 		return
@@ -463,18 +395,11 @@ func (pc *postController) repostPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (pc *postController) removeRepost(w http.ResponseWriter, r *http.Request) {
-	conn, err := grpc.Dial(pc.addr, insecureCredentials(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	defer conn.Close()
-	client := pb.NewPostServiceClient(conn)
+	client := pc.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, r)
-	if err != nil {
+	ctx, errCtx := appendUserIDHeader(ctx, r)
+	if errCtx != nil {
 		http.Error(w, "Unauthorized", 401)
 		cancel()
 		return

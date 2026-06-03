@@ -16,22 +16,16 @@ import (
 )
 
 type authController struct {
-	addr string
+	client pb.AuthServiceClient
 }
 
 func newAuthController(addr string) *authController {
-	return &authController{addr}
+	conn, _ := grpc.Dial(addr, insecureCredentials())
+	return &authController{pb.NewAuthServiceClient(conn)}
 }
 
 func (ac *authController) createSession(w http.ResponseWriter, r *http.Request) {
-	conn, err := grpc.Dial(ac.addr, insecureCredentials(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	defer conn.Close()
-	client := pb.NewAuthServiceClient(conn)
+	client := ac.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx = appendInternalAuth(ctx)
@@ -69,14 +63,7 @@ func (ac *authController) validateSession(w http.ResponseWriter, r *http.Request
 		return nil, err
 	}
 
-	conn, err := grpc.Dial(ac.addr, insecureCredentials(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		http.Error(w, "Internal Server Error", 500)
-		return nil, err
-	}
-	defer conn.Close()
-	client := pb.NewAuthServiceClient(conn)
+	client := ac.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx = appendInternalAuth(ctx)
@@ -108,14 +95,7 @@ func (ac *authController) deleteSession(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	conn, err := grpc.Dial(ac.addr, insecureCredentials(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	defer conn.Close()
-	client := pb.NewAuthServiceClient(conn)
+	client := ac.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx = appendInternalAuth(ctx)
@@ -141,14 +121,7 @@ func (ac *authController) deleteSessionByID(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	conn, err := grpc.Dial(ac.addr, insecureCredentials(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	defer conn.Close()
-	client := pb.NewAuthServiceClient(conn)
+	client := ac.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx = appendInternalAuth(ctx)
@@ -190,14 +163,7 @@ func (ac *authController) getSessions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	conn, err := grpc.Dial(ac.addr, insecureCredentials(), grpc.WithBlock())
-	if err != nil {
-		log.Printf("Connecting to service failed: %v", err)
-		http.Error(w, "Internal Server Error", 500)
-		return
-	}
-	defer conn.Close()
-	client := pb.NewAuthServiceClient(conn)
+	client := ac.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx = appendInternalAuth(ctx)

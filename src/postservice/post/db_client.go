@@ -5,6 +5,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 
 	pb "github.com/robbdimitrov/thoughts/src/postservice/genproto"
@@ -217,8 +218,14 @@ func (c *DbClient) getPost(id int32, currentUserID int32) (*pb.Post, error) {
 
 func (c *DbClient) deletePost(postID int32, userID int32) error {
 	query := "DELETE FROM posts WHERE id = $1 AND user_id = $2"
-	_, err := c.db.Exec(context.Background(), query, postID, userID)
-	return err
+	tag, err := c.db.Exec(context.Background(), query, postID, userID)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return pgx.ErrNoRows
+	}
+	return nil
 }
 
 func (c *DbClient) likePost(postID int32, userID int32) error {
