@@ -1,4 +1,4 @@
-use bcrypt::verify;
+use argon2::{PasswordHash, PasswordVerifier, Argon2};
 use tonic::{Request, Response, Status};
 use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine as _};
 use rand::RngCore;
@@ -56,7 +56,9 @@ impl<D: AuthDb> AuthService for Controller<D> {
 
         match user_opt {
             Some((user_id, password_hash)) => {
-                let is_valid = verify(&req.password, &password_hash).unwrap_or(false);
+                let is_valid = PasswordHash::new(&password_hash)
+                    .map(|parsed_hash| Argon2::default().verify_password(req.password.as_bytes(), &parsed_hash).is_ok())
+                    .unwrap_or(false);
                 if !is_valid {
                     return Err(Status::unauthenticated("Incorrect email or password."));
                 }
@@ -138,7 +140,7 @@ impl<D: AuthDb> AuthService for Controller<D> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use bcrypt::DEFAULT_COST;
+    use argon2::{password_hash::{rand_core::OsRng, PasswordHasher, SaltString}, Argon2};
 
     struct MockAuthDb;
 
@@ -147,7 +149,8 @@ mod tests {
         async fn get_user(&self, email: &str) -> Result<Option<(i32, String)>, sqlx::Error> {
             if email == "test@example.com" {
                 // "password" hashed
-                let hash = bcrypt::hash("password", DEFAULT_COST).unwrap();
+                let salt = SaltString::generate(&mut OsRng);
+                let hash = Argon2::default().hash_password("password".as_bytes(), &salt).unwrap().to_string();
                 Ok(Some((1, hash)))
             } else if email == "db_error@example.com" {
                 Err(sqlx::Error::RowNotFound)

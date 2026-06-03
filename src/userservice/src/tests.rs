@@ -37,6 +37,8 @@ impl UserDb for Arc<MockDb> {
             followers: 0,
             followed: false,
             created: "2026-06-02T00:00:00Z".to_string(),
+            profile_photo_key: "".to_string(),
+            cover_photo_key: "".to_string(),
         });
         Ok(id)
     }
@@ -60,13 +62,15 @@ impl UserDb for Arc<MockDb> {
         Ok(users.iter().find(|u| u.username == username).cloned())
     }
 
-    async fn update_user(&self, user_id: i32, name: &str, username: &str, email: &str, bio: &str) -> Result<(), SqlxError> {
+    async fn update_user(&self, user_id: i32, name: &str, username: &str, email: &str, bio: &str, profile_photo_key: Option<&str>, cover_photo_key: Option<&str>) -> Result<(), SqlxError> {
         let mut users = self.users.lock().await;
         if let Some(u) = users.iter_mut().find(|u| u.id == user_id) {
             u.name = name.to_string();
             u.username = username.to_string();
             u.email = email.to_string();
             u.bio = bio.to_string();
+            if let Some(key) = profile_photo_key { u.profile_photo_key = key.to_string(); }
+            if let Some(key) = cover_photo_key { u.cover_photo_key = key.to_string(); }
         }
         Ok(())
     }
