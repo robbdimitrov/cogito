@@ -36,3 +36,4 @@ npm-debug.log*
 *.code-workspace
 *.sw*
 .antigravitycli
+antigravity*

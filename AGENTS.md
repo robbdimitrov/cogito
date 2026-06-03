@@ -97,6 +97,13 @@ kubectl delete namespace thoughts
 
 Unit tests exist for the Rust services. Run `cargo test` inside the respective service directory. For Go services, follow the 80/20 rule for test coverage (aim for ~80% coverage focusing on the most critical 20% of code).
 
+Frontend tests are written with Vitest and React Testing Library. To run them:
+```sh
+cd src/frontend
+npm run test
+```
+Follow the 80/20 rule for frontend test coverage as well, focusing on critical utility functions, hooks, and core shared components.
+
 ## Database Notes
 
 - `src/database/schema.sql` is copied to `/docker-entrypoint-initdb.d/` in the Postgres image and executes on first container start.
