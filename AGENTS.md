@@ -114,6 +114,7 @@ Alternatively, you can run tests for individual services:
 ## Constraints & Gotchas
 
 - Follow **SOLID**, **KISS**, and **DRY** when writing code and refactoring: keep changes focused, prefer simple local patterns, avoid duplicated logic, and add abstractions only when they remove real complexity.
+- Microservices must be stateless and designed to work properly in multi-replica environments.
 - Frontend styling should use Tailwind utilities and DaisyUI components. Add custom CSS only in EXTREME circumstances.
 - Frontend API response handling must tolerate `204 No Content` and non-JSON gateway error bodies; avoid calling `response.json()` unconditionally.
 - No CI workflows, pre-commit hooks, or lint configs for Go/Python.
