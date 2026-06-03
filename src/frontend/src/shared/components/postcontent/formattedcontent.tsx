@@ -11,13 +11,21 @@ interface FormattedContentProps {
 function FormattedContent({ content, className = '' }: FormattedContentProps) {
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
-  let match: RegExpExecArray | null;
+  // Use a local regex and matchAll to avoid global RegExp object state mutations during React concurrent renders
+  const tokenRegex = /(https?:\/\/[^\s]+)|(^|[^A-Za-z0-9_])([#@])([A-Za-z0-9_]{1,50})/g;
+  const matches = Array.from(content.matchAll(tokenRegex));
 
-  tokenRegex.lastIndex = 0;
-  while ((match = tokenRegex.exec(content)) !== null) {
+  for (const match of matches) {
     if (match[1]) {
-      const url = match[1];
-      const matchStart = match.index;
+      let url = match[1];
+      const matchStart = match.index!;
+      
+      // Remove trailing punctuation from URL (common when URL is at the end of a sentence)
+      const punctuationMatch = url.match(/[.,;:?!"']+$/);
+      if (punctuationMatch) {
+        url = url.slice(0, -punctuationMatch[0].length);
+      }
+
       if (matchStart > lastIndex) {
         parts.push(content.slice(lastIndex, matchStart));
       }
@@ -26,10 +34,11 @@ function FormattedContent({ content, className = '' }: FormattedContentProps) {
           {url}
         </a>
       );
+      // Advance lastIndex by the actual URL length (excluding the trailing punctuation, which will be caught by the next slice)
       lastIndex = matchStart + url.length;
     } else {
       const [fullMatch, _, prefix, symbol, tagOrUser] = match;
-      const matchStart = match.index + (prefix || '').length;
+      const matchStart = match.index! + (prefix || '').length;
 
       if (matchStart > lastIndex) {
         parts.push(content.slice(lastIndex, matchStart));
@@ -58,7 +67,7 @@ function FormattedContent({ content, className = '' }: FormattedContentProps) {
         );
       }
 
-      lastIndex = match.index + fullMatch.length;
+      lastIndex = match.index! + fullMatch.length;
     }
   }
 
