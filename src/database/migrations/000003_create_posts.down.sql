@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS reposts;
+DROP TABLE IF EXISTS likes;
+DROP INDEX IF EXISTS posts_hashtags_idx;
+DROP TABLE IF EXISTS posts;

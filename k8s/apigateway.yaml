@@ -35,6 +35,16 @@ spec:
         tier: backend
         component: apigateway
     spec:
+      initContainers:
+      - name: migration
+        image: localhost:5000/thoughts/migration
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: thoughts-db-secret
+              key: postgres-password
       containers:
       - name: apigateway
         image: localhost:5000/thoughts/apigateway

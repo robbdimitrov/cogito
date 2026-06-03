@@ -7,7 +7,7 @@ proto:
 	@cd src/postservice && protoc -I../.. --go_out=. --go-grpc_out=. ../../pb/thoughts.proto
 
 .PHONY: all
-all: apigateway authservice database frontend imageservice postservice userservice
+all: apigateway authservice migration frontend imageservice postservice userservice
 
 .PHONY: apigateway
 apigateway: proto
@@ -17,9 +17,9 @@ apigateway: proto
 authservice:
 	docker build -t localhost:5000/thoughts/authservice -f src/authservice/Dockerfile .
 
-.PHONY: database
-database:
-	docker build -t localhost:5000/thoughts/database src/database
+.PHONY: migration
+migration:
+	docker build -t localhost:5000/thoughts/migration src/database
 
 .PHONY: frontend
 frontend:

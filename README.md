@@ -32,7 +32,6 @@ Run all unit tests across the frontend and backend microservices using the provi
 make test
 ```
 
-
 **Prerequisites:** `kubectl`, `docker`, and `make` must be installed.
 
 **Cleanup:**
