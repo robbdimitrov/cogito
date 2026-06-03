@@ -3,21 +3,22 @@ import Avatar from '@/shared/components/avatar/avatar';
 import { Pen, Send } from 'lucide-react';
 import GlassCard from '@/shared/components/ui/surface';
 import { useAPI } from '@/shared/contexts/apicontext';
+import { User } from '@/shared/types';
 
-function CreateThought({user, onCreatePost}) {
+function CreateThought({user, onCreatePost}: {user: User, onCreatePost: (content: string) => Promise<void>}) {
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [cursorPosition, setCursorPosition] = useState(null);
-  const [suggestions, setSuggestions] = useState([]);
+  const [cursorPosition, setCursorPosition] = useState<number | null>(null);
+  const [suggestions, setSuggestions] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showTypeahead, setShowTypeahead] = useState(false);
   const api = useAPI();
-  const textareaRef = useRef(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       if (searchQuery.length > 0) {
-        api.searchUsers(searchQuery, 5).then((res: any) => {
+        api.searchUsers(searchQuery, 5).then((res) => {
           setSuggestions(res.items || []);
           setShowTypeahead(true);
         }).catch(() => {

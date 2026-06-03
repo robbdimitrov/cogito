@@ -5,6 +5,7 @@ import SettingsMenu from '@/app/settings/[[...tab]]/settingsmenu';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAPI } from '@/shared/contexts/apicontext';
 import { useToast } from '@/shared/components/toast/toast';
+import { Session } from '@/shared/types';
 
 const Password = React.lazy(() => import('@/app/settings/[[...tab]]/password'));
 const EditProfile = React.lazy(() => import('@/app/settings/[[...tab]]/editprofile'));
@@ -26,20 +27,21 @@ function Settings(props) {
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
   // State for active sessions
-  const [sessions, setSessions] = useState<any[]>([]);
+  const [sessions, setSessions] = useState<Session[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [sessionsError, setSessionsError] = useState<string | null>(null);
 
   const fetchSessions = useCallback(async () => {
     try {
       setSessionsError(null);
-      const data: any = await apiClient.getSessions();
+      const data = await apiClient.getSessions();
       if (data) {
-        setSessions(data.sessions || data.items || []);
-        setCurrentSessionId(data.currentSessionId || null);
+        setSessions(data.items || []);
+        // Note: data.currentSessionId is not in the type definition, we may need to assert or type it better if it's there
+        setCurrentSessionId((data as any).currentSessionId || null);
       }
-    } catch (e: any) {
-      setSessionsError(e.message || 'Failed to load sessions');
+    } catch (e) {
+      setSessionsError(e instanceof Error ? e.message : 'Failed to load sessions');
     }
   }, [apiClient]);
 
