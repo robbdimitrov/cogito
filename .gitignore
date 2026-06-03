@@ -13,6 +13,10 @@ dist
 .env*.local
 coverage/
 
+# Rust
+target/
+src/thoughts.rs
+
 # Python
 venv
 __pycache__
