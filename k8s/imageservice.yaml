@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: imageservice
+  namespace: thoughts
+  labels:
+    app: imageservice
+    component: imageservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: imageservice
+      component: imageservice
+  template:
+    metadata:
+      labels:
+        app: imageservice
+        component: imageservice
+    spec:
+      containers:
+      - name: imageservice
+        image: localhost:5000/thoughts/imageservice:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5050
+          name: grpc
+        - containerPort: 8081
+          name: http
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: backend-secret
+              key: database_url
+        - name: IMAGE_DIR
+          value: "/app/uploads"
+        volumeMounts:
+        - name: image-storage
+          mountPath: /app/uploads
+      volumes:
+      - name: image-storage
+        persistentVolumeClaim:
+          claimName: image-volume-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: imageservice
+  namespace: thoughts
+spec:
+  type: ClusterIP
+  selector:
+    app: imageservice
+    component: imageservice
+  ports:
+  - name: grpc
+    port: 5050
+    targetPort: 5050
+  - name: http
+    port: 8081
+    targetPort: 8081
