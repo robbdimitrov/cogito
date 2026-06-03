@@ -16,9 +16,23 @@ async function parseResponseBody(response: Response): Promise<unknown> {
   return parseJsonResponseText(text);
 }
 
+function camelizeKeys(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map(v => camelizeKeys(v));
+  } else if (obj !== null && obj.constructor === Object) {
+    return Object.keys(obj).reduce((result, key) => {
+      const camelKey = key.replace(/_([a-z])/g, (g) => g[1].toUpperCase());
+      result[camelKey] = camelizeKeys(obj[key]);
+      return result;
+    }, {} as any);
+  }
+  return obj;
+}
+
 function parseJsonResponseText(text: string): unknown {
   try {
-    return JSON.parse(text);
+    const parsed = JSON.parse(text);
+    return camelizeKeys(parsed);
   } catch {
     throw new Error('Received non-JSON response from server');
   }
@@ -51,8 +65,12 @@ class APIClient {
     };
     const headers: Record<string, string> = {};
     if (body) {
-      headers['content-type'] = 'application/json';
-      options.body = JSON.stringify(body);
+      if (body instanceof FormData) {
+        options.body = body;
+      } else {
+        headers['content-type'] = 'application/json';
+        options.body = JSON.stringify(body);
+      }
     }
     const mutatingMethods = [httpMethod.post, httpMethod.put, httpMethod.delete, 'PATCH'];
     if (mutatingMethods.includes(method)) {
@@ -93,9 +111,9 @@ class APIClient {
     return this.request<{id: number}>(url, httpMethod.post, body);
   }
 
-  updateUser(userId: string | number, name: string, username: string, email: string, bio: string): Promise<void> {
+  updateUser(userId: string | number, name: string, username: string, email: string, bio: string, profilePhotoKey?: string, coverPhotoKey?: string): Promise<void> {
     const url = `/api/users/${userId}`;
-    const body = {name, username, email, bio};
+    const body = {name, username, email, bio, profilePhotoKey, coverPhotoKey};
     return this.request<void>(url, httpMethod.put, body);
   }
 
@@ -165,9 +183,9 @@ class APIClient {
 
   // Posts
 
-  createPost(content: string): Promise<{id: number}> {
+  createPost(content: string, mediaKey?: string): Promise<{id: number}> {
     const url = '/api/posts';
-    const body = {content};
+    const body = {content, mediaKey};
     return this.request<{id: number}>(url, httpMethod.post, body);
   }
 
@@ -219,6 +237,15 @@ class APIClient {
   removeRepost(postId: string | number): Promise<void> {
     const url = `/api/posts/${postId}/reposts`;
     return this.request<void>(url, httpMethod.delete);
+  }
+
+  // Upload
+
+  uploadImage(file: File): Promise<{key: string}> {
+    const url = '/api/upload';
+    const body = new FormData();
+    body.append('file', file);
+    return this.request<{key: string}>(url, httpMethod.post, body);
   }
 }
 

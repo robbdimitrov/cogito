@@ -9,6 +9,8 @@ export interface User {
   followers: number;
   likes: number;
   followed?: boolean;
+  profilePhotoKey?: string;
+  coverPhotoKey?: string;
 }
 
 export interface Post {
@@ -23,6 +25,7 @@ export interface Post {
   user?: User;
   rethoughtByUserId?: string;
   rethoughtByUser?: User;
+  mediaKey?: string;
 }
 
 export interface Session {

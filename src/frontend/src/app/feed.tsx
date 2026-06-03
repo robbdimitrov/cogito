@@ -45,9 +45,9 @@ function Feed(props: FeedProps) {
     } catch (e: unknown) {}
   };
 
-  const handleCreatePost = async (content: string) => {
+  const handleCreatePost = async (content: string, mediaKey?: string) => {
     try {
-      await apiClient.createPost(content);
+      await apiClient.createPost(content, mediaKey);
       router.refresh();
     } catch (e: unknown) {}
   };

@@ -1,19 +1,26 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Avatar from '@/shared/components/avatar/avatar';
-import { Pen, Send } from 'lucide-react';
+import { Pen, Send, Image as ImageIcon, X } from 'lucide-react';
 import GlassCard from '@/shared/components/ui/surface';
 import { useAPI } from '@/shared/contexts/apicontext';
 import { User } from '@/shared/types';
+import { resizeImageForUpload } from '@/shared/utils/image';
+import { useToast } from '@/shared/components/toast/toast';
 
-function CreateThought({user, onCreatePost}: {user: User, onCreatePost: (content: string) => Promise<void>}) {
+function CreateThought({user, onCreatePost}: {user: User, onCreatePost: (content: string, mediaKey?: string) => Promise<void>}) {
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
   const [suggestions, setSuggestions] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [showTypeahead, setShowTypeahead] = useState(false);
+  const [mediaKey, setMediaKey] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  
   const api = useAPI();
+  const toast = useToast();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -68,17 +75,36 @@ function CreateThought({user, onCreatePost}: {user: User, onCreatePost: (content
     textareaRef.current?.focus();
   };
 
-  function handleSubmit(event) {
+  function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    if (!content.trim() || isSubmitting) return;
+    if ((!content.trim() && !mediaKey) || isSubmitting) return;
     setIsSubmitting(true);
-    onCreatePost(content.trim())
+    onCreatePost(content.trim(), mediaKey || undefined)
       .then(() => {
         setContent('');
+        setMediaKey(null);
         setIsSubmitting(false);
         setShowTypeahead(false);
       })
       .catch(() => setIsSubmitting(false));
+  }
+
+  async function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploadingImage(true);
+    try {
+      const resized = await resizeImageForUpload(file);
+      const res = await api.uploadImage(resized);
+      setMediaKey(res.key);
+      toast.success('Image attached');
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to attach image');
+    } finally {
+      setUploadingImage(false);
+      event.target.value = '';
+    }
   }
 
   return (
@@ -87,7 +113,7 @@ function CreateThought({user, onCreatePost}: {user: User, onCreatePost: (content
         <form onSubmit={handleSubmit}>
           <div className="flex gap-3 sm:gap-4">
             <div className="hidden sm:block shrink-0">
-              <Avatar name={user?.name} size="md" />
+              <Avatar name={user?.name} size="md" photoKey={user?.profilePhotoKey} />
             </div>
             <div className="relative flex-1 min-w-0">
               <Pen className="absolute left-3 top-3.5 h-5 w-5 text-slate-500 dark:text-slate-400 pointer-events-none" />
@@ -111,7 +137,7 @@ function CreateThought({user, onCreatePost}: {user: User, onCreatePost: (content
                       className="w-full text-left px-4 py-3 hover:bg-slate-100 dark:hover:bg-slate-800/80 flex items-center gap-3 border-b border-slate-100 dark:border-slate-800/50 last:border-0 transition-colors"
                       onClick={() => handleSelectSuggestion(u.username)}
                     >
-                      <Avatar name={u.name} size="sm" />
+                      <Avatar name={u.name} size="sm" photoKey={u.profilePhotoKey} />
                       <div className="overflow-hidden">
                         <div className="font-semibold text-sm text-slate-900 dark:text-white truncate">{u.name}</div>
                         <div className="text-xs text-slate-500 dark:text-slate-400 truncate">@{u.username}</div>
@@ -122,12 +148,35 @@ function CreateThought({user, onCreatePost}: {user: User, onCreatePost: (content
               )}
             </div>
           </div>
+          {mediaKey && (
+            <div className="mt-3 sm:pl-14">
+              <div className="relative inline-block">
+                <img src={`/api/uploads/${mediaKey}`} alt="Attached" className="max-h-60 rounded-xl object-cover border border-slate-200 dark:border-slate-800" />
+                <button type="button" onClick={() => setMediaKey(null)} className="absolute top-2 right-2 p-1 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
           <div className="flex justify-between items-center mt-3 sm:pl-14">
-            <span className={`text-sm ${content.length > 240 ? 'text-warning' : 'text-slate-500 dark:text-slate-400'}`}>{content.length}/255</span>
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm btn-circle text-slate-500 hover:text-primary transition-colors"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingImage}
+                title="Attach image"
+              >
+                {uploadingImage ? <span className="loading loading-spinner loading-xs"></span> : <ImageIcon className="h-5 w-5" />}
+              </button>
+              <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/gif,image/webp" className="hidden" onChange={handleImageUpload} />
+              
+              <span className={`text-sm ${content.length > 240 ? 'text-warning' : 'text-slate-500 dark:text-slate-400'}`}>{content.length}/255</span>
+            </div>
             <button
               type="submit"
-              className={`btn btn-primary btn-sm gap-1 rounded-full px-5 ${!isSubmitting && content.trim() ? 'shadow-lg shadow-primary/20' : 'shadow-none'}`}
-              disabled={isSubmitting || !content.trim()}
+              className={`btn btn-primary btn-sm gap-1 rounded-full px-5 ${!isSubmitting && (content.trim() || mediaKey) ? 'shadow-lg shadow-primary/20' : 'shadow-none'}`}
+              disabled={isSubmitting || (!content.trim() && !mediaKey)}
             >
               <Send className="h-4 w-4" />
               Post

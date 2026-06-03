@@ -140,7 +140,7 @@ function PostDetail({ initialPost, currentUserId }: PostDetailProps) {
         <div className="card-body p-4 sm:p-5">
           <div className="flex items-start gap-3 sm:gap-4">
             <Link href={`/@${author.username}`} className="shrink-0">
-              <Avatar name={author.name} size="md" />
+              <Avatar name={author.name} size="md" photoKey={author.profilePhotoKey} />
             </Link>
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-2">
@@ -162,6 +162,11 @@ function PostDetail({ initialPost, currentUserId }: PostDetailProps) {
                 )}
               </div>
               <FormattedContent content={post.content} className="mt-3 whitespace-pre-wrap break-words text-[1.02rem] leading-relaxed sm:mt-4 sm:text-lg" />
+              {post.mediaKey && (
+                <div className="mt-3 sm:mt-4">
+                  <img src={`/api/uploads/${post.mediaKey}`} alt="Post attachment" className="max-h-[500px] w-auto rounded-xl object-contain border border-slate-200 dark:border-slate-800" />
+                </div>
+              )}
               <div className="mt-4 flex items-center gap-2 border-t border-slate-200 pt-3 dark:border-slate-700 sm:mt-6 sm:gap-6 sm:pt-4">
                 <button
                   className={`btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 transition-all duration-150 hover:scale-105 active:scale-95 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4 ${post.reposted ? 'text-success bg-success/10' : 'text-slate-500 dark:text-slate-400 hover:text-success hover:bg-success/10'}`}

@@ -85,7 +85,7 @@ function ThoughtItem({post, user, onLike, onRepost, onDelete, currentUserId}) {
         <div className="card-body p-4 sm:p-5">
           <div className="flex items-start gap-3 sm:gap-4">
             <Link href={`/@${author?.username}`} className="shrink-0 transition-transform duration-200 hover:scale-105">
-              <Avatar name={author?.name} size="md" />
+              <Avatar name={author?.name} size="md" photoKey={author?.profilePhotoKey} />
             </Link>
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-3 sm:gap-4">
@@ -112,6 +112,11 @@ function ThoughtItem({post, user, onLike, onRepost, onDelete, currentUserId}) {
                 content={optimisticPost.content}
                 className="mt-3 sm:mt-3.5 whitespace-pre-wrap break-words text-[15px] sm:text-[1.05rem] leading-relaxed text-slate-800 dark:text-slate-200"
               />
+              {optimisticPost.mediaKey && (
+                <div className="mt-3">
+                  <img src={`/api/uploads/${optimisticPost.mediaKey}`} alt="Post attachment" className="max-h-96 w-auto rounded-xl object-contain border border-slate-200 dark:border-slate-800" />
+                </div>
+              )}
               <div className="mt-3">
                 <Link href={`/posts/${optimisticPost.id}`} className="text-[0.8rem] sm:text-sm font-medium text-slate-400 dark:text-slate-500 hover:text-primary transition-colors">
                   {formatPostDate(optimisticPost.created)}

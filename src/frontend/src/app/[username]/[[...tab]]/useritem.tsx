@@ -29,7 +29,7 @@ function UserItem({user, onFollow, onUnfollow, currentUserId}: UserItemProps) {
         <div className="flex items-start justify-between gap-3">
           <Link href={`/@${user.username}`} className="flex items-center gap-3 min-w-0 group">
             <div className="shrink-0 rounded-full p-1 bg-white/45 dark:bg-white/5 ring-1 ring-white/60 dark:ring-white/10 transition-transform duration-200 group-hover:scale-105">
-              <Avatar name={user.name} size="md" />
+              <Avatar name={user.name} size="md" photoKey={user.profilePhotoKey} />
             </div>
             <div className="min-w-0 pt-0.5">
               <p className="font-semibold truncate text-base-content group-hover:underline">{user.name}</p>

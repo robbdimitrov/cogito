@@ -79,7 +79,7 @@ function Navbar({isLoggedIn, user}: NavbarProps) {
               aria-label="User menu"
               aria-expanded={isDropdownOpen}
             >
-              <Avatar name={user?.name} size="md" />
+              <Avatar name={user?.name} size="md" photoKey={user?.profilePhotoKey} />
             </button>
             {isDropdownOpen && (
               <ul className="menu menu-sm dropdown-content z-[1001] mt-3 w-56 rounded-2xl border border-white/70 bg-white/90 p-2 shadow-2xl shadow-slate-900/20 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/95 dark:shadow-black/50">

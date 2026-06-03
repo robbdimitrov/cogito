@@ -24,12 +24,16 @@ function UserHeader({user, currentUser, onFollow, onUnfollow}) {
   return (
     <GlassCard className="overflow-hidden">
       <div className="relative h-24 bg-gradient-to-tr from-primary via-primary/80 to-secondary sm:h-32">
-        <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 25% 25%, white 1px, transparent 1px)', backgroundSize: '24px 24px'}}></div>
+        {user.coverPhotoKey ? (
+          <img src={`/api/uploads/${user.coverPhotoKey}`} alt="Cover" className="absolute inset-0 w-full h-full object-cover" />
+        ) : (
+          <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 25% 25%, white 1px, transparent 1px)', backgroundSize: '24px 24px'}}></div>
+        )}
       </div>
       <div className="card-body relative -mt-11 px-4 pb-4 sm:-mt-14 sm:px-6 sm:pb-6">
         <div className="flex justify-between items-end">
           <div className="relative rounded-full border border-base-200/50 bg-base-100 p-1 dark:bg-slate-800">
-            <Avatar name={user.name} size="lg" />
+            <Avatar name={user.name} size="lg" photoKey={user.profilePhotoKey} />
           </div>
           {isOwnProfile ? (
             <Link href="/settings/profile" className="btn btn-outline btn-sm gap-1 rounded-full px-3 sm:px-4">

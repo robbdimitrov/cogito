@@ -55,10 +55,10 @@ function Settings(props) {
     }
   }, [apiClient, fetchSessions, toast]);
 
-  const updateUser = useCallback(async (name: string, username: string, email: string, bio: string) => {
+  const updateUser = useCallback(async (name: string, username: string, email: string, bio: string, profilePhotoKey?: string, coverPhotoKey?: string) => {
     try {
       setUpdateError(null);
-      await apiClient.updateUser(user.id, name, username, email, bio);
+      await apiClient.updateUser(user.id, name, username, email, bio, profilePhotoKey, coverPhotoKey);
       toast.success('Profile updated successfully');
       router.refresh();
     } catch (e: any) {

@@ -30,7 +30,7 @@ function UserCard({user, variant = 'sidebar'}) {
       <GlassCard className="overflow-hidden">
         <div className="flex items-center gap-3 p-3">
           <Link href={`/@${user.username}`} className="shrink-0">
-            <Avatar name={user.name} size="md" />
+            <Avatar name={user.name} size="md" photoKey={user.profilePhotoKey} />
           </Link>
           <Link href={`/@${user.username}`} className="min-w-0 flex-1">
             <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">Your profile</p>
@@ -50,12 +50,16 @@ function UserCard({user, variant = 'sidebar'}) {
 
   return (
     <GlassCard className="sticky top-20 overflow-hidden">
-      <div className="h-16 bg-gradient-to-r from-primary/70 to-secondary/70"></div>
-      <div className="card-body p-4 -mt-8">
+      <div className="h-16 relative bg-gradient-to-r from-primary/70 to-secondary/70">
+        {user.coverPhotoKey && (
+          <img src={`/api/uploads/${user.coverPhotoKey}`} alt="Cover" className="absolute inset-0 w-full h-full object-cover" />
+        )}
+      </div>
+      <div className="card-body p-4 -mt-8 relative z-10">
         <Link href={`/@${user.username}`}>
           <div className="flex items-center gap-3">
             <div className="rounded-full border border-base-200/50 bg-base-100 p-1 dark:bg-slate-800">
-              <Avatar name={user.name} size="lg" />
+              <Avatar name={user.name} size="lg" photoKey={user.profilePhotoKey} />
             </div>
             <div className="min-w-0 pt-6">
               <p className="font-bold truncate">{user.name}</p>
