@@ -2,11 +2,12 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"log"
+	"net/http"
 	"strconv"
 	"time"
 
-	"github.com/labstack/echo/v4"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -22,11 +23,12 @@ func newAuthController(addr string) *authController {
 	return &authController{addr}
 }
 
-func (ac *authController) createSession(c echo.Context) error {
+func (ac *authController) createSession(w http.ResponseWriter, r *http.Request) {
 	conn, err := grpc.Dial(ac.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500)
+		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 	defer conn.Close()
 	client := pb.NewAuthServiceClient(conn)
@@ -39,8 +41,9 @@ func (ac *authController) createSession(c echo.Context) error {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
-	if err := c.Bind(&body); err != nil {
-		return echo.NewHTTPError(400, "Invalid request body")
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, "Invalid request body", 400)
+		return
 	}
 
 	req := pb.Credentials{
@@ -51,23 +54,26 @@ func (ac *authController) createSession(c echo.Context) error {
 	res, err := client.CreateSession(ctx, &req)
 	if err != nil {
 		log.Printf("Creating session failed: %v", err)
-		return newHTTPError(err)
+		grpcError(w, err)
+		return
 	}
 
-	createCookie(c, res.Id)
-	return c.JSON(200, map[string]int32{"id": res.UserId})
+	createCookie(w, res.Id)
+	jsonResponse(w, 200, map[string]int32{"id": res.UserId})
 }
 
-func (ac *authController) validateSession(c echo.Context) error {
-	cookie, err := c.Cookie("session")
+func (ac *authController) validateSession(w http.ResponseWriter, r *http.Request) (*http.Request, error) {
+	cookie, err := r.Cookie("session")
 	if err != nil {
-		return echo.NewHTTPError(401)
+		http.Error(w, "Unauthorized", 401)
+		return nil, err
 	}
 
 	conn, err := grpc.Dial(ac.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500)
+		http.Error(w, "Internal Server Error", 500)
+		return nil, err
 	}
 	defer conn.Close()
 	client := pb.NewAuthServiceClient(conn)
@@ -83,27 +89,30 @@ func (ac *authController) validateSession(c echo.Context) error {
 		log.Printf("Validating session failed: %v", err)
 		s := status.Convert(err)
 		if s.Code() == codes.Unauthenticated {
-			clearCookie(c)
+			clearCookie(w)
 		}
-		return newHTTPError(err)
+		grpcError(w, err)
+		return nil, err
 	}
 
-	createCookie(c, res.Id)
-	setUserID(c, strconv.Itoa(int(res.UserId)))
+	createCookie(w, res.Id)
+	r = setUserID(r, strconv.Itoa(int(res.UserId)))
 
-	return nil
+	return r, nil
 }
 
-func (ac *authController) deleteSession(c echo.Context) error {
-	cookie, err := c.Cookie("session")
+func (ac *authController) deleteSession(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("session")
 	if err != nil {
-		return echo.NewHTTPError(401)
+		http.Error(w, "Unauthorized", 401)
+		return
 	}
 
 	conn, err := grpc.Dial(ac.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500)
+		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 	defer conn.Close()
 	client := pb.NewAuthServiceClient(conn)
@@ -117,23 +126,26 @@ func (ac *authController) deleteSession(c echo.Context) error {
 	_, err = client.DeleteSession(ctx, &req)
 	if err != nil {
 		log.Printf("Deleting session failed: %v", err)
-		return newHTTPError(err)
+		grpcError(w, err)
+		return
 	}
 
-	clearCookie(c)
-	return c.NoContent(204)
+	clearCookie(w)
+	w.WriteHeader(204)
 }
 
-func (ac *authController) deleteSessionByID(c echo.Context) error {
-	sessionID := c.Param("sessionId")
+func (ac *authController) deleteSessionByID(w http.ResponseWriter, r *http.Request) {
+	sessionID := r.PathValue("sessionId")
 	if sessionID == "" {
-		return echo.NewHTTPError(400, "Session ID is required")
+		http.Error(w, "Session ID is required", 400)
+		return
 	}
 
 	conn, err := grpc.Dial(ac.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500)
+		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 	defer conn.Close()
 	client := pb.NewAuthServiceClient(conn)
@@ -145,38 +157,44 @@ func (ac *authController) deleteSessionByID(c echo.Context) error {
 	sess, err := client.GetSession(ctx, &pb.SessionRequest{SessionId: sessionID})
 	if err != nil {
 		log.Printf("Getting session for ownership check failed: %v", err)
-		return newHTTPError(err)
+		grpcError(w, err)
+		return
 	}
 
-	userIDStr := getUserID(c)
+	userIDStr := getUserID(r)
 	userID, err := strconv.ParseInt(userIDStr, 10, 32)
 	if err != nil || userID == 0 {
-		return echo.NewHTTPError(401)
+		http.Error(w, "Unauthorized", 401)
+		return
 	}
 
 	if sess.UserId != int32(userID) {
-		return echo.NewHTTPError(403, "Cannot delete another user's session")
+		http.Error(w, "Cannot delete another user's session", 403)
+		return
 	}
 
 	_, err = client.DeleteSession(ctx, &pb.SessionRequest{SessionId: sessionID})
 	if err != nil {
 		log.Printf("Deleting session by ID failed: %v", err)
-		return newHTTPError(err)
+		grpcError(w, err)
+		return
 	}
 
-	return c.NoContent(204)
+	w.WriteHeader(204)
 }
 
-func (ac *authController) getSessions(c echo.Context) error {
-	cookie, err := c.Cookie("session")
+func (ac *authController) getSessions(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("session")
 	if err != nil {
-		return echo.NewHTTPError(401)
+		http.Error(w, "Unauthorized", 401)
+		return
 	}
 
 	conn, err := grpc.Dial(ac.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500)
+		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 	defer conn.Close()
 	client := pb.NewAuthServiceClient(conn)
@@ -191,16 +209,18 @@ func (ac *authController) getSessions(c echo.Context) error {
 		log.Printf("Validating session failed: %v", err)
 		s := status.Convert(err)
 		if s.Code() == codes.Unauthenticated {
-			clearCookie(c)
+			clearCookie(w)
 		}
-		return newHTTPError(err)
+		grpcError(w, err)
+		return
 	}
 
 	req := pb.UserRequest{UserId: validateRes.UserId}
 	res, err := client.GetSessions(ctx, &req)
 	if err != nil {
 		log.Printf("Getting sessions failed: %v", err)
-		return newHTTPError(err)
+		grpcError(w, err)
+		return
 	}
 
 	sessions := make([]session, len(res.Sessions))
@@ -212,7 +232,7 @@ func (ac *authController) getSessions(c echo.Context) error {
 		}
 	}
 
-	return c.JSON(200, map[string]interface{}{
+	jsonResponse(w, 200, map[string]interface{}{
 		"sessions":         sessions,
 		"currentSessionId": cookie.Value,
 		"userId":           validateRes.UserId,

@@ -1,17 +1,19 @@
 package api
 
 type user struct {
-	ID        int32  `json:"id"`
-	Name      string `json:"name"`
-	Username  string `json:"username"`
-	Email     string `json:"email"`
-	Bio       string `json:"bio"`
-	Posts     int32  `json:"posts"`
-	Likes     int32  `json:"likes"`
-	Following int32  `json:"following"`
-	Followers int32  `json:"followers"`
-	Followed  bool   `json:"followed"`
-	Created   string `json:"created"`
+	ID              int32  `json:"id"`
+	Name            string `json:"name"`
+	Username        string `json:"username"`
+	Email           string `json:"email"`
+	Bio             string `json:"bio"`
+	Posts           int32  `json:"posts"`
+	Likes           int32  `json:"likes"`
+	Following       int32  `json:"following"`
+	Followers       int32  `json:"followers"`
+	Followed        bool   `json:"followed"`
+	Created         string `json:"created"`
+	ProfilePhotoKey string `json:"profilePhotoKey,omitempty"`
+	CoverPhotoKey   string `json:"coverPhotoKey,omitempty"`
 }
 
 type post struct {
@@ -25,6 +27,7 @@ type post struct {
 	Created           string `json:"created"`
 	RethoughtByUserID int32  `json:"rethoughtByUserId"`
 	RethoughtCreated  string `json:"rethoughtCreated"`
+	MediaKey          string `json:"mediaKey,omitempty"`
 }
 
 type session struct {

@@ -5,31 +5,34 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"log"
+	"net/http"
 	"os"
 	"strconv"
 	"time"
 
-	"github.com/labstack/echo/v4"
 	"google.golang.org/grpc"
 
 	pb "github.com/robbdimitrov/thoughts/src/apigateway/genproto"
 )
 
 type userController struct {
-	addr     string
-	authAddr string
+	addr      string
+	authAddr  string
+	imageAddr string
 }
 
-func newUserController(addr string, authAddr string) *userController {
-	return &userController{addr, authAddr}
+func newUserController(addr string, authAddr string, imageAddr string) *userController {
+	return &userController{addr, authAddr, imageAddr}
 }
 
-func (s *userController) createUser(c echo.Context) error {
+func (s *userController) createUser(w http.ResponseWriter, r *http.Request) {
 	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500)
+		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
@@ -44,8 +47,9 @@ func (s *userController) createUser(c echo.Context) error {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
-	if err := c.Bind(&body); err != nil {
-		return echo.NewHTTPError(400, "Invalid request body")
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, "Invalid request body", 400)
+		return
 	}
 
 	req := pb.CreateUserRequest{
@@ -58,30 +62,35 @@ func (s *userController) createUser(c echo.Context) error {
 	res, err := client.CreateUser(ctx, &req)
 	if err != nil {
 		log.Printf("Creating user failed: %v", err)
-		return newHTTPError(err)
+		grpcError(w, err)
+		return
 	}
 
-	return c.JSON(201, map[string]int32{"id": res.Id})
+	jsonResponse(w, 201, map[string]int32{"id": res.Id})
 }
 
-func (s *userController) getUser(c echo.Context) error {
+func (s *userController) getUser(w http.ResponseWriter, r *http.Request) {
 	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500)
+		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
 
-	userID, err := strconv.Atoi(c.Param("userId"))
+	userID, err := strconv.Atoi(r.PathValue("userId"))
 	if err != nil {
-		return echo.NewHTTPError(400)
+		http.Error(w, "Invalid user ID", 400)
+		return
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, c)
+	ctx, err = appendUserIDHeader(ctx, r)
 	if err != nil {
-		return err
+		http.Error(w, "Unauthorized", 401)
+		cancel()
+		return
 	}
 	defer cancel()
 
@@ -90,73 +99,122 @@ func (s *userController) getUser(c echo.Context) error {
 	res, err := client.GetUser(ctx, &req)
 	if err != nil {
 		log.Printf("Getting user failed: %v", err)
-		return newHTTPError(err)
+		grpcError(w, err)
+		return
 	}
 
-	if getUserID(c) == c.Param("userId") {
-		return c.JSON(200, mapCurrentUser(res))
+	if getUserID(r) == r.PathValue("userId") {
+		jsonResponse(w, 200, mapCurrentUser(res))
+	} else {
+		jsonResponse(w, 200, mapUser(res))
 	}
-	return c.JSON(200, mapUser(res))
 }
 
-func (s *userController) getUserByUsername(c echo.Context) error {
+func (s *userController) getUserByUsername(w http.ResponseWriter, r *http.Request) {
 	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500)
+		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, c)
+	ctx, err = appendUserIDHeader(ctx, r)
 	if err != nil {
-		return err
+		http.Error(w, "Unauthorized", 401)
+		cancel()
+		return
 	}
 	defer cancel()
 
-	req := pb.GetUserByUsernameRequest{Username: c.QueryParam("username")}
+	req := pb.GetUserByUsernameRequest{Username: r.URL.Query().Get("username")}
 
 	res, err := client.GetUserByUsername(ctx, &req)
 	if err != nil {
 		log.Printf("Getting user by username failed: %v", err)
-		return newHTTPError(err)
+		grpcError(w, err)
+		return
 	}
 
-	return c.JSON(200, mapUser(res))
+	jsonResponse(w, 200, mapUser(res))
 }
 
-func (s *userController) updateUser(c echo.Context) error {
+func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500)
+		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
 
-	currentUserID := getUserID(c)
-	if currentUserID != c.Param("userId") {
-		return echo.NewHTTPError(403)
+	currentUserID := getUserID(r)
+	if currentUserID != r.PathValue("userId") {
+		http.Error(w, "Forbidden", 403)
+		return
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, c)
+	ctx, err = appendUserIDHeader(ctx, r)
 	if err != nil {
-		return err
+		http.Error(w, "Unauthorized", 401)
+		cancel()
+		return
 	}
 	defer cancel()
 
 	var body struct {
-		Name        string `json:"name"`
-		Username    string `json:"username"`
-		Email       string `json:"email"`
-		Bio         string `json:"bio"`
-		Password    string `json:"password"`
-		OldPassword string `json:"oldPassword"`
+		Name          string  `json:"name"`
+		Username      string  `json:"username"`
+		Email         string  `json:"email"`
+		Bio           string  `json:"bio"`
+		Password      string  `json:"password"`
+		OldPassword   string  `json:"oldPassword"`
+		ProfilePhotoKey *string `json:"profilePhotoKey"`
+		CoverPhotoKey   *string `json:"coverPhotoKey"`
 	}
-	if err := c.Bind(&body); err != nil {
-		return echo.NewHTTPError(400, "Invalid request body")
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, "Invalid request body", 400)
+		return
+	}
+
+	userIDInt, _ := strconv.Atoi(currentUserID)
+
+	// Fetch existing user to get old photos
+	oldUserReq := pb.UserRequest{UserId: int32(userIDInt)}
+	oldUserRes, err := client.GetUser(ctx, &oldUserReq)
+	if err != nil {
+		log.Printf("Getting old user failed: %v", err)
+		grpcError(w, err)
+		return
+	}
+
+	var imgClient pb.ImageServiceClient
+	var imgConn *grpc.ClientConn
+	if body.ProfilePhotoKey != nil || body.CoverPhotoKey != nil {
+		imgConn, err = grpc.Dial(s.imageAddr, insecureCredentials(), grpc.WithBlock())
+		if err == nil {
+			imgClient = pb.NewImageServiceClient(imgConn)
+			defer imgConn.Close()
+
+			if body.ProfilePhotoKey != nil && *body.ProfilePhotoKey != "" {
+				_, err = imgClient.VerifyUpload(ctx, &pb.VerifyUploadRequest{Filename: *body.ProfilePhotoKey, UserId: int32(userIDInt)})
+				if err != nil {
+					grpcError(w, err)
+					return
+				}
+			}
+			if body.CoverPhotoKey != nil && *body.CoverPhotoKey != "" {
+				_, err = imgClient.VerifyUpload(ctx, &pb.VerifyUploadRequest{Filename: *body.CoverPhotoKey, UserId: int32(userIDInt)})
+				if err != nil {
+					grpcError(w, err)
+					return
+				}
+			}
+		}
 	}
 
 	req := pb.UpdateUserRequest{
@@ -167,11 +225,37 @@ func (s *userController) updateUser(c echo.Context) error {
 		Password:    body.Password,
 		OldPassword: body.OldPassword,
 	}
+	if body.ProfilePhotoKey != nil {
+		req.ProfilePhotoKey = body.ProfilePhotoKey
+	}
+	if body.CoverPhotoKey != nil {
+		req.CoverPhotoKey = body.CoverPhotoKey
+	}
 
 	_, err = client.UpdateUser(ctx, &req)
 	if err != nil {
 		log.Printf("Updating user failed: %v", err)
-		return newHTTPError(err)
+		grpcError(w, err)
+		return
+	}
+
+	if imgClient != nil {
+		if body.ProfilePhotoKey != nil {
+			if *body.ProfilePhotoKey != "" {
+				_, _ = imgClient.ConsumeUpload(ctx, &pb.ConsumeUploadRequest{Filename: *body.ProfilePhotoKey})
+			}
+			if oldUserRes.ProfilePhotoKey != "" && oldUserRes.ProfilePhotoKey != *body.ProfilePhotoKey {
+				_, _ = imgClient.DeleteImage(ctx, &pb.DeleteImageRequest{Filename: oldUserRes.ProfilePhotoKey})
+			}
+		}
+		if body.CoverPhotoKey != nil {
+			if *body.CoverPhotoKey != "" {
+				_, _ = imgClient.ConsumeUpload(ctx, &pb.ConsumeUploadRequest{Filename: *body.CoverPhotoKey})
+			}
+			if oldUserRes.CoverPhotoKey != "" && oldUserRes.CoverPhotoKey != *body.CoverPhotoKey {
+				_, _ = imgClient.DeleteImage(ctx, &pb.DeleteImageRequest{Filename: oldUserRes.CoverPhotoKey})
+			}
+		}
 	}
 
 	if body.Password != "" {
@@ -181,7 +265,7 @@ func (s *userController) updateUser(c echo.Context) error {
 			authClient := pb.NewAuthServiceClient(authConn)
 			
 			var currentSessionID string
-			if cookie, err := c.Cookie("session"); err == nil {
+			if cookie, err := r.Cookie("session"); err == nil {
 				currentSessionID = cookie.Value
 			}
 
@@ -193,7 +277,6 @@ func (s *userController) updateUser(c echo.Context) error {
 			h.Write([]byte(currentSessionID))
 			currentHashedSessionID := base64.RawURLEncoding.EncodeToString(h.Sum(nil))
 
-			userIDInt, _ := strconv.Atoi(currentUserID)
 			sessionsRes, err := authClient.GetSessions(ctx, &pb.UserRequest{UserId: int32(userIDInt)})
 			if err == nil {
 				for _, sess := range sessionsRes.Sessions {
@@ -205,32 +288,37 @@ func (s *userController) updateUser(c echo.Context) error {
 		}
 	}
 
-	return c.NoContent(204)
+	w.WriteHeader(204)
 }
 
-func (s *userController) getFollowing(c echo.Context) error {
+func (s *userController) getFollowing(w http.ResponseWriter, r *http.Request) {
 	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500)
+		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, c)
+	ctx, err = appendUserIDHeader(ctx, r)
 	if err != nil {
-		return err
+		http.Error(w, "Unauthorized", 401)
+		cancel()
+		return
 	}
 	defer cancel()
 
-	userID, err := strconv.Atoi(c.Param("userId"))
+	userID, err := strconv.Atoi(r.PathValue("userId"))
 	if err != nil {
-		return echo.NewHTTPError(400)
+		http.Error(w, "Invalid user ID", 400)
+		return
 	}
-	page, limit, err := getPageAndLimit(c)
+	page, limit, err := getPageAndLimit(r)
 	if err != nil {
-		return err
+		grpcError(w, err)
+		return
 	}
 
 	req := pb.GetUsersRequest{
@@ -242,7 +330,8 @@ func (s *userController) getFollowing(c echo.Context) error {
 	res, err := client.GetFollowing(ctx, &req)
 	if err != nil {
 		log.Printf("Getting following failed: %v", err)
-		return newHTTPError(err)
+		grpcError(w, err)
+		return
 	}
 
 	users := make([]user, len(res.Users))
@@ -250,29 +339,33 @@ func (s *userController) getFollowing(c echo.Context) error {
 		users[i] = mapUser(v)
 	}
 
-	return c.JSON(200, map[string][]user{"items": users})
+	jsonResponse(w, 200, map[string][]user{"items": users})
 }
 
-func (s *userController) searchUsers(c echo.Context) error {
+func (s *userController) searchUsers(w http.ResponseWriter, r *http.Request) {
 	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500)
+		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, c)
+	ctx, err = appendUserIDHeader(ctx, r)
 	if err != nil {
-		return err
+		http.Error(w, "Unauthorized", 401)
+		cancel()
+		return
 	}
 	defer cancel()
 
-	query := c.QueryParam("q")
-	_, limit, err := getPageAndLimit(c)
+	query := r.URL.Query().Get("q")
+	_, limit, err := getPageAndLimit(r)
 	if err != nil {
-		return err
+		grpcError(w, err)
+		return
 	}
 
 	req := pb.SearchUsersRequest{
@@ -283,7 +376,8 @@ func (s *userController) searchUsers(c echo.Context) error {
 	res, err := client.SearchUsers(ctx, &req)
 	if err != nil {
 		log.Printf("Searching users failed: %v", err)
-		return newHTTPError(err)
+		grpcError(w, err)
+		return
 	}
 
 	users := make([]user, len(res.Users))
@@ -291,32 +385,37 @@ func (s *userController) searchUsers(c echo.Context) error {
 		users[i] = mapUser(v)
 	}
 
-	return c.JSON(200, map[string][]user{"items": users})
+	jsonResponse(w, 200, map[string][]user{"items": users})
 }
 
-func (s *userController) getFollowers(c echo.Context) error {
+func (s *userController) getFollowers(w http.ResponseWriter, r *http.Request) {
 	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500)
+		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, c)
+	ctx, err = appendUserIDHeader(ctx, r)
 	if err != nil {
-		return err
+		http.Error(w, "Unauthorized", 401)
+		cancel()
+		return
 	}
 	defer cancel()
 
-	userID, err := strconv.Atoi(c.Param("userId"))
+	userID, err := strconv.Atoi(r.PathValue("userId"))
 	if err != nil {
-		return echo.NewHTTPError(400)
+		http.Error(w, "Invalid user ID", 400)
+		return
 	}
-	page, limit, err := getPageAndLimit(c)
+	page, limit, err := getPageAndLimit(r)
 	if err != nil {
-		return err
+		grpcError(w, err)
+		return
 	}
 
 	req := pb.GetUsersRequest{
@@ -328,7 +427,8 @@ func (s *userController) getFollowers(c echo.Context) error {
 	res, err := client.GetFollowers(ctx, &req)
 	if err != nil {
 		log.Printf("Getting followers failed: %v", err)
-		return newHTTPError(err)
+		grpcError(w, err)
+		return
 	}
 
 	users := make([]user, len(res.Users))
@@ -336,67 +436,77 @@ func (s *userController) getFollowers(c echo.Context) error {
 		users[i] = mapUser(v)
 	}
 
-	return c.JSON(200, map[string][]user{"items": users})
+	jsonResponse(w, 200, map[string][]user{"items": users})
 }
 
-func (s *userController) followUser(c echo.Context) error {
+func (s *userController) followUser(w http.ResponseWriter, r *http.Request) {
 	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500)
+		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, c)
+	ctx, err = appendUserIDHeader(ctx, r)
 	if err != nil {
-		return err
+		http.Error(w, "Unauthorized", 401)
+		cancel()
+		return
 	}
 	defer cancel()
 
-	userID, err := strconv.Atoi(c.Param("userId"))
+	userID, err := strconv.Atoi(r.PathValue("userId"))
 	if err != nil {
-		return echo.NewHTTPError(400)
+		http.Error(w, "Invalid user ID", 400)
+		return
 	}
 	req := pb.UserRequest{UserId: int32(userID)}
 
 	_, err = client.FollowUser(ctx, &req)
 	if err != nil {
 		log.Printf("Following user failed: %v", err)
-		return newHTTPError(err)
+		grpcError(w, err)
+		return
 	}
 
-	return c.NoContent(204)
+	w.WriteHeader(204)
 }
 
-func (s *userController) unfollowUser(c echo.Context) error {
+func (s *userController) unfollowUser(w http.ResponseWriter, r *http.Request) {
 	conn, err := grpc.Dial(s.addr, insecureCredentials(), grpc.WithBlock())
 	if err != nil {
 		log.Printf("Connecting to service failed: %v", err)
-		return echo.NewHTTPError(500)
+		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 	defer conn.Close()
 	client := pb.NewUserServiceClient(conn)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, err = appendUserIDHeader(ctx, c)
+	ctx, err = appendUserIDHeader(ctx, r)
 	if err != nil {
-		return err
+		http.Error(w, "Unauthorized", 401)
+		cancel()
+		return
 	}
 	defer cancel()
 
-	userID, err := strconv.Atoi(c.Param("userId"))
+	userID, err := strconv.Atoi(r.PathValue("userId"))
 	if err != nil {
-		return echo.NewHTTPError(400)
+		http.Error(w, "Invalid user ID", 400)
+		return
 	}
 	req := pb.UserRequest{UserId: int32(userID)}
 
 	_, err = client.UnfollowUser(ctx, &req)
 	if err != nil {
 		log.Printf("Unfollowing user failed: %v", err)
-		return newHTTPError(err)
+		grpcError(w, err)
+		return
 	}
 
-	return c.NoContent(204)
+	w.WriteHeader(204)
 }

@@ -16,17 +16,19 @@ func mapUserWithEmail(u *pb.User, includeEmail bool) user {
 		email = u.Email
 	}
 	return user{
-		ID:        u.Id,
-		Name:      u.Name,
-		Username:  u.Username,
-		Email:     email,
-		Bio:       u.Bio,
-		Posts:     u.Posts,
-		Likes:     u.Likes,
-		Following: u.Following,
-		Followers: u.Followers,
-		Followed:  u.Followed,
-		Created:   u.Created,
+		ID:              u.Id,
+		Name:            u.Name,
+		Username:        u.Username,
+		Email:           email,
+		Bio:             u.Bio,
+		Posts:           u.Posts,
+		Likes:           u.Likes,
+		Following:       u.Following,
+		Followers:       u.Followers,
+		Followed:        u.Followed,
+		Created:         u.Created,
+		ProfilePhotoKey: u.ProfilePhotoKey,
+		CoverPhotoKey:   u.CoverPhotoKey,
 	}
 }
 
@@ -42,5 +44,6 @@ func mapPost(p *pb.Post) post {
 		Created:           p.Created,
 		RethoughtByUserID: p.RethoughtByUserId,
 		RethoughtCreated:  p.RethoughtCreated,
+		MediaKey:          p.MediaKey,
 	}
 }

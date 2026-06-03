@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"time"
@@ -19,12 +20,20 @@ func main() {
 	authAddr := os.Getenv("AUTH_SERVICE_ADDR")
 	postAddr := os.Getenv("POST_SERVICE_ADDR")
 	userAddr := os.Getenv("USER_SERVICE_ADDR")
+	imageAddr := os.Getenv("IMAGE_SERVICE_ADDR")
+	if imageAddr == "" {
+		imageAddr = "imageservice:8081"
+	}
 
-	server := api.CreateServer(authAddr, postAddr, userAddr)
+	handler := api.CreateServer(authAddr, postAddr, userAddr, imageAddr)
+	server := &http.Server{
+		Addr:    fmt.Sprintf(":%s", port),
+		Handler: handler,
+	}
 
 	go func() {
 		log.Printf("Server is starting on port %s", port)
-		if err := server.Start(fmt.Sprintf(":%s", port)); err != nil {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatal(err)
 		}
 	}()

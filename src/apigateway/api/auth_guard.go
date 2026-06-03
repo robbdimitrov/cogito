@@ -1,6 +1,6 @@
 package api
 
-import "github.com/labstack/echo/v4"
+import "net/http"
 
 type route struct {
 	method string
@@ -14,19 +14,20 @@ var allowed = []route{
 	{method: "GET", path: "/"},
 }
 
-func authGuard(ac *authController) func(echo.HandlerFunc) echo.HandlerFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			req := c.Request()
+func authGuard(ac *authController) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			for _, v := range allowed {
-				if req.Method == v.method && req.URL.Path == v.path {
-					return next(c)
+				if r.Method == v.method && r.URL.Path == v.path {
+					next.ServeHTTP(w, r)
+					return
 				}
 			}
-			if err := ac.validateSession(c); err != nil {
-				return err
+			newReq, err := ac.validateSession(w, r)
+			if err != nil {
+				return // validation already wrote error to w
 			}
-			return next(c)
-		}
+			next.ServeHTTP(w, newReq)
+		})
 	}
 }

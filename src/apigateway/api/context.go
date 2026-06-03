@@ -6,28 +6,32 @@ import (
 	"os"
 	"time"
 
-	"github.com/labstack/echo/v4"
 	"google.golang.org/grpc/metadata"
 )
 
 const defaultInternalGRPCToken = "dev-internal-grpc-token"
 
-func getUserID(c echo.Context) string {
-	v, ok := c.Get("userId").(string)
+type contextKey string
+
+const userIDKey contextKey = "userId"
+
+func getUserID(r *http.Request) string {
+	v, ok := r.Context().Value(userIDKey).(string)
 	if !ok {
 		return ""
 	}
 	return v
 }
 
-func setUserID(c echo.Context, userID string) {
-	c.Set("userId", userID)
+func setUserID(r *http.Request, userID string) *http.Request {
+	ctx := context.WithValue(r.Context(), userIDKey, userID)
+	return r.WithContext(ctx)
 }
 
-func appendUserIDHeader(ctx context.Context, c echo.Context) (context.Context, error) {
-	uid := getUserID(c)
+func appendUserIDHeader(ctx context.Context, r *http.Request) (context.Context, error) {
+	uid := getUserID(r)
 	if uid == "" {
-		return nil, echo.NewHTTPError(401)
+		return nil, os.ErrPermission
 	}
 	return appendInternalAuth(metadata.AppendToOutgoingContext(ctx, "user-id", uid)), nil
 }
@@ -40,7 +44,7 @@ func appendInternalAuth(ctx context.Context) context.Context {
 	return metadata.AppendToOutgoingContext(ctx, "internal-token", token)
 }
 
-func createCookie(c echo.Context, sessionID string) {
+func createCookie(w http.ResponseWriter, sessionID string) {
 	cookie := &http.Cookie{
 		Name:     "session",
 		Value:    sessionID,
@@ -50,10 +54,10 @@ func createCookie(c echo.Context, sessionID string) {
 		Secure:   os.Getenv("COOKIE_SECURE") == "true",
 		SameSite: http.SameSiteStrictMode,
 	}
-	c.SetCookie(cookie)
+	http.SetCookie(w, cookie)
 }
 
-func clearCookie(c echo.Context) {
+func clearCookie(w http.ResponseWriter) {
 	cookie := &http.Cookie{
 		Name:     "session",
 		Value:    "",
@@ -64,5 +68,5 @@ func clearCookie(c echo.Context) {
 		Secure:   os.Getenv("COOKIE_SECURE") == "true",
 		SameSite: http.SameSiteStrictMode,
 	}
-	c.SetCookie(cookie)
+	http.SetCookie(w, cookie)
 }

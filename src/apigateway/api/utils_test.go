@@ -5,7 +5,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/labstack/echo/v4"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -30,14 +29,13 @@ func TestGetStatusCode(t *testing.T) {
 	}
 }
 
-func TestNewHTTPError(t *testing.T) {
+func TestGrpcError(t *testing.T) {
 	s := status.New(codes.NotFound, "not found")
-	err := newHTTPError(s.Err())
-	if err.Code != http.StatusNotFound {
-		t.Errorf("expected 404, got %v", err.Code)
-	}
-	if err.Message != "not found" {
-		t.Errorf("expected 'not found', got %v", err.Message)
+	rec := httptest.NewRecorder()
+	grpcError(rec, s.Err())
+	
+	if rec.Code != http.StatusNotFound {
+		t.Errorf("expected 404, got %v", rec.Code)
 	}
 }
 
@@ -49,24 +47,20 @@ func TestInsecureCredentials(t *testing.T) {
 }
 
 func TestGetIntQuery(t *testing.T) {
-	e := echo.New()
 	req := httptest.NewRequest(http.MethodGet, "/?valid=10&invalid=abc", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
 
-	if val, err := getIntQuery(c, "empty", 5); err != nil || val != 5 {
+	if val, err := getIntQuery(req, "empty", 5); err != nil || val != 5 {
 		t.Errorf("expected 5, got %v with error %v", val, err)
 	}
-	if val, err := getIntQuery(c, "valid", 5); err != nil || val != 10 {
+	if val, err := getIntQuery(req, "valid", 5); err != nil || val != 10 {
 		t.Errorf("expected 10, got %v with error %v", val, err)
 	}
-	if _, err := getIntQuery(c, "invalid", 5); err == nil {
+	if _, err := getIntQuery(req, "invalid", 5); err == nil {
 		t.Errorf("expected error, got nil")
 	}
 }
 
 func TestGetPageAndLimit(t *testing.T) {
-	e := echo.New()
 	tests := []struct {
 		query       string
 		page        int
@@ -84,8 +78,7 @@ func TestGetPageAndLimit(t *testing.T) {
 
 	for _, tt := range tests {
 		req := httptest.NewRequest(http.MethodGet, tt.query, nil)
-		c := e.NewContext(req, httptest.NewRecorder())
-		page, limit, err := getPageAndLimit(c)
+		page, limit, err := getPageAndLimit(req)
 		if tt.expectError {
 			if err == nil {
 				t.Errorf("expected error for query %s, got nil", tt.query)

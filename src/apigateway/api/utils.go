@@ -1,10 +1,10 @@
 package api
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 
-	"github.com/labstack/echo/v4"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
@@ -28,10 +28,18 @@ func getStatusCode(s *status.Status) int {
 	}
 }
 
-// newHTTPError converts grpc error to http error
-func newHTTPError(err error) *echo.HTTPError {
+// grpcError writes grpc error to http response
+func grpcError(w http.ResponseWriter, err error) {
 	s := status.Convert(err)
-	return echo.NewHTTPError(getStatusCode(s), s.Proto().GetMessage())
+	http.Error(w, s.Proto().GetMessage(), getStatusCode(s))
+}
+
+func jsonResponse(w http.ResponseWriter, status int, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	if data != nil {
+		json.NewEncoder(w).Encode(data)
+	}
 }
 
 func insecureCredentials() grpc.DialOption {
@@ -39,8 +47,8 @@ func insecureCredentials() grpc.DialOption {
 }
 
 // getIntQuery parses an integer query parameter with a fallback default value.
-func getIntQuery(c echo.Context, key string, defaultValue int) (int, error) {
-	value := c.QueryParam(key)
+func getIntQuery(r *http.Request, key string, defaultValue int) (int, error) {
+	value := r.URL.Query().Get(key)
 	if value == "" {
 		return defaultValue, nil
 	}
@@ -51,20 +59,20 @@ func getIntQuery(c echo.Context, key string, defaultValue int) (int, error) {
 	return parsed, nil
 }
 
-func getPageAndLimit(c echo.Context) (int, int, error) {
-	page, err := getIntQuery(c, "page", 0)
+func getPageAndLimit(r *http.Request) (int, int, error) {
+	page, err := getIntQuery(r, "page", 0)
 	if err != nil {
 		return 0, 0, err
 	}
-	limit, err := getIntQuery(c, "limit", 20)
+	limit, err := getIntQuery(r, "limit", 20)
 	if err != nil {
 		return 0, 0, err
 	}
 	if page < 0 {
-		return 0, 0, echo.NewHTTPError(http.StatusBadRequest, "Page must be zero or greater")
+		return 0, 0, status.Error(codes.InvalidArgument, "Page must be zero or greater")
 	}
 	if limit < 1 || limit > 100 {
-		return 0, 0, echo.NewHTTPError(http.StatusBadRequest, "Limit must be between 1 and 100")
+		return 0, 0, status.Error(codes.InvalidArgument, "Limit must be between 1 and 100")
 	}
 	return page, limit, nil
 }
