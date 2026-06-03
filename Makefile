@@ -33,3 +33,15 @@ postservice: proto
 userservice:
 	docker build -t localhost:5000/thoughts/userservice -f src/userservice/Dockerfile .
 
+.PHONY: test
+test:
+	@echo "Testing apigateway..."
+	@cd src/apigateway && go test -v ./...
+	@echo "Testing postservice..."
+	@cd src/postservice && go test -v ./...
+	@echo "Testing authservice..."
+	@cd src/authservice && cargo test
+	@echo "Testing userservice..."
+	@cd src/userservice && cargo test
+	@echo "Testing frontend..."
+	@cd src/frontend && npm run test

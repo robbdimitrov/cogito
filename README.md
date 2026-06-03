@@ -24,6 +24,15 @@ Deploy the application to your active Kubernetes cluster using the provided scri
 
 The script builds the Docker images, creates the Kubernetes namespace (`thoughts` by default) and resources, waits for pods to be ready, and starts a port-forward to the frontend at http://localhost:8080/. It is idempotent and safe to re-run for updates.
 
+## Testing
+
+Run all unit tests across the frontend and backend microservices using the provided `Makefile` target:
+
+```sh
+make test
+```
+
+
 **Prerequisites:** `kubectl`, `docker`, and `make` must be installed.
 
 **Cleanup:**

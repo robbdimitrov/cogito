@@ -95,14 +95,16 @@ kubectl delete namespace thoughts
 
 ## Testing
 
-Unit tests exist for the Rust services. Run `cargo test` inside the respective service directory. For Go services, follow the 80/20 rule for test coverage (aim for ~80% coverage focusing on the most critical 20% of code).
+You can run all unit tests across the frontend and backend microservices using the provided `Makefile` target:
 
-Frontend tests are written with Vitest and React Testing Library. To run them:
 ```sh
-cd src/frontend
-npm run test
+make test
 ```
-Follow the 80/20 rule for frontend test coverage as well, focusing on critical utility functions, hooks, and core shared components.
+
+Alternatively, you can run tests for individual services:
+- **Rust services**: Run `cargo test` inside the respective service directory.
+- **Go services**: Run `go test -v ./...` inside the respective service directory. Follow the 80/20 rule for test coverage (aim for ~80% coverage focusing on the most critical 20% of code).
+- **Frontend**: Tests are written with Vitest and React Testing Library. Run `npm run test` inside `src/frontend`. Follow the 80/20 rule for frontend test coverage as well, focusing on critical utility functions, hooks, and core shared components.
 
 ## Database Notes
 
