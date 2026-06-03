@@ -60,6 +60,11 @@ spec:
             secretKeyRef:
               name: thoughts-db-secret
               key: internal-grpc-token
+        - name: SESSION_HMAC_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: thoughts-db-secret
+              key: session-hmac-secret
         livenessProbe:
           httpGet:
             path: /

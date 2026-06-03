@@ -64,7 +64,9 @@ impl crate::controller::AuthDb for DbClient {
     }
 
     async fn get_session(&self, session_id: &str) -> Result<Option<crate::thoughts::Session>, sqlx::Error> {
-        self.delete_expired_sessions().await?;
+        if let Err(e) = self.delete_expired_sessions().await {
+            eprintln!("Failed to delete expired sessions: {}", e);
+        }
         let ttl = session_ttl_days();
         let row = sqlx::query_as::<_, (String, i32, String)>(
             r#"SELECT id, user_id, time_format(created) as created
@@ -84,7 +86,9 @@ impl crate::controller::AuthDb for DbClient {
     }
 
     async fn get_sessions(&self, user_id: i32) -> Result<Vec<crate::thoughts::Session>, sqlx::Error> {
-        self.delete_expired_sessions().await?;
+        if let Err(e) = self.delete_expired_sessions().await {
+            eprintln!("Failed to delete expired sessions: {}", e);
+        }
         let ttl = session_ttl_days();
         let rows = sqlx::query_as::<_, (String, i32, String)>(
             r#"SELECT id, user_id, time_format(created) as created

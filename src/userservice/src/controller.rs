@@ -39,6 +39,8 @@ impl<D: UserDb> UserService for Controller<D> {
         let req = request.into_inner();
         if req.username.is_empty() || req.email.is_empty() || req.password.is_empty() {
             return Err(Status::invalid_argument("Name, username, email and password are required."));
+        } else if req.password.len() < 8 {
+            return Err(Status::invalid_argument("Password must be at least 8 characters long."));
         } else if !is_valid_email(&req.email) {
             return Err(Status::invalid_argument("Invalid email address."));
         }
@@ -89,6 +91,10 @@ impl<D: UserDb> UserService for Controller<D> {
             let (_, hash_str) = user;
             if !validate_password(&req.old_password, &hash_str).unwrap_or(false) {
                 return Err(Status::invalid_argument("Wrong password. Enter the correct current password."));
+            }
+
+            if req.password.len() < 8 {
+                return Err(Status::invalid_argument("New password must be at least 8 characters long."));
             }
 
             let new_hash = generate_hash(&req.password).map_err(|e| {

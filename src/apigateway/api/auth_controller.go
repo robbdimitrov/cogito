@@ -8,6 +8,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	pb "github.com/robbdimitrov/thoughts/src/apigateway/genproto"
 )
@@ -79,7 +81,10 @@ func (ac *authController) validateSession(c echo.Context) error {
 	res, err := client.GetSession(ctx, &req)
 	if err != nil {
 		log.Printf("Validating session failed: %v", err)
-		clearCookie(c)
+		s := status.Convert(err)
+		if s.Code() == codes.Unauthenticated {
+			clearCookie(c)
+		}
 		return newHTTPError(err)
 	}
 
@@ -184,7 +189,10 @@ func (ac *authController) getSessions(c echo.Context) error {
 	validateRes, err := client.GetSession(ctx, &validateReq)
 	if err != nil {
 		log.Printf("Validating session failed: %v", err)
-		clearCookie(c)
+		s := status.Convert(err)
+		if s.Code() == codes.Unauthenticated {
+			clearCookie(c)
+		}
 		return newHTTPError(err)
 	}
 

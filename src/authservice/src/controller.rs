@@ -2,6 +2,19 @@ use bcrypt::verify;
 use tonic::{Request, Response, Status};
 use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine as _};
 use rand::RngCore;
+use sha2::Sha256;
+use hmac::{Hmac, Mac, KeyInit};
+use std::env;
+
+type HmacSha256 = Hmac<Sha256>;
+
+fn hash_session_id(session_id: &str) -> String {
+    let secret = env::var("SESSION_HMAC_SECRET").unwrap_or_else(|_| "default-session-secret-change-me".to_string());
+    let mut mac = HmacSha256::new_from_slice(secret.as_bytes())
+        .expect("HMAC can take key of any size");
+    mac.update(session_id.as_bytes());
+    URL_SAFE_NO_PAD.encode(mac.finalize().into_bytes())
+}
 
 use crate::thoughts::auth_service_server::AuthService;
 use crate::thoughts::{Credentials, Empty, Session, SessionRequest, Sessions, UserRequest};
@@ -52,11 +65,15 @@ impl<D: AuthDb> AuthService for Controller<D> {
                 let mut key = [0u8; 21];
                 rand::thread_rng().fill_bytes(&mut key);
                 let session_id = URL_SAFE_NO_PAD.encode(&key);
-                let session = self.db_client.create_session(&session_id, user_id).await.map_err(|e| {
+
+                let hashed_id = hash_session_id(&session_id);
+
+                let mut session = self.db_client.create_session(&hashed_id, user_id).await.map_err(|e| {
                     eprintln!("Creating session failed: {}", e);
                     Status::internal("Internal server error.")
                 })?;
 
+                session.id = session_id;
                 Ok(Response::new(session))
             }
             None => Err(Status::unauthenticated("Incorrect email or password.")),
@@ -68,13 +85,18 @@ impl<D: AuthDb> AuthService for Controller<D> {
         request: Request<SessionRequest>,
     ) -> Result<Response<Session>, Status> {
         let req = request.into_inner();
-        let session_opt = self.db_client.get_session(&req.session_id).await.map_err(|e| {
+        let hashed_id = hash_session_id(&req.session_id);
+
+        let session_opt = self.db_client.get_session(&hashed_id).await.map_err(|e| {
             eprintln!("Getting session failed: {}", e);
             Status::internal("Internal server error.")
         })?;
 
         match session_opt {
-            Some(session) => Ok(Response::new(session)),
+            Some(mut session) => {
+                session.id = req.session_id;
+                Ok(Response::new(session))
+            },
             None => Err(Status::unauthenticated("Session not found.")),
         }
     }
@@ -99,10 +121,15 @@ impl<D: AuthDb> AuthService for Controller<D> {
         request: Request<SessionRequest>,
     ) -> Result<Response<Empty>, Status> {
         let req = request.into_inner();
-        self.db_client.delete_session(&req.session_id).await.map_err(|e| {
-            eprintln!("Deleting session failed: {}", e);
-            Status::internal("Internal server error.")
-        })?;
+        let hashed_id = hash_session_id(&req.session_id);
+
+        let res1 = self.db_client.delete_session(&hashed_id).await;
+        let res2 = self.db_client.delete_session(&req.session_id).await;
+
+        if res1.is_err() && res2.is_err() {
+            eprintln!("Deleting session failed");
+            return Err(Status::internal("Internal server error."));
+        }
 
         Ok(Response::new(Empty {}))
     }
@@ -138,7 +165,9 @@ mod tests {
         }
 
         async fn get_session(&self, session_id: &str) -> Result<Option<Session>, sqlx::Error> {
-            if session_id == "valid_session" {
+            let expected_hashed_id = hash_session_id("valid_session");
+
+            if session_id == expected_hashed_id {
                 Ok(Some(Session {
                     id: session_id.to_string(),
                     user_id: 1,

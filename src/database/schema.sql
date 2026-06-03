@@ -55,6 +55,14 @@ CREATE TABLE reposts (
   UNIQUE(post_id, user_id)
 );
 
+-- Rate Limits
+
+CREATE TABLE rate_limits (
+  id varchar(255) PRIMARY KEY,
+  tokens integer NOT NULL,
+  last_updated timestamp NOT NULL DEFAULT now()
+);
+
 -- Utils
 
 CREATE OR REPLACE FUNCTION time_format(origin timestamp)

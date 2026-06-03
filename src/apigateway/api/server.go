@@ -25,6 +25,7 @@ func CreateServer(addrs ...string) *echo.Echo {
 	})
 
 	server.Use(middleware.Recover())
+	server.Use(middleware.Secure())
 	server.Use(middleware.BodyLimit("2M"))
 	server.Use(middleware.CSRFWithConfig(middleware.CSRFConfig{
 		TokenLookup:    "header:X-CSRF-Token",
@@ -34,7 +35,6 @@ func CreateServer(addrs ...string) *echo.Echo {
 		Skipper: func(c echo.Context) bool {
 			for _, v := range []route{
 				{method: "POST", path: "/sessions"},
-				{method: "DELETE", path: "/sessions"},
 				{method: "POST", path: "/users"},
 				{method: "GET", path: "/"},
 			} {
@@ -43,6 +43,27 @@ func CreateServer(addrs ...string) *echo.Echo {
 				}
 			}
 			return false
+		},
+	}))
+
+	rlStore := NewPostgresRateLimiterStore(5, 0.5)
+	server.Use(middleware.RateLimiterWithConfig(middleware.RateLimiterConfig{
+		Store: rlStore,
+		IdentifierExtractor: func(c echo.Context) (string, error) {
+			return c.RealIP(), nil
+		},
+		ErrorHandler: func(c echo.Context, err error) error {
+			return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+		},
+		DenyHandler: func(c echo.Context, identifier string, err error) error {
+			return echo.NewHTTPError(http.StatusTooManyRequests, "Too many requests")
+		},
+		Skipper: func(c echo.Context) bool {
+			req := c.Request()
+			if req.Method == "POST" && (req.URL.Path == "/sessions" || req.URL.Path == "/users") {
+				return false
+			}
+			return true
 		},
 	}))
 

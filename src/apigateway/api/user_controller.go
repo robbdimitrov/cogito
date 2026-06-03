@@ -2,7 +2,11 @@ package api
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
 	"log"
+	"os"
 	"strconv"
 	"time"
 
@@ -13,11 +17,12 @@ import (
 )
 
 type userController struct {
-	addr string
+	addr     string
+	authAddr string
 }
 
-func newUserController(addr string) *userController {
-	return &userController{addr}
+func newUserController(addr string, authAddr string) *userController {
+	return &userController{addr, authAddr}
 }
 
 func (s *userController) createUser(c echo.Context) error {
@@ -167,6 +172,37 @@ func (s *userController) updateUser(c echo.Context) error {
 	if err != nil {
 		log.Printf("Updating user failed: %v", err)
 		return newHTTPError(err)
+	}
+
+	if body.Password != "" {
+		authConn, err := grpc.Dial(s.authAddr, insecureCredentials(), grpc.WithBlock())
+		if err == nil {
+			defer authConn.Close()
+			authClient := pb.NewAuthServiceClient(authConn)
+			
+			var currentSessionID string
+			if cookie, err := c.Cookie("session"); err == nil {
+				currentSessionID = cookie.Value
+			}
+
+			secret := os.Getenv("SESSION_HMAC_SECRET")
+			if secret == "" {
+				secret = "default-session-secret-change-me"
+			}
+			h := hmac.New(sha256.New, []byte(secret))
+			h.Write([]byte(currentSessionID))
+			currentHashedSessionID := base64.RawURLEncoding.EncodeToString(h.Sum(nil))
+
+			userIDInt, _ := strconv.Atoi(currentUserID)
+			sessionsRes, err := authClient.GetSessions(ctx, &pb.UserRequest{UserId: int32(userIDInt)})
+			if err == nil {
+				for _, sess := range sessionsRes.Sessions {
+					if sess.Id != currentHashedSessionID {
+						_, _ = authClient.DeleteSession(ctx, &pb.SessionRequest{SessionId: sess.Id})
+					}
+				}
+			}
+		}
 	}
 
 	return c.NoContent(204)

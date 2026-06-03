@@ -14,7 +14,7 @@ func newRouter(addrs ...string) *router {
 	return &router{
 		auth: newAuthController(addrs[0]),
 		post: newPostController(addrs[1]),
-		user: newUserController(addrs[2]),
+		user: newUserController(addrs[2], addrs[0]),
 	}
 }
 
