@@ -1121,3 +1121,181 @@ var PostService_ServiceDesc = grpc.ServiceDesc{
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "pb/thoughts.proto",
 }
+
+const (
+	ImageService_VerifyUpload_FullMethodName  = "/thoughts.ImageService/VerifyUpload"
+	ImageService_ConsumeUpload_FullMethodName = "/thoughts.ImageService/ConsumeUpload"
+	ImageService_DeleteImage_FullMethodName   = "/thoughts.ImageService/DeleteImage"
+)
+
+// ImageServiceClient is the client API for ImageService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type ImageServiceClient interface {
+	VerifyUpload(ctx context.Context, in *VerifyUploadRequest, opts ...grpc.CallOption) (*Empty, error)
+	ConsumeUpload(ctx context.Context, in *ConsumeUploadRequest, opts ...grpc.CallOption) (*Empty, error)
+	DeleteImage(ctx context.Context, in *DeleteImageRequest, opts ...grpc.CallOption) (*Empty, error)
+}
+
+type imageServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewImageServiceClient(cc grpc.ClientConnInterface) ImageServiceClient {
+	return &imageServiceClient{cc}
+}
+
+func (c *imageServiceClient) VerifyUpload(ctx context.Context, in *VerifyUploadRequest, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, ImageService_VerifyUpload_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *imageServiceClient) ConsumeUpload(ctx context.Context, in *ConsumeUploadRequest, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, ImageService_ConsumeUpload_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *imageServiceClient) DeleteImage(ctx context.Context, in *DeleteImageRequest, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, ImageService_DeleteImage_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// ImageServiceServer is the server API for ImageService service.
+// All implementations must embed UnimplementedImageServiceServer
+// for forward compatibility.
+type ImageServiceServer interface {
+	VerifyUpload(context.Context, *VerifyUploadRequest) (*Empty, error)
+	ConsumeUpload(context.Context, *ConsumeUploadRequest) (*Empty, error)
+	DeleteImage(context.Context, *DeleteImageRequest) (*Empty, error)
+	mustEmbedUnimplementedImageServiceServer()
+}
+
+// UnimplementedImageServiceServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedImageServiceServer struct{}
+
+func (UnimplementedImageServiceServer) VerifyUpload(context.Context, *VerifyUploadRequest) (*Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method VerifyUpload not implemented")
+}
+func (UnimplementedImageServiceServer) ConsumeUpload(context.Context, *ConsumeUploadRequest) (*Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method ConsumeUpload not implemented")
+}
+func (UnimplementedImageServiceServer) DeleteImage(context.Context, *DeleteImageRequest) (*Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteImage not implemented")
+}
+func (UnimplementedImageServiceServer) mustEmbedUnimplementedImageServiceServer() {}
+func (UnimplementedImageServiceServer) testEmbeddedByValue()                      {}
+
+// UnsafeImageServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ImageServiceServer will
+// result in compilation errors.
+type UnsafeImageServiceServer interface {
+	mustEmbedUnimplementedImageServiceServer()
+}
+
+func RegisterImageServiceServer(s grpc.ServiceRegistrar, srv ImageServiceServer) {
+	// If the following call panics, it indicates UnimplementedImageServiceServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&ImageService_ServiceDesc, srv)
+}
+
+func _ImageService_VerifyUpload_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VerifyUploadRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ImageServiceServer).VerifyUpload(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ImageService_VerifyUpload_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ImageServiceServer).VerifyUpload(ctx, req.(*VerifyUploadRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ImageService_ConsumeUpload_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConsumeUploadRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ImageServiceServer).ConsumeUpload(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ImageService_ConsumeUpload_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ImageServiceServer).ConsumeUpload(ctx, req.(*ConsumeUploadRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ImageService_DeleteImage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteImageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ImageServiceServer).DeleteImage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ImageService_DeleteImage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ImageServiceServer).DeleteImage(ctx, req.(*DeleteImageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// ImageService_ServiceDesc is the grpc.ServiceDesc for ImageService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var ImageService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "thoughts.ImageService",
+	HandlerType: (*ImageServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "VerifyUpload",
+			Handler:    _ImageService_VerifyUpload_Handler,
+		},
+		{
+			MethodName: "ConsumeUpload",
+			Handler:    _ImageService_ConsumeUpload_Handler,
+		},
+		{
+			MethodName: "DeleteImage",
+			Handler:    _ImageService_DeleteImage_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "pb/thoughts.proto",
+}

@@ -10,6 +10,8 @@ CREATE TABLE users (
   email varchar(255) UNIQUE NOT NULL,
   password varchar(255) NOT NULL,
   bio varchar(255) DEFAULT '',
+  profile_photo_key varchar(255) DEFAULT '',
+  cover_photo_key varchar(255) DEFAULT '',
   created timestamp NOT NULL DEFAULT now()
 );
 
@@ -19,6 +21,14 @@ CREATE TABLE followers (
   created timestamp NOT NULL DEFAULT now(),
   CHECK (user_id <> follower_id),
   UNIQUE(user_id, follower_id)
+);
+
+-- Uploads Staging
+
+CREATE TABLE uploads (
+  filename varchar(255) PRIMARY KEY,
+  user_id integer REFERENCES users ON DELETE CASCADE,
+  created timestamp NOT NULL DEFAULT now()
 );
 
 -- Sessions
@@ -36,6 +46,7 @@ CREATE TABLE posts (
   user_id integer REFERENCES users ON DELETE CASCADE,
   content varchar(255) NOT NULL,
   hashtags varchar(50)[] DEFAULT '{}',
+  media_key varchar(255) DEFAULT '',
   created timestamp NOT NULL DEFAULT now()
 );
 

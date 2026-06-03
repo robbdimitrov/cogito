@@ -32,6 +32,8 @@ message User {
   int32 followers = 9;
   bool followed = 10;
   string created = 11;
+  string profile_photo_key = 12;
+  string cover_photo_key = 13;
 }
 
 message UpdateUserRequest {
@@ -41,6 +43,8 @@ message UpdateUserRequest {
   string password = 4;
   string old_password = 5;
   string bio = 6;
+  optional string profile_photo_key = 7;
+  optional string cover_photo_key = 8;
 }
 
 message GetUsersRequest {
@@ -108,6 +112,7 @@ service AuthService {
 
 message CreatePostRequest {
   string content = 1;
+  optional string media_key = 2;
 }
 
 message PostRequest {
@@ -125,6 +130,7 @@ message Post {
   string created = 8;
   int32 rethought_by_user_id = 9;
   string rethought_created = 10;
+  string media_key = 11;
 }
 
 message GetFeedRequest {
@@ -160,4 +166,25 @@ service PostService {
   rpc UnlikePost(PostRequest) returns (Empty);
   rpc RepostPost(PostRequest) returns (Empty);
   rpc RemoveRepost(PostRequest) returns (Empty);
+}
+
+// Images
+
+message VerifyUploadRequest {
+  string filename = 1;
+  int32 user_id = 2;
+}
+
+message ConsumeUploadRequest {
+  string filename = 1;
+}
+
+message DeleteImageRequest {
+  string filename = 1;
+}
+
+service ImageService {
+  rpc VerifyUpload(VerifyUploadRequest) returns (Empty);
+  rpc ConsumeUpload(ConsumeUploadRequest) returns (Empty);
+  rpc DeleteImage(DeleteImageRequest) returns (Empty);
 }

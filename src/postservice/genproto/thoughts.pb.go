@@ -178,20 +178,22 @@ func (x *UserRequest) GetUserId() int32 {
 }
 
 type User struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	Username      string                 `protobuf:"bytes,3,opt,name=username,proto3" json:"username,omitempty"`
-	Email         string                 `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
-	Bio           string                 `protobuf:"bytes,5,opt,name=bio,proto3" json:"bio,omitempty"`
-	Posts         int32                  `protobuf:"varint,6,opt,name=posts,proto3" json:"posts,omitempty"`
-	Likes         int32                  `protobuf:"varint,7,opt,name=likes,proto3" json:"likes,omitempty"`
-	Following     int32                  `protobuf:"varint,8,opt,name=following,proto3" json:"following,omitempty"`
-	Followers     int32                  `protobuf:"varint,9,opt,name=followers,proto3" json:"followers,omitempty"`
-	Followed      bool                   `protobuf:"varint,10,opt,name=followed,proto3" json:"followed,omitempty"`
-	Created       string                 `protobuf:"bytes,11,opt,name=created,proto3" json:"created,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Id              int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name            string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Username        string                 `protobuf:"bytes,3,opt,name=username,proto3" json:"username,omitempty"`
+	Email           string                 `protobuf:"bytes,4,opt,name=email,proto3" json:"email,omitempty"`
+	Bio             string                 `protobuf:"bytes,5,opt,name=bio,proto3" json:"bio,omitempty"`
+	Posts           int32                  `protobuf:"varint,6,opt,name=posts,proto3" json:"posts,omitempty"`
+	Likes           int32                  `protobuf:"varint,7,opt,name=likes,proto3" json:"likes,omitempty"`
+	Following       int32                  `protobuf:"varint,8,opt,name=following,proto3" json:"following,omitempty"`
+	Followers       int32                  `protobuf:"varint,9,opt,name=followers,proto3" json:"followers,omitempty"`
+	Followed        bool                   `protobuf:"varint,10,opt,name=followed,proto3" json:"followed,omitempty"`
+	Created         string                 `protobuf:"bytes,11,opt,name=created,proto3" json:"created,omitempty"`
+	ProfilePhotoKey string                 `protobuf:"bytes,12,opt,name=profile_photo_key,json=profilePhotoKey,proto3" json:"profile_photo_key,omitempty"`
+	CoverPhotoKey   string                 `protobuf:"bytes,13,opt,name=cover_photo_key,json=coverPhotoKey,proto3" json:"cover_photo_key,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *User) Reset() {
@@ -301,16 +303,32 @@ func (x *User) GetCreated() string {
 	return ""
 }
 
+func (x *User) GetProfilePhotoKey() string {
+	if x != nil {
+		return x.ProfilePhotoKey
+	}
+	return ""
+}
+
+func (x *User) GetCoverPhotoKey() string {
+	if x != nil {
+		return x.CoverPhotoKey
+	}
+	return ""
+}
+
 type UpdateUserRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Username      string                 `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
-	Email         string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
-	Password      string                 `protobuf:"bytes,4,opt,name=password,proto3" json:"password,omitempty"`
-	OldPassword   string                 `protobuf:"bytes,5,opt,name=old_password,json=oldPassword,proto3" json:"old_password,omitempty"`
-	Bio           string                 `protobuf:"bytes,6,opt,name=bio,proto3" json:"bio,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Name            string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Username        string                 `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
+	Email           string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
+	Password        string                 `protobuf:"bytes,4,opt,name=password,proto3" json:"password,omitempty"`
+	OldPassword     string                 `protobuf:"bytes,5,opt,name=old_password,json=oldPassword,proto3" json:"old_password,omitempty"`
+	Bio             string                 `protobuf:"bytes,6,opt,name=bio,proto3" json:"bio,omitempty"`
+	ProfilePhotoKey *string                `protobuf:"bytes,7,opt,name=profile_photo_key,json=profilePhotoKey,proto3,oneof" json:"profile_photo_key,omitempty"`
+	CoverPhotoKey   *string                `protobuf:"bytes,8,opt,name=cover_photo_key,json=coverPhotoKey,proto3,oneof" json:"cover_photo_key,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *UpdateUserRequest) Reset() {
@@ -381,6 +399,20 @@ func (x *UpdateUserRequest) GetOldPassword() string {
 func (x *UpdateUserRequest) GetBio() string {
 	if x != nil {
 		return x.Bio
+	}
+	return ""
+}
+
+func (x *UpdateUserRequest) GetProfilePhotoKey() string {
+	if x != nil && x.ProfilePhotoKey != nil {
+		return *x.ProfilePhotoKey
+	}
+	return ""
+}
+
+func (x *UpdateUserRequest) GetCoverPhotoKey() string {
+	if x != nil && x.CoverPhotoKey != nil {
+		return *x.CoverPhotoKey
 	}
 	return ""
 }
@@ -824,6 +856,7 @@ func (x *Sessions) GetSessions() []*Session {
 type CreatePostRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Content       string                 `protobuf:"bytes,1,opt,name=content,proto3" json:"content,omitempty"`
+	MediaKey      *string                `protobuf:"bytes,2,opt,name=media_key,json=mediaKey,proto3,oneof" json:"media_key,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -861,6 +894,13 @@ func (*CreatePostRequest) Descriptor() ([]byte, []int) {
 func (x *CreatePostRequest) GetContent() string {
 	if x != nil {
 		return x.Content
+	}
+	return ""
+}
+
+func (x *CreatePostRequest) GetMediaKey() string {
+	if x != nil && x.MediaKey != nil {
+		return *x.MediaKey
 	}
 	return ""
 }
@@ -921,6 +961,7 @@ type Post struct {
 	Created           string                 `protobuf:"bytes,8,opt,name=created,proto3" json:"created,omitempty"`
 	RethoughtByUserId int32                  `protobuf:"varint,9,opt,name=rethought_by_user_id,json=rethoughtByUserId,proto3" json:"rethought_by_user_id,omitempty"`
 	RethoughtCreated  string                 `protobuf:"bytes,10,opt,name=rethought_created,json=rethoughtCreated,proto3" json:"rethought_created,omitempty"`
+	MediaKey          string                 `protobuf:"bytes,11,opt,name=media_key,json=mediaKey,proto3" json:"media_key,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -1021,6 +1062,13 @@ func (x *Post) GetRethoughtByUserId() int32 {
 func (x *Post) GetRethoughtCreated() string {
 	if x != nil {
 		return x.RethoughtCreated
+	}
+	return ""
+}
+
+func (x *Post) GetMediaKey() string {
+	if x != nil {
+		return x.MediaKey
 	}
 	return ""
 }
@@ -1241,6 +1289,146 @@ func (x *GetHashtagPostsRequest) GetLimit() int32 {
 	return 0
 }
 
+type VerifyUploadRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Filename      string                 `protobuf:"bytes,1,opt,name=filename,proto3" json:"filename,omitempty"`
+	UserId        int32                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VerifyUploadRequest) Reset() {
+	*x = VerifyUploadRequest{}
+	mi := &file_pb_thoughts_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VerifyUploadRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VerifyUploadRequest) ProtoMessage() {}
+
+func (x *VerifyUploadRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pb_thoughts_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VerifyUploadRequest.ProtoReflect.Descriptor instead.
+func (*VerifyUploadRequest) Descriptor() ([]byte, []int) {
+	return file_pb_thoughts_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *VerifyUploadRequest) GetFilename() string {
+	if x != nil {
+		return x.Filename
+	}
+	return ""
+}
+
+func (x *VerifyUploadRequest) GetUserId() int32 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+type ConsumeUploadRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Filename      string                 `protobuf:"bytes,1,opt,name=filename,proto3" json:"filename,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ConsumeUploadRequest) Reset() {
+	*x = ConsumeUploadRequest{}
+	mi := &file_pb_thoughts_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConsumeUploadRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConsumeUploadRequest) ProtoMessage() {}
+
+func (x *ConsumeUploadRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pb_thoughts_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConsumeUploadRequest.ProtoReflect.Descriptor instead.
+func (*ConsumeUploadRequest) Descriptor() ([]byte, []int) {
+	return file_pb_thoughts_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *ConsumeUploadRequest) GetFilename() string {
+	if x != nil {
+		return x.Filename
+	}
+	return ""
+}
+
+type DeleteImageRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Filename      string                 `protobuf:"bytes,1,opt,name=filename,proto3" json:"filename,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteImageRequest) Reset() {
+	*x = DeleteImageRequest{}
+	mi := &file_pb_thoughts_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteImageRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteImageRequest) ProtoMessage() {}
+
+func (x *DeleteImageRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pb_thoughts_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteImageRequest.ProtoReflect.Descriptor instead.
+func (*DeleteImageRequest) Descriptor() ([]byte, []int) {
+	return file_pb_thoughts_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *DeleteImageRequest) GetFilename() string {
+	if x != nil {
+		return x.Filename
+	}
+	return ""
+}
+
 var File_pb_thoughts_proto protoreflect.FileDescriptor
 
 const file_pb_thoughts_proto_rawDesc = "" +
@@ -1255,7 +1443,7 @@ const file_pb_thoughts_proto_rawDesc = "" +
 	"Identifier\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\"&\n" +
 	"\vUserRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x05R\x06userId\"\x8c\x02\n" +
+	"\auser_id\x18\x01 \x01(\x05R\x06userId\"\xe0\x02\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1a\n" +
@@ -1268,14 +1456,20 @@ const file_pb_thoughts_proto_rawDesc = "" +
 	"\tfollowers\x18\t \x01(\x05R\tfollowers\x12\x1a\n" +
 	"\bfollowed\x18\n" +
 	" \x01(\bR\bfollowed\x12\x18\n" +
-	"\acreated\x18\v \x01(\tR\acreated\"\xaa\x01\n" +
+	"\acreated\x18\v \x01(\tR\acreated\x12*\n" +
+	"\x11profile_photo_key\x18\f \x01(\tR\x0fprofilePhotoKey\x12&\n" +
+	"\x0fcover_photo_key\x18\r \x01(\tR\rcoverPhotoKey\"\xb2\x02\n" +
 	"\x11UpdateUserRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1a\n" +
 	"\busername\x18\x02 \x01(\tR\busername\x12\x14\n" +
 	"\x05email\x18\x03 \x01(\tR\x05email\x12\x1a\n" +
 	"\bpassword\x18\x04 \x01(\tR\bpassword\x12!\n" +
 	"\fold_password\x18\x05 \x01(\tR\voldPassword\x12\x10\n" +
-	"\x03bio\x18\x06 \x01(\tR\x03bio\"T\n" +
+	"\x03bio\x18\x06 \x01(\tR\x03bio\x12/\n" +
+	"\x11profile_photo_key\x18\a \x01(\tH\x00R\x0fprofilePhotoKey\x88\x01\x01\x12+\n" +
+	"\x0fcover_photo_key\x18\b \x01(\tH\x01R\rcoverPhotoKey\x88\x01\x01B\x14\n" +
+	"\x12_profile_photo_keyB\x12\n" +
+	"\x10_cover_photo_key\"T\n" +
 	"\x0fGetUsersRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\x05R\x06userId\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x14\n" +
@@ -1299,11 +1493,14 @@ const file_pb_thoughts_proto_rawDesc = "" +
 	"\auser_id\x18\x02 \x01(\x05R\x06userId\x12\x18\n" +
 	"\acreated\x18\x03 \x01(\tR\acreated\"9\n" +
 	"\bSessions\x12-\n" +
-	"\bsessions\x18\x01 \x03(\v2\x11.thoughts.SessionR\bsessions\"-\n" +
+	"\bsessions\x18\x01 \x03(\v2\x11.thoughts.SessionR\bsessions\"]\n" +
 	"\x11CreatePostRequest\x12\x18\n" +
-	"\acontent\x18\x01 \x01(\tR\acontent\"&\n" +
+	"\acontent\x18\x01 \x01(\tR\acontent\x12 \n" +
+	"\tmedia_key\x18\x02 \x01(\tH\x00R\bmediaKey\x88\x01\x01B\f\n" +
+	"\n" +
+	"_media_key\"&\n" +
 	"\vPostRequest\x12\x17\n" +
-	"\apost_id\x18\x01 \x01(\x05R\x06postId\"\xa3\x02\n" +
+	"\apost_id\x18\x01 \x01(\x05R\x06postId\"\xc0\x02\n" +
 	"\x04Post\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x05R\x06userId\x12\x18\n" +
@@ -1315,7 +1512,8 @@ const file_pb_thoughts_proto_rawDesc = "" +
 	"\acreated\x18\b \x01(\tR\acreated\x12/\n" +
 	"\x14rethought_by_user_id\x18\t \x01(\x05R\x11rethoughtByUserId\x12+\n" +
 	"\x11rethought_created\x18\n" +
-	" \x01(\tR\x10rethoughtCreated\":\n" +
+	" \x01(\tR\x10rethoughtCreated\x12\x1b\n" +
+	"\tmedia_key\x18\v \x01(\tR\bmediaKey\":\n" +
 	"\x0eGetFeedRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
 	"\x05limit\x18\x02 \x01(\x05R\x05limit\"-\n" +
@@ -1328,7 +1526,14 @@ const file_pb_thoughts_proto_rawDesc = "" +
 	"\x16GetHashtagPostsRequest\x12\x10\n" +
 	"\x03tag\x18\x01 \x01(\tR\x03tag\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x14\n" +
-	"\x05limit\x18\x03 \x01(\x05R\x05limit2\xa9\x04\n" +
+	"\x05limit\x18\x03 \x01(\x05R\x05limit\"J\n" +
+	"\x13VerifyUploadRequest\x12\x1a\n" +
+	"\bfilename\x18\x01 \x01(\tR\bfilename\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x05R\x06userId\"2\n" +
+	"\x14ConsumeUploadRequest\x12\x1a\n" +
+	"\bfilename\x18\x01 \x01(\tR\bfilename\"0\n" +
+	"\x12DeleteImageRequest\x12\x1a\n" +
+	"\bfilename\x18\x01 \x01(\tR\bfilename2\xa9\x04\n" +
 	"\vUserService\x12?\n" +
 	"\n" +
 	"CreateUser\x12\x1b.thoughts.CreateUserRequest\x1a\x14.thoughts.Identifier\x120\n" +
@@ -1363,7 +1568,11 @@ const file_pb_thoughts_proto_rawDesc = "" +
 	"UnlikePost\x12\x15.thoughts.PostRequest\x1a\x0f.thoughts.Empty\x124\n" +
 	"\n" +
 	"RepostPost\x12\x15.thoughts.PostRequest\x1a\x0f.thoughts.Empty\x126\n" +
-	"\fRemoveRepost\x12\x15.thoughts.PostRequest\x1a\x0f.thoughts.EmptyB\fZ\n" +
+	"\fRemoveRepost\x12\x15.thoughts.PostRequest\x1a\x0f.thoughts.Empty2\xce\x01\n" +
+	"\fImageService\x12>\n" +
+	"\fVerifyUpload\x12\x1d.thoughts.VerifyUploadRequest\x1a\x0f.thoughts.Empty\x12@\n" +
+	"\rConsumeUpload\x12\x1e.thoughts.ConsumeUploadRequest\x1a\x0f.thoughts.Empty\x12<\n" +
+	"\vDeleteImage\x12\x1c.thoughts.DeleteImageRequest\x1a\x0f.thoughts.EmptyB\fZ\n" +
 	"./genprotob\x06proto3"
 
 var (
@@ -1378,7 +1587,7 @@ func file_pb_thoughts_proto_rawDescGZIP() []byte {
 	return file_pb_thoughts_proto_rawDescData
 }
 
-var file_pb_thoughts_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
+var file_pb_thoughts_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
 var file_pb_thoughts_proto_goTypes = []any{
 	(*CreateUserRequest)(nil),        // 0: thoughts.CreateUserRequest
 	(*Identifier)(nil),               // 1: thoughts.Identifier
@@ -1401,6 +1610,9 @@ var file_pb_thoughts_proto_goTypes = []any{
 	(*Posts)(nil),                    // 18: thoughts.Posts
 	(*GetPostsRequest)(nil),          // 19: thoughts.GetPostsRequest
 	(*GetHashtagPostsRequest)(nil),   // 20: thoughts.GetHashtagPostsRequest
+	(*VerifyUploadRequest)(nil),      // 21: thoughts.VerifyUploadRequest
+	(*ConsumeUploadRequest)(nil),     // 22: thoughts.ConsumeUploadRequest
+	(*DeleteImageRequest)(nil),       // 23: thoughts.DeleteImageRequest
 }
 var file_pb_thoughts_proto_depIdxs = []int32{
 	3,  // 0: thoughts.Users.users:type_name -> thoughts.User
@@ -1430,32 +1642,38 @@ var file_pb_thoughts_proto_depIdxs = []int32{
 	15, // 24: thoughts.PostService.UnlikePost:input_type -> thoughts.PostRequest
 	15, // 25: thoughts.PostService.RepostPost:input_type -> thoughts.PostRequest
 	15, // 26: thoughts.PostService.RemoveRepost:input_type -> thoughts.PostRequest
-	1,  // 27: thoughts.UserService.CreateUser:output_type -> thoughts.Identifier
-	3,  // 28: thoughts.UserService.GetUser:output_type -> thoughts.User
-	3,  // 29: thoughts.UserService.GetUserByUsername:output_type -> thoughts.User
-	9,  // 30: thoughts.UserService.UpdateUser:output_type -> thoughts.Empty
-	6,  // 31: thoughts.UserService.GetFollowing:output_type -> thoughts.Users
-	6,  // 32: thoughts.UserService.GetFollowers:output_type -> thoughts.Users
-	9,  // 33: thoughts.UserService.FollowUser:output_type -> thoughts.Empty
-	9,  // 34: thoughts.UserService.UnfollowUser:output_type -> thoughts.Empty
-	6,  // 35: thoughts.UserService.SearchUsers:output_type -> thoughts.Users
-	12, // 36: thoughts.AuthService.CreateSession:output_type -> thoughts.Session
-	12, // 37: thoughts.AuthService.GetSession:output_type -> thoughts.Session
-	9,  // 38: thoughts.AuthService.DeleteSession:output_type -> thoughts.Empty
-	13, // 39: thoughts.AuthService.GetSessions:output_type -> thoughts.Sessions
-	1,  // 40: thoughts.PostService.CreatePost:output_type -> thoughts.Identifier
-	18, // 41: thoughts.PostService.GetFeed:output_type -> thoughts.Posts
-	18, // 42: thoughts.PostService.GetPosts:output_type -> thoughts.Posts
-	18, // 43: thoughts.PostService.GetLikedPosts:output_type -> thoughts.Posts
-	18, // 44: thoughts.PostService.GetHashtagPosts:output_type -> thoughts.Posts
-	16, // 45: thoughts.PostService.GetPost:output_type -> thoughts.Post
-	9,  // 46: thoughts.PostService.DeletePost:output_type -> thoughts.Empty
-	9,  // 47: thoughts.PostService.LikePost:output_type -> thoughts.Empty
-	9,  // 48: thoughts.PostService.UnlikePost:output_type -> thoughts.Empty
-	9,  // 49: thoughts.PostService.RepostPost:output_type -> thoughts.Empty
-	9,  // 50: thoughts.PostService.RemoveRepost:output_type -> thoughts.Empty
-	27, // [27:51] is the sub-list for method output_type
-	3,  // [3:27] is the sub-list for method input_type
+	21, // 27: thoughts.ImageService.VerifyUpload:input_type -> thoughts.VerifyUploadRequest
+	22, // 28: thoughts.ImageService.ConsumeUpload:input_type -> thoughts.ConsumeUploadRequest
+	23, // 29: thoughts.ImageService.DeleteImage:input_type -> thoughts.DeleteImageRequest
+	1,  // 30: thoughts.UserService.CreateUser:output_type -> thoughts.Identifier
+	3,  // 31: thoughts.UserService.GetUser:output_type -> thoughts.User
+	3,  // 32: thoughts.UserService.GetUserByUsername:output_type -> thoughts.User
+	9,  // 33: thoughts.UserService.UpdateUser:output_type -> thoughts.Empty
+	6,  // 34: thoughts.UserService.GetFollowing:output_type -> thoughts.Users
+	6,  // 35: thoughts.UserService.GetFollowers:output_type -> thoughts.Users
+	9,  // 36: thoughts.UserService.FollowUser:output_type -> thoughts.Empty
+	9,  // 37: thoughts.UserService.UnfollowUser:output_type -> thoughts.Empty
+	6,  // 38: thoughts.UserService.SearchUsers:output_type -> thoughts.Users
+	12, // 39: thoughts.AuthService.CreateSession:output_type -> thoughts.Session
+	12, // 40: thoughts.AuthService.GetSession:output_type -> thoughts.Session
+	9,  // 41: thoughts.AuthService.DeleteSession:output_type -> thoughts.Empty
+	13, // 42: thoughts.AuthService.GetSessions:output_type -> thoughts.Sessions
+	1,  // 43: thoughts.PostService.CreatePost:output_type -> thoughts.Identifier
+	18, // 44: thoughts.PostService.GetFeed:output_type -> thoughts.Posts
+	18, // 45: thoughts.PostService.GetPosts:output_type -> thoughts.Posts
+	18, // 46: thoughts.PostService.GetLikedPosts:output_type -> thoughts.Posts
+	18, // 47: thoughts.PostService.GetHashtagPosts:output_type -> thoughts.Posts
+	16, // 48: thoughts.PostService.GetPost:output_type -> thoughts.Post
+	9,  // 49: thoughts.PostService.DeletePost:output_type -> thoughts.Empty
+	9,  // 50: thoughts.PostService.LikePost:output_type -> thoughts.Empty
+	9,  // 51: thoughts.PostService.UnlikePost:output_type -> thoughts.Empty
+	9,  // 52: thoughts.PostService.RepostPost:output_type -> thoughts.Empty
+	9,  // 53: thoughts.PostService.RemoveRepost:output_type -> thoughts.Empty
+	9,  // 54: thoughts.ImageService.VerifyUpload:output_type -> thoughts.Empty
+	9,  // 55: thoughts.ImageService.ConsumeUpload:output_type -> thoughts.Empty
+	9,  // 56: thoughts.ImageService.DeleteImage:output_type -> thoughts.Empty
+	30, // [30:57] is the sub-list for method output_type
+	3,  // [3:30] is the sub-list for method input_type
 	3,  // [3:3] is the sub-list for extension type_name
 	3,  // [3:3] is the sub-list for extension extendee
 	0,  // [0:3] is the sub-list for field type_name
@@ -1466,15 +1684,17 @@ func file_pb_thoughts_proto_init() {
 	if File_pb_thoughts_proto != nil {
 		return
 	}
+	file_pb_thoughts_proto_msgTypes[4].OneofWrappers = []any{}
+	file_pb_thoughts_proto_msgTypes[14].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pb_thoughts_proto_rawDesc), len(file_pb_thoughts_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   21,
+			NumMessages:   24,
 			NumExtensions: 0,
-			NumServices:   3,
+			NumServices:   4,
 		},
 		GoTypes:           file_pb_thoughts_proto_goTypes,
 		DependencyIndexes: file_pb_thoughts_proto_depIdxs,
