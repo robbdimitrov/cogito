@@ -140,3 +140,70 @@ async fn test_get_user() {
     let user = res.unwrap().into_inner();
     assert_eq!(user.username, "testuser");
 }
+
+use crate::thoughts::{UpdateUserRequest, GetUserByUsernameRequest, SearchUsersRequest};
+
+#[tokio::test]
+async fn test_update_user() {
+    let db = Arc::new(MockDb::new());
+    let controller = Controller::new(db.clone());
+
+    let _ = db.create_user("Test", "testuser", "test@example.com", "hash").await;
+
+    let req = create_request(UpdateUserRequest {
+        name: "Updated Name".into(),
+        username: "updateduser".into(),
+        email: "updated@example.com".into(),
+        bio: "New Bio".into(),
+        password: "".into(),
+        old_password: "".into(),
+        profile_photo_key: Some("key1".into()),
+        cover_photo_key: Some("key2".into()),
+    }, 1);
+
+    let res = controller.update_user(req).await;
+    assert!(res.is_ok());
+
+    let user = db.get_user(1, 1).await.unwrap().unwrap();
+    assert_eq!(user.name, "Updated Name");
+    assert_eq!(user.username, "updateduser");
+    assert_eq!(user.bio, "New Bio");
+    assert_eq!(user.profile_photo_key, "key1");
+}
+
+#[tokio::test]
+async fn test_get_user_by_username() {
+    let db = Arc::new(MockDb::new());
+    let controller = Controller::new(db.clone());
+
+    let _ = db.create_user("Test", "testuser", "test@example.com", "hash").await;
+
+    let req = create_request(GetUserByUsernameRequest {
+        username: "testuser".into(),
+    }, 1);
+
+    let res = controller.get_user_by_username(req).await;
+    assert!(res.is_ok());
+    let user = res.unwrap().into_inner();
+    assert_eq!(user.username, "testuser");
+}
+
+#[tokio::test]
+async fn test_search_users() {
+    let db = Arc::new(MockDb::new());
+    let controller = Controller::new(db.clone());
+
+    let _ = db.create_user("Test1", "user1", "test1@example.com", "hash").await;
+    let _ = db.create_user("Test2", "user2", "test2@example.com", "hash").await;
+    let _ = db.create_user("Other", "other", "other@example.com", "hash").await;
+
+    let req = create_request(SearchUsersRequest {
+        query: "user".into(),
+        limit: 10,
+    }, 1);
+
+    let res = controller.search_users(req).await;
+    assert!(res.is_ok());
+    let users = res.unwrap().into_inner().users;
+    assert_eq!(users.len(), 2);
+}

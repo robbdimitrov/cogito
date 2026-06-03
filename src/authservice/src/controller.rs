@@ -291,4 +291,27 @@ mod tests {
         assert!(res.is_err());
         assert_eq!(res.unwrap_err().code(), tonic::Code::Unauthenticated);
     }
+
+    #[tokio::test]
+    async fn test_get_sessions() {
+        let controller = Controller::new(MockAuthDb);
+        let req = Request::new(UserRequest {
+            user_id: 1,
+        });
+        let res = controller.get_sessions(req).await;
+        assert!(res.is_ok());
+        let sessions = res.unwrap().into_inner().sessions;
+        assert_eq!(sessions.len(), 1);
+        assert_eq!(sessions[0].id, "valid_session");
+    }
+
+    #[tokio::test]
+    async fn test_delete_session() {
+        let controller = Controller::new(MockAuthDb);
+        let req = Request::new(SessionRequest {
+            session_id: "valid_session".to_string(),
+        });
+        let res = controller.delete_session(req).await;
+        assert!(res.is_ok());
+    }
 }

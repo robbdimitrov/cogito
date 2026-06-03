@@ -10,25 +10,25 @@ use tokio::{fs::File, io::AsyncWriteExt};
 use uuid::Uuid;
 use tower_http::services::ServeDir;
 
-use crate::db::Db;
+use crate::db::ImageDb;
 
-struct AppState {
-    db: Db,
+struct AppState<D: ImageDb> {
+    db: D,
     image_dir: String,
 }
 
-pub fn create_router(db: Db, image_dir: String) -> Router {
+pub fn create_router<D: ImageDb>(db: D, image_dir: String) -> Router {
     let state = Arc::new(AppState { db, image_dir });
     
     Router::new()
-        .route("/upload", post(upload_handler))
+        .route("/upload", post(upload_handler::<D>))
         .nest_service("/", ServeDir::new(state.image_dir.clone()))
         .with_state(state)
 }
 
-async fn upload_handler(
+async fn upload_handler<D: ImageDb>(
     headers: HeaderMap,
-    State(state): State<Arc<AppState>>,
+    State(state): State<Arc<AppState<D>>>,
     mut multipart: Multipart,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
     let user_id_header = headers.get("x-user-id")

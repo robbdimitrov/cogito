@@ -988,6 +988,7 @@ dependencies = [
 name = "imageservice"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "axum 0.7.9",
  "prost",
  "serde_json",

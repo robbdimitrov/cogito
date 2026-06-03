@@ -7,6 +7,9 @@ mod db;
 mod grpc;
 mod http;
 
+#[cfg(test)]
+mod tests;
+
 use std::env;
 use tonic::transport::Server;
 use tokio::fs;

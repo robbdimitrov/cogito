@@ -3,21 +3,21 @@ use tokio::fs;
 
 use crate::thoughts::image_service_server::ImageService;
 use crate::thoughts::{VerifyUploadRequest, ConsumeUploadRequest, DeleteImageRequest, Empty};
-use crate::db::Db;
+use crate::db::ImageDb;
 
-pub struct ImageGrpcService {
-    db: Db,
+pub struct ImageGrpcService<D: ImageDb> {
+    db: D,
     image_dir: String,
 }
 
-impl ImageGrpcService {
-    pub fn new(db: Db, image_dir: String) -> Self {
+impl<D: ImageDb> ImageGrpcService<D> {
+    pub fn new(db: D, image_dir: String) -> Self {
         Self { db, image_dir }
     }
 }
 
 #[tonic::async_trait]
-impl ImageService for ImageGrpcService {
+impl<D: ImageDb> ImageService for ImageGrpcService<D> {
     async fn verify_upload(
         &self,
         request: Request<VerifyUploadRequest>,
@@ -54,8 +54,10 @@ impl ImageService for ImageGrpcService {
         let _ = self.db.consume_upload(&req.filename).await;
 
         // Ensure we don't allow directory traversal
-        let safe_filename = req.filename.replace("..", "").replace("/", "");
-        let file_path = std::path::Path::new(&self.image_dir).join(safe_filename);
+        if req.filename.contains("..") || req.filename.contains('/') || req.filename.contains('\\') {
+            return Err(Status::invalid_argument("Invalid filename"));
+        }
+        let file_path = std::path::Path::new(&self.image_dir).join(&req.filename);
         
         if file_path.exists() {
             fs::remove_file(file_path).await
