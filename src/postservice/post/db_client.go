@@ -36,9 +36,15 @@ func (c *DbClient) Close() {
 	c.db.Close()
 }
 
-func (c *DbClient) createPost(content string, tags []string, userID int32) (int32, error) {
-	query := "INSERT INTO posts (user_id, content, hashtags) VALUES ($1, $2, $3) RETURNING id"
-	row := c.db.QueryRow(context.Background(), query, userID, content, tags)
+func (c *DbClient) createPost(content string, tags []string, userID int32, mediaKey *string) (int32, error) {
+	query := "INSERT INTO posts (user_id, content, hashtags, media_key) VALUES ($1, $2, $3, $4) RETURNING id"
+	
+	var mk string
+	if mediaKey != nil {
+		mk = *mediaKey
+	}
+	
+	row := c.db.QueryRow(context.Background(), query, userID, content, tags, mk)
 
 	var id int32
 	err := row.Scan(&id)
@@ -48,7 +54,7 @@ func (c *DbClient) createPost(content string, tags []string, userID int32) (int3
 
 func (c *DbClient) getFeed(page int32, limit int32, currentUserID int32) ([]*pb.Post, error) {
 	query := `SELECT id, user_id, content, likes, liked, reposts, reposted, created,
-		rethought_by_user_id, rethought_created
+		rethought_by_user_id, rethought_created, media_key
 		FROM (
 			SELECT posts.id, posts.user_id, posts.content,
 			(SELECT count(*) FROM likes WHERE post_id = posts.id) AS likes,
@@ -60,7 +66,8 @@ func (c *DbClient) getFeed(page int32, limit int32, currentUserID int32) ([]*pb.
 			time_format(posts.created) AS created,
 			0::integer AS rethought_by_user_id,
 			''::text AS rethought_created,
-			posts.created AS timeline_created
+			posts.created AS timeline_created,
+			posts.media_key
 			FROM posts
 			UNION ALL
 			SELECT posts.id, posts.user_id, posts.content,
@@ -73,7 +80,8 @@ func (c *DbClient) getFeed(page int32, limit int32, currentUserID int32) ([]*pb.
 			time_format(posts.created) AS created,
 			reposts.user_id AS rethought_by_user_id,
 			time_format(reposts.created) AS rethought_created,
-			reposts.created AS timeline_created
+			reposts.created AS timeline_created,
+			posts.media_key
 			FROM reposts
 			INNER JOIN posts ON posts.id = reposts.post_id
 		) feed
@@ -91,7 +99,7 @@ func (c *DbClient) getFeed(page int32, limit int32, currentUserID int32) ([]*pb.
 
 func (c *DbClient) getPosts(userID int32, page int32, limit int32, currentUserID int32) ([]*pb.Post, error) {
 	query := `SELECT id, user_id, content, likes, liked, reposts, reposted, created,
-		rethought_by_user_id, rethought_created
+		rethought_by_user_id, rethought_created, media_key
 		FROM (
 			SELECT posts.id, posts.user_id, posts.content,
 			(SELECT count(*) FROM likes WHERE post_id = posts.id) AS likes,
@@ -103,7 +111,8 @@ func (c *DbClient) getPosts(userID int32, page int32, limit int32, currentUserID
 			time_format(posts.created) AS created,
 			0::integer AS rethought_by_user_id,
 			''::text AS rethought_created,
-			posts.created AS timeline_created
+			posts.created AS timeline_created,
+			posts.media_key
 			FROM posts
 			WHERE posts.user_id = $2
 			UNION ALL
@@ -117,7 +126,8 @@ func (c *DbClient) getPosts(userID int32, page int32, limit int32, currentUserID
 			time_format(posts.created) AS created,
 			reposts.user_id AS rethought_by_user_id,
 			time_format(reposts.created) AS rethought_created,
-			reposts.created AS timeline_created
+			reposts.created AS timeline_created,
+			posts.media_key
 			FROM reposts
 			INNER JOIN posts ON posts.id = reposts.post_id
 			WHERE reposts.user_id = $2
@@ -144,7 +154,8 @@ func (c *DbClient) getLikedPosts(userID int32, page int32, limit int32, currentU
 		WHERE post_id = id AND reposts.user_id = $1) AS reposted,
 		time_format(posts.created) AS created,
 		0::integer AS rethought_by_user_id,
-		''::text AS rethought_created
+		''::text AS rethought_created,
+		posts.media_key
 		FROM posts
 		INNER JOIN likes ON post_id = id
 		WHERE likes.user_id = $2
@@ -170,7 +181,8 @@ func (c *DbClient) getHashtagPosts(tag string, page int32, limit int32, currentU
 		WHERE post_id = id AND reposts.user_id = $1) AS reposted,
 		time_format(created) AS created,
 		0::integer AS rethought_by_user_id,
-		''::text AS rethought_created
+		''::text AS rethought_created,
+		media_key
 		FROM posts
 		WHERE hashtags @> ARRAY[$2]::varchar[]
 		ORDER BY created DESC
@@ -195,7 +207,8 @@ func (c *DbClient) getPost(id int32, currentUserID int32) (*pb.Post, error) {
 		WHERE post_id = id AND reposts.user_id = $1) AS reposted,
 		time_format(created) AS created,
 		0::integer AS rethought_by_user_id,
-		''::text AS rethought_created
+		''::text AS rethought_created,
+		media_key
 		FROM posts WHERE id = $2`
 
 	row := c.db.QueryRow(context.Background(), query, currentUserID, id)

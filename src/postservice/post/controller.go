@@ -51,7 +51,7 @@ func (c *controller) CreatePost(ctx context.Context, req *pb.CreatePostRequest) 
 
 	tags := extractHashtags(req.Content)
 
-	res, err := c.dbClient.createPost(req.Content, tags, userID)
+	res, err := c.dbClient.createPost(req.Content, tags, userID, req.MediaKey)
 	if err != nil {
 		log.Printf("Creating post failed: %v", err)
 		return nil, newError(codes.Internal)

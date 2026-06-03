@@ -14,7 +14,7 @@ pub trait UserDb: Send + Sync + 'static {
     async fn get_user_with_id(&self, user_id: i32) -> Result<Option<(i32, String)>, SqlxError>;
     async fn get_user(&self, user_id: i32, current_user_id: i32) -> Result<Option<User>, SqlxError>;
     async fn get_user_by_username(&self, username: &str, current_user_id: i32) -> Result<Option<User>, SqlxError>;
-    async fn update_user(&self, user_id: i32, name: &str, username: &str, email: &str, bio: &str) -> Result<(), SqlxError>;
+    async fn update_user(&self, user_id: i32, name: &str, username: &str, email: &str, bio: &str, profile_photo_key: Option<&str>, cover_photo_key: Option<&str>) -> Result<(), SqlxError>;
     async fn update_password(&self, user_id: i32, password_hash: &str) -> Result<(), SqlxError>;
     async fn get_following(&self, user_id: i32, page: i32, limit: i32, current_user_id: i32) -> Result<Vec<User>, SqlxError>;
     async fn get_followers(&self, user_id: i32, page: i32, limit: i32, current_user_id: i32) -> Result<Vec<User>, SqlxError>;
@@ -114,7 +114,7 @@ impl<D: UserDb> UserService for Controller<D> {
             return Err(Status::invalid_argument("Invalid email address."));
         }
 
-        self.db_client.update_user(user_id, &req.name, &req.username, &req.email, &req.bio).await.map_err(|e| {
+        self.db_client.update_user(user_id, &req.name, &req.username, &req.email, &req.bio, req.profile_photo_key.as_deref(), req.cover_photo_key.as_deref()).await.map_err(|e| {
             eprintln!("Updating user failed: {}", e);
             Status::internal("Internal server error.")
         })?;

@@ -42,7 +42,7 @@ impl crate::controller::UserDb for DbClient {
 
     async fn get_user(&self, user_id: i32, current_user_id: i32) -> Result<Option<User>, SqlxError> {
         let row = sqlx::query(
-            r#"SELECT id, name, username, email, bio,
+            r#"SELECT id, name, username, email, bio, profile_photo_key, cover_photo_key,
                 (SELECT count(*)::int FROM posts WHERE user_id = users.id) AS posts,
                 (SELECT count(*)::int FROM likes WHERE user_id = users.id) AS likes,
                 (SELECT count(*)::int FROM followers WHERE follower_id = users.id) AS following,
@@ -68,12 +68,14 @@ impl crate::controller::UserDb for DbClient {
             followers: r.get::<'_, Option<i32>, _>("followers").unwrap_or(0),
             followed: r.get::<'_, Option<bool>, _>("followed").unwrap_or(false),
             created: r.get::<'_, Option<String>, _>("created").unwrap_or_default(),
+            profile_photo_key: r.get::<'_, Option<String>, _>("profile_photo_key").unwrap_or_default(),
+            cover_photo_key: r.get::<'_, Option<String>, _>("cover_photo_key").unwrap_or_default(),
         }))
     }
 
     async fn get_user_by_username(&self, username: &str, current_user_id: i32) -> Result<Option<User>, SqlxError> {
         let row = sqlx::query(
-            r#"SELECT id, name, username, email, bio,
+            r#"SELECT id, name, username, email, bio, profile_photo_key, cover_photo_key,
                 (SELECT count(*)::int FROM posts WHERE user_id = users.id) AS posts,
                 (SELECT count(*)::int FROM likes WHERE user_id = users.id) AS likes,
                 (SELECT count(*)::int FROM followers WHERE follower_id = users.id) AS following,
@@ -99,17 +101,21 @@ impl crate::controller::UserDb for DbClient {
             followers: r.get::<'_, Option<i32>, _>("followers").unwrap_or(0),
             followed: r.get::<'_, Option<bool>, _>("followed").unwrap_or(false),
             created: r.get::<'_, Option<String>, _>("created").unwrap_or_default(),
+            profile_photo_key: r.get::<'_, Option<String>, _>("profile_photo_key").unwrap_or_default(),
+            cover_photo_key: r.get::<'_, Option<String>, _>("cover_photo_key").unwrap_or_default(),
         }))
     }
 
-    async fn update_user(&self, user_id: i32, name: &str, username: &str, email: &str, bio: &str) -> Result<(), SqlxError> {
+    async fn update_user(&self, user_id: i32, name: &str, username: &str, email: &str, bio: &str, profile_photo_key: Option<&str>, cover_photo_key: Option<&str>) -> Result<(), SqlxError> {
         sqlx::query(
-            "UPDATE users SET name = $1, username = $2, email = $3, bio = $4 WHERE id = $5"
+            "UPDATE users SET name = $1, username = $2, email = $3, bio = $4, profile_photo_key = COALESCE($5, profile_photo_key), cover_photo_key = COALESCE($6, cover_photo_key) WHERE id = $7"
         )
         .bind(name)
         .bind(username)
         .bind(email)
         .bind(bio)
+        .bind(profile_photo_key)
+        .bind(cover_photo_key)
         .bind(user_id)
         .execute(&self.pool)
         .await?;
@@ -130,7 +136,7 @@ impl crate::controller::UserDb for DbClient {
     async fn get_following(&self, user_id: i32, page: i32, limit: i32, current_user_id: i32) -> Result<Vec<User>, SqlxError> {
         let offset = page * limit;
         let rows = sqlx::query(
-            r#"SELECT users.id, users.name, users.username, users.email, users.bio,
+            r#"SELECT users.id, users.name, users.username, users.email, users.bio, users.profile_photo_key, users.cover_photo_key,
                 (SELECT count(*)::int FROM posts WHERE user_id = users.id) AS posts,
                 (SELECT count(*)::int FROM likes WHERE user_id = users.id) AS likes,
                 (SELECT count(*)::int FROM followers WHERE follower_id = users.id) AS following,
@@ -162,13 +168,15 @@ impl crate::controller::UserDb for DbClient {
             followers: r.get::<'_, Option<i32>, _>("followers").unwrap_or(0),
             followed: r.get::<'_, Option<bool>, _>("followed").unwrap_or(false),
             created: r.get::<'_, Option<String>, _>("created").unwrap_or_default(),
+            profile_photo_key: r.get::<'_, Option<String>, _>("profile_photo_key").unwrap_or_default(),
+            cover_photo_key: r.get::<'_, Option<String>, _>("cover_photo_key").unwrap_or_default(),
         }).collect())
     }
 
     async fn get_followers(&self, user_id: i32, page: i32, limit: i32, current_user_id: i32) -> Result<Vec<User>, SqlxError> {
         let offset = page * limit;
         let rows = sqlx::query(
-            r#"SELECT users.id, users.name, users.username, users.email, users.bio,
+            r#"SELECT users.id, users.name, users.username, users.email, users.bio, users.profile_photo_key, users.cover_photo_key,
                 (SELECT count(*)::int FROM posts WHERE user_id = users.id) AS posts,
                 (SELECT count(*)::int FROM likes WHERE user_id = users.id) AS likes,
                 (SELECT count(*)::int FROM followers WHERE follower_id = users.id) AS following,
@@ -200,6 +208,8 @@ impl crate::controller::UserDb for DbClient {
             followers: r.get::<'_, Option<i32>, _>("followers").unwrap_or(0),
             followed: r.get::<'_, Option<bool>, _>("followed").unwrap_or(false),
             created: r.get::<'_, Option<String>, _>("created").unwrap_or_default(),
+            profile_photo_key: r.get::<'_, Option<String>, _>("profile_photo_key").unwrap_or_default(),
+            cover_photo_key: r.get::<'_, Option<String>, _>("cover_photo_key").unwrap_or_default(),
         }).collect())
     }
 
@@ -228,7 +238,7 @@ impl crate::controller::UserDb for DbClient {
     async fn search_users(&self, query: &str, limit: i32, _current_user_id: i32) -> Result<Vec<User>, SqlxError> {
         let pattern = format!("{}%", query);
         let rows = sqlx::query(
-            r#"SELECT id, name, username, email, bio,
+            r#"SELECT id, name, username, email, bio, profile_photo_key, cover_photo_key,
                 0::int AS posts,
                 0::int AS likes,
                 0::int AS following,
@@ -255,6 +265,8 @@ impl crate::controller::UserDb for DbClient {
             followers: r.get::<'_, Option<i32>, _>("followers").unwrap_or(0),
             followed: r.get::<'_, Option<bool>, _>("followed").unwrap_or(false),
             created: r.get::<'_, Option<String>, _>("created").unwrap_or_default(),
+            profile_photo_key: r.get::<'_, Option<String>, _>("profile_photo_key").unwrap_or_default(),
+            cover_photo_key: r.get::<'_, Option<String>, _>("cover_photo_key").unwrap_or_default(),
         }).collect())
     }
 }
