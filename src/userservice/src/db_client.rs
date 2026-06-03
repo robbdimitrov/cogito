@@ -9,7 +9,10 @@ pub struct DbClient {
 
 impl DbClient {
     pub async fn new(db_url: &str) -> Result<Self, SqlxError> {
-        let pool = PgPool::connect(db_url).await?;
+        let pool = sqlx::postgres::PgPoolOptions::new()
+            .max_connections(5)
+            .connect(db_url)
+            .await?;
         Ok(Self { pool })
     }
 }

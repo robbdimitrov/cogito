@@ -15,7 +15,10 @@ pub struct Db {
 
 impl Db {
     pub async fn new(database_url: &str) -> Result<Self, sqlx::Error> {
-        let pool = PgPool::connect(database_url).await?;
+        let pool = sqlx::postgres::PgPoolOptions::new()
+            .max_connections(5)
+            .connect(database_url)
+            .await?;
         Ok(Self { pool })
     }
 }

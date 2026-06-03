@@ -22,7 +22,7 @@ func NewDbClient(dbURL string) *DbClient {
 	if err != nil {
 		log.Fatalf("Unable to parse database URL: %v", err)
 	}
-	config.MaxConns = 10
+	config.MaxConns = 5
 
 	db, err := pgxpool.ConnectConfig(context.Background(), config)
 	if err != nil {
