@@ -20,7 +20,7 @@ type authController struct {
 }
 
 func newAuthController(addr string) *authController {
-	conn, _ := grpc.Dial(addr, insecureCredentials())
+	conn, _ := grpc.NewClient(addr, insecureCredentials())
 	return &authController{pb.NewAuthServiceClient(conn)}
 }
 
@@ -59,7 +59,7 @@ func (ac *authController) createSession(w http.ResponseWriter, r *http.Request) 
 func (ac *authController) validateSession(w http.ResponseWriter, r *http.Request) (*http.Request, error) {
 	cookie, err := r.Cookie("session")
 	if err != nil {
-		http.Error(w, "Unauthorized", 401)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return nil, err
 	}
 
@@ -91,7 +91,7 @@ func (ac *authController) validateSession(w http.ResponseWriter, r *http.Request
 func (ac *authController) deleteSession(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session")
 	if err != nil {
-		http.Error(w, "Unauthorized", 401)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
@@ -137,12 +137,12 @@ func (ac *authController) deleteSessionByID(w http.ResponseWriter, r *http.Reque
 	userIDStr := getUserID(r)
 	userID, err := strconv.ParseInt(userIDStr, 10, 32)
 	if err != nil || userID == 0 {
-		http.Error(w, "Unauthorized", 401)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
 	if sess.UserId != int32(userID) {
-		http.Error(w, "Cannot delete another user's session", 403)
+		http.Error(w, "Cannot delete another user's session", http.StatusForbidden)
 		return
 	}
 
@@ -159,7 +159,7 @@ func (ac *authController) deleteSessionByID(w http.ResponseWriter, r *http.Reque
 func (ac *authController) getSessions(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session")
 	if err != nil {
-		http.Error(w, "Unauthorized", 401)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 

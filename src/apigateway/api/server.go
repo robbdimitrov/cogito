@@ -77,7 +77,7 @@ func csrfMiddleware() func(http.Handler) http.Handler {
 				next.ServeHTTP(w, r)
 				return
 			}
-			
+
 			// Also skip GET requests in general for CSRF modifying state, or we check it?
 			// The original echo CSRF skipper skipped only those three. Wait, standard CSRF applies to all?
 			// Echo CSRF by default applies to POST, PUT, DELETE, PATCH
@@ -89,7 +89,7 @@ func csrfMiddleware() func(http.Handler) http.Handler {
 				cookie, err := r.Cookie("_csrf")
 				headerToken := r.Header.Get("X-CSRF-Token")
 				if err != nil || cookie.Value == "" || headerToken == "" || cookie.Value != headerToken {
-					http.Error(w, "Invalid CSRF token", 403)
+					http.Error(w, "Invalid CSRF token", http.StatusForbidden)
 					return
 				}
 			}
@@ -127,14 +127,14 @@ func rateLimitMiddleware(store *PostgresRateLimiterStore) func(http.Handler) htt
 			if forwarded := r.Header.Get("X-Forwarded-For"); forwarded != "" {
 				ip = strings.Split(forwarded, ",")[0]
 			}
-			
+
 			allowed, err := store.Allow(ip)
 			if err != nil {
 				http.Error(w, err.Error(), 500)
 				return
 			}
 			if !allowed {
-				http.Error(w, "Too many requests", 429)
+				http.Error(w, "Too many requests", http.StatusTooManyRequests)
 				return
 			}
 

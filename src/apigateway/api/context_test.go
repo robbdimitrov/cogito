@@ -24,13 +24,13 @@ func TestUserContext(t *testing.T) {
 func TestAppendUserIDHeader(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 
-	ctx, err := appendUserIDHeader(context.Background(), req)
+	_, err := appendUserIDHeader(context.Background(), req)
 	if err == nil {
 		t.Errorf("expected error when user id is missing")
 	}
 
 	req = setUserID(req, "456")
-	ctx, err = appendUserIDHeader(context.Background(), req)
+	ctx, err := appendUserIDHeader(context.Background(), req)
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
@@ -46,7 +46,7 @@ func TestCookies(t *testing.T) {
 	defer os.Unsetenv("COOKIE_SECURE")
 
 	createCookie(rec, "session-123")
-	
+
 	var found bool
 	for _, cookie := range rec.Result().Cookies() {
 		if cookie.Name == "session" {

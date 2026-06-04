@@ -19,10 +19,10 @@ type postController struct {
 }
 
 func newPostController(addr string, imageAddr string) *postController {
-	conn, _ := grpc.Dial(addr, insecureCredentials())
+	conn, _ := grpc.NewClient(addr, insecureCredentials())
 	var imgClient pb.ImageServiceClient
 	if imageAddr != "" {
-		imgConn, _ := grpc.Dial(imageAddr, insecureCredentials())
+		imgConn, _ := grpc.NewClient(imageAddr, insecureCredentials())
 		imgClient = pb.NewImageServiceClient(imgConn)
 	}
 	return &postController{pb.NewPostServiceClient(conn), imgClient}
@@ -34,7 +34,7 @@ func (pc *postController) createPost(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", 401)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		cancel()
 		return
 	}
@@ -74,7 +74,7 @@ func (pc *postController) getFeed(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", 401)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		cancel()
 		return
 	}
@@ -112,7 +112,7 @@ func (pc *postController) getPosts(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", 401)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		cancel()
 		return
 	}
@@ -156,7 +156,7 @@ func (pc *postController) getLikedPosts(w http.ResponseWriter, r *http.Request) 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", 401)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		cancel()
 		return
 	}
@@ -200,7 +200,7 @@ func (pc *postController) getHashtagPosts(w http.ResponseWriter, r *http.Request
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", 401)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		cancel()
 		return
 	}
@@ -239,7 +239,7 @@ func (pc *postController) getPost(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", 401)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		cancel()
 		return
 	}
@@ -268,7 +268,7 @@ func (pc *postController) deletePost(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", 401)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		cancel()
 		return
 	}
@@ -313,7 +313,7 @@ func (pc *postController) likePost(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", 401)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		cancel()
 		return
 	}
@@ -342,7 +342,7 @@ func (pc *postController) unlikePost(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", 401)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		cancel()
 		return
 	}
@@ -371,7 +371,7 @@ func (pc *postController) repostPost(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", 401)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		cancel()
 		return
 	}
@@ -400,7 +400,7 @@ func (pc *postController) removeRepost(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", 401)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		cancel()
 		return
 	}

@@ -24,11 +24,11 @@ type userController struct {
 }
 
 func newUserController(addr string, authAddr string, imageAddr string) *userController {
-	conn, _ := grpc.Dial(addr, insecureCredentials())
-	authConn, _ := grpc.Dial(authAddr, insecureCredentials())
+	conn, _ := grpc.NewClient(addr, insecureCredentials())
+	authConn, _ := grpc.NewClient(authAddr, insecureCredentials())
 	var imgClient pb.ImageServiceClient
 	if imageAddr != "" {
-		imgConn, _ := grpc.Dial(imageAddr, insecureCredentials())
+		imgConn, _ := grpc.NewClient(imageAddr, insecureCredentials())
 		imgClient = pb.NewImageServiceClient(imgConn)
 	}
 	return &userController{
@@ -85,7 +85,7 @@ func (s *userController) getUser(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", 401)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		cancel()
 		return
 	}
@@ -113,7 +113,7 @@ func (s *userController) getUserByUsername(w http.ResponseWriter, r *http.Reques
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", 401)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		cancel()
 		return
 	}
@@ -136,26 +136,26 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 
 	currentUserID := getUserID(r)
 	if currentUserID != r.PathValue("userId") {
-		http.Error(w, "Forbidden", 403)
+		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", 401)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		cancel()
 		return
 	}
 	defer cancel()
 
 	var body struct {
-		Name          string  `json:"name"`
-		Username      string  `json:"username"`
-		Email         string  `json:"email"`
-		Bio           string  `json:"bio"`
-		Password      string  `json:"password"`
-		OldPassword   string  `json:"oldPassword"`
+		Name            string  `json:"name"`
+		Username        string  `json:"username"`
+		Email           string  `json:"email"`
+		Bio             string  `json:"bio"`
+		Password        string  `json:"password"`
+		OldPassword     string  `json:"oldPassword"`
 		ProfilePhotoKey *string `json:"profilePhotoKey"`
 		CoverPhotoKey   *string `json:"coverPhotoKey"`
 	}
@@ -178,21 +178,21 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 	imgClient := s.imgClient
 	if (body.ProfilePhotoKey != nil || body.CoverPhotoKey != nil) && imgClient != nil {
 
-			if body.ProfilePhotoKey != nil && *body.ProfilePhotoKey != "" {
-				_, err = imgClient.VerifyUpload(ctx, &pb.VerifyUploadRequest{Filename: *body.ProfilePhotoKey, UserId: int32(userIDInt)})
-				if err != nil {
-					grpcError(w, err)
-					return
-				}
-			}
-			if body.CoverPhotoKey != nil && *body.CoverPhotoKey != "" {
-				_, err = imgClient.VerifyUpload(ctx, &pb.VerifyUploadRequest{Filename: *body.CoverPhotoKey, UserId: int32(userIDInt)})
-				if err != nil {
-					grpcError(w, err)
-					return
-				}
+		if body.ProfilePhotoKey != nil && *body.ProfilePhotoKey != "" {
+			_, err = imgClient.VerifyUpload(ctx, &pb.VerifyUploadRequest{Filename: *body.ProfilePhotoKey, UserId: int32(userIDInt)})
+			if err != nil {
+				grpcError(w, err)
+				return
 			}
 		}
+		if body.CoverPhotoKey != nil && *body.CoverPhotoKey != "" {
+			_, err = imgClient.VerifyUpload(ctx, &pb.VerifyUploadRequest{Filename: *body.CoverPhotoKey, UserId: int32(userIDInt)})
+			if err != nil {
+				grpcError(w, err)
+				return
+			}
+		}
+	}
 	req := pb.UpdateUserRequest{
 		Name:        body.Name,
 		Username:    body.Username,
@@ -237,7 +237,7 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 	if body.Password != "" {
 		authClient := s.authClient
 		if authClient != nil {
-			
+
 			var currentSessionID string
 			if cookie, err := r.Cookie("session"); err == nil {
 				currentSessionID = cookie.Value
@@ -271,7 +271,7 @@ func (s *userController) getFollowing(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", 401)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		cancel()
 		return
 	}
@@ -315,7 +315,7 @@ func (s *userController) searchUsers(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", 401)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		cancel()
 		return
 	}
@@ -354,7 +354,7 @@ func (s *userController) getFollowers(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", 401)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		cancel()
 		return
 	}
@@ -398,7 +398,7 @@ func (s *userController) followUser(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", 401)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		cancel()
 		return
 	}
@@ -427,7 +427,7 @@ func (s *userController) unfollowUser(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", 401)
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		cancel()
 		return
 	}
