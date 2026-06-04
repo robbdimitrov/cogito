@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useAPI } from '@/shared/contexts/apicontext';
+import { useToast } from '@/shared/components/toast/toast';
 import ThoughtList from '@/shared/components/thoughtlist/thoughtlist';
 import type { Post, User } from '@/shared/types';
 
@@ -15,26 +16,27 @@ interface PostTabProps {
 function PostTab({ user, posts, currentUserId, emptyMessage }: PostTabProps) {
   const apiClient = useAPI();
   const router = useRouter();
+  const toast = useToast();
 
   const handleLike = async (post: Post) => {
     try {
       post.liked ? await apiClient.unlikePost(post.id) : await apiClient.likePost(post.id);
       router.refresh();
-    } catch (e: unknown) {}
+    } catch (e: any) { toast.error(e.message || 'Failed to update like'); }
   };
 
   const handleRepost = async (post: Post) => {
     try {
       post.reposted ? await apiClient.removeRepost(post.id) : await apiClient.repostPost(post.id);
       router.refresh();
-    } catch (e: unknown) {}
+    } catch (e: any) { toast.error(e.message || 'Failed to update repost'); }
   };
 
   const handleDeletePost = async (postId: string) => {
     try {
       await apiClient.deletePost(postId);
       router.refresh();
-    } catch (e: unknown) {}
+    } catch (e: any) { toast.error(e.message || 'Failed to delete post'); }
   };
 
   return (

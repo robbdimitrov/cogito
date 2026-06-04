@@ -64,12 +64,12 @@ function SettingsHome() {
         </div>
       </GlassCard>
 
-      <div className="space-y-2 sm:space-y-3">
-        {settingsLinks.map((item) => {
-          const Icon = item.icon;
-          return (
-            <Link key={item.href} href={item.href} className="group block outline-none">
-              <GlassCard interactive className="overflow-hidden group-focus-visible:ring-2 group-focus-visible:ring-primary group-focus-visible:ring-offset-2 group-focus-visible:ring-offset-base-100">
+      <GlassCard className="overflow-hidden">
+        <div className="flex flex-col divide-y divide-base-200/70 dark:divide-white/10">
+          {settingsLinks.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link key={item.href} href={item.href} className="group block outline-none transition-colors duration-200 hover:bg-base-100/50 dark:hover:bg-slate-800/50 focus-visible:bg-base-100/50 dark:focus-visible:bg-slate-800/50">
                 <div className="flex items-center gap-3 p-4 sm:p-5">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary dark:bg-primary/20 dark:text-violet-300">
                     <Icon className="h-5 w-5" />
@@ -80,11 +80,11 @@ function SettingsHome() {
                   </div>
                   <ChevronRight className="h-5 w-5 shrink-0 text-slate-400 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </div>
-              </GlassCard>
-            </Link>
-          );
-        })}
-      </div>
+              </Link>
+            );
+          })}
+        </div>
+      </GlassCard>
     </div>
   );
 }

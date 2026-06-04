@@ -7,6 +7,7 @@ import ThoughtList from '@/shared/components/thoughtlist/thoughtlist';
 
 import { useAPI } from '@/shared/contexts/apicontext';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/shared/components/toast/toast';
 import type { User, Post } from '@/shared/types';
 
 interface FeedProps {
@@ -19,6 +20,7 @@ interface FeedProps {
 function Feed(props: FeedProps) {
   const apiClient = useAPI();
   const router = useRouter();
+  const toast = useToast();
   const user = props.user || null;
   const posts = props.posts || [];
   const currentUserId = props.currentUserId || null;
@@ -27,28 +29,31 @@ function Feed(props: FeedProps) {
     try {
       post.liked ? await apiClient.unlikePost(post.id) : await apiClient.likePost(post.id);
       router.refresh();
-    } catch (e: unknown) {}
+    } catch (e: any) { toast.error(e.message || 'Failed to update like'); }
   };
 
   const handleRepost = async (post: Post) => {
     try {
       post.reposted ? await apiClient.removeRepost(post.id) : await apiClient.repostPost(post.id);
       router.refresh();
-    } catch (e: unknown) {}
+    } catch (e: any) { toast.error(e.message || 'Failed to update repost'); }
   };
 
   const handleDeletePost = async (postId: string) => {
     try {
       await apiClient.deletePost(postId);
       router.refresh();
-    } catch (e: unknown) {}
+    } catch (e: any) { toast.error(e.message || 'Failed to delete post'); }
   };
 
   const handleCreatePost = async (content: string, mediaKey?: string) => {
     try {
       await apiClient.createPost(content, mediaKey);
       router.refresh();
-    } catch (e: unknown) {}
+    } catch (e: any) { 
+      toast.error(e.message || 'Failed to create post');
+      throw e;
+    }
   };
 
   return (
@@ -64,7 +69,7 @@ function Feed(props: FeedProps) {
             </div>
           )}
           {user && <CreateThought user={user} onCreatePost={handleCreatePost} />}
-          {posts.length === 0 ? <p className="text-center text-slate-500 mt-8">No thoughts yet. Be the first to share!</p> : <ThoughtList posts={posts} users={user ? [user] : []} onLike={handleLike} onRepost={handleRepost} onDelete={handleDeletePost} currentUserId={currentUserId} />}
+          <ThoughtList posts={posts} users={user ? [user] : []} onLike={handleLike} onRepost={handleRepost} onDelete={handleDeletePost} currentUserId={currentUserId} emptyMessage="No thoughts yet. Be the first to share!" />
         </section>
       </div>
     </main>

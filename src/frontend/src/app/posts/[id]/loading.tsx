@@ -1,8 +1,9 @@
+import GlassCard from '@/shared/components/ui/surface';
 
 export default function Loading() {
   return (
     <div className="container mx-auto max-w-2xl px-3 py-3 sm:px-4 sm:py-6">
-      <div className="card bg-base-100 border border-base-200 animate-pulse">
+      <GlassCard className="animate-pulse">
         <div className="card-body space-y-4 p-4 sm:p-5">
           <div className="flex gap-3">
             <div className="skeleton h-12 w-12 rounded-full" />
@@ -18,7 +19,7 @@ export default function Loading() {
             <div className="skeleton h-8 w-16" />
           </div>
         </div>
-      </div>
+      </GlassCard>
     </div>
   );
 }
