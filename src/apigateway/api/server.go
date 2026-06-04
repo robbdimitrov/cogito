@@ -1,48 +1,88 @@
 package api
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/base64"
-	"log"
+	"log/slog"
 	"net/http"
-	"strings"
+	"strconv"
+	"time"
 )
 
 // CreateServer creates and setups new standard http.Handler
 func CreateServer(authAddr, postAddr, userAddr, imageAddr string) http.Handler {
+	setupLogger()
 	mux := http.NewServeMux()
 	router := newRouter(authAddr, postAddr, userAddr, imageAddr)
 	router.configureRoutes(mux)
 
 	var handler http.Handler = mux
 
-	// Auth Guard Middleware
-	handler = authGuard(router.auth)(handler)
-
-	// Rate Limiter Middleware
-	rlStore := NewPostgresRateLimiterStore(5, 0.5)
+	rlStore := NewPostgresRateLimiterStore()
+	startRateLimitCleanup(rlStore)
 	handler = rateLimitMiddleware(rlStore)(handler)
 
-	// CSRF Middleware
+	handler = authGuard(router.auth)(handler)
+
+	handler = newConcurrencyLimiter().middleware(handler)
+
 	handler = csrfMiddleware()(handler)
 
-	// Body Limit Middleware (2M)
 	handler = bodyLimitMiddleware(2 * 1024 * 1024)(handler)
 
-	// Secure Headers Middleware
 	handler = secureHeadersMiddleware()(handler)
 
-	// Request Logger Middleware
 	handler = loggerMiddleware()(handler)
+	handler = requestIDMiddleware()(handler)
 
 	return handler
+}
+
+func startRateLimitCleanup(store *PostgresRateLimiterStore) {
+	interval := time.Duration(envInt("RATE_LIMIT_CLEANUP_INTERVAL_MINUTES", 60)) * time.Minute
+	maxAge := time.Duration(envInt("RATE_LIMIT_MAX_AGE_HOURS", 24)) * time.Hour
+	go func() {
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+		for range ticker.C {
+			if err := store.Cleanup(context.Background(), maxAge); err != nil {
+				slog.Warn("rate limiter cleanup failed", "error", err)
+			}
+		}
+	}()
+}
+
+func requestIDMiddleware() func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			requestID := r.Header.Get("X-Request-ID")
+			if requestID == "" {
+				requestID = newRequestID()
+			}
+			w.Header().Set("X-Request-ID", requestID)
+			next.ServeHTTP(w, setRequestID(r, requestID))
+		})
+	}
 }
 
 func loggerMiddleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			log.Printf("Request %s %s", r.Method, r.URL.RequestURI())
-			next.ServeHTTP(w, r)
+			start := time.Now()
+			rec := &statusRecorder{ResponseWriter: w}
+			next.ServeHTTP(rec, r)
+			if rec.status == 0 {
+				rec.status = http.StatusOK
+			}
+			slog.Info("http request",
+				"request_id", getRequestID(r),
+				"method", r.Method,
+				"route", r.Pattern,
+				"path", r.URL.Path,
+				"status", rec.status,
+				"duration_ms", time.Since(start).Milliseconds(),
+			)
 		})
 	}
 }
@@ -117,23 +157,22 @@ func csrfMiddleware() func(http.Handler) http.Handler {
 func rateLimitMiddleware(store *PostgresRateLimiterStore) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Skip for certain routes
-			if r.Method == "POST" && (r.URL.Path == "/sessions" || r.URL.Path == "/users") {
+			policy, exempt := rateLimitPolicy(r)
+			if exempt {
 				next.ServeHTTP(w, r)
 				return
 			}
 
-			ip := r.RemoteAddr
-			if forwarded := r.Header.Get("X-Forwarded-For"); forwarded != "" {
-				ip = strings.Split(forwarded, ",")[0]
-			}
-
-			allowed, err := store.Allow(ip)
+			decision, err := store.Allow(r.Context(), rateLimitKey(r, policy), policy)
 			if err != nil {
-				http.Error(w, err.Error(), 500)
-				return
+				slog.Error("rate limiter storage failed", "request_id", getRequestID(r), "policy", policy.Name, "error", err)
+				if !decision.Allowed {
+					http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
+					return
+				}
 			}
-			if !allowed {
+			if !decision.Allowed {
+				w.Header().Set("Retry-After", strconv.Itoa(int(decision.RetryAfter.Seconds()+0.5)))
 				http.Error(w, "Too many requests", http.StatusTooManyRequests)
 				return
 			}

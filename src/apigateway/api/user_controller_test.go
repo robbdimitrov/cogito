@@ -81,10 +81,12 @@ func (m *mockImageServiceClientForUser) DeleteImage(ctx context.Context, in *pb.
 func TestImageUploadProxy_ForwardsFrontendRouteWithUserHeader(t *testing.T) {
 	var gotPath string
 	var gotUserID string
+	var gotRequestID string
 
 	imageServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		gotPath = r.URL.Path
 		gotUserID = r.Header.Get("x-user-id")
+		gotRequestID = r.Header.Get("X-Request-ID")
 		json.NewEncoder(w).Encode(map[string]string{"filename": "new-profile.jpg"})
 	}))
 	defer imageServer.Close()
@@ -94,6 +96,7 @@ func TestImageUploadProxy_ForwardsFrontendRouteWithUserHeader(t *testing.T) {
 
 	req := httptest.NewRequest("POST", "/uploads", bytes.NewBufferString("image-body"))
 	req = setUserID(req, "42")
+	req = setRequestID(req, "req-test")
 	w := httptest.NewRecorder()
 
 	router.proxyImageUpload(w, req)
@@ -106,6 +109,9 @@ func TestImageUploadProxy_ForwardsFrontendRouteWithUserHeader(t *testing.T) {
 	}
 	if gotUserID != "42" {
 		t.Errorf("Expected x-user-id header 42, got %s", gotUserID)
+	}
+	if gotRequestID != "req-test" {
+		t.Errorf("Expected X-Request-ID header req-test, got %s", gotRequestID)
 	}
 }
 

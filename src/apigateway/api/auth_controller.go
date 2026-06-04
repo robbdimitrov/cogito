@@ -3,12 +3,12 @@ package api
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -20,7 +20,11 @@ type authController struct {
 }
 
 func newAuthController(addr string) *authController {
-	conn, _ := grpc.NewClient(addr, insecureCredentials())
+	conn, err := newGatewayClient(addr, "auth")
+	if err != nil {
+		slog.Error("unable to create auth client", "error", err)
+		os.Exit(1)
+	}
 	return &authController{pb.NewAuthServiceClient(conn)}
 }
 
@@ -28,7 +32,7 @@ func (ac *authController) createSession(w http.ResponseWriter, r *http.Request) 
 	client := ac.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx = appendInternalAuth(ctx)
+	ctx = appendInternalAuthForRequest(ctx, r)
 	defer cancel()
 
 	var body struct {
@@ -47,7 +51,7 @@ func (ac *authController) createSession(w http.ResponseWriter, r *http.Request) 
 
 	res, err := client.CreateSession(ctx, &req)
 	if err != nil {
-		log.Printf("Creating session failed: %v", err)
+		slog.Warn("creating session failed", "request_id", getRequestID(r), "error_kind", status.Code(err).String())
 		grpcError(w, err)
 		return
 	}
@@ -66,14 +70,14 @@ func (ac *authController) validateSession(w http.ResponseWriter, r *http.Request
 	client := ac.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx = appendInternalAuth(ctx)
+	ctx = appendInternalAuthForRequest(ctx, r)
 	defer cancel()
 
 	req := pb.SessionRequest{SessionId: cookie.Value}
 
 	res, err := client.GetSession(ctx, &req)
 	if err != nil {
-		log.Printf("Validating session failed: %v", err)
+		slog.Warn("validating session failed", "request_id", getRequestID(r), "error_kind", status.Code(err).String())
 		s := status.Convert(err)
 		if s.Code() == codes.Unauthenticated {
 			clearCookie(w)
@@ -98,14 +102,14 @@ func (ac *authController) deleteSession(w http.ResponseWriter, r *http.Request) 
 	client := ac.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx = appendInternalAuth(ctx)
+	ctx = appendInternalAuthForRequest(ctx, r)
 	defer cancel()
 
 	req := pb.SessionRequest{SessionId: cookie.Value}
 
 	_, err = client.DeleteSession(ctx, &req)
 	if err != nil {
-		log.Printf("Deleting session failed: %v", err)
+		slog.Warn("deleting session failed", "request_id", getRequestID(r), "error_kind", status.Code(err).String())
 		grpcError(w, err)
 		return
 	}
@@ -124,12 +128,12 @@ func (ac *authController) deleteSessionByID(w http.ResponseWriter, r *http.Reque
 	client := ac.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx = appendInternalAuth(ctx)
+	ctx = appendInternalAuthForRequest(ctx, r)
 	defer cancel()
 
 	sess, err := client.GetSession(ctx, &pb.SessionRequest{SessionId: sessionID})
 	if err != nil {
-		log.Printf("Getting session for ownership check failed: %v", err)
+		slog.Warn("getting session for ownership check failed", "request_id", getRequestID(r), "error_kind", status.Code(err).String())
 		grpcError(w, err)
 		return
 	}
@@ -148,7 +152,7 @@ func (ac *authController) deleteSessionByID(w http.ResponseWriter, r *http.Reque
 
 	_, err = client.DeleteSession(ctx, &pb.SessionRequest{SessionId: sessionID})
 	if err != nil {
-		log.Printf("Deleting session by ID failed: %v", err)
+		slog.Warn("deleting session by id failed", "request_id", getRequestID(r), "error_kind", status.Code(err).String())
 		grpcError(w, err)
 		return
 	}
@@ -166,13 +170,13 @@ func (ac *authController) getSessions(w http.ResponseWriter, r *http.Request) {
 	client := ac.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx = appendInternalAuth(ctx)
+	ctx = appendInternalAuthForRequest(ctx, r)
 	defer cancel()
 
 	validateReq := pb.SessionRequest{SessionId: cookie.Value}
 	validateRes, err := client.GetSession(ctx, &validateReq)
 	if err != nil {
-		log.Printf("Validating session failed: %v", err)
+		slog.Warn("validating session failed", "request_id", getRequestID(r), "error_kind", status.Code(err).String())
 		s := status.Convert(err)
 		if s.Code() == codes.Unauthenticated {
 			clearCookie(w)
@@ -184,7 +188,7 @@ func (ac *authController) getSessions(w http.ResponseWriter, r *http.Request) {
 	req := pb.UserRequest{UserId: validateRes.UserId}
 	res, err := client.GetSessions(ctx, &req)
 	if err != nil {
-		log.Printf("Getting sessions failed: %v", err)
+		slog.Warn("getting sessions failed", "request_id", getRequestID(r), "error_kind", status.Code(err).String())
 		grpcError(w, err)
 		return
 	}

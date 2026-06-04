@@ -2,6 +2,8 @@ package api
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"net/http"
 	"os"
 	"time"
@@ -14,6 +16,38 @@ const defaultInternalGRPCToken = "dev-internal-grpc-token"
 type contextKey string
 
 const userIDKey contextKey = "userId"
+const requestIDKey contextKey = "requestId"
+
+func getRequestID(r *http.Request) string {
+	return requestIDFromContext(r.Context())
+}
+
+func requestIDFromContext(ctx context.Context) string {
+	v, ok := ctx.Value(requestIDKey).(string)
+	if ok && v != "" {
+		return v
+	}
+	if md, ok := metadata.FromOutgoingContext(ctx); ok {
+		values := md.Get("x-request-id")
+		if len(values) > 0 {
+			return values[0]
+		}
+	}
+	return ""
+}
+
+func setRequestID(r *http.Request, requestID string) *http.Request {
+	ctx := context.WithValue(r.Context(), requestIDKey, requestID)
+	return r.WithContext(ctx)
+}
+
+func newRequestID() string {
+	var b [16]byte
+	if _, err := rand.Read(b[:]); err != nil {
+		return time.Now().Format("20060102150405.000000000")
+	}
+	return hex.EncodeToString(b[:])
+}
 
 func getUserID(r *http.Request) string {
 	v, ok := r.Context().Value(userIDKey).(string)
@@ -33,7 +67,7 @@ func appendUserIDHeader(ctx context.Context, r *http.Request) (context.Context, 
 	if uid == "" {
 		return nil, os.ErrPermission
 	}
-	return appendInternalAuth(metadata.AppendToOutgoingContext(ctx, "user-id", uid)), nil
+	return appendInternalAuth(appendRequestIDHeader(metadata.AppendToOutgoingContext(ctx, "user-id", uid), r)), nil
 }
 
 func appendInternalAuth(ctx context.Context) context.Context {
@@ -42,6 +76,17 @@ func appendInternalAuth(ctx context.Context) context.Context {
 		token = defaultInternalGRPCToken
 	}
 	return metadata.AppendToOutgoingContext(ctx, "internal-token", token)
+}
+
+func appendInternalAuthForRequest(ctx context.Context, r *http.Request) context.Context {
+	return appendInternalAuth(appendRequestIDHeader(ctx, r))
+}
+
+func appendRequestIDHeader(ctx context.Context, r *http.Request) context.Context {
+	if requestID := getRequestID(r); requestID != "" {
+		return metadata.AppendToOutgoingContext(ctx, "x-request-id", requestID)
+	}
+	return ctx
 }
 
 func createCookie(w http.ResponseWriter, sessionID string) {

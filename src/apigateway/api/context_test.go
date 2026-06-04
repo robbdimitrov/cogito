@@ -6,6 +6,8 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+
+	"google.golang.org/grpc/metadata"
 )
 
 func TestUserContext(t *testing.T) {
@@ -36,6 +38,25 @@ func TestAppendUserIDHeader(t *testing.T) {
 	}
 	if ctx == nil {
 		t.Errorf("expected context, got nil")
+	}
+}
+
+func TestAppendUserIDHeaderForwardsRequestID(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req = setUserID(req, "456")
+	req = setRequestID(req, "req-123")
+
+	ctx, err := appendUserIDHeader(context.Background(), req)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	md, ok := metadata.FromOutgoingContext(ctx)
+	if !ok {
+		t.Fatalf("expected outgoing metadata")
+	}
+	if got := md.Get("x-request-id"); len(got) != 1 || got[0] != "req-123" {
+		t.Fatalf("expected x-request-id req-123, got %v", got)
 	}
 }
 

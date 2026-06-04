@@ -6,13 +6,11 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
-
-	"google.golang.org/grpc"
 
 	pb "github.com/robbdimitrov/thoughts/src/apigateway/genproto"
 )
@@ -24,11 +22,24 @@ type userController struct {
 }
 
 func newUserController(addr string, authAddr string, imageAddr string) *userController {
-	conn, _ := grpc.NewClient(addr, insecureCredentials())
-	authConn, _ := grpc.NewClient(authAddr, insecureCredentials())
+	conn, err := newGatewayClient(addr, "user")
+	if err != nil {
+		slog.Error("unable to create user client", "error", err)
+		os.Exit(1)
+	}
+	authConn, err := newGatewayClient(authAddr, "auth")
+	if err != nil {
+		slog.Error("unable to create auth client", "error", err)
+		os.Exit(1)
+	}
 	var imgClient pb.ImageServiceClient
-	if imageAddr != "" {
-		imgConn, _ := grpc.NewClient(imageAddr, insecureCredentials())
+	imageGRPCAddr := imageGRPCAddress(imageAddr)
+	if imageGRPCAddr != "" {
+		imgConn, err := newGatewayClient(imageGRPCAddr, "image-grpc")
+		if err != nil {
+			slog.Error("unable to create image client", "error", err)
+			os.Exit(1)
+		}
 		imgClient = pb.NewImageServiceClient(imgConn)
 	}
 	return &userController{
@@ -42,7 +53,7 @@ func (s *userController) createUser(w http.ResponseWriter, r *http.Request) {
 	client := s.client
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx = appendInternalAuth(ctx)
+	ctx = appendInternalAuthForRequest(ctx, r)
 	defer cancel()
 
 	var body struct {
@@ -65,7 +76,7 @@ func (s *userController) createUser(w http.ResponseWriter, r *http.Request) {
 
 	res, err := client.CreateUser(ctx, &req)
 	if err != nil {
-		log.Printf("Creating user failed: %v", err)
+		slog.Warn("creating user failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
 		return
 	}
@@ -95,7 +106,7 @@ func (s *userController) getUser(w http.ResponseWriter, r *http.Request) {
 
 	res, err := client.GetUser(ctx, &req)
 	if err != nil {
-		log.Printf("Getting user failed: %v", err)
+		slog.Warn("getting user failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
 		return
 	}
@@ -123,7 +134,7 @@ func (s *userController) getUserByUsername(w http.ResponseWriter, r *http.Reques
 
 	res, err := client.GetUserByUsername(ctx, &req)
 	if err != nil {
-		log.Printf("Getting user by username failed: %v", err)
+		slog.Warn("getting user by username failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
 		return
 	}
@@ -170,7 +181,7 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 	oldUserReq := pb.UserRequest{UserId: int32(userIDInt)}
 	oldUserRes, err := client.GetUser(ctx, &oldUserReq)
 	if err != nil {
-		log.Printf("Getting old user failed: %v", err)
+		slog.Warn("getting old user failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
 		return
 	}
@@ -210,7 +221,7 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 
 	_, err = client.UpdateUser(ctx, &req)
 	if err != nil {
-		log.Printf("Updating user failed: %v", err)
+		slog.Warn("updating user failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
 		return
 	}
@@ -296,7 +307,7 @@ func (s *userController) getFollowing(w http.ResponseWriter, r *http.Request) {
 
 	res, err := client.GetFollowing(ctx, &req)
 	if err != nil {
-		log.Printf("Getting following failed: %v", err)
+		slog.Warn("getting following failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
 		return
 	}
@@ -335,7 +346,7 @@ func (s *userController) searchUsers(w http.ResponseWriter, r *http.Request) {
 
 	res, err := client.SearchUsers(ctx, &req)
 	if err != nil {
-		log.Printf("Searching users failed: %v", err)
+		slog.Warn("searching users failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
 		return
 	}
@@ -379,7 +390,7 @@ func (s *userController) getFollowers(w http.ResponseWriter, r *http.Request) {
 
 	res, err := client.GetFollowers(ctx, &req)
 	if err != nil {
-		log.Printf("Getting followers failed: %v", err)
+		slog.Warn("getting followers failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
 		return
 	}
@@ -413,7 +424,7 @@ func (s *userController) followUser(w http.ResponseWriter, r *http.Request) {
 
 	_, err = client.FollowUser(ctx, &req)
 	if err != nil {
-		log.Printf("Following user failed: %v", err)
+		slog.Warn("following user failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
 		return
 	}
@@ -442,7 +453,7 @@ func (s *userController) unfollowUser(w http.ResponseWriter, r *http.Request) {
 
 	_, err = client.UnfollowUser(ctx, &req)
 	if err != nil {
-		log.Printf("Unfollowing user failed: %v", err)
+		slog.Warn("unfollowing user failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
 		return
 	}

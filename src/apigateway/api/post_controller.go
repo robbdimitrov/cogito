@@ -3,12 +3,11 @@ package api
 import (
 	"context"
 	"encoding/json"
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
-
-	"google.golang.org/grpc"
 
 	pb "github.com/robbdimitrov/thoughts/src/apigateway/genproto"
 )
@@ -19,10 +18,19 @@ type postController struct {
 }
 
 func newPostController(addr string, imageAddr string) *postController {
-	conn, _ := grpc.NewClient(addr, insecureCredentials())
+	conn, err := newGatewayClient(addr, "post")
+	if err != nil {
+		slog.Error("unable to create post client", "error", err)
+		os.Exit(1)
+	}
 	var imgClient pb.ImageServiceClient
-	if imageAddr != "" {
-		imgConn, _ := grpc.NewClient(imageAddr, insecureCredentials())
+	imageGRPCAddr := imageGRPCAddress(imageAddr)
+	if imageGRPCAddr != "" {
+		imgConn, err := newGatewayClient(imageGRPCAddr, "image-grpc")
+		if err != nil {
+			slog.Error("unable to create image client", "error", err)
+			os.Exit(1)
+		}
 		imgClient = pb.NewImageServiceClient(imgConn)
 	}
 	return &postController{pb.NewPostServiceClient(conn), imgClient}
@@ -60,7 +68,7 @@ func (pc *postController) createPost(w http.ResponseWriter, r *http.Request) {
 
 	res, err := client.CreatePost(ctx, &req)
 	if err != nil {
-		log.Printf("Creating post failed: %v", err)
+		slog.Warn("creating post failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
 		return
 	}
@@ -93,7 +101,7 @@ func (pc *postController) getFeed(w http.ResponseWriter, r *http.Request) {
 
 	res, err := client.GetFeed(ctx, &req)
 	if err != nil {
-		log.Printf("Getting posts failed: %v", err)
+		slog.Warn("getting posts failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
 		return
 	}
@@ -137,7 +145,7 @@ func (pc *postController) getPosts(w http.ResponseWriter, r *http.Request) {
 
 	res, err := client.GetPosts(ctx, &req)
 	if err != nil {
-		log.Printf("Getting posts failed: %v", err)
+		slog.Warn("getting posts failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
 		return
 	}
@@ -181,7 +189,7 @@ func (pc *postController) getLikedPosts(w http.ResponseWriter, r *http.Request) 
 
 	res, err := client.GetLikedPosts(ctx, &req)
 	if err != nil {
-		log.Printf("Getting liked posts failed: %v", err)
+		slog.Warn("getting liked posts failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
 		return
 	}
@@ -220,7 +228,7 @@ func (pc *postController) getHashtagPosts(w http.ResponseWriter, r *http.Request
 
 	res, err := client.GetHashtagPosts(ctx, &req)
 	if err != nil {
-		log.Printf("Getting hashtag posts failed: %v", err)
+		slog.Warn("getting hashtag posts failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
 		return
 	}
@@ -254,7 +262,7 @@ func (pc *postController) getPost(w http.ResponseWriter, r *http.Request) {
 
 	res, err := client.GetPost(ctx, &req)
 	if err != nil {
-		log.Printf("Getting post failed: %v", err)
+		slog.Warn("getting post failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
 		return
 	}
@@ -284,14 +292,14 @@ func (pc *postController) deletePost(w http.ResponseWriter, r *http.Request) {
 	// Fetch post first to check if there is a media_key
 	postRes, err := client.GetPost(ctx, &req)
 	if err != nil {
-		log.Printf("Getting post for deletion check failed: %v", err)
+		slog.Warn("getting post for deletion check failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
 		return
 	}
 
 	_, err = client.DeletePost(ctx, &req)
 	if err != nil {
-		log.Printf("Deleting post failed: %v", err)
+		slog.Warn("deleting post failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
 		return
 	}
@@ -300,7 +308,7 @@ func (pc *postController) deletePost(w http.ResponseWriter, r *http.Request) {
 	if postRes.MediaKey != "" && pc.imgClient != nil {
 		_, err := pc.imgClient.DeleteImage(ctx, &pb.DeleteImageRequest{Filename: postRes.MediaKey})
 		if err != nil {
-			log.Printf("Deleting image failed: %v", err)
+			slog.Warn("deleting image failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		}
 	}
 
@@ -328,7 +336,7 @@ func (pc *postController) likePost(w http.ResponseWriter, r *http.Request) {
 
 	_, err = client.LikePost(ctx, &req)
 	if err != nil {
-		log.Printf("Liking post failed: %v", err)
+		slog.Warn("liking post failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
 		return
 	}
@@ -357,7 +365,7 @@ func (pc *postController) unlikePost(w http.ResponseWriter, r *http.Request) {
 
 	_, err = client.UnlikePost(ctx, &req)
 	if err != nil {
-		log.Printf("Unliking post failed: %v", err)
+		slog.Warn("unliking post failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
 		return
 	}
@@ -386,7 +394,7 @@ func (pc *postController) repostPost(w http.ResponseWriter, r *http.Request) {
 
 	_, err = client.RepostPost(ctx, &req)
 	if err != nil {
-		log.Printf("Creating repost failed: %v", err)
+		slog.Warn("creating repost failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
 		return
 	}
@@ -415,7 +423,7 @@ func (pc *postController) removeRepost(w http.ResponseWriter, r *http.Request) {
 
 	_, err = client.RemoveRepost(ctx, &req)
 	if err != nil {
-		log.Printf("Deleting repost failed: %v", err)
+		slog.Warn("deleting repost failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
 		return
 	}

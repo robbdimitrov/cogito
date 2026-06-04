@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -32,7 +33,7 @@ func main() {
 	}
 
 	go func() {
-		log.Printf("Server is starting on port %s", port)
+		slog.Info("server starting", "port", port)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatal(err)
 		}
@@ -45,7 +46,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	log.Println("Server is shutting down...")
+	slog.Info("server shutting down")
 	if err := server.Shutdown(ctx); err != nil {
 		log.Fatal(err)
 	}

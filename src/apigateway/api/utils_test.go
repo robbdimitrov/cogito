@@ -33,7 +33,7 @@ func TestGrpcError(t *testing.T) {
 	s := status.New(codes.NotFound, "not found")
 	rec := httptest.NewRecorder()
 	grpcError(rec, s.Err())
-	
+
 	if rec.Code != http.StatusNotFound {
 		t.Errorf("expected 404, got %v", rec.Code)
 	}

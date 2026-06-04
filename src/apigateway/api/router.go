@@ -1,24 +1,51 @@
 package api
 
 import (
+	"errors"
+	"io"
+	"log/slog"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
+	"time"
 )
 
 type router struct {
-	auth      *authController
-	post      *postController
-	user      *userController
-	imageAddr string
+	auth             *authController
+	post             *postController
+	user             *userController
+	imageAddr        string
+	imageHTTP        *http.Client
+	imageHTTPBreaker *circuitBreaker
+}
+
+func imageGRPCAddress(imageHTTPAddr string) string {
+	if addr := os.Getenv("IMAGE_GRPC_SERVICE_ADDR"); addr != "" {
+		return addr
+	}
+	if imageHTTPAddr == "imageservice:8081" {
+		return "imageservice:5050"
+	}
+	return imageHTTPAddr
 }
 
 func newRouter(authAddr, postAddr, userAddr, imageAddr string) *router {
+	imageBreaker := newCircuitBreaker("image-http")
 	return &router{
-		auth:      newAuthController(authAddr),
-		post:      newPostController(postAddr, imageAddr),
-		user:      newUserController(userAddr, authAddr, imageAddr),
-		imageAddr: imageAddr,
+		auth:             newAuthController(authAddr),
+		post:             newPostController(postAddr, imageAddr),
+		user:             newUserController(userAddr, authAddr, imageAddr),
+		imageAddr:        imageAddr,
+		imageHTTPBreaker: imageBreaker,
+		imageHTTP: &http.Client{
+			Transport: &retryHTTPTransport{
+				base:    http.DefaultTransport,
+				breaker: imageBreaker,
+				retries: envInt("HTTP_RETRY_MAX_ATTEMPTS", 3),
+				backoff: time.Duration(envInt("HTTP_RETRY_BACKOFF_MS", 100)) * time.Millisecond,
+			},
+		},
 	}
 }
 
@@ -100,15 +127,87 @@ func (r *router) proxyImageRequest(path string, configure func(*http.Request)) h
 		}
 
 		proxy := httputil.NewSingleHostReverseProxy(targetURL)
+		if r.imageHTTP != nil && r.imageHTTP.Transport != nil {
+			proxy.Transport = r.imageHTTP.Transport
+		}
+		proxy.ErrorHandler = func(w http.ResponseWriter, req *http.Request, err error) {
+			slog.Warn("image proxy failed", "request_id", getRequestID(req), "error", err)
+			http.Error(w, "Image service unavailable", http.StatusServiceUnavailable)
+		}
 		originalDirector := proxy.Director
 		proxy.Director = func(proxyReq *http.Request) {
 			originalDirector(proxyReq)
 			proxyReq.URL.Path = path
 			proxyReq.URL.RawPath = ""
+			if requestID := getRequestID(req); requestID != "" {
+				proxyReq.Header.Set("X-Request-ID", requestID)
+			}
 			if configure != nil {
 				configure(proxyReq)
 			}
 		}
 		proxy.ServeHTTP(w, req)
 	}
+}
+
+type retryHTTPTransport struct {
+	base    http.RoundTripper
+	breaker *circuitBreaker
+	retries int
+	backoff time.Duration
+}
+
+func (t *retryHTTPTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	if !t.breaker.allow() {
+		return nil, errors.New("downstream circuit open")
+	}
+	attempts := 1
+	if req.Method == http.MethodGet {
+		attempts = t.retries
+	}
+	var lastResp *http.Response
+	var lastErr error
+	for attempt := 1; attempt <= attempts; attempt++ {
+		resp, err := t.base.RoundTrip(req)
+		if err == nil && !isTransientHTTPStatus(resp.StatusCode) {
+			t.breaker.success()
+			return resp, nil
+		}
+		if err == nil {
+			lastResp = resp
+		} else {
+			lastErr = err
+		}
+		if req.Method != http.MethodGet || attempt == attempts {
+			if err != nil || (resp != nil && isTransientHTTPStatus(resp.StatusCode)) {
+				t.breaker.failureTransient()
+			}
+			if err != nil {
+				return nil, err
+			}
+			return resp, nil
+		}
+		if resp != nil && resp.Body != nil {
+			_, _ = io.Copy(io.Discard, resp.Body)
+			_ = resp.Body.Close()
+		}
+		slog.Warn("retrying image http request", "request_id", req.Header.Get("X-Request-ID"), "attempt", attempt, "status", responseStatus(lastResp), "error", lastErr)
+		select {
+		case <-req.Context().Done():
+			return nil, req.Context().Err()
+		case <-time.After(time.Duration(attempt) * t.backoff):
+		}
+	}
+	return lastResp, lastErr
+}
+
+func isTransientHTTPStatus(status int) bool {
+	return status == http.StatusBadGateway || status == http.StatusServiceUnavailable || status == http.StatusGatewayTimeout
+}
+
+func responseStatus(resp *http.Response) int {
+	if resp == nil {
+		return 0
+	}
+	return resp.StatusCode
 }

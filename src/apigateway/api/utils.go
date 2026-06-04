@@ -34,6 +34,10 @@ func grpcError(w http.ResponseWriter, err error) {
 	http.Error(w, s.Proto().GetMessage(), getStatusCode(s))
 }
 
+func grpcCode(err error) string {
+	return status.Code(err).String()
+}
+
 func jsonResponse(w http.ResponseWriter, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
