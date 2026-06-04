@@ -134,4 +134,34 @@ describe('APIClient', () => {
       }));
     });
   });
+
+  describe('uploadImage', () => {
+    it('uses the image multipart field and maps filename to key', async () => {
+      document.cookie = '_csrf=mock-token';
+
+      const mockResponse = {
+        ok: true,
+        status: 200,
+        text: vi.fn().mockResolvedValue(JSON.stringify({filename: 'profile.jpg'})),
+      };
+      vi.mocked(fetch).mockResolvedValue(mockResponse as any);
+
+      const file = new File(['image-bytes'], 'profile.jpg', {type: 'image/jpeg'});
+      const result = await apiClient.uploadImage(file);
+
+      expect(result).toEqual({key: 'profile.jpg'});
+      expect(fetch).toHaveBeenCalledWith('/api/uploads', expect.objectContaining({
+        method: httpMethod.post,
+        headers: {
+          'X-CSRF-Token': 'mock-token',
+        },
+      }));
+
+      const request = vi.mocked(fetch).mock.calls[0][1] as RequestInit;
+      expect(request.body).toBeInstanceOf(FormData);
+      const uploaded = (request.body as FormData).get('image') as File;
+      expect(uploaded.name).toBe('profile.jpg');
+      expect(uploaded.type).toBe('image/jpeg');
+    });
+  });
 });

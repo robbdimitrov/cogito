@@ -65,9 +65,50 @@ func (r *router) configureRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("DELETE /posts/{postId}/reposts", r.post.removeRepost)
 
 	// Image Gateway Orchestration
-	targetURL, _ := url.Parse("http://" + r.imageAddr)
-	proxy := httputil.NewSingleHostReverseProxy(targetURL)
+	mux.HandleFunc("POST /uploads", r.proxyImageUpload)
+	mux.HandleFunc("GET /uploads/{filename}", r.proxyImageFile)
+}
 
-	mux.Handle("POST /api/upload", proxy)
-	mux.Handle("GET /images/", proxy)
+func (r *router) proxyImageUpload(w http.ResponseWriter, req *http.Request) {
+	userID := getUserID(req)
+	if userID == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	r.proxyImageRequest("/uploads", func(proxyReq *http.Request) {
+		proxyReq.Header.Set("x-user-id", userID)
+	})(w, req)
+}
+
+func (r *router) proxyImageFile(w http.ResponseWriter, req *http.Request) {
+	filename := req.PathValue("filename")
+	if filename == "" {
+		http.NotFound(w, req)
+		return
+	}
+
+	r.proxyImageRequest("/uploads/"+filename, nil)(w, req)
+}
+
+func (r *router) proxyImageRequest(path string, configure func(*http.Request)) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		targetURL, err := url.Parse("http://" + r.imageAddr)
+		if err != nil {
+			http.Error(w, "Invalid image service address", http.StatusInternalServerError)
+			return
+		}
+
+		proxy := httputil.NewSingleHostReverseProxy(targetURL)
+		originalDirector := proxy.Director
+		proxy.Director = func(proxyReq *http.Request) {
+			originalDirector(proxyReq)
+			proxyReq.URL.Path = path
+			proxyReq.URL.RawPath = ""
+			if configure != nil {
+				configure(proxyReq)
+			}
+		}
+		proxy.ServeHTTP(w, req)
+	}
 }

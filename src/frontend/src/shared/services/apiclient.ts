@@ -242,10 +242,11 @@ class APIClient {
   // Upload
 
   uploadImage(file: File): Promise<{key: string}> {
-    const url = '/api/upload';
+    const url = '/api/uploads';
     const body = new FormData();
-    body.append('file', file);
-    return this.request<{key: string}>(url, httpMethod.post, body);
+    body.append('image', file, file.name);
+    return this.request<{filename: string}>(url, httpMethod.post, body)
+      .then(({filename}) => ({key: filename}));
   }
 }
 

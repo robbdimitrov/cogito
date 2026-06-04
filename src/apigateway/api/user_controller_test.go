@@ -3,8 +3,10 @@ package api
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"google.golang.org/grpc"
@@ -35,10 +37,10 @@ func (m *mockUserServiceClient) UpdateUser(ctx context.Context, in *pb.UpdateUse
 
 type mockAuthServiceClient struct {
 	pb.AuthServiceClient
-	getSessionsCalled    bool
-	deleteSessionCalled  int
-	deletedSessionIDs    []string
-	sessions             []*pb.Session
+	getSessionsCalled   bool
+	deleteSessionCalled int
+	deletedSessionIDs   []string
+	sessions            []*pb.Session
 }
 
 func (m *mockAuthServiceClient) GetSessions(ctx context.Context, in *pb.UserRequest, opts ...grpc.CallOption) (*pb.Sessions, error) {
@@ -76,6 +78,63 @@ func (m *mockImageServiceClientForUser) DeleteImage(ctx context.Context, in *pb.
 	return &pb.Empty{}, nil
 }
 
+func TestImageUploadProxy_ForwardsFrontendRouteWithUserHeader(t *testing.T) {
+	var gotPath string
+	var gotUserID string
+
+	imageServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotPath = r.URL.Path
+		gotUserID = r.Header.Get("x-user-id")
+		json.NewEncoder(w).Encode(map[string]string{"filename": "new-profile.jpg"})
+	}))
+	defer imageServer.Close()
+
+	imageAddr := strings.TrimPrefix(imageServer.URL, "http://")
+	router := &router{imageAddr: imageAddr}
+
+	req := httptest.NewRequest("POST", "/uploads", bytes.NewBufferString("image-body"))
+	req = setUserID(req, "42")
+	w := httptest.NewRecorder()
+
+	router.proxyImageUpload(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("Expected status 200, got %d", w.Code)
+	}
+	if gotPath != "/uploads" {
+		t.Errorf("Expected proxied path /uploads, got %s", gotPath)
+	}
+	if gotUserID != "42" {
+		t.Errorf("Expected x-user-id header 42, got %s", gotUserID)
+	}
+}
+
+func TestImageFileProxy_RewritesFrontendUploadsRoute(t *testing.T) {
+	var gotPath string
+
+	imageServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotPath = r.URL.Path
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer imageServer.Close()
+
+	imageAddr := strings.TrimPrefix(imageServer.URL, "http://")
+	router := &router{imageAddr: imageAddr}
+
+	req := httptest.NewRequest("GET", "/uploads/profile.jpg", nil)
+	req.SetPathValue("filename", "profile.jpg")
+	w := httptest.NewRecorder()
+
+	router.proxyImageFile(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("Expected status 200, got %d", w.Code)
+	}
+	if gotPath != "/uploads/profile.jpg" {
+		t.Errorf("Expected proxied path /uploads/profile.jpg, got %s", gotPath)
+	}
+}
+
 func TestUpdateUser_ImageAndSessionOrchestration(t *testing.T) {
 	mockUser := &mockUserServiceClient{
 		oldProfileKey: "old-profile.jpg",
@@ -99,7 +158,7 @@ func TestUpdateUser_ImageAndSessionOrchestration(t *testing.T) {
 	req := httptest.NewRequest("PUT", "/users/1", bytes.NewBufferString(body))
 	req.SetPathValue("userId", "1")
 	req = setUserID(req, "1")
-	
+
 	w := httptest.NewRecorder()
 	uc.updateUser(w, req)
 
