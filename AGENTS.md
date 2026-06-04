@@ -10,11 +10,12 @@ Microservices app with an HTTP gateway calling gRPC backends.
 | `postservice` | Go 1.26 | gRPC — posts, likes, reposts | `main.go` |
 | `authservice` | Rust | gRPC — sessions | `src/main.rs` |
 | `userservice` | Rust | gRPC — users, follows | `src/main.rs` |
+| `imageservice` | Rust | gRPC + HTTP — image upload staging, verification, cleanup | `src/main.rs` |
 | `frontend` | Next.js 16 / React 19 | App Router frontend | `src/app/` |
 | `database` | PostgreSQL 14 | Schema init via `schema.sql` | — |
 
 - Proto contract: `pb/thoughts.proto`
-- Backend gRPC port: **5050**; gateway + frontend port: **8080**
+- Backend gRPC port: **5050**; `imageservice` HTTP port: **8081**; gateway + frontend port: **8080**
 - All backend services connect to Postgres via `DATABASE_URL` (e.g. `postgresql://postgres:kubernetes@database:5432`)
 
 ## Build
@@ -22,7 +23,7 @@ Microservices app with an HTTP gateway calling gRPC backends.
 Docker images are built with Make. Tags target `localhost:5000/thoughts/<service>`.
 
 ```sh
-make                  # builds apigateway, authservice, database, frontend
+make                  # builds all service images, migration image, and frontend image
 make <service>        # individual service
 ```
 
@@ -58,7 +59,7 @@ Dockerfiles use multi-stage builds: `golang:1.26` builder → `scratch` runtime.
 ### Rust services
 
 ```sh
-cd src/authservice   # or src/userservice
+cd src/authservice   # or src/userservice or src/imageservice
 cargo run
 ```
 
@@ -75,7 +76,7 @@ The `go_package` option is `./genproto`, so outputs land in `<service>/genproto/
 
 
 
-**Rust** is handled automatically via `build.rs` and `tonic-build` during `cargo build`.
+**Rust** is handled automatically via `build.rs` and `tonic-build` during `cargo build` in `authservice`, `userservice`, and `imageservice`.
 
 ## Kubernetes / Local Deploy
 

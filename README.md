@@ -11,6 +11,7 @@ Service | Language | Description
 [authservice](/src/authservice) | Rust | Authentication service for creation and validation of sessions.
 [database](/src/database) | SQL | PostgreSQL database with tables, relationships and functions.
 [frontend](/src/frontend) | JavaScript | React frontend of the app.
+[imageservice](/src/imageservice) | Rust | Image upload, staging verification and cleanup service.
 [postservice](/src/postservice) | Go | Service for creation, liking, reposting and fetching of posts.
 [userservice](/src/userservice) | Rust | Service for creation, following and fetching of users.
 
