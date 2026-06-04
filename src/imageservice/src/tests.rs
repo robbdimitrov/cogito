@@ -1,12 +1,12 @@
-use std::sync::Arc;
-use tonic::{Request, Status};
-use tokio::sync::Mutex;
 use async_trait::async_trait;
+use std::sync::Arc;
+use tokio::sync::Mutex;
+use tonic::{Request, Status};
 
-use crate::db::ImageDb;
+use crate::db_client::ImageDb;
 use crate::grpc::ImageGrpcService;
 use crate::thoughts::image_service_server::ImageService;
-use crate::thoughts::{VerifyUploadRequest, ConsumeUploadRequest, DeleteImageRequest};
+use crate::thoughts::{ConsumeUploadRequest, DeleteImageRequest, VerifyUploadRequest};
 
 struct MockDb {
     uploads: Mutex<Vec<(String, i32)>>,

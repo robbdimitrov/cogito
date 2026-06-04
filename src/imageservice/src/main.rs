@@ -1,9 +1,7 @@
 #[allow(clippy::all)]
-pub mod thoughts {
-    tonic::include_proto!("thoughts");
-}
+pub mod thoughts;
 
-mod db;
+mod db_client;
 mod grpc;
 mod http;
 
@@ -11,9 +9,9 @@ mod http;
 mod tests;
 
 use std::env;
-use tonic::transport::Server;
-use tokio::fs;
 use thoughts::image_service_server::ImageServiceServer;
+use tokio::fs;
+use tonic::transport::Server;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -24,22 +22,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     fs::create_dir_all(&image_dir).await?;
 
-    let db = db::Db::new(&db_url).await?;
+    let db_client = db_client::DbClient::new(&db_url).await?;
 
-    let router = http::create_router(db.clone(), image_dir.clone());
+    let router = http::create_router(db_client.clone(), image_dir.clone());
     let http_addr = format!("0.0.0.0:{}", http_port);
     let listener = tokio::net::TcpListener::bind(&http_addr).await?;
-    
+
     println!("HTTP Server is starting on port {}", http_port);
     tokio::spawn(async move {
         axum::serve(listener, router).await.unwrap();
     });
 
     let grpc_addr = format!("0.0.0.0:{}", grpc_port).parse()?;
-    let grpc_service = grpc::ImageGrpcService::new(db.clone(), image_dir);
-    
+    let grpc_service = grpc::ImageGrpcService::new(db_client.clone(), image_dir);
+
     println!("gRPC Server is starting on port {}", grpc_port);
-    
+
     let shutdown_signal = async {
         tokio::signal::ctrl_c()
             .await
@@ -52,7 +50,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .serve_with_shutdown(grpc_addr, shutdown_signal)
         .await?;
 
-    db.pool.close().await;
+    db_client.pool.close().await;
 
     Ok(())
 }

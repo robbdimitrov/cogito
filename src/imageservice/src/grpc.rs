@@ -1,9 +1,9 @@
-use tonic::{Request, Response, Status};
 use tokio::fs;
+use tonic::{Request, Response, Status};
 
+use crate::db_client::ImageDb;
 use crate::thoughts::image_service_server::ImageService;
-use crate::thoughts::{VerifyUploadRequest, ConsumeUploadRequest, DeleteImageRequest, Empty};
-use crate::db::ImageDb;
+use crate::thoughts::{ConsumeUploadRequest, DeleteImageRequest, Empty, VerifyUploadRequest};
 
 pub struct ImageGrpcService<D: ImageDb> {
     db: D,
@@ -23,13 +23,16 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
         request: Request<VerifyUploadRequest>,
     ) -> Result<Response<Empty>, Status> {
         let req = request.into_inner();
-        let is_valid = self.db.verify_upload(&req.filename, req.user_id).await
+        let is_valid = self
+            .db
+            .verify_upload(&req.filename, req.user_id)
+            .await
             .map_err(|e| Status::internal(e.to_string()))?;
-            
+
         if !is_valid {
             return Err(Status::not_found("Upload not found or not owned by user"));
         }
-        
+
         Ok(Response::new(Empty {}))
     }
 
@@ -38,9 +41,11 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
         request: Request<ConsumeUploadRequest>,
     ) -> Result<Response<Empty>, Status> {
         let req = request.into_inner();
-        self.db.consume_upload(&req.filename).await
+        self.db
+            .consume_upload(&req.filename)
+            .await
             .map_err(|e| Status::internal(e.to_string()))?;
-            
+
         Ok(Response::new(Empty {}))
     }
 
@@ -49,21 +54,23 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
         request: Request<DeleteImageRequest>,
     ) -> Result<Response<Empty>, Status> {
         let req = request.into_inner();
-        
+
         // Also cleanup uploads table just in case it was an orphaned staging file
         let _ = self.db.consume_upload(&req.filename).await;
 
         // Ensure we don't allow directory traversal
-        if req.filename.contains("..") || req.filename.contains('/') || req.filename.contains('\\') {
+        if req.filename.contains("..") || req.filename.contains('/') || req.filename.contains('\\')
+        {
             return Err(Status::invalid_argument("Invalid filename"));
         }
         let file_path = std::path::Path::new(&self.image_dir).join(&req.filename);
-        
+
         if file_path.exists() {
-            fs::remove_file(file_path).await
+            fs::remove_file(file_path)
+                .await
                 .map_err(|e| Status::internal(format!("Failed to delete file: {}", e)))?;
         }
-        
+
         Ok(Response::new(Empty {}))
     }
 }

@@ -1,5 +1,5 @@
-use sqlx::postgres::PgPool;
 use async_trait::async_trait;
+use sqlx::postgres::PgPool;
 
 #[async_trait]
 pub trait ImageDb: Send + Sync + 'static {
@@ -9,11 +9,11 @@ pub trait ImageDb: Send + Sync + 'static {
 }
 
 #[derive(Clone)]
-pub struct Db {
+pub struct DbClient {
     pub pool: PgPool,
 }
 
-impl Db {
+impl DbClient {
     pub async fn new(database_url: &str) -> Result<Self, sqlx::Error> {
         let pool = sqlx::postgres::PgPoolOptions::new()
             .max_connections(5)
@@ -24,7 +24,7 @@ impl Db {
 }
 
 #[async_trait]
-impl ImageDb for Db {
+impl ImageDb for DbClient {
     async fn insert_upload(&self, filename: &str, user_id: i32) -> Result<(), sqlx::Error> {
         sqlx::query("INSERT INTO uploads (filename, user_id) VALUES ($1, $2)")
             .bind(filename)
@@ -35,12 +35,13 @@ impl ImageDb for Db {
     }
 
     async fn verify_upload(&self, filename: &str, user_id: i32) -> Result<bool, sqlx::Error> {
-        let count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM uploads WHERE filename = $1 AND user_id = $2")
-            .bind(filename)
-            .bind(user_id)
-            .fetch_one(&self.pool)
-            .await?;
-        
+        let count: i64 =
+            sqlx::query_scalar("SELECT COUNT(*) FROM uploads WHERE filename = $1 AND user_id = $2")
+                .bind(filename)
+                .bind(user_id)
+                .fetch_one(&self.pool)
+                .await?;
+
         Ok(count > 0)
     }
 

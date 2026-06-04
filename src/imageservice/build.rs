@@ -1,4 +1,8 @@
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    tonic_build::compile_protos("../../pb/thoughts.proto")?;
+    tonic_build::configure()
+        .build_server(true)
+        .build_client(false)
+        .out_dir("src")
+        .compile(&["../../pb/thoughts.proto"], &["../../pb"])?;
     Ok(())
 }
