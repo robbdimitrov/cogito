@@ -15,7 +15,7 @@ function ControlBar({user}) {
 
   const tabs = [
     {
-      name: 'Thoughts',
+      name: 'Posts',
       count: user.posts,
       href: path,
       isActive: isActive(path),

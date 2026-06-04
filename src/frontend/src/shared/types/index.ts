@@ -23,9 +23,9 @@ export interface Post {
   liked?: boolean;
   reposted?: boolean;
   user?: User;
-  rethoughtByUserId?: string;
-  rethoughtCreated?: string;
-  rethoughtByUser?: User;
+  repostByUserId?: string;
+  repostCreated?: string;
+  repostByUser?: User;
   mediaKey?: string;
   replies: number;
   inReplyToId?: string;

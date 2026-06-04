@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"sync"
 	"time"
 
 	pb "github.com/robbdimitrov/thoughts/src/apigateway/genproto"
@@ -85,14 +86,20 @@ func (pc *postController) createPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (pc *postController) enrichWithQuotes(ctx context.Context, posts []*pb.Post) {
+	var wg sync.WaitGroup
 	for _, p := range posts {
 		if p.QuoteOfId != 0 {
-			q, err := pc.client.GetPost(ctx, &pb.PostRequest{PostId: p.QuoteOfId})
-			if err == nil {
-				p.QuotePost = q
-			}
+			wg.Add(1)
+			go func(p *pb.Post) {
+				defer wg.Done()
+				q, err := pc.client.GetPost(ctx, &pb.PostRequest{PostId: p.QuoteOfId})
+				if err == nil {
+					p.QuotePost = q
+				}
+			}(p)
 		}
 	}
+	wg.Wait()
 }
 
 func (pc *postController) getFeed(w http.ResponseWriter, r *http.Request) {

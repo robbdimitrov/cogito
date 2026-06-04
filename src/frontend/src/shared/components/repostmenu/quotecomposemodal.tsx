@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Post } from '@/shared/types';
-import QuoteEmbed from '@/shared/components/thoughtlist/quoteembed';
+import QuoteEmbed from '@/shared/components/postlist/quoteembed';
 
 interface QuoteComposeModalProps {
   quotedPost: Post;
@@ -32,7 +32,7 @@ function QuoteComposeModal({ quotedPost, onClose, onSubmit }: QuoteComposeModalP
   return (
     <dialog className="modal modal-open">
       <div className="modal-box max-w-lg">
-        <h3 className="font-bold text-lg mb-3">Rethought</h3>
+        <h3 className="font-bold text-lg mb-3">Repost</h3>
         <form onSubmit={handleSubmit}>
           <textarea
             className="textarea textarea-bordered w-full resize-none text-base leading-relaxed"
@@ -62,7 +62,7 @@ function QuoteComposeModal({ quotedPost, onClose, onSubmit }: QuoteComposeModalP
               disabled={isSubmitting || !content.trim()}
             >
               {isSubmitting ? <span className="loading loading-spinner loading-xs" /> : null}
-              Rethought
+              Repost
             </button>
           </div>
         </form>

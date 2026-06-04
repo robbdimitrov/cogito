@@ -25,8 +25,8 @@ type post struct {
 	Reposts           int32  `json:"reposts"`
 	Reposted          bool   `json:"reposted"`
 	Created           string `json:"created"`
-	RethoughtByUserID int32  `json:"rethoughtByUserId"`
-	RethoughtCreated  string `json:"rethoughtCreated"`
+	RepostByUserID int32  `json:"repostByUserId"`
+	RepostCreated  string `json:"repostCreated"`
 	MediaKey          string `json:"mediaKey,omitempty"`
 	Replies           int32  `json:"replies"`
 	InReplyToID       int32  `json:"inReplyToId,omitempty"`

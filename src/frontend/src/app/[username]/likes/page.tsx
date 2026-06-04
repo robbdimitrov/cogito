@@ -28,7 +28,7 @@ export default async function LikesPage({ params }: { params: Promise<{ username
       user={profileUser}
       posts={likes}
       currentUserId={currentUser?.id}
-      emptyMessage="No liked thoughts yet."
+      emptyMessage="No liked posts yet."
     />
   );
 }

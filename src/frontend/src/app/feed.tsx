@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import UserCard from '@/app/usercard';
-import CreateThought from '@/app/createthought';
-import ThoughtList from '@/shared/components/thoughtlist/thoughtlist';
+import CreatePost from '@/app/createpost';
+import PostList from '@/shared/components/postlist/postlist';
 import QuoteComposeModal from '@/shared/components/repostmenu/quotecomposemodal';
 
 import { useAPI } from '@/shared/contexts/apicontext';
@@ -70,8 +70,8 @@ function Feed(props: FeedProps) {
               <UserCard user={user} variant="compact" />
             </div>
           )}
-          {user && <CreateThought user={user} onCreatePost={handleCreatePost} />}
-          <ThoughtList posts={posts} users={user ? [user] : []} onLike={handleLike} onRepost={handleRepost} onDelete={handleDeletePost} currentUserId={currentUserId} onQuote={(post) => setQuotingPost(post)} emptyMessage="No thoughts yet. Be the first to share!" />
+          {user && <CreatePost user={user} onCreatePost={handleCreatePost} />}
+          <PostList posts={posts} users={user ? [user] : []} onLike={handleLike} onRepost={handleRepost} onDelete={handleDeletePost} currentUserId={currentUserId} onQuote={(post) => setQuotingPost(post)} emptyMessage="No posts yet. Be the first to share!" />
         </section>
       </div>
       {quotingPost && (

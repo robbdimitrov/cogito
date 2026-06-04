@@ -24,6 +24,6 @@ export function UserListSkeleton({ count = 3 }: { count?: number }) {
   );
 }
 
-export function ThoughtTabSkeleton() {
+export function PostTabSkeleton() {
   return <FeedSkeleton count={2} />;
 }

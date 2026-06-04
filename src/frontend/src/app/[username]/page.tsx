@@ -28,7 +28,7 @@ export default async function UserPostsPage({ params }: { params: Promise<{ user
       user={profileUser}
       posts={posts}
       currentUserId={currentUser?.id}
-      emptyMessage="No thoughts yet. Share what's on your mind!"
+      emptyMessage="No posts yet. Share what's on your mind!"
     />
   );
 }

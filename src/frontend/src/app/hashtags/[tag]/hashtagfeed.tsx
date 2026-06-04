@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import ThoughtList from '@/shared/components/thoughtlist/thoughtlist';
+import PostList from '@/shared/components/postlist/postlist';
 import { useAPI } from '@/shared/contexts/apicontext';
 import { useToast } from '@/shared/components/toast/toast';
 import type { Post } from '@/shared/types';
@@ -39,7 +39,7 @@ function HashtagFeed({ tag, posts, currentUserId = null }: HashtagFeedProps) {
   };
 
   return (
-    <ThoughtList
+    <PostList
       posts={posts}
       users={[]}
       onLike={handleLike}

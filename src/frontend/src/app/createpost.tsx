@@ -7,7 +7,7 @@ import { User } from '@/shared/types';
 import { resizeImageForUpload } from '@/shared/utils/image';
 import { useToast } from '@/shared/components/toast/toast';
 
-function CreateThought({user, onCreatePost}: {user: User, onCreatePost: (content: string, mediaKey?: string) => Promise<void>}) {
+function CreatePost({user, onCreatePost}: {user: User, onCreatePost: (content: string, mediaKey?: string) => Promise<void>}) {
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
@@ -188,4 +188,4 @@ function CreateThought({user, onCreatePost}: {user: User, onCreatePost: (content
   );
 }
 
-export default CreateThought;
+export default CreatePost;

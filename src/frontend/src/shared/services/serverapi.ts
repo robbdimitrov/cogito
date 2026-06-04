@@ -59,16 +59,16 @@ export const getServerSessions = cache(async function getServerSessions() {
   return fetchServer('/sessions');
 });
 
-export async function hydratePostAuthors(rawPosts: Post[], rethoughtByUser: User | null = null) {
+export async function hydratePostAuthors(rawPosts: Post[], repostByUser: User | null = null) {
   if (!rawPosts) return [];
   const userIds: string[] = [
     ...new Set(
       rawPosts
-        .flatMap((p) => [p.userId, p.rethoughtByUserId, p.quotePost?.userId])
+        .flatMap((p) => [p.userId, p.repostByUserId, p.quotePost?.userId])
         .filter(Boolean)
     ),
   ] as string[];
-  
+
   const userMap: Record<string, User | null> = {};
   await Promise.all(
     userIds.map(async (uid: string) => {
@@ -87,10 +87,10 @@ export async function hydratePostAuthors(rawPosts: Post[], rethoughtByUser: User
       user: userMap[p.userId],
     };
 
-    if (p.rethoughtByUserId) {
-      post.rethoughtByUser = userMap[p.rethoughtByUserId];
-    } else if (rethoughtByUser && p.userId !== rethoughtByUser.id) {
-      post.rethoughtByUser = rethoughtByUser;
+    if (p.repostByUserId) {
+      post.repostByUser = userMap[p.repostByUserId];
+    } else if (repostByUser && p.userId !== repostByUser.id) {
+      post.repostByUser = repostByUser;
     }
 
     if (p.quotePost?.userId) {

@@ -1,9 +1,9 @@
-import ThoughtItem from '@/shared/components/thoughtlist/thoughtitem';
+import PostItem from './postitem';
 import { MessageSquare } from 'lucide-react';
 import GlassCard from '@/shared/components/ui/surface';
 import type { Post, User } from '@/shared/types';
 
-interface ThoughtListProps {
+interface PostListProps {
   posts: Post[];
   users: User[];
   onLike: (post: Post) => Promise<void>;
@@ -14,7 +14,7 @@ interface ThoughtListProps {
   emptyMessage?: string;
 }
 
-function ThoughtList({posts, users, onLike, onRepost, onDelete, currentUserId, onQuote, emptyMessage = "No thoughts yet. Share what's on your mind!"}: ThoughtListProps) {
+function PostList({posts, users, onLike, onRepost, onDelete, currentUserId, onQuote, emptyMessage = "No posts yet. Share what's on your mind!"}: PostListProps) {
   if (!posts || posts.length === 0) {
     return (
       <GlassCard>
@@ -29,8 +29,8 @@ function ThoughtList({posts, users, onLike, onRepost, onDelete, currentUserId, o
   return (
     <ul className="space-y-3">
       {posts.map((post) => (
-        <ThoughtItem
-          key={post.rethoughtByUserId ? `${post.id}-rethought-${post.rethoughtByUserId}-${post.rethoughtCreated}` : post.id}
+        <PostItem
+          key={`${post.id}${post.repostByUserId ? `-${post.repostByUserId}-${post.repostCreated}` : ''}`}
           post={post}
           user={users[0]}
           onLike={onLike}
@@ -44,4 +44,4 @@ function ThoughtList({posts, users, onLike, onRepost, onDelete, currentUserId, o
   );
 }
 
-export default ThoughtList;
+export default PostList;

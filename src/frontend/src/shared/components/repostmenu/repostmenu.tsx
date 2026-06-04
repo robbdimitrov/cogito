@@ -28,7 +28,7 @@ function RepostMenu({ reposted, reposts, isReposting, onRepost, onQuote }: Repos
     <details ref={detailsRef} className="dropdown">
       <summary
         className={`btn btn-ghost btn-sm gap-2 rounded-full px-4 hover:scale-105 active:scale-95 transition-all duration-150 list-none ${reposted ? 'text-success bg-success/10' : 'text-slate-500 dark:text-slate-400 hover:text-success hover:bg-success/5'}`}
-        aria-label={reposted ? 'Remove rethought' : 'Rethought options'}
+        aria-label={reposted ? 'Remove repost' : 'Repost options'}
         aria-disabled={isReposting}
         onClick={(e) => { if (isReposting) e.preventDefault(); }}
       >
@@ -39,7 +39,7 @@ function RepostMenu({ reposted, reposts, isReposting, onRepost, onQuote }: Repos
         <li>
           <button type="button" onClick={handleRepost} disabled={isReposting}>
             <Repeat className="h-4 w-4" />
-            {reposted ? 'Undo Rethought' : 'Rethought'}
+            {reposted ? 'Undo Repost' : 'Repost'}
           </button>
         </li>
         <li>

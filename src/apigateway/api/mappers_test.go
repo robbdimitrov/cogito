@@ -50,8 +50,8 @@ func TestMapPost(t *testing.T) {
 		Reposts:           2,
 		Reposted:          false,
 		Created:           "now",
-		RethoughtByUserId: 3,
-		RethoughtCreated:  "then",
+		RepostByUserId: 3,
+		RepostCreated:  "then",
 		MediaKey:          "media.jpg",
 	}
 

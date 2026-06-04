@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAPI } from '@/shared/contexts/apicontext';
 import { useToast } from '@/shared/components/toast/toast';
-import ThoughtList from '@/shared/components/thoughtlist/thoughtlist';
+import PostList from '@/shared/components/postlist/postlist';
 import QuoteComposeModal from '@/shared/components/repostmenu/quotecomposemodal';
 import type { Post, User } from '@/shared/types';
 
@@ -44,7 +44,7 @@ function PostTab({ user, posts, currentUserId, emptyMessage }: PostTabProps) {
 
   return (
     <>
-      <ThoughtList
+      <PostList
         posts={posts}
         users={[user]}
         onLike={handleLike}

@@ -135,6 +135,7 @@ func isRetryableGRPCMethod(method string) bool {
 		"/thoughts.PostService/GetLikedPosts",
 		"/thoughts.PostService/GetHashtagPosts",
 		"/thoughts.PostService/GetPost",
+		"/thoughts.PostService/GetReplies",
 		"/thoughts.UserService/GetUser",
 		"/thoughts.UserService/GetUserByUsername",
 		"/thoughts.UserService/GetFollowing",

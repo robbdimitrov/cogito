@@ -975,8 +975,8 @@ type Post struct {
 	Reposts           int32                  `protobuf:"varint,6,opt,name=reposts,proto3" json:"reposts,omitempty"`
 	Reposted          bool                   `protobuf:"varint,7,opt,name=reposted,proto3" json:"reposted,omitempty"`
 	Created           string                 `protobuf:"bytes,8,opt,name=created,proto3" json:"created,omitempty"`
-	RethoughtByUserId int32                  `protobuf:"varint,9,opt,name=rethought_by_user_id,json=rethoughtByUserId,proto3" json:"rethought_by_user_id,omitempty"`
-	RethoughtCreated  string                 `protobuf:"bytes,10,opt,name=rethought_created,json=rethoughtCreated,proto3" json:"rethought_created,omitempty"`
+	RepostByUserId int32                  `protobuf:"varint,9,opt,name=repost_by_user_id,json=repostByUserId,proto3" json:"repost_by_user_id,omitempty"`
+	RepostCreated  string                 `protobuf:"bytes,10,opt,name=repost_created,json=repostCreated,proto3" json:"repost_created,omitempty"`
 	MediaKey          string                 `protobuf:"bytes,11,opt,name=media_key,json=mediaKey,proto3" json:"media_key,omitempty"`
 	Replies           int32                  `protobuf:"varint,12,opt,name=replies,proto3" json:"replies,omitempty"`
 	InReplyToId       int32                  `protobuf:"varint,13,opt,name=in_reply_to_id,json=inReplyToId,proto3" json:"in_reply_to_id,omitempty"`
@@ -1072,16 +1072,16 @@ func (x *Post) GetCreated() string {
 	return ""
 }
 
-func (x *Post) GetRethoughtByUserId() int32 {
+func (x *Post) GetRepostByUserId() int32 {
 	if x != nil {
-		return x.RethoughtByUserId
+		return x.RepostByUserId
 	}
 	return 0
 }
 
-func (x *Post) GetRethoughtCreated() string {
+func (x *Post) GetRepostCreated() string {
 	if x != nil {
-		return x.RethoughtCreated
+		return x.RepostCreated
 	}
 	return ""
 }
@@ -1612,7 +1612,7 @@ const file_thoughts_proto_rawDesc = "" +
 	"\x0f_in_reply_to_idB\x0e\n" +
 	"\f_quote_of_id\"&\n" +
 	"\vPostRequest\x12\x17\n" +
-	"\apost_id\x18\x01 \x01(\x05R\x06postId\"\xce\x03\n" +
+	"\apost_id\x18\x01 \x01(\x05R\x06postId\"\xc2\x03\n" +
 	"\x04Post\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x05R\x06userId\x12\x18\n" +
@@ -1621,10 +1621,10 @@ const file_thoughts_proto_rawDesc = "" +
 	"\x05liked\x18\x05 \x01(\bR\x05liked\x12\x18\n" +
 	"\areposts\x18\x06 \x01(\x05R\areposts\x12\x1a\n" +
 	"\breposted\x18\a \x01(\bR\breposted\x12\x18\n" +
-	"\acreated\x18\b \x01(\tR\acreated\x12/\n" +
-	"\x14rethought_by_user_id\x18\t \x01(\x05R\x11rethoughtByUserId\x12+\n" +
-	"\x11rethought_created\x18\n" +
-	" \x01(\tR\x10rethoughtCreated\x12\x1b\n" +
+	"\acreated\x18\b \x01(\tR\acreated\x12)\n" +
+	"\x11repost_by_user_id\x18\t \x01(\x05R\x0erepostByUserId\x12%\n" +
+	"\x0erepost_created\x18\n" +
+	" \x01(\tR\rrepostCreated\x12\x1b\n" +
 	"\tmedia_key\x18\v \x01(\tR\bmediaKey\x12\x18\n" +
 	"\areplies\x18\f \x01(\x05R\areplies\x12#\n" +
 	"\x0ein_reply_to_id\x18\r \x01(\x05R\vinReplyToId\x12\x1e\n" +

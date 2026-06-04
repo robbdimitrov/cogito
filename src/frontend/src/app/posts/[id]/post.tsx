@@ -12,7 +12,7 @@ import GlassCard from '@/shared/components/ui/surface';
 import ConfirmModal from '@/shared/components/ui/confirmmodal';
 import ReplyComposer from '@/shared/components/replycomposer/replycomposer';
 import QuoteComposeModal from '@/shared/components/repostmenu/quotecomposemodal';
-import ThoughtItem from '@/shared/components/thoughtlist/thoughtitem';
+import PostItem from '@/shared/components/postlist/postitem';
 
 function formatRelativeTime(dateString: string) {
   const date = new Date(dateString);
@@ -226,7 +226,7 @@ function PostDetail({ initialPost, currentUserId, currentUser, initialReplies }:
       {replies.length > 0 && (
         <div className="mt-2 space-y-0 divide-y divide-slate-100 dark:divide-slate-800/60">
           {replies.map((reply) => (
-            <ThoughtItem
+            <PostItem
               key={reply.id}
               post={reply}
               user={reply.user}

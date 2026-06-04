@@ -6,7 +6,7 @@ import GlassCard from '@/shared/components/ui/surface';
 import FormattedContent from '@/shared/components/postcontent/formattedcontent';
 import ConfirmModal from '@/shared/components/ui/confirmmodal';
 import RepostMenu from '@/shared/components/repostmenu/repostmenu';
-import QuoteEmbed from '@/shared/components/thoughtlist/quoteembed';
+import QuoteEmbed from './quoteembed';
 
 function formatPostDate(dateString) {
   const date = new Date(dateString);
@@ -19,7 +19,7 @@ function formatPostDate(dateString) {
   return `${time} · ${day}`;
 }
 
-function ThoughtItem({post, user, onLike, onRepost, onDelete, currentUserId, onQuote}) {
+function PostItem({post, user, onLike, onRepost, onDelete, currentUserId, onQuote}) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
   const [isReposting, setIsReposting] = useState(false);
@@ -28,7 +28,7 @@ function ThoughtItem({post, user, onLike, onRepost, onDelete, currentUserId, onQ
 
   const author = optimisticPost.user || user;
   const isOwnPost = currentUserId && optimisticPost.userId === currentUserId;
-  const rethoughtBy = optimisticPost.rethoughtByUser;
+  const repostedBy = optimisticPost.repostByUser;
 
   function handleDelete() {
     onDelete(optimisticPost.id);
@@ -77,16 +77,16 @@ function ThoughtItem({post, user, onLike, onRepost, onDelete, currentUserId, onQ
 
   return (
     <li>
-      {rethoughtBy && (
+      {repostedBy && (
         <div className="mx-auto -mb-px flex w-[calc(100%-1rem)] items-center gap-2 rounded-t-2xl border border-b-slate-200/70 border-white/60 bg-base-100/75 px-4 sm:px-5 py-2 text-xs sm:text-sm text-slate-600 shadow-lg shadow-slate-900/5 backdrop-blur-2xl dark:border-white/10 dark:border-b-slate-700/70 dark:bg-slate-900/70 dark:text-slate-300">
           <Repeat className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-          <Link href={`/@${rethoughtBy.username}`} className="font-semibold hover:underline truncate min-w-0">
-            @{rethoughtBy.username}
+          <Link href={`/@${repostedBy.username}`} className="font-semibold hover:underline truncate min-w-0">
+            @{repostedBy.username}
           </Link>
-          <span className="shrink-0">rethought</span>
+          <span className="shrink-0">reposted</span>
         </div>
       )}
-      <GlassCard as="article" interactive className={`overflow-hidden ${rethoughtBy ? 'rounded-b-2xl rounded-t-none' : ''}`}>
+      <GlassCard as="article" interactive className={`overflow-hidden ${repostedBy ? 'rounded-b-2xl rounded-t-none' : ''}`}>
         <div className="card-body p-4 sm:p-5">
           <div className="flex items-start gap-3 sm:gap-4">
             <Link href={`/@${author?.username}`} className="shrink-0 transition-transform duration-200 hover:scale-105">
@@ -151,7 +151,7 @@ function ThoughtItem({post, user, onLike, onRepost, onDelete, currentUserId, onQ
                   className={`btn btn-ghost btn-sm gap-2 rounded-full px-4 hover:scale-105 active:scale-95 transition-all duration-150 ${optimisticPost.liked ? 'text-error bg-error/10' : 'text-slate-500 dark:text-slate-400 hover:text-error hover:bg-error/5'}`}
                   onClick={handleLike}
                   disabled={isLiking}
-                  aria-label={optimisticPost.liked ? 'Unlike thought' : 'Like thought'}
+                  aria-label={optimisticPost.liked ? 'Unlike post' : 'Like post'}
                 >
                   <Heart className={`h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] ${optimisticPost.liked ? 'scale-125' : 'scale-100'}`} fill={optimisticPost.liked ? 'currentColor' : 'none'} />
                   <span className="text-xs sm:text-sm font-semibold tracking-wide">{optimisticPost.likes}</span>
@@ -173,4 +173,4 @@ function ThoughtItem({post, user, onLike, onRepost, onDelete, currentUserId, onQ
   );
 }
 
-export default ThoughtItem;
+export default PostItem;

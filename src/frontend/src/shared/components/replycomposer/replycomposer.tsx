@@ -35,7 +35,7 @@ function ReplyComposer({ currentUser, replyToPost, onReply }: ReplyComposerProps
       <div className="flex-1 min-w-0">
         <textarea
           className="textarea textarea-bordered w-full resize-none text-sm leading-relaxed"
-          placeholder={`Reply to @${replyToPost.user?.username ?? 'this thought'}…`}
+          placeholder={`Reply to @${replyToPost.user?.username ?? 'this post'}…`}
           value={content}
           onChange={(e) => setContent(e.target.value)}
           maxLength={255}

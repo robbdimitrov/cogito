@@ -1,5 +1,5 @@
-import { ThoughtTabSkeleton } from '@/app/[username]/tabloading';
+import { PostTabSkeleton } from '@/app/[username]/tabloading';
 
 export default function Loading() {
-  return <ThoughtTabSkeleton />;
+  return <PostTabSkeleton />;
 }

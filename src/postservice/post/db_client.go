@@ -64,7 +64,7 @@ func (c *DbClient) createPost(content string, tags []string, userID int32, media
 
 func (c *DbClient) getFeed(page int32, limit int32, currentUserID int32) ([]*pb.Post, error) {
 	query := `SELECT id, user_id, content, likes, liked, reposts, reposted, created,
-		rethought_by_user_id, rethought_created, media_key, replies, in_reply_to_id, quote_of_id
+		repost_by_user_id, repost_created, media_key, replies, in_reply_to_id, quote_of_id
 		FROM (
 			SELECT posts.id, posts.user_id, posts.content,
 			(SELECT count(*) FROM likes WHERE post_id = posts.id) AS likes,
@@ -74,8 +74,8 @@ func (c *DbClient) getFeed(page int32, limit int32, currentUserID int32) ([]*pb.
 			EXISTS (SELECT 1 FROM reposts
 			WHERE post_id = posts.id AND reposts.user_id = $1) AS reposted,
 			time_format(posts.created) AS created,
-			0::integer AS rethought_by_user_id,
-			''::text AS rethought_created,
+			0::integer AS repost_by_user_id,
+			''::text AS repost_created,
 			posts.created AS timeline_created,
 			posts.media_key,
 			(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = posts.id) AS replies,
@@ -92,8 +92,8 @@ func (c *DbClient) getFeed(page int32, limit int32, currentUserID int32) ([]*pb.
 			EXISTS (SELECT 1 FROM reposts AS current_user_reposts
 			WHERE current_user_reposts.post_id = posts.id AND current_user_reposts.user_id = $1) AS reposted,
 			time_format(posts.created) AS created,
-			reposts.user_id AS rethought_by_user_id,
-			time_format(reposts.created) AS rethought_created,
+			reposts.user_id AS repost_by_user_id,
+			time_format(reposts.created) AS repost_created,
 			reposts.created AS timeline_created,
 			posts.media_key,
 			(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = posts.id) AS replies,
@@ -117,7 +117,7 @@ func (c *DbClient) getFeed(page int32, limit int32, currentUserID int32) ([]*pb.
 
 func (c *DbClient) getPosts(userID int32, page int32, limit int32, currentUserID int32) ([]*pb.Post, error) {
 	query := `SELECT id, user_id, content, likes, liked, reposts, reposted, created,
-		rethought_by_user_id, rethought_created, media_key, replies, in_reply_to_id, quote_of_id
+		repost_by_user_id, repost_created, media_key, replies, in_reply_to_id, quote_of_id
 		FROM (
 			SELECT posts.id, posts.user_id, posts.content,
 			(SELECT count(*) FROM likes WHERE post_id = posts.id) AS likes,
@@ -127,8 +127,8 @@ func (c *DbClient) getPosts(userID int32, page int32, limit int32, currentUserID
 			EXISTS (SELECT 1 FROM reposts
 			WHERE post_id = posts.id AND reposts.user_id = $1) AS reposted,
 			time_format(posts.created) AS created,
-			0::integer AS rethought_by_user_id,
-			''::text AS rethought_created,
+			0::integer AS repost_by_user_id,
+			''::text AS repost_created,
 			posts.created AS timeline_created,
 			posts.media_key,
 			(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = posts.id) AS replies,
@@ -145,8 +145,8 @@ func (c *DbClient) getPosts(userID int32, page int32, limit int32, currentUserID
 			EXISTS (SELECT 1 FROM reposts AS current_user_reposts
 			WHERE current_user_reposts.post_id = posts.id AND current_user_reposts.user_id = $1) AS reposted,
 			time_format(posts.created) AS created,
-			reposts.user_id AS rethought_by_user_id,
-			time_format(reposts.created) AS rethought_created,
+			reposts.user_id AS repost_by_user_id,
+			time_format(reposts.created) AS repost_created,
 			reposts.created AS timeline_created,
 			posts.media_key,
 			(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = posts.id) AS replies,
@@ -177,8 +177,8 @@ func (c *DbClient) getLikedPosts(userID int32, page int32, limit int32, currentU
 		EXISTS (SELECT 1 FROM reposts
 		WHERE post_id = id AND reposts.user_id = $1) AS reposted,
 		time_format(posts.created) AS created,
-		0::integer AS rethought_by_user_id,
-		''::text AS rethought_created,
+		0::integer AS repost_by_user_id,
+		''::text AS repost_created,
 		posts.media_key,
 		(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = id) AS replies,
 		COALESCE(in_reply_to_id, 0) AS in_reply_to_id,
@@ -207,8 +207,8 @@ func (c *DbClient) getHashtagPosts(tag string, page int32, limit int32, currentU
 		EXISTS (SELECT 1 FROM reposts
 		WHERE post_id = id AND reposts.user_id = $1) AS reposted,
 		time_format(created) AS created,
-		0::integer AS rethought_by_user_id,
-		''::text AS rethought_created,
+		0::integer AS repost_by_user_id,
+		''::text AS repost_created,
 		media_key,
 		(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = id) AS replies,
 		COALESCE(in_reply_to_id, 0) AS in_reply_to_id,
@@ -236,8 +236,8 @@ func (c *DbClient) getPost(id int32, currentUserID int32) (*pb.Post, error) {
 		EXISTS (SELECT 1 FROM reposts
 		WHERE post_id = id AND reposts.user_id = $1) AS reposted,
 		time_format(created) AS created,
-		0::integer AS rethought_by_user_id,
-		''::text AS rethought_created,
+		0::integer AS repost_by_user_id,
+		''::text AS repost_created,
 		media_key,
 		(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = id) AS replies,
 		COALESCE(in_reply_to_id, 0) AS in_reply_to_id,
@@ -291,8 +291,8 @@ func (c *DbClient) getReplies(postID int32, page int32, limit int32, currentUser
 		(SELECT count(*) FROM reposts WHERE post_id = id) AS reposts,
 		EXISTS (SELECT 1 FROM reposts WHERE post_id = id AND reposts.user_id = $1) AS reposted,
 		time_format(created) AS created,
-		0::integer AS rethought_by_user_id,
-		''::text AS rethought_created,
+		0::integer AS repost_by_user_id,
+		''::text AS repost_created,
 		media_key,
 		(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = id) AS replies,
 		COALESCE(in_reply_to_id, 0) AS in_reply_to_id,
