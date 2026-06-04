@@ -80,6 +80,7 @@ impl<D: UserDb> UserService for Controller<D> {
         &self,
         request: Request<CreateUserRequest>,
     ) -> Result<Response<Identifier>, Status> {
+        let request_id = crate::logging::request_id(&request).to_string();
         let req = request.into_inner();
         if req.username.is_empty() || req.email.is_empty() || req.password.is_empty() {
             return Err(Status::invalid_argument(
@@ -94,7 +95,7 @@ impl<D: UserDb> UserService for Controller<D> {
         }
 
         let hash = generate_hash(&req.password).map_err(|e| {
-            eprintln!("Hashing failed: {}", e);
+            tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/CreateUser", error = %e, "hashing failed");
             Status::internal("Internal server error.")
         })?;
 
@@ -105,7 +106,7 @@ impl<D: UserDb> UserService for Controller<D> {
         {
             Ok(id) => Ok(Response::new(Identifier { id })),
             Err(e) => {
-                eprintln!("Creating user failed: {}", e);
+                tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/CreateUser", error = %e, "creating user failed");
                 Err(Status::invalid_argument(
                     "User with this username or email already exists.",
                 ))
@@ -114,6 +115,7 @@ impl<D: UserDb> UserService for Controller<D> {
     }
 
     async fn get_user(&self, request: Request<UserRequest>) -> Result<Response<User>, Status> {
+        let request_id = crate::logging::request_id(&request).to_string();
         let user_id = get_user_id(&request)?;
         let target_user_id = request.into_inner().user_id;
 
@@ -121,7 +123,7 @@ impl<D: UserDb> UserService for Controller<D> {
             Ok(Some(user)) => Ok(Response::new(user)),
             Ok(None) => Err(Status::not_found("Resource not found.")),
             Err(e) => {
-                eprintln!("Getting user failed: {}", e);
+                tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/GetUser", error = %e, "getting user failed");
                 Err(Status::internal("Internal server error."))
             }
         }
@@ -131,6 +133,7 @@ impl<D: UserDb> UserService for Controller<D> {
         &self,
         request: Request<UpdateUserRequest>,
     ) -> Result<Response<Empty>, Status> {
+        let request_id = crate::logging::request_id(&request).to_string();
         let user_id = get_user_id(&request)?;
         let req = request.into_inner();
 
@@ -146,7 +149,7 @@ impl<D: UserDb> UserService for Controller<D> {
                 .get_user_with_id(user_id)
                 .await
                 .map_err(|e| {
-                    eprintln!("Getting user failed: {}", e);
+                    tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/UpdateUser", error = %e, "getting user failed");
                     Status::internal("Internal server error.")
                 })?
                 .ok_or_else(|| Status::not_found("Resource not found."))?;
@@ -165,7 +168,7 @@ impl<D: UserDb> UserService for Controller<D> {
             }
 
             let new_hash = generate_hash(&req.password).map_err(|e| {
-                eprintln!("Hashing failed: {}", e);
+                tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/UpdateUser", error = %e, "hashing failed");
                 Status::internal("Internal server error.")
             })?;
 
@@ -173,7 +176,7 @@ impl<D: UserDb> UserService for Controller<D> {
                 .update_password(user_id, &new_hash)
                 .await
                 .map_err(|e| {
-                    eprintln!("Updating user failed: {}", e);
+                    tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/UpdateUser", error = %e, "updating user failed");
                     Status::internal("Internal server error.")
                 })?;
 
@@ -197,7 +200,7 @@ impl<D: UserDb> UserService for Controller<D> {
             .update_user(user_id, fields)
             .await
             .map_err(|e| {
-                eprintln!("Updating user failed: {}", e);
+                tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/UpdateUser", error = %e, "updating user failed");
                 Status::internal("Internal server error.")
             })?;
 
@@ -208,6 +211,7 @@ impl<D: UserDb> UserService for Controller<D> {
         &self,
         request: Request<GetUserByUsernameRequest>,
     ) -> Result<Response<User>, Status> {
+        let request_id = crate::logging::request_id(&request).to_string();
         let user_id = get_user_id(&request)?;
         let req = request.into_inner();
 
@@ -219,7 +223,7 @@ impl<D: UserDb> UserService for Controller<D> {
             Ok(Some(user)) => Ok(Response::new(user)),
             Ok(None) => Err(Status::not_found("Resource not found.")),
             Err(e) => {
-                eprintln!("Getting user by username failed: {}", e);
+                tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/GetUserByUsername", error = %e, "getting user by username failed");
                 Err(Status::internal("Internal server error."))
             }
         }
@@ -229,6 +233,7 @@ impl<D: UserDb> UserService for Controller<D> {
         &self,
         request: Request<GetUsersRequest>,
     ) -> Result<Response<Users>, Status> {
+        let request_id = crate::logging::request_id(&request).to_string();
         let user_id = get_user_id(&request)?;
         let req = request.into_inner();
 
@@ -239,7 +244,7 @@ impl<D: UserDb> UserService for Controller<D> {
         {
             Ok(users) => Ok(Response::new(Users { users })),
             Err(e) => {
-                eprintln!("Getting users failed: {}", e);
+                tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/GetFollowing", error = %e, "getting users failed");
                 Err(Status::internal("Internal server error."))
             }
         }
@@ -249,6 +254,7 @@ impl<D: UserDb> UserService for Controller<D> {
         &self,
         request: Request<GetUsersRequest>,
     ) -> Result<Response<Users>, Status> {
+        let request_id = crate::logging::request_id(&request).to_string();
         let user_id = get_user_id(&request)?;
         let req = request.into_inner();
 
@@ -259,13 +265,14 @@ impl<D: UserDb> UserService for Controller<D> {
         {
             Ok(users) => Ok(Response::new(Users { users })),
             Err(e) => {
-                eprintln!("Getting users failed: {}", e);
+                tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/GetFollowers", error = %e, "getting users failed");
                 Err(Status::internal("Internal server error."))
             }
         }
     }
 
     async fn follow_user(&self, request: Request<UserRequest>) -> Result<Response<Empty>, Status> {
+        let request_id = crate::logging::request_id(&request).to_string();
         let user_id = get_user_id(&request)?;
         let req = request.into_inner();
 
@@ -276,7 +283,7 @@ impl<D: UserDb> UserService for Controller<D> {
         match self.db_client.follow_user(req.user_id, user_id).await {
             Ok(_) => Ok(Response::new(Empty {})),
             Err(e) => {
-                eprintln!("Following user failed: {}", e);
+                tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/FollowUser", error = %e, "following user failed");
                 Err(Status::internal("Internal server error."))
             }
         }
@@ -286,13 +293,14 @@ impl<D: UserDb> UserService for Controller<D> {
         &self,
         request: Request<UserRequest>,
     ) -> Result<Response<Empty>, Status> {
+        let request_id = crate::logging::request_id(&request).to_string();
         let user_id = get_user_id(&request)?;
         let req = request.into_inner();
 
         match self.db_client.unfollow_user(req.user_id, user_id).await {
             Ok(_) => Ok(Response::new(Empty {})),
             Err(e) => {
-                eprintln!("Unfollowing user failed: {}", e);
+                tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/UnfollowUser", error = %e, "unfollowing user failed");
                 Err(Status::internal("Internal server error."))
             }
         }
@@ -302,6 +310,7 @@ impl<D: UserDb> UserService for Controller<D> {
         &self,
         request: Request<SearchUsersRequest>,
     ) -> Result<Response<Users>, Status> {
+        let request_id = crate::logging::request_id(&request).to_string();
         let user_id = get_user_id(&request)?;
         let req = request.into_inner();
 
@@ -312,7 +321,7 @@ impl<D: UserDb> UserService for Controller<D> {
         {
             Ok(users) => Ok(Response::new(Users { users })),
             Err(e) => {
-                eprintln!("Searching users failed: {}", e);
+                tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/SearchUsers", error = %e, "searching users failed");
                 Err(Status::internal("Internal server error."))
             }
         }

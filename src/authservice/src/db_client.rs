@@ -74,7 +74,7 @@ impl crate::controller::AuthDb for DbClient {
         session_id: &str,
     ) -> Result<Option<crate::thoughts::Session>, sqlx::Error> {
         if let Err(e) = self.delete_expired_sessions().await {
-            eprintln!("Failed to delete expired sessions: {}", e);
+            tracing::warn!(error = %e, "failed to delete expired sessions");
         }
         let ttl = session_ttl_days();
         let row = sqlx::query_as::<_, (String, i32, String)>(
@@ -99,7 +99,7 @@ impl crate::controller::AuthDb for DbClient {
         user_id: i32,
     ) -> Result<Vec<crate::thoughts::Session>, sqlx::Error> {
         if let Err(e) = self.delete_expired_sessions().await {
-            eprintln!("Failed to delete expired sessions: {}", e);
+            tracing::warn!(error = %e, "failed to delete expired sessions");
         }
         let ttl = session_ttl_days();
         let rows = sqlx::query_as::<_, (String, i32, String)>(
@@ -137,15 +137,20 @@ impl crate::controller::AuthDb for DbClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::sync::Mutex;
+
+    static ENV_MUTEX: Mutex<()> = Mutex::new(());
 
     #[test]
     fn test_session_ttl_days_default() {
+        let _guard = ENV_MUTEX.lock().unwrap();
         env::remove_var("SESSION_TTL_DAYS");
         assert_eq!(session_ttl_days(), 7);
     }
 
     #[test]
     fn test_session_ttl_days_custom() {
+        let _guard = ENV_MUTEX.lock().unwrap();
         env::set_var("SESSION_TTL_DAYS", "14");
         assert_eq!(session_ttl_days(), 14);
         env::remove_var("SESSION_TTL_DAYS");

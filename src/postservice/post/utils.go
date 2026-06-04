@@ -44,6 +44,18 @@ func validateInternalAuth(ctx context.Context) error {
 	return nil
 }
 
+func requestID(ctx context.Context) string {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return ""
+	}
+	values := md.Get("x-request-id")
+	if len(values) == 0 {
+		return ""
+	}
+	return values[0]
+}
+
 func internalGRPCToken() string {
 	token := os.Getenv("INTERNAL_GRPC_TOKEN")
 	if token == "" {

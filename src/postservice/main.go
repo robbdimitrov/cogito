@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"net"
 	"os"
 	"os/signal"
@@ -11,6 +12,7 @@ import (
 )
 
 func main() {
+	setupLogger()
 	port := "5050"
 	if value := os.Getenv("PORT"); value != "" {
 		port = value
@@ -26,7 +28,7 @@ func main() {
 	server := post.CreateServer(dbClient)
 
 	go func() {
-		log.Printf("Server is starting on port %s", port)
+		slog.Info("server starting", "port", port)
 		if err := server.Serve(lis); err != nil {
 			log.Fatal(err)
 		}
@@ -36,7 +38,15 @@ func main() {
 	signal.Notify(quit, os.Interrupt)
 	<-quit
 
-	log.Println("Server is shutting down...")
+	slog.Info("server shutting down")
 	server.GracefulStop()
 	dbClient.Close()
+}
+
+func setupLogger() {
+	level := slog.LevelInfo
+	if os.Getenv("LOG_LEVEL") == "debug" {
+		level = slog.LevelDebug
+	}
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: level})))
 }

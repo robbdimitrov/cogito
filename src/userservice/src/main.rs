@@ -1,6 +1,7 @@
 pub mod controller;
 pub mod crypto;
 pub mod db_client;
+pub mod logging;
 #[allow(clippy::all)]
 pub mod thoughts;
 pub mod utils;
@@ -17,11 +18,12 @@ use thoughts::user_service_server::UserServiceServer;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    logging::init();
     let port = env::var("PORT").unwrap_or_else(|_| "5050".to_string());
     let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
     let addr = format!("0.0.0.0:{}", port).parse()?;
-    println!("Server is starting on port {}", port);
+    tracing::info!(port = %port, "server starting");
 
     let db_client = db_client::DbClient::new(&db_url).await?;
     let pool = db_client.pool.clone();
@@ -32,7 +34,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         signal::ctrl_c()
             .await
             .expect("failed to install CTRL+C signal handler");
-        println!("Server is shutting down...");
+        tracing::info!("server shutting down");
     };
 
     Server::builder()

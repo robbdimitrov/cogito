@@ -34,6 +34,7 @@ async fn upload_handler<D: ImageDb>(
     State(state): State<Arc<AppState<D>>>,
     mut multipart: Multipart,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
+    let request_id = crate::logging::http_request_id(&headers).to_string();
     let user_id_header = headers.get("x-user-id").ok_or((
         StatusCode::UNAUTHORIZED,
         "Missing x-user-id header".to_string(),
@@ -56,14 +57,20 @@ async fn upload_handler<D: ImageDb>(
 
         fs::create_dir_all(&state.image_dir)
             .await
-            .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+            .map_err(|e| {
+                tracing::warn!(request_id = %request_id, method = "POST /uploads", error = %e, "creating upload directory failed");
+                (StatusCode::INTERNAL_SERVER_ERROR, e.to_string())
+            })?;
 
         let upload_id = Uuid::new_v4().to_string();
         let temp_filename = format!("{}.uploading", upload_id);
         let temp_path = std::path::Path::new(&state.image_dir).join(&temp_filename);
         let mut file = File::create(&temp_path)
             .await
-            .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+            .map_err(|e| {
+                tracing::warn!(request_id = %request_id, method = "POST /uploads", error = %e, "creating upload file failed");
+                (StatusCode::INTERNAL_SERVER_ERROR, e.to_string())
+            })?;
 
         let mut total_bytes = 0;
         let mut signature = Vec::with_capacity(12);
@@ -88,7 +95,10 @@ async fn upload_handler<D: ImageDb>(
             }
             file.write_all(&chunk)
                 .await
-                .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+                .map_err(|e| {
+                    tracing::warn!(request_id = %request_id, method = "POST /uploads", error = %e, "writing upload file failed");
+                    (StatusCode::INTERNAL_SERVER_ERROR, e.to_string())
+                })?;
         }
 
         let extension = match image_extension(&signature) {
@@ -107,9 +117,13 @@ async fn upload_handler<D: ImageDb>(
         drop(file);
         fs::rename(&temp_path, &final_path)
             .await
-            .map_err(|e| (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()))?;
+            .map_err(|e| {
+                tracing::warn!(request_id = %request_id, method = "POST /uploads", error = %e, "finalizing upload file failed");
+                (StatusCode::INTERNAL_SERVER_ERROR, e.to_string())
+            })?;
 
         if let Err(e) = state.db.insert_upload(&filename, user_id).await {
+            tracing::warn!(request_id = %request_id, method = "POST /uploads", error = %e, "recording upload failed");
             let _ = fs::remove_file(&final_path).await;
             return Err((StatusCode::INTERNAL_SERVER_ERROR, e.to_string()));
         }

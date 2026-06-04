@@ -45,13 +45,14 @@ impl<D: AuthDb> AuthService for Controller<D> {
         &self,
         request: Request<Credentials>,
     ) -> Result<Response<Session>, Status> {
+        let request_id = crate::logging::request_id(&request).to_string();
         let req = request.into_inner();
         if req.email.is_empty() || req.password.is_empty() {
             return Err(Status::invalid_argument("Missing credentials."));
         }
 
         let user_opt = self.db_client.get_user(&req.email).await.map_err(|e| {
-            eprintln!("Getting user failed: {}", e);
+            tracing::warn!(request_id = %request_id, method = "/thoughts.AuthService/CreateSession", error = %e, "getting user failed");
             Status::internal("Internal server error.")
         })?;
 
@@ -80,7 +81,7 @@ impl<D: AuthDb> AuthService for Controller<D> {
                     .create_session(&hashed_id, user_id)
                     .await
                     .map_err(|e| {
-                        eprintln!("Creating session failed: {}", e);
+                        tracing::warn!(request_id = %request_id, method = "/thoughts.AuthService/CreateSession", error = %e, "creating session failed");
                         Status::internal("Internal server error.")
                     })?;
 
@@ -95,11 +96,12 @@ impl<D: AuthDb> AuthService for Controller<D> {
         &self,
         request: Request<SessionRequest>,
     ) -> Result<Response<Session>, Status> {
+        let request_id = crate::logging::request_id(&request).to_string();
         let req = request.into_inner();
         let hashed_id = hash_session_id(&req.session_id);
 
         let session_opt = self.db_client.get_session(&hashed_id).await.map_err(|e| {
-            eprintln!("Getting session failed: {}", e);
+            tracing::warn!(request_id = %request_id, method = "/thoughts.AuthService/GetSession", error = %e, "getting session failed");
             Status::internal("Internal server error.")
         })?;
 
@@ -116,13 +118,14 @@ impl<D: AuthDb> AuthService for Controller<D> {
         &self,
         request: Request<UserRequest>,
     ) -> Result<Response<Sessions>, Status> {
+        let request_id = crate::logging::request_id(&request).to_string();
         let req = request.into_inner();
         let sessions_list = self
             .db_client
             .get_sessions(req.user_id)
             .await
             .map_err(|e| {
-                eprintln!("Getting sessions failed: {}", e);
+                tracing::warn!(request_id = %request_id, method = "/thoughts.AuthService/GetSessions", error = %e, "getting sessions failed");
                 Status::internal("Internal server error.")
             })?;
 
@@ -135,6 +138,7 @@ impl<D: AuthDb> AuthService for Controller<D> {
         &self,
         request: Request<SessionRequest>,
     ) -> Result<Response<Empty>, Status> {
+        let request_id = crate::logging::request_id(&request).to_string();
         let req = request.into_inner();
         let hashed_id = hash_session_id(&req.session_id);
 
@@ -142,7 +146,7 @@ impl<D: AuthDb> AuthService for Controller<D> {
         let res2 = self.db_client.delete_session(&req.session_id).await;
 
         if res1.is_err() && res2.is_err() {
-            eprintln!("Deleting session failed");
+            tracing::warn!(request_id = %request_id, method = "/thoughts.AuthService/DeleteSession", "deleting session failed");
             return Err(Status::internal("Internal server error."));
         }
 

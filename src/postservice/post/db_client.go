@@ -39,12 +39,12 @@ func (c *DbClient) Close() {
 
 func (c *DbClient) createPost(content string, tags []string, userID int32, mediaKey *string) (int32, error) {
 	query := "INSERT INTO posts (user_id, content, hashtags, media_key) VALUES ($1, $2, $3, $4) RETURNING id"
-	
+
 	var mk string
 	if mediaKey != nil {
 		mk = *mediaKey
 	}
-	
+
 	row := c.db.QueryRow(context.Background(), query, userID, content, tags, mk)
 
 	var id int32

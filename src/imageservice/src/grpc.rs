@@ -22,12 +22,16 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
         &self,
         request: Request<VerifyUploadRequest>,
     ) -> Result<Response<Empty>, Status> {
+        let request_id = crate::logging::grpc_request_id(&request).to_string();
         let req = request.into_inner();
         let is_valid = self
             .db
             .verify_upload(&req.filename, req.user_id)
             .await
-            .map_err(|e| Status::internal(e.to_string()))?;
+            .map_err(|e| {
+                tracing::warn!(request_id = %request_id, method = "/thoughts.ImageService/VerifyUpload", error = %e, "verifying upload failed");
+                Status::internal(e.to_string())
+            })?;
 
         if !is_valid {
             return Err(Status::not_found("Upload not found or not owned by user"));
@@ -40,11 +44,15 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
         &self,
         request: Request<ConsumeUploadRequest>,
     ) -> Result<Response<Empty>, Status> {
+        let request_id = crate::logging::grpc_request_id(&request).to_string();
         let req = request.into_inner();
         self.db
             .consume_upload(&req.filename)
             .await
-            .map_err(|e| Status::internal(e.to_string()))?;
+            .map_err(|e| {
+                tracing::warn!(request_id = %request_id, method = "/thoughts.ImageService/ConsumeUpload", error = %e, "consuming upload failed");
+                Status::internal(e.to_string())
+            })?;
 
         Ok(Response::new(Empty {}))
     }
@@ -53,6 +61,7 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
         &self,
         request: Request<DeleteImageRequest>,
     ) -> Result<Response<Empty>, Status> {
+        let request_id = crate::logging::grpc_request_id(&request).to_string();
         let req = request.into_inner();
 
         // Also cleanup uploads table just in case it was an orphaned staging file
@@ -68,7 +77,10 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
         if file_path.exists() {
             fs::remove_file(file_path)
                 .await
-                .map_err(|e| Status::internal(format!("Failed to delete file: {}", e)))?;
+                .map_err(|e| {
+                    tracing::warn!(request_id = %request_id, method = "/thoughts.ImageService/DeleteImage", error = %e, "deleting image failed");
+                    Status::internal(format!("Failed to delete file: {}", e))
+                })?;
         }
 
         Ok(Response::new(Empty {}))

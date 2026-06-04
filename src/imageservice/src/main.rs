@@ -4,6 +4,7 @@ pub mod thoughts;
 mod db_client;
 mod grpc;
 mod http;
+mod logging;
 
 #[cfg(test)]
 mod tests;
@@ -15,6 +16,7 @@ use tonic::transport::Server;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    logging::init();
     let grpc_port = env::var("PORT").unwrap_or_else(|_| "5050".to_string());
     let http_port = env::var("HTTP_PORT").unwrap_or_else(|_| "8081".to_string());
     let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
@@ -28,7 +30,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let http_addr = format!("0.0.0.0:{}", http_port);
     let listener = tokio::net::TcpListener::bind(&http_addr).await?;
 
-    println!("HTTP Server is starting on port {}", http_port);
+    tracing::info!(port = %http_port, "http server starting");
     tokio::spawn(async move {
         axum::serve(listener, router).await.unwrap();
     });
@@ -36,13 +38,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let grpc_addr = format!("0.0.0.0:{}", grpc_port).parse()?;
     let grpc_service = grpc::ImageGrpcService::new(db_client.clone(), image_dir);
 
-    println!("gRPC Server is starting on port {}", grpc_port);
+    tracing::info!(port = %grpc_port, "grpc server starting");
 
     let shutdown_signal = async {
         tokio::signal::ctrl_c()
             .await
             .expect("Failed to install Ctrl+C signal handler");
-        println!("Server is shutting down...");
+        tracing::info!("server shutting down");
     };
 
     Server::builder()

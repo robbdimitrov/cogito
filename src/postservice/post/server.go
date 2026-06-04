@@ -2,8 +2,11 @@ package post
 
 import (
 	"context"
+	"log/slog"
+	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/status"
 
 	pb "github.com/robbdimitrov/thoughts/src/postservice/genproto"
 )
@@ -22,8 +25,22 @@ func internalAuthInterceptor(
 	info *grpc.UnaryServerInfo,
 	handler grpc.UnaryHandler,
 ) (interface{}, error) {
+	start := time.Now()
 	if err := validateInternalAuth(ctx); err != nil {
+		slog.Warn("grpc request rejected", "request_id", requestID(ctx), "method", info.FullMethod, "error_kind", status.Code(err).String(), "duration_ms", time.Since(start).Milliseconds())
 		return nil, err
 	}
-	return handler(ctx, req)
+	resp, err := handler(ctx, req)
+	attrs := []any{
+		"request_id", requestID(ctx),
+		"method", info.FullMethod,
+		"duration_ms", time.Since(start).Milliseconds(),
+	}
+	if err != nil {
+		attrs = append(attrs, "error_kind", status.Code(err).String())
+		slog.Warn("grpc request failed", attrs...)
+		return resp, err
+	}
+	slog.Info("grpc request", attrs...)
+	return resp, nil
 }

@@ -13,6 +13,8 @@ rand = "0.8"
 base64 = "0.22"
 sha2 = "0.11.0"
 hmac = "0.13.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["json"] }
 
 [build-dependencies]
 tonic-build = "0.11"

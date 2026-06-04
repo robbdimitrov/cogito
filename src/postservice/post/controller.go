@@ -2,7 +2,7 @@ package post
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"regexp"
 	"strings"
 
@@ -53,7 +53,7 @@ func (c *controller) CreatePost(ctx context.Context, req *pb.CreatePostRequest) 
 
 	res, err := c.dbClient.createPost(req.Content, tags, userID, req.MediaKey)
 	if err != nil {
-		log.Printf("Creating post failed: %v", err)
+		slog.Warn("creating post failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
 	}
 
@@ -68,7 +68,7 @@ func (c *controller) GetFeed(ctx context.Context, req *pb.GetFeedRequest) (*pb.P
 
 	res, err := c.dbClient.getFeed(req.Page, req.Limit, userID)
 	if err != nil {
-		log.Printf("Getting posts failed: %v", err)
+		slog.Warn("getting posts failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
 	}
 
@@ -83,7 +83,7 @@ func (c *controller) GetPosts(ctx context.Context, req *pb.GetPostsRequest) (*pb
 
 	res, err := c.dbClient.getPosts(req.UserId, req.Page, req.Limit, userID)
 	if err != nil {
-		log.Printf("Getting posts failed: %v", err)
+		slog.Warn("getting posts failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
 	}
 
@@ -98,7 +98,7 @@ func (c *controller) GetLikedPosts(ctx context.Context, req *pb.GetPostsRequest)
 
 	res, err := c.dbClient.getLikedPosts(req.UserId, req.Page, req.Limit, userID)
 	if err != nil {
-		log.Printf("Getting posts failed: %v", err)
+		slog.Warn("getting liked posts failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
 	}
 
@@ -116,7 +116,7 @@ func (c *controller) GetHashtagPosts(ctx context.Context, req *pb.GetHashtagPost
 
 	res, err := c.dbClient.getHashtagPosts(req.Tag, req.Page, req.Limit, userID)
 	if err != nil {
-		log.Printf("Getting hashtag posts failed: %v", err)
+		slog.Warn("getting hashtag posts failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
 	}
 
@@ -131,7 +131,7 @@ func (c *controller) GetPost(ctx context.Context, req *pb.PostRequest) (*pb.Post
 
 	res, err := c.dbClient.getPost(req.PostId, userID)
 	if err != nil {
-		log.Printf("Getting post failed: %v", err)
+		slog.Warn("getting post failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.NotFound)
 	}
 
@@ -145,7 +145,7 @@ func (c *controller) DeletePost(ctx context.Context, req *pb.PostRequest) (*pb.E
 	}
 
 	if err := c.dbClient.deletePost(req.PostId, userID); err != nil {
-		log.Printf("Deleting post failed: %v", err)
+		slog.Warn("deleting post failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
 	}
 
@@ -159,7 +159,7 @@ func (c *controller) LikePost(ctx context.Context, req *pb.PostRequest) (*pb.Emp
 	}
 
 	if err = c.dbClient.likePost(req.PostId, userID); err != nil {
-		log.Printf("Liking post failed: %v", err)
+		slog.Warn("liking post failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
 	}
 
@@ -173,7 +173,7 @@ func (c *controller) UnlikePost(ctx context.Context, req *pb.PostRequest) (*pb.E
 	}
 
 	if err = c.dbClient.unlikePost(req.PostId, userID); err != nil {
-		log.Printf("Unliking post failed: %v", err)
+		slog.Warn("unliking post failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
 	}
 
@@ -187,7 +187,7 @@ func (c *controller) RepostPost(ctx context.Context, req *pb.PostRequest) (*pb.E
 	}
 
 	if err = c.dbClient.repostPost(req.PostId, userID); err != nil {
-		log.Printf("Reposting post failed: %v", err)
+		slog.Warn("reposting post failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
 	}
 
@@ -201,7 +201,7 @@ func (c *controller) RemoveRepost(ctx context.Context, req *pb.PostRequest) (*pb
 	}
 
 	if err = c.dbClient.removeRepost(req.PostId, userID); err != nil {
-		log.Printf("Removing repost failed: %v", err)
+		slog.Warn("removing repost failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
 	}
 
