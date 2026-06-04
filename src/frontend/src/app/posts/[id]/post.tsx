@@ -10,6 +10,9 @@ import { AlertTriangle, ArrowLeft, Trash2, Repeat, Heart } from 'lucide-react';
 import FormattedContent from '@/shared/components/postcontent/formattedcontent';
 import GlassCard from '@/shared/components/ui/surface';
 import ConfirmModal from '@/shared/components/ui/confirmmodal';
+import ReplyComposer from '@/shared/components/replycomposer/replycomposer';
+import QuoteComposeModal from '@/shared/components/repostmenu/quotecomposemodal';
+import ThoughtItem from '@/shared/components/thoughtlist/thoughtitem';
 
 function formatRelativeTime(dateString: string) {
   const date = new Date(dateString);
@@ -25,15 +28,17 @@ function formatRelativeTime(dateString: string) {
   if (diffHour < 24) return `${diffHour}h`;
   return `${diffDay}d`;
 }
-import type { Post } from '@/shared/types';
+import type { Post, User } from '@/shared/types';
 
 interface PostDetailProps {
   postId?: string;
   initialPost?: Post | null;
   currentUserId?: string | null;
+  currentUser?: User | null;
+  initialReplies?: Post[];
 }
 
-function PostDetail({ initialPost, currentUserId }: PostDetailProps) {
+function PostDetail({ initialPost, currentUserId, currentUser, initialReplies }: PostDetailProps) {
   const apiClient = useAPI();
   const toast = useToast();
   const [postState, setPostState] = useState({source: initialPost, value: initialPost});
@@ -50,6 +55,8 @@ function PostDetail({ initialPost, currentUserId }: PostDetailProps) {
   );
   const router = useRouter();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [replies, setReplies] = useState<Post[]>(initialReplies ?? []);
+  const [quotingPost, setQuotingPost] = useState<Post | null>(null);
 
   const author = post?.user;
 
@@ -204,6 +211,66 @@ function PostDetail({ initialPost, currentUserId }: PostDetailProps) {
         onConfirm={handleDelete}
         onCancel={() => setShowDeleteModal(false)}
       />
+      {currentUser && post && (
+        <div className="mt-3">
+          <ReplyComposer
+            currentUser={currentUser}
+            replyToPost={post}
+            onReply={async (content) => {
+              await apiClient.createPost(content, undefined, post.id);
+              router.refresh();
+            }}
+          />
+        </div>
+      )}
+      {replies.length > 0 && (
+        <div className="mt-2 space-y-0 divide-y divide-slate-100 dark:divide-slate-800/60">
+          {replies.map((reply) => (
+            <ThoughtItem
+              key={reply.id}
+              post={reply}
+              user={reply.user}
+              onLike={async (p: Post) => {
+                try {
+                  p.liked ? await apiClient.unlikePost(p.id) : await apiClient.likePost(p.id);
+                  router.refresh();
+                } catch {
+                  toast.error('Action failed.');
+                }
+              }}
+              onRepost={async (p: Post) => {
+                try {
+                  p.reposted ? await apiClient.removeRepost(p.id) : await apiClient.repostPost(p.id);
+                  router.refresh();
+                } catch {
+                  toast.error('Action failed.');
+                }
+              }}
+              onDelete={async (id: string) => {
+                try {
+                  await apiClient.deletePost(id);
+                  setReplies((prev) => prev.filter((r) => r.id !== id));
+                } catch {
+                  toast.error('Delete failed.');
+                }
+              }}
+              currentUserId={currentUserId}
+              onQuote={(p: Post) => setQuotingPost(p)}
+            />
+          ))}
+        </div>
+      )}
+      {quotingPost && (
+        <QuoteComposeModal
+          quotedPost={quotingPost}
+          onClose={() => setQuotingPost(null)}
+          onSubmit={async (content) => {
+            await apiClient.createPost(content, undefined, undefined, quotingPost.id);
+            setQuotingPost(null);
+            router.refresh();
+          }}
+        />
+      )}
     </div>
   );
 }

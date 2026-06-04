@@ -1,8 +1,20 @@
 import ThoughtItem from '@/shared/components/thoughtlist/thoughtitem';
 import { MessageSquare } from 'lucide-react';
 import GlassCard from '@/shared/components/ui/surface';
+import type { Post, User } from '@/shared/types';
 
-function ThoughtList({posts, users, onLike, onRepost, onDelete, currentUserId, emptyMessage = "No thoughts yet. Share what's on your mind!"}) {
+interface ThoughtListProps {
+  posts: Post[];
+  users: User[];
+  onLike: (post: Post) => Promise<void>;
+  onRepost: (post: Post) => Promise<void>;
+  onDelete: (id: string) => void;
+  currentUserId: string | null | undefined;
+  onQuote?: (post: Post) => void;
+  emptyMessage?: string;
+}
+
+function ThoughtList({posts, users, onLike, onRepost, onDelete, currentUserId, onQuote, emptyMessage = "No thoughts yet. Share what's on your mind!"}: ThoughtListProps) {
   if (!posts || posts.length === 0) {
     return (
       <GlassCard>
@@ -25,6 +37,7 @@ function ThoughtList({posts, users, onLike, onRepost, onDelete, currentUserId, e
           onRepost={onRepost}
           onDelete={onDelete || (() => {})}
           currentUserId={currentUserId}
+          onQuote={onQuote}
         />
       ))}
     </ul>

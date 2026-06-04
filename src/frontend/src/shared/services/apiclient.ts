@@ -183,10 +183,17 @@ class APIClient {
 
   // Posts
 
-  createPost(content: string, mediaKey?: string): Promise<{id: number}> {
+  createPost(content: string, mediaKey?: string, inReplyToId?: string | number, quoteOfId?: string | number): Promise<{id: number}> {
     const url = '/api/posts';
-    const body = {content, mediaKey};
+    const body: Record<string, unknown> = {content, mediaKey};
+    if (inReplyToId != null) body.inReplyToId = Number(inReplyToId);
+    if (quoteOfId != null) body.quoteOfId = Number(quoteOfId);
     return this.request<{id: number}>(url, httpMethod.post, body);
+  }
+
+  getReplies(postId: string | number, page: number, limit = 20): Promise<{items: Post[]}> {
+    const url = `/api/posts/${postId}/replies?page=${page}&limit=${limit}`;
+    return this.request<{items: Post[]}>(url, httpMethod.get);
   }
 
   getPost(postId: string | number): Promise<Post> {

@@ -64,7 +64,7 @@ export async function hydratePostAuthors(rawPosts: Post[], rethoughtByUser: User
   const userIds: string[] = [
     ...new Set(
       rawPosts
-        .flatMap((p) => [p.userId, p.rethoughtByUserId])
+        .flatMap((p) => [p.userId, p.rethoughtByUserId, p.quotePost?.userId])
         .filter(Boolean)
     ),
   ] as string[];
@@ -91,6 +91,10 @@ export async function hydratePostAuthors(rawPosts: Post[], rethoughtByUser: User
       post.rethoughtByUser = userMap[p.rethoughtByUserId];
     } else if (rethoughtByUser && p.userId !== rethoughtByUser.id) {
       post.rethoughtByUser = rethoughtByUser;
+    }
+
+    if (p.quotePost?.userId) {
+      post.quotePost = { ...p.quotePost, user: userMap[p.quotePost.userId] };
     }
 
     return post;

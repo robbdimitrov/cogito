@@ -24,8 +24,13 @@ export interface Post {
   reposted?: boolean;
   user?: User;
   rethoughtByUserId?: string;
+  rethoughtCreated?: string;
   rethoughtByUser?: User;
   mediaKey?: string;
+  replies: number;
+  inReplyToId?: string;
+  quoteOfId?: string;
+  quotePost?: Post;
 }
 
 export interface Session {

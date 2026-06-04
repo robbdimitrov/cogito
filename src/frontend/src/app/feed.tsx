@@ -1,9 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import UserCard from '@/app/usercard';
 import CreateThought from '@/app/createthought';
 import ThoughtList from '@/shared/components/thoughtlist/thoughtlist';
-
+import QuoteComposeModal from '@/shared/components/repostmenu/quotecomposemodal';
 
 import { useAPI } from '@/shared/contexts/apicontext';
 import { useRouter } from 'next/navigation';
@@ -24,6 +25,7 @@ function Feed(props: FeedProps) {
   const user = props.user || null;
   const posts = props.posts || [];
   const currentUserId = props.currentUserId || null;
+  const [quotingPost, setQuotingPost] = useState<Post | null>(null);
 
   const handleLike = async (post: Post) => {
     try {
@@ -69,9 +71,20 @@ function Feed(props: FeedProps) {
             </div>
           )}
           {user && <CreateThought user={user} onCreatePost={handleCreatePost} />}
-          <ThoughtList posts={posts} users={user ? [user] : []} onLike={handleLike} onRepost={handleRepost} onDelete={handleDeletePost} currentUserId={currentUserId} emptyMessage="No thoughts yet. Be the first to share!" />
+          <ThoughtList posts={posts} users={user ? [user] : []} onLike={handleLike} onRepost={handleRepost} onDelete={handleDeletePost} currentUserId={currentUserId} onQuote={(post) => setQuotingPost(post)} emptyMessage="No thoughts yet. Be the first to share!" />
         </section>
       </div>
+      {quotingPost && (
+        <QuoteComposeModal
+          quotedPost={quotingPost}
+          onClose={() => setQuotingPost(null)}
+          onSubmit={async (content) => {
+            await apiClient.createPost(content, undefined, undefined, quotingPost.id);
+            setQuotingPost(null);
+            router.refresh();
+          }}
+        />
+      )}
     </main>
   );
 }

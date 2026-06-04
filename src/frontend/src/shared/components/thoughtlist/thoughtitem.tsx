@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Avatar from '@/shared/components/avatar/avatar';
-import { Trash2, Repeat, Heart } from 'lucide-react';
+import { Trash2, Repeat, Heart, MessageSquare } from 'lucide-react';
 import GlassCard from '@/shared/components/ui/surface';
 import FormattedContent from '@/shared/components/postcontent/formattedcontent';
 import ConfirmModal from '@/shared/components/ui/confirmmodal';
+import RepostMenu from '@/shared/components/repostmenu/repostmenu';
+import QuoteEmbed from '@/shared/components/thoughtlist/quoteembed';
 
 function formatPostDate(dateString) {
   const date = new Date(dateString);
@@ -17,7 +19,7 @@ function formatPostDate(dateString) {
   return `${time} · ${day}`;
 }
 
-function ThoughtItem({post, user, onLike, onRepost, onDelete, currentUserId}) {
+function ThoughtItem({post, user, onLike, onRepost, onDelete, currentUserId, onQuote}) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
   const [isReposting, setIsReposting] = useState(false);
@@ -120,22 +122,30 @@ function ThoughtItem({post, user, onLike, onRepost, onDelete, currentUserId}) {
                   <img src={`/api/uploads/${optimisticPost.mediaKey}`} alt="Post attachment" className="max-h-96 w-auto rounded-xl object-contain border border-slate-200 dark:border-slate-800" />
                 </div>
               )}
+              {optimisticPost.quotePost && (
+                <QuoteEmbed post={optimisticPost.quotePost} />
+              )}
               <div className="mt-3">
                 <Link href={`/posts/${optimisticPost.id}`} className="text-[0.8rem] sm:text-sm font-medium text-slate-400 dark:text-slate-500 hover:text-primary transition-colors">
                   {formatPostDate(optimisticPost.created)}
                 </Link>
               </div>
               <div className="mt-3 sm:mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60 flex items-center gap-2 sm:gap-3">
-                <button
-                  type="button"
-                  className={`btn btn-ghost btn-sm gap-2 rounded-full px-4 hover:scale-105 active:scale-95 transition-all duration-150 ${optimisticPost.reposted ? 'text-success bg-success/10' : 'text-slate-500 dark:text-slate-400 hover:text-success hover:bg-success/5'}`}
-                  onClick={handleRepost}
-                  disabled={isReposting}
-                  aria-label={optimisticPost.reposted ? 'Remove rethought' : 'Rethink thought'}
+                <Link
+                  href={`/posts/${optimisticPost.id}`}
+                  className="btn btn-ghost btn-sm gap-1.5 rounded-full px-3 text-slate-500 dark:text-slate-400 hover:text-primary hover:bg-primary/5 transition-all duration-150"
+                  aria-label="Replies"
                 >
-                  <Repeat className={`h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] ${optimisticPost.reposted ? 'rotate-180 scale-110' : 'rotate-0 scale-100'}`} />
-                  <span className="text-xs sm:text-sm font-semibold tracking-wide">{optimisticPost.reposts}</span>
-                </button>
+                  <MessageSquare className="h-4 w-4" />
+                  <span className="text-xs sm:text-sm font-semibold">{optimisticPost.replies ?? 0}</span>
+                </Link>
+                <RepostMenu
+                  reposted={optimisticPost.reposted ?? false}
+                  reposts={optimisticPost.reposts}
+                  isReposting={isReposting}
+                  onRepost={handleRepost}
+                  onQuote={() => onQuote?.(optimisticPost)}
+                />
                 <button
                   type="button"
                   className={`btn btn-ghost btn-sm gap-2 rounded-full px-4 hover:scale-105 active:scale-95 transition-all duration-150 ${optimisticPost.liked ? 'text-error bg-error/10' : 'text-slate-500 dark:text-slate-400 hover:text-error hover:bg-error/5'}`}

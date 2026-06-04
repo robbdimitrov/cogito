@@ -1,9 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAPI } from '@/shared/contexts/apicontext';
 import { useToast } from '@/shared/components/toast/toast';
 import ThoughtList from '@/shared/components/thoughtlist/thoughtlist';
+import QuoteComposeModal from '@/shared/components/repostmenu/quotecomposemodal';
 import type { Post, User } from '@/shared/types';
 
 interface PostTabProps {
@@ -17,6 +19,7 @@ function PostTab({ user, posts, currentUserId, emptyMessage }: PostTabProps) {
   const apiClient = useAPI();
   const router = useRouter();
   const toast = useToast();
+  const [quotingPost, setQuotingPost] = useState<Post | null>(null);
 
   const handleLike = async (post: Post) => {
     try {
@@ -40,15 +43,29 @@ function PostTab({ user, posts, currentUserId, emptyMessage }: PostTabProps) {
   };
 
   return (
-    <ThoughtList
-      posts={posts}
-      users={[user]}
-      onLike={handleLike}
-      onRepost={handleRepost}
-      onDelete={handleDeletePost}
-      currentUserId={currentUserId}
-      emptyMessage={emptyMessage}
-    />
+    <>
+      <ThoughtList
+        posts={posts}
+        users={[user]}
+        onLike={handleLike}
+        onRepost={handleRepost}
+        onDelete={handleDeletePost}
+        currentUserId={currentUserId}
+        onQuote={(post) => setQuotingPost(post)}
+        emptyMessage={emptyMessage}
+      />
+      {quotingPost && (
+        <QuoteComposeModal
+          quotedPost={quotingPost}
+          onClose={() => setQuotingPost(null)}
+          onSubmit={async (content) => {
+            await apiClient.createPost(content, undefined, undefined, quotingPost.id);
+            setQuotingPost(null);
+            router.refresh();
+          }}
+        />
+      )}
+    </>
   );
 }
 
