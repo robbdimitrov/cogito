@@ -1,4 +1,4 @@
-# Thoughts — Agent Notes
+# Thoughts - Agent Notes
 
 ## Architecture
 
@@ -7,12 +7,12 @@ Microservices app with an HTTP gateway calling gRPC backends.
 | Service | Language | Role | Entrypoint |
 |---|---|---|---|
 | `apigateway` | Go 1.26 | Echo HTTP API gateway | `main.go` |
-| `postservice` | Go 1.26 | gRPC — posts, likes, reposts | `main.go` |
-| `authservice` | Rust | gRPC — sessions | `src/main.rs` |
-| `userservice` | Rust | gRPC — users, follows | `src/main.rs` |
-| `imageservice` | Rust | gRPC + HTTP — image upload staging, verification, cleanup | `src/main.rs` |
+| `postservice` | Go 1.26 | gRPC - posts, likes, reposts | `main.go` |
+| `authservice` | Rust | gRPC - sessions | `src/main.rs` |
+| `userservice` | Rust | gRPC - users, follows | `src/main.rs` |
+| `imageservice` | Rust | gRPC + HTTP - image upload staging, verification, cleanup | `src/main.rs` |
 | `frontend` | Next.js 16 / React 19 | App Router frontend | `src/app/` |
-| `database` | PostgreSQL 14 | Schema init via `schema.sql` | — |
+| `database` | PostgreSQL 14 | Schema init via `schema.sql` | - |
 
 - Proto contract: `pb/thoughts.proto`
 - Backend gRPC port: **5050**; `imageservice` HTTP port: **8081**; gateway + frontend port: **8080**
