@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use tonic::{Request, Status};
+use tonic::Request;
 
 use crate::db_client::ImageDb;
 use crate::grpc::ImageGrpcService;

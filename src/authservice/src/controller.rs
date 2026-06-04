@@ -1,17 +1,18 @@
-use argon2::{PasswordHash, PasswordVerifier, Argon2};
-use tonic::{Request, Response, Status};
+use argon2::{Argon2, PasswordHash, PasswordVerifier};
 use base64::{engine::general_purpose::URL_SAFE_NO_PAD, Engine as _};
+use hmac::{Hmac, KeyInit, Mac};
 use rand::RngCore;
 use sha2::Sha256;
-use hmac::{Hmac, Mac, KeyInit};
 use std::env;
+use tonic::{Request, Response, Status};
 
 type HmacSha256 = Hmac<Sha256>;
 
 fn hash_session_id(session_id: &str) -> String {
-    let secret = env::var("SESSION_HMAC_SECRET").unwrap_or_else(|_| "default-session-secret-change-me".to_string());
-    let mut mac = HmacSha256::new_from_slice(secret.as_bytes())
-        .expect("HMAC can take key of any size");
+    let secret = env::var("SESSION_HMAC_SECRET")
+        .unwrap_or_else(|_| "default-session-secret-change-me".to_string());
+    let mut mac =
+        HmacSha256::new_from_slice(secret.as_bytes()).expect("HMAC can take key of any size");
     mac.update(session_id.as_bytes());
     URL_SAFE_NO_PAD.encode(mac.finalize().into_bytes())
 }
@@ -57,7 +58,11 @@ impl<D: AuthDb> AuthService for Controller<D> {
         match user_opt {
             Some((user_id, password_hash)) => {
                 let is_valid = PasswordHash::new(&password_hash)
-                    .map(|parsed_hash| Argon2::default().verify_password(req.password.as_bytes(), &parsed_hash).is_ok())
+                    .map(|parsed_hash| {
+                        Argon2::default()
+                            .verify_password(req.password.as_bytes(), &parsed_hash)
+                            .is_ok()
+                    })
                     .unwrap_or(false);
                 if !is_valid {
                     return Err(Status::unauthenticated("Incorrect email or password."));
@@ -66,14 +71,18 @@ impl<D: AuthDb> AuthService for Controller<D> {
                 // Generate a 21-byte token and encode it as URL-safe base64 (28 characters)
                 let mut key = [0u8; 21];
                 rand::thread_rng().fill_bytes(&mut key);
-                let session_id = URL_SAFE_NO_PAD.encode(&key);
+                let session_id = URL_SAFE_NO_PAD.encode(key);
 
                 let hashed_id = hash_session_id(&session_id);
 
-                let mut session = self.db_client.create_session(&hashed_id, user_id).await.map_err(|e| {
-                    eprintln!("Creating session failed: {}", e);
-                    Status::internal("Internal server error.")
-                })?;
+                let mut session = self
+                    .db_client
+                    .create_session(&hashed_id, user_id)
+                    .await
+                    .map_err(|e| {
+                        eprintln!("Creating session failed: {}", e);
+                        Status::internal("Internal server error.")
+                    })?;
 
                 session.id = session_id;
                 Ok(Response::new(session))
@@ -98,7 +107,7 @@ impl<D: AuthDb> AuthService for Controller<D> {
             Some(mut session) => {
                 session.id = req.session_id;
                 Ok(Response::new(session))
-            },
+            }
             None => Err(Status::unauthenticated("Session not found.")),
         }
     }
@@ -108,10 +117,14 @@ impl<D: AuthDb> AuthService for Controller<D> {
         request: Request<UserRequest>,
     ) -> Result<Response<Sessions>, Status> {
         let req = request.into_inner();
-        let sessions_list = self.db_client.get_sessions(req.user_id).await.map_err(|e| {
-            eprintln!("Getting sessions failed: {}", e);
-            Status::internal("Internal server error.")
-        })?;
+        let sessions_list = self
+            .db_client
+            .get_sessions(req.user_id)
+            .await
+            .map_err(|e| {
+                eprintln!("Getting sessions failed: {}", e);
+                Status::internal("Internal server error.")
+            })?;
 
         Ok(Response::new(Sessions {
             sessions: sessions_list,
@@ -140,7 +153,10 @@ impl<D: AuthDb> AuthService for Controller<D> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use argon2::{password_hash::{rand_core::OsRng, PasswordHasher, SaltString}, Argon2};
+    use argon2::{
+        password_hash::{rand_core::OsRng, PasswordHasher, SaltString},
+        Argon2,
+    };
 
     struct MockAuthDb;
 
@@ -150,7 +166,10 @@ mod tests {
             if email == "test@example.com" {
                 // "password" hashed
                 let salt = SaltString::generate(&mut OsRng);
-                let hash = Argon2::default().hash_password("password".as_bytes(), &salt).unwrap().to_string();
+                let hash = Argon2::default()
+                    .hash_password("password".as_bytes(), &salt)
+                    .unwrap()
+                    .to_string();
                 Ok(Some((1, hash)))
             } else if email == "db_error@example.com" {
                 Err(sqlx::Error::RowNotFound)
@@ -159,7 +178,11 @@ mod tests {
             }
         }
 
-        async fn create_session(&self, session_id: &str, user_id: i32) -> Result<Session, sqlx::Error> {
+        async fn create_session(
+            &self,
+            session_id: &str,
+            user_id: i32,
+        ) -> Result<Session, sqlx::Error> {
             Ok(Session {
                 id: session_id.to_string(),
                 user_id,
@@ -202,7 +225,7 @@ mod tests {
     fn test_token_generation() {
         let mut key = [0u8; 21];
         rand::thread_rng().fill_bytes(&mut key);
-        let id = URL_SAFE_NO_PAD.encode(&key);
+        let id = URL_SAFE_NO_PAD.encode(key);
         // Base64 encoding of 21 bytes without padding results in 28 characters
         assert_eq!(id.len(), 28);
     }
@@ -295,9 +318,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_sessions() {
         let controller = Controller::new(MockAuthDb);
-        let req = Request::new(UserRequest {
-            user_id: 1,
-        });
+        let req = Request::new(UserRequest { user_id: 1 });
         let res = controller.get_sessions(req).await;
         assert!(res.is_ok());
         let sessions = res.unwrap().into_inner().sessions;

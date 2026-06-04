@@ -15,5 +15,7 @@ pub fn generate_hash(password: &str) -> Result<String, String> {
 
 pub fn validate_password(password: &str, hash_str: &str) -> Result<bool, String> {
     let parsed_hash = PasswordHash::new(hash_str).map_err(|e| e.to_string())?;
-    Ok(Argon2::default().verify_password(password.as_bytes(), &parsed_hash).is_ok())
+    Ok(Argon2::default()
+        .verify_password(password.as_bytes(), &parsed_hash)
+        .is_ok())
 }

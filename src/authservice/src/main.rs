@@ -1,12 +1,12 @@
 #[allow(clippy::all)]
 pub mod thoughts;
 
-mod db_client;
 mod controller;
+mod db_client;
 
 use std::env;
-use tonic::transport::Server;
 use thoughts::auth_service_server::AuthServiceServer;
+use tonic::transport::Server;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

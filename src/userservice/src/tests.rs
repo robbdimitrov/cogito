@@ -1,12 +1,11 @@
-use super::controller::Controller;
-use super::controller::UserDb;
-use crate::thoughts::{User, CreateUserRequest, UserRequest};
+use super::controller::{Controller, UpdateUserFields, UserDb};
+use crate::thoughts::user_service_server::UserService;
+use crate::thoughts::{CreateUserRequest, User, UserRequest};
 use async_trait::async_trait;
 use sqlx::Error as SqlxError;
-use tonic::Request;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use crate::thoughts::user_service_server::UserService;
+use tonic::Request;
 
 struct MockDb {
     users: Mutex<Vec<User>>,
@@ -22,7 +21,13 @@ impl MockDb {
 
 #[async_trait]
 impl UserDb for Arc<MockDb> {
-    async fn create_user(&self, name: &str, username: &str, email: &str, _password_hash: &str) -> Result<i32, SqlxError> {
+    async fn create_user(
+        &self,
+        name: &str,
+        username: &str,
+        email: &str,
+        _password_hash: &str,
+    ) -> Result<i32, SqlxError> {
         let mut users = self.users.lock().await;
         let id = (users.len() + 1) as i32;
         users.push(User {
@@ -52,25 +57,41 @@ impl UserDb for Arc<MockDb> {
         }
     }
 
-    async fn get_user(&self, user_id: i32, _current_user_id: i32) -> Result<Option<User>, SqlxError> {
+    async fn get_user(
+        &self,
+        user_id: i32,
+        _current_user_id: i32,
+    ) -> Result<Option<User>, SqlxError> {
         let users = self.users.lock().await;
         Ok(users.iter().find(|u| u.id == user_id).cloned())
     }
 
-    async fn get_user_by_username(&self, username: &str, _current_user_id: i32) -> Result<Option<User>, SqlxError> {
+    async fn get_user_by_username(
+        &self,
+        username: &str,
+        _current_user_id: i32,
+    ) -> Result<Option<User>, SqlxError> {
         let users = self.users.lock().await;
         Ok(users.iter().find(|u| u.username == username).cloned())
     }
 
-    async fn update_user(&self, user_id: i32, name: &str, username: &str, email: &str, bio: &str, profile_photo_key: Option<&str>, cover_photo_key: Option<&str>) -> Result<(), SqlxError> {
+    async fn update_user(
+        &self,
+        user_id: i32,
+        fields: UpdateUserFields<'_>,
+    ) -> Result<(), SqlxError> {
         let mut users = self.users.lock().await;
         if let Some(u) = users.iter_mut().find(|u| u.id == user_id) {
-            u.name = name.to_string();
-            u.username = username.to_string();
-            u.email = email.to_string();
-            u.bio = bio.to_string();
-            if let Some(key) = profile_photo_key { u.profile_photo_key = key.to_string(); }
-            if let Some(key) = cover_photo_key { u.cover_photo_key = key.to_string(); }
+            u.name = fields.name.to_string();
+            u.username = fields.username.to_string();
+            u.email = fields.email.to_string();
+            u.bio = fields.bio.to_string();
+            if let Some(key) = fields.profile_photo_key {
+                u.profile_photo_key = key.to_string();
+            }
+            if let Some(key) = fields.cover_photo_key {
+                u.cover_photo_key = key.to_string();
+            }
         }
         Ok(())
     }
@@ -79,11 +100,23 @@ impl UserDb for Arc<MockDb> {
         Ok(())
     }
 
-    async fn get_following(&self, _user_id: i32, _page: i32, _limit: i32, _current_user_id: i32) -> Result<Vec<User>, SqlxError> {
+    async fn get_following(
+        &self,
+        _user_id: i32,
+        _page: i32,
+        _limit: i32,
+        _current_user_id: i32,
+    ) -> Result<Vec<User>, SqlxError> {
         Ok(vec![])
     }
 
-    async fn get_followers(&self, _user_id: i32, _page: i32, _limit: i32, _current_user_id: i32) -> Result<Vec<User>, SqlxError> {
+    async fn get_followers(
+        &self,
+        _user_id: i32,
+        _page: i32,
+        _limit: i32,
+        _current_user_id: i32,
+    ) -> Result<Vec<User>, SqlxError> {
         Ok(vec![])
     }
 
@@ -95,29 +128,44 @@ impl UserDb for Arc<MockDb> {
         Ok(())
     }
 
-    async fn search_users(&self, query: &str, _limit: i32, _current_user_id: i32) -> Result<Vec<User>, SqlxError> {
+    async fn search_users(
+        &self,
+        query: &str,
+        _limit: i32,
+        _current_user_id: i32,
+    ) -> Result<Vec<User>, SqlxError> {
         let users = self.users.lock().await;
-        Ok(users.iter().filter(|u| u.username.contains(query)).cloned().collect())
+        Ok(users
+            .iter()
+            .filter(|u| u.username.contains(query))
+            .cloned()
+            .collect())
     }
 }
 
 fn create_request<T>(msg: T, user_id: i32) -> Request<T> {
     let mut req = Request::new(msg);
-    req.metadata_mut().insert("user-id", user_id.to_string().parse().unwrap());
+    req.metadata_mut()
+        .insert("user-id", user_id.to_string().parse().unwrap());
     req
 }
 
 #[tokio::test]
 async fn test_create_user() {
     let db = Arc::new(MockDb::new());
-    let controller = Controller { db_client: db.clone() };
+    let controller = Controller {
+        db_client: db.clone(),
+    };
 
-    let req = create_request(CreateUserRequest {
-        name: "Test".into(),
-        username: "testuser".into(),
-        email: "test@example.com".into(),
-        password: "password".into(),
-    }, 1);
+    let req = create_request(
+        CreateUserRequest {
+            name: "Test".into(),
+            username: "testuser".into(),
+            email: "test@example.com".into(),
+            password: "password".into(),
+        },
+        1,
+    );
 
     let res = controller.create_user(req).await;
     assert!(res.is_ok());
@@ -131,35 +179,42 @@ async fn test_get_user() {
     let controller = Controller::new(db.clone());
 
     // Create a user first
-    let _ = db.create_user("Test", "testuser", "test@example.com", "hash").await;
+    let _ = db
+        .create_user("Test", "testuser", "test@example.com", "hash")
+        .await;
 
     let req = create_request(UserRequest { user_id: 1 }, 1);
     let res = controller.get_user(req).await;
-    
+
     assert!(res.is_ok());
     let user = res.unwrap().into_inner();
     assert_eq!(user.username, "testuser");
 }
 
-use crate::thoughts::{UpdateUserRequest, GetUserByUsernameRequest, SearchUsersRequest};
+use crate::thoughts::{GetUserByUsernameRequest, SearchUsersRequest, UpdateUserRequest};
 
 #[tokio::test]
 async fn test_update_user() {
     let db = Arc::new(MockDb::new());
     let controller = Controller::new(db.clone());
 
-    let _ = db.create_user("Test", "testuser", "test@example.com", "hash").await;
+    let _ = db
+        .create_user("Test", "testuser", "test@example.com", "hash")
+        .await;
 
-    let req = create_request(UpdateUserRequest {
-        name: "Updated Name".into(),
-        username: "updateduser".into(),
-        email: "updated@example.com".into(),
-        bio: "New Bio".into(),
-        password: "".into(),
-        old_password: "".into(),
-        profile_photo_key: Some("key1".into()),
-        cover_photo_key: Some("key2".into()),
-    }, 1);
+    let req = create_request(
+        UpdateUserRequest {
+            name: "Updated Name".into(),
+            username: "updateduser".into(),
+            email: "updated@example.com".into(),
+            bio: "New Bio".into(),
+            password: "".into(),
+            old_password: "".into(),
+            profile_photo_key: Some("key1".into()),
+            cover_photo_key: Some("key2".into()),
+        },
+        1,
+    );
 
     let res = controller.update_user(req).await;
     assert!(res.is_ok());
@@ -176,11 +231,16 @@ async fn test_get_user_by_username() {
     let db = Arc::new(MockDb::new());
     let controller = Controller::new(db.clone());
 
-    let _ = db.create_user("Test", "testuser", "test@example.com", "hash").await;
+    let _ = db
+        .create_user("Test", "testuser", "test@example.com", "hash")
+        .await;
 
-    let req = create_request(GetUserByUsernameRequest {
-        username: "testuser".into(),
-    }, 1);
+    let req = create_request(
+        GetUserByUsernameRequest {
+            username: "testuser".into(),
+        },
+        1,
+    );
 
     let res = controller.get_user_by_username(req).await;
     assert!(res.is_ok());
@@ -193,14 +253,23 @@ async fn test_search_users() {
     let db = Arc::new(MockDb::new());
     let controller = Controller::new(db.clone());
 
-    let _ = db.create_user("Test1", "user1", "test1@example.com", "hash").await;
-    let _ = db.create_user("Test2", "user2", "test2@example.com", "hash").await;
-    let _ = db.create_user("Other", "other", "other@example.com", "hash").await;
+    let _ = db
+        .create_user("Test1", "user1", "test1@example.com", "hash")
+        .await;
+    let _ = db
+        .create_user("Test2", "user2", "test2@example.com", "hash")
+        .await;
+    let _ = db
+        .create_user("Other", "other", "other@example.com", "hash")
+        .await;
 
-    let req = create_request(SearchUsersRequest {
-        query: "user".into(),
-        limit: 10,
-    }, 1);
+    let req = create_request(
+        SearchUsersRequest {
+            query: "user".into(),
+            limit: 10,
+        },
+        1,
+    );
 
     let res = controller.search_users(req).await;
     assert!(res.is_ok());
