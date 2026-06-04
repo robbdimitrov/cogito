@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.6.2
 // - protoc             v7.35.0
-// source: pb/thoughts.proto
+// source: thoughts.proto
 
 package genproto
 
@@ -421,7 +421,7 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "pb/thoughts.proto",
+	Metadata: "thoughts.proto",
 }
 
 const (
@@ -637,7 +637,7 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "pb/thoughts.proto",
+	Metadata: "thoughts.proto",
 }
 
 const (
@@ -652,6 +652,7 @@ const (
 	PostService_UnlikePost_FullMethodName      = "/thoughts.PostService/UnlikePost"
 	PostService_RepostPost_FullMethodName      = "/thoughts.PostService/RepostPost"
 	PostService_RemoveRepost_FullMethodName    = "/thoughts.PostService/RemoveRepost"
+	PostService_GetReplies_FullMethodName      = "/thoughts.PostService/GetReplies"
 )
 
 // PostServiceClient is the client API for PostService service.
@@ -669,6 +670,7 @@ type PostServiceClient interface {
 	UnlikePost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error)
 	RepostPost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error)
 	RemoveRepost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error)
+	GetReplies(ctx context.Context, in *GetRepliesRequest, opts ...grpc.CallOption) (*Posts, error)
 }
 
 type postServiceClient struct {
@@ -789,6 +791,16 @@ func (c *postServiceClient) RemoveRepost(ctx context.Context, in *PostRequest, o
 	return out, nil
 }
 
+func (c *postServiceClient) GetReplies(ctx context.Context, in *GetRepliesRequest, opts ...grpc.CallOption) (*Posts, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Posts)
+	err := c.cc.Invoke(ctx, PostService_GetReplies_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PostServiceServer is the server API for PostService service.
 // All implementations must embed UnimplementedPostServiceServer
 // for forward compatibility.
@@ -804,6 +816,7 @@ type PostServiceServer interface {
 	UnlikePost(context.Context, *PostRequest) (*Empty, error)
 	RepostPost(context.Context, *PostRequest) (*Empty, error)
 	RemoveRepost(context.Context, *PostRequest) (*Empty, error)
+	GetReplies(context.Context, *GetRepliesRequest) (*Posts, error)
 	mustEmbedUnimplementedPostServiceServer()
 }
 
@@ -846,6 +859,9 @@ func (UnimplementedPostServiceServer) RepostPost(context.Context, *PostRequest) 
 }
 func (UnimplementedPostServiceServer) RemoveRepost(context.Context, *PostRequest) (*Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method RemoveRepost not implemented")
+}
+func (UnimplementedPostServiceServer) GetReplies(context.Context, *GetRepliesRequest) (*Posts, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetReplies not implemented")
 }
 func (UnimplementedPostServiceServer) mustEmbedUnimplementedPostServiceServer() {}
 func (UnimplementedPostServiceServer) testEmbeddedByValue()                     {}
@@ -1066,6 +1082,24 @@ func _PostService_RemoveRepost_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PostService_GetReplies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRepliesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).GetReplies(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PostService_GetReplies_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).GetReplies(ctx, req.(*GetRepliesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PostService_ServiceDesc is the grpc.ServiceDesc for PostService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1117,9 +1151,13 @@ var PostService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "RemoveRepost",
 			Handler:    _PostService_RemoveRepost_Handler,
 		},
+		{
+			MethodName: "GetReplies",
+			Handler:    _PostService_GetReplies_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "pb/thoughts.proto",
+	Metadata: "thoughts.proto",
 }
 
 const (
@@ -1297,5 +1335,5 @@ var ImageService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "pb/thoughts.proto",
+	Metadata: "thoughts.proto",
 }

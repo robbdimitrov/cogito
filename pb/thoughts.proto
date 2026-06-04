@@ -113,6 +113,8 @@ service AuthService {
 message CreatePostRequest {
   string content = 1;
   optional string media_key = 2;
+  optional int32 in_reply_to_id = 3;
+  optional int32 quote_of_id = 4;
 }
 
 message PostRequest {
@@ -131,6 +133,10 @@ message Post {
   int32 rethought_by_user_id = 9;
   string rethought_created = 10;
   string media_key = 11;
+  int32 replies = 12;
+  int32 in_reply_to_id = 13;
+  int32 quote_of_id = 14;
+  Post quote_post = 15;
 }
 
 message GetFeedRequest {
@@ -154,6 +160,12 @@ message GetHashtagPostsRequest {
   int32 limit = 3;
 }
 
+message GetRepliesRequest {
+  int32 post_id = 1;
+  int32 page = 2;
+  int32 limit = 3;
+}
+
 service PostService {
   rpc CreatePost(CreatePostRequest) returns (Identifier);
   rpc GetFeed(GetFeedRequest) returns (Posts);
@@ -166,6 +178,7 @@ service PostService {
   rpc UnlikePost(PostRequest) returns (Empty);
   rpc RepostPost(PostRequest) returns (Empty);
   rpc RemoveRepost(PostRequest) returns (Empty);
+  rpc GetReplies(GetRepliesRequest) returns (Posts);
 }
 
 // Images

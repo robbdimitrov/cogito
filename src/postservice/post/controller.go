@@ -49,10 +49,17 @@ func (c *controller) CreatePost(ctx context.Context, req *pb.CreatePostRequest) 
 		return nil, err
 	}
 
+	if req.InReplyToId != nil && req.QuoteOfId != nil {
+		return nil, newError(codes.InvalidArgument)
+	}
+
 	tags := extractHashtags(req.Content)
 
-	res, err := c.dbClient.createPost(req.Content, tags, userID, req.MediaKey)
+	res, err := c.dbClient.createPost(req.Content, tags, userID, req.MediaKey, req.InReplyToId, req.QuoteOfId)
 	if err != nil {
+		if err == errInvalidReference {
+			return nil, newError(codes.InvalidArgument)
+		}
 		slog.Warn("creating post failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
 	}
@@ -136,6 +143,21 @@ func (c *controller) GetPost(ctx context.Context, req *pb.PostRequest) (*pb.Post
 	}
 
 	return res, nil
+}
+
+func (c *controller) GetReplies(ctx context.Context, req *pb.GetRepliesRequest) (*pb.Posts, error) {
+	userID, err := getUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.dbClient.getReplies(req.PostId, req.Page, req.Limit, userID)
+	if err != nil {
+		slog.Warn("getting replies failed", "request_id", requestID(ctx), "error", err)
+		return nil, newError(codes.Internal)
+	}
+
+	return &pb.Posts{Posts: res}, nil
 }
 
 func (c *controller) DeletePost(ctx context.Context, req *pb.PostRequest) (*pb.Empty, error) {
