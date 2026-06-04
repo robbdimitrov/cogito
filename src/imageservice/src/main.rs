@@ -4,6 +4,7 @@ pub mod thoughts;
 mod db_client;
 mod grpc;
 mod http;
+mod internal_auth;
 mod logging;
 
 #[cfg(test)]
@@ -48,7 +49,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     Server::builder()
-        .add_service(ImageServiceServer::new(grpc_service))
+        .add_service(ImageServiceServer::with_interceptor(
+            grpc_service,
+            internal_auth::interceptor,
+        ))
         .serve_with_shutdown(grpc_addr, shutdown_signal)
         .await?;
 

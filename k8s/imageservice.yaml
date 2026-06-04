@@ -20,24 +20,46 @@ spec:
     spec:
       containers:
       - name: imageservice
-        image: localhost:5000/thoughts/imageservice:latest
+        image: localhost:5000/thoughts/imageservice
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5050
           name: grpc
         - containerPort: 8081
           name: http
+        resources:
+          limits:
+            memory: 256Mi
+            cpu: 500m
+          requests:
+            memory: 128Mi
+            cpu: 200m
         env:
         - name: DATABASE_URL
           valueFrom:
             secretKeyRef:
-              name: backend-secret
-              key: database_url
+              name: thoughts-db-secret
+              key: database-url
+        - name: INTERNAL_GRPC_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: thoughts-db-secret
+              key: internal-grpc-token
         - name: IMAGE_DIR
           value: "/app/uploads"
         volumeMounts:
         - name: image-storage
           mountPath: /app/uploads
+        livenessProbe:
+          tcpSocket:
+            port: 5050
+          initialDelaySeconds: 10
+          periodSeconds: 15
+        readinessProbe:
+          tcpSocket:
+            port: 5050
+          initialDelaySeconds: 5
+          periodSeconds: 10
       volumes:
       - name: image-storage
         persistentVolumeClaim:

@@ -1,6 +1,7 @@
 pub mod controller;
 pub mod crypto;
 pub mod db_client;
+pub mod internal_auth;
 pub mod logging;
 #[allow(clippy::all)]
 pub mod thoughts;
@@ -38,7 +39,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     Server::builder()
-        .add_service(UserServiceServer::new(controller))
+        .add_service(UserServiceServer::with_interceptor(
+            controller,
+            internal_auth::interceptor,
+        ))
         .serve_with_shutdown(addr, shutdown)
         .await?;
 

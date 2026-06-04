@@ -3,6 +3,7 @@ pub mod thoughts;
 
 mod controller;
 mod db_client;
+mod internal_auth;
 mod logging;
 
 use std::env;
@@ -30,7 +31,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     Server::builder()
-        .add_service(AuthServiceServer::new(controller))
+        .add_service(AuthServiceServer::with_interceptor(
+            controller,
+            internal_auth::interceptor,
+        ))
         .serve_with_shutdown(addr, shutdown_signal)
         .await?;
 
