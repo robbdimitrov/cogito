@@ -1,4 +1,3 @@
-import React from 'react';
 import UserItem from './useritem';
 import { Users } from 'lucide-react';
 import GlassCard from '@/shared/components/ui/surface';

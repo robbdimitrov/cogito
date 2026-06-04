@@ -1,4 +1,3 @@
-import React from 'react';
 import { Check, MessageSquare } from 'lucide-react';
 
 type AuthHeroProps = {

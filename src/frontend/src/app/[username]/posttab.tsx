@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useAPI } from '@/shared/contexts/apicontext';
 import ThoughtList from '@/shared/components/thoughtlist/thoughtlist';

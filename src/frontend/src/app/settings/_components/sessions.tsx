@@ -1,4 +1,3 @@
-import React from 'react';
 import { AlertCircle, XCircle, Monitor, X } from 'lucide-react';
 import GlassCard from '@/shared/components/ui/surface';
 

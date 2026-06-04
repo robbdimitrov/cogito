@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import Avatar from '@/shared/components/avatar/avatar';
 import { Trash2, Repeat, Heart } from 'lucide-react';
@@ -21,11 +21,8 @@ function ThoughtItem({post, user, onLike, onRepost, onDelete, currentUserId}) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
   const [isReposting, setIsReposting] = useState(false);
-  const [optimisticPost, setOptimisticPost] = useState(post);
-
-  React.useEffect(() => {
-    setOptimisticPost(post);
-  }, [post]);
+  const [optimisticState, setOptimisticState] = useState({source: post, value: post});
+  const optimisticPost = optimisticState.source === post ? optimisticState.value : post;
 
   const author = optimisticPost.user || user;
   const isOwnPost = currentUserId && optimisticPost.userId === currentUserId;
@@ -39,15 +36,18 @@ function ThoughtItem({post, user, onLike, onRepost, onDelete, currentUserId}) {
   async function handleLike() {
     if (isLiking) return;
     setIsLiking(true);
-    setOptimisticPost(prev => ({
-      ...prev,
-      liked: !prev.liked,
-      likes: prev.liked ? Math.max(0, prev.likes - 1) : prev.likes + 1
-    }));
+    setOptimisticState({
+      source: post,
+      value: {
+        ...optimisticPost,
+        liked: !optimisticPost.liked,
+        likes: optimisticPost.liked ? Math.max(0, optimisticPost.likes - 1) : optimisticPost.likes + 1
+      }
+    });
     try {
       await onLike(post); // pass original post to parent to use its ID and current status
     } catch (e) {
-      setOptimisticPost(post);
+      setOptimisticState({source: post, value: post});
     } finally {
       setIsLiking(false);
     }
@@ -56,15 +56,18 @@ function ThoughtItem({post, user, onLike, onRepost, onDelete, currentUserId}) {
   async function handleRepost() {
     if (isReposting) return;
     setIsReposting(true);
-    setOptimisticPost(prev => ({
-      ...prev,
-      reposted: !prev.reposted,
-      reposts: prev.reposted ? Math.max(0, prev.reposts - 1) : prev.reposts + 1
-    }));
+    setOptimisticState({
+      source: post,
+      value: {
+        ...optimisticPost,
+        reposted: !optimisticPost.reposted,
+        reposts: optimisticPost.reposted ? Math.max(0, optimisticPost.reposts - 1) : optimisticPost.reposts + 1
+      }
+    });
     try {
       await onRepost(post);
     } catch (e) {
-      setOptimisticPost(post);
+      setOptimisticState({source: post, value: post});
     } finally {
       setIsReposting(false);
     }

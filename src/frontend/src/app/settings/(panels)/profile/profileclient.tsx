@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import EditProfile from '@/app/settings/_components/editprofile';
 import { useAPI } from '@/shared/contexts/apicontext';
@@ -25,5 +25,5 @@ export default function ProfileClient({ user }: { user: User }) {
     }
   }, [apiClient, router, toast, user.id]);
 
-  return <EditProfile user={user} updateUser={updateUser} error={updateError} />;
+  return <EditProfile key={user.id} user={user} updateUser={updateUser} error={updateError} />;
 }

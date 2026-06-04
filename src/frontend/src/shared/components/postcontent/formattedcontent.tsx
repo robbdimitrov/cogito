@@ -1,7 +1,5 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 import Link from 'next/link';
-
-const tokenRegex = /(https?:\/\/[^\s]+)|(^|[^A-Za-z0-9_])([#@])([A-Za-z0-9_]{1,50})/g;
 
 interface FormattedContentProps {
   content: string;
@@ -9,7 +7,7 @@ interface FormattedContentProps {
 }
 
 function FormattedContent({ content, className = '' }: FormattedContentProps) {
-  const parts: React.ReactNode[] = [];
+  const parts: ReactNode[] = [];
   let lastIndex = 0;
   // Use a local regex and matchAll to avoid global RegExp object state mutations during React concurrent renders
   const tokenRegex = /(https?:\/\/[^\s]+)|(^|[^A-Za-z0-9_])([#@])([A-Za-z0-9_]{1,50})/g;

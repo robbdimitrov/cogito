@@ -1,8 +1,7 @@
 'use client';
 
-import React, {useState, useEffect, useRef} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import Avatar from '@/shared/components/avatar/avatar';
 import { Sun, Moon, Home, User as UserIcon, Settings, LogOut } from 'lucide-react';
 import { useAPI } from '@/shared/contexts/apicontext';

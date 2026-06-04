@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useRef} from 'react';
 import { AlertCircle, Camera, Trash2, Image as ImageIcon } from 'lucide-react';
 import GlassCard, {Field, FormInput, FormTextArea} from '@/shared/components/ui/surface';
 import { resizeImageForUpload } from '@/shared/utils/image';
@@ -24,23 +24,6 @@ function EditProfile(props: any) {
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    setState({
-      name: props.user.name || '',
-      username: props.user.username || '',
-      email: props.user.email || '',
-      bio: props.user.bio || '',
-      profilePhotoKey: props.user.profilePhotoKey || '',
-      coverPhotoKey: props.user.coverPhotoKey || '',
-    });
-  }, [props.user]);
-
-  useEffect(() => {
-    if (props.error) {
-      setIsSubmitting(false);
-    }
-  }, [props.error]);
-
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setIsSubmitting(true);
@@ -63,7 +46,7 @@ function EditProfile(props: any) {
     try {
       const resized = await resizeImageForUpload(file);
       const res = await apiClient.uploadImage(resized);
-      setState(s => ({ ...s, [type === 'avatar' ? 'profilePhotoKey' : 'coverPhotoKey']: res.key }));
+      setState((s) => ({...s, [type === 'avatar' ? 'profilePhotoKey' : 'coverPhotoKey']: res.key}));
       toast.success(`${type === 'avatar' ? 'Profile' : 'Cover'} photo uploaded`);
     } catch (e: any) {
       toast.error(e.message || 'Failed to upload image');

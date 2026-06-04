@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useState} from 'react';
+import {useState} from 'react';
 import Link from 'next/link';
 import { AlertCircle, User, Mail, Lock, UserPlus } from 'lucide-react';
 import AuthHero from '@/shared/components/auth/authhero';

@@ -1,4 +1,3 @@
-import React from 'react';
 import { FeedSkeleton } from '@/app/feedskeleton';
 import GlassCard from '@/shared/components/ui/surface';
 

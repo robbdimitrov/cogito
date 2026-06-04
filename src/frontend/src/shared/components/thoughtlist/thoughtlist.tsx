@@ -1,4 +1,3 @@
-import React from 'react';
 import ThoughtItem from '@/shared/components/thoughtlist/thoughtitem';
 import { MessageSquare } from 'lucide-react';
 import GlassCard from '@/shared/components/ui/surface';

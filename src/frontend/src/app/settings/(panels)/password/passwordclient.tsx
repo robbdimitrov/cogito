@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
 import Password from '@/app/settings/_components/password';
 import { useAPI } from '@/shared/contexts/apicontext';
 import { useToast } from '@/shared/components/toast/toast';

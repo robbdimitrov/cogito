@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import {useState} from 'react';
 import Link from 'next/link';
 import Avatar from '@/shared/components/avatar/avatar';
 import { Check, UserPlus } from 'lucide-react';

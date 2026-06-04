@@ -1,4 +1,3 @@
-import React from 'react';
 import Link from 'next/link';
 import Avatar from '@/shared/components/avatar/avatar';
 import { Pen, Check, UserPlus, Calendar } from 'lucide-react';

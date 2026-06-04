@@ -1,4 +1,3 @@
-import React from 'react';
 
 function Avatar({name, size = 'md', photoKey}: {name: string, size?: 'sm' | 'md' | 'lg' | 'xl', photoKey?: string}) {
   const sizeMap = {

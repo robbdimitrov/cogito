@@ -35,7 +35,7 @@ describe('resizeImageForUpload', () => {
     }) as any);
 
     // Mock Canvas toBlob
-    HTMLCanvasElement.prototype.toBlob = vi.fn(function(this: any, callback: BlobCallback, type?: string, quality?: any) {
+    HTMLCanvasElement.prototype.toBlob = vi.fn(function(this: any, callback: BlobCallback, _type?: string, quality?: any) {
       // Base size is area of canvas in bytes.
       // At 1600x800 this is 1,280,000 bytes (~1.28MB).
       // Multiplied by quality (0.88 to start), it is ~1,126,400 bytes.

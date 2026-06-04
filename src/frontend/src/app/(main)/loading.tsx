@@ -1,4 +1,3 @@
-import React from 'react';
 import { FeedSkeleton } from '@/app/feedskeleton';
 
 export default function Loading() {

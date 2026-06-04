@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useState, useEffect, useCallback} from 'react';
+import {useCallback, useState} from 'react';
 import Link from 'next/link';
 import Avatar from '@/shared/components/avatar/avatar';
 import { useToast } from '@/shared/components/toast/toast';
@@ -36,13 +36,20 @@ interface PostDetailProps {
 function PostDetail({ initialPost, currentUserId }: PostDetailProps) {
   const apiClient = useAPI();
   const toast = useToast();
-  const [post, setPost] = useState(initialPost);
+  const [postState, setPostState] = useState({source: initialPost, value: initialPost});
+  const post = postState.source === initialPost ? postState.value : initialPost;
+  const setPost = useCallback(
+    (nextPost: Post | null | ((prev: Post | null) => Post | null)) => {
+      setPostState((prevState) => {
+        const currentPost = prevState.source === initialPost ? prevState.value : initialPost;
+        const value = typeof nextPost === 'function' ? nextPost(currentPost) : nextPost;
+        return {source: initialPost, value};
+      });
+    },
+    [initialPost]
+  );
   const router = useRouter();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-  useEffect(() => {
-    setPost(initialPost);
-  }, [initialPost]);
 
   const author = post?.user;
 
@@ -72,7 +79,7 @@ function PostDetail({ initialPost, currentUserId }: PostDetailProps) {
     } finally {
       setIsLiking(false);
     }
-  }, [post, toast, isLiking, apiClient]);
+  }, [post, toast, isLiking, apiClient, setPost]);
 
   const handleRepost = useCallback(async () => {
     if (!post || isReposting) return;
@@ -96,7 +103,7 @@ function PostDetail({ initialPost, currentUserId }: PostDetailProps) {
     } finally {
       setIsReposting(false);
     }
-  }, [post, toast, isReposting, apiClient]);
+  }, [post, toast, isReposting, apiClient, setPost]);
 
   const handleDelete = useCallback(async () => {
     if (!post) return;

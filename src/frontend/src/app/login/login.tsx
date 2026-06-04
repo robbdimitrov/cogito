@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useState} from 'react';
+import {useState} from 'react';
 import Link from 'next/link';
 import { AlertCircle, Mail, Lock } from 'lucide-react';
 import AuthHero from '@/shared/components/auth/authhero';
@@ -78,7 +78,7 @@ function Login({error: initialError}: {error?: string | null}) {
               <div className="divider my-4">or</div>
 
               <p className="text-center text-sm text-base-content/60">
-                Don't have an account? <Link href="/signup" className="link link-primary font-medium">Sign Up</Link>
+                Don&apos;t have an account? <Link href="/signup" className="link link-primary font-medium">Sign Up</Link>
               </p>
             </div>
           </GlassCard>

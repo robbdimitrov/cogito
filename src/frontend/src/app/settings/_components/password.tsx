@@ -1,16 +1,10 @@
-import React, {useState, useEffect} from 'react';
+import {useState} from 'react';
 import { AlertCircle } from 'lucide-react';
 import GlassCard, {Field, FormInput} from '@/shared/components/ui/surface';
 
 function Password(props) {
   const [state, setState] = useState({password: '', oldPassword: ''});
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (props.error) {
-      setIsSubmitting(false);
-    }
-  }, [props.error]);
 
   function handleSubmit(event) {
     event.preventDefault();

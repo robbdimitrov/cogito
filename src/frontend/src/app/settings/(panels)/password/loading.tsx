@@ -1,4 +1,3 @@
-import React from 'react';
 import GlassCard from '@/shared/components/ui/surface';
 
 export default function Loading() {

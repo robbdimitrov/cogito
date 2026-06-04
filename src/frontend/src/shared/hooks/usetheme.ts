@@ -23,13 +23,11 @@ function applyTheme(mode: ThemeMode) {
 }
 
 export function useTheme() {
-  const [theme, setThemeState] = useState<ThemeMode>('system');
+  const [theme, setThemeState] = useState<ThemeMode>(() => getStoredTheme());
 
   useEffect(() => {
-    const initialTheme = getStoredTheme();
-    setThemeState(initialTheme);
-    applyTheme(initialTheme);
-  }, []);
+    applyTheme(theme);
+  }, [theme]);
 
   useEffect(() => {
     const media = window.matchMedia('(prefers-color-scheme: dark)');

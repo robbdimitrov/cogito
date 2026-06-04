@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import UserCard from '@/app/usercard';
 import CreateThought from '@/app/createthought';
 import ThoughtList from '@/shared/components/thoughtlist/thoughtlist';
