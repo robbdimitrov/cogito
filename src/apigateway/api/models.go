@@ -28,6 +28,10 @@ type post struct {
 	RethoughtByUserID int32  `json:"rethoughtByUserId"`
 	RethoughtCreated  string `json:"rethoughtCreated"`
 	MediaKey          string `json:"mediaKey,omitempty"`
+	Replies           int32  `json:"replies"`
+	InReplyToID       int32  `json:"inReplyToId,omitempty"`
+	QuoteOfID         int32  `json:"quoteOfId,omitempty"`
+	QuotePost         *post  `json:"quotePost,omitempty"`
 }
 
 type session struct {

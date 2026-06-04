@@ -90,6 +90,7 @@ func (r *router) configureRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("DELETE /posts/{postId}/likes", r.post.unlikePost)
 	mux.HandleFunc("POST /posts/{postId}/reposts", r.post.repostPost)
 	mux.HandleFunc("DELETE /posts/{postId}/reposts", r.post.removeRepost)
+	mux.HandleFunc("GET /posts/{postId}/replies", r.post.getReplies)
 
 	// Image Gateway Orchestration
 	mux.HandleFunc("POST /uploads", r.proxyImageUpload)

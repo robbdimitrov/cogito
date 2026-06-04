@@ -49,8 +49,10 @@ func (pc *postController) createPost(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	var body struct {
-		Content  string  `json:"content"`
-		MediaKey *string `json:"mediaKey"`
+		Content     string  `json:"content"`
+		MediaKey    *string `json:"mediaKey"`
+		InReplyToID *int32  `json:"inReplyToId"`
+		QuoteOfID   *int32  `json:"quoteOfId"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		http.Error(w, "Invalid request body", 400)
@@ -65,6 +67,12 @@ func (pc *postController) createPost(w http.ResponseWriter, r *http.Request) {
 	if body.MediaKey != nil {
 		req.MediaKey = body.MediaKey
 	}
+	if body.InReplyToID != nil {
+		req.InReplyToId = body.InReplyToID
+	}
+	if body.QuoteOfID != nil {
+		req.QuoteOfId = body.QuoteOfID
+	}
 
 	res, err := client.CreatePost(ctx, &req)
 	if err != nil {
@@ -74,6 +82,17 @@ func (pc *postController) createPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonResponse(w, 201, map[string]int32{"id": res.Id})
+}
+
+func (pc *postController) enrichWithQuotes(ctx context.Context, posts []*pb.Post) {
+	for _, p := range posts {
+		if p.QuoteOfId != 0 {
+			q, err := pc.client.GetPost(ctx, &pb.PostRequest{PostId: p.QuoteOfId})
+			if err == nil {
+				p.QuotePost = q
+			}
+		}
+	}
 }
 
 func (pc *postController) getFeed(w http.ResponseWriter, r *http.Request) {
@@ -106,6 +125,7 @@ func (pc *postController) getFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	pc.enrichWithQuotes(ctx, res.Posts)
 	posts := make([]post, len(res.Posts))
 	for i, v := range res.Posts {
 		posts[i] = mapPost(v)
@@ -150,6 +170,7 @@ func (pc *postController) getPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	pc.enrichWithQuotes(ctx, res.Posts)
 	posts := make([]post, len(res.Posts))
 	for i, v := range res.Posts {
 		posts[i] = mapPost(v)
@@ -194,6 +215,7 @@ func (pc *postController) getLikedPosts(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	pc.enrichWithQuotes(ctx, res.Posts)
 	posts := make([]post, len(res.Posts))
 	for i, v := range res.Posts {
 		posts[i] = mapPost(v)
@@ -233,6 +255,7 @@ func (pc *postController) getHashtagPosts(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	pc.enrichWithQuotes(ctx, res.Posts)
 	posts := make([]post, len(res.Posts))
 	for i, v := range res.Posts {
 		posts[i] = mapPost(v)
@@ -266,6 +289,8 @@ func (pc *postController) getPost(w http.ResponseWriter, r *http.Request) {
 		grpcError(w, err)
 		return
 	}
+
+	pc.enrichWithQuotes(ctx, []*pb.Post{res})
 
 	jsonResponse(w, 200, mapPost(res))
 }
@@ -429,4 +454,49 @@ func (pc *postController) removeRepost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(204)
+}
+
+func (pc *postController) getReplies(w http.ResponseWriter, r *http.Request) {
+	client := pc.client
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, errCtx := appendUserIDHeader(ctx, r)
+	if errCtx != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		cancel()
+		return
+	}
+	defer cancel()
+
+	postID, err := strconv.Atoi(r.PathValue("postId"))
+	if err != nil {
+		http.Error(w, "Invalid post ID", 400)
+		return
+	}
+	page, limit, err := getPageAndLimit(r)
+	if err != nil {
+		grpcError(w, err)
+		return
+	}
+
+	req := pb.GetRepliesRequest{
+		PostId: int32(postID),
+		Page:   int32(page),
+		Limit:  int32(limit),
+	}
+
+	res, err := client.GetReplies(ctx, &req)
+	if err != nil {
+		slog.Warn("getting replies failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
+		grpcError(w, err)
+		return
+	}
+
+	pc.enrichWithQuotes(ctx, res.Posts)
+	posts := make([]post, len(res.Posts))
+	for i, v := range res.Posts {
+		posts[i] = mapPost(v)
+	}
+
+	jsonResponse(w, 200, map[string][]post{"items": posts})
 }
