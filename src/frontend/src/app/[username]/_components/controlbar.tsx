@@ -1,10 +1,11 @@
 import React from 'react';
 import Link from 'next/link';
-import {usePathname} from 'next/navigation';
+import {usePathname, useRouter} from 'next/navigation';
 import {glassSurfaceClasses} from '@/shared/components/ui/surface';
 
 function ControlBar({user}) {
   const pathname = usePathname();
+  const router = useRouter();
   const path = `/@${user.username}`;
 
   const isActive = (href) => {
@@ -38,6 +39,15 @@ function ControlBar({user}) {
       isActive: pathname.endsWith('/likes'),
     },
   ];
+  const tabHrefs = tabs.map((tab) => tab.href).join('|');
+
+  React.useEffect(() => {
+    tabHrefs.split('|').forEach((href) => {
+      if (href && href !== pathname) {
+        router.prefetch(href);
+      }
+    });
+  }, [pathname, router, tabHrefs]);
 
   return (
     <div className={`tabs tabs-boxed mt-3 grid grid-cols-4 rounded-2xl p-1 sm:mt-4 sm:p-1.5 ${glassSurfaceClasses}`}>

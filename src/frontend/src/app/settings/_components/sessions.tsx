@@ -1,26 +1,8 @@
-import React, {useState, useEffect} from 'react';
+import React from 'react';
 import { AlertCircle, XCircle, Monitor, X } from 'lucide-react';
 import GlassCard from '@/shared/components/ui/surface';
 
 function Sessions(props) {
-  const [isLoading, setIsLoading] = useState(true);
-  const { fetchSessions } = props;
-
-  useEffect(() => {
-    setIsLoading(true);
-    fetchSessions().finally(() => setIsLoading(false));
-  }, [fetchSessions]);
-
-  if (isLoading) {
-    return (
-      <GlassCard>
-        <div className="card-body flex justify-center py-12" role="status" aria-live="polite">
-          <span className="loading loading-spinner loading-lg" aria-label="Loading sessions"></span>
-        </div>
-      </GlassCard>
-    );
-  }
-
   if (props.sessionsError) {
     return (
       <GlassCard>
@@ -76,7 +58,7 @@ function Sessions(props) {
                       {!isCurrent && (
                         <button
                           className="btn btn-error btn-sm btn-ghost min-h-10 gap-2 rounded-lg"
-                          onClick={() => props.deleteSession(session.id).then(() => props.fetchSessions())}
+                          onClick={() => props.deleteSession(session.id)}
                           aria-label="Terminate browser session"
                         >
                           <X className="h-4 w-4" aria-hidden="true" />

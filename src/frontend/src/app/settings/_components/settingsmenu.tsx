@@ -1,6 +1,8 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
-import {usePathname} from 'next/navigation';
+import {usePathname, useRouter} from 'next/navigation';
 import {ChevronRight, Lock, Monitor, Settings, User} from 'lucide-react';
 import GlassCard from '@/shared/components/ui/surface';
 
@@ -12,10 +14,16 @@ const menuItems = [
 
 function SettingsMenu() {
   const pathname = usePathname();
+  const router = useRouter();
 
-  const isActive = (tabPath) => {
-    return pathname.includes(tabPath);
-  };
+  React.useEffect(() => {
+    menuItems.forEach((item) => {
+      const href = `/settings/${item.link}`;
+      if (href !== pathname) {
+        router.prefetch(href);
+      }
+    });
+  }, [pathname, router]);
 
   return (
     <GlassCard as="nav" className="overflow-hidden md:sticky md:top-24" aria-labelledby="settings-nav-heading">

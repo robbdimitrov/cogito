@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import {ChevronRight, Lock, Monitor, Moon, Sun, User, Laptop} from 'lucide-react';

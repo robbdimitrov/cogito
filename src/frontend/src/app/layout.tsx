@@ -10,6 +10,7 @@ export const metadata = {
   title: 'Thoughts',
   description: 'A premium space to share your thoughts.',
 };
+export const dynamic = 'force-dynamic';
 import React from 'react';
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

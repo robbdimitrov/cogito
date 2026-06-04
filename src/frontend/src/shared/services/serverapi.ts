@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers';
+import { cache } from 'react';
 import type { User, Post } from '@/shared/types';
 
 const API_BASE = `${process.env.API_URL || 'http://localhost:8080'}`;
@@ -29,9 +30,9 @@ export async function fetchServer(url: string, options: RequestInit = {}) {
   return res.json();
 }
 
-export async function getCurrentUser() {
+export const getCurrentUser = cache(async function getCurrentUser() {
   try {
-    const sessionsData = await fetchServer('/sessions');
+    const sessionsData = await getServerSessions();
     const sessions = sessionsData ? (sessionsData.sessions || sessionsData.items) : null;
     if (sessionsData && sessionsData.currentSessionId && sessions) {
       const currentSession = sessions.find(s => s.id === sessionsData.currentSessionId);
@@ -44,7 +45,19 @@ export async function getCurrentUser() {
     // Expected to fail if no session
   }
   return null;
-}
+});
+
+export const getUserByUsername = cache(async function getUserByUsername(username: string) {
+  return fetchServer(`/users?username=${encodeURIComponent(username)}`);
+});
+
+export const getUserById = cache(async function getUserById(userId: string | number) {
+  return fetchServer(`/users/${userId}`);
+});
+
+export const getServerSessions = cache(async function getServerSessions() {
+  return fetchServer('/sessions');
+});
 
 export async function hydratePostAuthors(rawPosts: Post[], rethoughtByUser: User | null = null) {
   if (!rawPosts) return [];
@@ -60,7 +73,7 @@ export async function hydratePostAuthors(rawPosts: Post[], rethoughtByUser: User
   await Promise.all(
     userIds.map(async (uid: string) => {
       try {
-        const u = await fetchServer(`/users/${uid}`);
+        const u = await getUserById(uid);
         userMap[uid] = u;
       } catch {
         userMap[uid] = null;
