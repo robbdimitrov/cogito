@@ -15,7 +15,7 @@ coverage/
 
 # Rust
 target/
-src/thoughts.rs
+**/src/thoughts.rs
 
 # Python
 venv
@@ -27,10 +27,8 @@ pkg
 vendor
 
 # Compiled binaries
-src/apigateway/apigateway
-src/authservice/authservice
-src/postservice/postservice
-src/userservice/userservice
+/src/*/service
+/src/*/*service
 
 # Logs
 npm-debug.log*
