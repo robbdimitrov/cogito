@@ -63,6 +63,7 @@ export const getCurrentUser = cache(async function getCurrentUser() {
         return user;
       }
     }
+    return null;
   } catch {
     return null;
   }
