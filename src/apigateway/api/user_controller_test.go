@@ -113,13 +113,20 @@ func TestImageUploadProxy_ForwardsFrontendRouteWithUserHeader(t *testing.T) {
 	if gotRequestID != "req-test" {
 		t.Errorf("Expected X-Request-ID header req-test, got %s", gotRequestID)
 	}
+	if got := w.Header().Get("Cache-Control"); got != "" {
+		t.Errorf("Expected upload response not to be cached, got %q", got)
+	}
 }
 
-func TestImageFileProxy_RewritesFrontendUploadsRoute(t *testing.T) {
+func TestImageFileProxy_ForwardsCacheAndValidatorHeaders(t *testing.T) {
 	var gotPath string
+	var gotMethod string
 
 	imageServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		gotPath = r.URL.Path
+		gotMethod = r.Method
+		w.Header().Set("Cache-Control", "private, max-age=86400")
+		w.Header().Set("Last-Modified", "Sat, 06 Jun 2026 10:00:00 GMT")
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer imageServer.Close()
@@ -138,6 +145,103 @@ func TestImageFileProxy_RewritesFrontendUploadsRoute(t *testing.T) {
 	}
 	if gotPath != "/uploads/profile.jpg" {
 		t.Errorf("Expected proxied path /uploads/profile.jpg, got %s", gotPath)
+	}
+	if gotMethod != http.MethodGet {
+		t.Errorf("Expected proxied method GET, got %s", gotMethod)
+	}
+	if got := w.Header().Get("Cache-Control"); got != "private, max-age=86400" {
+		t.Errorf("Expected cache header to be forwarded, got %q", got)
+	}
+	if got := w.Header().Get("Last-Modified"); got != "Sat, 06 Jun 2026 10:00:00 GMT" {
+		t.Errorf("Expected Last-Modified to be forwarded, got %q", got)
+	}
+}
+
+func TestImageFileProxy_ForwardsHeadRequest(t *testing.T) {
+	var gotMethod string
+
+	imageServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotMethod = r.Method
+		w.Header().Set("Cache-Control", "private, max-age=86400")
+		w.Header().Set("Last-Modified", "Sat, 06 Jun 2026 10:00:00 GMT")
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer imageServer.Close()
+
+	imageAddr := strings.TrimPrefix(imageServer.URL, "http://")
+	router := &router{imageAddr: imageAddr}
+
+	req := httptest.NewRequest(http.MethodHead, "/uploads/profile.jpg", nil)
+	req.SetPathValue("filename", "profile.jpg")
+	w := httptest.NewRecorder()
+
+	router.proxyImageFile(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("Expected status 200, got %d", w.Code)
+	}
+	if gotMethod != http.MethodHead {
+		t.Errorf("Expected proxied method HEAD, got %s", gotMethod)
+	}
+	if got := w.Header().Get("Cache-Control"); got != "private, max-age=86400" {
+		t.Errorf("Expected cache header to be forwarded, got %q", got)
+	}
+	if got := w.Header().Get("Last-Modified"); got != "Sat, 06 Jun 2026 10:00:00 GMT" {
+		t.Errorf("Expected Last-Modified to be forwarded, got %q", got)
+	}
+}
+
+func TestImageFileProxy_DoesNotCacheMissingImage(t *testing.T) {
+	imageServer := httptest.NewServer(http.NotFoundHandler())
+	defer imageServer.Close()
+
+	imageAddr := strings.TrimPrefix(imageServer.URL, "http://")
+	router := &router{imageAddr: imageAddr}
+
+	req := httptest.NewRequest(http.MethodGet, "/uploads/missing.jpg", nil)
+	req.SetPathValue("filename", "missing.jpg")
+	w := httptest.NewRecorder()
+
+	router.proxyImageFile(w, req)
+
+	if w.Code != http.StatusNotFound {
+		t.Fatalf("Expected status 404, got %d", w.Code)
+	}
+	if got := w.Header().Get("Cache-Control"); got != "" {
+		t.Errorf("Expected missing image not to be cached, got %q", got)
+	}
+}
+
+func TestImageFileProxy_ForwardsConditionalRequest(t *testing.T) {
+	const lastModified = "Sat, 06 Jun 2026 10:00:00 GMT"
+	var gotIfModifiedSince string
+
+	imageServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotIfModifiedSince = r.Header.Get("If-Modified-Since")
+		w.Header().Set("Cache-Control", "private, max-age=86400")
+		w.Header().Set("Last-Modified", lastModified)
+		w.WriteHeader(http.StatusNotModified)
+	}))
+	defer imageServer.Close()
+
+	imageAddr := strings.TrimPrefix(imageServer.URL, "http://")
+	router := &router{imageAddr: imageAddr}
+
+	req := httptest.NewRequest("GET", "/uploads/profile.jpg", nil)
+	req.Header.Set("If-Modified-Since", lastModified)
+	req.SetPathValue("filename", "profile.jpg")
+	w := httptest.NewRecorder()
+
+	router.proxyImageFile(w, req)
+
+	if w.Code != http.StatusNotModified {
+		t.Fatalf("Expected status 304, got %d", w.Code)
+	}
+	if gotIfModifiedSince != lastModified {
+		t.Errorf("Expected conditional header to be forwarded, got %q", gotIfModifiedSince)
+	}
+	if got := w.Header().Get("Cache-Control"); got != "private, max-age=86400" {
+		t.Errorf("Expected cache header to be forwarded, got %q", got)
 	}
 }
 

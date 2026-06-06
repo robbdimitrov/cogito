@@ -1,9 +1,13 @@
 use axum::{
-    extract::{Multipart, State},
-    http::{HeaderMap, StatusCode},
-    response::{IntoResponse, Json},
-    routing::post,
     Router,
+    extract::{Multipart, Request, State},
+    http::{
+        HeaderMap, Method, StatusCode,
+        header::{CACHE_CONTROL, HeaderValue},
+    },
+    middleware::{self, Next},
+    response::{IntoResponse, Json, Response},
+    routing::post,
 };
 use std::sync::Arc;
 use tokio::{
@@ -15,6 +19,8 @@ use uuid::Uuid;
 
 use crate::db_client::ImageDb;
 
+const IMAGE_CACHE_CONTROL: &str = "private, max-age=86400";
+
 struct AppState<D: ImageDb> {
     db: D,
     image_dir: String,
@@ -25,8 +31,28 @@ pub fn create_router<D: ImageDb>(db: D, image_dir: String) -> Router {
 
     Router::new()
         .route("/uploads", post(upload_handler::<D>))
-        .nest_service("/uploads", ServeDir::new(state.image_dir.clone()))
+        .nest_service("/uploads/", ServeDir::new(state.image_dir.clone()))
+        .layer(middleware::from_fn(cache_image_responses))
         .with_state(state)
+}
+
+async fn cache_image_responses(request: Request, next: Next) -> Response {
+    let cacheable_request = matches!(*request.method(), Method::GET | Method::HEAD)
+        && request
+            .uri()
+            .path()
+            .strip_prefix("/uploads/")
+            .is_some_and(|filename| !filename.is_empty());
+    let mut response = next.run(request).await;
+
+    if cacheable_request
+        && (response.status().is_success() || response.status() == StatusCode::NOT_MODIFIED)
+    {
+        response
+            .headers_mut()
+            .insert(CACHE_CONTROL, HeaderValue::from_static(IMAGE_CACHE_CONTROL));
+    }
+    response
 }
 
 async fn upload_handler<D: ImageDb>(
@@ -152,7 +178,42 @@ fn image_extension(bytes: &[u8]) -> Option<&'static str> {
 
 #[cfg(test)]
 mod tests {
-    use super::image_extension;
+    use super::{IMAGE_CACHE_CONTROL, create_router, image_extension};
+    use crate::db_client::ImageDb;
+    use async_trait::async_trait;
+    use axum::{
+        body::Body,
+        http::{
+            Method, Request, StatusCode,
+            header::{CACHE_CONTROL, CONTENT_RANGE, IF_MODIFIED_SINCE, LAST_MODIFIED, RANGE},
+        },
+    };
+    use std::fs;
+    use tower::ServiceExt;
+
+    #[derive(Clone)]
+    struct MockDb;
+
+    #[async_trait]
+    impl ImageDb for MockDb {
+        async fn insert_upload(&self, _filename: &str, _user_id: i32) -> Result<(), sqlx::Error> {
+            Ok(())
+        }
+
+        async fn verify_upload(&self, _filename: &str, _user_id: i32) -> Result<bool, sqlx::Error> {
+            Ok(true)
+        }
+
+        async fn consume_upload(&self, _filename: &str) -> Result<(), sqlx::Error> {
+            Ok(())
+        }
+    }
+
+    fn test_image_dir() -> (std::path::PathBuf, String) {
+        let path = std::env::temp_dir().join(format!("imageservice-http-{}", uuid::Uuid::new_v4()));
+        fs::create_dir_all(&path).unwrap();
+        (path.clone(), path.to_string_lossy().into_owned())
+    }
 
     #[test]
     fn image_extension_detects_supported_formats() {
@@ -168,5 +229,137 @@ mod tests {
     #[test]
     fn image_extension_rejects_unknown_bytes() {
         assert_eq!(image_extension(b"not an image"), None);
+    }
+
+    #[tokio::test]
+    async fn image_get_and_head_responses_are_cached() {
+        let (path, image_dir) = test_image_dir();
+        fs::write(path.join("test.jpg"), [0xff, 0xd8, 0xff]).unwrap();
+        let app = create_router(MockDb, image_dir);
+
+        for method in [Method::GET, Method::HEAD] {
+            let response = app
+                .clone()
+                .oneshot(
+                    Request::builder()
+                        .method(method)
+                        .uri("/uploads/test.jpg")
+                        .body(Body::empty())
+                        .unwrap(),
+                )
+                .await
+                .unwrap();
+
+            assert_eq!(response.status(), StatusCode::OK);
+            assert_eq!(
+                response.headers().get(CACHE_CONTROL).unwrap(),
+                IMAGE_CACHE_CONTROL
+            );
+            assert!(response.headers().contains_key(LAST_MODIFIED));
+        }
+
+        fs::remove_dir_all(path).unwrap();
+    }
+
+    #[tokio::test]
+    async fn missing_images_are_not_cached() {
+        let (path, image_dir) = test_image_dir();
+        let response = create_router(MockDb, image_dir)
+            .oneshot(
+                Request::builder()
+                    .uri("/uploads/missing.jpg")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::NOT_FOUND);
+        assert!(!response.headers().contains_key(CACHE_CONTROL));
+        fs::remove_dir_all(path).unwrap();
+    }
+
+    #[tokio::test]
+    async fn upload_errors_are_not_cached() {
+        let (path, image_dir) = test_image_dir();
+        let response = create_router(MockDb, image_dir)
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/uploads")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+        assert!(!response.headers().contains_key(CACHE_CONTROL));
+        fs::remove_dir_all(path).unwrap();
+    }
+
+    #[tokio::test]
+    async fn conditional_image_requests_keep_static_file_behavior() {
+        let (path, image_dir) = test_image_dir();
+        fs::write(path.join("test.jpg"), [0xff, 0xd8, 0xff]).unwrap();
+        let app = create_router(MockDb, image_dir);
+
+        let initial = app
+            .clone()
+            .oneshot(
+                Request::builder()
+                    .uri("/uploads/test.jpg")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        let last_modified = initial.headers().get(LAST_MODIFIED).unwrap().clone();
+
+        let response = app
+            .oneshot(
+                Request::builder()
+                    .uri("/uploads/test.jpg")
+                    .header(IF_MODIFIED_SINCE, last_modified)
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::NOT_MODIFIED);
+        assert_eq!(
+            response.headers().get(CACHE_CONTROL).unwrap(),
+            IMAGE_CACHE_CONTROL
+        );
+        fs::remove_dir_all(path).unwrap();
+    }
+
+    #[tokio::test]
+    async fn range_requests_keep_static_file_behavior() {
+        let (path, image_dir) = test_image_dir();
+        fs::write(path.join("test.jpg"), [0xff, 0xd8, 0xff]).unwrap();
+
+        let response = create_router(MockDb, image_dir)
+            .oneshot(
+                Request::builder()
+                    .uri("/uploads/test.jpg")
+                    .header(RANGE, "bytes=0-1")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::PARTIAL_CONTENT);
+        assert_eq!(
+            response.headers().get(CONTENT_RANGE).unwrap(),
+            "bytes 0-1/3"
+        );
+        assert_eq!(
+            response.headers().get(CACHE_CONTROL).unwrap(),
+            IMAGE_CACHE_CONTROL
+        );
+        fs::remove_dir_all(path).unwrap();
     }
 }

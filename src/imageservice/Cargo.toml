@@ -16,5 +16,8 @@ async-trait = "0.1"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["json"] }
 
+[dev-dependencies]
+tower = { version = "0.4", features = ["util"] }
+
 [build-dependencies]
 tonic-build = "0.11"
