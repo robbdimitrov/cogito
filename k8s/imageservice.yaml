@@ -2,20 +2,22 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: imageservice
-  namespace: thoughts
   labels:
-    app: imageservice
+    app: thoughts
+    tier: backend
     component: imageservice
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: imageservice
+      app: thoughts
+      tier: backend
       component: imageservice
   template:
     metadata:
       labels:
-        app: imageservice
+        app: thoughts
+        tier: backend
         component: imageservice
     spec:
       containers:
@@ -69,11 +71,15 @@ apiVersion: v1
 kind: Service
 metadata:
   name: imageservice
-  namespace: thoughts
+  labels:
+    app: thoughts
+    tier: backend
+    component: imageservice
 spec:
   type: ClusterIP
   selector:
-    app: imageservice
+    app: thoughts
+    tier: backend
     component: imageservice
   ports:
   - name: grpc

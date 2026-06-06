@@ -37,7 +37,7 @@ spec:
     spec:
       initContainers:
       - name: migration
-        image: localhost:5000/thoughts/migration
+        image: localhost:5000/thoughts/database
         imagePullPolicy: IfNotPresent
         env:
         - name: POSTGRES_PASSWORD

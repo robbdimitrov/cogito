@@ -17,21 +17,21 @@ type user struct {
 }
 
 type post struct {
-	ID                int32  `json:"id"`
-	UserID            int32  `json:"userId"`
-	Content           string `json:"content"`
-	Likes             int32  `json:"likes"`
-	Liked             bool   `json:"liked"`
-	Reposts           int32  `json:"reposts"`
-	Reposted          bool   `json:"reposted"`
-	Created           string `json:"created"`
+	ID             int32  `json:"id"`
+	UserID         int32  `json:"userId"`
+	Content        string `json:"content"`
+	Likes          int32  `json:"likes"`
+	Liked          bool   `json:"liked"`
+	Reposts        int32  `json:"reposts"`
+	Reposted       bool   `json:"reposted"`
+	Created        string `json:"created"`
 	RepostByUserID int32  `json:"repostByUserId"`
 	RepostCreated  string `json:"repostCreated"`
-	MediaKey          string `json:"mediaKey,omitempty"`
-	Replies           int32  `json:"replies"`
-	InReplyToID       int32  `json:"inReplyToId,omitempty"`
-	QuoteOfID         int32  `json:"quoteOfId,omitempty"`
-	QuotePost         *post  `json:"quotePost,omitempty"`
+	MediaKey       string `json:"mediaKey,omitempty"`
+	Replies        int32  `json:"replies"`
+	InReplyToID    int32  `json:"inReplyToId,omitempty"`
+	QuoteOfID      int32  `json:"quoteOfId,omitempty"`
+	QuotePost      *post  `json:"quotePost,omitempty"`
 }
 
 type session struct {

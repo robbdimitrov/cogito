@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// CreateServer creates and setups new standard http.Handler
+// CreateServer builds the gateway HTTP handler and middleware chain.
 func CreateServer(authAddr, postAddr, userAddr, imageAddr string) http.Handler {
 	setupLogger()
 	mux := http.NewServeMux()
@@ -105,11 +105,13 @@ func bodyLimitMiddleware(limit int64) func(http.Handler) http.Handler {
 func csrfMiddleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Generate a new CSRF token if one doesn't exist
 			cookie, err := r.Cookie("_csrf")
 			if err != nil || cookie.Value == "" {
 				tokenBytes := make([]byte, 32)
-				rand.Read(tokenBytes)
+				if _, err := rand.Read(tokenBytes); err != nil {
+					http.Error(w, "Failed to generate CSRF token", http.StatusInternalServerError)
+					return
+				}
 				token := base64.RawURLEncoding.EncodeToString(tokenBytes)
 				http.SetCookie(w, &http.Cookie{
 					Name:     "_csrf",
@@ -120,19 +122,11 @@ func csrfMiddleware() func(http.Handler) http.Handler {
 				})
 			}
 
-			// Skip CSRF for specific routes
 			if (r.Method == "POST" && r.URL.Path == "/sessions") ||
 				(r.Method == "POST" && r.URL.Path == "/users") ||
 				(r.Method == "GET" && r.URL.Path == "/") {
 				next.ServeHTTP(w, r)
 				return
-			}
-
-			// Also skip GET requests in general for CSRF modifying state, or we check it?
-			// The original echo CSRF skipper skipped only those three. Wait, standard CSRF applies to all?
-			// Echo CSRF by default applies to POST, PUT, DELETE, PATCH
-			if r.Method == "GET" || r.Method == "HEAD" || r.Method == "OPTIONS" || r.Method == "TRACE" {
-				// but original skipper didn't explicitly say this. Echo CSRF middleware inherently skips safe methods.
 			}
 
 			if r.Method != "GET" && r.Method != "HEAD" && r.Method != "OPTIONS" && r.Method != "TRACE" {

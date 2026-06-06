@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import UserTab from '@/app/[username]/usertab';
 import { fetchServer, getCurrentUser, getUserByUsername } from '@/shared/services/serverapi';
 import { normalizeUsername } from '@/app/[username]/routeutils';
+import type { User } from '@/shared/types';
 
 export default async function FollowersPage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
@@ -11,9 +12,9 @@ export default async function FollowersPage({ params }: { params: Promise<{ user
     notFound();
   }
 
-  let followers = [];
+  let followers: User[] = [];
   try {
-    const data = await fetchServer(`/users/${profileUser.id}/followers?page=0&limit=20`);
+    const data = await fetchServer<{ items: User[] }>(`/users/${profileUser.id}/followers?page=0&limit=20`);
     followers = data && data.items ? data.items : [];
   } catch (e) {
     console.error('Followers error:', e);

@@ -15,12 +15,12 @@ REMOTE_PORT="${REMOTE_PORT:-8080}"
 PORT_FORWARD_LOG="${PORT_FORWARD_LOG:-/tmp/thoughts-port-forward-${LOCAL_PORT}.log}"
 PORT_FORWARD_PID_FILE="${PORT_FORWARD_PID_FILE:-/tmp/thoughts-port-forward-${LOCAL_PORT}.pid}"
 
-SERVICES=(apigateway authservice database frontend postservice userservice)
 ROLL_OUT_DATABASE=(deployment/database)
 ROLL_OUT_REST=(
   deployment/apigateway
   deployment/authservice
   deployment/frontend
+  deployment/imageservice
   deployment/postservice
   deployment/userservice
 )
@@ -43,6 +43,37 @@ require_tools() {
 
 require_docker() {
   docker info >/dev/null 2>&1 || die "Docker daemon is not running. Start Docker and try again."
+}
+
+random_secret() {
+  if command -v openssl >/dev/null; then
+    openssl rand -hex 32
+    return
+  fi
+
+  local secret
+  secret="$(LC_ALL=C tr -dc 'a-f0-9' </dev/urandom | head -c 64 || true)"
+  [[ ${#secret} -eq 64 ]] || die "failed to generate a secret"
+  printf '%s\n' "${secret}"
+}
+
+ensure_namespace() {
+  kubectl create namespace "${NS}" 2>/dev/null || true
+}
+
+ensure_secret() {
+  if kubectl -n "${NS}" get secret thoughts-db-secret >/dev/null 2>&1; then
+    return
+  fi
+
+  log "creating generated database and service secrets"
+  local postgres_password
+  postgres_password="$(random_secret)"
+  kubectl -n "${NS}" create secret generic thoughts-db-secret \
+    --from-literal=postgres-password="${postgres_password}" \
+    --from-literal=database-url="postgresql://postgres:${postgres_password}@database:5432/thoughts" \
+    --from-literal=internal-grpc-token="$(random_secret)" \
+    --from-literal=session-hmac-secret="$(random_secret)"
 }
 
 port_pids() {
@@ -93,7 +124,8 @@ build_images() {
 
 apply_manifests() {
   log "creating namespace and applying manifests"
-  kubectl create namespace "${NS}" 2>/dev/null || true
+  ensure_namespace
+  ensure_secret
   kubectl apply -f "${K8S_DIR}" -n "${NS}"
 }
 

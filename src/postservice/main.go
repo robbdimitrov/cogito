@@ -24,7 +24,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	dbClient := post.NewDbClient(dbURL)
+	dbClient, err := post.NewDBClient(dbURL)
+	if err != nil {
+		log.Fatalf("failed to initialize database: %v", err)
+	}
 	server := post.CreateServer(dbClient)
 
 	go func() {

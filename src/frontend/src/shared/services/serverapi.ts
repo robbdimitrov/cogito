@@ -4,30 +4,52 @@ import type { User, Post } from '@/shared/types';
 
 const API_BASE = `${process.env.API_URL || 'http://localhost:8080'}`;
 
-export async function fetchServer(url: string, options: RequestInit = {}) {
+interface SessionsResponse {
+  currentSessionId?: string;
+  items?: Array<{ id: string; userId: string }>;
+  sessions?: Array<{ id: string; userId: string }>;
+}
+
+async function parseResponse(response: Response): Promise<unknown> {
+  const text = await response.text();
+  if (!text) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error('Received non-JSON response from server');
+  }
+}
+
+export async function fetchServer<T = unknown>(
+  url: string,
+  options: RequestInit = {},
+): Promise<T | null> {
   const cookieStore = await cookies();
-  
+
   const headers = new Headers(options.headers || {});
   headers.set('Cookie', cookieStore.toString());
-  
+
   const res = await fetch(`${API_BASE}${url}`, {
     ...options,
     headers,
-    cache: 'no-store'
+    cache: 'no-store',
   });
-  
+
   if (res.status === 204) {
     return null;
   }
-  
+
   if (!res.ok) {
     if (res.status === 401) {
       return null;
     }
     throw new Error('Failed to fetch data');
   }
-  
-  return res.json();
+
+  return parseResponse(res) as Promise<T>;
 }
 
 export const getCurrentUser = cache(async function getCurrentUser() {
@@ -37,26 +59,25 @@ export const getCurrentUser = cache(async function getCurrentUser() {
     if (sessionsData && sessionsData.currentSessionId && sessions) {
       const currentSession = sessions.find(s => s.id === sessionsData.currentSessionId);
       if (currentSession && currentSession.userId) {
-        const user = await fetchServer(`/users/${currentSession.userId}`);
+        const user = await fetchServer<User>(`/users/${currentSession.userId}`);
         return user;
       }
     }
-  } catch (e) {
-    // Expected to fail if no session
+  } catch {
+    return null;
   }
-  return null;
 });
 
 export const getUserByUsername = cache(async function getUserByUsername(username: string) {
-  return fetchServer(`/users?username=${encodeURIComponent(username)}`);
+  return fetchServer<User>(`/users?username=${encodeURIComponent(username)}`);
 });
 
 export const getUserById = cache(async function getUserById(userId: string | number) {
-  return fetchServer(`/users/${userId}`);
+  return fetchServer<User>(`/users/${userId}`);
 });
 
 export const getServerSessions = cache(async function getServerSessions() {
-  return fetchServer('/sessions');
+  return fetchServer<SessionsResponse>('/sessions');
 });
 
 export async function hydratePostAuthors(rawPosts: Post[], repostByUser: User | null = null) {
@@ -69,14 +90,14 @@ export async function hydratePostAuthors(rawPosts: Post[], repostByUser: User | 
     ),
   ] as string[];
 
-  const userMap: Record<string, User | null> = {};
+  const userMap: Record<string, User | undefined> = {};
   await Promise.all(
     userIds.map(async (uid: string) => {
       try {
         const u = await getUserById(uid);
-        userMap[uid] = u;
+        userMap[uid] = u ?? undefined;
       } catch {
-        userMap[uid] = null;
+        userMap[uid] = undefined;
       }
     })
   );

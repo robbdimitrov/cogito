@@ -5,9 +5,9 @@ import type { Post } from '@/shared/types';
 export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
-  let post = null;
+  let post: Post | null = null;
   try {
-    const data = await fetchServer(`/posts/${id}`);
+    const data = await fetchServer<Post>(`/posts/${id}`);
     if (data) {
       const hydrated = await hydratePostAuthors([data]);
       post = hydrated[0];
@@ -18,7 +18,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
 
   let replies: Post[] = [];
   try {
-    const repliesData = await fetchServer(`/posts/${id}/replies?page=0&limit=20`);
+    const repliesData = await fetchServer<{ items: Post[] }>(`/posts/${id}/replies?page=0&limit=20`);
     if (repliesData?.items) {
       replies = await hydratePostAuthors(repliesData.items);
     }

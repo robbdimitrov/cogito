@@ -1,5 +1,6 @@
 import HashtagFeed from '@/app/hashtags/[tag]/hashtagfeed';
 import { fetchServer, getCurrentUser, hydratePostAuthors } from '@/shared/services/serverapi';
+import type { Post } from '@/shared/types';
 
 function normalizeTag(rawTag: string) {
   const tag = rawTag.replace(/^#/, '').toLowerCase();
@@ -9,11 +10,11 @@ function normalizeTag(rawTag: string) {
 export default async function HashtagPage({ params }: { params: Promise<{ tag: string }> }) {
   const { tag: rawTag } = await params;
   const tag = normalizeTag(rawTag);
-  let initialPosts = [];
+  let initialPosts: Post[] = [];
 
   if (tag) {
     try {
-      const data = await fetchServer(`/hashtags/${encodeURIComponent(tag)}/posts?page=0`);
+      const data = await fetchServer<{ items: Post[] }>(`/hashtags/${encodeURIComponent(tag)}/posts?page=0`);
       if (data && data.items) {
         initialPosts = await hydratePostAuthors(data.items);
       }

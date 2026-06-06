@@ -42,17 +42,17 @@ func TestMapUser(t *testing.T) {
 
 func TestMapPost(t *testing.T) {
 	p := &pb.Post{
-		Id:                1,
-		UserId:            2,
-		Content:           "content",
-		Likes:             5,
-		Liked:             true,
-		Reposts:           2,
-		Reposted:          false,
-		Created:           "now",
+		Id:             1,
+		UserId:         2,
+		Content:        "content",
+		Likes:          5,
+		Liked:          true,
+		Reposts:        2,
+		Reposted:       false,
+		Created:        "now",
 		RepostByUserId: 3,
 		RepostCreated:  "then",
-		MediaKey:          "media.jpg",
+		MediaKey:       "media.jpg",
 	}
 
 	mapped := mapPost(p)

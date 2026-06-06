@@ -5,7 +5,6 @@
   "private": true,
   "sideEffects": [
     "src/index.css",
-    "src/tailwind-source.css",
     "**/*.css"
   ],
   "scripts": {

@@ -6,13 +6,13 @@ Microservices app with an HTTP gateway calling gRPC backends.
 
 | Service | Language | Role | Entrypoint |
 |---|---|---|---|
-| `apigateway` | Go 1.26 | Echo HTTP API gateway | `main.go` |
+| `apigateway` | Go 1.26 | `net/http` API gateway | `main.go` |
 | `postservice` | Go 1.26 | gRPC - posts, likes, reposts | `main.go` |
 | `authservice` | Rust | gRPC - sessions | `src/main.rs` |
 | `userservice` | Rust | gRPC - users, follows | `src/main.rs` |
 | `imageservice` | Rust | gRPC + HTTP - image upload staging, verification, cleanup | `src/main.rs` |
 | `frontend` | Next.js 16 / React 19 | App Router frontend | `src/app/` |
-| `database` | PostgreSQL 14 | Schema init via `schema.sql` | - |
+| `database` | PostgreSQL 17 | Versioned schema migrations | - |
 
 - Proto contract: `pb/thoughts.proto`
 - Backend gRPC port: **5050**; `imageservice` HTTP port: **8081**; gateway + frontend port: **8080**
@@ -27,8 +27,6 @@ make                  # builds all service images, migration image, and frontend
 make <service>        # individual service
 ```
 
-**Known Makefile issues (fixed):** registry paths and `imageservice` references were corrected.
-
 ### Frontend dev server
 
 ```sh
@@ -39,7 +37,7 @@ npm run build           # production build
 npm start               # serve the production build
 ```
 
-`next.config.mjs` rewrites `/api/:path*` to `${API_URL || 'http://localhost:8080'}/:path*`, preserving same-origin browser requests while the gateway receives paths without the `/api` prefix. Client-side API calls should use `/api/...` with `credentials: 'include'`; server components/helpers should call the gateway directly via `API_URL` and forward cookies from `next/headers`.
+`src/app/api/[...path]/route.ts` proxies `/api/:path*` to `${API_URL || 'http://localhost:8080'}/:path*`, preserving same-origin browser requests while the gateway receives paths without the `/api` prefix. Client-side API calls should use `/api/...` with `credentials: 'include'`; server components/helpers should call the gateway directly via `API_URL` and forward cookies from `next/headers`.
 
 `src/proxy.ts` is the Next Proxy route guard. Keep `/api`, `_next/static`, `_next/image`, and metadata files excluded from its matcher so API rewrites and static assets are not session-gated. Do not put broad data fetching in Proxy beyond lightweight route/session checks.
 
@@ -65,9 +63,9 @@ cargo run
 
 ## Protobuf / Codegen
 
-There is **no automated codegen script**. If `pb/thoughts.proto` changes, regenerate outputs manually in each service.
+Run `make proto` after changing `pb/thoughts.proto`.
 
-**Go** (run from inside the service dir):
+The target runs the equivalent commands in both Go service directories:
 ```sh
 cd src/apigateway   # or src/postservice
 protoc --go_out=. --go-grpc_out=. ../../pb/thoughts.proto
@@ -81,18 +79,17 @@ The `go_package` option is `./genproto`, so outputs land in `<service>/genproto/
 ## Kubernetes / Local Deploy
 
 ```sh
-kubectl create namespace thoughts
-kubectl apply -f ./k8s -n thoughts
-kubectl port-forward service/frontend 8080:8080 -n thoughts
+./scripts/deploy.sh
 ```
+
+The script builds images, creates the namespace and generated secrets, applies
+the manifests, waits for rollouts, and starts the frontend port-forward.
 
 Cleanup:
 ```sh
 kubectl delete -f ./k8s -n thoughts
 kubectl delete namespace thoughts
 ```
-
-**Deployment fixes applied:** each backend Deployment and Service now uses a unique `component` label so Services route only to their intended pods. `imagePullPolicy: IfNotPresent` is set on all containers so `kind` clusters can use locally loaded images without a registry.
 
 ## Testing
 
@@ -109,16 +106,22 @@ Alternatively, you can run tests for individual services:
 
 ## Database Notes
 
-- `src/database/schema.sql` is copied to `/docker-entrypoint-initdb.d/` in the Postgres image and executes on first container start.
-- The schema runs `CREATE DATABASE thoughts;` then `\connect thoughts` before creating tables. The `DATABASE_URL` env vars now end with `/thoughts` so services connect to the correct database.
+- `src/database/migrations/` contains paired `NNNNNN_description.up.sql` and `.down.sql` migrations.
+- The migration image runs before the gateway starts and applies pending migrations to the `thoughts` database.
 
 ## Constraints & Gotchas
 
 - Follow **SOLID**, **KISS**, and **DRY** when writing code and refactoring: keep changes focused, prefer simple local patterns, avoid duplicated logic, and add abstractions only when they remove real complexity.
+- Use standard initialisms in Go names (`ID`, `URL`, `HTTP`, `DB`). Generated identifiers are exempt.
+- HTTP APIs return JSON consistently, including errors. Use symbolic `http.Status*` constants.
+- Type API boundaries explicitly. Prefer `unknown` over `any`, map transport DTOs deliberately, and keep strict TypeScript enabled.
+- Comments explain constraints or intent. Do not preserve implementation history, temporary reasoning, or narration of obvious code.
+- Keep handwritten Go `gofmt`-clean and Rust `rustfmt`-clean. Regenerate generated code instead of editing it manually.
+- Write behavior-oriented tests with typed fakes and framework-native HTTP test utilities. Use inline Rust tests for private helpers and service-level test modules for endpoint behavior.
+- New migrations use two-space indentation, paired up/down files, and corrective migrations rather than rewriting applied history.
 - Microservices must be stateless and designed to work properly in multi-replica environments.
 - Frontend styling should use Tailwind utilities and DaisyUI components. Add custom CSS only in EXTREME circumstances.
 - Frontend API response handling must tolerate `204 No Content` and non-JSON gateway error bodies; avoid calling `response.json()` unconditionally.
-- No CI workflows, pre-commit hooks, or lint configs for Go/Python.
 - The `deletePost` query in `postservice/post/db_client.go` only checks `post_id` in the `WHERE` clause despite accepting `userID` as a parameter (potential bug if you modify that area).
 
 ## Git Conventions

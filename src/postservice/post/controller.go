@@ -36,10 +36,10 @@ func extractHashtags(content string) []string {
 type controller struct {
 	pb.UnsafePostServiceServer
 
-	dbClient *DbClient
+	dbClient *DBClient
 }
 
-func newController(dbClient *DbClient) *controller {
+func newController(dbClient *DBClient) *controller {
 	return &controller{dbClient: dbClient}
 }
 

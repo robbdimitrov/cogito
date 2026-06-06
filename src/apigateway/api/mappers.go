@@ -34,20 +34,20 @@ func mapUserWithEmail(u *pb.User, includeEmail bool) user {
 
 func mapPost(p *pb.Post) post {
 	result := post{
-		ID:                p.Id,
-		UserID:            p.UserId,
-		Content:           p.Content,
-		Likes:             p.Likes,
-		Liked:             p.Liked,
-		Reposts:           p.Reposts,
-		Reposted:          p.Reposted,
-		Created:           p.Created,
+		ID:             p.Id,
+		UserID:         p.UserId,
+		Content:        p.Content,
+		Likes:          p.Likes,
+		Liked:          p.Liked,
+		Reposts:        p.Reposts,
+		Reposted:       p.Reposted,
+		Created:        p.Created,
 		RepostByUserID: p.RepostByUserId,
 		RepostCreated:  p.RepostCreated,
-		MediaKey:          p.MediaKey,
-		Replies:           p.Replies,
-		InReplyToID:       p.InReplyToId,
-		QuoteOfID:         p.QuoteOfId,
+		MediaKey:       p.MediaKey,
+		Replies:        p.Replies,
+		InReplyToID:    p.InReplyToId,
+		QuoteOfID:      p.QuoteOfId,
 	}
 	if p.QuotePost != nil {
 		q := mapPost(p.QuotePost)

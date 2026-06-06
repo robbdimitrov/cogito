@@ -11,8 +11,7 @@ import (
 	pb "github.com/robbdimitrov/thoughts/src/postservice/genproto"
 )
 
-// CreateServer creates a new grpc server
-func CreateServer(dbClient *DbClient) *grpc.Server {
+func CreateServer(dbClient *DBClient) *grpc.Server {
 	server := grpc.NewServer(grpc.UnaryInterceptor(internalAuthInterceptor))
 	controller := newController(dbClient)
 	pb.RegisterPostServiceServer(server, controller)
