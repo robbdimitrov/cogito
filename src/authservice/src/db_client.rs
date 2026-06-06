@@ -1,3 +1,4 @@
+use sqlx::types::chrono::{DateTime, Utc};
 use sqlx::PgPool;
 use std::env;
 
@@ -57,9 +58,9 @@ impl crate::controller::AuthDb for DbClient {
         session_id: &str,
         user_id: i32,
     ) -> Result<crate::thoughts::Session, sqlx::Error> {
-        let row = sqlx::query_as::<_, (String, i32, String)>(
+        let row = sqlx::query_as::<_, (String, i32, DateTime<Utc>)>(
             r#"INSERT INTO sessions (id, user_id) VALUES ($1, $2)
-               RETURNING id, user_id, time_format(created) as created"#,
+               RETURNING id, user_id, created"#,
         )
         .bind(session_id)
         .bind(user_id)
@@ -69,7 +70,7 @@ impl crate::controller::AuthDb for DbClient {
         Ok(crate::thoughts::Session {
             id: row.0,
             user_id: row.1,
-            created: row.2,
+            created: row.2.to_rfc3339(),
         })
     }
 
@@ -81,8 +82,8 @@ impl crate::controller::AuthDb for DbClient {
             tracing::warn!(error = %e, "failed to delete expired sessions");
         }
         let ttl = session_ttl_days();
-        let row = sqlx::query_as::<_, (String, i32, String)>(
-            r#"SELECT id, user_id, time_format(created) as created
+        let row = sqlx::query_as::<_, (String, i32, DateTime<Utc>)>(
+            r#"SELECT id, user_id, created
                FROM sessions
                WHERE id = $1 AND created > now() - ($2 * interval '1 day')"#,
         )
@@ -94,7 +95,7 @@ impl crate::controller::AuthDb for DbClient {
         Ok(row.map(|r| crate::thoughts::Session {
             id: r.0,
             user_id: r.1,
-            created: r.2,
+            created: r.2.to_rfc3339(),
         }))
     }
 
@@ -106,8 +107,8 @@ impl crate::controller::AuthDb for DbClient {
             tracing::warn!(error = %e, "failed to delete expired sessions");
         }
         let ttl = session_ttl_days();
-        let rows = sqlx::query_as::<_, (String, i32, String)>(
-            r#"SELECT id, user_id, time_format(created) as created
+        let rows = sqlx::query_as::<_, (String, i32, DateTime<Utc>)>(
+            r#"SELECT id, user_id, created
                FROM sessions
                WHERE user_id = $1 AND created > now() - ($2 * interval '1 day')
                ORDER BY created DESC"#,
@@ -122,7 +123,7 @@ impl crate::controller::AuthDb for DbClient {
             .map(|r| crate::thoughts::Session {
                 id: r.0,
                 user_id: r.1,
-                created: r.2,
+                created: r.2.to_rfc3339(),
             })
             .collect();
 

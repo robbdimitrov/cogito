@@ -1,6 +1,7 @@
 use crate::controller::{UpdateUserFields, UserDb};
 use crate::thoughts::User;
 use async_trait::async_trait;
+use sqlx::types::chrono::{DateTime, Utc};
 use sqlx::{Error as SqlxError, PgPool, Row};
 
 #[derive(Debug, Clone)]
@@ -61,7 +62,7 @@ impl UserDb for DbClient {
                 (SELECT count(*)::int FROM followers WHERE follower_id = users.id) AS following,
                 (SELECT count(*)::int FROM followers WHERE user_id = users.id) AS followers,
                 EXISTS (SELECT 1 FROM followers WHERE user_id = users.id AND follower_id = $1) AS followed,
-                time_format(created) AS created
+                created
                 FROM users WHERE id = $2"#
         )
         .bind(current_user_id)
@@ -81,7 +82,8 @@ impl UserDb for DbClient {
             followers: r.get::<'_, Option<i32>, _>("followers").unwrap_or(0),
             followed: r.get::<'_, Option<bool>, _>("followed").unwrap_or(false),
             created: r
-                .get::<'_, Option<String>, _>("created")
+                .get::<'_, Option<DateTime<Utc>>, _>("created")
+                .map(|dt| dt.to_rfc3339())
                 .unwrap_or_default(),
             profile_photo_key: r
                 .get::<'_, Option<String>, _>("profile_photo_key")
@@ -104,7 +106,7 @@ impl UserDb for DbClient {
                 (SELECT count(*)::int FROM followers WHERE follower_id = users.id) AS following,
                 (SELECT count(*)::int FROM followers WHERE user_id = users.id) AS followers,
                 EXISTS (SELECT 1 FROM followers WHERE user_id = users.id AND follower_id = $1) AS followed,
-                time_format(created) AS created
+                created
                 FROM users WHERE username = $2"#
         )
         .bind(current_user_id)
@@ -124,7 +126,8 @@ impl UserDb for DbClient {
             followers: r.get::<'_, Option<i32>, _>("followers").unwrap_or(0),
             followed: r.get::<'_, Option<bool>, _>("followed").unwrap_or(false),
             created: r
-                .get::<'_, Option<String>, _>("created")
+                .get::<'_, Option<DateTime<Utc>>, _>("created")
+                .map(|dt| dt.to_rfc3339())
                 .unwrap_or_default(),
             profile_photo_key: r
                 .get::<'_, Option<String>, _>("profile_photo_key")
@@ -179,7 +182,7 @@ impl UserDb for DbClient {
                 (SELECT count(*)::int FROM followers WHERE follower_id = users.id) AS following,
                 (SELECT count(*)::int FROM followers WHERE user_id = users.id) AS followers,
                 EXISTS (SELECT 1 FROM followers WHERE user_id = users.id AND follower_id = $1) AS followed,
-                time_format(users.created) AS created
+                users.created
                 FROM users
                 INNER JOIN followers ON followers.user_id = users.id
                 WHERE followers.follower_id = $2
@@ -234,7 +237,7 @@ impl UserDb for DbClient {
                 (SELECT count(*)::int FROM followers WHERE follower_id = users.id) AS following,
                 (SELECT count(*)::int FROM followers WHERE user_id = users.id) AS followers,
                 EXISTS (SELECT 1 FROM followers WHERE user_id = users.id AND follower_id = $1) AS followed,
-                time_format(users.created) AS created
+                users.created
                 FROM users
                 INNER JOIN followers ON followers.follower_id = users.id
                 WHERE followers.user_id = $2
@@ -308,7 +311,7 @@ impl UserDb for DbClient {
                 0::int AS following,
                 0::int AS followers,
                 false AS followed,
-                time_format(created) AS created
+                created
                 FROM users WHERE username ILIKE $1
                 LIMIT $2"#,
         )

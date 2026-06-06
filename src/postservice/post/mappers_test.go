@@ -3,6 +3,7 @@ package post
 import (
 	"errors"
 	"testing"
+	"time"
 )
 
 type mockRow struct {
@@ -21,6 +22,8 @@ func (m *mockRow) Scan(dest ...interface{}) error {
 			*v = "test"
 		case *bool:
 			*v = true
+		case *time.Time:
+			*v = time.Time{}
 		}
 	}
 	return nil
