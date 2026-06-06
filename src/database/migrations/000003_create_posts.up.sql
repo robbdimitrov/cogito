@@ -7,10 +7,8 @@ CREATE TABLE posts (
   created timestamp NOT NULL DEFAULT now()
 );
 
--- +goose NO TRANSACTION
--- golang-migrate equivalent for no transaction: (handled globally or ignored in simple setups)
--- Actually golang-migrate doesn't strictly support concurrent indexes inside its default transaction block easily without the x-migrate directive, but we can just use the index creation syntax.
-CREATE INDEX CONCURRENTLY posts_hashtags_idx ON posts USING GIN (hashtags);
+CREATE INDEX posts_user_id_created_idx ON posts (user_id, created DESC);
+CREATE INDEX posts_hashtags_idx ON posts USING GIN (hashtags);
 
 CREATE TABLE likes (
   post_id integer REFERENCES posts ON DELETE CASCADE,
@@ -19,9 +17,13 @@ CREATE TABLE likes (
   UNIQUE(post_id, user_id)
 );
 
+CREATE INDEX likes_user_id_idx ON likes (user_id);
+
 CREATE TABLE reposts (
   post_id integer REFERENCES posts ON DELETE CASCADE,
   user_id integer REFERENCES users ON DELETE CASCADE,
   created timestamp NOT NULL DEFAULT now(),
   UNIQUE(post_id, user_id)
 );
+
+CREATE INDEX reposts_user_id_idx ON reposts (user_id);

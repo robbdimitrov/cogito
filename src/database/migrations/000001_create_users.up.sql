@@ -17,3 +17,5 @@ CREATE TABLE followers (
   CHECK (user_id <> follower_id),
   UNIQUE(user_id, follower_id)
 );
+
+CREATE INDEX followers_follower_id_idx ON followers (follower_id);
