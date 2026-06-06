@@ -51,7 +51,7 @@ async function getErrorMessage(response: Response): Promise<string> {
       return data.message;
     }
   } catch {
-    return fallbackMessage;
+    return text.trim() || fallbackMessage;
   }
 
   return fallbackMessage;

@@ -21,18 +21,13 @@ func CreateServer(authAddr, postAddr, userAddr, imageAddr string) http.Handler {
 
 	rlStore := NewPostgresRateLimiterStore()
 	startRateLimitCleanup(rlStore)
+
 	handler = rateLimitMiddleware(rlStore)(handler)
-
 	handler = authGuard(router.auth)(handler)
-
 	handler = newConcurrencyLimiter().middleware(handler)
-
 	handler = csrfMiddleware()(handler)
-
 	handler = bodyLimitMiddleware(2 * 1024 * 1024)(handler)
-
 	handler = secureHeadersMiddleware()(handler)
-
 	handler = loggerMiddleware()(handler)
 	handler = requestIDMiddleware()(handler)
 
@@ -110,6 +105,21 @@ func bodyLimitMiddleware(limit int64) func(http.Handler) http.Handler {
 func csrfMiddleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Generate a new CSRF token if one doesn't exist
+			cookie, err := r.Cookie("_csrf")
+			if err != nil || cookie.Value == "" {
+				tokenBytes := make([]byte, 32)
+				rand.Read(tokenBytes)
+				token := base64.RawURLEncoding.EncodeToString(tokenBytes)
+				http.SetCookie(w, &http.Cookie{
+					Name:     "_csrf",
+					Value:    token,
+					Path:     "/",
+					HttpOnly: false,
+					SameSite: http.SameSiteStrictMode,
+				})
+			}
+
 			// Skip CSRF for specific routes
 			if (r.Method == "POST" && r.URL.Path == "/sessions") ||
 				(r.Method == "POST" && r.URL.Path == "/users") ||
@@ -132,21 +142,6 @@ func csrfMiddleware() func(http.Handler) http.Handler {
 					http.Error(w, "Invalid CSRF token", http.StatusForbidden)
 					return
 				}
-			}
-
-			// Generate a new CSRF token if one doesn't exist
-			cookie, err := r.Cookie("_csrf")
-			if err != nil || cookie.Value == "" {
-				tokenBytes := make([]byte, 32)
-				rand.Read(tokenBytes)
-				token := base64.RawURLEncoding.EncodeToString(tokenBytes)
-				http.SetCookie(w, &http.Cookie{
-					Name:     "_csrf",
-					Value:    token,
-					Path:     "/",
-					HttpOnly: false,
-					SameSite: http.SameSiteStrictMode,
-				})
 			}
 
 			next.ServeHTTP(w, r)

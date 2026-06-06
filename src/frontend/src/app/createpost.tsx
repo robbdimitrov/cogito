@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useActionState } from 'react';
 import Avatar from '@/shared/components/avatar/avatar';
 import { Pen, Send, Image as ImageIcon, X } from 'lucide-react';
 import GlassCard from '@/shared/components/ui/surface';
@@ -9,7 +9,6 @@ import { useToast } from '@/shared/components/toast/toast';
 
 function CreatePost({user, onCreatePost}: {user: User, onCreatePost: (content: string, mediaKey?: string) => Promise<void>}) {
   const [content, setContent] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [cursorPosition, setCursorPosition] = useState<number | null>(null);
   const [suggestions, setSuggestions] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -75,19 +74,21 @@ function CreatePost({user, onCreatePost}: {user: User, onCreatePost: (content: s
     textareaRef.current?.focus();
   };
 
-  function handleSubmit(event: React.FormEvent) {
-    event.preventDefault();
-    if ((!content.trim() && !mediaKey) || isSubmitting) return;
-    setIsSubmitting(true);
-    onCreatePost(content.trim(), mediaKey || undefined)
-      .then(() => {
+  const [state, formAction, isPending] = useActionState(
+    async (prevState: any, formData: FormData) => {
+      if (!content.trim() && !mediaKey) return prevState;
+      try {
+        await onCreatePost(content.trim(), mediaKey || undefined);
         setContent('');
         setMediaKey(null);
-        setIsSubmitting(false);
         setShowTypeahead(false);
-      })
-      .catch(() => setIsSubmitting(false));
-  }
+        return { error: null };
+      } catch (e: any) {
+        return { error: e.message || 'Failed to post' };
+      }
+    },
+    { error: null }
+  );
 
   async function handleImageUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -110,7 +111,7 @@ function CreatePost({user, onCreatePost}: {user: User, onCreatePost: (content: s
   return (
     <GlassCard>
       <div className="card-body p-4 sm:p-5">
-        <form onSubmit={handleSubmit}>
+        <form action={formAction}>
           <div className="flex gap-3 sm:gap-4">
             <div className="hidden sm:block shrink-0">
               <Avatar name={user?.name} size="md" photoKey={user?.profilePhotoKey} />
@@ -175,8 +176,8 @@ function CreatePost({user, onCreatePost}: {user: User, onCreatePost: (content: s
             </div>
             <button
               type="submit"
-              className={`btn btn-primary btn-sm gap-1 rounded-full px-5 ${!isSubmitting && (content.trim() || mediaKey) ? 'shadow-lg shadow-primary/20' : 'shadow-none'}`}
-              disabled={isSubmitting || (!content.trim() && !mediaKey)}
+              className={`btn btn-primary btn-sm gap-1 rounded-full px-5 ${!isPending && (content.trim() || mediaKey) ? 'shadow-lg shadow-primary/20' : 'shadow-none'}`}
+              disabled={isPending || (!content.trim() && !mediaKey)}
             >
               <Send className="h-4 w-4" />
               Post
