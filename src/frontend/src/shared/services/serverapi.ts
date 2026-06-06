@@ -6,7 +6,6 @@ const API_BASE = `${process.env.API_URL || 'http://localhost:8080'}`;
 
 interface SessionsResponse {
   currentSessionId?: string;
-  items?: Array<{ id: string; userId: string }>;
   sessions?: Array<{ id: string; userId: string }>;
 }
 
@@ -55,7 +54,7 @@ export async function fetchServer<T = unknown>(
 export const getCurrentUser = cache(async function getCurrentUser() {
   try {
     const sessionsData = await getServerSessions();
-    const sessions = sessionsData ? (sessionsData.sessions || sessionsData.items) : null;
+    const sessions = sessionsData?.sessions ?? null;
     if (sessionsData && sessionsData.currentSessionId && sessions) {
       const currentSession = sessions.find(s => s.id === sessionsData.currentSessionId);
       if (currentSession && currentSession.userId) {

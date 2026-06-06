@@ -22,8 +22,8 @@ export default function SessionsClient({ initialSessions, initialCurrentSessionI
     try {
       setSessionsError(null);
       const data = await apiClient.getSessions();
-      setSessions(data.items || []);
-      setCurrentSessionId((data as any).currentSessionId || null);
+      setSessions(data.sessions ?? []);
+      setCurrentSessionId(data.currentSessionId ?? null);
     } catch (e) {
       setSessionsError(e instanceof Error ? e.message : 'Failed to load sessions');
     }

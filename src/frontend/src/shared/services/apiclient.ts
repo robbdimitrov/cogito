@@ -171,9 +171,9 @@ class APIClient {
     return this.request<void>(url, httpMethod.delete);
   }
 
-  getSessions(): Promise<{items: Session[]}> {
+  getSessions(): Promise<{sessions: Session[]; currentSessionId: string}> {
     const url = '/api/sessions';
-    return this.request<{items: Session[]}>(url, httpMethod.get);
+    return this.request<{sessions: Session[]; currentSessionId: string}>(url, httpMethod.get);
   }
 
   deleteSession(sessionId: string): Promise<void> {

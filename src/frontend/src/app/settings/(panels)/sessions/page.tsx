@@ -7,7 +7,7 @@ export default async function SessionsSettingsPage() {
 
   try {
     const data = await getServerSessions();
-    sessions = data ? (data.items || data.sessions || []) : [];
+    sessions = data?.sessions ?? [];
     currentSessionId = data?.currentSessionId || null;
   } catch (e) {
     console.error('Sessions error:', e);
