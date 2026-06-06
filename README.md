@@ -1,7 +1,6 @@
 # Thoughts
 
-**Thoughts** is a post-sharing application where users can create, browse,
-like and repost posts and follow other users.
+**Thoughts** is a full-stack post-sharing platform built with a production-grade microservices architecture. Combining high-performance Go and Rust gRPC backends with a modern Next.js frontend, it provides a seamless experience for users to create, browse, and interact with posts.
 
 ## Features
 
