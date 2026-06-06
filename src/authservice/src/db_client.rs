@@ -1,5 +1,5 @@
-use sqlx::types::chrono::{DateTime, Utc};
 use sqlx::PgPool;
+use sqlx::types::chrono::{DateTime, Utc};
 use std::env;
 
 const DEFAULT_SESSION_TTL_DAYS: i32 = 7;
