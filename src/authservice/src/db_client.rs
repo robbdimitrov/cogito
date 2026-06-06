@@ -4,9 +4,13 @@ use std::env;
 const DEFAULT_SESSION_TTL_DAYS: i32 = 7;
 
 fn session_ttl_days() -> i32 {
-    let days: i32 = env::var("SESSION_TTL_DAYS")
-        .unwrap_or_else(|_| DEFAULT_SESSION_TTL_DAYS.to_string())
-        .parse()
+    parse_session_ttl_days(env::var("SESSION_TTL_DAYS").ok().as_deref())
+}
+
+fn parse_session_ttl_days(value: Option<&str>) -> i32 {
+    let days = value
+        .unwrap_or_default()
+        .parse::<i32>()
         .unwrap_or(DEFAULT_SESSION_TTL_DAYS);
     std::cmp::max(1, days)
 }
@@ -137,22 +141,14 @@ impl crate::controller::AuthDb for DbClient {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::Mutex;
-
-    static ENV_MUTEX: Mutex<()> = Mutex::new(());
 
     #[test]
     fn test_session_ttl_days_default() {
-        let _guard = ENV_MUTEX.lock().unwrap();
-        env::remove_var("SESSION_TTL_DAYS");
-        assert_eq!(session_ttl_days(), 7);
+        assert_eq!(parse_session_ttl_days(None), 7);
     }
 
     #[test]
     fn test_session_ttl_days_custom() {
-        let _guard = ENV_MUTEX.lock().unwrap();
-        env::set_var("SESSION_TTL_DAYS", "14");
-        assert_eq!(session_ttl_days(), 14);
-        env::remove_var("SESSION_TTL_DAYS");
+        assert_eq!(parse_session_ttl_days(Some("14")), 14);
     }
 }
