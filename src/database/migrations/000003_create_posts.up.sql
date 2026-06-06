@@ -4,11 +4,15 @@ CREATE TABLE posts (
   content varchar(255) NOT NULL,
   hashtags varchar(50)[] DEFAULT '{}',
   media_key varchar(255) DEFAULT '',
+  in_reply_to_id integer REFERENCES posts(id) ON DELETE SET NULL,
+  quote_of_id    integer REFERENCES posts(id) ON DELETE SET NULL,
   created timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE INDEX posts_user_id_created_idx ON posts (user_id, created DESC);
 CREATE INDEX posts_hashtags_idx ON posts USING GIN (hashtags);
+CREATE INDEX posts_in_reply_to_id_idx ON posts (in_reply_to_id)
+  WHERE in_reply_to_id IS NOT NULL;
 
 CREATE TABLE likes (
   post_id integer REFERENCES posts ON DELETE CASCADE,
