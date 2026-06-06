@@ -27,8 +27,11 @@ pub trait UserDb: Send + Sync + 'static {
         password_hash: &str,
     ) -> Result<i32, SqlxError>;
     async fn get_user_with_id(&self, user_id: i32) -> Result<Option<(i32, String)>, SqlxError>;
-    async fn get_user(&self, user_id: i32, current_user_id: i32)
-        -> Result<Option<User>, SqlxError>;
+    async fn get_user(
+        &self,
+        user_id: i32,
+        current_user_id: i32,
+    ) -> Result<Option<User>, SqlxError>;
     async fn get_user_by_username(
         &self,
         username: &str,
@@ -74,6 +77,14 @@ impl<D: UserDb> Controller<D> {
     }
 }
 
+fn is_valid_username(username: &str) -> bool {
+    !username.is_empty()
+        && username.len() <= 255
+        && username
+            .bytes()
+            .all(|character| character.is_ascii_alphanumeric() || character == b'_')
+}
+
 #[tonic::async_trait]
 impl<D: UserDb> UserService for Controller<D> {
     async fn create_user(
@@ -82,9 +93,17 @@ impl<D: UserDb> UserService for Controller<D> {
     ) -> Result<Response<Identifier>, Status> {
         let request_id = crate::logging::request_id(&request).to_string();
         let req = request.into_inner();
-        if req.username.is_empty() || req.email.is_empty() || req.password.is_empty() {
+        if req.name.is_empty()
+            || req.username.is_empty()
+            || req.email.is_empty()
+            || req.password.is_empty()
+        {
             return Err(Status::invalid_argument(
                 "Name, username, email and password are required.",
+            ));
+        } else if !is_valid_username(&req.username) {
+            return Err(Status::invalid_argument(
+                "Username may contain only letters, numbers, and underscores.",
             ));
         } else if req.password.len() < 8 {
             return Err(Status::invalid_argument(
@@ -183,7 +202,11 @@ impl<D: UserDb> UserService for Controller<D> {
             return Ok(Response::new(Empty {}));
         }
 
-        if !is_valid_email(&req.email) {
+        if !is_valid_username(&req.username) {
+            return Err(Status::invalid_argument(
+                "Username may contain only letters, numbers, and underscores.",
+            ));
+        } else if !is_valid_email(&req.email) {
             return Err(Status::invalid_argument("Invalid email address."));
         }
 

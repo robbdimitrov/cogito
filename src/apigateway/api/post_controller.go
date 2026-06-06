@@ -11,6 +11,7 @@ import (
 	"time"
 
 	pb "github.com/robbdimitrov/thoughts/src/apigateway/genproto"
+	"unicode/utf8"
 )
 
 type postController struct {
@@ -59,7 +60,7 @@ func (pc *postController) createPost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request body", 400)
 		return
 	}
-	if len(body.Content) == 0 || len(body.Content) > 255 {
+	if utf8.RuneCountInString(body.Content) == 0 || utf8.RuneCountInString(body.Content) > 255 {
 		http.Error(w, "Content must be between 1 and 255 characters", 400)
 		return
 	}

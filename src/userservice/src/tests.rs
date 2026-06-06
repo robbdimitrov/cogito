@@ -174,6 +174,24 @@ async fn test_create_user() {
 }
 
 #[tokio::test]
+async fn test_create_user_rejects_invalid_username() {
+    let db = Arc::new(MockDb::new());
+    let controller = Controller::new(db);
+    let req = create_request(
+        CreateUserRequest {
+            name: "Test".into(),
+            username: "invalid/user".into(),
+            email: "test@example.com".into(),
+            password: "password".into(),
+        },
+        1,
+    );
+
+    let error = controller.create_user(req).await.unwrap_err();
+    assert_eq!(error.code(), tonic::Code::InvalidArgument);
+}
+
+#[tokio::test]
 async fn test_get_user() {
     let db = Arc::new(MockDb::new());
     let controller = Controller::new(db.clone());
@@ -224,6 +242,31 @@ async fn test_update_user() {
     assert_eq!(user.username, "updateduser");
     assert_eq!(user.bio, "New Bio");
     assert_eq!(user.profile_photo_key, "key1");
+}
+
+#[tokio::test]
+async fn test_update_user_rejects_invalid_username() {
+    let db = Arc::new(MockDb::new());
+    let controller = Controller::new(db.clone());
+    let _ = db
+        .create_user("Test", "testuser", "test@example.com", "hash")
+        .await;
+    let req = create_request(
+        UpdateUserRequest {
+            name: "Updated Name".into(),
+            username: "invalid/user".into(),
+            email: "updated@example.com".into(),
+            bio: String::new(),
+            password: String::new(),
+            old_password: String::new(),
+            profile_photo_key: None,
+            cover_photo_key: None,
+        },
+        1,
+    );
+
+    let error = controller.update_user(req).await.unwrap_err();
+    assert_eq!(error.code(), tonic::Code::InvalidArgument);
 }
 
 #[tokio::test]

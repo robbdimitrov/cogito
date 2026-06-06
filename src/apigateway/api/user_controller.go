@@ -13,6 +13,7 @@ import (
 	"time"
 
 	pb "github.com/robbdimitrov/thoughts/src/apigateway/genproto"
+	"unicode/utf8"
 )
 
 type userController struct {
@@ -64,6 +65,11 @@ func (s *userController) createUser(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		http.Error(w, "Invalid request body", 400)
+		return
+	}
+
+	if utf8.RuneCountInString(body.Name) > 255 || utf8.RuneCountInString(body.Username) > 255 || utf8.RuneCountInString(body.Email) > 255 {
+		http.Error(w, "Profile fields cannot exceed 255 characters", 400)
 		return
 	}
 
@@ -172,6 +178,11 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		http.Error(w, "Invalid request body", 400)
+		return
+	}
+
+	if utf8.RuneCountInString(body.Name) > 255 || utf8.RuneCountInString(body.Username) > 255 || utf8.RuneCountInString(body.Email) > 255 || utf8.RuneCountInString(body.Bio) > 255 {
+		http.Error(w, "Profile fields cannot exceed 255 characters", 400)
 		return
 	}
 
