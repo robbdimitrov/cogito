@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"strings"
+	"iter"
 
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgconn"
@@ -62,7 +63,7 @@ func (c *DbClient) createPost(content string, tags []string, userID int32, media
 	return id, err
 }
 
-func (c *DbClient) getFeed(page int32, limit int32, currentUserID int32) ([]*pb.Post, error) {
+func (c *DbClient) getFeed(page int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
 	query := `SELECT id, user_id, content, likes, liked, reposts, reposted, created,
 		repost_by_user_id, repost_created, media_key, replies, in_reply_to_id, quote_of_id
 		FROM (
@@ -110,12 +111,11 @@ func (c *DbClient) getFeed(page int32, limit int32, currentUserID int32) ([]*pb.
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
-	return mapPosts(rows)
+	return mapPosts(rows), nil
 }
 
-func (c *DbClient) getPosts(userID int32, page int32, limit int32, currentUserID int32) ([]*pb.Post, error) {
+func (c *DbClient) getPosts(userID int32, page int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
 	query := `SELECT id, user_id, content, likes, liked, reposts, reposted, created,
 		repost_by_user_id, repost_created, media_key, replies, in_reply_to_id, quote_of_id
 		FROM (
@@ -163,12 +163,11 @@ func (c *DbClient) getPosts(userID int32, page int32, limit int32, currentUserID
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
-	return mapPosts(rows)
+	return mapPosts(rows), nil
 }
 
-func (c *DbClient) getLikedPosts(userID int32, page int32, limit int32, currentUserID int32) ([]*pb.Post, error) {
+func (c *DbClient) getLikedPosts(userID int32, page int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
 	query := `SELECT id, posts.user_id, content,
 		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
 		EXISTS (SELECT 1 FROM likes
@@ -193,12 +192,11 @@ func (c *DbClient) getLikedPosts(userID int32, page int32, limit int32, currentU
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
-	return mapPosts(rows)
+	return mapPosts(rows), nil
 }
 
-func (c *DbClient) getHashtagPosts(tag string, page int32, limit int32, currentUserID int32) ([]*pb.Post, error) {
+func (c *DbClient) getHashtagPosts(tag string, page int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
 	query := `SELECT id, user_id, content,
 		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
 		EXISTS (SELECT 1 FROM likes
@@ -222,9 +220,8 @@ func (c *DbClient) getHashtagPosts(tag string, page int32, limit int32, currentU
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
-	return mapPosts(rows)
+	return mapPosts(rows), nil
 }
 
 func (c *DbClient) getPost(id int32, currentUserID int32) (*pb.Post, error) {
@@ -284,7 +281,7 @@ func (c *DbClient) removeRepost(postID int32, userID int32) error {
 	return err
 }
 
-func (c *DbClient) getReplies(postID int32, page int32, limit int32, currentUserID int32) ([]*pb.Post, error) {
+func (c *DbClient) getReplies(postID int32, page int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
 	query := `SELECT id, user_id, content,
 		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
 		EXISTS (SELECT 1 FROM likes WHERE post_id = id AND likes.user_id = $1) AS liked,
@@ -306,7 +303,6 @@ func (c *DbClient) getReplies(postID int32, page int32, limit int32, currentUser
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
 
-	return mapPosts(rows)
+	return mapPosts(rows), nil
 }

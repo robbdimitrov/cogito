@@ -1,13 +1,20 @@
 package post
 
 import (
-	"github.com/jackc/pgx/v4"
+	"iter"
 
 	pb "github.com/robbdimitrov/thoughts/src/postservice/genproto"
 )
 
 type row interface {
 	Scan(dest ...interface{}) error
+}
+
+type rows interface {
+	row
+	Close()
+	Err() error
+	Next() bool
 }
 
 func mapPost(r row) (*pb.Post, error) {
@@ -24,14 +31,17 @@ func mapPost(r row) (*pb.Post, error) {
 	return &post, nil
 }
 
-func mapPosts(r pgx.Rows) ([]*pb.Post, error) {
-	posts := []*pb.Post{}
-	for r.Next() {
-		post, err := mapPost(r)
-		if err != nil {
-			return nil, err
+func mapPosts(r rows) iter.Seq2[*pb.Post, error] {
+	return func(yield func(*pb.Post, error) bool) {
+		defer r.Close()
+		for r.Next() {
+			post, err := mapPost(r)
+			if !yield(post, err) {
+				return
+			}
 		}
-		posts = append(posts, post)
+		if err := r.Err(); err != nil {
+			yield(nil, err)
+		}
 	}
-	return posts, nil
 }

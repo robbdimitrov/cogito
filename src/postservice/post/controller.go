@@ -73,13 +73,22 @@ func (c *controller) GetFeed(ctx context.Context, req *pb.GetFeedRequest) (*pb.P
 		return nil, err
 	}
 
-	res, err := c.dbClient.getFeed(req.Page, req.Limit, userID)
+	resIter, err := c.dbClient.getFeed(req.Page, req.Limit, userID)
 	if err != nil {
 		slog.Warn("getting posts failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
 	}
 
-	return &pb.Posts{Posts: res}, nil
+	var posts []*pb.Post
+	for post, err := range resIter {
+		if err != nil {
+			slog.Warn("mapping post failed", "request_id", requestID(ctx), "error", err)
+			return nil, newError(codes.Internal)
+		}
+		posts = append(posts, post)
+	}
+
+	return &pb.Posts{Posts: posts}, nil
 }
 
 func (c *controller) GetPosts(ctx context.Context, req *pb.GetPostsRequest) (*pb.Posts, error) {
@@ -88,13 +97,22 @@ func (c *controller) GetPosts(ctx context.Context, req *pb.GetPostsRequest) (*pb
 		return nil, err
 	}
 
-	res, err := c.dbClient.getPosts(req.UserId, req.Page, req.Limit, userID)
+	resIter, err := c.dbClient.getPosts(req.UserId, req.Page, req.Limit, userID)
 	if err != nil {
 		slog.Warn("getting posts failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
 	}
 
-	return &pb.Posts{Posts: res}, nil
+	var posts []*pb.Post
+	for post, err := range resIter {
+		if err != nil {
+			slog.Warn("mapping post failed", "request_id", requestID(ctx), "error", err)
+			return nil, newError(codes.Internal)
+		}
+		posts = append(posts, post)
+	}
+
+	return &pb.Posts{Posts: posts}, nil
 }
 
 func (c *controller) GetLikedPosts(ctx context.Context, req *pb.GetPostsRequest) (*pb.Posts, error) {
@@ -103,13 +121,22 @@ func (c *controller) GetLikedPosts(ctx context.Context, req *pb.GetPostsRequest)
 		return nil, err
 	}
 
-	res, err := c.dbClient.getLikedPosts(req.UserId, req.Page, req.Limit, userID)
+	resIter, err := c.dbClient.getLikedPosts(req.UserId, req.Page, req.Limit, userID)
 	if err != nil {
 		slog.Warn("getting liked posts failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
 	}
 
-	return &pb.Posts{Posts: res}, nil
+	var posts []*pb.Post
+	for post, err := range resIter {
+		if err != nil {
+			slog.Warn("mapping post failed", "request_id", requestID(ctx), "error", err)
+			return nil, newError(codes.Internal)
+		}
+		posts = append(posts, post)
+	}
+
+	return &pb.Posts{Posts: posts}, nil
 }
 
 func (c *controller) GetHashtagPosts(ctx context.Context, req *pb.GetHashtagPostsRequest) (*pb.Posts, error) {
@@ -121,13 +148,22 @@ func (c *controller) GetHashtagPosts(ctx context.Context, req *pb.GetHashtagPost
 		return nil, newError(codes.InvalidArgument)
 	}
 
-	res, err := c.dbClient.getHashtagPosts(req.Tag, req.Page, req.Limit, userID)
+	resIter, err := c.dbClient.getHashtagPosts(req.Tag, req.Page, req.Limit, userID)
 	if err != nil {
 		slog.Warn("getting hashtag posts failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
 	}
 
-	return &pb.Posts{Posts: res}, nil
+	var posts []*pb.Post
+	for post, err := range resIter {
+		if err != nil {
+			slog.Warn("mapping post failed", "request_id", requestID(ctx), "error", err)
+			return nil, newError(codes.Internal)
+		}
+		posts = append(posts, post)
+	}
+
+	return &pb.Posts{Posts: posts}, nil
 }
 
 func (c *controller) GetPost(ctx context.Context, req *pb.PostRequest) (*pb.Post, error) {
@@ -151,13 +187,22 @@ func (c *controller) GetReplies(ctx context.Context, req *pb.GetRepliesRequest) 
 		return nil, err
 	}
 
-	res, err := c.dbClient.getReplies(req.PostId, req.Page, req.Limit, userID)
+	resIter, err := c.dbClient.getReplies(req.PostId, req.Page, req.Limit, userID)
 	if err != nil {
 		slog.Warn("getting replies failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
 	}
 
-	return &pb.Posts{Posts: res}, nil
+	var posts []*pb.Post
+	for post, err := range resIter {
+		if err != nil {
+			slog.Warn("mapping post failed", "request_id", requestID(ctx), "error", err)
+			return nil, newError(codes.Internal)
+		}
+		posts = append(posts, post)
+	}
+
+	return &pb.Posts{Posts: posts}, nil
 }
 
 func (c *controller) DeletePost(ctx context.Context, req *pb.PostRequest) (*pb.Empty, error) {

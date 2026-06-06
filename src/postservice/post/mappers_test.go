@@ -26,6 +26,34 @@ func (m *mockRow) Scan(dest ...interface{}) error {
 	return nil
 }
 
+type mockRows struct {
+	next      bool
+	scanErr   error
+	rowsErr   error
+	closed    bool
+	nextCalls int
+}
+
+func (m *mockRows) Next() bool {
+	m.nextCalls++
+	if m.next && m.nextCalls == 1 {
+		return true
+	}
+	return false
+}
+
+func (m *mockRows) Scan(dest ...interface{}) error {
+	return (&mockRow{err: m.scanErr}).Scan(dest...)
+}
+
+func (m *mockRows) Close() {
+	m.closed = true
+}
+
+func (m *mockRows) Err() error {
+	return m.rowsErr
+}
+
 func TestMapPost(t *testing.T) {
 	mr := &mockRow{}
 	post, err := mapPost(mr)
@@ -40,5 +68,43 @@ func TestMapPost(t *testing.T) {
 	_, err = mapPost(mr)
 	if err == nil {
 		t.Errorf("expected error")
+	}
+}
+
+func TestMapPostsPropagatesRowsError(t *testing.T) {
+	rowsErr := errors.New("rows error")
+	rows := &mockRows{rowsErr: rowsErr}
+
+	var gotErr error
+	for _, err := range mapPosts(rows) {
+		gotErr = err
+	}
+
+	if !errors.Is(gotErr, rowsErr) {
+		t.Fatalf("expected rows error, got %v", gotErr)
+	}
+	if !rows.closed {
+		t.Fatal("expected rows to be closed")
+	}
+}
+
+func TestMapPostsClosesRowsAfterMapping(t *testing.T) {
+	rows := &mockRows{next: true}
+	var posts int
+
+	for post, err := range mapPosts(rows) {
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if post != nil {
+			posts++
+		}
+	}
+
+	if posts != 1 {
+		t.Fatalf("expected one post, got %d", posts)
+	}
+	if !rows.closed {
+		t.Fatal("expected rows to be closed")
 	}
 }
