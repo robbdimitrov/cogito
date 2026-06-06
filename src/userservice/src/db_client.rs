@@ -83,7 +83,7 @@ impl UserDb for DbClient {
             followed: r.get::<'_, Option<bool>, _>("followed").unwrap_or(false),
             created: r
                 .get::<'_, Option<DateTime<Utc>>, _>("created")
-                .map(|dt| dt.to_rfc3339())
+                .map(|dt| dt.format("%Y-%m-%dT%H:%M:%SZ").to_string())
                 .unwrap_or_default(),
             profile_photo_key: r
                 .get::<'_, Option<String>, _>("profile_photo_key")
@@ -127,7 +127,7 @@ impl UserDb for DbClient {
             followed: r.get::<'_, Option<bool>, _>("followed").unwrap_or(false),
             created: r
                 .get::<'_, Option<DateTime<Utc>>, _>("created")
-                .map(|dt| dt.to_rfc3339())
+                .map(|dt| dt.format("%Y-%m-%dT%H:%M:%SZ").to_string())
                 .unwrap_or_default(),
             profile_photo_key: r
                 .get::<'_, Option<String>, _>("profile_photo_key")

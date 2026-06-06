@@ -70,7 +70,7 @@ impl crate::controller::AuthDb for DbClient {
         Ok(crate::thoughts::Session {
             id: row.0,
             user_id: row.1,
-            created: row.2.to_rfc3339(),
+            created: row.2.format("%Y-%m-%dT%H:%M:%SZ").to_string(),
         })
     }
 
@@ -95,7 +95,7 @@ impl crate::controller::AuthDb for DbClient {
         Ok(row.map(|r| crate::thoughts::Session {
             id: r.0,
             user_id: r.1,
-            created: r.2.to_rfc3339(),
+            created: r.2.format("%Y-%m-%dT%H:%M:%SZ").to_string(),
         }))
     }
 
@@ -123,7 +123,7 @@ impl crate::controller::AuthDb for DbClient {
             .map(|r| crate::thoughts::Session {
                 id: r.0,
                 user_id: r.1,
-                created: r.2.to_rfc3339(),
+                created: r.2.format("%Y-%m-%dT%H:%M:%SZ").to_string(),
             })
             .collect();
 
