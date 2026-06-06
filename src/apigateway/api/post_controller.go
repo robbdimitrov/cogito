@@ -99,6 +99,16 @@ func (pc *postController) enrichWithQuotes(ctx context.Context, posts []*pb.Post
 				}
 			}(p)
 		}
+		if p.RepostOf != nil && p.RepostOf.QuoteOfId != 0 {
+			wg.Add(1)
+			go func(orig *pb.Post) {
+				defer wg.Done()
+				q, err := pc.client.GetPost(ctx, &pb.PostRequest{PostId: orig.QuoteOfId})
+				if err == nil {
+					orig.QuotePost = q
+				}
+			}(p.RepostOf)
+		}
 	}
 	wg.Wait()
 }

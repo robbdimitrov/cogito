@@ -18,12 +18,21 @@ func (m *mockRow) Scan(dest ...interface{}) error {
 		switch v := d.(type) {
 		case *int32:
 			*v = int32(i)
+		case **int32:
+			val := int32(i)
+			*v = &val
 		case *string:
 			*v = "test"
+		case **string:
+			s := "test"
+			*v = &s
 		case *bool:
 			*v = true
 		case *time.Time:
 			*v = time.Time{}
+		case **time.Time:
+			t := time.Time{}
+			*v = &t
 		}
 	}
 	return nil
@@ -69,6 +78,30 @@ func TestMapPost(t *testing.T) {
 
 	mr = &mockRow{err: errors.New("scan error")}
 	_, err = mapPost(mr)
+	if err == nil {
+		t.Errorf("expected error")
+	}
+}
+
+func TestMapFeedPost(t *testing.T) {
+	mr := &mockRow{}
+	post, err := mapFeedPost(mr)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if post.Id != 0 || post.UserId != 1 {
+		t.Errorf("mapping failed: %+v", post)
+	}
+	// repost_of_id at position 8 is set by mockRow, so RepostOf should be populated
+	if post.RepostOfId == nil {
+		t.Errorf("expected repost_of_id to be set")
+	}
+	if post.RepostOf == nil {
+		t.Errorf("expected repost_of to be populated")
+	}
+
+	mr = &mockRow{err: errors.New("scan error")}
+	_, err = mapFeedPost(mr)
 	if err == nil {
 		t.Errorf("expected error")
 	}

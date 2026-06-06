@@ -39,68 +39,58 @@ func (c *DBClient) Close() {
 }
 
 func (c *DBClient) createPost(content string, tags []string, userID int32, mediaKey *string, inReplyToID *int32, quoteOfID *int32) (int32, error) {
-	query := "INSERT INTO posts (user_id, content, hashtags, media_key, in_reply_to_id, quote_of_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id"
-
 	var mk string
 	if mediaKey != nil {
 		mk = *mediaKey
 	}
 
-	row := c.db.QueryRow(context.Background(), query, userID, content, tags, mk, inReplyToID, quoteOfID)
+	var row pgx.Row
+	if quoteOfID != nil {
+		query := `INSERT INTO posts (user_id, content, hashtags, media_key, in_reply_to_id, quote_of_id)
+			SELECT $1, $2, $3, $4, $5, COALESCE(p.repost_of_id, p.id)
+			FROM posts p WHERE p.id = $6
+			RETURNING id`
+		row = c.db.QueryRow(context.Background(), query, userID, content, tags, mk, inReplyToID, *quoteOfID)
+	} else {
+		query := "INSERT INTO posts (user_id, content, hashtags, media_key, in_reply_to_id, quote_of_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id"
+		row = c.db.QueryRow(context.Background(), query, userID, content, tags, mk, inReplyToID, nil)
+	}
 
 	var id int32
 	err := row.Scan(&id)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return 0, errInvalidReference
+		}
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23503" {
 			return 0, errInvalidReference
 		}
+		return 0, err
 	}
-	return id, err
+	return id, nil
 }
 
 func (c *DBClient) getFeed(page int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
-	query := `SELECT id, user_id, content, likes, liked, reposts, reposted, created,
-		repost_by_user_id, repost_created, media_key, replies, in_reply_to_id, quote_of_id
-		FROM (
-			SELECT posts.id, posts.user_id, posts.content,
-			(SELECT count(*) FROM likes WHERE post_id = posts.id) AS likes,
-			EXISTS (SELECT 1 FROM likes
-			WHERE post_id = posts.id AND likes.user_id = $1) AS liked,
-			(SELECT count(*) FROM reposts WHERE post_id = posts.id) AS reposts,
-			EXISTS (SELECT 1 FROM reposts
-			WHERE post_id = posts.id AND reposts.user_id = $1) AS reposted,
-			posts.created,
-			0::integer AS repost_by_user_id,
-			NULL::timestamptz AS repost_created,
-			posts.created AS timeline_created,
-			posts.media_key,
-			(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = posts.id) AS replies,
-			COALESCE(posts.in_reply_to_id, 0) AS in_reply_to_id,
-			COALESCE(posts.quote_of_id, 0) AS quote_of_id
-			FROM posts
-			WHERE posts.in_reply_to_id IS NULL
-			UNION ALL
-			SELECT posts.id, posts.user_id, posts.content,
-			(SELECT count(*) FROM likes WHERE post_id = posts.id) AS likes,
-			EXISTS (SELECT 1 FROM likes
-			WHERE post_id = posts.id AND likes.user_id = $1) AS liked,
-			(SELECT count(*) FROM reposts WHERE post_id = posts.id) AS reposts,
-			EXISTS (SELECT 1 FROM reposts AS current_user_reposts
-			WHERE current_user_reposts.post_id = posts.id AND current_user_reposts.user_id = $1) AS reposted,
-			posts.created,
-			reposts.user_id AS repost_by_user_id,
-			reposts.created AS repost_created,
-			reposts.created AS timeline_created,
-			posts.media_key,
-			(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = posts.id) AS replies,
-			COALESCE(posts.in_reply_to_id, 0) AS in_reply_to_id,
-			COALESCE(posts.quote_of_id, 0) AS quote_of_id
-			FROM reposts
-			INNER JOIN posts ON posts.id = reposts.post_id
-			WHERE posts.in_reply_to_id IS NULL
-		) feed
-		ORDER BY timeline_created DESC
+	query := `SELECT
+		p.id, p.user_id, p.content,
+		(SELECT count(*) FROM likes WHERE post_id = COALESCE(o.id, p.id)) AS likes,
+		EXISTS (SELECT 1 FROM likes WHERE post_id = COALESCE(o.id, p.id) AND likes.user_id = $1) AS liked,
+		(SELECT count(*) FROM posts AS rp WHERE rp.repost_of_id = COALESCE(o.id, p.id)) AS reposts,
+		EXISTS (SELECT 1 FROM posts AS rp WHERE rp.repost_of_id = COALESCE(o.id, p.id) AND rp.user_id = $1) AS reposted,
+		p.created, p.repost_of_id, p.media_key,
+		(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = COALESCE(o.id, p.id)) AS replies,
+		COALESCE(p.in_reply_to_id, 0) AS in_reply_to_id,
+		COALESCE(p.quote_of_id, 0) AS quote_of_id,
+		o.id AS o_id, o.user_id AS o_user_id, o.content AS o_content,
+		o.created AS o_created, o.media_key AS o_media_key,
+		COALESCE(o.in_reply_to_id, 0) AS o_in_reply_to_id,
+		COALESCE(o.quote_of_id, 0) AS o_quote_of_id
+		FROM posts p
+		LEFT JOIN posts o ON o.id = p.repost_of_id
+		WHERE p.in_reply_to_id IS NULL
+		AND (o.id IS NULL OR o.in_reply_to_id IS NULL)
+		ORDER BY p.created DESC
 		LIMIT $2 OFFSET $3`
 
 	rows, err := c.db.Query(context.Background(), query, currentUserID, limit, page*limit)
@@ -108,51 +98,30 @@ func (c *DBClient) getFeed(page int32, limit int32, currentUserID int32) (iter.S
 		return nil, err
 	}
 
-	return mapPosts(rows), nil
+	return mapFeedPosts(rows), nil
 }
 
 func (c *DBClient) getPosts(userID int32, page int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
-	query := `SELECT id, user_id, content, likes, liked, reposts, reposted, created,
-		repost_by_user_id, repost_created, media_key, replies, in_reply_to_id, quote_of_id
-		FROM (
-			SELECT posts.id, posts.user_id, posts.content,
-			(SELECT count(*) FROM likes WHERE post_id = posts.id) AS likes,
-			EXISTS (SELECT 1 FROM likes
-			WHERE post_id = posts.id AND likes.user_id = $1) AS liked,
-			(SELECT count(*) FROM reposts WHERE post_id = posts.id) AS reposts,
-			EXISTS (SELECT 1 FROM reposts
-			WHERE post_id = posts.id AND reposts.user_id = $1) AS reposted,
-			posts.created,
-			0::integer AS repost_by_user_id,
-			NULL::timestamptz AS repost_created,
-			posts.created AS timeline_created,
-			posts.media_key,
-			(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = posts.id) AS replies,
-			COALESCE(posts.in_reply_to_id, 0) AS in_reply_to_id,
-			COALESCE(posts.quote_of_id, 0) AS quote_of_id
-			FROM posts
-			WHERE posts.user_id = $2 AND posts.in_reply_to_id IS NULL
-			UNION ALL
-			SELECT posts.id, posts.user_id, posts.content,
-			(SELECT count(*) FROM likes WHERE post_id = posts.id) AS likes,
-			EXISTS (SELECT 1 FROM likes
-			WHERE post_id = posts.id AND likes.user_id = $1) AS liked,
-			(SELECT count(*) FROM reposts WHERE post_id = posts.id) AS reposts,
-			EXISTS (SELECT 1 FROM reposts AS current_user_reposts
-			WHERE current_user_reposts.post_id = posts.id AND current_user_reposts.user_id = $1) AS reposted,
-			posts.created,
-			reposts.user_id AS repost_by_user_id,
-			reposts.created AS repost_created,
-			reposts.created AS timeline_created,
-			posts.media_key,
-			(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = posts.id) AS replies,
-			COALESCE(posts.in_reply_to_id, 0) AS in_reply_to_id,
-			COALESCE(posts.quote_of_id, 0) AS quote_of_id
-			FROM reposts
-			INNER JOIN posts ON posts.id = reposts.post_id
-			WHERE reposts.user_id = $2 AND posts.in_reply_to_id IS NULL
-		) profile_feed
-		ORDER BY timeline_created DESC
+	query := `SELECT
+		p.id, p.user_id, p.content,
+		(SELECT count(*) FROM likes WHERE post_id = COALESCE(o.id, p.id)) AS likes,
+		EXISTS (SELECT 1 FROM likes WHERE post_id = COALESCE(o.id, p.id) AND likes.user_id = $1) AS liked,
+		(SELECT count(*) FROM posts AS rp WHERE rp.repost_of_id = COALESCE(o.id, p.id)) AS reposts,
+		EXISTS (SELECT 1 FROM posts AS rp WHERE rp.repost_of_id = COALESCE(o.id, p.id) AND rp.user_id = $1) AS reposted,
+		p.created, p.repost_of_id, p.media_key,
+		(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = COALESCE(o.id, p.id)) AS replies,
+		COALESCE(p.in_reply_to_id, 0) AS in_reply_to_id,
+		COALESCE(p.quote_of_id, 0) AS quote_of_id,
+		o.id AS o_id, o.user_id AS o_user_id, o.content AS o_content,
+		o.created AS o_created, o.media_key AS o_media_key,
+		COALESCE(o.in_reply_to_id, 0) AS o_in_reply_to_id,
+		COALESCE(o.quote_of_id, 0) AS o_quote_of_id
+		FROM posts p
+		LEFT JOIN posts o ON o.id = p.repost_of_id
+		WHERE p.user_id = $2
+		AND p.in_reply_to_id IS NULL
+		AND (o.id IS NULL OR o.in_reply_to_id IS NULL)
+		ORDER BY p.created DESC
 		LIMIT $3 OFFSET $4`
 
 	rows, err := c.db.Query(context.Background(), query, currentUserID, userID, limit, page*limit)
@@ -160,21 +129,16 @@ func (c *DBClient) getPosts(userID int32, page int32, limit int32, currentUserID
 		return nil, err
 	}
 
-	return mapPosts(rows), nil
+	return mapFeedPosts(rows), nil
 }
 
 func (c *DBClient) getLikedPosts(userID int32, page int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
 	query := `SELECT id, posts.user_id, content,
 		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
-		EXISTS (SELECT 1 FROM likes
-		WHERE post_id = id AND likes.user_id = $1) AS liked,
-		(SELECT count(*) FROM reposts WHERE post_id = id) AS reposts,
-		EXISTS (SELECT 1 FROM reposts
-		WHERE post_id = id AND reposts.user_id = $1) AS reposted,
-		posts.created,
-		0::integer AS repost_by_user_id,
-		NULL::timestamptz AS repost_created,
-		posts.media_key,
+		EXISTS (SELECT 1 FROM likes WHERE post_id = id AND likes.user_id = $1) AS liked,
+		(SELECT count(*) FROM posts AS rp WHERE rp.repost_of_id = id) AS reposts,
+		EXISTS (SELECT 1 FROM posts AS rp WHERE rp.repost_of_id = id AND rp.user_id = $1) AS reposted,
+		posts.created, posts.repost_of_id, posts.media_key,
 		(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = id) AS replies,
 		COALESCE(in_reply_to_id, 0) AS in_reply_to_id,
 		COALESCE(quote_of_id, 0) AS quote_of_id
@@ -195,15 +159,10 @@ func (c *DBClient) getLikedPosts(userID int32, page int32, limit int32, currentU
 func (c *DBClient) getHashtagPosts(tag string, page int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
 	query := `SELECT id, user_id, content,
 		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
-		EXISTS (SELECT 1 FROM likes
-		WHERE post_id = id AND likes.user_id = $1) AS liked,
-		(SELECT count(*) FROM reposts WHERE post_id = id) AS reposts,
-		EXISTS (SELECT 1 FROM reposts
-		WHERE post_id = id AND reposts.user_id = $1) AS reposted,
-		created,
-		0::integer AS repost_by_user_id,
-		NULL::timestamptz AS repost_created,
-		media_key,
+		EXISTS (SELECT 1 FROM likes WHERE post_id = id AND likes.user_id = $1) AS liked,
+		(SELECT count(*) FROM posts AS rp WHERE rp.repost_of_id = id) AS reposts,
+		EXISTS (SELECT 1 FROM posts AS rp WHERE rp.repost_of_id = id AND rp.user_id = $1) AS reposted,
+		created, repost_of_id, media_key,
 		(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = id) AS replies,
 		COALESCE(in_reply_to_id, 0) AS in_reply_to_id,
 		COALESCE(quote_of_id, 0) AS quote_of_id
@@ -223,15 +182,10 @@ func (c *DBClient) getHashtagPosts(tag string, page int32, limit int32, currentU
 func (c *DBClient) getPost(id int32, currentUserID int32) (*pb.Post, error) {
 	query := `SELECT id, user_id, content,
 		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
-		EXISTS (SELECT 1 FROM likes
-		WHERE post_id = id AND likes.user_id = $1) AS liked,
-		(SELECT count(*) FROM reposts WHERE post_id = id) AS reposts,
-		EXISTS (SELECT 1 FROM reposts
-		WHERE post_id = id AND reposts.user_id = $1) AS reposted,
-		created,
-		0::integer AS repost_by_user_id,
-		NULL::timestamptz AS repost_created,
-		media_key,
+		EXISTS (SELECT 1 FROM likes WHERE post_id = id AND likes.user_id = $1) AS liked,
+		(SELECT count(*) FROM posts AS rp WHERE rp.repost_of_id = id) AS reposts,
+		EXISTS (SELECT 1 FROM posts AS rp WHERE rp.repost_of_id = id AND rp.user_id = $1) AS reposted,
+		created, repost_of_id, media_key,
 		(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = id) AS replies,
 		COALESCE(in_reply_to_id, 0) AS in_reply_to_id,
 		COALESCE(quote_of_id, 0) AS quote_of_id
@@ -266,14 +220,18 @@ func (c *DBClient) unlikePost(postID int32, userID int32) error {
 }
 
 func (c *DBClient) repostPost(postID int32, userID int32) error {
-	query := "INSERT INTO reposts (post_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING"
-	_, err := c.db.Exec(context.Background(), query, postID, userID)
+	query := `INSERT INTO posts (user_id, repost_of_id)
+		SELECT $1, COALESCE(p.repost_of_id, p.id)
+		FROM posts p WHERE p.id = $2
+		AND p.in_reply_to_id IS NULL
+		ON CONFLICT (user_id, repost_of_id) DO NOTHING`
+	_, err := c.db.Exec(context.Background(), query, userID, postID)
 	return err
 }
 
 func (c *DBClient) removeRepost(postID int32, userID int32) error {
-	query := "DELETE FROM reposts WHERE post_id = $1 AND user_id = $2"
-	_, err := c.db.Exec(context.Background(), query, postID, userID)
+	query := "DELETE FROM posts WHERE user_id = $1 AND repost_of_id = $2"
+	_, err := c.db.Exec(context.Background(), query, userID, postID)
 	return err
 }
 
@@ -281,12 +239,9 @@ func (c *DBClient) getReplies(postID int32, page int32, limit int32, currentUser
 	query := `SELECT id, user_id, content,
 		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
 		EXISTS (SELECT 1 FROM likes WHERE post_id = id AND likes.user_id = $1) AS liked,
-		(SELECT count(*) FROM reposts WHERE post_id = id) AS reposts,
-		EXISTS (SELECT 1 FROM reposts WHERE post_id = id AND reposts.user_id = $1) AS reposted,
-		created,
-		0::integer AS repost_by_user_id,
-		NULL::timestamptz AS repost_created,
-		media_key,
+		(SELECT count(*) FROM posts AS rp WHERE rp.repost_of_id = id) AS reposts,
+		EXISTS (SELECT 1 FROM posts AS rp WHERE rp.repost_of_id = id AND rp.user_id = $1) AS reposted,
+		created, repost_of_id, media_key,
 		(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = id) AS replies,
 		COALESCE(in_reply_to_id, 0) AS in_reply_to_id,
 		COALESCE(quote_of_id, 0) AS quote_of_id

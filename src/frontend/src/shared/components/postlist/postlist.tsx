@@ -30,7 +30,7 @@ function PostList({posts, users, onLike, onRepost, onDelete, currentUserId, onQu
     <ul className="space-y-3">
       {posts.map((post) => (
         <PostItem
-          key={`${post.id}${post.repostByUserId ? `-${post.repostByUserId}-${post.repostCreated}` : ''}`}
+          key={`${post.id}${post.repostOfId ? `-repost-${post.userId}` : ''}`}
           post={post}
           user={users[0]}
           onLike={onLike}

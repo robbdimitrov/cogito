@@ -26,12 +26,15 @@ function PostItem({post, user, onLike, onRepost, onDelete, currentUserId, onQuot
   const [optimisticState, setOptimisticState] = useState({source: post, value: post});
   const optimisticPost = optimisticState.source === post ? optimisticState.value : post;
 
-  const author = optimisticPost.user || user;
-  const isOwnPost = currentUserId && optimisticPost.userId === currentUserId;
-  const repostedBy = optimisticPost.repostByUser;
+  const isRepost = !!post.repostOfId;
+  const displayPost = (isRepost && post.repostOf) ? post.repostOf : optimisticPost;
+  const repostedBy = isRepost ? post.user : undefined;
+
+  const author = displayPost.user || user;
+  const isOwnPost = currentUserId && post.userId === currentUserId;
 
   function handleDelete() {
-    onDelete(optimisticPost.id);
+    onDelete(post.id);
     setShowDeleteModal(false);
   }
 
@@ -47,7 +50,7 @@ function PostItem({post, user, onLike, onRepost, onDelete, currentUserId, onQuot
       }
     });
     try {
-      await onLike(post); // pass original post to parent to use its ID and current status
+      await onLike(displayPost);
     } catch (e) {
       setOptimisticState({source: post, value: post});
     } finally {
@@ -67,7 +70,7 @@ function PostItem({post, user, onLike, onRepost, onDelete, currentUserId, onQuot
       }
     });
     try {
-      await onRepost(post);
+      await onRepost(displayPost);
     } catch (e) {
       setOptimisticState({source: post, value: post});
     } finally {
@@ -114,25 +117,25 @@ function PostItem({post, user, onLike, onRepost, onDelete, currentUserId, onQuot
                 )}
               </div>
               <FormattedContent
-                content={optimisticPost.content}
+                content={displayPost.content}
                 className="mt-3 sm:mt-3.5 whitespace-pre-wrap break-words text-[15px] sm:text-[1.05rem] leading-relaxed text-slate-800 dark:text-slate-200"
               />
-              {optimisticPost.mediaKey && (
+              {displayPost.mediaKey && (
                 <div className="mt-3">
-                  <img src={`/api/uploads/${optimisticPost.mediaKey}`} alt="Post attachment" className="max-h-96 w-auto rounded-xl object-contain border border-slate-200 dark:border-slate-800" />
+                  <img src={`/api/uploads/${displayPost.mediaKey}`} alt="Post attachment" className="max-h-96 w-auto rounded-xl object-contain border border-slate-200 dark:border-slate-800" />
                 </div>
               )}
-              {optimisticPost.quotePost && (
-                <QuoteEmbed post={optimisticPost.quotePost} />
+              {displayPost.quotePost && (
+                <QuoteEmbed post={displayPost.quotePost} />
               )}
               <div className="mt-3">
-                <Link href={`/posts/${optimisticPost.id}`} className="text-[0.8rem] sm:text-sm font-medium text-slate-400 dark:text-slate-500 hover:text-primary transition-colors">
-                  {formatPostDate(optimisticPost.created)}
+                <Link href={`/posts/${displayPost.id}`} className="text-[0.8rem] sm:text-sm font-medium text-slate-400 dark:text-slate-500 hover:text-primary transition-colors">
+                  {formatPostDate(displayPost.created)}
                 </Link>
               </div>
               <div className="mt-3 sm:mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60 flex items-center gap-2 sm:gap-3">
                 <Link
-                  href={`/posts/${optimisticPost.id}`}
+                  href={`/posts/${displayPost.id}`}
                   className="btn btn-ghost btn-sm gap-1.5 rounded-full px-3 text-slate-500 dark:text-slate-400 hover:text-primary hover:bg-primary/5 transition-all duration-150"
                   aria-label="Replies"
                 >
@@ -144,7 +147,7 @@ function PostItem({post, user, onLike, onRepost, onDelete, currentUserId, onQuot
                   reposts={optimisticPost.reposts}
                   isReposting={isReposting}
                   onRepost={handleRepost}
-                  onQuote={() => onQuote?.(optimisticPost)}
+                  onQuote={() => onQuote?.(displayPost)}
                 />
                 <button
                   type="button"

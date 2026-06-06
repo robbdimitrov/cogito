@@ -80,12 +80,12 @@ export const getServerSessions = cache(async function getServerSessions() {
   return fetchServer<SessionsResponse>('/sessions');
 });
 
-export async function hydratePostAuthors(rawPosts: Post[], repostByUser: User | null = null) {
+export async function hydratePostAuthors(rawPosts: Post[]) {
   if (!rawPosts) return [];
   const userIds: string[] = [
     ...new Set(
       rawPosts
-        .flatMap((p) => [p.userId, p.repostByUserId, p.quotePost?.userId])
+        .flatMap((p) => [p.userId, p.repostOf?.userId, p.quotePost?.userId, p.repostOf?.quotePost?.userId])
         .filter(Boolean)
     ),
   ] as string[];
@@ -108,10 +108,12 @@ export async function hydratePostAuthors(rawPosts: Post[], repostByUser: User | 
       user: userMap[p.userId],
     };
 
-    if (p.repostByUserId) {
-      post.repostByUser = userMap[p.repostByUserId];
-    } else if (repostByUser && p.userId !== repostByUser.id) {
-      post.repostByUser = repostByUser;
+    if (p.repostOf?.userId) {
+      const repostOf = { ...p.repostOf, user: userMap[p.repostOf.userId] };
+      if (p.repostOf.quotePost?.userId) {
+        repostOf.quotePost = { ...p.repostOf.quotePost, user: userMap[p.repostOf.quotePost.userId] };
+      }
+      post.repostOf = repostOf;
     }
 
     if (p.quotePost?.userId) {

@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.6.2
 // - protoc             v7.35.0
-// source: thoughts.proto
+// source: pb/thoughts.proto
 
 package genproto
 
@@ -421,7 +421,7 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "thoughts.proto",
+	Metadata: "pb/thoughts.proto",
 }
 
 const (
@@ -637,7 +637,7 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "thoughts.proto",
+	Metadata: "pb/thoughts.proto",
 }
 
 const (
@@ -1157,7 +1157,7 @@ var PostService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "thoughts.proto",
+	Metadata: "pb/thoughts.proto",
 }
 
 const (
@@ -1335,5 +1335,5 @@ var ImageService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "thoughts.proto",
+	Metadata: "pb/thoughts.proto",
 }

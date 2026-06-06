@@ -41,18 +41,24 @@ func TestMapUser(t *testing.T) {
 }
 
 func TestMapPost(t *testing.T) {
+	repostOfID := int32(10)
 	p := &pb.Post{
-		Id:             1,
-		UserId:         2,
-		Content:        "content",
-		Likes:          5,
-		Liked:          true,
-		Reposts:        2,
-		Reposted:       false,
-		Created:        "now",
-		RepostByUserId: 3,
-		RepostCreated:  "then",
-		MediaKey:       "media.jpg",
+		Id:         1,
+		UserId:     2,
+		Content:    "content",
+		Likes:      5,
+		Liked:      true,
+		Reposts:    2,
+		Reposted:   false,
+		Created:    "now",
+		RepostOfId: &repostOfID,
+		MediaKey:   "media.jpg",
+		RepostOf: &pb.Post{
+			Id:      10,
+			UserId:  3,
+			Content: "original",
+			Created: "before",
+		},
 	}
 
 	mapped := mapPost(p)
@@ -61,5 +67,11 @@ func TestMapPost(t *testing.T) {
 	}
 	if mapped.MediaKey != "media.jpg" {
 		t.Errorf("expected media key to be mapped")
+	}
+	if mapped.RepostOfID != 10 {
+		t.Errorf("expected repost_of_id to be mapped")
+	}
+	if mapped.RepostOf == nil || mapped.RepostOf.ID != 10 {
+		t.Errorf("expected repost_of to be mapped")
 	}
 }
