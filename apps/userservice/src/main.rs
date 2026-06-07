@@ -4,6 +4,7 @@ pub mod db_client;
 pub mod internal_auth;
 pub mod logging;
 #[allow(clippy::all)]
+#[rustfmt::skip]
 pub mod thoughts;
 pub mod utils;
 
