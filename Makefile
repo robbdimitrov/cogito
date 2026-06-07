@@ -10,61 +10,61 @@ all: apigateway authservice database frontend imageservice postservice userservi
 .PHONY: proto
 proto:
 	@echo "Generating protobufs for Go services..."
-	@cd src/apigateway && protoc -I../.. --go_out=. --go-grpc_out=. ../../pb/thoughts.proto
-	@cd src/postservice && protoc -I../.. --go_out=. --go-grpc_out=. ../../pb/thoughts.proto
+	@cd apps/apigateway && protoc -I../.. --go_out=. --go-grpc_out=. ../../pb/thoughts.proto
+	@cd apps/postservice && protoc -I../.. --go_out=. --go-grpc_out=. ../../pb/thoughts.proto
 
 .PHONY: apigateway
 apigateway: proto
-	docker build -t $(IMAGE_PREFIX)/apigateway src/apigateway
+	docker build -t $(IMAGE_PREFIX)/apigateway apps/apigateway
 
 .PHONY: authservice
 authservice:
-	docker build -t $(IMAGE_PREFIX)/authservice -f src/authservice/Dockerfile .
+	docker build -t $(IMAGE_PREFIX)/authservice -f apps/authservice/Dockerfile .
 
 .PHONY: database
 database:
-	docker build -t $(IMAGE_PREFIX)/database src/database
+	docker build -t $(IMAGE_PREFIX)/database apps/database
 
 .PHONY: frontend
 frontend:
-	docker build -t $(IMAGE_PREFIX)/frontend src/frontend
+	docker build -t $(IMAGE_PREFIX)/frontend apps/frontend
 
 .PHONY: imageservice
 imageservice:
-	docker build -t $(IMAGE_PREFIX)/imageservice -f src/imageservice/Dockerfile .
+	docker build -t $(IMAGE_PREFIX)/imageservice -f apps/imageservice/Dockerfile .
 
 .PHONY: postservice
 postservice: proto
-	docker build -t $(IMAGE_PREFIX)/postservice src/postservice
+	docker build -t $(IMAGE_PREFIX)/postservice apps/postservice
 
 .PHONY: userservice
 userservice:
-	docker build -t $(IMAGE_PREFIX)/userservice -f src/userservice/Dockerfile .
+	docker build -t $(IMAGE_PREFIX)/userservice -f apps/userservice/Dockerfile .
 
 .PHONY: format
 format:
-	@gofmt -w $$(find src/apigateway src/postservice -name '*.go' -not -path '*/genproto/*')
-	@find src/authservice/src src/userservice/src src/imageservice/src \
+	@gofmt -w $$(find apps/apigateway apps/postservice -name '*.go' -not -path '*/genproto/*')
+	@find apps/authservice/src apps/userservice/src apps/imageservice/src \
 		-name '*.rs' -not -name thoughts.rs -print | xargs rustfmt --edition 2024
 
 .PHONY: lint
 lint:
-	@test -z "$$(gofmt -l $$(find src/apigateway src/postservice -name '*.go' -not -path '*/genproto/*'))"
-	@find src/authservice/src src/userservice/src src/imageservice/src \
+	@test -z "$$(gofmt -l $$(find apps/apigateway apps/postservice -name '*.go' -not -path '*/genproto/*'))"
+	@find apps/authservice/src apps/userservice/src apps/imageservice/src \
 		-name '*.rs' -not -name thoughts.rs -print | xargs rustfmt --edition 2024 --check
-	@cd src/frontend && npm run lint
+	@cd apps/frontend && npm run lint
 
 .PHONY: test
 test:
 	@echo "Testing apigateway..."
-	@cd src/apigateway && go test -v ./...
+	@cd apps/apigateway && go test -v ./...
 	@echo "Testing postservice..."
-	@cd src/postservice && go test -v ./...
+	@cd apps/postservice && go test -v ./...
 	@echo "Testing authservice..."
-	@cd src/authservice && cargo test
+	@cd apps/authservice && cargo test
 	@echo "Testing userservice..."
-	@cd src/userservice && cargo test
+	@cd apps/userservice && cargo test
 	@echo "Testing frontend..."
-	@cd src/frontend && npm run test
+	@cd apps/frontend && npm run test
 	@echo "Testing imageservice..."
-	@cd src/imageservice && cargo test
+	@cd apps/imageservice && cargo test

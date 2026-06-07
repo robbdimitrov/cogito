@@ -30,7 +30,7 @@ make <service>        # individual service
 ### Frontend dev server
 
 ```sh
-cd src/frontend
+cd apps/frontend
 npm install --no-optional
 npm run dev             # dev server on :3000
 npm run build           # production build
@@ -44,7 +44,7 @@ npm start               # serve the production build
 ### Go services
 
 ```sh
-cd src/apigateway   # or src/postservice
+cd apps/apigateway   # or apps/postservice
 go mod download
 go build -v -o service
 ```
@@ -57,7 +57,7 @@ Dockerfiles use multi-stage builds: `golang:1.26` builder → `scratch` runtime.
 ### Rust services
 
 ```sh
-cd src/authservice   # or src/userservice or src/imageservice
+cd apps/authservice   # or apps/userservice or apps/imageservice
 cargo run
 ```
 
@@ -67,7 +67,7 @@ Run `make proto` after changing `pb/thoughts.proto`.
 
 The target runs the equivalent commands in both Go service directories:
 ```sh
-cd src/apigateway   # or src/postservice
+cd apps/apigateway   # or apps/postservice
 protoc --go_out=. --go-grpc_out=. ../../pb/thoughts.proto
 ```
 The `go_package` option is `./genproto`, so outputs land in `<service>/genproto/`.
@@ -87,7 +87,7 @@ the manifests, waits for rollouts, and starts the frontend port-forward.
 
 Cleanup:
 ```sh
-kubectl delete -f ./k8s -n thoughts
+kubectl delete -f ./deploy -n thoughts
 kubectl delete namespace thoughts
 ```
 
@@ -102,11 +102,11 @@ make test
 Alternatively, you can run tests for individual services:
 - **Rust services**: Run `cargo test` inside the respective service directory.
 - **Go services**: Run `go test -v ./...` inside the respective service directory. Follow the 80/20 rule for test coverage (aim for ~80% coverage focusing on the most critical 20% of code).
-- **Frontend**: Tests are written with Vitest and React Testing Library. Run `npm run test` inside `src/frontend`. Follow the 80/20 rule for frontend test coverage as well, focusing on critical utility functions, hooks, and core shared components.
+- **Frontend**: Tests are written with Vitest and React Testing Library. Run `npm run test` inside `apps/frontend`. Follow the 80/20 rule for frontend test coverage as well, focusing on critical utility functions, hooks, and core shared components.
 
 ## Database Notes
 
-- `src/database/migrations/` contains paired `NNNNNN_description.up.sql` and `.down.sql` migrations.
+- `apps/database/migrations/` contains paired `NNNNNN_description.up.sql` and `.down.sql` migrations.
 - The migration image runs before the gateway starts and applies pending migrations to the `thoughts` database.
 
 ## Constraints & Gotchas

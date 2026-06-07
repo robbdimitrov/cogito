@@ -27,8 +27,8 @@ pkg
 vendor
 
 # Compiled binaries
-/src/*/service
-/src/*/*service
+/apps/*/service
+/apps/*/*service
 
 # Logs
 npm-debug.log*

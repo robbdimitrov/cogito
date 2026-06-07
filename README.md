@@ -15,13 +15,13 @@
 
 | Service | Language | Description |
 | --- | --- | --- |
-| [apigateway](/src/apigateway) | Go | API Gateway routing HTTP traffic to internal gRPC backends. |
-| [authservice](/src/authservice) | Rust | User authentication and session management. |
-| [database](/src/database) | PostgreSQL | Database schema, tables, and functions. |
-| [frontend](/src/frontend) | TypeScript | Next.js/React web application. |
-| [imageservice](/src/imageservice) | Rust | Image upload, verification, and staging cleanup. |
-| [postservice](/src/postservice) | Go | Core logic for creating, liking, and reposting posts. |
-| [userservice](/src/userservice) | Rust | User profile and follower graph management. |
+| [apigateway](/apps/apigateway) | Go | API Gateway routing HTTP traffic to internal gRPC backends. |
+| [authservice](/apps/authservice) | Rust | User authentication and session management. |
+| [database](/apps/database) | PostgreSQL | Database schema, tables, and functions. |
+| [frontend](/apps/frontend) | TypeScript | Next.js/React web application. |
+| [imageservice](/apps/imageservice) | Rust | Image upload, verification, and staging cleanup. |
+| [postservice](/apps/postservice) | Go | Core logic for creating, liking, and reposting posts. |
+| [userservice](/apps/userservice) | Rust | User profile and follower graph management. |
 
 ## Deploy
 
@@ -38,7 +38,7 @@ The script builds the Docker images, creates the Kubernetes namespace (`thoughts
 To remove all deployed resources and the namespace:
 
 ```sh
-kubectl delete -f ./k8s -n thoughts
+kubectl delete -f ./deploy -n thoughts
 kubectl delete namespace thoughts
 ```
 

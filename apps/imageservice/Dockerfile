@@ -5,11 +5,11 @@ WORKDIR /app
 RUN apk add --no-cache protobuf-dev
 
 COPY pb ./pb
-COPY src/imageservice ./src/imageservice
+COPY apps/imageservice ./apps/imageservice
 
-WORKDIR /app/src/imageservice
+WORKDIR /app/apps/imageservice
 RUN cargo build --release
 
 FROM scratch
-COPY --from=builder /app/src/imageservice/target/release/imageservice /service
+COPY --from=builder /app/apps/imageservice/target/release/imageservice /service
 CMD ["/service"]
