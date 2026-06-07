@@ -1,6 +1,6 @@
 package api
 
-import pb "github.com/robbdimitrov/thoughts/src/apigateway/genproto"
+import pb "github.com/robbdimitrov/thoughts/apps/apigateway/genproto"
 
 func mapUser(u *pb.User) user {
 	return mapUserWithEmail(u, false)

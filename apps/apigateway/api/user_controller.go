@@ -12,8 +12,9 @@ import (
 	"strconv"
 	"time"
 
-	pb "github.com/robbdimitrov/thoughts/src/apigateway/genproto"
 	"unicode/utf8"
+
+	pb "github.com/robbdimitrov/thoughts/apps/apigateway/genproto"
 )
 
 type userController struct {

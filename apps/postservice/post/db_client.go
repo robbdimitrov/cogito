@@ -10,7 +10,7 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
 
-	pb "github.com/robbdimitrov/thoughts/src/postservice/genproto"
+	pb "github.com/robbdimitrov/thoughts/apps/postservice/genproto"
 )
 
 var errInvalidReference = errors.New("invalid reference")

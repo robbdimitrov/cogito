@@ -1,4 +1,4 @@
-module github.com/robbdimitrov/thoughts/src/postservice
+module github.com/robbdimitrov/thoughts/apps/postservice
 
 go 1.26
 

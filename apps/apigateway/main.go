@@ -10,7 +10,7 @@ import (
 	"os/signal"
 	"time"
 
-	"github.com/robbdimitrov/thoughts/src/apigateway/api"
+	"github.com/robbdimitrov/thoughts/apps/apigateway/api"
 )
 
 func main() {
