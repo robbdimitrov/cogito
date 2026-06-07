@@ -14,7 +14,7 @@ Microservices app with an HTTP gateway calling gRPC backends.
 | `frontend` | Next.js / React | App Router frontend | `src/app/` |
 | `database` | PostgreSQL | Versioned schema migrations | - |
 
-- Proto contract: `pb/thoughts.proto`
+- Proto contract: `packages/pb/thoughts.proto`
 - Backend gRPC port: **5050**; `imageservice` HTTP port: **8081**; gateway + frontend port: **8080**
 - All backend services connect to Postgres via `DATABASE_URL` (e.g. `postgresql://postgres:kubernetes@database:5432`)
 
@@ -63,12 +63,12 @@ cargo run
 
 ## Protobuf / Codegen
 
-Run `make proto` after changing `pb/thoughts.proto`.
+Run `make proto` after changing `packages/pb/thoughts.proto`.
 
 The target runs the equivalent commands in both Go service directories:
 ```sh
 cd apps/apigateway   # or apps/postservice
-protoc --go_out=. --go-grpc_out=. ../../pb/thoughts.proto
+protoc --go_out=. --go-grpc_out=. ../../packages/pb/thoughts.proto
 ```
 The `go_package` option is `./genproto`, so outputs land in `<service>/genproto/`.
 

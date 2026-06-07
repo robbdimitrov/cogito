@@ -10,8 +10,8 @@ all: apigateway authservice database frontend imageservice postservice userservi
 .PHONY: proto
 proto:
 	@echo "Generating protobufs for Go services..."
-	@cd apps/apigateway && protoc -I../.. --go_out=. --go-grpc_out=. ../../pb/thoughts.proto
-	@cd apps/postservice && protoc -I../.. --go_out=. --go-grpc_out=. ../../pb/thoughts.proto
+	@cd apps/apigateway && protoc -I../.. --go_out=. --go-grpc_out=. ../../packages/pb/thoughts.proto
+	@cd apps/postservice && protoc -I../.. --go_out=. --go-grpc_out=. ../../packages/pb/thoughts.proto
 
 .PHONY: apigateway
 apigateway: proto
