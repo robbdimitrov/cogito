@@ -266,11 +266,7 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 				currentSessionID = cookie.Value
 			}
 
-			secret := os.Getenv("SESSION_HMAC_SECRET")
-			if secret == "" {
-				secret = "default-session-secret-change-me"
-			}
-			h := hmac.New(sha256.New, []byte(secret))
+			h := hmac.New(sha256.New, []byte(sessionHMACSecret()))
 			h.Write([]byte(currentSessionID))
 			currentHashedSessionID := base64.RawURLEncoding.EncodeToString(h.Sum(nil))
 

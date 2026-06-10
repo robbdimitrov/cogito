@@ -3,6 +3,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build_server(true)
         .build_client(false)
         .out_dir("src")
-        .compile(&["../../packages/pb/thoughts.proto"], &["../../packages/pb"])?;
+        .compile(
+            &["../../packages/pb/thoughts.proto"],
+            &["../../packages/pb"],
+        )?;
     Ok(())
 }

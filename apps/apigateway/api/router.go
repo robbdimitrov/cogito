@@ -106,6 +106,7 @@ func (r *router) proxyImageUpload(w http.ResponseWriter, req *http.Request) {
 
 	r.proxyImageRequest("/uploads", func(proxyReq *http.Request) {
 		proxyReq.Header.Set("x-user-id", userID)
+		proxyReq.Header.Set("internal-token", internalGRPCToken())
 	})(w, req)
 }
 

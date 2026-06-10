@@ -13,6 +13,7 @@ tower-http = { version = "0.5", features = ["fs", "trace"] }
 uuid = { version = "1.8", features = ["v4"] }
 serde_json = "1.0"
 async-trait = "0.1"
+subtle = "2"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["json"] }
 

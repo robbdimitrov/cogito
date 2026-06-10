@@ -30,10 +30,29 @@ pub fn create_router<D: ImageDb>(db: D, image_dir: String) -> Router {
     let state = Arc::new(AppState { db, image_dir });
 
     Router::new()
-        .route("/uploads", post(upload_handler::<D>))
+        .route(
+            "/uploads",
+            post(upload_handler::<D>).route_layer(middleware::from_fn(require_internal_token)),
+        )
         .nest_service("/uploads/", ServeDir::new(state.image_dir.clone()))
         .layer(middleware::from_fn(cache_image_responses))
         .with_state(state)
+}
+
+// Uploads are only reachable through the gateway, which forwards the shared
+// internal token. Reject direct requests so the x-user-id header cannot be spoofed.
+async fn require_internal_token(request: Request, next: Next) -> Response {
+    let provided = request
+        .headers()
+        .get("internal-token")
+        .and_then(|value| value.to_str().ok())
+        .unwrap_or("");
+
+    if crate::internal_auth::token_matches(provided, &crate::internal_auth::internal_grpc_token()) {
+        next.run(request).await
+    } else {
+        (StatusCode::UNAUTHORIZED, "Unauthorized").into_response()
+    }
 }
 
 async fn cache_image_responses(request: Request, next: Next) -> Response {
@@ -75,7 +94,10 @@ async fn upload_handler<D: ImageDb>(
     while let Some(mut field) = multipart
         .next_field()
         .await
-        .map_err(|e| (StatusCode::BAD_REQUEST, e.to_string()))?
+        .map_err(|e| {
+            tracing::warn!(request_id = %request_id, method = "POST /uploads", error = %e, "reading multipart field failed");
+            (StatusCode::BAD_REQUEST, "Invalid upload.".to_string())
+        })?
     {
         if field.name() != Some("image") {
             continue;
@@ -85,7 +107,7 @@ async fn upload_handler<D: ImageDb>(
             .await
             .map_err(|e| {
                 tracing::warn!(request_id = %request_id, method = "POST /uploads", error = %e, "creating upload directory failed");
-                (StatusCode::INTERNAL_SERVER_ERROR, e.to_string())
+                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.".to_string())
             })?;
 
         let upload_id = Uuid::new_v4().to_string();
@@ -95,7 +117,7 @@ async fn upload_handler<D: ImageDb>(
             .await
             .map_err(|e| {
                 tracing::warn!(request_id = %request_id, method = "POST /uploads", error = %e, "creating upload file failed");
-                (StatusCode::INTERNAL_SERVER_ERROR, e.to_string())
+                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.".to_string())
             })?;
 
         let mut total_bytes = 0;
@@ -105,7 +127,10 @@ async fn upload_handler<D: ImageDb>(
         while let Some(chunk) = field
             .chunk()
             .await
-            .map_err(|e| (StatusCode::BAD_REQUEST, e.to_string()))?
+            .map_err(|e| {
+                tracing::warn!(request_id = %request_id, method = "POST /uploads", error = %e, "reading upload chunk failed");
+                (StatusCode::BAD_REQUEST, "Invalid upload.".to_string())
+            })?
         {
             total_bytes += chunk.len();
             if total_bytes > limit {
@@ -123,7 +148,7 @@ async fn upload_handler<D: ImageDb>(
                 .await
                 .map_err(|e| {
                     tracing::warn!(request_id = %request_id, method = "POST /uploads", error = %e, "writing upload file failed");
-                    (StatusCode::INTERNAL_SERVER_ERROR, e.to_string())
+                    (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.".to_string())
                 })?;
         }
 
@@ -145,13 +170,13 @@ async fn upload_handler<D: ImageDb>(
             .await
             .map_err(|e| {
                 tracing::warn!(request_id = %request_id, method = "POST /uploads", error = %e, "finalizing upload file failed");
-                (StatusCode::INTERNAL_SERVER_ERROR, e.to_string())
+                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.".to_string())
             })?;
 
         if let Err(e) = state.db.insert_upload(&filename, user_id).await {
             tracing::warn!(request_id = %request_id, method = "POST /uploads", error = %e, "recording upload failed");
             let _ = fs::remove_file(&final_path).await;
-            return Err((StatusCode::INTERNAL_SERVER_ERROR, e.to_string()));
+            return Err((StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.".to_string()));
         }
 
         return Ok(Json(serde_json::json!({ "filename": filename })));
@@ -287,6 +312,10 @@ mod tests {
                 Request::builder()
                     .method(Method::POST)
                     .uri("/uploads")
+                    .header(
+                        "internal-token",
+                        crate::internal_auth::internal_grpc_token(),
+                    )
                     .body(Body::empty())
                     .unwrap(),
             )
@@ -295,6 +324,24 @@ mod tests {
 
         assert_eq!(response.status(), StatusCode::BAD_REQUEST);
         assert!(!response.headers().contains_key(CACHE_CONTROL));
+        fs::remove_dir_all(path).unwrap();
+    }
+
+    #[tokio::test]
+    async fn upload_without_internal_token_is_rejected() {
+        let (path, image_dir) = test_image_dir();
+        let response = create_router(MockDb, image_dir)
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/uploads")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
         fs::remove_dir_all(path).unwrap();
     }
 

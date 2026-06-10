@@ -4,9 +4,24 @@ use hmac::{Hmac, KeyInit, Mac};
 use rand::RngCore;
 use sha2::Sha256;
 use std::env;
+use std::sync::OnceLock;
 use tonic::{Request, Response, Status};
 
 type HmacSha256 = Hmac<Sha256>;
+
+// A precomputed Argon2 hash used to equalize verification time when an email is
+// not found, so response timing does not reveal whether an account exists.
+fn dummy_password_hash() -> &'static str {
+    static HASH: OnceLock<String> = OnceLock::new();
+    HASH.get_or_init(|| {
+        use argon2::password_hash::{PasswordHasher, SaltString, rand_core::OsRng};
+        let salt = SaltString::generate(&mut OsRng);
+        Argon2::default()
+            .hash_password(b"timing-equalizer", &salt)
+            .map(|hash| hash.to_string())
+            .unwrap_or_default()
+    })
+}
 
 fn hash_session_id(session_id: &str) -> String {
     let secret = env::var("SESSION_HMAC_SECRET")
@@ -88,7 +103,15 @@ impl<D: AuthDb> AuthService for Controller<D> {
                 session.id = session_id;
                 Ok(Response::new(session))
             }
-            None => Err(Status::unauthenticated("Incorrect email or password.")),
+            None => {
+                // Verify against a dummy hash so the not-found path costs the
+                // same as a wrong-password verification (prevents user enumeration).
+                if let Ok(parsed_hash) = PasswordHash::new(dummy_password_hash()) {
+                    let _ =
+                        Argon2::default().verify_password(req.password.as_bytes(), &parsed_hash);
+                }
+                Err(Status::unauthenticated("Incorrect email or password."))
+            }
         }
     }
 

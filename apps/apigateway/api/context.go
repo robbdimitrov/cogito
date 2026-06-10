@@ -12,6 +12,26 @@ import (
 )
 
 const defaultInternalGRPCToken = "dev-internal-grpc-token"
+const defaultSessionHMACSecret = "default-session-secret-change-me"
+
+func internalGRPCToken() string {
+	if token := os.Getenv("INTERNAL_GRPC_TOKEN"); token != "" {
+		return token
+	}
+	return defaultInternalGRPCToken
+}
+
+func sessionHMACSecret() string {
+	if secret := os.Getenv("SESSION_HMAC_SECRET"); secret != "" {
+		return secret
+	}
+	return defaultSessionHMACSecret
+}
+
+// secureCookies is opt-in via COOKIE_SECURE=true; local deploys run over HTTP.
+func secureCookies() bool {
+	return os.Getenv("COOKIE_SECURE") == "true"
+}
 
 type contextKey string
 
@@ -71,11 +91,7 @@ func appendUserIDHeader(ctx context.Context, r *http.Request) (context.Context, 
 }
 
 func appendInternalAuth(ctx context.Context) context.Context {
-	token := os.Getenv("INTERNAL_GRPC_TOKEN")
-	if token == "" {
-		token = defaultInternalGRPCToken
-	}
-	return metadata.AppendToOutgoingContext(ctx, "internal-token", token)
+	return metadata.AppendToOutgoingContext(ctx, "internal-token", internalGRPCToken())
 }
 
 func appendInternalAuthForRequest(ctx context.Context, r *http.Request) context.Context {
@@ -96,7 +112,7 @@ func createCookie(w http.ResponseWriter, sessionID string) {
 		Path:     "/",
 		Expires:  time.Now().Add(7 * 24 * time.Hour),
 		HttpOnly: true,
-		Secure:   os.Getenv("COOKIE_SECURE") == "true",
+		Secure:   secureCookies(),
 		SameSite: http.SameSiteStrictMode,
 	}
 	http.SetCookie(w, cookie)
@@ -110,7 +126,7 @@ func clearCookie(w http.ResponseWriter) {
 		Expires:  time.Unix(0, 0),
 		MaxAge:   -1,
 		HttpOnly: true,
-		Secure:   os.Getenv("COOKIE_SECURE") == "true",
+		Secure:   secureCookies(),
 		SameSite: http.SameSiteStrictMode,
 	}
 	http.SetCookie(w, cookie)

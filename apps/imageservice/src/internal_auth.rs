@@ -1,4 +1,5 @@
 use std::env;
+use subtle::ConstantTimeEq;
 use tonic::{Request, Status};
 
 const DEFAULT_INTERNAL_GRPC_TOKEN: &str = "dev-internal-grpc-token";
@@ -14,16 +15,22 @@ fn authenticate(req: Request<()>, expected: &str) -> Result<Request<()>, Status>
     let provided = req
         .metadata()
         .get("internal-token")
-        .and_then(|value| value.to_str().ok());
+        .and_then(|value| value.to_str().ok())
+        .unwrap_or("");
 
-    if provided == Some(expected) {
+    if token_matches(provided, expected) {
         Ok(req)
     } else {
         Err(Status::unauthenticated("Unauthenticated."))
     }
 }
 
-fn internal_grpc_token() -> String {
+/// Constant-time comparison of a provided token against the expected secret.
+pub fn token_matches(provided: &str, expected: &str) -> bool {
+    provided.as_bytes().ct_eq(expected.as_bytes()).into()
+}
+
+pub fn internal_grpc_token() -> String {
     env::var("INTERNAL_GRPC_TOKEN").unwrap_or_else(|_| DEFAULT_INTERNAL_GRPC_TOKEN.to_string())
 }
 

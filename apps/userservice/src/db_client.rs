@@ -303,7 +303,11 @@ impl UserDb for DbClient {
         limit: i32,
         _current_user_id: i32,
     ) -> Result<Vec<User>, SqlxError> {
-        let pattern = format!("{}%", query);
+        let escaped = query
+            .replace('\\', "\\\\")
+            .replace('%', "\\%")
+            .replace('_', "\\_");
+        let pattern = format!("{}%", escaped);
         let rows = sqlx::query(
             r#"SELECT id, name, username, email, bio, profile_photo_key, cover_photo_key,
                 0::int AS posts,
@@ -312,7 +316,7 @@ impl UserDb for DbClient {
                 0::int AS followers,
                 false AS followed,
                 created
-                FROM users WHERE username ILIKE $1
+                FROM users WHERE username ILIKE $1 ESCAPE '\'
                 LIMIT $2"#,
         )
         .bind(pattern)

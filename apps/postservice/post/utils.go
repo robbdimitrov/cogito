@@ -2,6 +2,7 @@ package post
 
 import (
 	"context"
+	"crypto/subtle"
 	"os"
 	"strconv"
 
@@ -38,7 +39,7 @@ func validateInternalAuth(ctx context.Context) error {
 		return newError(codes.Unauthenticated)
 	}
 	values := md.Get("internal-token")
-	if len(values) == 0 || values[0] != internalGRPCToken() {
+	if len(values) == 0 || subtle.ConstantTimeCompare([]byte(values[0]), []byte(internalGRPCToken())) != 1 {
 		return newError(codes.Unauthenticated)
 	}
 	return nil

@@ -8,8 +8,11 @@ mod internal_auth;
 mod logging;
 
 use std::env;
+use std::time::Duration;
 use thoughts::auth_service_server::AuthServiceServer;
 use tonic::transport::Server;
+
+const SESSION_CLEANUP_INTERVAL: Duration = Duration::from_secs(3600);
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -22,6 +25,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let db_client = db_client::DbClient::new(&db_url).await?;
     let pool = db_client.pool.clone();
+
+    // Periodically purge expired sessions instead of on every read path.
+    let cleanup_client = db_client.clone();
+    tokio::spawn(async move {
+        let mut interval = tokio::time::interval(SESSION_CLEANUP_INTERVAL);
+        loop {
+            interval.tick().await;
+            if let Err(e) = cleanup_client.delete_expired_sessions().await {
+                tracing::warn!(error = %e, "failed to delete expired sessions");
+            }
+        }
+    });
+
     let controller = controller::Controller::new(db_client);
 
     let shutdown_signal = async {

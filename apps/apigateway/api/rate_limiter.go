@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v4"
@@ -139,15 +138,15 @@ func rateLimitKey(r *http.Request, policy RateLimitPolicy) string {
 	return policy.Name + ":ip:" + clientIP(r)
 }
 
+// clientIP resolves the rate-limit identity from the connection's remote
+// address. X-Forwarded-For is intentionally ignored: it is attacker-controlled
+// and there is no trusted proxy in front of the gateway in local deploys.
 func clientIP(r *http.Request) string {
-	if forwarded := r.Header.Get("X-Forwarded-For"); forwarded != "" {
-		return strings.TrimSpace(strings.Split(forwarded, ",")[0])
-	}
 	host, _, err := net.SplitHostPort(r.RemoteAddr)
-	if err == nil {
-		return host
+	if err != nil {
+		return r.RemoteAddr
 	}
-	return r.RemoteAddr
+	return host
 }
 
 func envInt(key string, fallback int) int {

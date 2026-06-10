@@ -97,6 +97,7 @@ dependencies = [
  "rand",
  "sha2 0.11.0",
  "sqlx",
+ "subtle",
  "tokio",
  "tonic",
  "tonic-build",

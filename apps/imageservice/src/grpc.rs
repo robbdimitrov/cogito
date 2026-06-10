@@ -30,7 +30,7 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
             .await
             .map_err(|e| {
                 tracing::warn!(request_id = %request_id, method = "/thoughts.ImageService/VerifyUpload", error = %e, "verifying upload failed");
-                Status::internal(e.to_string())
+                Status::internal("Internal server error.")
             })?;
 
         if !is_valid {
@@ -51,7 +51,7 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
             .await
             .map_err(|e| {
                 tracing::warn!(request_id = %request_id, method = "/thoughts.ImageService/ConsumeUpload", error = %e, "consuming upload failed");
-                Status::internal(e.to_string())
+                Status::internal("Internal server error.")
             })?;
 
         Ok(Response::new(Empty {}))
@@ -79,7 +79,7 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
                 .await
                 .map_err(|e| {
                     tracing::warn!(request_id = %request_id, method = "/thoughts.ImageService/DeleteImage", error = %e, "deleting image failed");
-                    Status::internal(format!("Failed to delete file: {}", e))
+                    Status::internal("Internal server error.")
                 })?;
         }
 

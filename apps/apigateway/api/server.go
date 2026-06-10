@@ -22,9 +22,11 @@ func CreateServer(authAddr, postAddr, userAddr, imageAddr string) http.Handler {
 	rlStore := NewPostgresRateLimiterStore()
 	startRateLimitCleanup(rlStore)
 
-	handler = rateLimitMiddleware(rlStore)(handler)
+	// authGuard is innermost so rate limiting throttles requests before they
+	// reach session validation (and its per-request DB calls).
 	handler = authGuard(router.auth)(handler)
 	handler = newConcurrencyLimiter().middleware(handler)
+	handler = rateLimitMiddleware(rlStore)(handler)
 	handler = csrfMiddleware()(handler)
 	handler = bodyLimitMiddleware(2 * 1024 * 1024)(handler)
 	handler = secureHeadersMiddleware()(handler)
@@ -85,9 +87,9 @@ func loggerMiddleware() func(http.Handler) http.Handler {
 func secureHeadersMiddleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("X-XSS-Protection", "1; mode=block")
 			w.Header().Set("X-Content-Type-Options", "nosniff")
 			w.Header().Set("X-Frame-Options", "SAMEORIGIN")
+			w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
 			next.ServeHTTP(w, r)
 		})
 	}
@@ -118,17 +120,15 @@ func csrfMiddleware() func(http.Handler) http.Handler {
 					Value:    token,
 					Path:     "/",
 					HttpOnly: false,
+					Secure:   secureCookies(),
 					SameSite: http.SameSiteStrictMode,
 				})
 			}
 
-			if (r.Method == "POST" && r.URL.Path == "/sessions") ||
-				(r.Method == "POST" && r.URL.Path == "/users") ||
-				(r.Method == "GET" && r.URL.Path == "/") {
-				next.ServeHTTP(w, r)
-				return
-			}
-
+			// Safe methods (including the GET / health check) skip the
+			// double-submit check below. Login and signup are intentionally
+			// not exempt: the _csrf cookie is issued on page load, so clients
+			// must echo it via X-CSRF-Token to prevent login CSRF.
 			if r.Method != "GET" && r.Method != "HEAD" && r.Method != "OPTIONS" && r.Method != "TRACE" {
 				cookie, err := r.Cookie("_csrf")
 				headerToken := r.Header.Get("X-CSRF-Token")
