@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"log/slog"
 	"net/http"
 	"os"
 	"time"
@@ -13,6 +14,26 @@ import (
 
 const defaultInternalGRPCToken = "dev-internal-grpc-token"
 const defaultSessionHMACSecret = "default-session-secret-change-me"
+
+// ValidateSecrets warns when default secrets are in use and exits in production.
+// Call this from main before starting the server so os.Exit doesn't fire in tests.
+func ValidateSecrets() {
+	inProd := os.Getenv("APP_ENV") == "production"
+	if internalGRPCToken() == defaultInternalGRPCToken {
+		if inProd {
+			slog.Error("INTERNAL_GRPC_TOKEN must be set in production")
+			os.Exit(1)
+		}
+		slog.Warn("using default INTERNAL_GRPC_TOKEN — set env var before deploying")
+	}
+	if sessionHMACSecret() == defaultSessionHMACSecret {
+		if inProd {
+			slog.Error("SESSION_HMAC_SECRET must be set in production")
+			os.Exit(1)
+		}
+		slog.Warn("using default SESSION_HMAC_SECRET — set env var before deploying")
+	}
+}
 
 func internalGRPCToken() string {
 	if token := os.Getenv("INTERNAL_GRPC_TOKEN"); token != "" {

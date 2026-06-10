@@ -18,8 +18,8 @@ fn dummy_password_hash() -> &'static str {
         let salt = SaltString::generate(&mut OsRng);
         Argon2::default()
             .hash_password(b"timing-equalizer", &salt)
-            .map(|hash| hash.to_string())
-            .unwrap_or_default()
+            .expect("Argon2 timing-equalizer hash must succeed")
+            .to_string()
     })
 }
 

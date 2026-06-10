@@ -26,6 +26,7 @@ func main() {
 		imageAddr = "imageservice:8081"
 	}
 
+	api.ValidateSecrets()
 	handler := api.CreateServer(authAddr, postAddr, userAddr, imageAddr)
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%s", port),

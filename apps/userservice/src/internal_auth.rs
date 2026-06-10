@@ -26,7 +26,10 @@ fn authenticate(req: Request<()>, expected: &str) -> Result<Request<()>, Status>
 }
 
 fn internal_grpc_token() -> String {
-    env::var("INTERNAL_GRPC_TOKEN").unwrap_or_else(|_| DEFAULT_INTERNAL_GRPC_TOKEN.to_string())
+    match env::var("INTERNAL_GRPC_TOKEN") {
+        Ok(v) if !v.is_empty() => v,
+        _ => DEFAULT_INTERNAL_GRPC_TOKEN.to_string(),
+    }
 }
 
 #[cfg(test)]

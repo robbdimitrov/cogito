@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"crypto/rand"
+	"crypto/subtle"
 	"encoding/base64"
 	"log/slog"
 	"net/http"
@@ -22,11 +23,14 @@ func CreateServer(authAddr, postAddr, userAddr, imageAddr string) http.Handler {
 	rlStore := NewPostgresRateLimiterStore()
 	startRateLimitCleanup(rlStore)
 
-	// authGuard is innermost so rate limiting throttles requests before they
-	// reach session validation (and its per-request DB calls).
-	handler = authGuard(router.auth)(handler)
+	// authGuard runs before rateLimitMiddleware so the user ID is in context
+	// when the rate limit key is computed. Per-user keying is critical: without
+	// it, every request falls back to the IP key and all users share one bucket
+	// (all browser traffic arrives via the Next.js proxy pod, so RemoteAddr is
+	// always the same host).
 	handler = newConcurrencyLimiter().middleware(handler)
 	handler = rateLimitMiddleware(rlStore)(handler)
+	handler = authGuard(router.auth)(handler)
 	handler = csrfMiddleware()(handler)
 	handler = bodyLimitMiddleware(2 * 1024 * 1024)(handler)
 	handler = secureHeadersMiddleware()(handler)
@@ -130,9 +134,8 @@ func csrfMiddleware() func(http.Handler) http.Handler {
 			// not exempt: the _csrf cookie is issued on page load, so clients
 			// must echo it via X-CSRF-Token to prevent login CSRF.
 			if r.Method != "GET" && r.Method != "HEAD" && r.Method != "OPTIONS" && r.Method != "TRACE" {
-				cookie, err := r.Cookie("_csrf")
 				headerToken := r.Header.Get("X-CSRF-Token")
-				if err != nil || cookie.Value == "" || headerToken == "" || cookie.Value != headerToken {
+				if err != nil || cookie.Value == "" || headerToken == "" || subtle.ConstantTimeCompare([]byte(cookie.Value), []byte(headerToken)) != 1 {
 					http.Error(w, "Invalid CSRF token", http.StatusForbidden)
 					return
 				}

@@ -135,12 +135,17 @@ func rateLimitKey(r *http.Request, policy RateLimitPolicy) string {
 	if userID := getUserID(r); userID != "" {
 		return policy.Name + ":user:" + userID
 	}
+	// Session cookie is HttpOnly and server-issued — stable per-client identity
+	// that doesn't collapse to the proxy pod's IP for unauthenticated requests.
+	if cookie, err := r.Cookie("session"); err == nil && cookie.Value != "" {
+		return policy.Name + ":session:" + cookie.Value
+	}
 	return policy.Name + ":ip:" + clientIP(r)
 }
 
 // clientIP resolves the rate-limit identity from the connection's remote
 // address. X-Forwarded-For is intentionally ignored: it is attacker-controlled
-// and there is no trusted proxy in front of the gateway in local deploys.
+// and there is no trusted proxy in front of the gateway.
 func clientIP(r *http.Request) string {
 	host, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
