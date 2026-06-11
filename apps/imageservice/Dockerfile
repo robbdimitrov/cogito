@@ -4,7 +4,7 @@ WORKDIR /app
 
 RUN apk add --no-cache protobuf-dev
 
-COPY packages/pb ./packages/pb
+COPY pkg/pb ./pkg/pb
 COPY apps/imageservice ./apps/imageservice
 
 WORKDIR /app/apps/imageservice
