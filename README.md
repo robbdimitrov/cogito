@@ -13,6 +13,49 @@
 
 ## Architecture
 
+```mermaid
+graph TD
+    classDef user fill:transparent,stroke:transparent
+    classDef frontend fill:#0ea5e9,stroke:#0284c7,stroke-width:2px,color:#fff
+    classDef backend fill:#10b981,stroke:#059669,stroke-width:2px,color:#fff
+    classDef database fill:#f59e0b,stroke:#d97706,stroke-width:2px,color:#fff
+    classDef storage fill:#8b5cf6,stroke:#7c3aed,stroke-width:2px,color:#fff
+
+    User["👤 User"]:::user
+
+    subgraph Client ["Client"]
+        Web["📱 Frontend<br/>(Next.js)"]:::frontend
+    end
+
+    subgraph Gateway ["Gateway"]
+        API["🚪 API Gateway<br/>(Go)"]:::backend
+    end
+
+    subgraph Services ["Backend Services"]
+        Auth["🔑 Auth Service<br/>(Rust)"]:::backend
+        Users["👥 User Service<br/>(Rust)"]:::backend
+        Posts["📝 Post Service<br/>(Go)"]:::backend
+        Images["🖼️ Image Service<br/>(Rust)"]:::backend
+    end
+
+    subgraph Data ["Data & Storage"]
+        DB[("🗄️ Database<br/>(PostgreSQL)")]:::database
+        Vol["📁 Image Volume"]:::storage
+    end
+
+    User -->|HTTP Requests| Web
+    Web -->|REST API| API
+    API -->|gRPC| Auth
+    API -->|gRPC| Users
+    API -->|gRPC| Posts
+    API -->|gRPC, HTTP| Images
+    Auth -->|SQL Queries| DB
+    Users -->|SQL Queries| DB
+    Posts -->|SQL Queries| DB
+    Images -->|SQL Queries| DB
+    Images -->|File I/O| Vol
+```
+
 | Service | Language | Description |
 | --- | --- | --- |
 | [apigateway](/apps/apigateway) | Go | API Gateway routing HTTP traffic to internal gRPC backends. |
