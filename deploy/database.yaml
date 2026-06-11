@@ -17,6 +17,7 @@ metadata:
     app: thoughts
     tier: database
 spec:
+  replicas: 1
   strategy:
     type: Recreate
   selector:

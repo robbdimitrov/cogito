@@ -23,6 +23,7 @@ metadata:
     tier: backend
     component: authservice
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: thoughts
