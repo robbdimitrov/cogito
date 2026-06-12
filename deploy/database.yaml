@@ -2,24 +2,45 @@ apiVersion: v1
 kind: Service
 metadata:
   name: database
+  labels:
+    app: thoughts
+    tier: database
 spec:
   selector:
     app: thoughts
     tier: database
   ports:
-  - port: 5432
+  - name: postgres
+    port: 5432
+    targetPort: postgres
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: database-headless
+  labels:
+    app: thoughts
+    tier: database
+spec:
+  clusterIP: None
+  selector:
+    app: thoughts
+    tier: database
+  ports:
+  - name: postgres
+    port: 5432
+    targetPort: postgres
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: database
   labels:
     app: thoughts
     tier: database
 spec:
+  serviceName: database-headless
   replicas: 1
-  strategy:
-    type: Recreate
   selector:
     matchLabels:
       app: thoughts
@@ -30,12 +51,14 @@ spec:
         app: thoughts
         tier: database
     spec:
+      terminationGracePeriodSeconds: 60
       containers:
       - name: database
-        image: postgres:17-alpine
+        image: postgres:18.4-alpine
         imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 5432
+        - name: postgres
+          containerPort: 5432
         resources:
           limits:
             memory: 512Mi
@@ -52,9 +75,9 @@ spec:
         - name: POSTGRES_DB
           value: thoughts
         - name: PGDATA
-          value: /var/lib/postgresql/data/pgdata
+          value: /var/lib/postgresql/18/docker
         volumeMounts:
-        - mountPath: /var/lib/postgresql/data
+        - mountPath: /var/lib/postgresql
           name: database-storage
         startupProbe:
           exec:
@@ -77,7 +100,23 @@ spec:
           initialDelaySeconds: 5
           periodSeconds: 5
           timeoutSeconds: 3
-      volumes:
-        - name: database-storage
-          persistentVolumeClaim:
-            claimName: database-pv-claim
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+            - -d
+            - thoughts
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 6
+  volumeClaimTemplates:
+  - metadata:
+      name: database-storage
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 5Gi

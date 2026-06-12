@@ -15,7 +15,7 @@ REMOTE_PORT="${REMOTE_PORT:-8080}"
 PORT_FORWARD_LOG="${PORT_FORWARD_LOG:-/tmp/thoughts-port-forward-${LOCAL_PORT}.log}"
 PORT_FORWARD_PID_FILE="${PORT_FORWARD_PID_FILE:-/tmp/thoughts-port-forward-${LOCAL_PORT}.pid}"
 
-ROLL_OUT_DATABASE=(deployment/database)
+ROLL_OUT_DATABASE=(statefulset/database)
 ROLL_OUT_REST=(
   deployment/apigateway
   deployment/authservice
