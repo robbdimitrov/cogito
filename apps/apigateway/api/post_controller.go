@@ -11,7 +11,7 @@ import (
 
 	"unicode/utf8"
 
-	pb "github.com/robbdimitrov/thoughts/apps/apigateway/genproto"
+	pb "thoughts/apigateway/genproto"
 )
 
 type postController struct {

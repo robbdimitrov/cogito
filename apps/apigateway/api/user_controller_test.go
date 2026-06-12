@@ -11,7 +11,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	pb "github.com/robbdimitrov/thoughts/apps/apigateway/genproto"
+	pb "thoughts/apigateway/genproto"
 )
 
 type mockUserServiceClient struct {
@@ -82,19 +82,23 @@ func TestImageUploadProxy_ForwardsFrontendRouteWithUserHeader(t *testing.T) {
 	var gotPath string
 	var gotUserID string
 	var gotRequestID string
+	var gotInternalToken string
 
 	imageServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		gotPath = r.URL.Path
 		gotUserID = r.Header.Get("x-user-id")
 		gotRequestID = r.Header.Get("X-Request-ID")
+		gotInternalToken = r.Header.Get("internal-token")
 		json.NewEncoder(w).Encode(map[string]string{"filename": "new-profile.jpg"})
 	}))
 	defer imageServer.Close()
 
+	t.Setenv("INTERNAL_GRPC_TOKEN", "test-internal-token")
 	imageAddr := strings.TrimPrefix(imageServer.URL, "http://")
 	router := &router{imageAddr: imageAddr}
 
 	req := httptest.NewRequest("POST", "/uploads", bytes.NewBufferString("image-body"))
+	req.Header.Set("Connection", "internal-token")
 	req = setUserID(req, "42")
 	req = setRequestID(req, "req-test")
 	w := httptest.NewRecorder()
@@ -112,6 +116,9 @@ func TestImageUploadProxy_ForwardsFrontendRouteWithUserHeader(t *testing.T) {
 	}
 	if gotRequestID != "req-test" {
 		t.Errorf("Expected X-Request-ID header req-test, got %s", gotRequestID)
+	}
+	if gotInternalToken != "test-internal-token" {
+		t.Errorf("Expected internal-token header test-internal-token, got %s", gotInternalToken)
 	}
 	if got := w.Header().Get("Cache-Control"); got != "" {
 		t.Errorf("Expected upload response not to be cached, got %q", got)

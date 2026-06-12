@@ -1,4 +1,4 @@
-module github.com/robbdimitrov/thoughts/apps/apigateway
+module thoughts/apigateway
 
 go 1.26
 

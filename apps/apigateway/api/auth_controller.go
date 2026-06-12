@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	pb "github.com/robbdimitrov/thoughts/apps/apigateway/genproto"
+	pb "thoughts/apigateway/genproto"
 )
 
 type authController struct {

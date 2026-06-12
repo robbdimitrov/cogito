@@ -8,7 +8,7 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/robbdimitrov/thoughts/apps/postservice/post"
+	"thoughts/postservice/post"
 )
 
 func main() {

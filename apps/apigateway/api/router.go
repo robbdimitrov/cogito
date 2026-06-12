@@ -128,25 +128,27 @@ func (r *router) proxyImageRequest(path string, configure func(*http.Request)) h
 			return
 		}
 
-		proxy := httputil.NewSingleHostReverseProxy(targetURL)
+		proxy := &httputil.ReverseProxy{
+			Rewrite: func(proxyReq *httputil.ProxyRequest) {
+				proxyReq.SetURL(targetURL)
+				proxyReq.Out.Host = proxyReq.In.Host
+				proxyReq.Out.URL.Path = path
+				proxyReq.Out.URL.RawPath = ""
+				proxyReq.SetXForwarded()
+				if requestID := getRequestID(proxyReq.In); requestID != "" {
+					proxyReq.Out.Header.Set("X-Request-ID", requestID)
+				}
+				if configure != nil {
+					configure(proxyReq.Out)
+				}
+			},
+		}
 		if r.imageHTTP != nil && r.imageHTTP.Transport != nil {
 			proxy.Transport = r.imageHTTP.Transport
 		}
 		proxy.ErrorHandler = func(w http.ResponseWriter, req *http.Request, err error) {
 			slog.Warn("image proxy failed", "request_id", getRequestID(req), "error", err)
 			http.Error(w, "Image service unavailable", http.StatusServiceUnavailable)
-		}
-		originalDirector := proxy.Director
-		proxy.Director = func(proxyReq *http.Request) {
-			originalDirector(proxyReq)
-			proxyReq.URL.Path = path
-			proxyReq.URL.RawPath = ""
-			if requestID := getRequestID(req); requestID != "" {
-				proxyReq.Header.Set("X-Request-ID", requestID)
-			}
-			if configure != nil {
-				configure(proxyReq)
-			}
 		}
 		proxy.ServeHTTP(w, req)
 	}

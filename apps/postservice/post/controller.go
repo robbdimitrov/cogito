@@ -8,7 +8,7 @@ import (
 
 	"google.golang.org/grpc/codes"
 
-	pb "github.com/robbdimitrov/thoughts/apps/postservice/genproto"
+	pb "thoughts/postservice/genproto"
 )
 
 var hashtagPattern = regexp.MustCompile(`^[A-Za-z0-9_]{1,50}$`)
