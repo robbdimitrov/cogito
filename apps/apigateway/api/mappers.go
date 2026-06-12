@@ -60,3 +60,18 @@ func mapPost(p *pb.Post) post {
 	}
 	return result
 }
+
+// attachAuthors embeds the resolved author into a post and its nested
+// repost/quote posts, keyed by the post's UserID.
+func attachAuthors(p *post, authors map[int32]user) {
+	if a, ok := authors[p.UserID]; ok {
+		author := a
+		p.User = &author
+	}
+	if p.RepostOf != nil {
+		attachAuthors(p.RepostOf, authors)
+	}
+	if p.QuotePost != nil {
+		attachAuthors(p.QuotePost, authors)
+	}
+}

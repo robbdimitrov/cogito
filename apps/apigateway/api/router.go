@@ -34,7 +34,7 @@ func newRouter(authAddr, postAddr, userAddr, imageAddr string) *router {
 	imageBreaker := newCircuitBreaker("image-http")
 	return &router{
 		auth:             newAuthController(authAddr),
-		post:             newPostController(postAddr, imageAddr),
+		post:             newPostController(postAddr, userAddr, imageAddr),
 		user:             newUserController(userAddr, authAddr, imageAddr),
 		imageAddr:        imageAddr,
 		imageHTTPBreaker: imageBreaker,

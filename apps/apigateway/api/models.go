@@ -32,6 +32,7 @@ type post struct {
 	InReplyToID int32  `json:"inReplyToId,omitempty"`
 	QuoteOfID   int32  `json:"quoteOfId,omitempty"`
 	QuotePost   *post  `json:"quotePost,omitempty"`
+	User        *user  `json:"user,omitempty"`
 }
 
 type session struct {
