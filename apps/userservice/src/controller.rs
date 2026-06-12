@@ -1,7 +1,7 @@
 use crate::crypto::{generate_hash, validate_password};
 use crate::thoughts::user_service_server::UserService;
 use crate::thoughts::{
-    CreateUserRequest, Empty, GetUserByUsernameRequest, GetUsersRequest, Identifier,
+    CreateUserRequest, Empty, GetUserByUsernameRequest, GetUsersRequest, Identifier, Ids,
     SearchUsersRequest, UpdateUserRequest, User, UserRequest, Users,
 };
 use crate::utils::{get_user_id, is_valid_email};
@@ -34,6 +34,7 @@ pub trait UserDb: Send + Sync + 'static {
         username: &str,
         current_user_id: i32,
     ) -> Result<Option<User>, SqlxError>;
+    async fn get_users_by_ids(&self, ids: &[i32]) -> Result<Vec<User>, SqlxError>;
     async fn update_user(
         &self,
         user_id: i32,
@@ -244,6 +245,23 @@ impl<D: UserDb> UserService for Controller<D> {
             Ok(None) => Err(Status::not_found("Resource not found.")),
             Err(e) => {
                 tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/GetUserByUsername", error = %e, "getting user by username failed");
+                Err(Status::internal("Internal server error."))
+            }
+        }
+    }
+
+    async fn get_users_by_ids(&self, request: Request<Ids>) -> Result<Response<Users>, Status> {
+        let request_id = crate::logging::request_id(&request).to_string();
+        let req = request.into_inner();
+
+        if req.ids.is_empty() {
+            return Ok(Response::new(Users { users: vec![] }));
+        }
+
+        match self.db_client.get_users_by_ids(&req.ids).await {
+            Ok(users) => Ok(Response::new(Users { users })),
+            Err(e) => {
+                tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/GetUsersByIds", error = %e, "getting users by ids failed");
                 Err(Status::internal("Internal server error."))
             }
         }

@@ -133,6 +133,50 @@ func (x *Identifier) GetId() int32 {
 	return 0
 }
 
+type Ids struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Ids           []int32                `protobuf:"varint,1,rep,packed,name=ids,proto3" json:"ids,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Ids) Reset() {
+	*x = Ids{}
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Ids) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Ids) ProtoMessage() {}
+
+func (x *Ids) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Ids.ProtoReflect.Descriptor instead.
+func (*Ids) Descriptor() ([]byte, []int) {
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *Ids) GetIds() []int32 {
+	if x != nil {
+		return x.Ids
+	}
+	return nil
+}
+
 type UserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        int32                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
@@ -142,7 +186,7 @@ type UserRequest struct {
 
 func (x *UserRequest) Reset() {
 	*x = UserRequest{}
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[2]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -154,7 +198,7 @@ func (x *UserRequest) String() string {
 func (*UserRequest) ProtoMessage() {}
 
 func (x *UserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[2]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -167,7 +211,7 @@ func (x *UserRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserRequest.ProtoReflect.Descriptor instead.
 func (*UserRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{2}
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *UserRequest) GetUserId() int32 {
@@ -198,7 +242,7 @@ type User struct {
 
 func (x *User) Reset() {
 	*x = User{}
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[3]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -210,7 +254,7 @@ func (x *User) String() string {
 func (*User) ProtoMessage() {}
 
 func (x *User) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[3]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -223,7 +267,7 @@ func (x *User) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use User.ProtoReflect.Descriptor instead.
 func (*User) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{3}
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *User) GetId() int32 {
@@ -333,7 +377,7 @@ type UpdateUserRequest struct {
 
 func (x *UpdateUserRequest) Reset() {
 	*x = UpdateUserRequest{}
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[4]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -345,7 +389,7 @@ func (x *UpdateUserRequest) String() string {
 func (*UpdateUserRequest) ProtoMessage() {}
 
 func (x *UpdateUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[4]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -358,7 +402,7 @@ func (x *UpdateUserRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateUserRequest.ProtoReflect.Descriptor instead.
 func (*UpdateUserRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{4}
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *UpdateUserRequest) GetName() string {
@@ -428,7 +472,7 @@ type GetUsersRequest struct {
 
 func (x *GetUsersRequest) Reset() {
 	*x = GetUsersRequest{}
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[5]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -440,7 +484,7 @@ func (x *GetUsersRequest) String() string {
 func (*GetUsersRequest) ProtoMessage() {}
 
 func (x *GetUsersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[5]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -453,7 +497,7 @@ func (x *GetUsersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUsersRequest.ProtoReflect.Descriptor instead.
 func (*GetUsersRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{5}
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *GetUsersRequest) GetUserId() int32 {
@@ -486,7 +530,7 @@ type Users struct {
 
 func (x *Users) Reset() {
 	*x = Users{}
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[6]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -498,7 +542,7 @@ func (x *Users) String() string {
 func (*Users) ProtoMessage() {}
 
 func (x *Users) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[6]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -511,7 +555,7 @@ func (x *Users) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Users.ProtoReflect.Descriptor instead.
 func (*Users) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{6}
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *Users) GetUsers() []*User {
@@ -530,7 +574,7 @@ type GetUserByUsernameRequest struct {
 
 func (x *GetUserByUsernameRequest) Reset() {
 	*x = GetUserByUsernameRequest{}
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[7]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -542,7 +586,7 @@ func (x *GetUserByUsernameRequest) String() string {
 func (*GetUserByUsernameRequest) ProtoMessage() {}
 
 func (x *GetUserByUsernameRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[7]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -555,7 +599,7 @@ func (x *GetUserByUsernameRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserByUsernameRequest.ProtoReflect.Descriptor instead.
 func (*GetUserByUsernameRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{7}
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *GetUserByUsernameRequest) GetUsername() string {
@@ -575,7 +619,7 @@ type SearchUsersRequest struct {
 
 func (x *SearchUsersRequest) Reset() {
 	*x = SearchUsersRequest{}
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[8]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -587,7 +631,7 @@ func (x *SearchUsersRequest) String() string {
 func (*SearchUsersRequest) ProtoMessage() {}
 
 func (x *SearchUsersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[8]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -600,7 +644,7 @@ func (x *SearchUsersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SearchUsersRequest.ProtoReflect.Descriptor instead.
 func (*SearchUsersRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{8}
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *SearchUsersRequest) GetQuery() string {
@@ -625,7 +669,7 @@ type Empty struct {
 
 func (x *Empty) Reset() {
 	*x = Empty{}
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[9]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -637,7 +681,7 @@ func (x *Empty) String() string {
 func (*Empty) ProtoMessage() {}
 
 func (x *Empty) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[9]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -650,7 +694,7 @@ func (x *Empty) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Empty.ProtoReflect.Descriptor instead.
 func (*Empty) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{9}
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{10}
 }
 
 type Credentials struct {
@@ -663,7 +707,7 @@ type Credentials struct {
 
 func (x *Credentials) Reset() {
 	*x = Credentials{}
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[10]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -675,7 +719,7 @@ func (x *Credentials) String() string {
 func (*Credentials) ProtoMessage() {}
 
 func (x *Credentials) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[10]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -688,7 +732,7 @@ func (x *Credentials) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Credentials.ProtoReflect.Descriptor instead.
 func (*Credentials) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{10}
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *Credentials) GetEmail() string {
@@ -714,7 +758,7 @@ type SessionRequest struct {
 
 func (x *SessionRequest) Reset() {
 	*x = SessionRequest{}
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[11]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -726,7 +770,7 @@ func (x *SessionRequest) String() string {
 func (*SessionRequest) ProtoMessage() {}
 
 func (x *SessionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[11]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -739,7 +783,7 @@ func (x *SessionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SessionRequest.ProtoReflect.Descriptor instead.
 func (*SessionRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{11}
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *SessionRequest) GetSessionId() string {
@@ -760,7 +804,7 @@ type Session struct {
 
 func (x *Session) Reset() {
 	*x = Session{}
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[12]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -772,7 +816,7 @@ func (x *Session) String() string {
 func (*Session) ProtoMessage() {}
 
 func (x *Session) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[12]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -785,7 +829,7 @@ func (x *Session) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Session.ProtoReflect.Descriptor instead.
 func (*Session) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{12}
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *Session) GetId() string {
@@ -818,7 +862,7 @@ type Sessions struct {
 
 func (x *Sessions) Reset() {
 	*x = Sessions{}
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[13]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -830,7 +874,7 @@ func (x *Sessions) String() string {
 func (*Sessions) ProtoMessage() {}
 
 func (x *Sessions) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[13]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -843,7 +887,7 @@ func (x *Sessions) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Sessions.ProtoReflect.Descriptor instead.
 func (*Sessions) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{13}
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *Sessions) GetSessions() []*Session {
@@ -865,7 +909,7 @@ type CreatePostRequest struct {
 
 func (x *CreatePostRequest) Reset() {
 	*x = CreatePostRequest{}
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[14]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -877,7 +921,7 @@ func (x *CreatePostRequest) String() string {
 func (*CreatePostRequest) ProtoMessage() {}
 
 func (x *CreatePostRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[14]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -890,7 +934,7 @@ func (x *CreatePostRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreatePostRequest.ProtoReflect.Descriptor instead.
 func (*CreatePostRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{14}
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *CreatePostRequest) GetContent() string {
@@ -930,7 +974,7 @@ type PostRequest struct {
 
 func (x *PostRequest) Reset() {
 	*x = PostRequest{}
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[15]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -942,7 +986,7 @@ func (x *PostRequest) String() string {
 func (*PostRequest) ProtoMessage() {}
 
 func (x *PostRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[15]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -955,7 +999,7 @@ func (x *PostRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PostRequest.ProtoReflect.Descriptor instead.
 func (*PostRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{15}
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *PostRequest) GetPostId() int32 {
@@ -988,7 +1032,7 @@ type Post struct {
 
 func (x *Post) Reset() {
 	*x = Post{}
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[16]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1000,7 +1044,7 @@ func (x *Post) String() string {
 func (*Post) ProtoMessage() {}
 
 func (x *Post) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[16]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1013,7 +1057,7 @@ func (x *Post) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Post.ProtoReflect.Descriptor instead.
 func (*Post) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{16}
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *Post) GetId() int32 {
@@ -1131,7 +1175,7 @@ type GetFeedRequest struct {
 
 func (x *GetFeedRequest) Reset() {
 	*x = GetFeedRequest{}
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[17]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1143,7 +1187,7 @@ func (x *GetFeedRequest) String() string {
 func (*GetFeedRequest) ProtoMessage() {}
 
 func (x *GetFeedRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[17]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1156,7 +1200,7 @@ func (x *GetFeedRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetFeedRequest.ProtoReflect.Descriptor instead.
 func (*GetFeedRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{17}
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *GetFeedRequest) GetPage() int32 {
@@ -1182,7 +1226,7 @@ type Posts struct {
 
 func (x *Posts) Reset() {
 	*x = Posts{}
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[18]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1194,7 +1238,7 @@ func (x *Posts) String() string {
 func (*Posts) ProtoMessage() {}
 
 func (x *Posts) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[18]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1207,7 +1251,7 @@ func (x *Posts) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Posts.ProtoReflect.Descriptor instead.
 func (*Posts) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{18}
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *Posts) GetPosts() []*Post {
@@ -1228,7 +1272,7 @@ type GetPostsRequest struct {
 
 func (x *GetPostsRequest) Reset() {
 	*x = GetPostsRequest{}
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[19]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1240,7 +1284,7 @@ func (x *GetPostsRequest) String() string {
 func (*GetPostsRequest) ProtoMessage() {}
 
 func (x *GetPostsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[19]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1253,7 +1297,7 @@ func (x *GetPostsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetPostsRequest.ProtoReflect.Descriptor instead.
 func (*GetPostsRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{19}
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *GetPostsRequest) GetUserId() int32 {
@@ -1288,7 +1332,7 @@ type GetHashtagPostsRequest struct {
 
 func (x *GetHashtagPostsRequest) Reset() {
 	*x = GetHashtagPostsRequest{}
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[20]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1300,7 +1344,7 @@ func (x *GetHashtagPostsRequest) String() string {
 func (*GetHashtagPostsRequest) ProtoMessage() {}
 
 func (x *GetHashtagPostsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[20]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1313,7 +1357,7 @@ func (x *GetHashtagPostsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetHashtagPostsRequest.ProtoReflect.Descriptor instead.
 func (*GetHashtagPostsRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{20}
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *GetHashtagPostsRequest) GetTag() string {
@@ -1348,7 +1392,7 @@ type GetRepliesRequest struct {
 
 func (x *GetRepliesRequest) Reset() {
 	*x = GetRepliesRequest{}
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[21]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1360,7 +1404,7 @@ func (x *GetRepliesRequest) String() string {
 func (*GetRepliesRequest) ProtoMessage() {}
 
 func (x *GetRepliesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[21]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1373,7 +1417,7 @@ func (x *GetRepliesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRepliesRequest.ProtoReflect.Descriptor instead.
 func (*GetRepliesRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{21}
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *GetRepliesRequest) GetPostId() int32 {
@@ -1407,7 +1451,7 @@ type VerifyUploadRequest struct {
 
 func (x *VerifyUploadRequest) Reset() {
 	*x = VerifyUploadRequest{}
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[22]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1419,7 +1463,7 @@ func (x *VerifyUploadRequest) String() string {
 func (*VerifyUploadRequest) ProtoMessage() {}
 
 func (x *VerifyUploadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[22]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1432,7 +1476,7 @@ func (x *VerifyUploadRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyUploadRequest.ProtoReflect.Descriptor instead.
 func (*VerifyUploadRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{22}
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *VerifyUploadRequest) GetFilename() string {
@@ -1458,7 +1502,7 @@ type ConsumeUploadRequest struct {
 
 func (x *ConsumeUploadRequest) Reset() {
 	*x = ConsumeUploadRequest{}
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[23]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1470,7 +1514,7 @@ func (x *ConsumeUploadRequest) String() string {
 func (*ConsumeUploadRequest) ProtoMessage() {}
 
 func (x *ConsumeUploadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[23]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1483,7 +1527,7 @@ func (x *ConsumeUploadRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConsumeUploadRequest.ProtoReflect.Descriptor instead.
 func (*ConsumeUploadRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{23}
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *ConsumeUploadRequest) GetFilename() string {
@@ -1502,7 +1546,7 @@ type DeleteImageRequest struct {
 
 func (x *DeleteImageRequest) Reset() {
 	*x = DeleteImageRequest{}
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[24]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1514,7 +1558,7 @@ func (x *DeleteImageRequest) String() string {
 func (*DeleteImageRequest) ProtoMessage() {}
 
 func (x *DeleteImageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[24]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1527,7 +1571,7 @@ func (x *DeleteImageRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteImageRequest.ProtoReflect.Descriptor instead.
 func (*DeleteImageRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{24}
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *DeleteImageRequest) GetFilename() string {
@@ -1549,7 +1593,9 @@ const file_pkg_pb_thoughts_proto_rawDesc = "" +
 	"\bpassword\x18\x04 \x01(\tR\bpassword\"\x1c\n" +
 	"\n" +
 	"Identifier\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x05R\x02id\"&\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\"\x17\n" +
+	"\x03Ids\x12\x10\n" +
+	"\x03ids\x18\x01 \x03(\x05R\x03ids\"&\n" +
 	"\vUserRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\x05R\x06userId\"\xe0\x02\n" +
 	"\x04User\x12\x0e\n" +
@@ -1655,12 +1701,13 @@ const file_pkg_pb_thoughts_proto_rawDesc = "" +
 	"\x14ConsumeUploadRequest\x12\x1a\n" +
 	"\bfilename\x18\x01 \x01(\tR\bfilename\"0\n" +
 	"\x12DeleteImageRequest\x12\x1a\n" +
-	"\bfilename\x18\x01 \x01(\tR\bfilename2\xa9\x04\n" +
+	"\bfilename\x18\x01 \x01(\tR\bfilename2\xda\x04\n" +
 	"\vUserService\x12?\n" +
 	"\n" +
 	"CreateUser\x12\x1b.thoughts.CreateUserRequest\x1a\x14.thoughts.Identifier\x120\n" +
 	"\aGetUser\x12\x15.thoughts.UserRequest\x1a\x0e.thoughts.User\x12G\n" +
-	"\x11GetUserByUsername\x12\".thoughts.GetUserByUsernameRequest\x1a\x0e.thoughts.User\x12:\n" +
+	"\x11GetUserByUsername\x12\".thoughts.GetUserByUsernameRequest\x1a\x0e.thoughts.User\x12/\n" +
+	"\rGetUsersByIds\x12\r.thoughts.Ids\x1a\x0f.thoughts.Users\x12:\n" +
 	"\n" +
 	"UpdateUser\x12\x1b.thoughts.UpdateUserRequest\x1a\x0f.thoughts.Empty\x12:\n" +
 	"\fGetFollowing\x12\x19.thoughts.GetUsersRequest\x1a\x0f.thoughts.Users\x12:\n" +
@@ -1674,7 +1721,7 @@ const file_pkg_pb_thoughts_proto_rawDesc = "" +
 	"\n" +
 	"GetSession\x12\x18.thoughts.SessionRequest\x1a\x11.thoughts.Session\x12:\n" +
 	"\rDeleteSession\x12\x18.thoughts.SessionRequest\x1a\x0f.thoughts.Empty\x128\n" +
-	"\vGetSessions\x12\x15.thoughts.UserRequest\x1a\x12.thoughts.Sessions2\xbb\x05\n" +
+	"\vGetSessions\x12\x15.thoughts.UserRequest\x1a\x12.thoughts.Sessions2\xec\x05\n" +
 	"\vPostService\x12?\n" +
 	"\n" +
 	"CreatePost\x12\x1b.thoughts.CreatePostRequest\x1a\x14.thoughts.Identifier\x124\n" +
@@ -1682,7 +1729,8 @@ const file_pkg_pb_thoughts_proto_rawDesc = "" +
 	"\bGetPosts\x12\x19.thoughts.GetPostsRequest\x1a\x0f.thoughts.Posts\x12;\n" +
 	"\rGetLikedPosts\x12\x19.thoughts.GetPostsRequest\x1a\x0f.thoughts.Posts\x12D\n" +
 	"\x0fGetHashtagPosts\x12 .thoughts.GetHashtagPostsRequest\x1a\x0f.thoughts.Posts\x120\n" +
-	"\aGetPost\x12\x15.thoughts.PostRequest\x1a\x0e.thoughts.Post\x124\n" +
+	"\aGetPost\x12\x15.thoughts.PostRequest\x1a\x0e.thoughts.Post\x12/\n" +
+	"\rGetPostsByIds\x12\r.thoughts.Ids\x1a\x0f.thoughts.Posts\x124\n" +
 	"\n" +
 	"DeletePost\x12\x15.thoughts.PostRequest\x1a\x0f.thoughts.Empty\x122\n" +
 	"\bLikePost\x12\x15.thoughts.PostRequest\x1a\x0f.thoughts.Empty\x124\n" +
@@ -1711,98 +1759,103 @@ func file_pkg_pb_thoughts_proto_rawDescGZIP() []byte {
 	return file_pkg_pb_thoughts_proto_rawDescData
 }
 
-var file_pkg_pb_thoughts_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
+var file_pkg_pb_thoughts_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
 var file_pkg_pb_thoughts_proto_goTypes = []any{
 	(*CreateUserRequest)(nil),        // 0: thoughts.CreateUserRequest
 	(*Identifier)(nil),               // 1: thoughts.Identifier
-	(*UserRequest)(nil),              // 2: thoughts.UserRequest
-	(*User)(nil),                     // 3: thoughts.User
-	(*UpdateUserRequest)(nil),        // 4: thoughts.UpdateUserRequest
-	(*GetUsersRequest)(nil),          // 5: thoughts.GetUsersRequest
-	(*Users)(nil),                    // 6: thoughts.Users
-	(*GetUserByUsernameRequest)(nil), // 7: thoughts.GetUserByUsernameRequest
-	(*SearchUsersRequest)(nil),       // 8: thoughts.SearchUsersRequest
-	(*Empty)(nil),                    // 9: thoughts.Empty
-	(*Credentials)(nil),              // 10: thoughts.Credentials
-	(*SessionRequest)(nil),           // 11: thoughts.SessionRequest
-	(*Session)(nil),                  // 12: thoughts.Session
-	(*Sessions)(nil),                 // 13: thoughts.Sessions
-	(*CreatePostRequest)(nil),        // 14: thoughts.CreatePostRequest
-	(*PostRequest)(nil),              // 15: thoughts.PostRequest
-	(*Post)(nil),                     // 16: thoughts.Post
-	(*GetFeedRequest)(nil),           // 17: thoughts.GetFeedRequest
-	(*Posts)(nil),                    // 18: thoughts.Posts
-	(*GetPostsRequest)(nil),          // 19: thoughts.GetPostsRequest
-	(*GetHashtagPostsRequest)(nil),   // 20: thoughts.GetHashtagPostsRequest
-	(*GetRepliesRequest)(nil),        // 21: thoughts.GetRepliesRequest
-	(*VerifyUploadRequest)(nil),      // 22: thoughts.VerifyUploadRequest
-	(*ConsumeUploadRequest)(nil),     // 23: thoughts.ConsumeUploadRequest
-	(*DeleteImageRequest)(nil),       // 24: thoughts.DeleteImageRequest
+	(*Ids)(nil),                      // 2: thoughts.Ids
+	(*UserRequest)(nil),              // 3: thoughts.UserRequest
+	(*User)(nil),                     // 4: thoughts.User
+	(*UpdateUserRequest)(nil),        // 5: thoughts.UpdateUserRequest
+	(*GetUsersRequest)(nil),          // 6: thoughts.GetUsersRequest
+	(*Users)(nil),                    // 7: thoughts.Users
+	(*GetUserByUsernameRequest)(nil), // 8: thoughts.GetUserByUsernameRequest
+	(*SearchUsersRequest)(nil),       // 9: thoughts.SearchUsersRequest
+	(*Empty)(nil),                    // 10: thoughts.Empty
+	(*Credentials)(nil),              // 11: thoughts.Credentials
+	(*SessionRequest)(nil),           // 12: thoughts.SessionRequest
+	(*Session)(nil),                  // 13: thoughts.Session
+	(*Sessions)(nil),                 // 14: thoughts.Sessions
+	(*CreatePostRequest)(nil),        // 15: thoughts.CreatePostRequest
+	(*PostRequest)(nil),              // 16: thoughts.PostRequest
+	(*Post)(nil),                     // 17: thoughts.Post
+	(*GetFeedRequest)(nil),           // 18: thoughts.GetFeedRequest
+	(*Posts)(nil),                    // 19: thoughts.Posts
+	(*GetPostsRequest)(nil),          // 20: thoughts.GetPostsRequest
+	(*GetHashtagPostsRequest)(nil),   // 21: thoughts.GetHashtagPostsRequest
+	(*GetRepliesRequest)(nil),        // 22: thoughts.GetRepliesRequest
+	(*VerifyUploadRequest)(nil),      // 23: thoughts.VerifyUploadRequest
+	(*ConsumeUploadRequest)(nil),     // 24: thoughts.ConsumeUploadRequest
+	(*DeleteImageRequest)(nil),       // 25: thoughts.DeleteImageRequest
 }
 var file_pkg_pb_thoughts_proto_depIdxs = []int32{
-	3,  // 0: thoughts.Users.users:type_name -> thoughts.User
-	12, // 1: thoughts.Sessions.sessions:type_name -> thoughts.Session
-	16, // 2: thoughts.Post.quote_post:type_name -> thoughts.Post
-	16, // 3: thoughts.Post.repost_of:type_name -> thoughts.Post
-	16, // 4: thoughts.Posts.posts:type_name -> thoughts.Post
+	4,  // 0: thoughts.Users.users:type_name -> thoughts.User
+	13, // 1: thoughts.Sessions.sessions:type_name -> thoughts.Session
+	17, // 2: thoughts.Post.quote_post:type_name -> thoughts.Post
+	17, // 3: thoughts.Post.repost_of:type_name -> thoughts.Post
+	17, // 4: thoughts.Posts.posts:type_name -> thoughts.Post
 	0,  // 5: thoughts.UserService.CreateUser:input_type -> thoughts.CreateUserRequest
-	2,  // 6: thoughts.UserService.GetUser:input_type -> thoughts.UserRequest
-	7,  // 7: thoughts.UserService.GetUserByUsername:input_type -> thoughts.GetUserByUsernameRequest
-	4,  // 8: thoughts.UserService.UpdateUser:input_type -> thoughts.UpdateUserRequest
-	5,  // 9: thoughts.UserService.GetFollowing:input_type -> thoughts.GetUsersRequest
-	5,  // 10: thoughts.UserService.GetFollowers:input_type -> thoughts.GetUsersRequest
-	2,  // 11: thoughts.UserService.FollowUser:input_type -> thoughts.UserRequest
-	2,  // 12: thoughts.UserService.UnfollowUser:input_type -> thoughts.UserRequest
-	8,  // 13: thoughts.UserService.SearchUsers:input_type -> thoughts.SearchUsersRequest
-	10, // 14: thoughts.AuthService.CreateSession:input_type -> thoughts.Credentials
-	11, // 15: thoughts.AuthService.GetSession:input_type -> thoughts.SessionRequest
-	11, // 16: thoughts.AuthService.DeleteSession:input_type -> thoughts.SessionRequest
-	2,  // 17: thoughts.AuthService.GetSessions:input_type -> thoughts.UserRequest
-	14, // 18: thoughts.PostService.CreatePost:input_type -> thoughts.CreatePostRequest
-	17, // 19: thoughts.PostService.GetFeed:input_type -> thoughts.GetFeedRequest
-	19, // 20: thoughts.PostService.GetPosts:input_type -> thoughts.GetPostsRequest
-	19, // 21: thoughts.PostService.GetLikedPosts:input_type -> thoughts.GetPostsRequest
-	20, // 22: thoughts.PostService.GetHashtagPosts:input_type -> thoughts.GetHashtagPostsRequest
-	15, // 23: thoughts.PostService.GetPost:input_type -> thoughts.PostRequest
-	15, // 24: thoughts.PostService.DeletePost:input_type -> thoughts.PostRequest
-	15, // 25: thoughts.PostService.LikePost:input_type -> thoughts.PostRequest
-	15, // 26: thoughts.PostService.UnlikePost:input_type -> thoughts.PostRequest
-	15, // 27: thoughts.PostService.RepostPost:input_type -> thoughts.PostRequest
-	15, // 28: thoughts.PostService.RemoveRepost:input_type -> thoughts.PostRequest
-	21, // 29: thoughts.PostService.GetReplies:input_type -> thoughts.GetRepliesRequest
-	22, // 30: thoughts.ImageService.VerifyUpload:input_type -> thoughts.VerifyUploadRequest
-	23, // 31: thoughts.ImageService.ConsumeUpload:input_type -> thoughts.ConsumeUploadRequest
-	24, // 32: thoughts.ImageService.DeleteImage:input_type -> thoughts.DeleteImageRequest
-	1,  // 33: thoughts.UserService.CreateUser:output_type -> thoughts.Identifier
-	3,  // 34: thoughts.UserService.GetUser:output_type -> thoughts.User
-	3,  // 35: thoughts.UserService.GetUserByUsername:output_type -> thoughts.User
-	9,  // 36: thoughts.UserService.UpdateUser:output_type -> thoughts.Empty
-	6,  // 37: thoughts.UserService.GetFollowing:output_type -> thoughts.Users
-	6,  // 38: thoughts.UserService.GetFollowers:output_type -> thoughts.Users
-	9,  // 39: thoughts.UserService.FollowUser:output_type -> thoughts.Empty
-	9,  // 40: thoughts.UserService.UnfollowUser:output_type -> thoughts.Empty
-	6,  // 41: thoughts.UserService.SearchUsers:output_type -> thoughts.Users
-	12, // 42: thoughts.AuthService.CreateSession:output_type -> thoughts.Session
-	12, // 43: thoughts.AuthService.GetSession:output_type -> thoughts.Session
-	9,  // 44: thoughts.AuthService.DeleteSession:output_type -> thoughts.Empty
-	13, // 45: thoughts.AuthService.GetSessions:output_type -> thoughts.Sessions
-	1,  // 46: thoughts.PostService.CreatePost:output_type -> thoughts.Identifier
-	18, // 47: thoughts.PostService.GetFeed:output_type -> thoughts.Posts
-	18, // 48: thoughts.PostService.GetPosts:output_type -> thoughts.Posts
-	18, // 49: thoughts.PostService.GetLikedPosts:output_type -> thoughts.Posts
-	18, // 50: thoughts.PostService.GetHashtagPosts:output_type -> thoughts.Posts
-	16, // 51: thoughts.PostService.GetPost:output_type -> thoughts.Post
-	9,  // 52: thoughts.PostService.DeletePost:output_type -> thoughts.Empty
-	9,  // 53: thoughts.PostService.LikePost:output_type -> thoughts.Empty
-	9,  // 54: thoughts.PostService.UnlikePost:output_type -> thoughts.Empty
-	9,  // 55: thoughts.PostService.RepostPost:output_type -> thoughts.Empty
-	9,  // 56: thoughts.PostService.RemoveRepost:output_type -> thoughts.Empty
-	18, // 57: thoughts.PostService.GetReplies:output_type -> thoughts.Posts
-	9,  // 58: thoughts.ImageService.VerifyUpload:output_type -> thoughts.Empty
-	9,  // 59: thoughts.ImageService.ConsumeUpload:output_type -> thoughts.Empty
-	9,  // 60: thoughts.ImageService.DeleteImage:output_type -> thoughts.Empty
-	33, // [33:61] is the sub-list for method output_type
-	5,  // [5:33] is the sub-list for method input_type
+	3,  // 6: thoughts.UserService.GetUser:input_type -> thoughts.UserRequest
+	8,  // 7: thoughts.UserService.GetUserByUsername:input_type -> thoughts.GetUserByUsernameRequest
+	2,  // 8: thoughts.UserService.GetUsersByIds:input_type -> thoughts.Ids
+	5,  // 9: thoughts.UserService.UpdateUser:input_type -> thoughts.UpdateUserRequest
+	6,  // 10: thoughts.UserService.GetFollowing:input_type -> thoughts.GetUsersRequest
+	6,  // 11: thoughts.UserService.GetFollowers:input_type -> thoughts.GetUsersRequest
+	3,  // 12: thoughts.UserService.FollowUser:input_type -> thoughts.UserRequest
+	3,  // 13: thoughts.UserService.UnfollowUser:input_type -> thoughts.UserRequest
+	9,  // 14: thoughts.UserService.SearchUsers:input_type -> thoughts.SearchUsersRequest
+	11, // 15: thoughts.AuthService.CreateSession:input_type -> thoughts.Credentials
+	12, // 16: thoughts.AuthService.GetSession:input_type -> thoughts.SessionRequest
+	12, // 17: thoughts.AuthService.DeleteSession:input_type -> thoughts.SessionRequest
+	3,  // 18: thoughts.AuthService.GetSessions:input_type -> thoughts.UserRequest
+	15, // 19: thoughts.PostService.CreatePost:input_type -> thoughts.CreatePostRequest
+	18, // 20: thoughts.PostService.GetFeed:input_type -> thoughts.GetFeedRequest
+	20, // 21: thoughts.PostService.GetPosts:input_type -> thoughts.GetPostsRequest
+	20, // 22: thoughts.PostService.GetLikedPosts:input_type -> thoughts.GetPostsRequest
+	21, // 23: thoughts.PostService.GetHashtagPosts:input_type -> thoughts.GetHashtagPostsRequest
+	16, // 24: thoughts.PostService.GetPost:input_type -> thoughts.PostRequest
+	2,  // 25: thoughts.PostService.GetPostsByIds:input_type -> thoughts.Ids
+	16, // 26: thoughts.PostService.DeletePost:input_type -> thoughts.PostRequest
+	16, // 27: thoughts.PostService.LikePost:input_type -> thoughts.PostRequest
+	16, // 28: thoughts.PostService.UnlikePost:input_type -> thoughts.PostRequest
+	16, // 29: thoughts.PostService.RepostPost:input_type -> thoughts.PostRequest
+	16, // 30: thoughts.PostService.RemoveRepost:input_type -> thoughts.PostRequest
+	22, // 31: thoughts.PostService.GetReplies:input_type -> thoughts.GetRepliesRequest
+	23, // 32: thoughts.ImageService.VerifyUpload:input_type -> thoughts.VerifyUploadRequest
+	24, // 33: thoughts.ImageService.ConsumeUpload:input_type -> thoughts.ConsumeUploadRequest
+	25, // 34: thoughts.ImageService.DeleteImage:input_type -> thoughts.DeleteImageRequest
+	1,  // 35: thoughts.UserService.CreateUser:output_type -> thoughts.Identifier
+	4,  // 36: thoughts.UserService.GetUser:output_type -> thoughts.User
+	4,  // 37: thoughts.UserService.GetUserByUsername:output_type -> thoughts.User
+	7,  // 38: thoughts.UserService.GetUsersByIds:output_type -> thoughts.Users
+	10, // 39: thoughts.UserService.UpdateUser:output_type -> thoughts.Empty
+	7,  // 40: thoughts.UserService.GetFollowing:output_type -> thoughts.Users
+	7,  // 41: thoughts.UserService.GetFollowers:output_type -> thoughts.Users
+	10, // 42: thoughts.UserService.FollowUser:output_type -> thoughts.Empty
+	10, // 43: thoughts.UserService.UnfollowUser:output_type -> thoughts.Empty
+	7,  // 44: thoughts.UserService.SearchUsers:output_type -> thoughts.Users
+	13, // 45: thoughts.AuthService.CreateSession:output_type -> thoughts.Session
+	13, // 46: thoughts.AuthService.GetSession:output_type -> thoughts.Session
+	10, // 47: thoughts.AuthService.DeleteSession:output_type -> thoughts.Empty
+	14, // 48: thoughts.AuthService.GetSessions:output_type -> thoughts.Sessions
+	1,  // 49: thoughts.PostService.CreatePost:output_type -> thoughts.Identifier
+	19, // 50: thoughts.PostService.GetFeed:output_type -> thoughts.Posts
+	19, // 51: thoughts.PostService.GetPosts:output_type -> thoughts.Posts
+	19, // 52: thoughts.PostService.GetLikedPosts:output_type -> thoughts.Posts
+	19, // 53: thoughts.PostService.GetHashtagPosts:output_type -> thoughts.Posts
+	17, // 54: thoughts.PostService.GetPost:output_type -> thoughts.Post
+	19, // 55: thoughts.PostService.GetPostsByIds:output_type -> thoughts.Posts
+	10, // 56: thoughts.PostService.DeletePost:output_type -> thoughts.Empty
+	10, // 57: thoughts.PostService.LikePost:output_type -> thoughts.Empty
+	10, // 58: thoughts.PostService.UnlikePost:output_type -> thoughts.Empty
+	10, // 59: thoughts.PostService.RepostPost:output_type -> thoughts.Empty
+	10, // 60: thoughts.PostService.RemoveRepost:output_type -> thoughts.Empty
+	19, // 61: thoughts.PostService.GetReplies:output_type -> thoughts.Posts
+	10, // 62: thoughts.ImageService.VerifyUpload:output_type -> thoughts.Empty
+	10, // 63: thoughts.ImageService.ConsumeUpload:output_type -> thoughts.Empty
+	10, // 64: thoughts.ImageService.DeleteImage:output_type -> thoughts.Empty
+	35, // [35:65] is the sub-list for method output_type
+	5,  // [5:35] is the sub-list for method input_type
 	5,  // [5:5] is the sub-list for extension type_name
 	5,  // [5:5] is the sub-list for extension extendee
 	0,  // [0:5] is the sub-list for field type_name
@@ -1813,16 +1866,16 @@ func file_pkg_pb_thoughts_proto_init() {
 	if File_pkg_pb_thoughts_proto != nil {
 		return
 	}
-	file_pkg_pb_thoughts_proto_msgTypes[4].OneofWrappers = []any{}
-	file_pkg_pb_thoughts_proto_msgTypes[14].OneofWrappers = []any{}
-	file_pkg_pb_thoughts_proto_msgTypes[16].OneofWrappers = []any{}
+	file_pkg_pb_thoughts_proto_msgTypes[5].OneofWrappers = []any{}
+	file_pkg_pb_thoughts_proto_msgTypes[15].OneofWrappers = []any{}
+	file_pkg_pb_thoughts_proto_msgTypes[17].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_pb_thoughts_proto_rawDesc), len(file_pkg_pb_thoughts_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   25,
+			NumMessages:   26,
 			NumExtensions: 0,
 			NumServices:   4,
 		},

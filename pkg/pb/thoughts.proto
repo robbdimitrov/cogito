@@ -16,6 +16,10 @@ message Identifier {
   int32 id = 1;
 }
 
+message Ids {
+  repeated int32 ids = 1;
+}
+
 message UserRequest {
   int32 user_id = 1;
 }
@@ -70,6 +74,7 @@ service UserService {
   rpc CreateUser(CreateUserRequest) returns (Identifier);
   rpc GetUser(UserRequest) returns (User);
   rpc GetUserByUsername(GetUserByUsernameRequest) returns (User);
+  rpc GetUsersByIds(Ids) returns (Users);
   rpc UpdateUser(UpdateUserRequest) returns (Empty);
   rpc GetFollowing(GetUsersRequest) returns (Users);
   rpc GetFollowers(GetUsersRequest) returns (Users);
@@ -173,6 +178,7 @@ service PostService {
   rpc GetLikedPosts(GetPostsRequest) returns (Posts);
   rpc GetHashtagPosts(GetHashtagPostsRequest) returns (Posts);
   rpc GetPost(PostRequest) returns (Post);
+  rpc GetPostsByIds(Ids) returns (Posts);
   rpc DeletePost(PostRequest) returns (Empty);
   rpc LikePost(PostRequest) returns (Empty);
   rpc UnlikePost(PostRequest) returns (Empty);

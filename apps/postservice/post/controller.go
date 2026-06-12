@@ -166,6 +166,34 @@ func (c *controller) GetHashtagPosts(ctx context.Context, req *pb.GetHashtagPost
 	return &pb.Posts{Posts: posts}, nil
 }
 
+func (c *controller) GetPostsByIds(ctx context.Context, req *pb.Ids) (*pb.Posts, error) {
+	userID, err := getUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(req.Ids) == 0 {
+		return &pb.Posts{}, nil
+	}
+
+	resIter, err := c.dbClient.getPostsByIds(req.Ids, userID)
+	if err != nil {
+		slog.Warn("getting posts by ids failed", "request_id", requestID(ctx), "error", err)
+		return nil, newError(codes.Internal)
+	}
+
+	var posts []*pb.Post
+	for post, err := range resIter {
+		if err != nil {
+			slog.Warn("mapping post failed", "request_id", requestID(ctx), "error", err)
+			return nil, newError(codes.Internal)
+		}
+		posts = append(posts, post)
+	}
+
+	return &pb.Posts{Posts: posts}, nil
+}
+
 func (c *controller) GetPost(ctx context.Context, req *pb.PostRequest) (*pb.Post, error) {
 	userID, err := getUserID(ctx)
 	if err != nil {

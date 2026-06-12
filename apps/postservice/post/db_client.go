@@ -195,6 +195,26 @@ func (c *DBClient) getPost(id int32, currentUserID int32) (*pb.Post, error) {
 	return mapPost(row)
 }
 
+func (c *DBClient) getPostsByIds(ids []int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
+	query := `SELECT id, user_id, content,
+		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
+		EXISTS (SELECT 1 FROM likes WHERE post_id = id AND likes.user_id = $1) AS liked,
+		(SELECT count(*) FROM posts AS rp WHERE rp.repost_of_id = id) AS reposts,
+		EXISTS (SELECT 1 FROM posts AS rp WHERE rp.repost_of_id = id AND rp.user_id = $1) AS reposted,
+		created, repost_of_id, media_key,
+		(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = id) AS replies,
+		COALESCE(in_reply_to_id, 0) AS in_reply_to_id,
+		COALESCE(quote_of_id, 0) AS quote_of_id
+		FROM posts WHERE id = ANY($2)`
+
+	rows, err := c.db.Query(context.Background(), query, currentUserID, ids)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapPosts(rows), nil
+}
+
 func (c *DBClient) deletePost(postID int32, userID int32) error {
 	query := "DELETE FROM posts WHERE id = $1 AND user_id = $2"
 	tag, err := c.db.Exec(context.Background(), query, postID, userID)

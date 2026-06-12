@@ -22,6 +22,7 @@ const (
 	UserService_CreateUser_FullMethodName        = "/thoughts.UserService/CreateUser"
 	UserService_GetUser_FullMethodName           = "/thoughts.UserService/GetUser"
 	UserService_GetUserByUsername_FullMethodName = "/thoughts.UserService/GetUserByUsername"
+	UserService_GetUsersByIds_FullMethodName     = "/thoughts.UserService/GetUsersByIds"
 	UserService_UpdateUser_FullMethodName        = "/thoughts.UserService/UpdateUser"
 	UserService_GetFollowing_FullMethodName      = "/thoughts.UserService/GetFollowing"
 	UserService_GetFollowers_FullMethodName      = "/thoughts.UserService/GetFollowers"
@@ -37,6 +38,7 @@ type UserServiceClient interface {
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*Identifier, error)
 	GetUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*User, error)
 	GetUserByUsername(ctx context.Context, in *GetUserByUsernameRequest, opts ...grpc.CallOption) (*User, error)
+	GetUsersByIds(ctx context.Context, in *Ids, opts ...grpc.CallOption) (*Users, error)
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*Empty, error)
 	GetFollowing(ctx context.Context, in *GetUsersRequest, opts ...grpc.CallOption) (*Users, error)
 	GetFollowers(ctx context.Context, in *GetUsersRequest, opts ...grpc.CallOption) (*Users, error)
@@ -77,6 +79,16 @@ func (c *userServiceClient) GetUserByUsername(ctx context.Context, in *GetUserBy
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(User)
 	err := c.cc.Invoke(ctx, UserService_GetUserByUsername_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetUsersByIds(ctx context.Context, in *Ids, opts ...grpc.CallOption) (*Users, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Users)
+	err := c.cc.Invoke(ctx, UserService_GetUsersByIds_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -150,6 +162,7 @@ type UserServiceServer interface {
 	CreateUser(context.Context, *CreateUserRequest) (*Identifier, error)
 	GetUser(context.Context, *UserRequest) (*User, error)
 	GetUserByUsername(context.Context, *GetUserByUsernameRequest) (*User, error)
+	GetUsersByIds(context.Context, *Ids) (*Users, error)
 	UpdateUser(context.Context, *UpdateUserRequest) (*Empty, error)
 	GetFollowing(context.Context, *GetUsersRequest) (*Users, error)
 	GetFollowers(context.Context, *GetUsersRequest) (*Users, error)
@@ -174,6 +187,9 @@ func (UnimplementedUserServiceServer) GetUser(context.Context, *UserRequest) (*U
 }
 func (UnimplementedUserServiceServer) GetUserByUsername(context.Context, *GetUserByUsernameRequest) (*User, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetUserByUsername not implemented")
+}
+func (UnimplementedUserServiceServer) GetUsersByIds(context.Context, *Ids) (*Users, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetUsersByIds not implemented")
 }
 func (UnimplementedUserServiceServer) UpdateUser(context.Context, *UpdateUserRequest) (*Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method UpdateUser not implemented")
@@ -264,6 +280,24 @@ func _UserService_GetUserByUsername_Handler(srv interface{}, ctx context.Context
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).GetUserByUsername(ctx, req.(*GetUserByUsernameRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserService_GetUsersByIds_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Ids)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetUsersByIds(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetUsersByIds_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetUsersByIds(ctx, req.(*Ids))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -394,6 +428,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserByUsername",
 			Handler:    _UserService_GetUserByUsername_Handler,
+		},
+		{
+			MethodName: "GetUsersByIds",
+			Handler:    _UserService_GetUsersByIds_Handler,
 		},
 		{
 			MethodName: "UpdateUser",
@@ -647,6 +685,7 @@ const (
 	PostService_GetLikedPosts_FullMethodName   = "/thoughts.PostService/GetLikedPosts"
 	PostService_GetHashtagPosts_FullMethodName = "/thoughts.PostService/GetHashtagPosts"
 	PostService_GetPost_FullMethodName         = "/thoughts.PostService/GetPost"
+	PostService_GetPostsByIds_FullMethodName   = "/thoughts.PostService/GetPostsByIds"
 	PostService_DeletePost_FullMethodName      = "/thoughts.PostService/DeletePost"
 	PostService_LikePost_FullMethodName        = "/thoughts.PostService/LikePost"
 	PostService_UnlikePost_FullMethodName      = "/thoughts.PostService/UnlikePost"
@@ -665,6 +704,7 @@ type PostServiceClient interface {
 	GetLikedPosts(ctx context.Context, in *GetPostsRequest, opts ...grpc.CallOption) (*Posts, error)
 	GetHashtagPosts(ctx context.Context, in *GetHashtagPostsRequest, opts ...grpc.CallOption) (*Posts, error)
 	GetPost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Post, error)
+	GetPostsByIds(ctx context.Context, in *Ids, opts ...grpc.CallOption) (*Posts, error)
 	DeletePost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error)
 	LikePost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error)
 	UnlikePost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error)
@@ -741,6 +781,16 @@ func (c *postServiceClient) GetPost(ctx context.Context, in *PostRequest, opts .
 	return out, nil
 }
 
+func (c *postServiceClient) GetPostsByIds(ctx context.Context, in *Ids, opts ...grpc.CallOption) (*Posts, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Posts)
+	err := c.cc.Invoke(ctx, PostService_GetPostsByIds_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *postServiceClient) DeletePost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Empty)
@@ -811,6 +861,7 @@ type PostServiceServer interface {
 	GetLikedPosts(context.Context, *GetPostsRequest) (*Posts, error)
 	GetHashtagPosts(context.Context, *GetHashtagPostsRequest) (*Posts, error)
 	GetPost(context.Context, *PostRequest) (*Post, error)
+	GetPostsByIds(context.Context, *Ids) (*Posts, error)
 	DeletePost(context.Context, *PostRequest) (*Empty, error)
 	LikePost(context.Context, *PostRequest) (*Empty, error)
 	UnlikePost(context.Context, *PostRequest) (*Empty, error)
@@ -844,6 +895,9 @@ func (UnimplementedPostServiceServer) GetHashtagPosts(context.Context, *GetHasht
 }
 func (UnimplementedPostServiceServer) GetPost(context.Context, *PostRequest) (*Post, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetPost not implemented")
+}
+func (UnimplementedPostServiceServer) GetPostsByIds(context.Context, *Ids) (*Posts, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetPostsByIds not implemented")
 }
 func (UnimplementedPostServiceServer) DeletePost(context.Context, *PostRequest) (*Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeletePost not implemented")
@@ -992,6 +1046,24 @@ func _PostService_GetPost_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PostService_GetPostsByIds_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Ids)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).GetPostsByIds(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PostService_GetPostsByIds_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).GetPostsByIds(ctx, req.(*Ids))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PostService_DeletePost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PostRequest)
 	if err := dec(in); err != nil {
@@ -1130,6 +1202,10 @@ var PostService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetPost",
 			Handler:    _PostService_GetPost_Handler,
+		},
+		{
+			MethodName: "GetPostsByIds",
+			Handler:    _PostService_GetPostsByIds_Handler,
 		},
 		{
 			MethodName: "DeletePost",

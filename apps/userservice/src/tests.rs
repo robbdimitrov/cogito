@@ -75,6 +75,15 @@ impl UserDb for Arc<MockDb> {
         Ok(users.iter().find(|u| u.username == username).cloned())
     }
 
+    async fn get_users_by_ids(&self, ids: &[i32]) -> Result<Vec<User>, SqlxError> {
+        let users = self.users.lock().await;
+        Ok(users
+            .iter()
+            .filter(|u| ids.contains(&u.id))
+            .cloned()
+            .collect())
+    }
+
     async fn update_user(
         &self,
         user_id: i32,
@@ -207,6 +216,42 @@ async fn test_get_user() {
     assert!(res.is_ok());
     let user = res.unwrap().into_inner();
     assert_eq!(user.username, "testuser");
+}
+
+#[tokio::test]
+async fn test_get_users_by_ids() {
+    let db = Arc::new(MockDb::new());
+    let controller = Controller::new(db.clone());
+
+    let _ = db
+        .create_user("Alice", "alice", "alice@x.com", "hash")
+        .await;
+    let _ = db.create_user("Bob", "bob", "bob@x.com", "hash").await;
+    let _ = db
+        .create_user("Carol", "carol", "carol@x.com", "hash")
+        .await;
+
+    let req = create_request(crate::thoughts::Ids { ids: vec![1, 3] }, 1);
+    let res = controller.get_users_by_ids(req).await;
+
+    assert!(res.is_ok());
+    let users = res.unwrap().into_inner().users;
+    assert_eq!(users.len(), 2);
+    let usernames: Vec<&str> = users.iter().map(|u| u.username.as_str()).collect();
+    assert!(usernames.contains(&"alice"));
+    assert!(usernames.contains(&"carol"));
+}
+
+#[tokio::test]
+async fn test_get_users_by_ids_empty_returns_empty() {
+    let db = Arc::new(MockDb::new());
+    let controller = Controller::new(db.clone());
+
+    let req = create_request(crate::thoughts::Ids { ids: vec![] }, 1);
+    let res = controller.get_users_by_ids(req).await;
+
+    assert!(res.is_ok());
+    assert!(res.unwrap().into_inner().users.is_empty());
 }
 
 use crate::thoughts::{GetUserByUsernameRequest, SearchUsersRequest, UpdateUserRequest};

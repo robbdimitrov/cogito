@@ -138,6 +138,44 @@ impl UserDb for DbClient {
         }))
     }
 
+    async fn get_users_by_ids(&self, ids: &[i32]) -> Result<Vec<User>, SqlxError> {
+        // Lightweight author projection for embedding in post lists: no count
+        // subqueries, no email, no per-viewer `followed` flag.
+        let rows = sqlx::query(
+            r#"SELECT id, name, username, bio, profile_photo_key, cover_photo_key, created
+                FROM users WHERE id = ANY($1)"#,
+        )
+        .bind(ids)
+        .fetch_all(&self.pool)
+        .await?;
+
+        Ok(rows
+            .into_iter()
+            .map(|r| User {
+                id: r.get("id"),
+                name: r.get("name"),
+                username: r.get("username"),
+                email: String::new(),
+                bio: r.get::<'_, Option<String>, _>("bio").unwrap_or_default(),
+                posts: 0,
+                likes: 0,
+                following: 0,
+                followers: 0,
+                followed: false,
+                created: r
+                    .get::<'_, Option<DateTime<Utc>>, _>("created")
+                    .map(|dt| dt.format("%Y-%m-%dT%H:%M:%SZ").to_string())
+                    .unwrap_or_default(),
+                profile_photo_key: r
+                    .get::<'_, Option<String>, _>("profile_photo_key")
+                    .unwrap_or_default(),
+                cover_photo_key: r
+                    .get::<'_, Option<String>, _>("cover_photo_key")
+                    .unwrap_or_default(),
+            })
+            .collect())
+    }
+
     async fn update_user(
         &self,
         user_id: i32,
@@ -303,7 +341,9 @@ impl UserDb for DbClient {
         limit: i32,
         _current_user_id: i32,
     ) -> Result<Vec<User>, SqlxError> {
+        // Lowercase here so the predicate can hit the lower(username) index.
         let escaped = query
+            .to_lowercase()
             .replace('\\', "\\\\")
             .replace('%', "\\%")
             .replace('_', "\\_");
@@ -316,7 +356,7 @@ impl UserDb for DbClient {
                 0::int AS followers,
                 false AS followed,
                 created
-                FROM users WHERE username ILIKE $1 ESCAPE '\'
+                FROM users WHERE lower(username) LIKE $1 ESCAPE '\'
                 LIMIT $2"#,
         )
         .bind(pattern)
