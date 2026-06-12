@@ -1,5 +1,5 @@
 import PostDetail from '@/app/posts/[id]/post';
-import { fetchServer, hydratePostAuthors, getCurrentUser } from '@/shared/services/serverapi';
+import { fetchServer, getCurrentUser } from '@/shared/services/serverapi';
 import type { Post } from '@/shared/types';
 
 export default async function PostPage({ params }: { params: Promise<{ id: string }> }) {
@@ -9,8 +9,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
   try {
     const data = await fetchServer<Post>(`/posts/${id}`);
     if (data) {
-      const hydrated = await hydratePostAuthors([data]);
-      post = hydrated[0];
+      post = data;
     }
   } catch (e) {
     console.error('Post error:', e);
@@ -20,7 +19,7 @@ export default async function PostPage({ params }: { params: Promise<{ id: strin
   try {
     const repliesData = await fetchServer<{ items: Post[] }>(`/posts/${id}/replies?page=0&limit=20`);
     if (repliesData?.items) {
-      replies = await hydratePostAuthors(repliesData.items);
+      replies = repliesData.items;
     }
   } catch {}
 

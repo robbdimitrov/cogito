@@ -1,5 +1,5 @@
 import Feed from '@/app/feed';
-import { fetchServer, hydratePostAuthors, getCurrentUser } from '@/shared/services/serverapi';
+import { fetchServer, getCurrentUser } from '@/shared/services/serverapi';
 import type { Post } from '@/shared/types';
 
 export default async function FeedPage() {
@@ -7,7 +7,7 @@ export default async function FeedPage() {
   try {
     const data = await fetchServer<{ items: Post[] }>('/posts/feed?page=0');
     if (data && data.items) {
-      initialPosts = await hydratePostAuthors(data.items);
+      initialPosts = data.items;
     }
   } catch (e) {
     console.error('Feed error:', e);

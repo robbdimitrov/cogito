@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { cache } from 'react';
-import type { User, Post } from '@/shared/types';
+import type { User } from '@/shared/types';
 
 const API_BASE = `${process.env.API_URL || 'http://localhost:8080'}`;
 
@@ -72,54 +72,6 @@ export const getUserByUsername = cache(async function getUserByUsername(username
   return fetchServer<User>(`/users?username=${encodeURIComponent(username)}`);
 });
 
-export const getUserById = cache(async function getUserById(userId: string | number) {
-  return fetchServer<User>(`/users/${userId}`);
-});
-
 export const getServerSessions = cache(async function getServerSessions() {
   return fetchServer<SessionsResponse>('/sessions');
 });
-
-export async function hydratePostAuthors(rawPosts: Post[]) {
-  if (!rawPosts) return [];
-  const userIds: string[] = [
-    ...new Set(
-      rawPosts
-        .flatMap((p) => [p.userId, p.repostOf?.userId, p.quotePost?.userId, p.repostOf?.quotePost?.userId])
-        .filter(Boolean)
-    ),
-  ] as string[];
-
-  const userMap: Record<string, User | undefined> = {};
-  await Promise.all(
-    userIds.map(async (uid: string) => {
-      try {
-        const u = await getUserById(uid);
-        userMap[uid] = u ?? undefined;
-      } catch {
-        userMap[uid] = undefined;
-      }
-    })
-  );
-
-  return rawPosts.map((p) => {
-    const post = {
-      ...p,
-      user: userMap[p.userId],
-    };
-
-    if (p.repostOf?.userId) {
-      const repostOf = { ...p.repostOf, user: userMap[p.repostOf.userId] };
-      if (p.repostOf.quotePost?.userId) {
-        repostOf.quotePost = { ...p.repostOf.quotePost, user: userMap[p.repostOf.quotePost.userId] };
-      }
-      post.repostOf = repostOf;
-    }
-
-    if (p.quotePost?.userId) {
-      post.quotePost = { ...p.quotePost, user: userMap[p.quotePost.userId] };
-    }
-
-    return post;
-  });
-}

@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import PostTab from '@/app/[username]/posttab';
-import { fetchServer, getCurrentUser, getUserByUsername, hydratePostAuthors } from '@/shared/services/serverapi';
+import { fetchServer, getCurrentUser, getUserByUsername } from '@/shared/services/serverapi';
 import { normalizeUsername } from '@/app/[username]/routeutils';
 import type { Post } from '@/shared/types';
 
@@ -16,7 +16,7 @@ export default async function LikesPage({ params }: { params: Promise<{ username
   try {
     const data = await fetchServer<{ items: Post[] }>(`/users/${profileUser.id}/likes?page=0`);
     if (data && data.items) {
-      likes = await hydratePostAuthors(data.items);
+      likes = data.items;
     }
   } catch (e) {
     console.error('Likes error:', e);

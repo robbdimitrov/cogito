@@ -1,5 +1,5 @@
 import HashtagFeed from '@/app/hashtags/[tag]/hashtagfeed';
-import { fetchServer, getCurrentUser, hydratePostAuthors } from '@/shared/services/serverapi';
+import { fetchServer, getCurrentUser } from '@/shared/services/serverapi';
 import type { Post } from '@/shared/types';
 
 function normalizeTag(rawTag: string) {
@@ -16,7 +16,7 @@ export default async function HashtagPage({ params }: { params: Promise<{ tag: s
     try {
       const data = await fetchServer<{ items: Post[] }>(`/hashtags/${encodeURIComponent(tag)}/posts?page=0`);
       if (data && data.items) {
-        initialPosts = await hydratePostAuthors(data.items);
+        initialPosts = data.items;
       }
     } catch (e) {
       console.error('Hashtag posts error:', e);
