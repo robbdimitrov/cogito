@@ -21,6 +21,8 @@ CREATE INDEX posts_in_reply_to_id_idx ON posts (in_reply_to_id)
   WHERE in_reply_to_id IS NOT NULL;
 CREATE INDEX posts_repost_of_id_idx ON posts (repost_of_id)
   WHERE repost_of_id IS NOT NULL;
+CREATE INDEX posts_created_idx ON posts (created DESC)
+  WHERE in_reply_to_id IS NULL;
 
 CREATE TABLE likes (
   post_id integer REFERENCES posts ON DELETE CASCADE,

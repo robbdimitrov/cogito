@@ -19,3 +19,4 @@ CREATE TABLE followers (
 );
 
 CREATE INDEX followers_follower_id_idx ON followers (follower_id);
+CREATE INDEX users_username_lower_idx ON users (lower(username) text_pattern_ops);

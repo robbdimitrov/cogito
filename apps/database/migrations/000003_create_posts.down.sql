@@ -25,5 +25,6 @@ ALTER TABLE posts
 ALTER TABLE posts
   ALTER COLUMN content SET NOT NULL;
 
+DROP INDEX IF EXISTS posts_created_idx;
 DROP INDEX IF EXISTS posts_hashtags_idx;
 DROP TABLE IF EXISTS posts;
