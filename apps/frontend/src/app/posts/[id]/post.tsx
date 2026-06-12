@@ -231,17 +231,17 @@ function PostDetail({ initialPost, currentUserId, currentUser, initialReplies }:
               post={reply}
               user={reply.user}
               onLike={async (p: Post) => {
+                // PostItem applies the like optimistically; no refetch needed.
                 try {
                   p.liked ? await apiClient.unlikePost(p.id) : await apiClient.likePost(p.id);
-                  router.refresh();
                 } catch {
                   toast.error('Action failed.');
                 }
               }}
               onRepost={async (p: Post) => {
+                // PostItem applies the repost optimistically; no refetch needed.
                 try {
                   p.reposted ? await apiClient.removeRepost(p.id) : await apiClient.repostPost(p.id);
-                  router.refresh();
                 } catch {
                   toast.error('Action failed.');
                 }

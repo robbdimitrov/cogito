@@ -34,6 +34,8 @@ function QuoteEmbed({ post }: { post: Post }) {
           <img
             src={`/api/uploads/${post.mediaKey}`}
             alt="Quoted post attachment"
+            loading="lazy"
+            decoding="async"
             className="max-h-40 w-auto rounded-lg object-contain border border-slate-200 dark:border-slate-700"
           />
         </div>

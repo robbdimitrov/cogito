@@ -22,16 +22,16 @@ function PostTab({ user, posts, currentUserId, emptyMessage }: PostTabProps) {
   const [quotingPost, setQuotingPost] = useState<Post | null>(null);
 
   const handleLike = async (post: Post) => {
+    // PostItem applies the like optimistically; no full-list refetch needed.
     try {
       post.liked ? await apiClient.unlikePost(post.id) : await apiClient.likePost(post.id);
-      router.refresh();
     } catch (e: any) { toast.error(e.message || 'Failed to update like'); }
   };
 
   const handleRepost = async (post: Post) => {
+    // PostItem applies the repost optimistically; no full-list refetch needed.
     try {
       post.reposted ? await apiClient.removeRepost(post.id) : await apiClient.repostPost(post.id);
-      router.refresh();
     } catch (e: any) { toast.error(e.message || 'Failed to update repost'); }
   };
 
