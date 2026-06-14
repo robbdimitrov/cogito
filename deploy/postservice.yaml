@@ -44,10 +44,9 @@ spec:
         - containerPort: 5050
         resources:
           limits:
-            memory: 100Mi
-            cpu: 500m
+            memory: 128Mi
           requests:
-            memory: 50Mi
+            memory: 64Mi
             cpu: 100m
         env:
         - name: DATABASE_URL

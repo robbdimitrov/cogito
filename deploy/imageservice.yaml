@@ -32,10 +32,9 @@ spec:
         resources:
           limits:
             memory: 256Mi
-            cpu: 500m
           requests:
-            memory: 128Mi
-            cpu: 200m
+            memory: 64Mi
+            cpu: 75m
         env:
         - name: DATABASE_URL
           valueFrom:
