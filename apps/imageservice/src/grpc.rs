@@ -65,7 +65,9 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
         let req = request.into_inner();
 
         // Also cleanup uploads table just in case it was an orphaned staging file
-        let _ = self.db.consume_upload(&req.filename).await;
+        if let Err(e) = self.db.consume_upload(&req.filename).await {
+            tracing::warn!(request_id = %request_id, method = "/thoughts.ImageService/DeleteImage", error = %e, "cleaning up orphaned upload metadata failed");
+        }
 
         // Ensure we don't allow directory traversal
         if req.filename.contains("..") || req.filename.contains('/') || req.filename.contains('\\')

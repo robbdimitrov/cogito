@@ -36,6 +36,7 @@ pub fn create_router<D: ImageDb>(db: D, image_dir: String) -> Router {
         )
         .nest_service("/uploads/", ServeDir::new(state.image_dir.clone()))
         .layer(middleware::from_fn(cache_image_responses))
+        .layer(axum::extract::DefaultBodyLimit::max(1024 * 1024))
         .with_state(state)
 }
 

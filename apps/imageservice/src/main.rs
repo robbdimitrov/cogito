@@ -33,29 +33,44 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let listener = tokio::net::TcpListener::bind(&http_addr).await?;
 
     tracing::info!(port = %http_port, "http server starting");
-    tokio::spawn(async move {
-        axum::serve(listener, router).await.unwrap();
-    });
 
     let grpc_addr = format!("0.0.0.0:{}", grpc_port).parse()?;
     let grpc_service = grpc::ImageGrpcService::new(db_client.clone(), image_dir);
 
     tracing::info!(port = %grpc_port, "grpc server starting");
 
-    let shutdown_signal = async {
+    let (shutdown_tx, _) = tokio::sync::broadcast::channel::<()>(1);
+    let mut shutdown_rx1 = shutdown_tx.subscribe();
+    let mut shutdown_rx2 = shutdown_tx.subscribe();
+
+    tokio::spawn(async move {
         tokio::signal::ctrl_c()
             .await
             .expect("Failed to install Ctrl+C signal handler");
         tracing::info!("server shutting down");
-    };
+        let _ = shutdown_tx.send(());
+    });
 
-    Server::builder()
+    let axum_server = axum::serve(listener, router).with_graceful_shutdown(async move {
+        let _ = shutdown_rx1.recv().await;
+    });
+
+    let grpc_server = Server::builder()
         .add_service(ImageServiceServer::with_interceptor(
             grpc_service,
             internal_auth::interceptor,
         ))
-        .serve_with_shutdown(grpc_addr, shutdown_signal)
-        .await?;
+        .serve_with_shutdown(grpc_addr, async move {
+            let _ = shutdown_rx2.recv().await;
+        });
+
+    let (axum_res, grpc_res) = tokio::join!(axum_server, grpc_server);
+    if let Err(e) = axum_res {
+        tracing::error!(error = %e, "http server error");
+    }
+    if let Err(e) = grpc_res {
+        tracing::error!(error = %e, "grpc server error");
+    }
 
     db_client.pool.close().await;
 

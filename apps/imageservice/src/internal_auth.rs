@@ -27,6 +27,9 @@ fn authenticate(req: Request<()>, expected: &str) -> Result<Request<()>, Status>
 
 /// Constant-time comparison of a provided token against the expected secret.
 pub fn token_matches(provided: &str, expected: &str) -> bool {
+    if provided.len() != expected.len() {
+        return false;
+    }
     provided.as_bytes().ct_eq(expected.as_bytes()).into()
 }
 
