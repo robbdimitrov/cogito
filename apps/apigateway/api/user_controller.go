@@ -65,12 +65,12 @@ func (s *userController) createUser(w http.ResponseWriter, r *http.Request) {
 		Password string `json:"password"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		http.Error(w, "Invalid request body", 400)
+		jsonError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
 	if utf8.RuneCountInString(body.Name) > 255 || utf8.RuneCountInString(body.Username) > 255 || utf8.RuneCountInString(body.Email) > 255 {
-		http.Error(w, "Profile fields cannot exceed 255 characters", 400)
+		jsonError(w, http.StatusBadRequest, "Profile fields cannot exceed 255 characters")
 		return
 	}
 
@@ -96,14 +96,14 @@ func (s *userController) getUser(w http.ResponseWriter, r *http.Request) {
 
 	userID, err := strconv.Atoi(r.PathValue("userId"))
 	if err != nil {
-		http.Error(w, "Invalid user ID", 400)
+		jsonError(w, http.StatusBadRequest, "Invalid user ID")
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		jsonError(w, http.StatusUnauthorized, "Unauthorized")
 		cancel()
 		return
 	}
@@ -131,7 +131,7 @@ func (s *userController) getUserByUsername(w http.ResponseWriter, r *http.Reques
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		jsonError(w, http.StatusUnauthorized, "Unauthorized")
 		cancel()
 		return
 	}
@@ -154,14 +154,14 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 
 	currentUserID := getUserID(r)
 	if currentUserID != r.PathValue("userId") {
-		http.Error(w, "Forbidden", http.StatusForbidden)
+		jsonError(w, http.StatusForbidden, "Forbidden")
 		return
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		jsonError(w, http.StatusUnauthorized, "Unauthorized")
 		cancel()
 		return
 	}
@@ -178,12 +178,12 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 		CoverPhotoKey   *string `json:"coverPhotoKey"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		http.Error(w, "Invalid request body", 400)
+		jsonError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
 	if utf8.RuneCountInString(body.Name) > 255 || utf8.RuneCountInString(body.Username) > 255 || utf8.RuneCountInString(body.Email) > 255 || utf8.RuneCountInString(body.Bio) > 255 {
-		http.Error(w, "Profile fields cannot exceed 255 characters", 400)
+		jsonError(w, http.StatusBadRequest, "Profile fields cannot exceed 255 characters")
 		return
 	}
 
@@ -290,7 +290,7 @@ func (s *userController) getFollowing(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		jsonError(w, http.StatusUnauthorized, "Unauthorized")
 		cancel()
 		return
 	}
@@ -298,7 +298,7 @@ func (s *userController) getFollowing(w http.ResponseWriter, r *http.Request) {
 
 	userID, err := strconv.Atoi(r.PathValue("userId"))
 	if err != nil {
-		http.Error(w, "Invalid user ID", 400)
+		jsonError(w, http.StatusBadRequest, "Invalid user ID")
 		return
 	}
 	page, limit, err := getPageAndLimit(r)
@@ -334,7 +334,7 @@ func (s *userController) searchUsers(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		jsonError(w, http.StatusUnauthorized, "Unauthorized")
 		cancel()
 		return
 	}
@@ -373,7 +373,7 @@ func (s *userController) getFollowers(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		jsonError(w, http.StatusUnauthorized, "Unauthorized")
 		cancel()
 		return
 	}
@@ -381,7 +381,7 @@ func (s *userController) getFollowers(w http.ResponseWriter, r *http.Request) {
 
 	userID, err := strconv.Atoi(r.PathValue("userId"))
 	if err != nil {
-		http.Error(w, "Invalid user ID", 400)
+		jsonError(w, http.StatusBadRequest, "Invalid user ID")
 		return
 	}
 	page, limit, err := getPageAndLimit(r)
@@ -417,7 +417,7 @@ func (s *userController) followUser(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		jsonError(w, http.StatusUnauthorized, "Unauthorized")
 		cancel()
 		return
 	}
@@ -425,7 +425,7 @@ func (s *userController) followUser(w http.ResponseWriter, r *http.Request) {
 
 	userID, err := strconv.Atoi(r.PathValue("userId"))
 	if err != nil {
-		http.Error(w, "Invalid user ID", 400)
+		jsonError(w, http.StatusBadRequest, "Invalid user ID")
 		return
 	}
 	req := pb.UserRequest{UserId: int32(userID)}
@@ -446,7 +446,7 @@ func (s *userController) unfollowUser(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		jsonError(w, http.StatusUnauthorized, "Unauthorized")
 		cancel()
 		return
 	}
@@ -454,7 +454,7 @@ func (s *userController) unfollowUser(w http.ResponseWriter, r *http.Request) {
 
 	userID, err := strconv.Atoi(r.PathValue("userId"))
 	if err != nil {
-		http.Error(w, "Invalid user ID", 400)
+		jsonError(w, http.StatusBadRequest, "Invalid user ID")
 		return
 	}
 	req := pb.UserRequest{UserId: int32(userID)}

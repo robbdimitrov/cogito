@@ -31,7 +31,7 @@ func getStatusCode(s *status.Status) int {
 // grpcError writes grpc error to http response
 func grpcError(w http.ResponseWriter, err error) {
 	s := status.Convert(err)
-	http.Error(w, s.Proto().GetMessage(), getStatusCode(s))
+	jsonError(w, getStatusCode(s), s.Proto().GetMessage())
 }
 
 func grpcCode(err error) string {
@@ -44,6 +44,14 @@ func jsonResponse(w http.ResponseWriter, status int, data interface{}) {
 	if data != nil {
 		json.NewEncoder(w).Encode(data)
 	}
+}
+
+type errorResponse struct {
+	Error string `json:"error"`
+}
+
+func jsonError(w http.ResponseWriter, status int, msg string) {
+	jsonResponse(w, status, errorResponse{Error: msg})
 }
 
 func insecureCredentials() grpc.DialOption {

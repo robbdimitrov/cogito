@@ -115,7 +115,7 @@ func csrfMiddleware() func(http.Handler) http.Handler {
 			if err != nil || cookie.Value == "" {
 				tokenBytes := make([]byte, 32)
 				if _, err := rand.Read(tokenBytes); err != nil {
-					http.Error(w, "Failed to generate CSRF token", http.StatusInternalServerError)
+					jsonError(w, http.StatusInternalServerError, "Failed to generate CSRF token")
 					return
 				}
 				token := base64.RawURLEncoding.EncodeToString(tokenBytes)
@@ -136,7 +136,7 @@ func csrfMiddleware() func(http.Handler) http.Handler {
 			if r.Method != "GET" && r.Method != "HEAD" && r.Method != "OPTIONS" && r.Method != "TRACE" {
 				headerToken := r.Header.Get("X-CSRF-Token")
 				if err != nil || cookie.Value == "" || headerToken == "" || subtle.ConstantTimeCompare([]byte(cookie.Value), []byte(headerToken)) != 1 {
-					http.Error(w, "Invalid CSRF token", http.StatusForbidden)
+					jsonError(w, http.StatusForbidden, "Invalid CSRF token")
 					return
 				}
 			}
@@ -159,13 +159,13 @@ func rateLimitMiddleware(store *PostgresRateLimiterStore) func(http.Handler) htt
 			if err != nil {
 				slog.Error("rate limiter storage failed", "request_id", getRequestID(r), "policy", policy.Name, "error", err)
 				if !decision.Allowed {
-					http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
+					jsonError(w, http.StatusServiceUnavailable, "Service unavailable")
 					return
 				}
 			}
 			if !decision.Allowed {
 				w.Header().Set("Retry-After", strconv.Itoa(int(decision.RetryAfter.Seconds()+0.5)))
-				http.Error(w, "Too many requests", http.StatusTooManyRequests)
+				jsonError(w, http.StatusTooManyRequests, "Too many requests")
 				return
 			}
 

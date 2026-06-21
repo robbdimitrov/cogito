@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"errors"
 	"io"
 	"log/slog"
@@ -53,7 +54,7 @@ func (r *router) configureRoutes(mux *http.ServeMux) {
 	// Health check
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, req *http.Request) {
 		if req.URL.Path != "/" {
-			http.NotFound(w, req)
+			jsonError(w, http.StatusNotFound, "Not found")
 			return
 		}
 		w.WriteHeader(200)
@@ -100,7 +101,7 @@ func (r *router) configureRoutes(mux *http.ServeMux) {
 func (r *router) proxyImageUpload(w http.ResponseWriter, req *http.Request) {
 	userID := getUserID(req)
 	if userID == "" {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		jsonError(w, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
 
@@ -113,7 +114,7 @@ func (r *router) proxyImageUpload(w http.ResponseWriter, req *http.Request) {
 func (r *router) proxyImageFile(w http.ResponseWriter, req *http.Request) {
 	filename := req.PathValue("filename")
 	if filename == "" {
-		http.NotFound(w, req)
+		jsonError(w, http.StatusNotFound, "Not found")
 		return
 	}
 
@@ -124,7 +125,7 @@ func (r *router) proxyImageRequest(path string, configure func(*http.Request)) h
 	return func(w http.ResponseWriter, req *http.Request) {
 		targetURL, err := url.Parse("http://" + r.imageAddr)
 		if err != nil {
-			http.Error(w, "Invalid image service address", http.StatusInternalServerError)
+			jsonError(w, http.StatusInternalServerError, "Invalid image service address")
 			return
 		}
 
@@ -148,9 +149,12 @@ func (r *router) proxyImageRequest(path string, configure func(*http.Request)) h
 		}
 		proxy.ErrorHandler = func(w http.ResponseWriter, req *http.Request, err error) {
 			slog.Warn("image proxy failed", "request_id", getRequestID(req), "error", err)
-			http.Error(w, "Image service unavailable", http.StatusServiceUnavailable)
+			jsonError(w, http.StatusServiceUnavailable, "Image service unavailable")
 		}
-		proxy.ServeHTTP(w, req)
+
+		ctx, cancel := context.WithTimeout(req.Context(), 10*time.Second)
+		defer cancel()
+		proxy.ServeHTTP(w, req.WithContext(ctx))
 	}
 }
 

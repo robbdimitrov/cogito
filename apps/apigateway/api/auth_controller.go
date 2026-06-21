@@ -40,7 +40,7 @@ func (ac *authController) createSession(w http.ResponseWriter, r *http.Request) 
 		Password string `json:"password"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		http.Error(w, "Invalid request body", 400)
+		jsonError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
@@ -63,7 +63,7 @@ func (ac *authController) createSession(w http.ResponseWriter, r *http.Request) 
 func (ac *authController) validateSession(w http.ResponseWriter, r *http.Request) (*http.Request, error) {
 	cookie, err := r.Cookie("session")
 	if err != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		jsonError(w, http.StatusUnauthorized, "Unauthorized")
 		return nil, err
 	}
 
@@ -95,7 +95,7 @@ func (ac *authController) validateSession(w http.ResponseWriter, r *http.Request
 func (ac *authController) deleteSession(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session")
 	if err != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		jsonError(w, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
 
@@ -121,7 +121,7 @@ func (ac *authController) deleteSession(w http.ResponseWriter, r *http.Request) 
 func (ac *authController) deleteSessionByID(w http.ResponseWriter, r *http.Request) {
 	sessionID := r.PathValue("sessionId")
 	if sessionID == "" {
-		http.Error(w, "Session ID is required", 400)
+		jsonError(w, http.StatusBadRequest, "Session ID is required")
 		return
 	}
 
@@ -141,12 +141,12 @@ func (ac *authController) deleteSessionByID(w http.ResponseWriter, r *http.Reque
 	userIDStr := getUserID(r)
 	userID, err := strconv.ParseInt(userIDStr, 10, 32)
 	if err != nil || userID == 0 {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		jsonError(w, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
 
 	if sess.UserId != int32(userID) {
-		http.Error(w, "Cannot delete another user's session", http.StatusForbidden)
+		jsonError(w, http.StatusForbidden, "Cannot delete another user's session")
 		return
 	}
 
@@ -163,7 +163,7 @@ func (ac *authController) deleteSessionByID(w http.ResponseWriter, r *http.Reque
 func (ac *authController) getSessions(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session")
 	if err != nil {
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		jsonError(w, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
 

@@ -184,7 +184,7 @@ func (l *concurrencyLimiter) middleware(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 		default:
 			slog.Warn("concurrency limiter saturated", "request_id", getRequestID(r), "policy", concurrencyPolicy(r))
-			http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
+			jsonError(w, http.StatusServiceUnavailable, "Service unavailable")
 		}
 	})
 }
