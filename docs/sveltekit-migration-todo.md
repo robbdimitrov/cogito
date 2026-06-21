@@ -101,18 +101,18 @@
 Replaces `apps/frontend/src/proxy.ts` + `app/api/[...path]/route.ts`. **No `/api/[...path]`
 passthrough** — all backend access is server-mediated (BFF). The browser never calls `/api`.
 
-- [ ] `src/hooks.server.ts`:
-  - [ ] `handleFetch`: rewrite `/api/*` → `${BACKEND_URL}/*`, forward inbound `Cookie`, and for
+- [x] `src/hooks.server.ts`:
+  - [x] `handleFetch`: rewrite `/api/*` → `${BACKEND_URL}/*`, forward inbound `Cookie`, and for
         mutating methods set `X-CSRF-Token` from the `_csrf` cookie. This is how
         `load`/actions/endpoints reach the Go gateway (replaces `serverapi.fetchServer`).
-  - [ ] `handle`: set `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`,
+  - [x] `handle`: set `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`,
         `Referrer-Policy: strict-origin-when-cross-origin` on every response.
-  - [ ] CSP itself lives in `svelte.config.js` `kit.csp` (`mode: 'nonce'`, SvelteKit injects the
+  - [x] CSP itself lives in `svelte.config.js` `kit.csp` (`mode: 'nonce'`, SvelteKit injects the
         nonce). Port directives from `next.config.mjs` (`connect-src 'self'`, `img-src 'self' data:`,
         etc.) — see Appendix B.
-  - [ ] `handleError`: server-side logging.
-- [ ] `src/routes/health/+server.ts`: returns `ok`.
-- [ ] Env via `$env/dynamic/private` (`BACKEND_URL`) — never `$env/static/*`.
+  - [x] `handleError`: server-side logging.
+- [x] `src/routes/health/+server.ts`: returns `ok`.
+- [x] Env via `$env/dynamic/private` (`BACKEND_URL`) — never `$env/static/*`.
 - **Done when**: a server-side `load` calling a domain server function via `event.fetch` reaches the
   gateway; CSP header carries a per-request nonce; security headers present; `/health` ok.
 

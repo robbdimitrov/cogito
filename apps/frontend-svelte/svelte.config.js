@@ -6,6 +6,21 @@ const config = {
   preprocess: vitePreprocess(),
   kit: {
     adapter: adapter(),
+    csp: {
+      mode: "nonce",
+      directives: {
+        "default-src": ["self"],
+        "script-src": ["self"],
+        "style-src": ["self", "unsafe-inline"],
+        "img-src": ["self", "data:"],
+        "font-src": ["self"],
+        "connect-src": ["self"],
+        "object-src": ["none"],
+        "frame-ancestors": ["self"],
+        "base-uri": ["self"],
+        "form-action": ["self"],
+      },
+    },
   },
 };
 
