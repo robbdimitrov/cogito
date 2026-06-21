@@ -21,3 +21,19 @@ pub fn get_user_id<T>(req: &Request<T>) -> Result<i32, Status> {
         None => Err(Status::unauthenticated("Unauthenticated.")),
     }
 }
+
+pub fn is_unique_violation(e: &sqlx::Error) -> bool {
+    if let sqlx::Error::Database(db_err) = e {
+        db_err.is_unique_violation()
+    } else {
+        false
+    }
+}
+
+pub fn is_foreign_key_violation(e: &sqlx::Error) -> bool {
+    if let sqlx::Error::Database(db_err) = e {
+        db_err.is_foreign_key_violation()
+    } else {
+        false
+    }
+}

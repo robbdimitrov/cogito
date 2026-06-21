@@ -91,42 +91,47 @@ impl<D: UserDb> UserService for Controller<D> {
     ) -> Result<Response<Identifier>, Status> {
         let request_id = crate::logging::request_id(&request).to_string();
         let req = request.into_inner();
-        if req.name.is_empty()
-            || req.username.is_empty()
-            || req.email.is_empty()
-            || req.password.is_empty()
-        {
+        let name = req.name.trim();
+        let username = req.username.trim().to_lowercase();
+        let email = req.email.trim().to_lowercase();
+        let password = req.password.trim();
+
+        if name.is_empty() || username.is_empty() || email.is_empty() || password.is_empty() {
             return Err(Status::invalid_argument(
                 "Name, username, email and password are required.",
             ));
-        } else if !is_valid_username(&req.username) {
+        } else if !is_valid_username(&username) {
             return Err(Status::invalid_argument(
                 "Username may contain only letters, numbers, and underscores.",
             ));
-        } else if req.password.len() < 8 {
+        } else if password.len() < 8 || password.len() > 1024 {
             return Err(Status::invalid_argument(
                 "Password must be at least 8 characters long.",
             ));
-        } else if !is_valid_email(&req.email) {
+        } else if !is_valid_email(&email) {
             return Err(Status::invalid_argument("Invalid email address."));
         }
 
-        let hash = generate_hash(&req.password).map_err(|e| {
+        let hash = generate_hash(password).map_err(|e| {
             tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/CreateUser", error = %e, "hashing failed");
             Status::internal("Internal server error.")
         })?;
 
         match self
             .db_client
-            .create_user(&req.name, &req.username, &req.email, &hash)
+            .create_user(name, &username, &email, &hash)
             .await
         {
             Ok(id) => Ok(Response::new(Identifier { id })),
             Err(e) => {
-                tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/CreateUser", error = %e, "creating user failed");
-                Err(Status::invalid_argument(
-                    "User with this username or email already exists.",
-                ))
+                if crate::utils::is_unique_violation(&e) {
+                    Err(Status::already_exists(
+                        "User with this username or email already exists.",
+                    ))
+                } else {
+                    tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/CreateUser", error = %e, "creating user failed");
+                    Err(Status::internal("Internal server error."))
+                }
             }
         }
     }
@@ -173,18 +178,19 @@ impl<D: UserDb> UserService for Controller<D> {
 
             let (_, hash_str) = user;
             if !validate_password(&req.old_password, &hash_str).unwrap_or(false) {
-                return Err(Status::invalid_argument(
+                return Err(Status::unauthenticated(
                     "Wrong password. Enter the correct current password.",
                 ));
             }
 
-            if req.password.len() < 8 {
+            let password = req.password.trim();
+            if password.len() < 8 || password.len() > 1024 {
                 return Err(Status::invalid_argument(
                     "New password must be at least 8 characters long.",
                 ));
             }
 
-            let new_hash = generate_hash(&req.password).map_err(|e| {
+            let new_hash = generate_hash(password).map_err(|e| {
                 tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/UpdateUser", error = %e, "hashing failed");
                 Status::internal("Internal server error.")
             })?;
@@ -200,29 +206,48 @@ impl<D: UserDb> UserService for Controller<D> {
             return Ok(Response::new(Empty {}));
         }
 
-        if !is_valid_username(&req.username) {
+        let name = req.name.trim();
+        let username = req.username.trim().to_lowercase();
+        let email = req.email.trim().to_lowercase();
+        let bio = req.bio.trim();
+        let profile_photo_key = req
+            .profile_photo_key
+            .as_deref()
+            .map(str::trim)
+            .filter(|s| !s.is_empty());
+        let cover_photo_key = req
+            .cover_photo_key
+            .as_deref()
+            .map(str::trim)
+            .filter(|s| !s.is_empty());
+
+        if !is_valid_username(&username) {
             return Err(Status::invalid_argument(
                 "Username may contain only letters, numbers, and underscores.",
             ));
-        } else if !is_valid_email(&req.email) {
+        } else if !is_valid_email(&email) {
             return Err(Status::invalid_argument("Invalid email address."));
         }
 
         let fields = UpdateUserFields {
-            name: &req.name,
-            username: &req.username,
-            email: &req.email,
-            bio: &req.bio,
-            profile_photo_key: req.profile_photo_key.as_deref(),
-            cover_photo_key: req.cover_photo_key.as_deref(),
+            name,
+            username: &username,
+            email: &email,
+            bio,
+            profile_photo_key,
+            cover_photo_key,
         };
 
         self.db_client
             .update_user(user_id, fields)
             .await
             .map_err(|e| {
-                tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/UpdateUser", error = %e, "updating user failed");
-                Status::internal("Internal server error.")
+                if crate::utils::is_unique_violation(&e) {
+                    Status::already_exists("User with this username or email already exists.")
+                } else {
+                    tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/UpdateUser", error = %e, "updating user failed");
+                    Status::internal("Internal server error.")
+                }
             })?;
 
         Ok(Response::new(Empty {}))
@@ -321,8 +346,12 @@ impl<D: UserDb> UserService for Controller<D> {
         match self.db_client.follow_user(req.user_id, user_id).await {
             Ok(_) => Ok(Response::new(Empty {})),
             Err(e) => {
-                tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/FollowUser", error = %e, "following user failed");
-                Err(Status::internal("Internal server error."))
+                if crate::utils::is_foreign_key_violation(&e) {
+                    Err(Status::not_found("User not found."))
+                } else {
+                    tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/FollowUser", error = %e, "following user failed");
+                    Err(Status::internal("Internal server error."))
+                }
             }
         }
     }
