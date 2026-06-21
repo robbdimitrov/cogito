@@ -160,9 +160,9 @@ passthrough** — all backend access is server-mediated (BFF). The browser never
 
 `feat: add route param matchers`
 
-- [ ] `src/params/username.ts`: bare-username pattern — verify against `app/[username]/routeutils.ts`.
-- [ ] `src/params/tab.ts`: match `likes|followers|following`.
-- [ ] Junk segments must fall through to 404 (`/garbage!!` must not route to profile).
+- [x] `src/params/username.ts`: bare-username pattern — verify against `app/[username]/routeutils.ts`.
+- [x] `src/params/tab.ts`: match `likes|followers|following`.
+- [x] Junk segments must fall through to 404 (`/garbage!!` must not route to profile).
 - **Done when**: `/someuser` matches, junk does not route to profile.
 
 ## Commit 9 — Posts: feed + single post + replies
