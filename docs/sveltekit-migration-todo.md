@@ -146,12 +146,12 @@ passthrough** — all backend access is server-mediated (BFF). The browser never
 
 `feat: add login and signup with form actions`
 
-- [ ] `(auth)/login/+page.svelte` + `+page.server.ts` action → `login`. **Capture the backend
+- [x] `(auth)/login/+page.svelte` + `+page.server.ts` action → `login`. **Capture the backend
       `Set-Cookie` from the `event.fetch` response and re-emit via `cookies.set`.** Verify the
       `session` cookie lands in the browser — #1 silent breakage.
-- [ ] `(auth)/signup/+page.svelte` + action → `createUser` then `login`.
-- [ ] Logout action → `logout` + `cookies.delete`; idempotent.
-- [ ] `bind:value`, server-side validation, progressive enhancement; keep SvelteKit CSRF on.
+- [x] `(auth)/signup/+page.svelte` + action → `createUser` then `login`.
+- [x] Logout action → `logout` + `cookies.delete`; idempotent.
+- [x] `bind:value`, server-side validation, progressive enhancement; keep SvelteKit CSRF on.
       Port markup/validation from `app/login/login.tsx`, `app/signup/signup.tsx`, `auth/authhero.tsx`.
 - **Done when**: signup → logged-in session → refresh stays authed → logout clears session, all
   verified in the browser (cookie present).

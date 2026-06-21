@@ -1,6 +1,6 @@
 <script lang="ts">
   import FormInput from "./FormInput.svelte";
-  import type { Component } from "svelte";
+  import type { LucideIcon } from "@lucide/svelte";
   import type { HTMLInputAttributes } from "svelte/elements";
 
   let {
@@ -10,7 +10,7 @@
     class: className = "",
     ...attributes
   }: HTMLInputAttributes & {
-    icon: Component<{ class?: string; "aria-hidden"?: string }>;
+    icon: LucideIcon;
     iconClass?: string;
   } = $props();
 </script>

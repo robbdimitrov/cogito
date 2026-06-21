@@ -17,9 +17,17 @@ export async function apiRequest<T>(
   url: string,
   init?: RequestInit,
 ): Promise<T> {
+  return (await apiResponse<T>(fetch, url, init)).data;
+}
+
+export async function apiResponse<T>(
+  fetch: ServerFetch,
+  url: string,
+  init?: RequestInit,
+): Promise<{ data: T; response: Response }> {
   const response = await fetch(url, init);
   if (response.status === 204) {
-    return undefined as T;
+    return { data: undefined as T, response };
   }
 
   const text = await response.text();
@@ -27,11 +35,11 @@ export async function apiRequest<T>(
     throw new APIError(response.status, errorMessage(response.status, text));
   }
   if (!text) {
-    return undefined as T;
+    return { data: undefined as T, response };
   }
 
   try {
-    return camelizeKeys(JSON.parse(text)) as T;
+    return { data: camelizeKeys(JSON.parse(text)) as T, response };
   } catch {
     throw new APIError(502, "Received non-JSON response from server");
   }
