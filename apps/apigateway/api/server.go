@@ -31,7 +31,6 @@ func CreateServer(authAddr, postAddr, userAddr, imageAddr string) http.Handler {
 	handler = newConcurrencyLimiter().middleware(handler)
 	handler = rateLimitMiddleware(rlStore)(handler)
 	handler = authGuard(router.auth)(handler)
-	handler = csrfMiddleware()(handler)
 	handler = bodyLimitMiddleware(2 * 1024 * 1024)(handler)
 	handler = secureHeadersMiddleware()(handler)
 	handler = loggerMiddleware()(handler)
@@ -108,43 +107,6 @@ func bodyLimitMiddleware(limit int64) func(http.Handler) http.Handler {
 	}
 }
 
-func csrfMiddleware() func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			cookie, err := r.Cookie("_csrf")
-			if err != nil || cookie.Value == "" {
-				tokenBytes := make([]byte, 32)
-				if _, err := rand.Read(tokenBytes); err != nil {
-					jsonError(w, http.StatusInternalServerError, "Failed to generate CSRF token")
-					return
-				}
-				token := base64.RawURLEncoding.EncodeToString(tokenBytes)
-				http.SetCookie(w, &http.Cookie{
-					Name:     "_csrf",
-					Value:    token,
-					Path:     "/",
-					HttpOnly: false,
-					Secure:   secureCookies(),
-					SameSite: http.SameSiteStrictMode,
-				})
-			}
-
-			// Safe methods (including the GET / health check) skip the
-			// double-submit check below. Login and signup are intentionally
-			// not exempt: the _csrf cookie is issued on page load, so clients
-			// must echo it via X-CSRF-Token to prevent login CSRF.
-			if r.Method != "GET" && r.Method != "HEAD" && r.Method != "OPTIONS" && r.Method != "TRACE" {
-				headerToken := r.Header.Get("X-CSRF-Token")
-				if err != nil || cookie.Value == "" || headerToken == "" || subtle.ConstantTimeCompare([]byte(cookie.Value), []byte(headerToken)) != 1 {
-					jsonError(w, http.StatusForbidden, "Invalid CSRF token")
-					return
-				}
-			}
-
-			next.ServeHTTP(w, r)
-		})
-	}
-}
 
 func rateLimitMiddleware(store *PostgresRateLimiterStore) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
