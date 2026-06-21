@@ -1,46 +1,39 @@
 {
-  "name": "thoughts",
-  "author": "Robert Dimitrov",
-  "license": "MIT",
+  "name": "thoughts-frontend",
+  "version": "0.0.0",
   "private": true,
-  "sideEffects": [
-    "src/index.css",
-    "**/*.css"
-  ],
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint .",
-    "test": "vitest"
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "node build",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "lint": "prettier --check . && eslint .",
+    "format": "prettier --write ."
   },
   "dependencies": {
-    "lucide-react": "^1.17.0",
-    "next": "^16.2.7",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6"
+    "@lucide/svelte": "^1.21.0",
+    "svelte": "^5.56.3"
   },
   "devDependencies": {
-    "@testing-library/dom": "^10.4.1",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
-    "@types/node": "^25.9.1",
-    "@types/react": "^19.2.15",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.2",
-    "autoprefixer": "^10.4.16",
-    "daisyui": "^4.4.19",
+    "@eslint/js": "^9.39.1",
+    "@sveltejs/adapter-node": "^5.5.4",
+    "@sveltejs/kit": "^2.66.0",
+    "@sveltejs/vite-plugin-svelte": "^7.0.0",
+    "@tailwindcss/vite": "^4.3.1",
+    "@types/node": "^26.0.0",
+    "daisyui": "^5.5.23",
     "eslint": "^9.39.1",
-    "eslint-config-next": "^16.2.7",
-    "jsdom": "^29.1.1",
-    "postcss": "^8.4.32",
-    "tailwindcss": "^3.3.6",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-svelte": "^3.19.0",
+    "prettier": "^3.8.4",
+    "prettier-plugin-svelte": "^4.1.1",
+    "svelte-check": "^4.6.0",
+    "tailwindcss": "^4.3.1",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.8"
-  },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not op_mini all"
-  ]
+    "typescript-eslint": "^8.61.1",
+    "vite": "^8.0.16"
+  }
 }

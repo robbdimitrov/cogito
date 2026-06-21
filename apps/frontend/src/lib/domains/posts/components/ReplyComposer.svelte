@@ -1,0 +1,65 @@
+<script lang="ts">
+  import { enhance } from "$app/forms";
+  import { Send } from "@lucide/svelte";
+  import Avatar from "$lib/shared/components/ui/Avatar.svelte";
+  import type { User, Post } from "$lib/shared/types";
+
+  interface Props {
+    currentUser: User;
+    replyToPost: Post;
+  }
+
+  let { currentUser, replyToPost }: Props = $props();
+
+  let content = $state("");
+  let isSubmitting = $state(false);
+
+  // We use form action directly instead of passing onReply, since it's a mutation.
+  // Wait, wait... The React component took `onReply: (content: string) => Promise<void>`.
+  // Svelte 5 `ReplyComposer` shouldn't take a callback if we are using native forms.
+  // We can just use `<form action="?/reply" use:enhance>` directly in this component!
+</script>
+
+<form
+  method="POST"
+  action="?/reply"
+  class="flex items-start gap-3"
+  use:enhance={() => {
+    isSubmitting = true;
+    return async ({ update }) => {
+      isSubmitting = false;
+      content = "";
+      await update({ invalidateAll: false });
+    };
+  }}
+>
+  <input type="hidden" name="replyToId" value={replyToPost.id} />
+  <div class="shrink-0">
+    <Avatar
+      name={currentUser?.name}
+      size="sm"
+      photoKey={currentUser?.profilePhotoKey}
+    />
+  </div>
+  <div class="flex-1 min-w-0">
+    <textarea
+      name="content"
+      class="textarea textarea-bordered w-full resize-none text-sm leading-relaxed"
+      placeholder="Reply to @{replyToPost.user?.username ?? 'this post'}…"
+      bind:value={content}
+      maxlength={255}
+      rows={2}></textarea>
+  </div>
+  <button
+    type="submit"
+    class="btn btn-primary btn-sm btn-square shrink-0 mt-1"
+    disabled={isSubmitting || !content.trim()}
+    aria-label="Send reply"
+  >
+    {#if isSubmitting}
+      <span class="loading loading-spinner loading-xs"></span>
+    {:else}
+      <Send class="h-4 w-4" />
+    {/if}
+  </button>
+</form>
