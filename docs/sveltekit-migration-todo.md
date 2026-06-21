@@ -120,9 +120,9 @@ passthrough** — all backend access is server-mediated (BFF). The browser never
 
 `feat: add ssr theme handling via cookie`
 
-- [ ] `src/routes/+layout.server.ts`: read `theme` cookie, expose to layout.
-- [ ] Root `+layout.svelte`: apply `data-theme` from server data (no FOUC).
-- [ ] Theme rune/store: toggle writes `theme` cookie (`max-age=31536000; samesite=lax`) +
+- [x] `src/routes/+layout.server.ts`: read `theme` cookie, expose to layout.
+- [x] Root `+layout.svelte`: apply `data-theme` from server data (no FOUC).
+- [x] Theme rune/store: toggle writes `theme` cookie (`max-age=31536000; samesite=lax`) +
       `localStorage`. Port `shared/hooks/usetheme.ts` semantics (system/light/dark).
 - **Done when**: theme persists across reload with no flash; SSR matches client.
 

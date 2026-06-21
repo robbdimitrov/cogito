@@ -1,4 +1,5 @@
 import { env } from "$env/dynamic/private";
+import { parseTheme } from "$lib/shared/theme";
 import type { Handle, HandleFetch, HandleServerError } from "@sveltejs/kit";
 
 const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
@@ -37,7 +38,11 @@ export const handleFetch: HandleFetch = async ({ event, request, fetch }) => {
 };
 
 export const handle: Handle = async ({ event, resolve }) => {
-  const response = await resolve(event);
+  const theme = parseTheme(event.cookies.get("theme"));
+  const response = await resolve(event, {
+    transformPageChunk: ({ html }) =>
+      html.replace('data-theme="system"', `data-theme="${theme}"`),
+  });
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("X-Frame-Options", "SAMEORIGIN");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
