@@ -14,6 +14,7 @@ import (
 )
 
 var errInvalidReference = errors.New("invalid reference")
+var errNotFound = errors.New("not found")
 
 type DBClient struct {
 	db *pgxpool.Pool
@@ -38,7 +39,7 @@ func (c *DBClient) Close() {
 	c.db.Close()
 }
 
-func (c *DBClient) createPost(content string, tags []string, userID int32, mediaKey *string, inReplyToID *int32, quoteOfID *int32) (int32, error) {
+func (c *DBClient) createPost(ctx context.Context, content string, tags []string, userID int32, mediaKey *string, inReplyToID *int32, quoteOfID *int32) (int32, error) {
 	var mk string
 	if mediaKey != nil {
 		mk = *mediaKey
@@ -50,10 +51,10 @@ func (c *DBClient) createPost(content string, tags []string, userID int32, media
 			SELECT $1, $2, $3, $4, $5, COALESCE(p.repost_of_id, p.id)
 			FROM posts p WHERE p.id = $6
 			RETURNING id`
-		row = c.db.QueryRow(context.Background(), query, userID, content, tags, mk, inReplyToID, *quoteOfID)
+		row = c.db.QueryRow(ctx, query, userID, content, tags, mk, inReplyToID, *quoteOfID)
 	} else {
 		query := "INSERT INTO posts (user_id, content, hashtags, media_key, in_reply_to_id, quote_of_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id"
-		row = c.db.QueryRow(context.Background(), query, userID, content, tags, mk, inReplyToID, nil)
+		row = c.db.QueryRow(ctx, query, userID, content, tags, mk, inReplyToID, nil)
 	}
 
 	var id int32
@@ -71,7 +72,7 @@ func (c *DBClient) createPost(content string, tags []string, userID int32, media
 	return id, nil
 }
 
-func (c *DBClient) getFeed(page int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
+func (c *DBClient) getFeed(ctx context.Context, page int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
 	query := `SELECT
 		p.id, p.user_id, p.content,
 		(SELECT count(*) FROM likes WHERE post_id = COALESCE(o.id, p.id)) AS likes,
@@ -90,10 +91,10 @@ func (c *DBClient) getFeed(page int32, limit int32, currentUserID int32) (iter.S
 		LEFT JOIN posts o ON o.id = p.repost_of_id
 		WHERE p.in_reply_to_id IS NULL
 		AND (o.id IS NULL OR o.in_reply_to_id IS NULL)
-		ORDER BY p.created DESC
+		ORDER BY p.created DESC, p.id DESC
 		LIMIT $2 OFFSET $3`
 
-	rows, err := c.db.Query(context.Background(), query, currentUserID, limit, page*limit)
+	rows, err := c.db.Query(ctx, query, currentUserID, limit, page*limit)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +102,7 @@ func (c *DBClient) getFeed(page int32, limit int32, currentUserID int32) (iter.S
 	return mapFeedPosts(rows), nil
 }
 
-func (c *DBClient) getPosts(userID int32, page int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
+func (c *DBClient) getPosts(ctx context.Context, userID int32, page int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
 	query := `SELECT
 		p.id, p.user_id, p.content,
 		(SELECT count(*) FROM likes WHERE post_id = COALESCE(o.id, p.id)) AS likes,
@@ -121,10 +122,10 @@ func (c *DBClient) getPosts(userID int32, page int32, limit int32, currentUserID
 		WHERE p.user_id = $2
 		AND p.in_reply_to_id IS NULL
 		AND (o.id IS NULL OR o.in_reply_to_id IS NULL)
-		ORDER BY p.created DESC
+		ORDER BY p.created DESC, p.id DESC
 		LIMIT $3 OFFSET $4`
 
-	rows, err := c.db.Query(context.Background(), query, currentUserID, userID, limit, page*limit)
+	rows, err := c.db.Query(ctx, query, currentUserID, userID, limit, page*limit)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +133,7 @@ func (c *DBClient) getPosts(userID int32, page int32, limit int32, currentUserID
 	return mapFeedPosts(rows), nil
 }
 
-func (c *DBClient) getLikedPosts(userID int32, page int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
+func (c *DBClient) getLikedPosts(ctx context.Context, userID int32, page int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
 	query := `SELECT id, posts.user_id, content,
 		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
 		EXISTS (SELECT 1 FROM likes WHERE post_id = id AND likes.user_id = $1) AS liked,
@@ -145,10 +146,10 @@ func (c *DBClient) getLikedPosts(userID int32, page int32, limit int32, currentU
 		FROM posts
 		INNER JOIN likes ON post_id = id
 		WHERE likes.user_id = $2
-		ORDER BY likes.created DESC
+		ORDER BY likes.created DESC, id DESC
 		LIMIT $3 OFFSET $4`
 
-	rows, err := c.db.Query(context.Background(), query, currentUserID, userID, limit, page*limit)
+	rows, err := c.db.Query(ctx, query, currentUserID, userID, limit, page*limit)
 	if err != nil {
 		return nil, err
 	}
@@ -156,7 +157,7 @@ func (c *DBClient) getLikedPosts(userID int32, page int32, limit int32, currentU
 	return mapPosts(rows), nil
 }
 
-func (c *DBClient) getHashtagPosts(tag string, page int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
+func (c *DBClient) getHashtagPosts(ctx context.Context, tag string, page int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
 	query := `SELECT id, user_id, content,
 		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
 		EXISTS (SELECT 1 FROM likes WHERE post_id = id AND likes.user_id = $1) AS liked,
@@ -168,10 +169,10 @@ func (c *DBClient) getHashtagPosts(tag string, page int32, limit int32, currentU
 		COALESCE(quote_of_id, 0) AS quote_of_id
 		FROM posts
 		WHERE hashtags @> ARRAY[$2]::varchar[]
-		ORDER BY created DESC
+		ORDER BY created DESC, id DESC
 		LIMIT $3 OFFSET $4`
 
-	rows, err := c.db.Query(context.Background(), query, currentUserID, strings.ToLower(tag), limit, page*limit)
+	rows, err := c.db.Query(ctx, query, currentUserID, strings.ToLower(tag), limit, page*limit)
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +180,7 @@ func (c *DBClient) getHashtagPosts(tag string, page int32, limit int32, currentU
 	return mapPosts(rows), nil
 }
 
-func (c *DBClient) getPost(id int32, currentUserID int32) (*pb.Post, error) {
+func (c *DBClient) getPost(ctx context.Context, id int32, currentUserID int32) (*pb.Post, error) {
 	query := `SELECT id, user_id, content,
 		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
 		EXISTS (SELECT 1 FROM likes WHERE post_id = id AND likes.user_id = $1) AS liked,
@@ -191,11 +192,15 @@ func (c *DBClient) getPost(id int32, currentUserID int32) (*pb.Post, error) {
 		COALESCE(quote_of_id, 0) AS quote_of_id
 		FROM posts WHERE id = $2`
 
-	row := c.db.QueryRow(context.Background(), query, currentUserID, id)
-	return mapPost(row)
+	row := c.db.QueryRow(ctx, query, currentUserID, id)
+	post, err := mapPost(row)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, errNotFound
+	}
+	return post, err
 }
 
-func (c *DBClient) getPostsByIds(ids []int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
+func (c *DBClient) getPostsByIds(ctx context.Context, ids []int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
 	query := `SELECT id, user_id, content,
 		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
 		EXISTS (SELECT 1 FROM likes WHERE post_id = id AND likes.user_id = $1) AS liked,
@@ -207,7 +212,7 @@ func (c *DBClient) getPostsByIds(ids []int32, currentUserID int32) (iter.Seq2[*p
 		COALESCE(quote_of_id, 0) AS quote_of_id
 		FROM posts WHERE id = ANY($2)`
 
-	rows, err := c.db.Query(context.Background(), query, currentUserID, ids)
+	rows, err := c.db.Query(ctx, query, currentUserID, ids)
 	if err != nil {
 		return nil, err
 	}
@@ -215,47 +220,55 @@ func (c *DBClient) getPostsByIds(ids []int32, currentUserID int32) (iter.Seq2[*p
 	return mapPosts(rows), nil
 }
 
-func (c *DBClient) deletePost(postID int32, userID int32) error {
+func (c *DBClient) deletePost(ctx context.Context, postID int32, userID int32) error {
 	query := "DELETE FROM posts WHERE id = $1 AND user_id = $2"
-	tag, err := c.db.Exec(context.Background(), query, postID, userID)
+	tag, err := c.db.Exec(ctx, query, postID, userID)
 	if err != nil {
 		return err
 	}
 	if tag.RowsAffected() == 0 {
-		return pgx.ErrNoRows
+		return errNotFound
 	}
 	return nil
 }
 
-func (c *DBClient) likePost(postID int32, userID int32) error {
+func (c *DBClient) likePost(ctx context.Context, postID int32, userID int32) error {
 	query := "INSERT INTO likes (post_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING"
-	_, err := c.db.Exec(context.Background(), query, postID, userID)
+	_, err := c.db.Exec(ctx, query, postID, userID)
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) && pgErr.Code == "23503" {
+		return errInvalidReference
+	}
 	return err
 }
 
-func (c *DBClient) unlikePost(postID int32, userID int32) error {
+func (c *DBClient) unlikePost(ctx context.Context, postID int32, userID int32) error {
 	query := "DELETE FROM likes WHERE post_id = $1 AND user_id = $2"
-	_, err := c.db.Exec(context.Background(), query, postID, userID)
+	_, err := c.db.Exec(ctx, query, postID, userID)
 	return err
 }
 
-func (c *DBClient) repostPost(postID int32, userID int32) error {
+func (c *DBClient) repostPost(ctx context.Context, postID int32, userID int32) error {
 	query := `INSERT INTO posts (user_id, repost_of_id)
 		SELECT $1, COALESCE(p.repost_of_id, p.id)
 		FROM posts p WHERE p.id = $2
 		AND p.in_reply_to_id IS NULL
 		ON CONFLICT (user_id, repost_of_id) DO NOTHING`
-	_, err := c.db.Exec(context.Background(), query, userID, postID)
+	_, err := c.db.Exec(ctx, query, userID, postID)
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) && pgErr.Code == "23503" {
+		return errInvalidReference
+	}
 	return err
 }
 
-func (c *DBClient) removeRepost(postID int32, userID int32) error {
+func (c *DBClient) removeRepost(ctx context.Context, postID int32, userID int32) error {
 	query := "DELETE FROM posts WHERE user_id = $1 AND repost_of_id = $2"
-	_, err := c.db.Exec(context.Background(), query, userID, postID)
+	_, err := c.db.Exec(ctx, query, userID, postID)
 	return err
 }
 
-func (c *DBClient) getReplies(postID int32, page int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
+func (c *DBClient) getReplies(ctx context.Context, postID int32, page int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
 	query := `SELECT id, user_id, content,
 		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
 		EXISTS (SELECT 1 FROM likes WHERE post_id = id AND likes.user_id = $1) AS liked,
@@ -267,10 +280,10 @@ func (c *DBClient) getReplies(postID int32, page int32, limit int32, currentUser
 		COALESCE(quote_of_id, 0) AS quote_of_id
 		FROM posts
 		WHERE in_reply_to_id = $2
-		ORDER BY created ASC
+		ORDER BY created ASC, id ASC
 		LIMIT $3 OFFSET $4`
 
-	rows, err := c.db.Query(context.Background(), query, currentUserID, postID, limit, page*limit)
+	rows, err := c.db.Query(ctx, query, currentUserID, postID, limit, page*limit)
 	if err != nil {
 		return nil, err
 	}

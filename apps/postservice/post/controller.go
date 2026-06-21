@@ -2,6 +2,7 @@ package post
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"regexp"
 	"strings"
@@ -55,9 +56,9 @@ func (c *controller) CreatePost(ctx context.Context, req *pb.CreatePostRequest) 
 
 	tags := extractHashtags(req.Content)
 
-	res, err := c.dbClient.createPost(req.Content, tags, userID, req.MediaKey, req.InReplyToId, req.QuoteOfId)
+	res, err := c.dbClient.createPost(ctx, req.Content, tags, userID, req.MediaKey, req.InReplyToId, req.QuoteOfId)
 	if err != nil {
-		if err == errInvalidReference {
+		if errors.Is(err, errInvalidReference) {
 			return nil, newError(codes.InvalidArgument)
 		}
 		slog.Warn("creating post failed", "request_id", requestID(ctx), "error", err)
@@ -73,7 +74,7 @@ func (c *controller) GetFeed(ctx context.Context, req *pb.GetFeedRequest) (*pb.P
 		return nil, err
 	}
 
-	resIter, err := c.dbClient.getFeed(req.Page, req.Limit, userID)
+	resIter, err := c.dbClient.getFeed(ctx, req.Page, req.Limit, userID)
 	if err != nil {
 		slog.Warn("getting posts failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
@@ -97,7 +98,7 @@ func (c *controller) GetPosts(ctx context.Context, req *pb.GetPostsRequest) (*pb
 		return nil, err
 	}
 
-	resIter, err := c.dbClient.getPosts(req.UserId, req.Page, req.Limit, userID)
+	resIter, err := c.dbClient.getPosts(ctx, req.UserId, req.Page, req.Limit, userID)
 	if err != nil {
 		slog.Warn("getting posts failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
@@ -121,7 +122,7 @@ func (c *controller) GetLikedPosts(ctx context.Context, req *pb.GetPostsRequest)
 		return nil, err
 	}
 
-	resIter, err := c.dbClient.getLikedPosts(req.UserId, req.Page, req.Limit, userID)
+	resIter, err := c.dbClient.getLikedPosts(ctx, req.UserId, req.Page, req.Limit, userID)
 	if err != nil {
 		slog.Warn("getting liked posts failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
@@ -148,7 +149,7 @@ func (c *controller) GetHashtagPosts(ctx context.Context, req *pb.GetHashtagPost
 		return nil, newError(codes.InvalidArgument)
 	}
 
-	resIter, err := c.dbClient.getHashtagPosts(req.Tag, req.Page, req.Limit, userID)
+	resIter, err := c.dbClient.getHashtagPosts(ctx, req.Tag, req.Page, req.Limit, userID)
 	if err != nil {
 		slog.Warn("getting hashtag posts failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
@@ -176,7 +177,7 @@ func (c *controller) GetPostsByIds(ctx context.Context, req *pb.Ids) (*pb.Posts,
 		return &pb.Posts{}, nil
 	}
 
-	resIter, err := c.dbClient.getPostsByIds(req.Ids, userID)
+	resIter, err := c.dbClient.getPostsByIds(ctx, req.Ids, userID)
 	if err != nil {
 		slog.Warn("getting posts by ids failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
@@ -200,10 +201,13 @@ func (c *controller) GetPost(ctx context.Context, req *pb.PostRequest) (*pb.Post
 		return nil, err
 	}
 
-	res, err := c.dbClient.getPost(req.PostId, userID)
+	res, err := c.dbClient.getPost(ctx, req.PostId, userID)
 	if err != nil {
+		if errors.Is(err, errNotFound) {
+			return nil, newError(codes.NotFound)
+		}
 		slog.Warn("getting post failed", "request_id", requestID(ctx), "error", err)
-		return nil, newError(codes.NotFound)
+		return nil, newError(codes.Internal)
 	}
 
 	return res, nil
@@ -215,7 +219,7 @@ func (c *controller) GetReplies(ctx context.Context, req *pb.GetRepliesRequest) 
 		return nil, err
 	}
 
-	resIter, err := c.dbClient.getReplies(req.PostId, req.Page, req.Limit, userID)
+	resIter, err := c.dbClient.getReplies(ctx, req.PostId, req.Page, req.Limit, userID)
 	if err != nil {
 		slog.Warn("getting replies failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
@@ -239,7 +243,10 @@ func (c *controller) DeletePost(ctx context.Context, req *pb.PostRequest) (*pb.E
 		return nil, err
 	}
 
-	if err := c.dbClient.deletePost(req.PostId, userID); err != nil {
+	if err := c.dbClient.deletePost(ctx, req.PostId, userID); err != nil {
+		if errors.Is(err, errNotFound) {
+			return nil, newError(codes.NotFound)
+		}
 		slog.Warn("deleting post failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
 	}
@@ -253,7 +260,10 @@ func (c *controller) LikePost(ctx context.Context, req *pb.PostRequest) (*pb.Emp
 		return nil, err
 	}
 
-	if err = c.dbClient.likePost(req.PostId, userID); err != nil {
+	if err = c.dbClient.likePost(ctx, req.PostId, userID); err != nil {
+		if errors.Is(err, errInvalidReference) {
+			return nil, newError(codes.NotFound)
+		}
 		slog.Warn("liking post failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
 	}
@@ -267,7 +277,7 @@ func (c *controller) UnlikePost(ctx context.Context, req *pb.PostRequest) (*pb.E
 		return nil, err
 	}
 
-	if err = c.dbClient.unlikePost(req.PostId, userID); err != nil {
+	if err = c.dbClient.unlikePost(ctx, req.PostId, userID); err != nil {
 		slog.Warn("unliking post failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
 	}
@@ -281,7 +291,10 @@ func (c *controller) RepostPost(ctx context.Context, req *pb.PostRequest) (*pb.E
 		return nil, err
 	}
 
-	if err = c.dbClient.repostPost(req.PostId, userID); err != nil {
+	if err = c.dbClient.repostPost(ctx, req.PostId, userID); err != nil {
+		if errors.Is(err, errInvalidReference) {
+			return nil, newError(codes.NotFound)
+		}
 		slog.Warn("reposting post failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
 	}
@@ -295,7 +308,7 @@ func (c *controller) RemoveRepost(ctx context.Context, req *pb.PostRequest) (*pb
 		return nil, err
 	}
 
-	if err = c.dbClient.removeRepost(req.PostId, userID); err != nil {
+	if err = c.dbClient.removeRepost(ctx, req.PostId, userID); err != nil {
 		slog.Warn("removing repost failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
 	}
