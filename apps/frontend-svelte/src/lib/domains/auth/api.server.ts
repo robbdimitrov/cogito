@@ -9,9 +9,10 @@ interface LoginResponse {
   id: number;
 }
 
-interface SessionsResponse {
+export interface SessionsResponse {
   sessions: Session[];
   currentSessionId: string;
+  userId?: string;
 }
 
 export function login(

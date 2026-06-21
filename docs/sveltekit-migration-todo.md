@@ -130,13 +130,13 @@ passthrough** — all backend access is server-mediated (BFF). The browser never
 
 `feat: add app shell with session guard and navbar`
 
-- [ ] `src/routes/(app)/+layout.server.ts`: resolve `currentUser` (validate `/sessions` → fetch
+- [x] `src/routes/(app)/+layout.server.ts`: resolve `currentUser` (validate `/sessions` → fetch
       `/users/{id}`); `throw redirect(303, '/login')` when unauthenticated. Replaces `proxy.ts`
       guard + `serverapi.getCurrentUser`. Expose `currentUser` via layout data.
-- [ ] `(auth)` group layout (no guard) for login/signup.
-- [ ] `src/lib/shared/components/layout/Navbar.svelte` (port `shared/components/navbar`), theme toggle,
+- [x] `(auth)` group layout (no guard) for login/signup.
+- [x] `src/lib/shared/components/layout/Navbar.svelte` (port `shared/components/navbar`), theme toggle,
       user dropdown, logout; driven by `$page.data.currentUser`; lucide icons.
-- [ ] Toast provider via context + rune (port `shared/components/toast`); `Avatar`, `GlassCard`/
+- [x] Toast provider via context + rune (port `shared/components/toast`); `Avatar`, `GlassCard`/
       `Field`/`FormInput`/`IconInput`, `ConfirmModal`, `Loading`, `+error.svelte`. Replace
       `surface.tsx` class helpers with shared Tailwind utilities. Keep these under
       `src/lib/shared/components/ui`.
