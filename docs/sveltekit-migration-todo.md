@@ -104,7 +104,9 @@ passthrough** — all backend access is server-mediated (BFF). The browser never
 - [x] `src/hooks.server.ts`:
   - [x] `handleFetch`: rewrite `/api/*` → `${BACKEND_URL}/*`, forward inbound `Cookie`, and for
         mutating methods set `X-CSRF-Token` from the `_csrf` cookie. This is how
-        `load`/actions/endpoints reach the Go gateway (replaces `serverapi.fetchServer`).
+        `load`/actions/endpoints reach the Go gateway (replaces `serverapi.fetchServer`). Bootstrap
+        CSRF with a safe gateway GET when absent, bridge only the `session` and `_csrf` response
+        cookies, and bound the complete backend operation with `BACKEND_TIMEOUT_MS`.
   - [x] `handle`: set `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`,
         `Referrer-Policy: strict-origin-when-cross-origin` on every response.
   - [x] CSP itself lives in `svelte.config.js` `kit.csp` (`mode: 'nonce'`, SvelteKit injects the
@@ -336,36 +338,13 @@ All source paths are under `apps/frontend/src/`; all targets under `apps/fronten
 - **camelize:** gateway returns snake_case; convert to camelCase in the api layer (port
   `camelizeKeys` from `apiclient.ts`), or map DTOs explicitly.
 
-## Appendix C — SvelteKit recipes (copy-paste starting points)
+## Appendix C — SvelteKit implementation patterns
 
-```ts
-// src/hooks.server.ts — server↔backend transport + security headers
-import type { Handle, HandleFetch } from '@sveltejs/kit';
-import { env } from '$env/dynamic/private';
-const MUTATING = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
-
-export const handleFetch: HandleFetch = async ({ request, fetch, event }) => {
-  if (request.url.startsWith(`${event.url.origin}/api/`)) {
-    const target = request.url.replace(`${event.url.origin}/api`, env.BACKEND_URL);
-    const headers = new Headers(request.headers);
-    headers.set('cookie', event.request.headers.get('cookie') ?? '');
-    if (MUTATING.has(request.method)) {
-      const csrf = event.cookies.get('_csrf');
-      if (csrf) headers.set('x-csrf-token', csrf);
-    }
-    request = new Request(target, new Request(request, { headers }));
-  }
-  return fetch(request);
-};
-
-export const handle: Handle = async ({ event, resolve }) => {
-  const res = await resolve(event);
-  res.headers.set('X-Content-Type-Options', 'nosniff');
-  res.headers.set('X-Frame-Options', 'SAMEORIGIN');
-  res.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  return res;
-};
-```
+The canonical server↔backend transport is `apps/frontend-svelte/src/hooks.server.ts` together with
+`src/lib/shared/backendCookies.server.ts`. Keep it centralized there: same-origin `/api/*`
+recognition, backend rewrite, one total timeout budget, CSRF bootstrap/header injection,
+allowlisted cookie bridging, and response security headers are one boundary and must not be
+reimplemented in route actions.
 
 ```ts
 // src/lib/domains/posts/api.server.ts — server-only api fn shape: always (fetch, ...args)

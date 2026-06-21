@@ -1,14 +1,12 @@
 import type { Session } from "./model";
 import {
   apiRequest,
-  apiResponse,
   jsonRequest,
   type ServerFetch,
 } from "$lib/shared/transport.server";
 
-export interface LoginResult {
+interface LoginResult {
   id: number;
-  setCookies: string[];
 }
 
 export interface SessionsResponse {
@@ -22,19 +20,11 @@ export function login(
   email: string,
   password: string,
 ): Promise<LoginResult> {
-  return apiResponse<{ id: number }>(
+  return apiRequest(
     fetch,
     "/api/sessions",
     jsonRequest("POST", { email, password }),
-  ).then(({ data, response }) => {
-    const setCookies = response.headers.getSetCookie();
-    const fallback = response.headers.get("set-cookie");
-    return {
-      id: data.id,
-      setCookies:
-        setCookies.length > 0 ? setCookies : fallback ? [fallback] : [],
-    };
-  });
+  );
 }
 
 export function logout(fetch: ServerFetch): Promise<void> {

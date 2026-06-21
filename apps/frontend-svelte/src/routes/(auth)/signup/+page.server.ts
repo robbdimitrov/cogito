@@ -1,5 +1,4 @@
 import { login } from "$lib/domains/auth/api.server";
-import { applySetCookies } from "$lib/domains/auth/cookies.server";
 import { formString, validateSignup } from "$lib/domains/auth/validation";
 import { createUser } from "$lib/domains/users/api.server";
 import { APIError } from "$lib/shared/transport.server";
@@ -22,15 +21,14 @@ export const actions = {
 
     try {
       await createUser(fetch, name, username, email, password);
-      const result = await login(fetch, email, password);
-      if (result.setCookies.length === 0) {
+      await login(fetch, email, password);
+      if (!cookies.get("session")) {
         console.error("Signup login response did not include a session cookie");
         return fail(502, {
           error: "Account created, but login failed",
           fields,
         });
       }
-      applySetCookies(cookies, result.setCookies);
     } catch (error) {
       const message =
         error instanceof APIError && error.status < 500

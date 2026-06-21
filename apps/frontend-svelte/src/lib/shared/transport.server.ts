@@ -25,7 +25,18 @@ export async function apiResponse<T>(
   url: string,
   init?: RequestInit,
 ): Promise<{ data: T; response: Response }> {
-  const response = await fetch(url, init);
+  let response: Response;
+  try {
+    response = await fetch(url, init);
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "TimeoutError") {
+      throw new APIError(504, "Backend request timed out");
+    }
+    if (error instanceof TypeError) {
+      throw new APIError(503, "Backend service unavailable");
+    }
+    throw error;
+  }
   if (response.status === 204) {
     return { data: undefined as T, response };
   }

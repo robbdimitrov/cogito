@@ -1,5 +1,4 @@
 import { login } from "$lib/domains/auth/api.server";
-import { applySetCookies } from "$lib/domains/auth/cookies.server";
 import { formString } from "$lib/domains/auth/validation";
 import { APIError } from "$lib/shared/transport.server";
 import { fail, redirect } from "@sveltejs/kit";
@@ -16,12 +15,11 @@ export const actions = {
     }
 
     try {
-      const result = await login(fetch, email, password);
-      if (result.setCookies.length === 0) {
+      await login(fetch, email, password);
+      if (!cookies.get("session")) {
         console.error("Login response did not include a session cookie");
         return fail(502, { error: "Login failed", email });
       }
-      applySetCookies(cookies, result.setCookies);
     } catch (error) {
       const message =
         error instanceof APIError && error.status < 500
