@@ -1,13 +1,12 @@
 use std::env;
+use std::sync::OnceLock;
 use subtle::ConstantTimeEq;
 use tonic::{Request, Status};
-
-const DEFAULT_INTERNAL_GRPC_TOKEN: &str = "dev-internal-grpc-token";
 
 #[allow(clippy::result_large_err)]
 pub fn interceptor(req: Request<()>) -> Result<Request<()>, Status> {
     let expected = internal_grpc_token();
-    authenticate(req, &expected)
+    authenticate(req, expected)
 }
 
 #[allow(clippy::result_large_err)]
@@ -25,11 +24,9 @@ fn authenticate(req: Request<()>, expected: &str) -> Result<Request<()>, Status>
     }
 }
 
-fn internal_grpc_token() -> String {
-    match env::var("INTERNAL_GRPC_TOKEN") {
-        Ok(v) if !v.is_empty() => v,
-        _ => DEFAULT_INTERNAL_GRPC_TOKEN.to_string(),
-    }
+fn internal_grpc_token() -> &'static str {
+    static TOKEN: OnceLock<String> = OnceLock::new();
+    TOKEN.get_or_init(|| env::var("INTERNAL_GRPC_TOKEN").expect("INTERNAL_GRPC_TOKEN must be set"))
 }
 
 #[cfg(test)]

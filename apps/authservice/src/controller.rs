@@ -3,7 +3,6 @@ use base64::{Engine as _, engine::general_purpose::URL_SAFE_NO_PAD};
 use hmac::{Hmac, KeyInit, Mac};
 use rand::RngCore;
 use sha2::Sha256;
-use std::env;
 use std::sync::OnceLock;
 use tonic::{Request, Response, Status};
 
@@ -23,9 +22,7 @@ fn dummy_password_hash() -> &'static str {
     })
 }
 
-fn hash_session_id(session_id: &str) -> String {
-    let secret = env::var("SESSION_HMAC_SECRET")
-        .unwrap_or_else(|_| "default-session-secret-change-me".to_string());
+fn hash_session_id(secret: &str, session_id: &str) -> String {
     let mut mac =
         HmacSha256::new_from_slice(secret.as_bytes()).expect("HMAC can take key of any size");
     mac.update(session_id.as_bytes());
@@ -46,11 +43,15 @@ pub trait AuthDb: Send + Sync + 'static {
 
 pub struct Controller<D: AuthDb> {
     db_client: D,
+    session_hmac_secret: String,
 }
 
 impl<D: AuthDb> Controller<D> {
-    pub fn new(db_client: D) -> Self {
-        Self { db_client }
+    pub fn new(db_client: D, session_hmac_secret: String) -> Self {
+        Self {
+            db_client,
+            session_hmac_secret,
+        }
     }
 }
 
@@ -89,7 +90,7 @@ impl<D: AuthDb> AuthService for Controller<D> {
                 rand::thread_rng().fill_bytes(&mut key);
                 let session_id = URL_SAFE_NO_PAD.encode(key);
 
-                let hashed_id = hash_session_id(&session_id);
+                let hashed_id = hash_session_id(&self.session_hmac_secret, &session_id);
 
                 let mut session = self
                     .db_client
@@ -121,7 +122,7 @@ impl<D: AuthDb> AuthService for Controller<D> {
     ) -> Result<Response<Session>, Status> {
         let request_id = crate::logging::request_id(&request).to_string();
         let req = request.into_inner();
-        let hashed_id = hash_session_id(&req.session_id);
+        let hashed_id = hash_session_id(&self.session_hmac_secret, &req.session_id);
 
         let session_opt = self.db_client.get_session(&hashed_id).await.map_err(|e| {
             tracing::warn!(request_id = %request_id, method = "/thoughts.AuthService/GetSession", error = %e, "getting session failed");
@@ -163,7 +164,7 @@ impl<D: AuthDb> AuthService for Controller<D> {
     ) -> Result<Response<Empty>, Status> {
         let request_id = crate::logging::request_id(&request).to_string();
         let req = request.into_inner();
-        let hashed_id = hash_session_id(&req.session_id);
+        let hashed_id = hash_session_id(&self.session_hmac_secret, &req.session_id);
 
         let res1 = self.db_client.delete_session(&hashed_id).await;
         let res2 = self.db_client.delete_session(&req.session_id).await;
@@ -218,7 +219,7 @@ mod tests {
         }
 
         async fn get_session(&self, session_id: &str) -> Result<Option<Session>, sqlx::Error> {
-            let expected_hashed_id = hash_session_id("valid_session");
+            let expected_hashed_id = hash_session_id("test-secret", "valid_session");
 
             if session_id == expected_hashed_id {
                 Ok(Some(Session {
@@ -259,7 +260,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_create_session_success() {
-        let controller = Controller::new(MockAuthDb);
+        let controller = Controller::new(MockAuthDb, "test-secret".to_string());
         let req = Request::new(Credentials {
             email: "test@example.com".to_string(),
             password: "password".to_string(),
@@ -273,7 +274,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_create_session_missing_credentials() {
-        let controller = Controller::new(MockAuthDb);
+        let controller = Controller::new(MockAuthDb, "test-secret".to_string());
         let req = Request::new(Credentials {
             email: "".to_string(),
             password: "password".to_string(),
@@ -285,7 +286,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_create_session_incorrect_password() {
-        let controller = Controller::new(MockAuthDb);
+        let controller = Controller::new(MockAuthDb, "test-secret".to_string());
         let req = Request::new(Credentials {
             email: "test@example.com".to_string(),
             password: "wrong".to_string(),
@@ -297,7 +298,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_create_session_user_not_found() {
-        let controller = Controller::new(MockAuthDb);
+        let controller = Controller::new(MockAuthDb, "test-secret".to_string());
         let req = Request::new(Credentials {
             email: "unknown@example.com".to_string(),
             password: "password".to_string(),
@@ -309,7 +310,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_create_session_db_error() {
-        let controller = Controller::new(MockAuthDb);
+        let controller = Controller::new(MockAuthDb, "test-secret".to_string());
         let req = Request::new(Credentials {
             email: "db_error@example.com".to_string(),
             password: "password".to_string(),
@@ -321,7 +322,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_session_success() {
-        let controller = Controller::new(MockAuthDb);
+        let controller = Controller::new(MockAuthDb, "test-secret".to_string());
         let req = Request::new(SessionRequest {
             session_id: "valid_session".to_string(),
         });
@@ -333,7 +334,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_session_not_found() {
-        let controller = Controller::new(MockAuthDb);
+        let controller = Controller::new(MockAuthDb, "test-secret".to_string());
         let req = Request::new(SessionRequest {
             session_id: "unknown_session".to_string(),
         });
@@ -344,7 +345,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_sessions() {
-        let controller = Controller::new(MockAuthDb);
+        let controller = Controller::new(MockAuthDb, "test-secret".to_string());
         let req = Request::new(UserRequest { user_id: 1 });
         let res = controller.get_sessions(req).await;
         assert!(res.is_ok());
@@ -355,7 +356,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_delete_session() {
-        let controller = Controller::new(MockAuthDb);
+        let controller = Controller::new(MockAuthDb, "test-secret".to_string());
         let req = Request::new(SessionRequest {
             session_id: "valid_session".to_string(),
         });
