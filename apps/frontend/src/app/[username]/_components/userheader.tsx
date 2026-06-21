@@ -1,3 +1,4 @@
+import { getSafeUploadUrl } from '@/shared/utils/url';
 import Link from 'next/link';
 import Avatar from '@/shared/components/avatar/avatar';
 import { Pen, Check, UserPlus, Calendar } from 'lucide-react';
@@ -24,7 +25,7 @@ function UserHeader({user, currentUser, onFollow, onUnfollow}) {
     <GlassCard className="overflow-hidden">
       <div className="relative h-24 bg-gradient-to-tr from-primary via-primary/80 to-secondary sm:h-32">
         {user.coverPhotoKey ? (
-          <img src={`/api/uploads/${user.coverPhotoKey}`} alt="Cover" className="absolute inset-0 w-full h-full object-cover" />
+          <img src={getSafeUploadUrl(user.coverPhotoKey)} alt="Cover" className="absolute inset-0 w-full h-full object-cover" />
         ) : (
           <div className="absolute inset-0 opacity-10" style={{backgroundImage: 'radial-gradient(circle at 25% 25%, white 1px, transparent 1px)', backgroundSize: '24px 24px'}}></div>
         )}

@@ -24,7 +24,8 @@ async function proxyRequest(request: NextRequest, context: RouteContext) {
   };
 
   if (request.method !== 'GET' && request.method !== 'HEAD') {
-    init.body = await request.arrayBuffer();
+    init.body = request.body;
+    (init as any).duplex = 'half';
   }
 
   const response = await fetch(target, init);

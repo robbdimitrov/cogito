@@ -1,4 +1,4 @@
-import Feed from '@/app/feed';
+import Feed from '@/app/(main)/feed';
 import { fetchServer, getCurrentUser } from '@/shared/services/serverapi';
 import type { Post } from '@/shared/types';
 

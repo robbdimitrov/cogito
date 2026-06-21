@@ -1,3 +1,4 @@
+import { getSafeUploadUrl } from '@/shared/utils/url';
 import { useState } from 'react';
 import Link from 'next/link';
 import Avatar from '@/shared/components/avatar/avatar';
@@ -122,7 +123,7 @@ function PostItem({post, user, onLike, onRepost, onDelete, currentUserId, onQuot
               />
               {displayPost.mediaKey && (
                 <div className="mt-3">
-                  <img src={`/api/uploads/${displayPost.mediaKey}`} alt="Post attachment" loading="lazy" decoding="async" className="max-h-96 w-auto rounded-xl object-contain border border-slate-200 dark:border-slate-800" />
+                  <img src={getSafeUploadUrl(displayPost.mediaKey)} alt="Post attachment" loading="lazy" decoding="async" className="max-h-96 w-auto rounded-xl object-contain border border-slate-200 dark:border-slate-800" />
                 </div>
               )}
               {displayPost.quotePost && (

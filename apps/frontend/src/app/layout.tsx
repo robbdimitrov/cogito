@@ -28,7 +28,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[30rem] w-[30rem] rounded-full bg-indigo-400/10 blur-[100px] mix-blend-multiply dark:bg-indigo-600/10 dark:mix-blend-lighten opacity-50"></div>
           </div>
           <Navbar isLoggedIn={isLoggedIn} user={user} />
-          <div className="app-content relative z-0">
+          <div className="min-h-[calc(100vh-4rem)] flex flex-col relative z-0">
             <ErrorBoundary>
               {children}
             </ErrorBoundary>

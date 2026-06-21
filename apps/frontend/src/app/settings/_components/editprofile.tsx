@@ -1,3 +1,4 @@
+import { getSafeUploadUrl } from '@/shared/utils/url';
 import React, {useState, useRef} from 'react';
 import { AlertCircle, Camera, Trash2, Image as ImageIcon } from 'lucide-react';
 import GlassCard, {Field, FormInput, FormTextArea} from '@/shared/components/ui/surface';
@@ -76,7 +77,7 @@ function EditProfile(props: any) {
               <div className="flex items-center gap-3">
                 {state.profilePhotoKey ? (
                   <div className="relative h-16 w-16 overflow-hidden rounded-full border border-base-content/10">
-                    <img src={`/api/uploads/${state.profilePhotoKey}`} alt="Avatar" className="h-full w-full object-cover" />
+                    <img src={getSafeUploadUrl(state.profilePhotoKey)} alt="Avatar" className="h-full w-full object-cover" />
                   </div>
                 ) : (
                   <div className="flex h-16 w-16 items-center justify-center rounded-full bg-base-200 border border-base-content/10">
@@ -101,7 +102,7 @@ function EditProfile(props: any) {
               <div className="flex items-center gap-3">
                 {state.coverPhotoKey ? (
                   <div className="relative h-16 w-32 overflow-hidden rounded-lg border border-base-content/10">
-                    <img src={`/api/uploads/${state.coverPhotoKey}`} alt="Cover" className="h-full w-full object-cover" />
+                    <img src={getSafeUploadUrl(state.coverPhotoKey)} alt="Cover" className="h-full w-full object-cover" />
                   </div>
                 ) : (
                   <div className="flex h-16 w-32 items-center justify-center rounded-lg bg-base-200 border border-base-content/10">

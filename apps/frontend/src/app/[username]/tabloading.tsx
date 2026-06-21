@@ -1,4 +1,4 @@
-import { FeedSkeleton } from '@/app/feedskeleton';
+import { FeedSkeleton } from '@/shared/components/feed/feedskeleton';
 import GlassCard from '@/shared/components/ui/surface';
 
 export function UserListSkeleton({ count = 3 }: { count?: number }) {

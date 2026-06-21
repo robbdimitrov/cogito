@@ -1,3 +1,4 @@
+import { getSafeUploadUrl } from '@/shared/utils/url';
 
 function Avatar({name, size = 'md', photoKey}: {name: string, size?: 'sm' | 'md' | 'lg' | 'xl', photoKey?: string}) {
   const sizeMap = {
@@ -13,7 +14,7 @@ function Avatar({name, size = 'md', photoKey}: {name: string, size?: 'sm' | 'md'
     <div className={`avatar ${!photoKey ? 'placeholder' : ''}`}>
       <div className={`${photoKey ? 'bg-base-200' : 'bg-primary text-primary-content'} rounded-full ${sizeMap[size]} flex items-center justify-center font-bold overflow-hidden`}>
         {photoKey ? (
-          <img src={`/api/uploads/${photoKey}`} alt={name} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+          <img src={getSafeUploadUrl(photoKey)} alt={name} loading="lazy" decoding="async" className="w-full h-full object-cover" />
         ) : (
           <span>{initial}</span>
         )}

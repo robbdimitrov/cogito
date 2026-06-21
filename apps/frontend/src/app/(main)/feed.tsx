@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import UserCard from '@/app/usercard';
-import CreatePost from '@/app/createpost';
+import UserCard from '@/app/(main)/usercard';
+import CreatePost from '@/app/(main)/createpost';
 import PostList from '@/shared/components/postlist/postlist';
 import QuoteComposeModal from '@/shared/components/repostmenu/quotecomposemodal';
 

@@ -1,3 +1,4 @@
+import { getSafeUploadUrl } from '@/shared/utils/url';
 import Link from 'next/link';
 import Avatar from '@/shared/components/avatar/avatar';
 import GlassCard from '@/shared/components/ui/surface';
@@ -51,7 +52,7 @@ function UserCard({user, variant = 'sidebar'}) {
     <GlassCard className="sticky top-20 overflow-hidden">
       <div className="h-16 relative bg-gradient-to-r from-primary/70 to-secondary/70">
         {user.coverPhotoKey && (
-          <img src={`/api/uploads/${user.coverPhotoKey}`} alt="Cover" className="absolute inset-0 w-full h-full object-cover" />
+          <img src={getSafeUploadUrl(user.coverPhotoKey)} alt="Cover" className="absolute inset-0 w-full h-full object-cover" />
         )}
       </div>
       <div className="card-body p-4 -mt-8 relative z-10">

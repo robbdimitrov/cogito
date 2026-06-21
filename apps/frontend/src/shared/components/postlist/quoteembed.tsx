@@ -1,3 +1,4 @@
+import { getSafeUploadUrl } from '@/shared/utils/url';
 import Link from 'next/link';
 import Avatar from '@/shared/components/avatar/avatar';
 import FormattedContent from '@/shared/components/postcontent/formattedcontent';
@@ -32,7 +33,7 @@ function QuoteEmbed({ post }: { post: Post }) {
       {post.mediaKey && (
         <div className="mt-2">
           <img
-            src={`/api/uploads/${post.mediaKey}`}
+            src={getSafeUploadUrl(post.mediaKey)}
             alt="Quoted post attachment"
             loading="lazy"
             decoding="async"

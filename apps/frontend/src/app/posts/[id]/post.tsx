@@ -1,3 +1,4 @@
+import { getSafeUploadUrl } from '@/shared/utils/url';
 'use client';
 
 import {useCallback, useState} from 'react';
@@ -178,7 +179,7 @@ function PostDetail({ initialPost, currentUserId, currentUser, initialReplies }:
               <FormattedContent content={post.content} className="mt-3 whitespace-pre-wrap break-words text-[1.02rem] leading-relaxed sm:mt-4 sm:text-lg" />
               {post.mediaKey && (
                 <div className="mt-3 sm:mt-4">
-                  <img src={`/api/uploads/${post.mediaKey}`} alt="Post attachment" className="max-h-[500px] w-auto rounded-xl object-contain border border-slate-200 dark:border-slate-800" />
+                  <img src={getSafeUploadUrl(post.mediaKey)} alt="Post attachment" className="max-h-[500px] w-auto rounded-xl object-contain border border-slate-200 dark:border-slate-800" />
                 </div>
               )}
               <div className="mt-4 flex items-center gap-2 border-t border-slate-200 pt-3 dark:border-slate-700 sm:mt-6 sm:gap-6 sm:pt-4">

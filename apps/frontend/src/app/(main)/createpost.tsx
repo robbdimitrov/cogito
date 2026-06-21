@@ -1,3 +1,4 @@
+import { getSafeUploadUrl } from '@/shared/utils/url';
 import React, { useState, useEffect, useRef, useActionState } from 'react';
 import Avatar from '@/shared/components/avatar/avatar';
 import { Pen, Send, Image as ImageIcon, X } from 'lucide-react';
@@ -152,7 +153,7 @@ function CreatePost({user, onCreatePost}: {user: User, onCreatePost: (content: s
           {mediaKey && (
             <div className="mt-3 sm:pl-14">
               <div className="relative inline-block">
-                <img src={`/api/uploads/${mediaKey}`} alt="Attached" className="max-h-60 rounded-xl object-cover border border-slate-200 dark:border-slate-800" />
+                <img src={getSafeUploadUrl(mediaKey)} alt="Attached" className="max-h-60 rounded-xl object-cover border border-slate-200 dark:border-slate-800" />
                 <button type="button" onClick={() => setMediaKey(null)} className="absolute top-2 right-2 p-1 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors">
                   <X className="h-4 w-4" />
                 </button>
