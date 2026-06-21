@@ -1,129 +1,179 @@
-# Thoughts - Agent Notes
+# Thoughts
 
 ## Architecture
 
-Microservices app with an HTTP gateway calling gRPC backends.
+Thoughts is a stateless microservices application. The browser talks to a
+Next.js frontend/BFF, which talks to a Go HTTP gateway. The gateway coordinates
+gRPC backends and proxies image HTTP traffic.
 
-| Service | Language | Role | Entrypoint |
-|---|---|---|---|
-| `apigateway` | Go | `net/http` API gateway | `main.go` |
-| `postservice` | Go | gRPC - posts, likes, reposts | `main.go` |
-| `authservice` | Rust | gRPC - sessions | `src/main.rs` |
-| `userservice` | Rust | gRPC - users, follows | `src/main.rs` |
-| `imageservice` | Rust | gRPC + HTTP - image upload staging, verification, cleanup | `src/main.rs` |
-| `frontend` | Next.js / React | App Router frontend | `src/app/` |
-| `database` | PostgreSQL | Versioned schema migrations | - |
+| Service | Stack | Responsibility |
+|---|---|---|
+| `apps/frontend` | Next.js, React, strict TypeScript | SSR UI and same-origin API proxy |
+| `apps/apigateway` | Go, `net/http` | Public HTTP API, authentication boundary, orchestration |
+| `apps/postservice` | Go, gRPC | Posts, replies, likes, and reposts |
+| `apps/authservice` | Rust, Tonic | Sessions |
+| `apps/userservice` | Rust, Tonic | Users, credentials, and follows |
+| `apps/imageservice` | Rust, Tonic, Axum | Image upload staging, verification, serving, and cleanup |
+| `apps/database` | PostgreSQL migrations | Versioned shared schema |
 
-- Proto contract: `pkg/pb/thoughts.proto`
-- Backend gRPC port: **5050**; `imageservice` HTTP port: **8081**; gateway + frontend port: **8080**
-- All backend services connect to Postgres via `DATABASE_URL` (e.g. `postgresql://postgres:kubernetes@database:5432`)
+The protobuf contract is `pkg/pb/thoughts.proto`. gRPC services listen on port
+5050 by default, the image HTTP server listens on 8081, and the gateway and
+production frontend listen on 8080.
 
-## Build
+Container images are tagged `localhost:5000/thoughts/<service>`. Backend
+services use `DATABASE_URL` for PostgreSQL connectivity.
 
-Docker images are built with Make. Tags target `localhost:5000/thoughts/<service>`.
+Before changing a service with a nested `AGENTS.md`, read it. Nested files
+contain only local invariants; this file remains the source of shared rules.
 
-```sh
-make                  # builds all service images, migration image, and frontend image
-make <service>        # individual service
-```
+## Commands
 
-### Frontend dev server
-
-```sh
-cd apps/frontend
-npm install --no-optional
-npm run dev             # dev server on :3000
-npm run build           # production build
-npm start               # serve the production build
-```
-
-`src/app/api/[...path]/route.ts` proxies `/api/:path*` to `${API_URL || 'http://localhost:8080'}/:path*`, preserving same-origin browser requests while the gateway receives paths without the `/api` prefix. Client-side API calls should use `/api/...` with `credentials: 'include'`; server components/helpers should call the gateway directly via `API_URL` and forward cookies from `next/headers`.
-
-`src/proxy.ts` is the Next Proxy route guard. Keep `/api`, `_next/static`, `_next/image`, and metadata files excluded from its matcher so API rewrites and static assets are not session-gated. Do not put broad data fetching in Proxy beyond lightweight route/session checks.
-
-### Go services
+Run from the repository root:
 
 ```sh
-cd apps/apigateway   # or apps/postservice
-go mod download
-go build -v -o service
+make                     # build all container images
+make <service>           # build one service image
+make proto               # regenerate Go protobuf bindings
+make format              # format handwritten Go and Rust
+make lint                # formatting checks and frontend lint
+make test                # all unit tests
+./scripts/deploy.sh       # preferred local Kubernetes deployment
 ```
 
-Dockerfiles use multi-stage builds: `golang:1.26` builder → `scratch` runtime.
-**Build note:** `CGO_ENABLED=0` must be set when building for the `scratch` stage, otherwise the binary will fail at runtime with a linker error (`exec /service: no such file or directory`).
-
-
-
-### Rust services
+Service-level verification:
 
 ```sh
-cd apps/authservice   # or apps/userservice or apps/imageservice
-cargo run
+cd apps/apigateway && go test ./... && CGO_ENABLED=0 go build .
+cd apps/postservice && go test ./... && CGO_ENABLED=0 go build .
+cd apps/authservice && cargo test
+cd apps/userservice && cargo test
+cd apps/imageservice && cargo test
+cd apps/frontend && npm run lint && npm run test && npm run build
 ```
 
-## Protobuf / Codegen
+Go Docker images use a `scratch` runtime. Keep `CGO_ENABLED=0` for binaries
+copied into that stage.
 
-Run `make proto` after changing `pkg/pb/thoughts.proto`.
+## Contracts and Service Boundaries
 
-The target runs the equivalent commands in both Go service directories:
-```sh
-cd apps/apigateway   # or apps/postservice
-protoc --go_out=. --go-grpc_out=. ../../pkg/pb/thoughts.proto
-```
-The `go_package` option is `./genproto`, so outputs land in `<service>/genproto/`.
+- Keep services independently deployable and stateless. State shared across
+  requests or replicas belongs in PostgreSQL or another durable shared system.
+- The gateway owns the public HTTP contract, browser authentication boundary,
+  request limits, and transport mapping. Domain services own domain workflows
+  and persistence rules.
+- Treat protobuf messages as transport DTOs. Map them deliberately at service
+  boundaries instead of leaking generated types into unrelated domain code.
+- Change `pkg/pb/thoughts.proto` compatibly. Preserve field numbers, add rather
+  than repurpose fields, and run `make proto` after changes.
+- Rust bindings are generated by each service's `build.rs`. Go bindings under
+  `genproto/` are generated. Never edit generated files manually.
+- Every network call must have an explicit timeout and safe error mapping.
+  Retries require a bounded policy and an operation known to be idempotent.
+- Work that can run concurrently across replicas must use transactions, locks,
+  constraints, or another durable coordination mechanism.
 
+## Engineering Standards
 
+- Follow SOLID, KISS, DRY, YAGNI, and the Pareto principle. Keep changes
+  focused and do not build for hypothetical requirements.
+- Search for an existing helper, abstraction, or platform primitive before
+  adding one. Add abstractions only when they remove concrete complexity or
+  duplication.
+- Match surrounding structure, naming, and idioms so the codebase reads as one
+  system rather than a collection of personal styles.
+- Use precise names and standard initialisms. Prefer clarity over compressed
+  code and named constants over repeated policy-significant literals.
+- Keep related fixes together, but do not expand a task into unrelated cleanup.
+- Comments explain constraints, invariants, security decisions, or non-obvious
+  intent. Do not narrate straightforward code or preserve implementation
+  history.
+- Write behavior-oriented tests for critical paths, complex logic, and risky
+  failure modes. Do not chase coverage percentages.
 
-**Rust** is handled automatically via `build.rs` and `tonic-build` during `cargo build` in `authservice`, `userservice`, and `imageservice`.
+## Secure Engineering
 
-## Kubernetes / Local Deploy
+Security controls are design constraints, not review-time additions.
 
-```sh
-./scripts/deploy.sh
-```
+- Validate untrusted data where it enters the system. Bound request bodies,
+  multipart fields, stream reads, pagination, and collection sizes before
+  parsing or allocation.
+- Authentication and authorization default to deny. Never trust a
+  client-supplied user ID; derive identity from the validated session and keep
+  ownership checks next to the protected operation.
+- Use parameterized SQL exclusively. Make check-then-act operations atomic
+  with a transaction, row lock, or database constraint.
+- Keep secrets out of code, committed configuration, URLs, browser storage,
+  generated artifacts, and logs.
+- Use established cryptographic primitives and constant-time comparisons for
+  credentials, MACs, and tokens. Do not invent cryptographic protocols.
+- Never render user-controlled HTML directly. Validate user-controlled URLs
+  against an explicit scheme and origin policy.
+- Log structured operational metadata without credentials, session values,
+  request bodies, unnecessary personal data, or raw user-controlled text.
+- Justify new dependencies by their maintenance, security, image-size, and
+  runtime cost.
 
-The script builds images, creates the namespace and generated secrets, applies
-the manifests, waits for rollouts, and starts the frontend port-forward.
+## Go Conventions
 
-Cleanup:
-```sh
-kubectl delete -f ./deploy -n thoughts
-kubectl delete namespace thoughts
-```
+These rules apply to `apigateway` and `postservice`.
 
-## Testing
+- Keep handwritten code `gofmt`-clean and use standard initialisms such as
+  `ID`, `URL`, `HTTP`, and `DB`.
+- Use symbolic `http.Status*` constants. The public API contract is JSON,
+  including errors, unless an endpoint intentionally streams bytes. Use shared
+  response helpers for new code; existing plain-text `http.Error` call sites
+  are migration debt, not a pattern to copy.
+- Propagate `context.Context` through request and database boundaries. Do not
+  retain request contexts in work intended to outlive the request.
+- Use typed fakes and `httptest` for transport behavior. Keep database behavior
+  behind narrow interfaces where practical.
 
-You can run all unit tests across the frontend and backend microservices using the provided `Makefile` target:
+## Rust Conventions
 
-```sh
-make test
-```
+These rules apply to `authservice`, `userservice`, and `imageservice`.
 
-Alternatively, you can run tests for individual services:
-- **Rust services**: Run `cargo test` inside the respective service directory.
-- **Go services**: Run `go test -v ./...` inside the respective service directory. Follow the 80/20 rule for test coverage (aim for ~80% coverage focusing on the most critical 20% of code).
-- **Frontend**: Tests are written with Vitest and React Testing Library. Run `npm run test` inside `apps/frontend`. Follow the 80/20 rule for frontend test coverage as well, focusing on critical utility functions, hooks, and core shared components.
+- Keep handwritten code `rustfmt`-clean and address Clippy findings in changed
+  code unless a narrowly scoped suppression documents a generated-code or API
+  constraint.
+- Map database and internal failures to deliberate Tonic or Axum statuses.
+  Do not expose raw SQL, filesystem, or internal error details to clients.
+- Background tasks must have an intentional context lifetime, recover or
+  surface failures at their boundary, and shut down cleanly where required.
+- Use inline tests for private helpers and service-level test modules for
+  externally observable behavior.
 
-## Database Notes
+## Database Migrations
 
-- `apps/database/migrations/` contains paired `NNNNNN_description.up.sql` and `.down.sql` migrations.
-- The migration image runs before the gateway starts and applies pending migrations to the `thoughts` database.
+- Migrations live in `apps/database/migrations/` as paired
+  `NNNNNN_description.up.sql` and `.down.sql` files.
+- Use two-space indentation and parameterized queries in application code.
+- Applied migration history is append-only. Correct deployed schemas with a
+  new migration rather than rewriting an existing one.
+- Consider rollout order and mixed-version compatibility when a schema change
+  affects more than one independently deployed service.
 
-## Constraints & Gotchas
+## Git and Commits
 
-- Follow **SOLID**, **KISS**, and **DRY** when writing code and refactoring: keep changes focused, prefer simple local patterns, avoid duplicated logic, and add abstractions only when they remove real complexity.
-- Use standard initialisms in Go names (`ID`, `URL`, `HTTP`, `DB`). Generated identifiers are exempt.
-- HTTP APIs return JSON consistently, including errors. Use symbolic `http.Status*` constants.
-- Type API boundaries explicitly. Prefer `unknown` over `any`, map transport DTOs deliberately, and keep strict TypeScript enabled.
-- Comments explain constraints or intent. Do not preserve implementation history, temporary reasoning, or narration of obvious code.
-- Keep handwritten Go `gofmt`-clean and Rust `rustfmt`-clean. Regenerate generated code instead of editing it manually.
-- Write behavior-oriented tests with typed fakes and framework-native HTTP test utilities. Use inline Rust tests for private helpers and service-level test modules for endpoint behavior.
-- New migrations use two-space indentation, paired up/down files, and corrective migrations rather than rewriting applied history.
-- Microservices must be stateless and designed to work properly in multi-replica environments.
-- Frontend styling should use Tailwind utilities and DaisyUI components. Add custom CSS only in EXTREME circumstances.
-- Frontend API response handling must tolerate `204 No Content` and non-JSON gateway error bodies; avoid calling `response.json()` unconditionally.
-- The `deletePost` query in `postservice/post/db_client.go` only checks `post_id` in the `WHERE` clause despite accepting `userID` as a parameter (potential bug if you modify that area).
+- Keep one logical change per commit. Tests required by a behavior change
+  belong in the same commit.
+- Use Conventional Commits (`type(scope): description`) in imperative present
+  tense. Include a scope when it adds useful context.
+- Commit messages are one line, at most 72 characters, with no body, trailers,
+  or issue references.
+- Review the staged diff before committing. Create commits only when the user
+  explicitly requests them.
 
-## Git Conventions
+## Definition of Done
 
-- Use **single-line commits** (summary only, no body). Keep the message under 72 characters when possible.
+Before reporting a change complete:
+
+1. Identify touched untrusted inputs, validation, and resource bounds.
+2. Confirm authentication, authorization, and ownership checks.
+3. Confirm concurrent or cross-replica operations are atomic and retried work
+   is idempotent.
+4. Confirm network calls have timeouts, bounded reads, and deliberate retries.
+5. Add or update behavior-oriented tests for critical success and failure paths.
+6. Review the complete diff for correctness, security, unnecessary complexity,
+   duplication, stale comments, and unrelated changes.
+7. Run relevant formatters, linters, tests, and builds in proportion to risk.
+8. Report checks that could not run and remaining risk explicitly.
