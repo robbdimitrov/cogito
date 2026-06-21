@@ -80,17 +80,17 @@
 
 `feat: add typed api client`
 
-- [ ] `src/lib/domains/auth/server.ts`: `login` (POST `/api/sessions`), `logout` (DELETE),
+- [x] `src/lib/domains/auth/api.server.ts`: `login` (POST `/api/sessions`), `logout` (DELETE),
       `getSessions` (→ `{sessions, currentSessionId}`), `deleteSession`.
-- [ ] `src/lib/domains/users/server.ts`: `createUser`, `updateUser`, `updatePassword`, `getUser`,
+- [x] `src/lib/domains/users/api.server.ts`: `createUser`, `updateUser`, `updatePassword`, `getUser`,
       `getByUsername`, `searchUsers`, `getFollowing`/`getFollowers` (page), `follow`/`unfollow`.
-- [ ] `src/lib/domains/posts/server.ts`: feed / user-posts / liked / hashtag (page), `getPost`,
+- [x] `src/lib/domains/posts/api.server.ts`: feed / user-posts / liked / hashtag (page), `getPost`,
       `getReplies`, `create` (content, mediaKey, inReplyToId, quoteOfId), `delete`,
       `like`/`unlike`, `repost`/`removeRepost`.
-- [ ] `src/lib/domains/posts/uploads.server.ts`: `uploadImage` (multipart → `{key}`).
-- [ ] Each fn signature `(fetch, ...args)`; central response handler tolerating 204 + non-JSON
+- [x] `src/lib/domains/posts/uploads.server.ts`: `uploadImage` (multipart → `{key}`).
+- [x] Each fn signature `(fetch, ...args)`; central response handler tolerating 204 + non-JSON
       errors; typed returns. Mirror the endpoint set in `shared/services/apiclient.ts`.
-- [ ] Put the central response handler in `src/lib/shared/server/transport.ts`; keep all server
+- [x] Put the central response handler in `src/lib/shared/transport.server.ts`; keep all server
       modules named `*.server.ts` so backend transport never ships to the client.
 - **Done when**: every endpoint typed and reused from one place (DRY); check clean.
 
@@ -291,7 +291,7 @@ All source paths are under `apps/frontend/src/`; all targets under `apps/fronten
 | `proxy.ts` | `hooks.server.ts` (`handle` guard) + `(app)/+layout.server.ts` | guard once; layout reads result |
 | `app/api/[...path]/route.ts` | **deleted** | replaced by `handleFetch` + `/uploads` ingress route |
 | `shared/services/serverapi.ts` | `hooks.server.ts` `handleFetch` + domain `*.server.ts` modules | cookie forwarding centralized |
-| `shared/services/apiclient.ts` | `lib/domains/{auth,users,posts}/*.server.ts` | server-only; `(fetch, ...args)` |
+| `shared/services/apiclient.ts` | `lib/domains/{auth,users,posts}/api.server.ts` | server-only; `(fetch, ...args)` |
 | `shared/services/session.ts` + `contexts/apicontext.tsx` | **deleted** | no client singleton/Context (BFF) |
 | `shared/types/index.ts` | `lib/domains/{auth,users,posts}/model.ts` | split by model ownership |
 | `shared/utils/image.ts` | `lib/shared/image.ts` | port **verbatim** (browser-only) |
@@ -368,7 +368,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 ```
 
 ```ts
-// src/lib/domains/posts/server.ts — server-only api fn shape: always (fetch, ...args)
+// src/lib/domains/posts/api.server.ts — server-only api fn shape: always (fetch, ...args)
 import { error } from '@sveltejs/kit';
 import type { Post } from './model';
 type Fetch = typeof globalThis.fetch;
@@ -387,13 +387,13 @@ export const likePost = (fetch: Fetch, id: string) =>
 
 ```ts
 // src/routes/(app)/(main)/+page.server.ts  — reads via load
-import { getFeed } from '$lib/domains/posts/server';
+import { getFeed } from '$lib/domains/posts/api.server';
 export const load = async ({ fetch }) => ({ feed: (await getFeed(fetch, 0))?.items ?? [] });
 ```
 ```ts
 // src/routes/(app)/(main)/+server.ts  — purposeful "load more" endpoint (NOT a generic proxy)
 import { json } from '@sveltejs/kit';
-import { getFeed } from '$lib/domains/posts/server';
+import { getFeed } from '$lib/domains/posts/api.server';
 export const GET = async ({ fetch, url }) =>
   json((await getFeed(fetch, Number(url.searchParams.get('page') ?? '0')))?.items ?? []);
 ```
