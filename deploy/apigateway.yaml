@@ -65,16 +65,15 @@ spec:
           value: postservice:5050
         - name: USER_SERVICE_ADDR
           value: userservice:5050
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: thoughts-db-secret
-              key: database-url
         - name: INTERNAL_GRPC_TOKEN
           valueFrom:
             secretKeyRef:
               name: thoughts-db-secret
               key: internal-grpc-token
+        - name: DRAGONFLY_URL
+          value: "redis://dragonfly:6379"
+        - name: RATE_LIMIT_FAIL_OPEN
+          value: "true"
         - name: SESSION_HMAC_SECRET
           valueFrom:
             secretKeyRef:

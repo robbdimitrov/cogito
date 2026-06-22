@@ -2,17 +2,51 @@ package api
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"log/slog"
 	"net"
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
-	"github.com/jackc/pgx/v4"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/valkey-io/valkey-go"
 )
+
+const tokenBucketScript = `
+local key = KEYS[1]
+local burst = tonumber(ARGV[1])
+local rate = tonumber(ARGV[2])
+local now = tonumber(ARGV[3])
+
+local data = redis.call('HMGET', key, 'tokens', 'last')
+local tokens = tonumber(data[1])
+local last = tonumber(data[2])
+
+if tokens == nil then
+    tokens = burst
+    last = now
+end
+
+local elapsed = math.max(0, now - last)
+tokens = math.min(burst, tokens + elapsed * rate / 1000)
+
+local retry_ms = 0
+local allowed = 0
+if tokens >= 1 then
+    tokens = tokens - 1
+    allowed = 1
+else
+    retry_ms = math.ceil(1000 / rate)
+end
+
+local ttl = math.ceil(burst / rate * 2000)
+redis.call('HSET', key, 'tokens', tokens, 'last', now)
+redis.call('PEXPIRE', key, ttl)
+
+return {allowed, retry_ms}
+`
 
 type RateLimitPolicy struct {
 	Name  string
@@ -25,96 +59,70 @@ type RateLimitDecision struct {
 	RetryAfter time.Duration
 }
 
-type PostgresRateLimiterStore struct {
-	db       *pgxpool.Pool
-	failOpen bool
+type RateLimiterStore interface {
+	Allow(ctx context.Context, identifier string, policy RateLimitPolicy) (RateLimitDecision, error)
 }
 
-func NewPostgresRateLimiterStore() *PostgresRateLimiterStore {
-	dbURL := os.Getenv("DATABASE_URL")
+type DragonflyStore struct {
+	client    valkey.Client
+	scriptSHA string
+	failOpen  bool
+}
+
+func NewDragonflyStore() *DragonflyStore {
+	url := os.Getenv("DRAGONFLY_URL")
 	failOpen := envBool("RATE_LIMIT_FAIL_OPEN", false)
-	if dbURL == "" {
-		slog.Warn("database url not set for rate limiter", "fail_open", failOpen)
-		return &PostgresRateLimiterStore{failOpen: failOpen}
-	}
 
-	config, err := pgxpool.ParseConfig(dbURL)
+	client, err := valkey.NewClient(valkey.ClientOption{InitAddress: []string{parseDragonflyAddr(url)}})
 	if err != nil {
-		slog.Error("unable to parse database url", "error", err)
-		os.Exit(1)
-	}
-	config.MaxConns = 5
-
-	db, err := pgxpool.ConnectConfig(context.Background(), config)
-	if err != nil {
-		slog.Error("unable to connect to database for rate limiter", "error", err)
+		slog.Error("unable to connect to dragonfly", "error", err)
 		os.Exit(1)
 	}
 
-	return &PostgresRateLimiterStore{db: db, failOpen: failOpen}
+	ctx := context.Background()
+	result := client.Do(ctx, client.B().ScriptLoad().Script(tokenBucketScript).Build())
+	sha, err := result.ToString()
+	if err != nil {
+		slog.Error("unable to load rate limit script", "error", err)
+		os.Exit(1)
+	}
+
+	return &DragonflyStore{client: client, scriptSHA: sha, failOpen: failOpen}
 }
 
-func (s *PostgresRateLimiterStore) Allow(ctx context.Context, identifier string, policy RateLimitPolicy) (RateLimitDecision, error) {
-	if s.db == nil {
-		return RateLimitDecision{Allowed: s.failOpen}, errors.New("rate limiter storage unavailable")
+func parseDragonflyAddr(url string) string {
+	addr := url
+	if after, ok := strings.CutPrefix(url, "redis://"); ok {
+		addr = after
 	}
-
-	tx, err := s.db.Begin(ctx)
-	if err != nil {
-		return RateLimitDecision{}, err
-	}
-	defer func() { _ = tx.Rollback(ctx) }()
-
-	var tokens int
-	var elapsed float64
-	err = tx.QueryRow(ctx, "SELECT tokens, EXTRACT(EPOCH FROM now() - last_updated) FROM rate_limits WHERE id = $1 FOR UPDATE", identifier).Scan(&tokens, &elapsed)
-
-	if err != nil {
-		if !errors.Is(err, pgx.ErrNoRows) {
-			return RateLimitDecision{}, err
-		}
-		_, err = tx.Exec(ctx, "INSERT INTO rate_limits (id, tokens, last_updated) VALUES ($1, $2, now()) ON CONFLICT (id) DO NOTHING", identifier, policy.Burst-1)
-		if err != nil {
-			return RateLimitDecision{}, err
-		}
-		if err := tx.Commit(ctx); err != nil {
-			return RateLimitDecision{}, err
-		}
-		return RateLimitDecision{Allowed: true}, nil
-	}
-
-	newTokens := tokens + int(elapsed*policy.Rate)
-	if newTokens > policy.Burst {
-		newTokens = policy.Burst
-	}
-
-	if newTokens > 0 {
-		_, err = tx.Exec(ctx, "UPDATE rate_limits SET tokens = $1, last_updated = now() WHERE id = $2", newTokens-1, identifier)
-		if err != nil {
-			return RateLimitDecision{}, err
-		}
-		if err := tx.Commit(ctx); err != nil {
-			return RateLimitDecision{}, err
-		}
-		return RateLimitDecision{Allowed: true}, nil
-	}
-
-	if err := tx.Commit(ctx); err != nil {
-		return RateLimitDecision{}, err
-	}
-	retryAfter := time.Second
-	if policy.Rate > 0 {
-		retryAfter = time.Duration(float64(time.Second) / policy.Rate)
-	}
-	return RateLimitDecision{Allowed: false, RetryAfter: retryAfter}, nil
+	return addr
 }
 
-func (s *PostgresRateLimiterStore) Cleanup(ctx context.Context, maxAge time.Duration) error {
-	if s.db == nil {
-		return nil
+func (s *DragonflyStore) Allow(ctx context.Context, identifier string, policy RateLimitPolicy) (RateLimitDecision, error) {
+	nowMs := time.Now().UnixMilli()
+	cmd := s.client.B().Evalsha().Sha1(s.scriptSHA).Numkeys(1).Key(identifier).
+		Arg(strconv.Itoa(policy.Burst)).
+		Arg(strconv.FormatFloat(policy.Rate, 'f', -1, 64)).
+		Arg(strconv.FormatInt(nowMs, 10)).
+		Build()
+
+	result := s.client.Do(ctx, cmd)
+	if err := result.Error(); err != nil {
+		return RateLimitDecision{Allowed: s.failOpen}, err
 	}
-	_, err := s.db.Exec(ctx, "DELETE FROM rate_limits WHERE last_updated < now() - ($1 * interval '1 second')", int64(maxAge.Seconds()))
-	return err
+
+	vals, err := result.ToArray()
+	if err != nil || len(vals) < 2 {
+		return RateLimitDecision{Allowed: s.failOpen}, fmt.Errorf("unexpected script result")
+	}
+
+	allowed, _ := vals[0].ToInt64()
+	retryMs, _ := vals[1].ToInt64()
+
+	return RateLimitDecision{
+		Allowed:    allowed == 1,
+		RetryAfter: time.Duration(retryMs) * time.Millisecond,
+	}, nil
 }
 
 func rateLimitPolicy(r *http.Request) (RateLimitPolicy, bool) {
@@ -124,6 +132,8 @@ func rateLimitPolicy(r *http.Request) (RateLimitPolicy, bool) {
 	switch {
 	case r.Method == http.MethodPost && (r.URL.Path == "/sessions" || r.URL.Path == "/users" || r.URL.Path == "/uploads"):
 		return RateLimitPolicy{Name: "strict", Burst: envInt("RATE_LIMIT_STRICT_BURST", 5), Rate: envFloat("RATE_LIMIT_STRICT_RATE", 0.2)}, false
+	case r.Method == http.MethodGet && (r.URL.Path == "/users/search" || r.URL.Path == "/hashtags/search"):
+		return RateLimitPolicy{Name: "typeahead", Burst: envInt("RATE_LIMIT_TYPEAHEAD_BURST", 20), Rate: envFloat("RATE_LIMIT_TYPEAHEAD_RATE", 5)}, false
 	case r.Method == http.MethodGet || r.Method == http.MethodHead:
 		return RateLimitPolicy{Name: "read", Burst: envInt("RATE_LIMIT_READ_BURST", 120), Rate: envFloat("RATE_LIMIT_READ_RATE", 2)}, false
 	default:

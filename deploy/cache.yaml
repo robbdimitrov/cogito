@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: dragonfly
+  labels:
+    app: thoughts
+    component: dragonfly
+spec:
+  serviceName: dragonfly
+  replicas: 1
+  selector:
+    matchLabels:
+      app: thoughts
+      component: dragonfly
+  template:
+    metadata:
+      labels:
+        app: thoughts
+        component: dragonfly
+    spec:
+      containers:
+      - name: dragonfly
+        image: docker.dragonflydb.io/dragonflydb/dragonfly
+        args: ["--maxmemory=200mb"]
+        ports:
+        - containerPort: 6379
+          name: redis
+        resources:
+          limits:
+            memory: 256Mi
+          requests:
+            memory: 64Mi
+            cpu: 100m
+        volumeMounts:
+        - name: dragonfly-data
+          mountPath: /data
+        livenessProbe:
+          tcpSocket:
+            port: 6379
+          initialDelaySeconds: 5
+          periodSeconds: 15
+        readinessProbe:
+          tcpSocket:
+            port: 6379
+          initialDelaySeconds: 3
+          periodSeconds: 10
+  volumeClaimTemplates:
+  - metadata:
+      name: dragonfly-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dragonfly
+  labels:
+    app: thoughts
+    component: dragonfly
+spec:
+  clusterIP: None
+  selector:
+    app: thoughts
+    component: dragonfly
+  ports:
+  - name: redis
+    port: 6379
+    targetPort: 6379

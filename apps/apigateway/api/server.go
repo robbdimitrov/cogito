@@ -1,10 +1,6 @@
 package api
 
 import (
-	"context"
-	"crypto/rand"
-	"crypto/subtle"
-	"encoding/base64"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -20,8 +16,7 @@ func CreateServer(authAddr, postAddr, userAddr, imageAddr string) http.Handler {
 
 	var handler http.Handler = mux
 
-	rlStore := NewPostgresRateLimiterStore()
-	startRateLimitCleanup(rlStore)
+	rlStore := NewDragonflyStore()
 
 	// authGuard runs before rateLimitMiddleware so the user ID is in context
 	// when the rate limit key is computed. Per-user keying is critical: without
@@ -37,20 +32,6 @@ func CreateServer(authAddr, postAddr, userAddr, imageAddr string) http.Handler {
 	handler = requestIDMiddleware()(handler)
 
 	return handler
-}
-
-func startRateLimitCleanup(store *PostgresRateLimiterStore) {
-	interval := time.Duration(envInt("RATE_LIMIT_CLEANUP_INTERVAL_MINUTES", 60)) * time.Minute
-	maxAge := time.Duration(envInt("RATE_LIMIT_MAX_AGE_HOURS", 24)) * time.Hour
-	go func() {
-		ticker := time.NewTicker(interval)
-		defer ticker.Stop()
-		for range ticker.C {
-			if err := store.Cleanup(context.Background(), maxAge); err != nil {
-				slog.Warn("rate limiter cleanup failed", "error", err)
-			}
-		}
-	}()
 }
 
 func requestIDMiddleware() func(http.Handler) http.Handler {
@@ -107,8 +88,7 @@ func bodyLimitMiddleware(limit int64) func(http.Handler) http.Handler {
 	}
 }
 
-
-func rateLimitMiddleware(store *PostgresRateLimiterStore) func(http.Handler) http.Handler {
+func rateLimitMiddleware(store RateLimiterStore) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			policy, exempt := rateLimitPolicy(r)
