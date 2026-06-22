@@ -348,7 +348,8 @@ func (s *userController) searchUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if s.searchClient != nil {
-		res, err := s.searchClient.SearchUsers(ctx, &pb.SearchRequest{
+		searchCtx := appendInternalAuth(ctx)
+		res, err := s.searchClient.SearchUsers(searchCtx, &pb.SearchRequest{
 			Query:  query,
 			Limit:  int32(limit),
 			Offset: int32(page * limit),
