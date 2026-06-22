@@ -33,7 +33,7 @@ func mapPost(r row) (*pb.Post, error) {
 		return nil, err
 	}
 
-	post.Created = created.UTC().Format(time.RFC3339)
+	post.Created = created.UTC().Format(time.RFC3339Nano)
 	if content != nil {
 		post.Content = *content
 	}
@@ -67,7 +67,7 @@ func mapFeedPost(r row) (*pb.Post, error) {
 		return nil, err
 	}
 
-	post.Created = created.UTC().Format(time.RFC3339)
+	post.Created = created.UTC().Format(time.RFC3339Nano)
 	if content != nil {
 		post.Content = *content
 	}
@@ -88,7 +88,7 @@ func mapFeedPost(r row) (*pb.Post, error) {
 			orig.Content = *oContent
 		}
 		if oCreated != nil {
-			orig.Created = oCreated.UTC().Format(time.RFC3339)
+			orig.Created = oCreated.UTC().Format(time.RFC3339Nano)
 		}
 		if oMediaKey != nil {
 			orig.MediaKey = *oMediaKey
@@ -124,6 +124,48 @@ func mapFeedPosts(r rows) iter.Seq2[*pb.Post, error] {
 		}
 		if err := r.Err(); err != nil {
 			yield(nil, err)
+		}
+	}
+}
+
+type likedPostRow struct {
+	Post     *pb.Post
+	CursorTS time.Time
+}
+
+func mapLikedPosts(r rows) iter.Seq2[likedPostRow, error] {
+	return func(yield func(likedPostRow, error) bool) {
+		defer r.Close()
+		for r.Next() {
+			var cursorTS time.Time
+			post := pb.Post{}
+			var content *string
+			var created time.Time
+			var repostOfID *int32
+
+			err := r.Scan(&cursorTS, &post.Id, &post.UserId, &content,
+				&post.Likes, &post.Liked, &post.Reposts, &post.Reposted,
+				&created, &repostOfID, &post.MediaKey, &post.Replies,
+				&post.InReplyToId, &post.QuoteOfId)
+			if err != nil {
+				if !yield(likedPostRow{}, err) {
+					return
+				}
+				continue
+			}
+			post.Created = created.UTC().Format(time.RFC3339Nano)
+			if content != nil {
+				post.Content = *content
+			}
+			if repostOfID != nil {
+				post.RepostOfId = repostOfID
+			}
+			if !yield(likedPostRow{Post: &post, CursorTS: cursorTS}, nil) {
+				return
+			}
+		}
+		if err := r.Err(); err != nil {
+			yield(likedPostRow{}, err)
 		}
 	}
 }

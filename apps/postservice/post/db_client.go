@@ -6,6 +6,7 @@ import (
 	"iter"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
@@ -102,7 +103,7 @@ func (c *DBClient) createPost(ctx context.Context, content string, tags []string
 	return postID, tx.Commit(ctx)
 }
 
-func (c *DBClient) getFeed(ctx context.Context, page int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
+func (c *DBClient) getFeed(ctx context.Context, cursor Cursor, hasCursor bool, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
 	query := `SELECT
 		p.id, p.user_id, p.content,
 		(SELECT count(*) FROM likes WHERE post_id = COALESCE(o.id, p.id)) AS likes,
@@ -121,10 +122,17 @@ func (c *DBClient) getFeed(ctx context.Context, page int32, limit int32, current
 		LEFT JOIN posts o ON o.id = p.repost_of_id
 		WHERE p.in_reply_to_id IS NULL
 		AND (o.id IS NULL OR o.in_reply_to_id IS NULL)
+		AND ($2::timestamptz IS NULL OR (p.created, p.id) < ($2::timestamptz, $3::int))
 		ORDER BY p.created DESC, p.id DESC
-		LIMIT $2 OFFSET $3`
+		LIMIT $4`
 
-	rows, err := c.db.Query(ctx, query, currentUserID, limit, page*limit)
+	var cursorTS *time.Time
+	var cursorID int32
+	if hasCursor {
+		cursorTS = &cursor.Created
+		cursorID = cursor.ID
+	}
+	rows, err := c.db.Query(ctx, query, currentUserID, cursorTS, cursorID, limit+1)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +140,7 @@ func (c *DBClient) getFeed(ctx context.Context, page int32, limit int32, current
 	return mapFeedPosts(rows), nil
 }
 
-func (c *DBClient) getPosts(ctx context.Context, userID int32, page int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
+func (c *DBClient) getPosts(ctx context.Context, userID int32, cursor Cursor, hasCursor bool, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
 	query := `SELECT
 		p.id, p.user_id, p.content,
 		(SELECT count(*) FROM likes WHERE post_id = COALESCE(o.id, p.id)) AS likes,
@@ -152,10 +160,17 @@ func (c *DBClient) getPosts(ctx context.Context, userID int32, page int32, limit
 		WHERE p.user_id = $2
 		AND p.in_reply_to_id IS NULL
 		AND (o.id IS NULL OR o.in_reply_to_id IS NULL)
+		AND ($3::timestamptz IS NULL OR (p.created, p.id) < ($3::timestamptz, $4::int))
 		ORDER BY p.created DESC, p.id DESC
-		LIMIT $3 OFFSET $4`
+		LIMIT $5`
 
-	rows, err := c.db.Query(ctx, query, currentUserID, userID, limit, page*limit)
+	var cursorTS *time.Time
+	var cursorID int32
+	if hasCursor {
+		cursorTS = &cursor.Created
+		cursorID = cursor.ID
+	}
+	rows, err := c.db.Query(ctx, query, currentUserID, userID, cursorTS, cursorID, limit+1)
 	if err != nil {
 		return nil, err
 	}
@@ -163,8 +178,9 @@ func (c *DBClient) getPosts(ctx context.Context, userID int32, page int32, limit
 	return mapFeedPosts(rows), nil
 }
 
-func (c *DBClient) getLikedPosts(ctx context.Context, userID int32, page int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
-	query := `SELECT id, posts.user_id, content,
+func (c *DBClient) getLikedPosts(ctx context.Context, userID int32, cursor Cursor, hasCursor bool, limit int32, currentUserID int32) (iter.Seq2[likedPostRow, error], error) {
+	query := `SELECT likes.created AS cursor_ts,
+		id, posts.user_id, content,
 		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
 		EXISTS (SELECT 1 FROM likes WHERE post_id = id AND likes.user_id = $1) AS liked,
 		(SELECT count(*) FROM posts AS rp WHERE rp.repost_of_id = id) AS reposts,
@@ -176,18 +192,25 @@ func (c *DBClient) getLikedPosts(ctx context.Context, userID int32, page int32, 
 		FROM posts
 		INNER JOIN likes ON post_id = id
 		WHERE likes.user_id = $2
+		AND ($3::timestamptz IS NULL OR (likes.created, id) < ($3::timestamptz, $4::int))
 		ORDER BY likes.created DESC, id DESC
-		LIMIT $3 OFFSET $4`
+		LIMIT $5`
 
-	rows, err := c.db.Query(ctx, query, currentUserID, userID, limit, page*limit)
+	var cursorTS *time.Time
+	var cursorID int32
+	if hasCursor {
+		cursorTS = &cursor.Created
+		cursorID = cursor.ID
+	}
+	rows, err := c.db.Query(ctx, query, currentUserID, userID, cursorTS, cursorID, limit+1)
 	if err != nil {
 		return nil, err
 	}
 
-	return mapPosts(rows), nil
+	return mapLikedPosts(rows), nil
 }
 
-func (c *DBClient) getHashtagPosts(ctx context.Context, tag string, page int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
+func (c *DBClient) getHashtagPosts(ctx context.Context, tag string, cursor Cursor, hasCursor bool, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
 	query := `SELECT p.id, p.user_id, p.content,
 		(SELECT count(*) FROM likes WHERE post_id = p.id) AS likes,
 		EXISTS (SELECT 1 FROM likes WHERE post_id = p.id AND likes.user_id = $1) AS liked,
@@ -201,10 +224,17 @@ func (c *DBClient) getHashtagPosts(ctx context.Context, tag string, page int32, 
 		JOIN post_hashtags ph ON ph.post_id = p.id
 		JOIN hashtags h ON h.id = ph.hashtag_id
 		WHERE h.name = $2
+		AND ($3::timestamptz IS NULL OR (p.created, p.id) < ($3::timestamptz, $4::int))
 		ORDER BY p.created DESC, p.id DESC
-		LIMIT $3 OFFSET $4`
+		LIMIT $5`
 
-	rows, err := c.db.Query(ctx, query, currentUserID, strings.ToLower(tag), limit, page*limit)
+	var cursorTS *time.Time
+	var cursorID int32
+	if hasCursor {
+		cursorTS = &cursor.Created
+		cursorID = cursor.ID
+	}
+	rows, err := c.db.Query(ctx, query, currentUserID, strings.ToLower(tag), cursorTS, cursorID, limit+1)
 	if err != nil {
 		return nil, err
 	}
@@ -316,7 +346,7 @@ func (c *DBClient) removeRepost(ctx context.Context, postID int32, userID int32)
 	return err
 }
 
-func (c *DBClient) getReplies(ctx context.Context, postID int32, page int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
+func (c *DBClient) getReplies(ctx context.Context, postID int32, cursor Cursor, hasCursor bool, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
 	query := `SELECT id, user_id, content,
 		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
 		EXISTS (SELECT 1 FROM likes WHERE post_id = id AND likes.user_id = $1) AS liked,
@@ -328,10 +358,17 @@ func (c *DBClient) getReplies(ctx context.Context, postID int32, page int32, lim
 		COALESCE(quote_of_id, 0) AS quote_of_id
 		FROM posts
 		WHERE in_reply_to_id = $2
+		AND ($3::timestamptz IS NULL OR (created, id) > ($3::timestamptz, $4::int))
 		ORDER BY created ASC, id ASC
-		LIMIT $3 OFFSET $4`
+		LIMIT $5`
 
-	rows, err := c.db.Query(ctx, query, currentUserID, postID, limit, page*limit)
+	var cursorTS *time.Time
+	var cursorID int32
+	if hasCursor {
+		cursorTS = &cursor.Created
+		cursorID = cursor.ID
+	}
+	rows, err := c.db.Query(ctx, query, currentUserID, postID, cursorTS, cursorID, limit+1)
 	if err != nil {
 		return nil, err
 	}
