@@ -118,25 +118,32 @@ func (m *MeiliClient) DeleteDoc(index, id string) error {
 	return err
 }
 
-func (m *MeiliClient) SearchUsers(query string, limit, offset int32) ([]map[string]any, bool, error) {
-	return m.search("users", query, limit, offset)
+func (m *MeiliClient) SearchUsers(query string, limit int32, cursor string) ([]map[string]any, string, error) {
+	return m.search("users", query, limit, cursor)
 }
 
-func (m *MeiliClient) SearchPosts(query string, limit, offset int32) ([]map[string]any, bool, error) {
-	return m.search("posts", query, limit, offset)
+func (m *MeiliClient) SearchPosts(query string, limit int32, cursor string) ([]map[string]any, string, error) {
+	return m.search("posts", query, limit, cursor)
 }
 
-func (m *MeiliClient) SearchHashtags(query string, limit, offset int32) ([]map[string]any, bool, error) {
-	return m.search("hashtags", query, limit, offset)
+func (m *MeiliClient) SearchHashtags(query string, limit int32, cursor string) ([]map[string]any, string, error) {
+	return m.search("hashtags", query, limit, cursor)
 }
 
-func (m *MeiliClient) search(index, query string, limit, offset int32) ([]map[string]any, bool, error) {
+func (m *MeiliClient) search(index, query string, limit int32, cursor string) ([]map[string]any, string, error) {
+	offset := decodeSearchCursor(cursor)
+	if offset < 0 {
+		offset = 0
+	}
+	if offset > 1000 {
+		offset = 1000
+	}
 	res, err := m.client.Index(index).Search(query, &meilisearch.SearchRequest{
 		Limit:  int64(limit) + 1,
 		Offset: int64(offset),
 	})
 	if err != nil {
-		return nil, false, err
+		return nil, "", err
 	}
 	out := make([]map[string]any, 0, len(res.Hits))
 	for _, hit := range res.Hits {
@@ -144,9 +151,10 @@ func (m *MeiliClient) search(index, query string, limit, offset int32) ([]map[st
 			out = append(out, m)
 		}
 	}
-	hasMore := int64(len(out)) > int64(limit)
-	if hasMore {
+	var nextCursor string
+	if int64(len(out)) > int64(limit) {
 		out = out[:limit]
+		nextCursor = encodeSearchCursor(offset + limit)
 	}
-	return out, hasMore, nil
+	return out, nextCursor, nil
 }
