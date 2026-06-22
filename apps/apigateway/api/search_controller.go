@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"net/http"
+	"strings"
 	"time"
 	"unicode/utf8"
 
@@ -24,7 +25,7 @@ func (sc *searchController) search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	q := r.URL.Query().Get("q")
+	q := strings.TrimSpace(r.URL.Query().Get("q"))
 	if q == "" {
 		jsonError(w, http.StatusBadRequest, "Missing query parameter")
 		return
@@ -78,7 +79,7 @@ func (sc *searchController) search(w http.ResponseWriter, r *http.Request) {
 		}
 		jsonResponse(w, http.StatusOK, map[string]any{"items": tags, "hasMore": res.HasMore})
 
-	default: // "posts" and anything else
+	case "posts":
 		res, err := sc.client.SearchPosts(ctx, req)
 		if err != nil {
 			slog.Warn("search posts failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
@@ -90,5 +91,8 @@ func (sc *searchController) search(w http.ResponseWriter, r *http.Request) {
 			posts = append(posts, mapPost(p))
 		}
 		jsonResponse(w, http.StatusOK, map[string]any{"items": posts, "hasMore": res.HasMore})
+
+	default:
+		jsonError(w, http.StatusBadRequest, "Invalid type parameter")
 	}
 }

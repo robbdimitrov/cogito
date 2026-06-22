@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
-
 	"unicode/utf8"
 
 	pb "thoughts/apigateway/genproto"
@@ -574,7 +574,7 @@ func (pc *postController) getReplies(w http.ResponseWriter, r *http.Request) {
 }
 
 func (pc *postController) searchHashtags(w http.ResponseWriter, r *http.Request) {
-	q := r.URL.Query().Get("q")
+	q := strings.TrimSpace(r.URL.Query().Get("q"))
 	if q == "" {
 		jsonError(w, http.StatusBadRequest, "Missing query parameter")
 		return
@@ -627,5 +627,5 @@ func (pc *postController) searchHashtags(w http.ResponseWriter, r *http.Request)
 	for _, h := range res.Hashtags {
 		tags = append(tags, mapHashtag(h))
 	}
-	jsonResponse(w, http.StatusOK, map[string][]hashtag{"items": tags})
+	jsonResponse(w, http.StatusOK, map[string]any{"items": tags, "hasMore": res.HasMore})
 }

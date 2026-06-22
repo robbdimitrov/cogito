@@ -10,8 +10,8 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
-
 	"unicode/utf8"
 
 	pb "thoughts/apigateway/genproto"
@@ -340,7 +340,7 @@ func (s *userController) searchUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	defer cancel()
 
-	query := r.URL.Query().Get("q")
+	query := strings.TrimSpace(r.URL.Query().Get("q"))
 	if query == "" {
 		jsonError(w, http.StatusBadRequest, "Missing query parameter")
 		return
@@ -390,7 +390,7 @@ func (s *userController) searchUsers(w http.ResponseWriter, r *http.Request) {
 		users[i] = mapUser(v)
 	}
 
-	jsonResponse(w, http.StatusOK, map[string][]user{"items": users})
+	jsonResponse(w, http.StatusOK, map[string]any{"items": users, "hasMore": res.HasMore})
 }
 
 func (s *userController) getFollowers(w http.ResponseWriter, r *http.Request) {

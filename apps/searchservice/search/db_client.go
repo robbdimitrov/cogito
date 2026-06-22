@@ -37,12 +37,18 @@ type HashtagDoc struct {
 }
 
 func DrainOutbox(ctx context.Context, tx pgx.Tx) ([]OutboxRow, error) {
+	// DISTINCT ON cannot be combined with FOR UPDATE directly in PostgreSQL.
+	// Select the newest row ID per entity in a subquery, then lock those rows.
 	rows, err := tx.Query(ctx, `
-		SELECT DISTINCT ON (entity_type, entity_id) id, entity_type, entity_id, attempts
+		SELECT id, entity_type, entity_id, attempts
 		FROM search_outbox
-		ORDER BY entity_type, entity_id, id DESC
-		FOR UPDATE SKIP LOCKED
-		LIMIT 100`)
+		WHERE id IN (
+			SELECT DISTINCT ON (entity_type, entity_id) id
+			FROM search_outbox
+			ORDER BY entity_type, entity_id, id DESC
+			LIMIT 100
+		)
+		FOR UPDATE SKIP LOCKED`)
 	if err != nil {
 		return nil, err
 	}
