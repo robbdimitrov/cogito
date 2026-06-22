@@ -46,11 +46,22 @@ spec:
             secretKeyRef:
               name: thoughts-db-secret
               key: internal-grpc-token
-        - name: IMAGE_DIR
-          value: "/app/uploads"
-        volumeMounts:
-        - name: image-storage
-          mountPath: /app/uploads
+        - name: S3_ENDPOINT
+          value: "http://seaweedfs:8333"
+        - name: S3_BUCKET
+          value: "thoughts-images"
+        - name: S3_REGION
+          value: "us-east-1"
+        - name: S3_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: thoughts-db-secret
+              key: s3-access-key
+        - name: S3_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: thoughts-db-secret
+              key: s3-secret-key
         livenessProbe:
           tcpSocket:
             port: 5050
@@ -61,10 +72,6 @@ spec:
             port: 5050
           initialDelaySeconds: 5
           periodSeconds: 10
-      volumes:
-      - name: image-storage
-        persistentVolumeClaim:
-          claimName: image-volume-pvc
 ---
 apiVersion: v1
 kind: Service

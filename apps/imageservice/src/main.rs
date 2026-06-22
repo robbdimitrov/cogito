@@ -2,6 +2,7 @@
 #[rustfmt::skip]
 pub mod thoughts;
 
+mod blobstore;
 mod db_client;
 mod grpc;
 mod http;
@@ -12,9 +13,11 @@ mod logging;
 mod tests;
 
 use std::env;
+use std::sync::Arc;
 use thoughts::image_service_server::ImageServiceServer;
-use tokio::fs;
 use tonic::transport::Server;
+
+use blobstore::S3BlobStore;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -22,20 +25,33 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let grpc_port = env::var("PORT").unwrap_or_else(|_| "5050".to_string());
     let http_port = env::var("HTTP_PORT").unwrap_or_else(|_| "8081".to_string());
     let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let image_dir = env::var("IMAGE_DIR").unwrap_or_else(|_| "/app/uploads".to_string());
-
-    fs::create_dir_all(&image_dir).await?;
+    let s3_endpoint = env::var("S3_ENDPOINT").expect("S3_ENDPOINT must be set");
+    let s3_bucket = env::var("S3_BUCKET").expect("S3_BUCKET must be set");
+    let s3_region = env::var("S3_REGION").expect("S3_REGION must be set");
+    let s3_access_key = env::var("S3_ACCESS_KEY").expect("S3_ACCESS_KEY must be set");
+    let s3_secret_key = env::var("S3_SECRET_KEY").expect("S3_SECRET_KEY must be set");
 
     let db_client = db_client::DbClient::new(&db_url).await?;
 
-    let router = http::create_router(db_client.clone(), image_dir.clone());
+    let blobstore = Arc::new(
+        S3BlobStore::new(
+            &s3_endpoint,
+            &s3_bucket,
+            &s3_region,
+            &s3_access_key,
+            &s3_secret_key,
+        )
+        .await?,
+    );
+
+    let router = http::create_router(db_client.clone(), blobstore.clone());
     let http_addr = format!("0.0.0.0:{}", http_port);
     let listener = tokio::net::TcpListener::bind(&http_addr).await?;
 
     tracing::info!(port = %http_port, "http server starting");
 
     let grpc_addr = format!("0.0.0.0:{}", grpc_port).parse()?;
-    let grpc_service = grpc::ImageGrpcService::new(db_client.clone(), image_dir);
+    let grpc_service = grpc::ImageGrpcService::new(db_client.clone(), blobstore);
 
     tracing::info!(port = %grpc_port, "grpc server starting");
 

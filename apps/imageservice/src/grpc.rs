@@ -1,18 +1,19 @@
-use tokio::fs;
+use std::sync::Arc;
 use tonic::{Request, Response, Status};
 
+use crate::blobstore::BlobStore;
 use crate::db_client::ImageDb;
 use crate::thoughts::image_service_server::ImageService;
 use crate::thoughts::{ConsumeUploadRequest, DeleteImageRequest, Empty, VerifyUploadRequest};
 
 pub struct ImageGrpcService<D: ImageDb> {
     db: D,
-    image_dir: String,
+    blobstore: Arc<dyn BlobStore>,
 }
 
 impl<D: ImageDb> ImageGrpcService<D> {
-    pub fn new(db: D, image_dir: String) -> Self {
-        Self { db, image_dir }
+    pub fn new(db: D, blobstore: Arc<dyn BlobStore>) -> Self {
+        Self { db, blobstore }
     }
 }
 
@@ -54,6 +55,25 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
                 Status::internal("Internal server error.")
             })?;
 
+        self.blobstore
+            .copy(
+                &format!("staging/{}", req.filename),
+                &req.filename,
+            )
+            .await
+            .map_err(|e| {
+                tracing::warn!(request_id = %request_id, method = "/thoughts.ImageService/ConsumeUpload", error = %e, "promoting staged upload failed");
+                Status::internal("Internal server error.")
+            })?;
+
+        if let Err(e) = self
+            .blobstore
+            .delete(&format!("staging/{}", req.filename))
+            .await
+        {
+            tracing::warn!(request_id = %request_id, method = "/thoughts.ImageService/ConsumeUpload", error = %e, "deleting staged upload failed");
+        }
+
         Ok(Response::new(Empty {}))
     }
 
@@ -64,25 +84,29 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
         let request_id = crate::logging::grpc_request_id(&request).to_string();
         let req = request.into_inner();
 
-        // Also cleanup uploads table just in case it was an orphaned staging file
         if let Err(e) = self.db.consume_upload(&req.filename).await {
             tracing::warn!(request_id = %request_id, method = "/thoughts.ImageService/DeleteImage", error = %e, "cleaning up orphaned upload metadata failed");
         }
 
-        // Ensure we don't allow directory traversal
         if req.filename.contains("..") || req.filename.contains('/') || req.filename.contains('\\')
         {
             return Err(Status::invalid_argument("Invalid filename"));
         }
-        let file_path = std::path::Path::new(&self.image_dir).join(&req.filename);
 
-        if file_path.exists() {
-            fs::remove_file(file_path)
-                .await
-                .map_err(|e| {
-                    tracing::warn!(request_id = %request_id, method = "/thoughts.ImageService/DeleteImage", error = %e, "deleting image failed");
-                    Status::internal("Internal server error.")
-                })?;
+        self.blobstore
+            .delete(&req.filename)
+            .await
+            .map_err(|e| {
+                tracing::warn!(request_id = %request_id, method = "/thoughts.ImageService/DeleteImage", error = %e, "deleting image failed");
+                Status::internal("Internal server error.")
+            })?;
+
+        if let Err(e) = self
+            .blobstore
+            .delete(&format!("staging/{}", req.filename))
+            .await
+        {
+            tracing::warn!(request_id = %request_id, method = "/thoughts.ImageService/DeleteImage", error = %e, "deleting staged image failed");
         }
 
         Ok(Response::new(Empty {}))

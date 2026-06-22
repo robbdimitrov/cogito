@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: seaweedfs-config
+data:
+  s3.json: |
+    {
+      "identities": [
+        {
+          "name": "thoughts",
+          "credentials": [
+            {
+              "accessKey": "thoughts-access-key",
+              "secretKey": "thoughts-secret-key"
+            }
+          ],
+          "actions": ["Read", "Write", "List", "Tagging", "Admin"]
+        }
+      ]
+    }
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: seaweedfs
+  labels:
+    app: thoughts
+    component: seaweedfs
+spec:
+  serviceName: seaweedfs
+  replicas: 1
+  selector:
+    matchLabels:
+      app: thoughts
+      component: seaweedfs
+  template:
+    metadata:
+      labels:
+        app: thoughts
+        component: seaweedfs
+    spec:
+      containers:
+      - name: seaweedfs
+        image: chrislusf/seaweedfs
+        args: ["server", "-s3", "-s3.config=/etc/seaweed/s3.json"]
+        ports:
+        - containerPort: 8333
+          name: s3
+        resources:
+          limits:
+            memory: 256Mi
+          requests:
+            memory: 64Mi
+            cpu: 100m
+        volumeMounts:
+        - name: seaweedfs-data
+          mountPath: /data
+        - name: seaweedfs-config
+          mountPath: /etc/seaweed
+      volumes:
+      - name: seaweedfs-config
+        configMap:
+          name: seaweedfs-config
+  volumeClaimTemplates:
+  - metadata:
+      name: seaweedfs-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: seaweedfs
+  labels:
+    app: thoughts
+    component: seaweedfs
+spec:
+  clusterIP: None
+  selector:
+    app: thoughts
+    component: seaweedfs
+  ports:
+  - name: s3
+    port: 8333
+    targetPort: 8333

@@ -1,21 +1,24 @@
 use async_trait::async_trait;
-use std::sync::Arc;
-use tokio::sync::Mutex;
+use bytes::Bytes;
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
+use tokio::sync::Mutex as TokioMutex;
 use tonic::Request;
 
+use crate::blobstore::BlobStore;
 use crate::db_client::ImageDb;
 use crate::grpc::ImageGrpcService;
 use crate::thoughts::image_service_server::ImageService;
 use crate::thoughts::{ConsumeUploadRequest, DeleteImageRequest, VerifyUploadRequest};
 
 struct MockDb {
-    uploads: Mutex<Vec<(String, i32)>>,
+    uploads: TokioMutex<Vec<(String, i32)>>,
 }
 
 impl MockDb {
     fn new() -> Self {
         Self {
-            uploads: Mutex::new(vec![("test.jpg".to_string(), 1)]),
+            uploads: TokioMutex::new(vec![("test.jpg".to_string(), 1)]),
         }
     }
 }
@@ -40,10 +43,68 @@ impl ImageDb for Arc<MockDb> {
     }
 }
 
+#[derive(Clone)]
+struct MockBlobStore {
+    data: Arc<Mutex<HashMap<String, (Bytes, String)>>>,
+}
+
+impl MockBlobStore {
+    fn new() -> Self {
+        Self {
+            data: Arc::new(Mutex::new(HashMap::new())),
+        }
+    }
+
+    fn seed(&self, key: &str, content_type: &str, data: impl Into<Bytes>) {
+        self.data
+            .lock()
+            .unwrap()
+            .insert(key.to_string(), (data.into(), content_type.to_string()));
+    }
+
+    fn contains(&self, key: &str) -> bool {
+        self.data.lock().unwrap().contains_key(key)
+    }
+}
+
+#[async_trait]
+impl BlobStore for MockBlobStore {
+    async fn put(&self, key: &str, content_type: &str, data: Bytes) -> Result<(), String> {
+        self.data
+            .lock()
+            .unwrap()
+            .insert(key.to_string(), (data, content_type.to_string()));
+        Ok(())
+    }
+
+    async fn get(&self, key: &str) -> Result<Option<(Bytes, String)>, String> {
+        Ok(self.data.lock().unwrap().get(key).cloned())
+    }
+
+    async fn delete(&self, key: &str) -> Result<(), String> {
+        self.data.lock().unwrap().remove(key);
+        Ok(())
+    }
+
+    async fn copy(&self, src_key: &str, dst_key: &str) -> Result<(), String> {
+        let entry = self.data.lock().unwrap().get(src_key).cloned();
+        if let Some(e) = entry {
+            self.data.lock().unwrap().insert(dst_key.to_string(), e);
+            Ok(())
+        } else {
+            Err(format!("key not found: {src_key}"))
+        }
+    }
+}
+
+fn make_service(db: Arc<MockDb>, store: MockBlobStore) -> ImageGrpcService<Arc<MockDb>> {
+    ImageGrpcService::new(db, Arc::new(store))
+}
+
 #[tokio::test]
 async fn test_verify_upload_success() {
     let db = Arc::new(MockDb::new());
-    let service = ImageGrpcService::new(db, "/tmp".to_string());
+    let service = make_service(db, MockBlobStore::new());
 
     let req = Request::new(VerifyUploadRequest {
         filename: "test.jpg".to_string(),
@@ -57,7 +118,7 @@ async fn test_verify_upload_success() {
 #[tokio::test]
 async fn test_verify_upload_not_found() {
     let db = Arc::new(MockDb::new());
-    let service = ImageGrpcService::new(db, "/tmp".to_string());
+    let service = make_service(db, MockBlobStore::new());
 
     let req = Request::new(VerifyUploadRequest {
         filename: "test2.jpg".to_string(),
@@ -72,7 +133,7 @@ async fn test_verify_upload_not_found() {
 #[tokio::test]
 async fn test_delete_image_traversal_protection() {
     let db = Arc::new(MockDb::new());
-    let service = ImageGrpcService::new(db, "/tmp".to_string());
+    let service = make_service(db, MockBlobStore::new());
 
     let req = Request::new(DeleteImageRequest {
         filename: "../../../etc/passwd".to_string(),
@@ -84,9 +145,12 @@ async fn test_delete_image_traversal_protection() {
 }
 
 #[tokio::test]
-async fn test_consume_upload_removes() {
+async fn test_consume_upload_promotes_and_cleans_staging() {
     let db = Arc::new(MockDb::new());
-    let service = ImageGrpcService::new(db.clone(), "/tmp".to_string());
+    let store = MockBlobStore::new();
+    store.seed("staging/test.jpg", "image/jpeg", vec![0xff, 0xd8, 0xff]);
+
+    let service = make_service(db.clone(), store.clone());
 
     let req = Request::new(ConsumeUploadRequest {
         filename: "test.jpg".to_string(),
@@ -97,4 +161,7 @@ async fn test_consume_upload_removes() {
 
     let uploads = db.uploads.lock().await;
     assert!(uploads.is_empty());
+
+    assert!(store.contains("test.jpg"));
+    assert!(!store.contains("staging/test.jpg"));
 }
