@@ -26,7 +26,7 @@ func (c *controller) SearchUsers(ctx context.Context, req *pb.SearchRequest) (*p
 		return nil, err
 	}
 
-	hits, err := c.meili.SearchUsers(query, limit, offset)
+	hits, hasMore, err := c.meili.SearchUsers(query, limit, offset)
 	if err != nil {
 		slog.Warn("meili SearchUsers failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
@@ -39,7 +39,7 @@ func (c *controller) SearchUsers(ctx context.Context, req *pb.SearchRequest) (*p
 			users = append(users, u)
 		}
 	}
-	return &pb.Users{Users: users}, nil
+	return &pb.Users{Users: users, HasMore: hasMore}, nil
 }
 
 func (c *controller) SearchPosts(ctx context.Context, req *pb.SearchRequest) (*pb.Posts, error) {
@@ -48,7 +48,7 @@ func (c *controller) SearchPosts(ctx context.Context, req *pb.SearchRequest) (*p
 		return nil, err
 	}
 
-	hits, err := c.meili.SearchPosts(query, limit, offset)
+	hits, hasMore, err := c.meili.SearchPosts(query, limit, offset)
 	if err != nil {
 		slog.Warn("meili SearchPosts failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
@@ -61,7 +61,7 @@ func (c *controller) SearchPosts(ctx context.Context, req *pb.SearchRequest) (*p
 			posts = append(posts, p)
 		}
 	}
-	return &pb.Posts{Posts: posts}, nil
+	return &pb.Posts{Posts: posts, HasMore: hasMore}, nil
 }
 
 func (c *controller) SearchHashtags(ctx context.Context, req *pb.SearchRequest) (*pb.Hashtags, error) {
@@ -70,7 +70,7 @@ func (c *controller) SearchHashtags(ctx context.Context, req *pb.SearchRequest) 
 		return nil, err
 	}
 
-	hits, err := c.meili.SearchHashtags(query, limit, offset)
+	hits, hasMore, err := c.meili.SearchHashtags(query, limit, offset)
 	if err != nil {
 		slog.Warn("meili SearchHashtags failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
@@ -83,7 +83,7 @@ func (c *controller) SearchHashtags(ctx context.Context, req *pb.SearchRequest) 
 			tags = append(tags, h)
 		}
 	}
-	return &pb.Hashtags{Hashtags: tags}, nil
+	return &pb.Hashtags{Hashtags: tags, HasMore: hasMore}, nil
 }
 
 func validateSearchRequest(req *pb.SearchRequest) (query string, limit, offset int32, err error) {

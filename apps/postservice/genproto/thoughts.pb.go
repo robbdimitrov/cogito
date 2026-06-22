@@ -524,6 +524,7 @@ func (x *GetUsersRequest) GetLimit() int32 {
 type Users struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Users         []*User                `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"`
+	HasMore       bool                   `protobuf:"varint,2,opt,name=has_more,json=hasMore,proto3" json:"has_more,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -563,6 +564,13 @@ func (x *Users) GetUsers() []*User {
 		return x.Users
 	}
 	return nil
+}
+
+func (x *Users) GetHasMore() bool {
+	if x != nil {
+		return x.HasMore
+	}
+	return false
 }
 
 type GetUserByUsernameRequest struct {
@@ -1220,6 +1228,7 @@ func (x *GetFeedRequest) GetLimit() int32 {
 type Posts struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Posts         []*Post                `protobuf:"bytes,1,rep,name=posts,proto3" json:"posts,omitempty"`
+	HasMore       bool                   `protobuf:"varint,2,opt,name=has_more,json=hasMore,proto3" json:"has_more,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1259,6 +1268,13 @@ func (x *Posts) GetPosts() []*Post {
 		return x.Posts
 	}
 	return nil
+}
+
+func (x *Posts) GetHasMore() bool {
+	if x != nil {
+		return x.HasMore
+	}
+	return false
 }
 
 type GetPostsRequest struct {
@@ -1504,6 +1520,7 @@ func (x *Hashtag) GetPostCount() int32 {
 type Hashtags struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Hashtags      []*Hashtag             `protobuf:"bytes,1,rep,name=hashtags,proto3" json:"hashtags,omitempty"`
+	HasMore       bool                   `protobuf:"varint,2,opt,name=has_more,json=hasMore,proto3" json:"has_more,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1543,6 +1560,13 @@ func (x *Hashtags) GetHashtags() []*Hashtag {
 		return x.Hashtags
 	}
 	return nil
+}
+
+func (x *Hashtags) GetHasMore() bool {
+	if x != nil {
+		return x.HasMore
+	}
+	return false
 }
 
 type SearchHashtagsRequest struct {
@@ -1843,9 +1867,10 @@ const file_pkg_pb_thoughts_proto_rawDesc = "" +
 	"\x0fGetUsersRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\x05R\x06userId\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x14\n" +
-	"\x05limit\x18\x03 \x01(\x05R\x05limit\"-\n" +
+	"\x05limit\x18\x03 \x01(\x05R\x05limit\"H\n" +
 	"\x05Users\x12$\n" +
-	"\x05users\x18\x01 \x03(\v2\x0e.thoughts.UserR\x05users\"6\n" +
+	"\x05users\x18\x01 \x03(\v2\x0e.thoughts.UserR\x05users\x12\x19\n" +
+	"\bhas_more\x18\x02 \x01(\bR\ahasMore\"6\n" +
 	"\x18GetUserByUsernameRequest\x12\x1a\n" +
 	"\busername\x18\x01 \x01(\tR\busername\"@\n" +
 	"\x12SearchUsersRequest\x12\x14\n" +
@@ -1896,9 +1921,10 @@ const file_pkg_pb_thoughts_proto_rawDesc = "" +
 	"\r_repost_of_id\":\n" +
 	"\x0eGetFeedRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
-	"\x05limit\x18\x02 \x01(\x05R\x05limit\"-\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\"H\n" +
 	"\x05Posts\x12$\n" +
-	"\x05posts\x18\x01 \x03(\v2\x0e.thoughts.PostR\x05posts\"T\n" +
+	"\x05posts\x18\x01 \x03(\v2\x0e.thoughts.PostR\x05posts\x12\x19\n" +
+	"\bhas_more\x18\x02 \x01(\bR\ahasMore\"T\n" +
 	"\x0fGetPostsRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\x05R\x06userId\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x14\n" +
@@ -1915,9 +1941,10 @@ const file_pkg_pb_thoughts_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1d\n" +
 	"\n" +
-	"post_count\x18\x03 \x01(\x05R\tpostCount\"9\n" +
+	"post_count\x18\x03 \x01(\x05R\tpostCount\"T\n" +
 	"\bHashtags\x12-\n" +
-	"\bhashtags\x18\x01 \x03(\v2\x11.thoughts.HashtagR\bhashtags\"C\n" +
+	"\bhashtags\x18\x01 \x03(\v2\x11.thoughts.HashtagR\bhashtags\x12\x19\n" +
+	"\bhas_more\x18\x02 \x01(\bR\ahasMore\"C\n" +
 	"\x15SearchHashtagsRequest\x12\x14\n" +
 	"\x05query\x18\x01 \x01(\tR\x05query\x12\x14\n" +
 	"\x05limit\x18\x02 \x01(\x05R\x05limit\"J\n" +

@@ -117,25 +117,29 @@ func (m *MeiliClient) DeleteDoc(index, id string) error {
 	return err
 }
 
-func (m *MeiliClient) SearchUsers(query string, limit, offset int32) ([]map[string]any, error) {
+func (m *MeiliClient) SearchUsers(query string, limit, offset int32) ([]map[string]any, bool, error) {
 	return m.search("users", query, limit, offset)
 }
 
-func (m *MeiliClient) SearchPosts(query string, limit, offset int32) ([]map[string]any, error) {
+func (m *MeiliClient) SearchPosts(query string, limit, offset int32) ([]map[string]any, bool, error) {
 	return m.search("posts", query, limit, offset)
 }
 
-func (m *MeiliClient) SearchHashtags(query string, limit, offset int32) ([]map[string]any, error) {
+func (m *MeiliClient) SearchHashtags(query string, limit, offset int32) ([]map[string]any, bool, error) {
 	return m.search("hashtags", query, limit, offset)
 }
 
-func (m *MeiliClient) search(index, query string, limit, offset int32) ([]map[string]any, error) {
+func (m *MeiliClient) search(index, query string, limit, offset int32) ([]map[string]any, bool, error) {
 	res, err := m.client.Index(index).Search(query, &meilisearch.SearchRequest{
-		Limit:  int64(limit),
+		Limit:  int64(limit) + 1,
 		Offset: int64(offset),
 	})
 	if err != nil {
-		return nil, err
+		return nil, false, err
+	}
+	hasMore := int64(len(res.Hits)) > int64(limit)
+	if hasMore {
+		res.Hits = res.Hits[:limit]
 	}
 	out := make([]map[string]any, 0, len(res.Hits))
 	for _, hit := range res.Hits {
@@ -143,5 +147,5 @@ func (m *MeiliClient) search(index, query string, limit, offset int32) ([]map[st
 			out = append(out, m)
 		}
 	}
-	return out, nil
+	return out, hasMore, nil
 }

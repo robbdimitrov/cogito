@@ -58,8 +58,7 @@ func (sc *searchController) search(w http.ResponseWriter, r *http.Request) {
 		for _, u := range res.Users {
 			users = append(users, mapUser(u))
 		}
-		hasMore := len(users) == limit
-		jsonResponse(w, http.StatusOK, map[string]any{"items": users, "hasMore": hasMore})
+		jsonResponse(w, http.StatusOK, map[string]any{"items": users, "hasMore": res.HasMore})
 
 	case "hashtags":
 		res, err := sc.client.SearchHashtags(ctx, req)
@@ -72,8 +71,7 @@ func (sc *searchController) search(w http.ResponseWriter, r *http.Request) {
 		for _, h := range res.Hashtags {
 			tags = append(tags, mapHashtag(h))
 		}
-		hasMore := len(tags) == limit
-		jsonResponse(w, http.StatusOK, map[string]any{"items": tags, "hasMore": hasMore})
+		jsonResponse(w, http.StatusOK, map[string]any{"items": tags, "hasMore": res.HasMore})
 
 	default: // "posts" and anything else
 		res, err := sc.client.SearchPosts(ctx, req)
@@ -86,7 +84,6 @@ func (sc *searchController) search(w http.ResponseWriter, r *http.Request) {
 		for _, p := range res.Posts {
 			posts = append(posts, mapPost(p))
 		}
-		hasMore := len(posts) == limit
-		jsonResponse(w, http.StatusOK, map[string]any{"items": posts, "hasMore": hasMore})
+		jsonResponse(w, http.StatusOK, map[string]any{"items": posts, "hasMore": res.HasMore})
 	}
 }

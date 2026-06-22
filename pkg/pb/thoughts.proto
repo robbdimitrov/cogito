@@ -59,6 +59,7 @@ message GetUsersRequest {
 
 message Users {
   repeated User users = 1;
+  bool has_more = 2;
 }
 
 message GetUserByUsernameRequest {
@@ -151,6 +152,7 @@ message GetFeedRequest {
 
 message Posts {
   repeated Post posts = 1;
+  bool has_more = 2;
 }
 
 message GetPostsRequest {
@@ -179,6 +181,7 @@ message Hashtag {
 
 message Hashtags {
   repeated Hashtag hashtags = 1;
+  bool has_more = 2;
 }
 
 message SearchHashtagsRequest {
