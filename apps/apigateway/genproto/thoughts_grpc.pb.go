@@ -692,6 +692,7 @@ const (
 	PostService_RepostPost_FullMethodName      = "/thoughts.PostService/RepostPost"
 	PostService_RemoveRepost_FullMethodName    = "/thoughts.PostService/RemoveRepost"
 	PostService_GetReplies_FullMethodName      = "/thoughts.PostService/GetReplies"
+	PostService_SearchHashtags_FullMethodName  = "/thoughts.PostService/SearchHashtags"
 )
 
 // PostServiceClient is the client API for PostService service.
@@ -711,6 +712,7 @@ type PostServiceClient interface {
 	RepostPost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error)
 	RemoveRepost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error)
 	GetReplies(ctx context.Context, in *GetRepliesRequest, opts ...grpc.CallOption) (*Posts, error)
+	SearchHashtags(ctx context.Context, in *SearchHashtagsRequest, opts ...grpc.CallOption) (*Hashtags, error)
 }
 
 type postServiceClient struct {
@@ -851,6 +853,16 @@ func (c *postServiceClient) GetReplies(ctx context.Context, in *GetRepliesReques
 	return out, nil
 }
 
+func (c *postServiceClient) SearchHashtags(ctx context.Context, in *SearchHashtagsRequest, opts ...grpc.CallOption) (*Hashtags, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Hashtags)
+	err := c.cc.Invoke(ctx, PostService_SearchHashtags_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PostServiceServer is the server API for PostService service.
 // All implementations must embed UnimplementedPostServiceServer
 // for forward compatibility.
@@ -868,6 +880,7 @@ type PostServiceServer interface {
 	RepostPost(context.Context, *PostRequest) (*Empty, error)
 	RemoveRepost(context.Context, *PostRequest) (*Empty, error)
 	GetReplies(context.Context, *GetRepliesRequest) (*Posts, error)
+	SearchHashtags(context.Context, *SearchHashtagsRequest) (*Hashtags, error)
 	mustEmbedUnimplementedPostServiceServer()
 }
 
@@ -916,6 +929,9 @@ func (UnimplementedPostServiceServer) RemoveRepost(context.Context, *PostRequest
 }
 func (UnimplementedPostServiceServer) GetReplies(context.Context, *GetRepliesRequest) (*Posts, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetReplies not implemented")
+}
+func (UnimplementedPostServiceServer) SearchHashtags(context.Context, *SearchHashtagsRequest) (*Hashtags, error) {
+	return nil, status.Error(codes.Unimplemented, "method SearchHashtags not implemented")
 }
 func (UnimplementedPostServiceServer) mustEmbedUnimplementedPostServiceServer() {}
 func (UnimplementedPostServiceServer) testEmbeddedByValue()                     {}
@@ -1172,6 +1188,24 @@ func _PostService_GetReplies_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PostService_SearchHashtags_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchHashtagsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).SearchHashtags(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PostService_SearchHashtags_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).SearchHashtags(ctx, req.(*SearchHashtagsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PostService_ServiceDesc is the grpc.ServiceDesc for PostService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1230,6 +1264,10 @@ var PostService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetReplies",
 			Handler:    _PostService_GetReplies_Handler,
+		},
+		{
+			MethodName: "SearchHashtags",
+			Handler:    _PostService_SearchHashtags_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

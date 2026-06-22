@@ -171,6 +171,21 @@ message GetRepliesRequest {
   int32 limit = 3;
 }
 
+message Hashtag {
+  int32 id = 1;
+  string name = 2;
+  int32 post_count = 3;
+}
+
+message Hashtags {
+  repeated Hashtag hashtags = 1;
+}
+
+message SearchHashtagsRequest {
+  string query = 1;
+  int32 limit = 2;
+}
+
 service PostService {
   rpc CreatePost(CreatePostRequest) returns (Identifier);
   rpc GetFeed(GetFeedRequest) returns (Posts);
@@ -185,6 +200,7 @@ service PostService {
   rpc RepostPost(PostRequest) returns (Empty);
   rpc RemoveRepost(PostRequest) returns (Empty);
   rpc GetReplies(GetRepliesRequest) returns (Posts);
+  rpc SearchHashtags(SearchHashtagsRequest) returns (Hashtags);
 }
 
 // Images

@@ -1441,6 +1441,162 @@ func (x *GetRepliesRequest) GetLimit() int32 {
 	return 0
 }
 
+type Hashtag struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	PostCount     int32                  `protobuf:"varint,3,opt,name=post_count,json=postCount,proto3" json:"post_count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Hashtag) Reset() {
+	*x = Hashtag{}
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Hashtag) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Hashtag) ProtoMessage() {}
+
+func (x *Hashtag) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Hashtag.ProtoReflect.Descriptor instead.
+func (*Hashtag) Descriptor() ([]byte, []int) {
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *Hashtag) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *Hashtag) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Hashtag) GetPostCount() int32 {
+	if x != nil {
+		return x.PostCount
+	}
+	return 0
+}
+
+type Hashtags struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Hashtags      []*Hashtag             `protobuf:"bytes,1,rep,name=hashtags,proto3" json:"hashtags,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Hashtags) Reset() {
+	*x = Hashtags{}
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Hashtags) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Hashtags) ProtoMessage() {}
+
+func (x *Hashtags) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Hashtags.ProtoReflect.Descriptor instead.
+func (*Hashtags) Descriptor() ([]byte, []int) {
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *Hashtags) GetHashtags() []*Hashtag {
+	if x != nil {
+		return x.Hashtags
+	}
+	return nil
+}
+
+type SearchHashtagsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Query         string                 `protobuf:"bytes,1,opt,name=query,proto3" json:"query,omitempty"`
+	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SearchHashtagsRequest) Reset() {
+	*x = SearchHashtagsRequest{}
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SearchHashtagsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SearchHashtagsRequest) ProtoMessage() {}
+
+func (x *SearchHashtagsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SearchHashtagsRequest.ProtoReflect.Descriptor instead.
+func (*SearchHashtagsRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *SearchHashtagsRequest) GetQuery() string {
+	if x != nil {
+		return x.Query
+	}
+	return ""
+}
+
+func (x *SearchHashtagsRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
 type VerifyUploadRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Filename      string                 `protobuf:"bytes,1,opt,name=filename,proto3" json:"filename,omitempty"`
@@ -1451,7 +1607,7 @@ type VerifyUploadRequest struct {
 
 func (x *VerifyUploadRequest) Reset() {
 	*x = VerifyUploadRequest{}
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[23]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1463,7 +1619,7 @@ func (x *VerifyUploadRequest) String() string {
 func (*VerifyUploadRequest) ProtoMessage() {}
 
 func (x *VerifyUploadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[23]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1476,7 +1632,7 @@ func (x *VerifyUploadRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VerifyUploadRequest.ProtoReflect.Descriptor instead.
 func (*VerifyUploadRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{23}
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *VerifyUploadRequest) GetFilename() string {
@@ -1502,7 +1658,7 @@ type ConsumeUploadRequest struct {
 
 func (x *ConsumeUploadRequest) Reset() {
 	*x = ConsumeUploadRequest{}
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[24]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1514,7 +1670,7 @@ func (x *ConsumeUploadRequest) String() string {
 func (*ConsumeUploadRequest) ProtoMessage() {}
 
 func (x *ConsumeUploadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[24]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1527,7 +1683,7 @@ func (x *ConsumeUploadRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ConsumeUploadRequest.ProtoReflect.Descriptor instead.
 func (*ConsumeUploadRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{24}
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *ConsumeUploadRequest) GetFilename() string {
@@ -1546,7 +1702,7 @@ type DeleteImageRequest struct {
 
 func (x *DeleteImageRequest) Reset() {
 	*x = DeleteImageRequest{}
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[25]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1558,7 +1714,7 @@ func (x *DeleteImageRequest) String() string {
 func (*DeleteImageRequest) ProtoMessage() {}
 
 func (x *DeleteImageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_thoughts_proto_msgTypes[25]
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1571,7 +1727,7 @@ func (x *DeleteImageRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteImageRequest.ProtoReflect.Descriptor instead.
 func (*DeleteImageRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{25}
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *DeleteImageRequest) GetFilename() string {
@@ -1694,7 +1850,17 @@ const file_pkg_pb_thoughts_proto_rawDesc = "" +
 	"\x11GetRepliesRequest\x12\x17\n" +
 	"\apost_id\x18\x01 \x01(\x05R\x06postId\x12\x12\n" +
 	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x14\n" +
-	"\x05limit\x18\x03 \x01(\x05R\x05limit\"J\n" +
+	"\x05limit\x18\x03 \x01(\x05R\x05limit\"L\n" +
+	"\aHashtag\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1d\n" +
+	"\n" +
+	"post_count\x18\x03 \x01(\x05R\tpostCount\"9\n" +
+	"\bHashtags\x12-\n" +
+	"\bhashtags\x18\x01 \x03(\v2\x11.thoughts.HashtagR\bhashtags\"C\n" +
+	"\x15SearchHashtagsRequest\x12\x14\n" +
+	"\x05query\x18\x01 \x01(\tR\x05query\x12\x14\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\"J\n" +
 	"\x13VerifyUploadRequest\x12\x1a\n" +
 	"\bfilename\x18\x01 \x01(\tR\bfilename\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x05R\x06userId\"2\n" +
@@ -1721,7 +1887,7 @@ const file_pkg_pb_thoughts_proto_rawDesc = "" +
 	"\n" +
 	"GetSession\x12\x18.thoughts.SessionRequest\x1a\x11.thoughts.Session\x12:\n" +
 	"\rDeleteSession\x12\x18.thoughts.SessionRequest\x1a\x0f.thoughts.Empty\x128\n" +
-	"\vGetSessions\x12\x15.thoughts.UserRequest\x1a\x12.thoughts.Sessions2\xec\x05\n" +
+	"\vGetSessions\x12\x15.thoughts.UserRequest\x1a\x12.thoughts.Sessions2\xb3\x06\n" +
 	"\vPostService\x12?\n" +
 	"\n" +
 	"CreatePost\x12\x1b.thoughts.CreatePostRequest\x1a\x14.thoughts.Identifier\x124\n" +
@@ -1740,7 +1906,8 @@ const file_pkg_pb_thoughts_proto_rawDesc = "" +
 	"RepostPost\x12\x15.thoughts.PostRequest\x1a\x0f.thoughts.Empty\x126\n" +
 	"\fRemoveRepost\x12\x15.thoughts.PostRequest\x1a\x0f.thoughts.Empty\x12:\n" +
 	"\n" +
-	"GetReplies\x12\x1b.thoughts.GetRepliesRequest\x1a\x0f.thoughts.Posts2\xce\x01\n" +
+	"GetReplies\x12\x1b.thoughts.GetRepliesRequest\x1a\x0f.thoughts.Posts\x12E\n" +
+	"\x0eSearchHashtags\x12\x1f.thoughts.SearchHashtagsRequest\x1a\x12.thoughts.Hashtags2\xce\x01\n" +
 	"\fImageService\x12>\n" +
 	"\fVerifyUpload\x12\x1d.thoughts.VerifyUploadRequest\x1a\x0f.thoughts.Empty\x12@\n" +
 	"\rConsumeUpload\x12\x1e.thoughts.ConsumeUploadRequest\x1a\x0f.thoughts.Empty\x12<\n" +
@@ -1759,7 +1926,7 @@ func file_pkg_pb_thoughts_proto_rawDescGZIP() []byte {
 	return file_pkg_pb_thoughts_proto_rawDescData
 }
 
-var file_pkg_pb_thoughts_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
+var file_pkg_pb_thoughts_proto_msgTypes = make([]protoimpl.MessageInfo, 29)
 var file_pkg_pb_thoughts_proto_goTypes = []any{
 	(*CreateUserRequest)(nil),        // 0: thoughts.CreateUserRequest
 	(*Identifier)(nil),               // 1: thoughts.Identifier
@@ -1784,9 +1951,12 @@ var file_pkg_pb_thoughts_proto_goTypes = []any{
 	(*GetPostsRequest)(nil),          // 20: thoughts.GetPostsRequest
 	(*GetHashtagPostsRequest)(nil),   // 21: thoughts.GetHashtagPostsRequest
 	(*GetRepliesRequest)(nil),        // 22: thoughts.GetRepliesRequest
-	(*VerifyUploadRequest)(nil),      // 23: thoughts.VerifyUploadRequest
-	(*ConsumeUploadRequest)(nil),     // 24: thoughts.ConsumeUploadRequest
-	(*DeleteImageRequest)(nil),       // 25: thoughts.DeleteImageRequest
+	(*Hashtag)(nil),                  // 23: thoughts.Hashtag
+	(*Hashtags)(nil),                 // 24: thoughts.Hashtags
+	(*SearchHashtagsRequest)(nil),    // 25: thoughts.SearchHashtagsRequest
+	(*VerifyUploadRequest)(nil),      // 26: thoughts.VerifyUploadRequest
+	(*ConsumeUploadRequest)(nil),     // 27: thoughts.ConsumeUploadRequest
+	(*DeleteImageRequest)(nil),       // 28: thoughts.DeleteImageRequest
 }
 var file_pkg_pb_thoughts_proto_depIdxs = []int32{
 	4,  // 0: thoughts.Users.users:type_name -> thoughts.User
@@ -1794,71 +1964,74 @@ var file_pkg_pb_thoughts_proto_depIdxs = []int32{
 	17, // 2: thoughts.Post.quote_post:type_name -> thoughts.Post
 	17, // 3: thoughts.Post.repost_of:type_name -> thoughts.Post
 	17, // 4: thoughts.Posts.posts:type_name -> thoughts.Post
-	0,  // 5: thoughts.UserService.CreateUser:input_type -> thoughts.CreateUserRequest
-	3,  // 6: thoughts.UserService.GetUser:input_type -> thoughts.UserRequest
-	8,  // 7: thoughts.UserService.GetUserByUsername:input_type -> thoughts.GetUserByUsernameRequest
-	2,  // 8: thoughts.UserService.GetUsersByIds:input_type -> thoughts.Ids
-	5,  // 9: thoughts.UserService.UpdateUser:input_type -> thoughts.UpdateUserRequest
-	6,  // 10: thoughts.UserService.GetFollowing:input_type -> thoughts.GetUsersRequest
-	6,  // 11: thoughts.UserService.GetFollowers:input_type -> thoughts.GetUsersRequest
-	3,  // 12: thoughts.UserService.FollowUser:input_type -> thoughts.UserRequest
-	3,  // 13: thoughts.UserService.UnfollowUser:input_type -> thoughts.UserRequest
-	9,  // 14: thoughts.UserService.SearchUsers:input_type -> thoughts.SearchUsersRequest
-	11, // 15: thoughts.AuthService.CreateSession:input_type -> thoughts.Credentials
-	12, // 16: thoughts.AuthService.GetSession:input_type -> thoughts.SessionRequest
-	12, // 17: thoughts.AuthService.DeleteSession:input_type -> thoughts.SessionRequest
-	3,  // 18: thoughts.AuthService.GetSessions:input_type -> thoughts.UserRequest
-	15, // 19: thoughts.PostService.CreatePost:input_type -> thoughts.CreatePostRequest
-	18, // 20: thoughts.PostService.GetFeed:input_type -> thoughts.GetFeedRequest
-	20, // 21: thoughts.PostService.GetPosts:input_type -> thoughts.GetPostsRequest
-	20, // 22: thoughts.PostService.GetLikedPosts:input_type -> thoughts.GetPostsRequest
-	21, // 23: thoughts.PostService.GetHashtagPosts:input_type -> thoughts.GetHashtagPostsRequest
-	16, // 24: thoughts.PostService.GetPost:input_type -> thoughts.PostRequest
-	2,  // 25: thoughts.PostService.GetPostsByIds:input_type -> thoughts.Ids
-	16, // 26: thoughts.PostService.DeletePost:input_type -> thoughts.PostRequest
-	16, // 27: thoughts.PostService.LikePost:input_type -> thoughts.PostRequest
-	16, // 28: thoughts.PostService.UnlikePost:input_type -> thoughts.PostRequest
-	16, // 29: thoughts.PostService.RepostPost:input_type -> thoughts.PostRequest
-	16, // 30: thoughts.PostService.RemoveRepost:input_type -> thoughts.PostRequest
-	22, // 31: thoughts.PostService.GetReplies:input_type -> thoughts.GetRepliesRequest
-	23, // 32: thoughts.ImageService.VerifyUpload:input_type -> thoughts.VerifyUploadRequest
-	24, // 33: thoughts.ImageService.ConsumeUpload:input_type -> thoughts.ConsumeUploadRequest
-	25, // 34: thoughts.ImageService.DeleteImage:input_type -> thoughts.DeleteImageRequest
-	1,  // 35: thoughts.UserService.CreateUser:output_type -> thoughts.Identifier
-	4,  // 36: thoughts.UserService.GetUser:output_type -> thoughts.User
-	4,  // 37: thoughts.UserService.GetUserByUsername:output_type -> thoughts.User
-	7,  // 38: thoughts.UserService.GetUsersByIds:output_type -> thoughts.Users
-	10, // 39: thoughts.UserService.UpdateUser:output_type -> thoughts.Empty
-	7,  // 40: thoughts.UserService.GetFollowing:output_type -> thoughts.Users
-	7,  // 41: thoughts.UserService.GetFollowers:output_type -> thoughts.Users
-	10, // 42: thoughts.UserService.FollowUser:output_type -> thoughts.Empty
-	10, // 43: thoughts.UserService.UnfollowUser:output_type -> thoughts.Empty
-	7,  // 44: thoughts.UserService.SearchUsers:output_type -> thoughts.Users
-	13, // 45: thoughts.AuthService.CreateSession:output_type -> thoughts.Session
-	13, // 46: thoughts.AuthService.GetSession:output_type -> thoughts.Session
-	10, // 47: thoughts.AuthService.DeleteSession:output_type -> thoughts.Empty
-	14, // 48: thoughts.AuthService.GetSessions:output_type -> thoughts.Sessions
-	1,  // 49: thoughts.PostService.CreatePost:output_type -> thoughts.Identifier
-	19, // 50: thoughts.PostService.GetFeed:output_type -> thoughts.Posts
-	19, // 51: thoughts.PostService.GetPosts:output_type -> thoughts.Posts
-	19, // 52: thoughts.PostService.GetLikedPosts:output_type -> thoughts.Posts
-	19, // 53: thoughts.PostService.GetHashtagPosts:output_type -> thoughts.Posts
-	17, // 54: thoughts.PostService.GetPost:output_type -> thoughts.Post
-	19, // 55: thoughts.PostService.GetPostsByIds:output_type -> thoughts.Posts
-	10, // 56: thoughts.PostService.DeletePost:output_type -> thoughts.Empty
-	10, // 57: thoughts.PostService.LikePost:output_type -> thoughts.Empty
-	10, // 58: thoughts.PostService.UnlikePost:output_type -> thoughts.Empty
-	10, // 59: thoughts.PostService.RepostPost:output_type -> thoughts.Empty
-	10, // 60: thoughts.PostService.RemoveRepost:output_type -> thoughts.Empty
-	19, // 61: thoughts.PostService.GetReplies:output_type -> thoughts.Posts
-	10, // 62: thoughts.ImageService.VerifyUpload:output_type -> thoughts.Empty
-	10, // 63: thoughts.ImageService.ConsumeUpload:output_type -> thoughts.Empty
-	10, // 64: thoughts.ImageService.DeleteImage:output_type -> thoughts.Empty
-	35, // [35:65] is the sub-list for method output_type
-	5,  // [5:35] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	23, // 5: thoughts.Hashtags.hashtags:type_name -> thoughts.Hashtag
+	0,  // 6: thoughts.UserService.CreateUser:input_type -> thoughts.CreateUserRequest
+	3,  // 7: thoughts.UserService.GetUser:input_type -> thoughts.UserRequest
+	8,  // 8: thoughts.UserService.GetUserByUsername:input_type -> thoughts.GetUserByUsernameRequest
+	2,  // 9: thoughts.UserService.GetUsersByIds:input_type -> thoughts.Ids
+	5,  // 10: thoughts.UserService.UpdateUser:input_type -> thoughts.UpdateUserRequest
+	6,  // 11: thoughts.UserService.GetFollowing:input_type -> thoughts.GetUsersRequest
+	6,  // 12: thoughts.UserService.GetFollowers:input_type -> thoughts.GetUsersRequest
+	3,  // 13: thoughts.UserService.FollowUser:input_type -> thoughts.UserRequest
+	3,  // 14: thoughts.UserService.UnfollowUser:input_type -> thoughts.UserRequest
+	9,  // 15: thoughts.UserService.SearchUsers:input_type -> thoughts.SearchUsersRequest
+	11, // 16: thoughts.AuthService.CreateSession:input_type -> thoughts.Credentials
+	12, // 17: thoughts.AuthService.GetSession:input_type -> thoughts.SessionRequest
+	12, // 18: thoughts.AuthService.DeleteSession:input_type -> thoughts.SessionRequest
+	3,  // 19: thoughts.AuthService.GetSessions:input_type -> thoughts.UserRequest
+	15, // 20: thoughts.PostService.CreatePost:input_type -> thoughts.CreatePostRequest
+	18, // 21: thoughts.PostService.GetFeed:input_type -> thoughts.GetFeedRequest
+	20, // 22: thoughts.PostService.GetPosts:input_type -> thoughts.GetPostsRequest
+	20, // 23: thoughts.PostService.GetLikedPosts:input_type -> thoughts.GetPostsRequest
+	21, // 24: thoughts.PostService.GetHashtagPosts:input_type -> thoughts.GetHashtagPostsRequest
+	16, // 25: thoughts.PostService.GetPost:input_type -> thoughts.PostRequest
+	2,  // 26: thoughts.PostService.GetPostsByIds:input_type -> thoughts.Ids
+	16, // 27: thoughts.PostService.DeletePost:input_type -> thoughts.PostRequest
+	16, // 28: thoughts.PostService.LikePost:input_type -> thoughts.PostRequest
+	16, // 29: thoughts.PostService.UnlikePost:input_type -> thoughts.PostRequest
+	16, // 30: thoughts.PostService.RepostPost:input_type -> thoughts.PostRequest
+	16, // 31: thoughts.PostService.RemoveRepost:input_type -> thoughts.PostRequest
+	22, // 32: thoughts.PostService.GetReplies:input_type -> thoughts.GetRepliesRequest
+	25, // 33: thoughts.PostService.SearchHashtags:input_type -> thoughts.SearchHashtagsRequest
+	26, // 34: thoughts.ImageService.VerifyUpload:input_type -> thoughts.VerifyUploadRequest
+	27, // 35: thoughts.ImageService.ConsumeUpload:input_type -> thoughts.ConsumeUploadRequest
+	28, // 36: thoughts.ImageService.DeleteImage:input_type -> thoughts.DeleteImageRequest
+	1,  // 37: thoughts.UserService.CreateUser:output_type -> thoughts.Identifier
+	4,  // 38: thoughts.UserService.GetUser:output_type -> thoughts.User
+	4,  // 39: thoughts.UserService.GetUserByUsername:output_type -> thoughts.User
+	7,  // 40: thoughts.UserService.GetUsersByIds:output_type -> thoughts.Users
+	10, // 41: thoughts.UserService.UpdateUser:output_type -> thoughts.Empty
+	7,  // 42: thoughts.UserService.GetFollowing:output_type -> thoughts.Users
+	7,  // 43: thoughts.UserService.GetFollowers:output_type -> thoughts.Users
+	10, // 44: thoughts.UserService.FollowUser:output_type -> thoughts.Empty
+	10, // 45: thoughts.UserService.UnfollowUser:output_type -> thoughts.Empty
+	7,  // 46: thoughts.UserService.SearchUsers:output_type -> thoughts.Users
+	13, // 47: thoughts.AuthService.CreateSession:output_type -> thoughts.Session
+	13, // 48: thoughts.AuthService.GetSession:output_type -> thoughts.Session
+	10, // 49: thoughts.AuthService.DeleteSession:output_type -> thoughts.Empty
+	14, // 50: thoughts.AuthService.GetSessions:output_type -> thoughts.Sessions
+	1,  // 51: thoughts.PostService.CreatePost:output_type -> thoughts.Identifier
+	19, // 52: thoughts.PostService.GetFeed:output_type -> thoughts.Posts
+	19, // 53: thoughts.PostService.GetPosts:output_type -> thoughts.Posts
+	19, // 54: thoughts.PostService.GetLikedPosts:output_type -> thoughts.Posts
+	19, // 55: thoughts.PostService.GetHashtagPosts:output_type -> thoughts.Posts
+	17, // 56: thoughts.PostService.GetPost:output_type -> thoughts.Post
+	19, // 57: thoughts.PostService.GetPostsByIds:output_type -> thoughts.Posts
+	10, // 58: thoughts.PostService.DeletePost:output_type -> thoughts.Empty
+	10, // 59: thoughts.PostService.LikePost:output_type -> thoughts.Empty
+	10, // 60: thoughts.PostService.UnlikePost:output_type -> thoughts.Empty
+	10, // 61: thoughts.PostService.RepostPost:output_type -> thoughts.Empty
+	10, // 62: thoughts.PostService.RemoveRepost:output_type -> thoughts.Empty
+	19, // 63: thoughts.PostService.GetReplies:output_type -> thoughts.Posts
+	24, // 64: thoughts.PostService.SearchHashtags:output_type -> thoughts.Hashtags
+	10, // 65: thoughts.ImageService.VerifyUpload:output_type -> thoughts.Empty
+	10, // 66: thoughts.ImageService.ConsumeUpload:output_type -> thoughts.Empty
+	10, // 67: thoughts.ImageService.DeleteImage:output_type -> thoughts.Empty
+	37, // [37:68] is the sub-list for method output_type
+	6,  // [6:37] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_pkg_pb_thoughts_proto_init() }
@@ -1875,7 +2048,7 @@ func file_pkg_pb_thoughts_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_pb_thoughts_proto_rawDesc), len(file_pkg_pb_thoughts_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   26,
+			NumMessages:   29,
 			NumExtensions: 0,
 			NumServices:   4,
 		},
