@@ -3,6 +3,7 @@ package search
 import (
 	"fmt"
 	"log/slog"
+	"net/http"
 	"time"
 
 	meilisearch "github.com/meilisearch/meilisearch-go"
@@ -25,7 +26,8 @@ func NewMeiliClient(host, masterKey string) (*MeiliClient, error) {
 		return nil, fmt.Errorf("provisioning meili key: %w", err)
 	}
 
-	client := meilisearch.New(host, meilisearch.WithAPIKey(scopedKey))
+	httpClient := &http.Client{Timeout: 10 * time.Second}
+	client := meilisearch.New(host, meilisearch.WithAPIKey(scopedKey), meilisearch.WithCustomClient(httpClient))
 
 	if err := ensureIndexes(master); err != nil {
 		return nil, fmt.Errorf("ensuring meili indexes: %w", err)

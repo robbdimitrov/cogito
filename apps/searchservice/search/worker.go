@@ -33,10 +33,12 @@ func Run(ctx context.Context, db *pgxpool.Pool, meili *MeiliClient) {
 	backoff := backoffBase
 	for {
 		n, err := drainBatch(ctx, db, meili)
+		if n > 0 {
+			backoff = backoffBase
+		}
 		if err != nil {
 			slog.Warn("worker: drain error", "error", err)
 		} else if n > 0 {
-			backoff = backoffBase
 			continue
 		}
 
@@ -49,12 +51,7 @@ func Run(ctx context.Context, db *pgxpool.Pool, meili *MeiliClient) {
 		}
 
 		if n == 0 && err == nil {
-			if backoff < backoffMax {
-				backoff *= 2
-				if backoff > backoffMax {
-					backoff = backoffMax
-				}
-			}
+			backoff = min(backoff*2, backoffMax)
 		}
 	}
 }
