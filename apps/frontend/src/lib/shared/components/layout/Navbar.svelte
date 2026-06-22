@@ -1,5 +1,4 @@
 <script lang="ts">
-  /* eslint-disable svelte/no-navigation-without-resolve */
   import { resolve } from "$app/paths";
   import { page } from "$app/state";
   import type { User } from "$lib/domains/users/model";

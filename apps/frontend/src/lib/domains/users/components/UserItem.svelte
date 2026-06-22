@@ -1,6 +1,5 @@
 <!-- eslint-disable svelte/no-navigation-without-resolve -->
 <script lang="ts">
-  /* eslint-disable svelte/prefer-writable-derived */
   import { enhance } from "$app/forms";
   import { resolve } from "$app/paths";
   import Avatar from "$lib/shared/components/ui/Avatar.svelte";
@@ -16,7 +15,11 @@
   let isCurrentUser = $derived(currentUserId && user.id === currentUserId);
 
   let optimisticFollowOverride = $state<boolean | null>(null);
-  let followed = $derived(optimisticFollowOverride !== null ? optimisticFollowOverride : (user.followed ?? false));
+  let followed = $derived(
+    optimisticFollowOverride !== null
+      ? optimisticFollowOverride
+      : (user.followed ?? false),
+  );
   let isActionLoading = $state(false);
 </script>
 

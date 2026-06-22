@@ -1,6 +1,5 @@
 <!-- eslint-disable svelte/no-navigation-without-resolve -->
 <script lang="ts">
-  /* eslint-disable svelte/prefer-writable-derived */
   import { enhance } from "$app/forms";
   import { imageUrl } from "$lib/shared/imageUrl";
   import Avatar from "$lib/shared/components/ui/Avatar.svelte";
@@ -15,7 +14,11 @@
   }>();
 
   let optimisticFollowOverride = $state<boolean | null>(null);
-  let followed = $derived(optimisticFollowOverride !== null ? optimisticFollowOverride : (user.followed ?? false));
+  let followed = $derived(
+    optimisticFollowOverride !== null
+      ? optimisticFollowOverride
+      : (user.followed ?? false),
+  );
 
   function formatDate(dateString: string | undefined) {
     if (!dateString) return "";

@@ -12,6 +12,11 @@
 
   let content = $state("");
   let isSubmitting = $state(false);
+  let textarea = $state<HTMLTextAreaElement | null>(null);
+
+  $effect(() => {
+    textarea?.focus();
+  });
 
   function handleClose() {
     if (!isSubmitting) onClose();
@@ -43,7 +48,7 @@
         bind:value={content}
         maxlength={255}
         rows={3}
-        autofocus></textarea>
+        bind:this={textarea}></textarea>
       <div
         class="text-right text-sm mt-1 {content.length > 240
           ? 'text-warning'
@@ -74,7 +79,11 @@
       </div>
     </form>
   </div>
-  <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
   <!-- svelte-ignore a11y_click_events_have_key_events -->
-  <div class="modal-backdrop" onclick={handleClose} role="dialog"></div>
+  <div
+    class="modal-backdrop"
+    onclick={handleClose}
+    role="dialog"
+    tabindex="-1"
+  ></div>
 </dialog>
