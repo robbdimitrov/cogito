@@ -19,7 +19,8 @@ type MeiliClient struct {
 // idempotent), creates the three indexes with correct settings, then returns a
 // client configured with the scoped key. The master key is not retained.
 func NewMeiliClient(host, masterKey string) (*MeiliClient, error) {
-	master := meilisearch.New(host, meilisearch.WithAPIKey(masterKey))
+	masterHTTP := &http.Client{Timeout: 10 * time.Second}
+	master := meilisearch.New(host, meilisearch.WithAPIKey(masterKey), meilisearch.WithCustomClient(masterHTTP))
 
 	scopedKey, err := provisionScopedKey(master)
 	if err != nil {
