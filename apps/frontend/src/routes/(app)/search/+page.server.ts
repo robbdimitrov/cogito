@@ -1,9 +1,8 @@
 import type { PageServerLoad } from "./$types";
-import { searchHashtags, getHashtagPosts, type Hashtag } from "$lib/domains/posts/api.server";
-import { searchUsers } from "$lib/domains/users/api.server";
+import { apiClient } from "$lib/server/api/client";
 import type { Post } from "$lib/domains/posts/model";
 import type { User } from "$lib/domains/users/model";
-import { apiClient } from "$lib/server/api/client";
+import type { Hashtag } from "$lib/domains/posts/api.server";
 
 export const load: PageServerLoad = async (event) => {
   const q = event.url.searchParams.get("q") ?? "";
@@ -16,18 +15,14 @@ export const load: PageServerLoad = async (event) => {
 
   if (q) {
     try {
-      if (tab === "posts") {
-        const tag = q.startsWith("#") ? q.slice(1) : null;
-        if (tag) {
-          const res = await getHashtagPosts(api, tag, 0);
-          posts = res.items;
-        }
-      } else if (tab === "users") {
-        const res = await searchUsers(api, q, 20);
-        users = res.items;
-      } else if (tab === "hashtags") {
-        const res = await searchHashtags(api, q, 20);
-        hashtags = res.items;
+      const typeMap: Record<string, string> = { posts: "posts", users: "users", hashtags: "hashtags" };
+      const type = typeMap[tab] ?? "posts";
+      const res = await api(`/search?q=${encodeURIComponent(q)}&type=${type}&limit=20`);
+      if (res.ok) {
+        const data = await res.json();
+        if (tab === "posts") posts = data.items ?? [];
+        else if (tab === "users") users = data.items ?? [];
+        else if (tab === "hashtags") hashtags = data.items ?? [];
       }
     } catch {
       // fall through with empty results

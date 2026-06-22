@@ -68,10 +68,10 @@
         onQuote={handleQuote}
         emptyMessage="No posts found."
       />
-    {:else if q.startsWith("#")}
-      <p class="text-slate-500 dark:text-slate-400">No posts with {q} yet.</p>
+    {:else if q}
+      <p class="text-slate-500 dark:text-slate-400">No posts found for "{q}".</p>
     {:else}
-      <p class="text-slate-500 dark:text-slate-400">Search with a hashtag like #golang to find posts.</p>
+      <p class="text-slate-500 dark:text-slate-400">Enter a search query to find posts.</p>
     {/if}
   {:else if tab === "users"}
     {#if data.users.length > 0}
