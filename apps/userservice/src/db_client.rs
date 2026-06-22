@@ -28,16 +28,29 @@ impl UserDb for DbClient {
         email: &str,
         password_hash: &str,
     ) -> Result<i32, SqlxError> {
-        let row = sqlx::query_as::<_, (i32,)>(
-            "INSERT INTO users (name, username, email, password) VALUES ($1, $2, $3, $4) RETURNING id"
+        let mut tx = self.pool.begin().await?;
+
+        let (id,): (i32,) = sqlx::query_as(
+            "INSERT INTO users (name, username, email, password) VALUES ($1, $2, $3, $4) RETURNING id",
         )
         .bind(name)
         .bind(username)
         .bind(email)
         .bind(password_hash)
-        .fetch_one(&self.pool)
+        .fetch_one(&mut *tx)
         .await?;
-        Ok(row.0)
+
+        sqlx::query("INSERT INTO search_outbox (entity_type, entity_id) VALUES ('user', $1)")
+            .bind(id.to_string())
+            .execute(&mut *tx)
+            .await?;
+
+        sqlx::query("SELECT pg_notify('search_outbox', '')")
+            .execute(&mut *tx)
+            .await?;
+
+        tx.commit().await?;
+        Ok(id)
     }
 
     async fn get_user_with_id(&self, user_id: i32) -> Result<Option<(i32, String)>, SqlxError> {
@@ -181,8 +194,10 @@ impl UserDb for DbClient {
         user_id: i32,
         fields: UpdateUserFields<'_>,
     ) -> Result<(), SqlxError> {
+        let mut tx = self.pool.begin().await?;
+
         sqlx::query(
-            "UPDATE users SET name = $1, username = $2, email = $3, bio = $4, profile_photo_key = COALESCE($5, profile_photo_key), cover_photo_key = COALESCE($6, cover_photo_key) WHERE id = $7"
+            "UPDATE users SET name = $1, username = $2, email = $3, bio = $4, profile_photo_key = COALESCE($5, profile_photo_key), cover_photo_key = COALESCE($6, cover_photo_key) WHERE id = $7",
         )
         .bind(fields.name)
         .bind(fields.username)
@@ -191,8 +206,19 @@ impl UserDb for DbClient {
         .bind(fields.profile_photo_key)
         .bind(fields.cover_photo_key)
         .bind(user_id)
-        .execute(&self.pool)
+        .execute(&mut *tx)
         .await?;
+
+        sqlx::query("INSERT INTO search_outbox (entity_type, entity_id) VALUES ('user', $1)")
+            .bind(user_id.to_string())
+            .execute(&mut *tx)
+            .await?;
+
+        sqlx::query("SELECT pg_notify('search_outbox', '')")
+            .execute(&mut *tx)
+            .await?;
+
+        tx.commit().await?;
         Ok(())
     }
 
