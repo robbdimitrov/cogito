@@ -223,3 +223,17 @@ service ImageService {
   rpc ConsumeUpload(ConsumeUploadRequest) returns (Empty);
   rpc DeleteImage(DeleteImageRequest) returns (Empty);
 }
+
+// Search
+
+message SearchRequest {
+  string query = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+service SearchService {
+  rpc SearchUsers(SearchRequest) returns (Users);
+  rpc SearchPosts(SearchRequest) returns (Posts);
+  rpc SearchHashtags(SearchRequest) returns (Hashtags);
+}

@@ -1451,3 +1451,181 @@ var ImageService_ServiceDesc = grpc.ServiceDesc{
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "pkg/pb/thoughts.proto",
 }
+
+const (
+	SearchService_SearchUsers_FullMethodName    = "/thoughts.SearchService/SearchUsers"
+	SearchService_SearchPosts_FullMethodName    = "/thoughts.SearchService/SearchPosts"
+	SearchService_SearchHashtags_FullMethodName = "/thoughts.SearchService/SearchHashtags"
+)
+
+// SearchServiceClient is the client API for SearchService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type SearchServiceClient interface {
+	SearchUsers(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*Users, error)
+	SearchPosts(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*Posts, error)
+	SearchHashtags(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*Hashtags, error)
+}
+
+type searchServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewSearchServiceClient(cc grpc.ClientConnInterface) SearchServiceClient {
+	return &searchServiceClient{cc}
+}
+
+func (c *searchServiceClient) SearchUsers(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*Users, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Users)
+	err := c.cc.Invoke(ctx, SearchService_SearchUsers_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *searchServiceClient) SearchPosts(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*Posts, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Posts)
+	err := c.cc.Invoke(ctx, SearchService_SearchPosts_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *searchServiceClient) SearchHashtags(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*Hashtags, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Hashtags)
+	err := c.cc.Invoke(ctx, SearchService_SearchHashtags_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// SearchServiceServer is the server API for SearchService service.
+// All implementations must embed UnimplementedSearchServiceServer
+// for forward compatibility.
+type SearchServiceServer interface {
+	SearchUsers(context.Context, *SearchRequest) (*Users, error)
+	SearchPosts(context.Context, *SearchRequest) (*Posts, error)
+	SearchHashtags(context.Context, *SearchRequest) (*Hashtags, error)
+	mustEmbedUnimplementedSearchServiceServer()
+}
+
+// UnimplementedSearchServiceServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedSearchServiceServer struct{}
+
+func (UnimplementedSearchServiceServer) SearchUsers(context.Context, *SearchRequest) (*Users, error) {
+	return nil, status.Error(codes.Unimplemented, "method SearchUsers not implemented")
+}
+func (UnimplementedSearchServiceServer) SearchPosts(context.Context, *SearchRequest) (*Posts, error) {
+	return nil, status.Error(codes.Unimplemented, "method SearchPosts not implemented")
+}
+func (UnimplementedSearchServiceServer) SearchHashtags(context.Context, *SearchRequest) (*Hashtags, error) {
+	return nil, status.Error(codes.Unimplemented, "method SearchHashtags not implemented")
+}
+func (UnimplementedSearchServiceServer) mustEmbedUnimplementedSearchServiceServer() {}
+func (UnimplementedSearchServiceServer) testEmbeddedByValue()                       {}
+
+// UnsafeSearchServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to SearchServiceServer will
+// result in compilation errors.
+type UnsafeSearchServiceServer interface {
+	mustEmbedUnimplementedSearchServiceServer()
+}
+
+func RegisterSearchServiceServer(s grpc.ServiceRegistrar, srv SearchServiceServer) {
+	// If the following call panics, it indicates UnimplementedSearchServiceServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&SearchService_ServiceDesc, srv)
+}
+
+func _SearchService_SearchUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SearchServiceServer).SearchUsers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SearchService_SearchUsers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SearchServiceServer).SearchUsers(ctx, req.(*SearchRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SearchService_SearchPosts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SearchServiceServer).SearchPosts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SearchService_SearchPosts_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SearchServiceServer).SearchPosts(ctx, req.(*SearchRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SearchService_SearchHashtags_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SearchServiceServer).SearchHashtags(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SearchService_SearchHashtags_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SearchServiceServer).SearchHashtags(ctx, req.(*SearchRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// SearchService_ServiceDesc is the grpc.ServiceDesc for SearchService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var SearchService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "thoughts.SearchService",
+	HandlerType: (*SearchServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "SearchUsers",
+			Handler:    _SearchService_SearchUsers_Handler,
+		},
+		{
+			MethodName: "SearchPosts",
+			Handler:    _SearchService_SearchPosts_Handler,
+		},
+		{
+			MethodName: "SearchHashtags",
+			Handler:    _SearchService_SearchHashtags_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "pkg/pb/thoughts.proto",
+}
