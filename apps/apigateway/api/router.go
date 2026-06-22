@@ -10,6 +10,8 @@ import (
 	"net/url"
 	"os"
 	"time"
+
+	pb "thoughts/apigateway/genproto"
 )
 
 type router struct {
@@ -33,12 +35,21 @@ func imageGRPCAddress(imageHTTPAddr string) string {
 }
 
 func newRouter(authAddr, postAddr, userAddr, imageAddr, searchAddr string) *router {
+	var searchClient pb.SearchServiceClient
+	if searchAddr != "" {
+		searchConn, err := newGatewayClient(searchAddr, "search")
+		if err != nil {
+			slog.Error("unable to create search client", "error", err)
+			os.Exit(1)
+		}
+		searchClient = pb.NewSearchServiceClient(searchConn)
+	}
 	imageBreaker := newCircuitBreaker("image-http")
 	return &router{
 		auth:             newAuthController(authAddr),
-		post:             newPostController(postAddr, userAddr, imageAddr, searchAddr),
-		user:             newUserController(userAddr, authAddr, imageAddr, searchAddr),
-		search:           newSearchController(searchAddr),
+		post:             newPostController(postAddr, userAddr, imageAddr, searchClient),
+		user:             newUserController(userAddr, authAddr, imageAddr, searchClient),
+		search:           newSearchController(searchClient),
 		imageAddr:        imageAddr,
 		imageHTTPBreaker: imageBreaker,
 		imageHTTP: &http.Client{

@@ -24,7 +24,7 @@ type userController struct {
 	searchClient pb.SearchServiceClient
 }
 
-func newUserController(addr string, authAddr string, imageAddr string, searchAddr string) *userController {
+func newUserController(addr string, authAddr string, imageAddr string, searchClient pb.SearchServiceClient) *userController {
 	conn, err := newGatewayClient(addr, "user")
 	if err != nil {
 		slog.Error("unable to create user client", "error", err)
@@ -44,15 +44,6 @@ func newUserController(addr string, authAddr string, imageAddr string, searchAdd
 			os.Exit(1)
 		}
 		imgClient = pb.NewImageServiceClient(imgConn)
-	}
-	var searchClient pb.SearchServiceClient
-	if searchAddr != "" {
-		searchConn, err := newGatewayClient(searchAddr, "search")
-		if err != nil {
-			slog.Error("unable to create search client", "error", err)
-			os.Exit(1)
-		}
-		searchClient = pb.NewSearchServiceClient(searchConn)
 	}
 	return &userController{
 		client:       pb.NewUserServiceClient(conn),
@@ -350,7 +341,7 @@ func (s *userController) searchUsers(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	query := r.URL.Query().Get("q")
-	_, limit, err := getPageAndLimit(r)
+	page, limit, err := getPageAndLimit(r)
 	if err != nil {
 		grpcError(w, err)
 		return
@@ -358,8 +349,9 @@ func (s *userController) searchUsers(w http.ResponseWriter, r *http.Request) {
 
 	if s.searchClient != nil {
 		res, err := s.searchClient.SearchUsers(ctx, &pb.SearchRequest{
-			Query: query,
-			Limit: int32(limit),
+			Query:  query,
+			Limit:  int32(limit),
+			Offset: int32(page * limit),
 		})
 		if err != nil {
 			slog.Warn("searching users failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))

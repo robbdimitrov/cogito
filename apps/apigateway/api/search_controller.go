@@ -4,7 +4,6 @@ import (
 	"context"
 	"log/slog"
 	"net/http"
-	"os"
 	"time"
 
 	pb "thoughts/apigateway/genproto"
@@ -14,16 +13,8 @@ type searchController struct {
 	client pb.SearchServiceClient
 }
 
-func newSearchController(addr string) *searchController {
-	if addr == "" {
-		return &searchController{}
-	}
-	conn, err := newGatewayClient(addr, "search")
-	if err != nil {
-		slog.Error("unable to create search client", "error", err)
-		os.Exit(1)
-	}
-	return &searchController{client: pb.NewSearchServiceClient(conn)}
+func newSearchController(client pb.SearchServiceClient) *searchController {
+	return &searchController{client: client}
 }
 
 func (sc *searchController) search(w http.ResponseWriter, r *http.Request) {

@@ -21,7 +21,7 @@ type postController struct {
 	searchClient pb.SearchServiceClient
 }
 
-func newPostController(addr string, userAddr string, imageAddr string, searchAddr string) *postController {
+func newPostController(addr string, userAddr string, imageAddr string, searchClient pb.SearchServiceClient) *postController {
 	conn, err := newGatewayClient(addr, "post")
 	if err != nil {
 		slog.Error("unable to create post client", "error", err)
@@ -41,15 +41,6 @@ func newPostController(addr string, userAddr string, imageAddr string, searchAdd
 			os.Exit(1)
 		}
 		imgClient = pb.NewImageServiceClient(imgConn)
-	}
-	var searchClient pb.SearchServiceClient
-	if searchAddr != "" {
-		searchConn, err := newGatewayClient(searchAddr, "search")
-		if err != nil {
-			slog.Error("unable to create search client", "error", err)
-			os.Exit(1)
-		}
-		searchClient = pb.NewSearchServiceClient(searchConn)
 	}
 	return &postController{
 		client:       pb.NewPostServiceClient(conn),
@@ -591,6 +582,9 @@ func (pc *postController) searchHashtags(w http.ResponseWriter, r *http.Request)
 	limit := 8
 	if l, err := strconv.Atoi(r.URL.Query().Get("limit")); err == nil && l > 0 {
 		limit = l
+	}
+	if limit > 20 {
+		limit = 20
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
