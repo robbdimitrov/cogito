@@ -1,10 +1,12 @@
 use crate::crypto::{generate_hash, validate_password};
+use crate::pagination;
 use crate::thoughts::user_service_server::UserService;
 use crate::thoughts::{
     CreateUserRequest, Empty, GetUserByUsernameRequest, GetUsersRequest, Identifier, Ids,
     SearchUsersRequest, UpdateUserRequest, User, UserRequest, Users,
 };
 use crate::utils::{get_user_id, is_valid_email};
+use chrono::{DateTime, Utc};
 use sqlx::Error as SqlxError;
 use tonic::{Request, Response, Status};
 
@@ -44,17 +46,17 @@ pub trait UserDb: Send + Sync + 'static {
     async fn get_following(
         &self,
         user_id: i32,
-        page: i32,
+        cursor: &str,
         limit: i32,
         current_user_id: i32,
-    ) -> Result<Vec<User>, SqlxError>;
+    ) -> Result<Vec<(User, DateTime<Utc>)>, SqlxError>;
     async fn get_followers(
         &self,
         user_id: i32,
-        page: i32,
+        cursor: &str,
         limit: i32,
         current_user_id: i32,
-    ) -> Result<Vec<User>, SqlxError>;
+    ) -> Result<Vec<(User, DateTime<Utc>)>, SqlxError>;
     async fn follow_user(&self, user_id: i32, follower_id: i32) -> Result<(), SqlxError>;
     async fn unfollow_user(&self, user_id: i32, follower_id: i32) -> Result<(), SqlxError>;
     async fn search_users(
@@ -280,11 +282,17 @@ impl<D: UserDb> UserService for Controller<D> {
         let req = request.into_inner();
 
         if req.ids.is_empty() {
-            return Ok(Response::new(Users { users: vec![] }));
+            return Ok(Response::new(Users {
+                users: vec![],
+                next_cursor: String::new(),
+            }));
         }
 
         match self.db_client.get_users_by_ids(&req.ids).await {
-            Ok(users) => Ok(Response::new(Users { users })),
+            Ok(users) => Ok(Response::new(Users {
+                users,
+                next_cursor: String::new(),
+            })),
             Err(e) => {
                 tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/GetUsersByIds", error = %e, "getting users by ids failed");
                 Err(Status::internal("Internal server error."))
@@ -302,10 +310,20 @@ impl<D: UserDb> UserService for Controller<D> {
 
         match self
             .db_client
-            .get_following(req.user_id, req.page, req.limit, user_id)
+            .get_following(req.user_id, &req.cursor, req.limit, user_id)
             .await
         {
-            Ok(users) => Ok(Response::new(Users { users })),
+            Ok(mut rows) => {
+                let next_cursor = if rows.len() > req.limit as usize {
+                    let last = &rows[req.limit as usize - 1];
+                    pagination::encode_cursor(last.1, last.0.id)
+                } else {
+                    String::new()
+                };
+                rows.truncate(req.limit as usize);
+                let users: Vec<User> = rows.into_iter().map(|(u, _)| u).collect();
+                Ok(Response::new(Users { users, next_cursor }))
+            }
             Err(e) => {
                 tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/GetFollowing", error = %e, "getting users failed");
                 Err(Status::internal("Internal server error."))
@@ -323,10 +341,20 @@ impl<D: UserDb> UserService for Controller<D> {
 
         match self
             .db_client
-            .get_followers(req.user_id, req.page, req.limit, user_id)
+            .get_followers(req.user_id, &req.cursor, req.limit, user_id)
             .await
         {
-            Ok(users) => Ok(Response::new(Users { users })),
+            Ok(mut rows) => {
+                let next_cursor = if rows.len() > req.limit as usize {
+                    let last = &rows[req.limit as usize - 1];
+                    pagination::encode_cursor(last.1, last.0.id)
+                } else {
+                    String::new()
+                };
+                rows.truncate(req.limit as usize);
+                let users: Vec<User> = rows.into_iter().map(|(u, _)| u).collect();
+                Ok(Response::new(Users { users, next_cursor }))
+            }
             Err(e) => {
                 tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/GetFollowers", error = %e, "getting users failed");
                 Err(Status::internal("Internal server error."))
@@ -386,7 +414,10 @@ impl<D: UserDb> UserService for Controller<D> {
             .search_users(&req.query, req.limit, user_id)
             .await
         {
-            Ok(users) => Ok(Response::new(Users { users })),
+            Ok(users) => Ok(Response::new(Users {
+                users,
+                next_cursor: String::new(),
+            })),
             Err(e) => {
                 tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/SearchUsers", error = %e, "searching users failed");
                 Err(Status::internal("Internal server error."))

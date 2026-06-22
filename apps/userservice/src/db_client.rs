@@ -1,7 +1,8 @@
 use crate::controller::{UpdateUserFields, UserDb};
+use crate::pagination;
 use crate::thoughts::User;
 use async_trait::async_trait;
-use sqlx::types::chrono::{DateTime, Utc};
+use chrono::{DateTime, Utc};
 use sqlx::{Error as SqlxError, PgPool, Row};
 
 #[derive(Debug, Clone)]
@@ -234,13 +235,16 @@ impl UserDb for DbClient {
     async fn get_following(
         &self,
         user_id: i32,
-        page: i32,
+        cursor: &str,
         limit: i32,
         current_user_id: i32,
-    ) -> Result<Vec<User>, SqlxError> {
-        let offset = page * limit;
+    ) -> Result<Vec<(User, DateTime<Utc>)>, SqlxError> {
+        let cur = pagination::decode_cursor(cursor);
+        let cur_ts: Option<DateTime<Utc>> = cur.as_ref().map(|c| c.created);
+        let cur_id: Option<i32> = cur.as_ref().map(|c| c.id);
         let rows = sqlx::query(
-            r#"SELECT users.id, users.name, users.username, users.email, users.bio, users.profile_photo_key, users.cover_photo_key,
+            r#"SELECT followers.created AS cursor_ts,
+                users.id, users.name, users.username, users.email, users.bio, users.profile_photo_key, users.cover_photo_key,
                 (SELECT count(*)::int FROM posts WHERE user_id = users.id) AS posts,
                 (SELECT count(*)::int FROM likes WHERE user_id = users.id) AS likes,
                 (SELECT count(*)::int FROM followers WHERE follower_id = users.id) AS following,
@@ -250,38 +254,46 @@ impl UserDb for DbClient {
                 FROM users
                 INNER JOIN followers ON followers.user_id = users.id
                 WHERE followers.follower_id = $2
+                AND ($3::timestamptz IS NULL OR (followers.created, users.id) < ($3::timestamptz, $4::int))
                 ORDER BY followers.created DESC
-                LIMIT $3 OFFSET $4"#
+                LIMIT $5"#
         )
         .bind(current_user_id)
         .bind(user_id)
-        .bind(limit as i64)
-        .bind(offset as i64)
+        .bind(cur_ts)
+        .bind(cur_id)
+        .bind(limit as i64 + 1)
         .fetch_all(&self.pool)
         .await?;
 
         Ok(rows
             .into_iter()
-            .map(|r| User {
-                id: r.get("id"),
-                name: r.get("name"),
-                username: r.get("username"),
-                email: r.get("email"),
-                bio: r.get::<'_, Option<String>, _>("bio").unwrap_or_default(),
-                posts: r.get::<'_, Option<i32>, _>("posts").unwrap_or(0),
-                likes: r.get::<'_, Option<i32>, _>("likes").unwrap_or(0),
-                following: r.get::<'_, Option<i32>, _>("following").unwrap_or(0),
-                followers: r.get::<'_, Option<i32>, _>("followers").unwrap_or(0),
-                followed: r.get::<'_, Option<bool>, _>("followed").unwrap_or(false),
-                created: r
-                    .get::<'_, Option<String>, _>("created")
-                    .unwrap_or_default(),
-                profile_photo_key: r
-                    .get::<'_, Option<String>, _>("profile_photo_key")
-                    .unwrap_or_default(),
-                cover_photo_key: r
-                    .get::<'_, Option<String>, _>("cover_photo_key")
-                    .unwrap_or_default(),
+            .map(|r| {
+                let cursor_ts = r
+                    .get::<'_, Option<DateTime<Utc>>, _>("cursor_ts")
+                    .unwrap_or_default();
+                let user = User {
+                    id: r.get("id"),
+                    name: r.get("name"),
+                    username: r.get("username"),
+                    email: r.get("email"),
+                    bio: r.get::<'_, Option<String>, _>("bio").unwrap_or_default(),
+                    posts: r.get::<'_, Option<i32>, _>("posts").unwrap_or(0),
+                    likes: r.get::<'_, Option<i32>, _>("likes").unwrap_or(0),
+                    following: r.get::<'_, Option<i32>, _>("following").unwrap_or(0),
+                    followers: r.get::<'_, Option<i32>, _>("followers").unwrap_or(0),
+                    followed: r.get::<'_, Option<bool>, _>("followed").unwrap_or(false),
+                    created: r
+                        .get::<'_, Option<String>, _>("created")
+                        .unwrap_or_default(),
+                    profile_photo_key: r
+                        .get::<'_, Option<String>, _>("profile_photo_key")
+                        .unwrap_or_default(),
+                    cover_photo_key: r
+                        .get::<'_, Option<String>, _>("cover_photo_key")
+                        .unwrap_or_default(),
+                };
+                (user, cursor_ts)
             })
             .collect())
     }
@@ -289,13 +301,16 @@ impl UserDb for DbClient {
     async fn get_followers(
         &self,
         user_id: i32,
-        page: i32,
+        cursor: &str,
         limit: i32,
         current_user_id: i32,
-    ) -> Result<Vec<User>, SqlxError> {
-        let offset = page * limit;
+    ) -> Result<Vec<(User, DateTime<Utc>)>, SqlxError> {
+        let cur = pagination::decode_cursor(cursor);
+        let cur_ts: Option<DateTime<Utc>> = cur.as_ref().map(|c| c.created);
+        let cur_id: Option<i32> = cur.as_ref().map(|c| c.id);
         let rows = sqlx::query(
-            r#"SELECT users.id, users.name, users.username, users.email, users.bio, users.profile_photo_key, users.cover_photo_key,
+            r#"SELECT followers.created AS cursor_ts,
+                users.id, users.name, users.username, users.email, users.bio, users.profile_photo_key, users.cover_photo_key,
                 (SELECT count(*)::int FROM posts WHERE user_id = users.id) AS posts,
                 (SELECT count(*)::int FROM likes WHERE user_id = users.id) AS likes,
                 (SELECT count(*)::int FROM followers WHERE follower_id = users.id) AS following,
@@ -305,38 +320,46 @@ impl UserDb for DbClient {
                 FROM users
                 INNER JOIN followers ON followers.follower_id = users.id
                 WHERE followers.user_id = $2
+                AND ($3::timestamptz IS NULL OR (followers.created, users.id) < ($3::timestamptz, $4::int))
                 ORDER BY followers.created DESC
-                LIMIT $3 OFFSET $4"#
+                LIMIT $5"#
         )
         .bind(current_user_id)
         .bind(user_id)
-        .bind(limit as i64)
-        .bind(offset as i64)
+        .bind(cur_ts)
+        .bind(cur_id)
+        .bind(limit as i64 + 1)
         .fetch_all(&self.pool)
         .await?;
 
         Ok(rows
             .into_iter()
-            .map(|r| User {
-                id: r.get("id"),
-                name: r.get("name"),
-                username: r.get("username"),
-                email: r.get("email"),
-                bio: r.get::<'_, Option<String>, _>("bio").unwrap_or_default(),
-                posts: r.get::<'_, Option<i32>, _>("posts").unwrap_or(0),
-                likes: r.get::<'_, Option<i32>, _>("likes").unwrap_or(0),
-                following: r.get::<'_, Option<i32>, _>("following").unwrap_or(0),
-                followers: r.get::<'_, Option<i32>, _>("followers").unwrap_or(0),
-                followed: r.get::<'_, Option<bool>, _>("followed").unwrap_or(false),
-                created: r
-                    .get::<'_, Option<String>, _>("created")
-                    .unwrap_or_default(),
-                profile_photo_key: r
-                    .get::<'_, Option<String>, _>("profile_photo_key")
-                    .unwrap_or_default(),
-                cover_photo_key: r
-                    .get::<'_, Option<String>, _>("cover_photo_key")
-                    .unwrap_or_default(),
+            .map(|r| {
+                let cursor_ts = r
+                    .get::<'_, Option<DateTime<Utc>>, _>("cursor_ts")
+                    .unwrap_or_default();
+                let user = User {
+                    id: r.get("id"),
+                    name: r.get("name"),
+                    username: r.get("username"),
+                    email: r.get("email"),
+                    bio: r.get::<'_, Option<String>, _>("bio").unwrap_or_default(),
+                    posts: r.get::<'_, Option<i32>, _>("posts").unwrap_or(0),
+                    likes: r.get::<'_, Option<i32>, _>("likes").unwrap_or(0),
+                    following: r.get::<'_, Option<i32>, _>("following").unwrap_or(0),
+                    followers: r.get::<'_, Option<i32>, _>("followers").unwrap_or(0),
+                    followed: r.get::<'_, Option<bool>, _>("followed").unwrap_or(false),
+                    created: r
+                        .get::<'_, Option<String>, _>("created")
+                        .unwrap_or_default(),
+                    profile_photo_key: r
+                        .get::<'_, Option<String>, _>("profile_photo_key")
+                        .unwrap_or_default(),
+                    cover_photo_key: r
+                        .get::<'_, Option<String>, _>("cover_photo_key")
+                        .unwrap_or_default(),
+                };
+                (user, cursor_ts)
             })
             .collect())
     }

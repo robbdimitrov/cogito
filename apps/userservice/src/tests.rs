@@ -2,6 +2,7 @@ use super::controller::{Controller, UpdateUserFields, UserDb};
 use crate::thoughts::user_service_server::UserService;
 use crate::thoughts::{CreateUserRequest, User, UserRequest};
 use async_trait::async_trait;
+use chrono::{DateTime, Utc};
 use sqlx::Error as SqlxError;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -112,20 +113,20 @@ impl UserDb for Arc<MockDb> {
     async fn get_following(
         &self,
         _user_id: i32,
-        _page: i32,
+        _cursor: &str,
         _limit: i32,
         _current_user_id: i32,
-    ) -> Result<Vec<User>, SqlxError> {
+    ) -> Result<Vec<(User, DateTime<Utc>)>, SqlxError> {
         Ok(vec![])
     }
 
     async fn get_followers(
         &self,
         _user_id: i32,
-        _page: i32,
+        _cursor: &str,
         _limit: i32,
         _current_user_id: i32,
-    ) -> Result<Vec<User>, SqlxError> {
+    ) -> Result<Vec<(User, DateTime<Utc>)>, SqlxError> {
         Ok(vec![])
     }
 

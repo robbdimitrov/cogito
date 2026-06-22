@@ -3,6 +3,7 @@ pub mod crypto;
 pub mod db_client;
 pub mod internal_auth;
 pub mod logging;
+pub mod pagination;
 #[allow(clippy::all)]
 #[rustfmt::skip]
 pub mod thoughts;
