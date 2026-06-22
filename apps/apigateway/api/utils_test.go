@@ -60,25 +60,23 @@ func TestGetIntQuery(t *testing.T) {
 	}
 }
 
-func TestGetPageAndLimit(t *testing.T) {
+func TestGetCursorAndLimit(t *testing.T) {
 	tests := []struct {
 		query       string
-		page        int
+		cursor      string
 		limit       int
 		expectError bool
 	}{
-		{"/", 0, 20, false},
-		{"/?page=2&limit=50", 2, 50, false},
-		{"/?page=-1", 0, 0, true},
-		{"/?limit=0", 0, 0, true},
-		{"/?limit=101", 0, 0, true},
-		{"/?page=abc", 0, 0, true},
-		{"/?limit=abc", 0, 0, true},
+		{"/", "", 20, false},
+		{"/?cursor=abc&limit=50", "abc", 50, false},
+		{"/?limit=0", "", 0, true},
+		{"/?limit=101", "", 0, true},
+		{"/?limit=abc", "", 0, true},
 	}
 
 	for _, tt := range tests {
 		req := httptest.NewRequest(http.MethodGet, tt.query, nil)
-		page, limit, err := getPageAndLimit(req)
+		cursor, limit, err := getCursorAndLimit(req)
 		if tt.expectError {
 			if err == nil {
 				t.Errorf("expected error for query %s, got nil", tt.query)
@@ -87,8 +85,8 @@ func TestGetPageAndLimit(t *testing.T) {
 			if err != nil {
 				t.Errorf("unexpected error for query %s: %v", tt.query, err)
 			}
-			if page != tt.page || limit != tt.limit {
-				t.Errorf("for query %s expected %d, %d got %d, %d", tt.query, tt.page, tt.limit, page, limit)
+			if cursor != tt.cursor || limit != tt.limit {
+				t.Errorf("for query %s expected (%q, %d) got (%q, %d)", tt.query, tt.cursor, tt.limit, cursor, limit)
 			}
 		}
 	}

@@ -211,15 +211,15 @@ func (pc *postController) getFeed(w http.ResponseWriter, r *http.Request) {
 	}
 	defer cancel()
 
-	page, limit, err := getPageAndLimit(r)
+	cursor, limit, err := getCursorAndLimit(r)
 	if err != nil {
 		grpcError(w, err)
 		return
 	}
 
 	req := pb.GetFeedRequest{
-		Page:  int32(page),
-		Limit: int32(limit),
+		Cursor: cursor,
+		Limit:  int32(limit),
 	}
 
 	res, err := client.GetFeed(ctx, &req)
@@ -229,7 +229,7 @@ func (pc *postController) getFeed(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonResponse(w, 200, map[string][]post{"items": pc.buildPosts(ctx, res.Posts)})
+	jsonResponse(w, 200, map[string]any{"items": pc.buildPosts(ctx, res.Posts), "nextCursor": res.NextCursor})
 }
 
 func (pc *postController) getPosts(w http.ResponseWriter, r *http.Request) {
@@ -249,7 +249,7 @@ func (pc *postController) getPosts(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, http.StatusBadRequest, "Invalid user ID")
 		return
 	}
-	page, limit, err := getPageAndLimit(r)
+	cursor, limit, err := getCursorAndLimit(r)
 	if err != nil {
 		grpcError(w, err)
 		return
@@ -257,7 +257,7 @@ func (pc *postController) getPosts(w http.ResponseWriter, r *http.Request) {
 
 	req := pb.GetPostsRequest{
 		UserId: int32(userID),
-		Page:   int32(page),
+		Cursor: cursor,
 		Limit:  int32(limit),
 	}
 
@@ -268,7 +268,7 @@ func (pc *postController) getPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonResponse(w, 200, map[string][]post{"items": pc.buildPosts(ctx, res.Posts)})
+	jsonResponse(w, 200, map[string]any{"items": pc.buildPosts(ctx, res.Posts), "nextCursor": res.NextCursor})
 }
 
 func (pc *postController) getLikedPosts(w http.ResponseWriter, r *http.Request) {
@@ -288,7 +288,7 @@ func (pc *postController) getLikedPosts(w http.ResponseWriter, r *http.Request) 
 		jsonError(w, http.StatusBadRequest, "Invalid user ID")
 		return
 	}
-	page, limit, err := getPageAndLimit(r)
+	cursor, limit, err := getCursorAndLimit(r)
 	if err != nil {
 		grpcError(w, err)
 		return
@@ -296,7 +296,7 @@ func (pc *postController) getLikedPosts(w http.ResponseWriter, r *http.Request) 
 
 	req := pb.GetPostsRequest{
 		UserId: int32(userID),
-		Page:   int32(page),
+		Cursor: cursor,
 		Limit:  int32(limit),
 	}
 
@@ -307,7 +307,7 @@ func (pc *postController) getLikedPosts(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	jsonResponse(w, 200, map[string][]post{"items": pc.buildPosts(ctx, res.Posts)})
+	jsonResponse(w, 200, map[string]any{"items": pc.buildPosts(ctx, res.Posts), "nextCursor": res.NextCursor})
 }
 
 func (pc *postController) getHashtagPosts(w http.ResponseWriter, r *http.Request) {
@@ -322,16 +322,16 @@ func (pc *postController) getHashtagPosts(w http.ResponseWriter, r *http.Request
 	}
 	defer cancel()
 
-	page, limit, err := getPageAndLimit(r)
+	cursor, limit, err := getCursorAndLimit(r)
 	if err != nil {
 		grpcError(w, err)
 		return
 	}
 
 	req := pb.GetHashtagPostsRequest{
-		Tag:   r.PathValue("tag"),
-		Page:  int32(page),
-		Limit: int32(limit),
+		Tag:    r.PathValue("tag"),
+		Cursor: cursor,
+		Limit:  int32(limit),
 	}
 
 	res, err := client.GetHashtagPosts(ctx, &req)
@@ -341,7 +341,7 @@ func (pc *postController) getHashtagPosts(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	jsonResponse(w, 200, map[string][]post{"items": pc.buildPosts(ctx, res.Posts)})
+	jsonResponse(w, 200, map[string]any{"items": pc.buildPosts(ctx, res.Posts), "nextCursor": res.NextCursor})
 }
 
 func (pc *postController) getPost(w http.ResponseWriter, r *http.Request) {
@@ -551,7 +551,7 @@ func (pc *postController) getReplies(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, http.StatusBadRequest, "Invalid post ID")
 		return
 	}
-	page, limit, err := getPageAndLimit(r)
+	cursor, limit, err := getCursorAndLimit(r)
 	if err != nil {
 		grpcError(w, err)
 		return
@@ -559,7 +559,7 @@ func (pc *postController) getReplies(w http.ResponseWriter, r *http.Request) {
 
 	req := pb.GetRepliesRequest{
 		PostId: int32(postID),
-		Page:   int32(page),
+		Cursor: cursor,
 		Limit:  int32(limit),
 	}
 
@@ -570,7 +570,7 @@ func (pc *postController) getReplies(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	jsonResponse(w, 200, map[string][]post{"items": pc.buildPosts(ctx, res.Posts)})
+	jsonResponse(w, 200, map[string]any{"items": pc.buildPosts(ctx, res.Posts), "nextCursor": res.NextCursor})
 }
 
 func (pc *postController) searchHashtags(w http.ResponseWriter, r *http.Request) {
@@ -609,7 +609,7 @@ func (pc *postController) searchHashtags(w http.ResponseWriter, r *http.Request)
 		for _, h := range res.Hashtags {
 			tags = append(tags, mapHashtag(h))
 		}
-		jsonResponse(w, http.StatusOK, map[string]any{"items": tags, "hasMore": res.HasMore})
+		jsonResponse(w, http.StatusOK, map[string]any{"items": tags, "nextCursor": res.NextCursor})
 		return
 	}
 
@@ -627,5 +627,5 @@ func (pc *postController) searchHashtags(w http.ResponseWriter, r *http.Request)
 	for _, h := range res.Hashtags {
 		tags = append(tags, mapHashtag(h))
 	}
-	jsonResponse(w, http.StatusOK, map[string]any{"items": tags, "hasMore": res.HasMore})
+	jsonResponse(w, http.StatusOK, map[string]any{"items": tags, "nextCursor": ""})
 }

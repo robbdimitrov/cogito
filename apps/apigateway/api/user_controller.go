@@ -303,7 +303,7 @@ func (s *userController) getFollowing(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, http.StatusBadRequest, "Invalid user ID")
 		return
 	}
-	page, limit, err := getPageAndLimit(r)
+	cursor, limit, err := getCursorAndLimit(r)
 	if err != nil {
 		grpcError(w, err)
 		return
@@ -311,7 +311,7 @@ func (s *userController) getFollowing(w http.ResponseWriter, r *http.Request) {
 
 	req := pb.GetUsersRequest{
 		UserId: int32(userID),
-		Page:   int32(page),
+		Cursor: cursor,
 		Limit:  int32(limit),
 	}
 
@@ -327,7 +327,7 @@ func (s *userController) getFollowing(w http.ResponseWriter, r *http.Request) {
 		users[i] = mapUser(v)
 	}
 
-	jsonResponse(w, 200, map[string][]user{"items": users})
+	jsonResponse(w, 200, map[string]any{"items": users, "nextCursor": res.NextCursor})
 }
 
 func (s *userController) searchUsers(w http.ResponseWriter, r *http.Request) {
@@ -349,7 +349,7 @@ func (s *userController) searchUsers(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, http.StatusBadRequest, "Query exceeds maximum length")
 		return
 	}
-	page, limit, err := getPageAndLimit(r)
+	cursor, limit, err := getCursorAndLimit(r)
 	if err != nil {
 		grpcError(w, err)
 		return
@@ -360,7 +360,7 @@ func (s *userController) searchUsers(w http.ResponseWriter, r *http.Request) {
 		res, err := s.searchClient.SearchUsers(searchCtx, &pb.SearchRequest{
 			Query:  query,
 			Limit:  int32(limit),
-			Offset: int32(page * limit),
+			Cursor: cursor,
 		})
 		if err != nil {
 			slog.Warn("searching users failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
@@ -371,7 +371,7 @@ func (s *userController) searchUsers(w http.ResponseWriter, r *http.Request) {
 		for i, v := range res.Users {
 			users[i] = mapUser(v)
 		}
-		jsonResponse(w, http.StatusOK, map[string]any{"items": users, "hasMore": res.HasMore})
+		jsonResponse(w, http.StatusOK, map[string]any{"items": users, "nextCursor": res.NextCursor})
 		return
 	}
 
@@ -390,7 +390,7 @@ func (s *userController) searchUsers(w http.ResponseWriter, r *http.Request) {
 		users[i] = mapUser(v)
 	}
 
-	jsonResponse(w, http.StatusOK, map[string]any{"items": users, "hasMore": res.HasMore})
+	jsonResponse(w, http.StatusOK, map[string]any{"items": users, "nextCursor": ""})
 }
 
 func (s *userController) getFollowers(w http.ResponseWriter, r *http.Request) {
@@ -410,7 +410,7 @@ func (s *userController) getFollowers(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, http.StatusBadRequest, "Invalid user ID")
 		return
 	}
-	page, limit, err := getPageAndLimit(r)
+	cursor, limit, err := getCursorAndLimit(r)
 	if err != nil {
 		grpcError(w, err)
 		return
@@ -418,7 +418,7 @@ func (s *userController) getFollowers(w http.ResponseWriter, r *http.Request) {
 
 	req := pb.GetUsersRequest{
 		UserId: int32(userID),
-		Page:   int32(page),
+		Cursor: cursor,
 		Limit:  int32(limit),
 	}
 
@@ -434,7 +434,7 @@ func (s *userController) getFollowers(w http.ResponseWriter, r *http.Request) {
 		users[i] = mapUser(v)
 	}
 
-	jsonResponse(w, 200, map[string][]user{"items": users})
+	jsonResponse(w, 200, map[string]any{"items": users, "nextCursor": res.NextCursor})
 }
 
 func (s *userController) followUser(w http.ResponseWriter, r *http.Request) {

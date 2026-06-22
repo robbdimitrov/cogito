@@ -71,20 +71,14 @@ func getIntQuery(r *http.Request, key string, defaultValue int) (int, error) {
 	return parsed, nil
 }
 
-func getPageAndLimit(r *http.Request) (int, int, error) {
-	page, err := getIntQuery(r, "page", 0)
+func getCursorAndLimit(r *http.Request) (cursor string, limit int, err error) {
+	cursor = r.URL.Query().Get("cursor")
+	limit, err = getIntQuery(r, "limit", 20)
 	if err != nil {
-		return 0, 0, err
-	}
-	limit, err := getIntQuery(r, "limit", 20)
-	if err != nil {
-		return 0, 0, err
-	}
-	if page < 0 {
-		return 0, 0, status.Error(codes.InvalidArgument, "Page must be zero or greater")
+		return
 	}
 	if limit < 1 || limit > 100 {
-		return 0, 0, status.Error(codes.InvalidArgument, "Limit must be between 1 and 100")
+		err = status.Error(codes.InvalidArgument, "Limit must be between 1 and 100")
 	}
-	return page, limit, nil
+	return
 }

@@ -36,7 +36,7 @@ func (sc *searchController) search(w http.ResponseWriter, r *http.Request) {
 	}
 
 	searchType := r.URL.Query().Get("type")
-	page, limit, err := getPageAndLimit(r)
+	cursor, limit, err := getCursorAndLimit(r)
 	if err != nil {
 		grpcError(w, err)
 		return
@@ -49,7 +49,7 @@ func (sc *searchController) search(w http.ResponseWriter, r *http.Request) {
 	req := &pb.SearchRequest{
 		Query:  q,
 		Limit:  int32(limit),
-		Offset: int32(page * limit),
+		Cursor: cursor,
 	}
 
 	switch searchType {
@@ -64,7 +64,7 @@ func (sc *searchController) search(w http.ResponseWriter, r *http.Request) {
 		for _, u := range res.Users {
 			users = append(users, mapUser(u))
 		}
-		jsonResponse(w, http.StatusOK, map[string]any{"items": users, "hasMore": res.HasMore})
+		jsonResponse(w, http.StatusOK, map[string]any{"items": users, "nextCursor": res.NextCursor})
 
 	case "hashtags":
 		res, err := sc.client.SearchHashtags(ctx, req)
@@ -77,7 +77,7 @@ func (sc *searchController) search(w http.ResponseWriter, r *http.Request) {
 		for _, h := range res.Hashtags {
 			tags = append(tags, mapHashtag(h))
 		}
-		jsonResponse(w, http.StatusOK, map[string]any{"items": tags, "hasMore": res.HasMore})
+		jsonResponse(w, http.StatusOK, map[string]any{"items": tags, "nextCursor": res.NextCursor})
 
 	case "posts":
 		res, err := sc.client.SearchPosts(ctx, req)
@@ -90,7 +90,7 @@ func (sc *searchController) search(w http.ResponseWriter, r *http.Request) {
 		for _, p := range res.Posts {
 			posts = append(posts, mapPost(p))
 		}
-		jsonResponse(w, http.StatusOK, map[string]any{"items": posts, "hasMore": res.HasMore})
+		jsonResponse(w, http.StatusOK, map[string]any{"items": posts, "nextCursor": res.NextCursor})
 
 	default:
 		jsonError(w, http.StatusBadRequest, "Invalid type parameter")
