@@ -10,10 +10,10 @@ import {
 import type { Post } from "$lib/shared/types";
 
 export const load = async ({ fetch, params }) => {
-  let posts: Post[] = [];
+  let posts = { items: [] as Post[], nextCursor: null as string | null };
   try {
-    const feed = await getHashtagPosts(fetch, params.tag, 0);
-    posts = feed?.items ?? [];
+    const feed = await getHashtagPosts(fetch, params.tag, "");
+    posts = { items: feed?.items ?? [], nextCursor: feed?.nextCursor ?? null };
   } catch (e) {
     // ignore
   }

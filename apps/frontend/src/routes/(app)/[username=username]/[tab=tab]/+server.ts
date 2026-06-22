@@ -9,24 +9,24 @@ import { apiClient } from "$lib/server/api/client";
 
 export const GET = async (event) => {
   const { params, url } = event;
-  const page = Number(url.searchParams.get("page") ?? "0");
+  const cursor = url.searchParams.get("cursor") ?? "";
   const tab = params.tab;
   const cleanUsername = decodeURIComponent(params.username).replace(/^@/, "");
 
   try {
     const user = await getUser(apiClient(event), cleanUsername);
     if (tab === "likes") {
-      const feed = await getLikedPosts(apiClient(event), user.id, page);
-      return json(feed?.items ?? []);
+      const feed = await getLikedPosts(apiClient(event), user.id, cursor);
+      return json(feed ?? { items: [], nextCursor: null });
     } else if (tab === "followers") {
-      const userPage = await getFollowers(apiClient(event), user.id, page);
-      return json(userPage?.items ?? []);
+      const userPage = await getFollowers(apiClient(event), user.id, cursor);
+      return json(userPage ?? { items: [], nextCursor: null });
     } else if (tab === "following") {
-      const userPage = await getFollowing(apiClient(event), user.id, page);
-      return json(userPage?.items ?? []);
+      const userPage = await getFollowing(apiClient(event), user.id, cursor);
+      return json(userPage ?? { items: [], nextCursor: null });
     }
-    return json([]);
+    return json({ items: [], nextCursor: null });
   } catch (e) {
-    return json([]);
+    return json({ items: [], nextCursor: null });
   }
 };

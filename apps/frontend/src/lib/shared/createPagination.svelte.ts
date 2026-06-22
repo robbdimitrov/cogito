@@ -1,22 +1,28 @@
 export function createPagination<T>(
-  initial: T[],
-  fetchPage: (page: number) => Promise<T[]>,
+  getInitial: () => { items: T[]; nextCursor: string | null },
+  fetchPage: (
+    cursor: string,
+  ) => Promise<{ items: T[]; nextCursor: string | null }>,
 ) {
-  let items = $state(initial);
-  let page = $state(0);
+  const initial = $derived(getInitial());
+  let extra = $state<T[]>([]);
+  let cursor = $state<string | null>(null);
   let loading = $state(false);
-  let done = $state(initial.length === 0);
+
+  $effect(() => {
+    extra = [];
+    cursor = initial.nextCursor;
+  });
+
+  const items = $derived([...initial.items, ...extra]);
+  const done = $derived(!cursor);
 
   async function more() {
-    if (loading || done) return;
+    if (loading || done || !cursor) return;
     loading = true;
-    const next = await fetchPage(page + 1);
-    page += 1;
-    if (next.length) {
-      items = [...items, ...next];
-    } else {
-      done = true;
-    }
+    const next = await fetchPage(cursor);
+    extra = [...extra, ...next.items];
+    cursor = next.nextCursor;
     loading = false;
   }
 

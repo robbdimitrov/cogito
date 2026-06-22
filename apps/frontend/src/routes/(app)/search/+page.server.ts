@@ -15,9 +15,15 @@ export const load: PageServerLoad = async (event) => {
 
   if (q) {
     try {
-      const typeMap: Record<string, string> = { posts: "posts", users: "users", hashtags: "hashtags" };
+      const typeMap: Record<string, string> = {
+        posts: "posts",
+        users: "users",
+        hashtags: "hashtags",
+      };
       const type = typeMap[tab] ?? "posts";
-      const res = await api(`/search?q=${encodeURIComponent(q)}&type=${type}&limit=20`);
+      const res = await api(
+        `/search?q=${encodeURIComponent(q)}&type=${type}&limit=20`,
+      );
       if (res.ok) {
         const data = await res.json();
         if (tab === "posts") posts = data.items ?? [];

@@ -14,13 +14,15 @@
   let tab = $derived(data.tab);
   let isPosts = $derived(data.type === "posts");
 
-  const pagination = createPagination<any>(data.items, async (pageNum) => {
-    const res = await fetch(`/@${user.username}/${tab}?page=${pageNum}`);
-    if (res.ok) {
-      return await res.json();
-    }
-    return [];
-  });
+  const pagination = createPagination<any>(
+    () => ({ items: data.items, nextCursor: data.nextCursor }),
+    async (cursor) => {
+      const res = await fetch(
+        `/@${user.username}/${tab}?cursor=${encodeURIComponent(cursor)}`,
+      );
+      return res.ok ? res.json() : { items: [], nextCursor: null };
+    },
+  );
 
   let quotingPost = $state<Post | null>(null);
 

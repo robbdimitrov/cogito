@@ -10,13 +10,13 @@
   let { data } = $props();
   let user = $derived(data.currentUser);
 
-  const pagination = createPagination<Post>(data.feed, async (pageNum) => {
-    const res = await fetch(`/?page=${pageNum}`);
-    if (res.ok) {
-      return await res.json();
-    }
-    return [];
-  });
+  const pagination = createPagination<Post>(
+    () => data.feed,
+    async (cursor) => {
+      const res = await fetch(`/?cursor=${encodeURIComponent(cursor)}`);
+      return res.ok ? res.json() : { items: [], nextCursor: null };
+    },
+  );
 
   let quotingPost = $state<Post | null>(null);
 

@@ -9,13 +9,15 @@
   let tag = $derived(data.tag);
   let currentUser = $derived(data.currentUser);
 
-  const pagination = createPagination<Post>(data.posts, async (pageNum) => {
-    const res = await fetch(`/hashtags/${tag}?page=${pageNum}`);
-    if (res.ok) {
-      return await res.json();
-    }
-    return [];
-  });
+  const pagination = createPagination<Post>(
+    () => data.posts,
+    async (cursor) => {
+      const res = await fetch(
+        `/hashtags/${tag}?cursor=${encodeURIComponent(cursor)}`,
+      );
+      return res.ok ? res.json() : { items: [], nextCursor: null };
+    },
+  );
 
   let quotingPost = $state<Post | null>(null);
 

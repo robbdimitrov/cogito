@@ -8,8 +8,9 @@ interface Identifier {
   id: number;
 }
 
-interface PostPage {
+export interface PostPage {
   items: Post[];
+  nextCursor: string | null;
 }
 
 export interface Hashtag {
@@ -31,40 +32,40 @@ export interface CreatePostInput {
 
 export async function getFeed(
   api: ApiClient,
-  page: number,
+  cursor = "",
   limit = DEFAULT_PAGE_SIZE,
 ): Promise<PostPage> {
-  return getPage(api, "/posts/feed", page, limit);
+  return getCursorPage(api, "/posts/feed", cursor, limit);
 }
 
 export async function getUserPosts(
   api: ApiClient,
   userID: string | number,
-  page: number,
+  cursor = "",
   limit = DEFAULT_PAGE_SIZE,
 ): Promise<PostPage> {
-  return getPage(api, `/users/${userID}/posts`, page, limit);
+  return getCursorPage(api, `/users/${userID}/posts`, cursor, limit);
 }
 
 export async function getLikedPosts(
   api: ApiClient,
   userID: string | number,
-  page: number,
+  cursor = "",
   limit = DEFAULT_PAGE_SIZE,
 ): Promise<PostPage> {
-  return getPage(api, `/users/${userID}/likes`, page, limit);
+  return getCursorPage(api, `/users/${userID}/likes`, cursor, limit);
 }
 
 export async function getHashtagPosts(
   api: ApiClient,
   tag: string,
-  page: number,
+  cursor = "",
   limit = DEFAULT_PAGE_SIZE,
 ): Promise<PostPage> {
-  return getPage(
+  return getCursorPage(
     api,
     `/hashtags/${encodeURIComponent(tag)}/posts`,
-    page,
+    cursor,
     limit,
   );
 }
@@ -81,10 +82,10 @@ export async function getPost(
 export async function getReplies(
   api: ApiClient,
   postID: string | number,
-  page: number,
+  cursor = "",
   limit = DEFAULT_PAGE_SIZE,
 ): Promise<PostPage> {
-  return getPage(api, `/posts/${postID}/replies`, page, limit);
+  return getCursorPage(api, `/posts/${postID}/replies`, cursor, limit);
 }
 
 export async function create(
@@ -148,19 +149,17 @@ export async function searchHashtags(
   return unwrapped ?? { items: [] };
 }
 
-async function getPage(
+async function getCursorPage(
   api: ApiClient,
   path: string,
-  page: number,
+  cursor: string,
   limit: number,
 ): Promise<PostPage> {
-  const query = new URLSearchParams({
-    page: String(page),
-    limit: String(limit),
-  });
+  const query = new URLSearchParams({ limit: String(limit) });
+  if (cursor) query.set("cursor", cursor);
   const res = await api(`${path}?${query}`);
   const unwrapped = await unwrap<PostPage>(res);
-  return unwrapped ?? { items: [] };
+  return unwrapped ?? { items: [], nextCursor: null };
 }
 
 async function postMutation(

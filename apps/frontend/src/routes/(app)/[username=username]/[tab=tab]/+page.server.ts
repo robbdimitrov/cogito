@@ -22,19 +22,39 @@ export const load = async (event) => {
 
   try {
     if (tab === "likes") {
-      const feed = await getLikedPosts(apiClient(event), profileUser.id, 0);
-      return { tab, items: feed?.items ?? [], type: "posts" };
+      const feed = await getLikedPosts(apiClient(event), profileUser.id, "");
+      return {
+        tab,
+        items: feed?.items ?? [],
+        nextCursor: feed?.nextCursor ?? null,
+        type: "posts",
+      };
     } else if (tab === "followers") {
-      const userPage = await getFollowers(apiClient(event), profileUser.id, 0);
-      return { tab, items: userPage?.items ?? [], type: "users" };
+      const userPage = await getFollowers(apiClient(event), profileUser.id, "");
+      return {
+        tab,
+        items: userPage?.items ?? [],
+        nextCursor: userPage?.nextCursor ?? null,
+        type: "users",
+      };
     } else if (tab === "following") {
-      const userPage = await getFollowing(apiClient(event), profileUser.id, 0);
-      return { tab, items: userPage?.items ?? [], type: "users" };
+      const userPage = await getFollowing(apiClient(event), profileUser.id, "");
+      return {
+        tab,
+        items: userPage?.items ?? [],
+        nextCursor: userPage?.nextCursor ?? null,
+        type: "users",
+      };
     } else {
       throw error(404, "Not found");
     }
   } catch (e) {
-    return { tab, items: [], type: tab === "likes" ? "posts" : "users" };
+    return {
+      tab,
+      items: [],
+      nextCursor: null,
+      type: tab === "likes" ? "posts" : "users",
+    };
   }
 };
 

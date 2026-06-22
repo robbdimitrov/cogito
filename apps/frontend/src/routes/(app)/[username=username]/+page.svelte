@@ -9,27 +9,21 @@
   let user = $derived(data.profileUser);
   let currentUser = $derived(data.currentUser);
 
-  const pagination = createPagination<Post>(data.posts, async (pageNum) => {
-    const res = await fetch(`/@${user.username}?page=${pageNum}`);
-    if (res.ok) {
-      return await res.json();
-    }
-    return [];
-  });
+  const pagination = createPagination<Post>(
+    () => data.posts,
+    async (cursor) => {
+      const res = await fetch(
+        `/@${user.username}?cursor=${encodeURIComponent(cursor)}`,
+      );
+      return res.ok ? res.json() : { items: [], nextCursor: null };
+    },
+  );
 
   let quotingPost = $state<Post | null>(null);
 
   function handleQuote(post: Post) {
     quotingPost = post;
   }
-
-  $effect(() => {
-    // Reset pagination when data.posts changes (i.e. navigation to another user)
-    // Svelte 5 won't automatically recreate `pagination` when `data.posts` changes.
-    // However, the `createPagination` takes initial array but we might need to recreate it.
-    // For simplicity, we assume full page reload on navigation if it's the same route template,
-    // or SvelteKit destroys and recreates the component.
-  });
 </script>
 
 <PostList

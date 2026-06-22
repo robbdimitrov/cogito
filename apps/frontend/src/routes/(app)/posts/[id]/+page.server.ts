@@ -15,12 +15,15 @@ export const load = async (event) => {
   const { params } = event;
   const [post, repliesData] = await Promise.all([
     getPost(apiClient(event), params.id).catch(() => null),
-    getReplies(apiClient(event), params.id, 0).catch(() => null),
+    getReplies(apiClient(event), params.id, "").catch(() => null),
   ]);
 
   return {
     post,
-    replies: repliesData?.items ?? [],
+    replies: {
+      items: repliesData?.items ?? [],
+      nextCursor: repliesData?.nextCursor ?? null,
+    },
   };
 };
 

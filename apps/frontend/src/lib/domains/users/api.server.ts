@@ -9,8 +9,9 @@ interface Identifier {
   id: number;
 }
 
-interface UserPage {
+export interface UserPage {
   items: User[];
+  nextCursor: string | null;
 }
 
 export interface UpdateUserInput {
@@ -84,32 +85,32 @@ export async function searchUsers(
   api: ApiClient,
   query: string,
   limit = DEFAULT_SEARCH_LIMIT,
-): Promise<UserPage> {
+): Promise<{ items: User[] }> {
   const params = new URLSearchParams({
     q: query,
     limit: String(limit),
   });
   const res = await api(`/users/search?${params}`);
-  const unwrapped = await unwrap<UserPage>(res);
+  const unwrapped = await unwrap<{ items: User[] }>(res);
   return unwrapped ?? { items: [] };
 }
 
 export async function getFollowing(
   api: ApiClient,
   userID: string | number,
-  page: number,
+  cursor = "",
   limit = DEFAULT_PAGE_SIZE,
 ): Promise<UserPage> {
-  return getUserPage(api, userID, "following", page, limit);
+  return getUserCursorPage(api, userID, "following", cursor, limit);
 }
 
 export async function getFollowers(
   api: ApiClient,
   userID: string | number,
-  page: number,
+  cursor = "",
   limit = DEFAULT_PAGE_SIZE,
 ): Promise<UserPage> {
-  return getUserPage(api, userID, "followers", page, limit);
+  return getUserCursorPage(api, userID, "followers", cursor, limit);
 }
 
 export async function follow(
@@ -132,18 +133,16 @@ export async function unfollow(
   await unwrap<null>(res);
 }
 
-async function getUserPage(
+async function getUserCursorPage(
   api: ApiClient,
   userID: string | number,
   relationship: "following" | "followers",
-  page: number,
+  cursor: string,
   limit: number,
 ): Promise<UserPage> {
-  const query = new URLSearchParams({
-    page: String(page),
-    limit: String(limit),
-  });
+  const query = new URLSearchParams({ limit: String(limit) });
+  if (cursor) query.set("cursor", cursor);
   const res = await api(`/users/${userID}/${relationship}?${query}`);
   const unwrapped = await unwrap<UserPage>(res);
-  return unwrapped ?? { items: [] };
+  return unwrapped ?? { items: [], nextCursor: null };
 }

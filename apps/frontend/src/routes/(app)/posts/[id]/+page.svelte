@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from "svelte";
   import {
     AlertTriangle,
     ArrowLeft,
@@ -20,12 +21,11 @@
 
   let { data } = $props();
   let user = $derived(data.currentUser);
-  let initialPost = $derived(data.post);
-  let replies = $state<Post[]>(data.replies);
+  const replies = $derived(data.replies.items);
 
   const toast = getToastContext();
 
-  let post = $state(initialPost);
+  let post = $state(untrack(() => data.post));
   let showDeleteModal = $state(false);
   let quotingPost = $state<Post | null>(null);
 
@@ -34,11 +34,7 @@
   let isReposting = $state(false);
 
   $effect(() => {
-    post = initialPost;
-  });
-
-  $effect(() => {
-    replies = data.replies;
+    post = data.post;
   });
 
   function formatRelativeTime(dateString: string) {

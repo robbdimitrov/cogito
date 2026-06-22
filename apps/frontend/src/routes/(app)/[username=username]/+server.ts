@@ -5,13 +5,13 @@ import { apiClient } from "$lib/server/api/client";
 
 export const GET = async (event) => {
   const { params, url } = event;
-  const page = Number(url.searchParams.get("page") ?? "0");
+  const cursor = url.searchParams.get("cursor") ?? "";
   const cleanUsername = decodeURIComponent(params.username).replace(/^@/, "");
   try {
     const user = await getUser(apiClient(event), cleanUsername);
-    const feed = await getUserPosts(apiClient(event), user.id, page);
-    return json(feed?.items ?? []);
+    const feed = await getUserPosts(apiClient(event), user.id, cursor);
+    return json(feed ?? { items: [], nextCursor: null });
   } catch (e) {
-    return json([]);
+    return json({ items: [], nextCursor: null });
   }
 };

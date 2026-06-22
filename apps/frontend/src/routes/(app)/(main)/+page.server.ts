@@ -12,8 +12,10 @@ import { uploadImage } from "$lib/domains/posts/uploads.server";
 import { apiClient } from "$lib/server/api/client";
 
 export const load = async (event) => {
-  const feed = await getFeed(apiClient(event), 0);
-  return { feed: feed?.items ?? [] };
+  const feed = await getFeed(apiClient(event), "");
+  return {
+    feed: { items: feed?.items ?? [], nextCursor: feed?.nextCursor ?? null },
+  };
 };
 
 export const actions = {

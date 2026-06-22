@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from "svelte";
   import { goto } from "$app/navigation";
   import PostList from "$lib/domains/posts/components/PostList.svelte";
   import QuoteComposeModal from "$lib/domains/posts/components/QuoteComposeModal.svelte";
@@ -8,7 +9,11 @@
 
   let q = $derived(data.q);
   let tab = $derived(data.tab);
-  let searchInput = $state(data.q);
+  let searchInput = $state(untrack(() => data.q));
+
+  $effect(() => {
+    searchInput = q;
+  });
 
   let quotingPost = $state<Post | null>(null);
 
@@ -69,9 +74,13 @@
         emptyMessage="No posts found."
       />
     {:else if q}
-      <p class="text-slate-500 dark:text-slate-400">No posts found for "{q}".</p>
+      <p class="text-slate-500 dark:text-slate-400">
+        No posts found for "{q}".
+      </p>
     {:else}
-      <p class="text-slate-500 dark:text-slate-400">Enter a search query to find posts.</p>
+      <p class="text-slate-500 dark:text-slate-400">
+        Enter a search query to find posts.
+      </p>
     {/if}
   {:else if tab === "users"}
     {#if data.users.length > 0}
@@ -82,7 +91,9 @@
             class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white/60 p-4 transition-colors hover:bg-white/80 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:bg-slate-900/80"
           >
             <div>
-              <div class="font-semibold text-slate-900 dark:text-white">{user.name}</div>
+              <div class="font-semibold text-slate-900 dark:text-white">
+                {user.name}
+              </div>
               <div class="text-sm text-slate-500">@{user.username}</div>
             </div>
           </a>
@@ -100,7 +111,10 @@
             class="flex items-center justify-between rounded-2xl border border-slate-200 bg-white/60 p-4 transition-colors hover:bg-white/80 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:bg-slate-900/80"
           >
             <span class="font-semibold text-primary">#{hashtag.name}</span>
-            <span class="text-sm text-slate-500">{hashtag.postCount} {hashtag.postCount === 1 ? 'post' : 'posts'}</span>
+            <span class="text-sm text-slate-500"
+              >{hashtag.postCount}
+              {hashtag.postCount === 1 ? "post" : "posts"}</span
+            >
           </a>
         {/each}
       </div>

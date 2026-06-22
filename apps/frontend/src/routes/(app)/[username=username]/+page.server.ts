@@ -14,10 +14,10 @@ import { apiClient } from "$lib/server/api/client";
 export const load = async (event) => {
   const { parent } = event;
   const { profileUser } = await parent();
-  let posts: Post[] = [];
+  let posts = { items: [] as Post[], nextCursor: null as string | null };
   try {
-    const feed = await getUserPosts(apiClient(event), profileUser.id, 0);
-    posts = feed?.items ?? [];
+    const feed = await getUserPosts(apiClient(event), profileUser.id, "");
+    posts = { items: feed?.items ?? [], nextCursor: feed?.nextCursor ?? null };
   } catch (e) {
     // Ignore
   }

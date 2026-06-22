@@ -2,11 +2,11 @@ import { json } from "@sveltejs/kit";
 import { getHashtagPosts } from "$lib/domains/posts/api.server";
 
 export const GET = async ({ fetch, params, url }) => {
-  const page = Number(url.searchParams.get("page") ?? "0");
+  const cursor = url.searchParams.get("cursor") ?? "";
   try {
-    const feed = await getHashtagPosts(fetch, params.tag, page);
-    return json(feed?.items ?? []);
+    const feed = await getHashtagPosts(fetch, params.tag, cursor);
+    return json(feed ?? { items: [], nextCursor: null });
   } catch (e) {
-    return json([]);
+    return json({ items: [], nextCursor: null });
   }
 };
