@@ -55,7 +55,7 @@
           result.push({
             type: "hashtag",
             tag: tagOrUserStr,
-            href: `/hashtags/${encodeURIComponent(tagOrUserStr.toLowerCase())}`,
+            href: `/search?q=%23${tagOrUserStr.toLowerCase()}`,
             id: `hashtag-${matchStart}`,
           });
         } else if (symbol === "@") {

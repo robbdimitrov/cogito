@@ -14,6 +14,9 @@
   let suggestions = $state<User[]>([]);
   let searchQuery = $state("");
   let showTypeahead = $state(false);
+  let hashtagSuggestions = $state<{ id: number; name: string; postCount: number }[]>([]);
+  let hashtagQuery = $state("");
+  let showHashtagTypeahead = $state(false);
   let imageBlob = $state<Blob | null>(null);
   let imagePreview = $state<string | null>(null);
   let uploadingImage = $state(false);
@@ -43,6 +46,25 @@
     return () => clearTimeout(delayDebounceFn);
   });
 
+  $effect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (hashtagQuery.length > 0) {
+        try {
+          const response = await fetch(`/api/hashtags/search?query=${encodeURIComponent(hashtagQuery)}&limit=5`);
+          const res = await response.json();
+          hashtagSuggestions = res.items || [];
+          showHashtagTypeahead = true;
+        } catch {
+          hashtagSuggestions = [];
+        }
+      } else {
+        hashtagSuggestions = [];
+        showHashtagTypeahead = false;
+      }
+    }, 200);
+    return () => clearTimeout(delayDebounceFn);
+  });
+
   function handleChange(e: Event) {
     const target = e.target as HTMLTextAreaElement;
     content = target.value;
@@ -53,9 +75,24 @@
     if (match) {
       searchQuery = match[1] || "";
       showTypeahead = true;
+      // Clear hashtag typeahead when mention is active
+      hashtagQuery = "";
+      showHashtagTypeahead = false;
     } else {
       searchQuery = "";
       showTypeahead = false;
+    }
+
+    const hashtagMatch = textBeforeCursor.match(/(?:^|\s)#([A-Za-z0-9_]*)$/);
+    if (hashtagMatch) {
+      hashtagQuery = hashtagMatch[1] || "";
+      showHashtagTypeahead = true;
+      // Clear mention typeahead when hashtag is active
+      searchQuery = "";
+      showTypeahead = false;
+    } else {
+      hashtagQuery = "";
+      showHashtagTypeahead = false;
     }
   }
 
@@ -77,6 +114,27 @@
 
     showTypeahead = false;
     searchQuery = "";
+    textareaRef?.focus();
+  }
+
+  function handleSelectHashtag(name: string) {
+    if (cursorPosition === null) return;
+    const textBeforeCursor = content.substring(0, cursorPosition);
+    const textAfterCursor = content.substring(cursorPosition);
+    const match = textBeforeCursor.match(/(?:^|\s)#([A-Za-z0-9_]*)$/);
+
+    if (match) {
+      const matchStart = textBeforeCursor.lastIndexOf("#" + match[1]);
+      content =
+        content.substring(0, matchStart) +
+        "#" +
+        name +
+        " " +
+        textAfterCursor;
+    }
+
+    showHashtagTypeahead = false;
+    hashtagQuery = "";
     textareaRef?.focus();
   }
 
@@ -124,6 +182,9 @@
             if (imagePreview) URL.revokeObjectURL(imagePreview);
             imagePreview = null;
             showTypeahead = false;
+            showHashtagTypeahead = false;
+            hashtagQuery = "";
+            hashtagSuggestions = [];
             await update();
           } else if (result.type === "failure") {
             toast.error((result.data as any)?.error || "Failed to post");
@@ -179,6 +240,28 @@
                       class="truncate text-xs text-slate-500 dark:text-slate-400"
                     >
                       @{u.username}
+                    </div>
+                  </div>
+                </button>
+              {/each}
+            </div>
+          {/if}
+          {#if showHashtagTypeahead && hashtagSuggestions.length > 0}
+            <div
+              class="absolute left-0 top-[105%] z-10 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white/95 shadow-2xl backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/95"
+            >
+              {#each hashtagSuggestions as h}
+                <button
+                  type="button"
+                  class="flex w-full items-center gap-3 border-b border-slate-100 px-4 py-3 text-left transition-colors last:border-0 hover:bg-slate-100 dark:border-slate-800/50 dark:hover:bg-slate-800/80"
+                  onclick={() => handleSelectHashtag(h.name)}
+                >
+                  <div class="overflow-hidden">
+                    <div class="truncate text-sm font-semibold text-slate-900 dark:text-white">
+                      #{h.name}
+                    </div>
+                    <div class="truncate text-xs text-slate-500 dark:text-slate-400">
+                      {h.postCount} {h.postCount === 1 ? 'post' : 'posts'}
                     </div>
                   </div>
                 </button>

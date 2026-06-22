@@ -9,6 +9,7 @@
     Home,
     LogOut,
     Moon,
+    Search,
     Settings,
     Sun,
     User as UserIcon,
@@ -54,6 +55,14 @@
       >
         <Home class="size-5 sm:size-6" aria-hidden="true" />
         <span class="hidden sm:inline">Home</span>
+      </a>
+      <a
+        href={resolve("/search")}
+        class="btn btn-ghost gap-2 text-base normal-case transition-transform duration-200 hover:scale-105 hover:bg-white/40 dark:hover:bg-white/10 sm:text-lg"
+        aria-current={page.url.pathname === "/search" ? "page" : undefined}
+      >
+        <Search class="size-5 sm:size-6" aria-hidden="true" />
+        <span class="hidden sm:inline">Search</span>
       </a>
     {/if}
   </div>
