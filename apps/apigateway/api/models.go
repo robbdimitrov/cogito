@@ -40,3 +40,9 @@ type session struct {
 	UserID  int32  `json:"userId"`
 	Created string `json:"created"`
 }
+
+type hashtag struct {
+	ID        int32  `json:"id"`
+	Name      string `json:"name"`
+	PostCount int32  `json:"postCount"`
+}

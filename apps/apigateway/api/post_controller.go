@@ -570,3 +570,35 @@ func (pc *postController) getReplies(w http.ResponseWriter, r *http.Request) {
 
 	jsonResponse(w, 200, map[string][]post{"items": pc.buildPosts(ctx, res.Posts)})
 }
+
+func (pc *postController) searchHashtags(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query().Get("q")
+	if q == "" {
+		jsonError(w, http.StatusBadRequest, "Missing query parameter")
+		return
+	}
+	limit := 8
+	if l, err := strconv.Atoi(r.URL.Query().Get("limit")); err == nil && l > 0 {
+		limit = l
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx = appendInternalAuth(ctx)
+	defer cancel()
+
+	res, err := pc.client.SearchHashtags(ctx, &pb.SearchHashtagsRequest{
+		Query: q,
+		Limit: int32(limit),
+	})
+	if err != nil {
+		slog.Warn("searching hashtags failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
+		grpcError(w, err)
+		return
+	}
+
+	tags := make([]hashtag, 0, len(res.Hashtags))
+	for _, h := range res.Hashtags {
+		tags = append(tags, mapHashtag(h))
+	}
+	jsonResponse(w, http.StatusOK, map[string][]hashtag{"items": tags})
+}

@@ -85,6 +85,7 @@ func (r *router) configureRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /users/{userId}/posts", r.post.getPosts)
 	mux.HandleFunc("GET /users/{userId}/likes", r.post.getLikedPosts)
 	mux.HandleFunc("GET /hashtags/{tag}/posts", r.post.getHashtagPosts)
+	mux.HandleFunc("GET /hashtags/search", r.post.searchHashtags)
 	mux.HandleFunc("GET /posts/{postId}", r.post.getPost)
 	mux.HandleFunc("DELETE /posts/{postId}", r.post.deletePost)
 	mux.HandleFunc("POST /posts/{postId}/likes", r.post.likePost)

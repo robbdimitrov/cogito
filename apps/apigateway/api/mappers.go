@@ -61,6 +61,10 @@ func mapPost(p *pb.Post) post {
 	return result
 }
 
+func mapHashtag(h *pb.Hashtag) hashtag {
+	return hashtag{ID: h.Id, Name: h.Name, PostCount: h.PostCount}
+}
+
 // attachAuthors embeds the resolved author into a post and its nested
 // repost/quote posts, keyed by the post's UserID.
 func attachAuthors(p *post, authors map[int32]user) {
