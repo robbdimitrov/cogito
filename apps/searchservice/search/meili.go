@@ -138,15 +138,15 @@ func (m *MeiliClient) search(index, query string, limit, offset int32) ([]map[st
 	if err != nil {
 		return nil, false, err
 	}
-	hasMore := int64(len(res.Hits)) > int64(limit)
-	if hasMore {
-		res.Hits = res.Hits[:limit]
-	}
 	out := make([]map[string]any, 0, len(res.Hits))
 	for _, hit := range res.Hits {
 		if m, ok := hit.(map[string]any); ok {
 			out = append(out, m)
 		}
+	}
+	hasMore := int64(len(out)) > int64(limit)
+	if hasMore {
+		out = out[:limit]
 	}
 	return out, hasMore, nil
 }

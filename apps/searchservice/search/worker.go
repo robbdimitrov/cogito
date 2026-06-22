@@ -77,11 +77,20 @@ func dequeueAndDelete(ctx context.Context, db *pgxpool.Pool) ([]OutboxRow, error
 		return nil, nil
 	}
 
-	ids := make([]int64, len(rows))
+	entityTypes := make([]string, len(rows))
+	entityIDs := make([]string, len(rows))
 	for i, r := range rows {
-		ids[i] = r.ID
+		entityTypes[i] = r.EntityType
+		entityIDs[i] = r.EntityID
 	}
-	if _, err := tx.Exec(txCtx, "DELETE FROM search_outbox WHERE id = ANY($1)", ids); err != nil {
+	// Delete all rows for each (entity_type, entity_id) pair, not just the
+	// selected IDs, so older duplicate outbox rows don't accumulate.
+	if _, err := tx.Exec(txCtx,
+		`DELETE FROM search_outbox
+		 WHERE (entity_type, entity_id) IN (
+		     SELECT * FROM unnest($1::text[], $2::text[])
+		 )`,
+		entityTypes, entityIDs); err != nil {
 		return nil, err
 	}
 

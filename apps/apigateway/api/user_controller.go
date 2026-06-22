@@ -348,7 +348,7 @@ func (s *userController) searchUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if s.searchClient != nil {
-		searchCtx := appendInternalAuth(ctx)
+		searchCtx := appendInternalAuth(appendRequestIDHeader(ctx, r))
 		res, err := s.searchClient.SearchUsers(searchCtx, &pb.SearchRequest{
 			Query:  query,
 			Limit:  int32(limit),
@@ -363,7 +363,7 @@ func (s *userController) searchUsers(w http.ResponseWriter, r *http.Request) {
 		for i, v := range res.Users {
 			users[i] = mapUser(v)
 		}
-		jsonResponse(w, 200, map[string][]user{"items": users})
+		jsonResponse(w, http.StatusOK, map[string]any{"items": users, "hasMore": res.HasMore})
 		return
 	}
 
@@ -382,7 +382,7 @@ func (s *userController) searchUsers(w http.ResponseWriter, r *http.Request) {
 		users[i] = mapUser(v)
 	}
 
-	jsonResponse(w, 200, map[string][]user{"items": users})
+	jsonResponse(w, http.StatusOK, map[string][]user{"items": users})
 }
 
 func (s *userController) getFollowers(w http.ResponseWriter, r *http.Request) {

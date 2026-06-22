@@ -605,7 +605,7 @@ func (pc *postController) searchHashtags(w http.ResponseWriter, r *http.Request)
 		for _, h := range res.Hashtags {
 			tags = append(tags, mapHashtag(h))
 		}
-		jsonResponse(w, http.StatusOK, map[string][]hashtag{"items": tags})
+		jsonResponse(w, http.StatusOK, map[string]any{"items": tags, "hasMore": res.HasMore})
 		return
 	}
 
