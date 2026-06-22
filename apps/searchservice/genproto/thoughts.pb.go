@@ -464,7 +464,7 @@ func (x *UpdateUserRequest) GetCoverPhotoKey() string {
 type GetUsersRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        int32                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	Cursor        string                 `protobuf:"bytes,2,opt,name=cursor,proto3" json:"cursor,omitempty"`
 	Limit         int32                  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -507,11 +507,11 @@ func (x *GetUsersRequest) GetUserId() int32 {
 	return 0
 }
 
-func (x *GetUsersRequest) GetPage() int32 {
+func (x *GetUsersRequest) GetCursor() string {
 	if x != nil {
-		return x.Page
+		return x.Cursor
 	}
-	return 0
+	return ""
 }
 
 func (x *GetUsersRequest) GetLimit() int32 {
@@ -524,7 +524,7 @@ func (x *GetUsersRequest) GetLimit() int32 {
 type Users struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Users         []*User                `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"`
-	HasMore       bool                   `protobuf:"varint,2,opt,name=has_more,json=hasMore,proto3" json:"has_more,omitempty"`
+	NextCursor    string                 `protobuf:"bytes,2,opt,name=next_cursor,json=nextCursor,proto3" json:"next_cursor,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -566,11 +566,11 @@ func (x *Users) GetUsers() []*User {
 	return nil
 }
 
-func (x *Users) GetHasMore() bool {
+func (x *Users) GetNextCursor() string {
 	if x != nil {
-		return x.HasMore
+		return x.NextCursor
 	}
-	return false
+	return ""
 }
 
 type GetUserByUsernameRequest struct {
@@ -1175,7 +1175,7 @@ func (x *Post) GetRepostOf() *Post {
 
 type GetFeedRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	Cursor        string                 `protobuf:"bytes,1,opt,name=cursor,proto3" json:"cursor,omitempty"`
 	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1211,11 +1211,11 @@ func (*GetFeedRequest) Descriptor() ([]byte, []int) {
 	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{18}
 }
 
-func (x *GetFeedRequest) GetPage() int32 {
+func (x *GetFeedRequest) GetCursor() string {
 	if x != nil {
-		return x.Page
+		return x.Cursor
 	}
-	return 0
+	return ""
 }
 
 func (x *GetFeedRequest) GetLimit() int32 {
@@ -1228,7 +1228,7 @@ func (x *GetFeedRequest) GetLimit() int32 {
 type Posts struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Posts         []*Post                `protobuf:"bytes,1,rep,name=posts,proto3" json:"posts,omitempty"`
-	HasMore       bool                   `protobuf:"varint,2,opt,name=has_more,json=hasMore,proto3" json:"has_more,omitempty"`
+	NextCursor    string                 `protobuf:"bytes,2,opt,name=next_cursor,json=nextCursor,proto3" json:"next_cursor,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1270,17 +1270,17 @@ func (x *Posts) GetPosts() []*Post {
 	return nil
 }
 
-func (x *Posts) GetHasMore() bool {
+func (x *Posts) GetNextCursor() string {
 	if x != nil {
-		return x.HasMore
+		return x.NextCursor
 	}
-	return false
+	return ""
 }
 
 type GetPostsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        int32                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	Cursor        string                 `protobuf:"bytes,2,opt,name=cursor,proto3" json:"cursor,omitempty"`
 	Limit         int32                  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1323,11 +1323,11 @@ func (x *GetPostsRequest) GetUserId() int32 {
 	return 0
 }
 
-func (x *GetPostsRequest) GetPage() int32 {
+func (x *GetPostsRequest) GetCursor() string {
 	if x != nil {
-		return x.Page
+		return x.Cursor
 	}
-	return 0
+	return ""
 }
 
 func (x *GetPostsRequest) GetLimit() int32 {
@@ -1340,7 +1340,7 @@ func (x *GetPostsRequest) GetLimit() int32 {
 type GetHashtagPostsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Tag           string                 `protobuf:"bytes,1,opt,name=tag,proto3" json:"tag,omitempty"`
-	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	Cursor        string                 `protobuf:"bytes,2,opt,name=cursor,proto3" json:"cursor,omitempty"`
 	Limit         int32                  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1383,11 +1383,11 @@ func (x *GetHashtagPostsRequest) GetTag() string {
 	return ""
 }
 
-func (x *GetHashtagPostsRequest) GetPage() int32 {
+func (x *GetHashtagPostsRequest) GetCursor() string {
 	if x != nil {
-		return x.Page
+		return x.Cursor
 	}
-	return 0
+	return ""
 }
 
 func (x *GetHashtagPostsRequest) GetLimit() int32 {
@@ -1400,7 +1400,7 @@ func (x *GetHashtagPostsRequest) GetLimit() int32 {
 type GetRepliesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	PostId        int32                  `protobuf:"varint,1,opt,name=post_id,json=postId,proto3" json:"post_id,omitempty"`
-	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	Cursor        string                 `protobuf:"bytes,2,opt,name=cursor,proto3" json:"cursor,omitempty"`
 	Limit         int32                  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1443,11 +1443,11 @@ func (x *GetRepliesRequest) GetPostId() int32 {
 	return 0
 }
 
-func (x *GetRepliesRequest) GetPage() int32 {
+func (x *GetRepliesRequest) GetCursor() string {
 	if x != nil {
-		return x.Page
+		return x.Cursor
 	}
-	return 0
+	return ""
 }
 
 func (x *GetRepliesRequest) GetLimit() int32 {
@@ -1520,7 +1520,7 @@ func (x *Hashtag) GetPostCount() int32 {
 type Hashtags struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Hashtags      []*Hashtag             `protobuf:"bytes,1,rep,name=hashtags,proto3" json:"hashtags,omitempty"`
-	HasMore       bool                   `protobuf:"varint,2,opt,name=has_more,json=hasMore,proto3" json:"has_more,omitempty"`
+	NextCursor    string                 `protobuf:"bytes,2,opt,name=next_cursor,json=nextCursor,proto3" json:"next_cursor,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1562,11 +1562,11 @@ func (x *Hashtags) GetHashtags() []*Hashtag {
 	return nil
 }
 
-func (x *Hashtags) GetHasMore() bool {
+func (x *Hashtags) GetNextCursor() string {
 	if x != nil {
-		return x.HasMore
+		return x.NextCursor
 	}
-	return false
+	return ""
 }
 
 type SearchHashtagsRequest struct {
@@ -1764,8 +1764,8 @@ func (x *DeleteImageRequest) GetFilename() string {
 type SearchRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Query         string                 `protobuf:"bytes,1,opt,name=query,proto3" json:"query,omitempty"`
-	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
-	Offset        int32                  `protobuf:"varint,3,opt,name=offset,proto3" json:"offset,omitempty"`
+	Cursor        string                 `protobuf:"bytes,2,opt,name=cursor,proto3" json:"cursor,omitempty"`
+	Limit         int32                  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1807,16 +1807,16 @@ func (x *SearchRequest) GetQuery() string {
 	return ""
 }
 
+func (x *SearchRequest) GetCursor() string {
+	if x != nil {
+		return x.Cursor
+	}
+	return ""
+}
+
 func (x *SearchRequest) GetLimit() int32 {
 	if x != nil {
 		return x.Limit
-	}
-	return 0
-}
-
-func (x *SearchRequest) GetOffset() int32 {
-	if x != nil {
-		return x.Offset
 	}
 	return 0
 }
@@ -1863,14 +1863,15 @@ const file_pkg_pb_thoughts_proto_rawDesc = "" +
 	"\x11profile_photo_key\x18\a \x01(\tH\x00R\x0fprofilePhotoKey\x88\x01\x01\x12+\n" +
 	"\x0fcover_photo_key\x18\b \x01(\tH\x01R\rcoverPhotoKey\x88\x01\x01B\x14\n" +
 	"\x12_profile_photo_keyB\x12\n" +
-	"\x10_cover_photo_key\"T\n" +
+	"\x10_cover_photo_key\"X\n" +
 	"\x0fGetUsersRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x05R\x06userId\x12\x12\n" +
-	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x14\n" +
-	"\x05limit\x18\x03 \x01(\x05R\x05limit\"H\n" +
+	"\auser_id\x18\x01 \x01(\x05R\x06userId\x12\x16\n" +
+	"\x06cursor\x18\x02 \x01(\tR\x06cursor\x12\x14\n" +
+	"\x05limit\x18\x03 \x01(\x05R\x05limit\"N\n" +
 	"\x05Users\x12$\n" +
-	"\x05users\x18\x01 \x03(\v2\x0e.thoughts.UserR\x05users\x12\x19\n" +
-	"\bhas_more\x18\x02 \x01(\bR\ahasMore\"6\n" +
+	"\x05users\x18\x01 \x03(\v2\x0e.thoughts.UserR\x05users\x12\x1f\n" +
+	"\vnext_cursor\x18\x02 \x01(\tR\n" +
+	"nextCursor\"6\n" +
 	"\x18GetUserByUsernameRequest\x12\x1a\n" +
 	"\busername\x18\x01 \x01(\tR\busername\"@\n" +
 	"\x12SearchUsersRequest\x12\x14\n" +
@@ -1918,33 +1919,35 @@ const file_pkg_pb_thoughts_proto_rawDesc = "" +
 	"\n" +
 	"quote_post\x18\x0f \x01(\v2\x0e.thoughts.PostR\tquotePost\x12+\n" +
 	"\trepost_of\x18\x10 \x01(\v2\x0e.thoughts.PostR\brepostOfB\x0f\n" +
-	"\r_repost_of_id\":\n" +
-	"\x0eGetFeedRequest\x12\x12\n" +
-	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
-	"\x05limit\x18\x02 \x01(\x05R\x05limit\"H\n" +
+	"\r_repost_of_id\">\n" +
+	"\x0eGetFeedRequest\x12\x16\n" +
+	"\x06cursor\x18\x01 \x01(\tR\x06cursor\x12\x14\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\"N\n" +
 	"\x05Posts\x12$\n" +
-	"\x05posts\x18\x01 \x03(\v2\x0e.thoughts.PostR\x05posts\x12\x19\n" +
-	"\bhas_more\x18\x02 \x01(\bR\ahasMore\"T\n" +
+	"\x05posts\x18\x01 \x03(\v2\x0e.thoughts.PostR\x05posts\x12\x1f\n" +
+	"\vnext_cursor\x18\x02 \x01(\tR\n" +
+	"nextCursor\"X\n" +
 	"\x0fGetPostsRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x05R\x06userId\x12\x12\n" +
-	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x14\n" +
-	"\x05limit\x18\x03 \x01(\x05R\x05limit\"T\n" +
+	"\auser_id\x18\x01 \x01(\x05R\x06userId\x12\x16\n" +
+	"\x06cursor\x18\x02 \x01(\tR\x06cursor\x12\x14\n" +
+	"\x05limit\x18\x03 \x01(\x05R\x05limit\"X\n" +
 	"\x16GetHashtagPostsRequest\x12\x10\n" +
-	"\x03tag\x18\x01 \x01(\tR\x03tag\x12\x12\n" +
-	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x14\n" +
-	"\x05limit\x18\x03 \x01(\x05R\x05limit\"V\n" +
+	"\x03tag\x18\x01 \x01(\tR\x03tag\x12\x16\n" +
+	"\x06cursor\x18\x02 \x01(\tR\x06cursor\x12\x14\n" +
+	"\x05limit\x18\x03 \x01(\x05R\x05limit\"Z\n" +
 	"\x11GetRepliesRequest\x12\x17\n" +
-	"\apost_id\x18\x01 \x01(\x05R\x06postId\x12\x12\n" +
-	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x14\n" +
+	"\apost_id\x18\x01 \x01(\x05R\x06postId\x12\x16\n" +
+	"\x06cursor\x18\x02 \x01(\tR\x06cursor\x12\x14\n" +
 	"\x05limit\x18\x03 \x01(\x05R\x05limit\"L\n" +
 	"\aHashtag\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1d\n" +
 	"\n" +
-	"post_count\x18\x03 \x01(\x05R\tpostCount\"T\n" +
+	"post_count\x18\x03 \x01(\x05R\tpostCount\"Z\n" +
 	"\bHashtags\x12-\n" +
-	"\bhashtags\x18\x01 \x03(\v2\x11.thoughts.HashtagR\bhashtags\x12\x19\n" +
-	"\bhas_more\x18\x02 \x01(\bR\ahasMore\"C\n" +
+	"\bhashtags\x18\x01 \x03(\v2\x11.thoughts.HashtagR\bhashtags\x12\x1f\n" +
+	"\vnext_cursor\x18\x02 \x01(\tR\n" +
+	"nextCursor\"C\n" +
 	"\x15SearchHashtagsRequest\x12\x14\n" +
 	"\x05query\x18\x01 \x01(\tR\x05query\x12\x14\n" +
 	"\x05limit\x18\x02 \x01(\x05R\x05limit\"J\n" +
@@ -1956,9 +1959,9 @@ const file_pkg_pb_thoughts_proto_rawDesc = "" +
 	"\x12DeleteImageRequest\x12\x1a\n" +
 	"\bfilename\x18\x01 \x01(\tR\bfilename\"S\n" +
 	"\rSearchRequest\x12\x14\n" +
-	"\x05query\x18\x01 \x01(\tR\x05query\x12\x14\n" +
-	"\x05limit\x18\x02 \x01(\x05R\x05limit\x12\x16\n" +
-	"\x06offset\x18\x03 \x01(\x05R\x06offset2\xda\x04\n" +
+	"\x05query\x18\x01 \x01(\tR\x05query\x12\x16\n" +
+	"\x06cursor\x18\x02 \x01(\tR\x06cursor\x12\x14\n" +
+	"\x05limit\x18\x03 \x01(\x05R\x05limit2\xda\x04\n" +
 	"\vUserService\x12?\n" +
 	"\n" +
 	"CreateUser\x12\x1b.thoughts.CreateUserRequest\x1a\x14.thoughts.Identifier\x120\n" +

@@ -53,13 +53,13 @@ message UpdateUserRequest {
 
 message GetUsersRequest {
   int32 user_id = 1;
-  int32 page = 2;
+  string cursor = 2;
   int32 limit = 3;
 }
 
 message Users {
   repeated User users = 1;
-  bool has_more = 2;
+  string next_cursor = 2;
 }
 
 message GetUserByUsernameRequest {
@@ -146,30 +146,30 @@ message Post {
 }
 
 message GetFeedRequest {
-  int32 page = 1;
+  string cursor = 1;
   int32 limit = 2;
 }
 
 message Posts {
   repeated Post posts = 1;
-  bool has_more = 2;
+  string next_cursor = 2;
 }
 
 message GetPostsRequest {
   int32 user_id = 1;
-  int32 page = 2;
+  string cursor = 2;
   int32 limit = 3;
 }
 
 message GetHashtagPostsRequest {
   string tag = 1;
-  int32 page = 2;
+  string cursor = 2;
   int32 limit = 3;
 }
 
 message GetRepliesRequest {
   int32 post_id = 1;
-  int32 page = 2;
+  string cursor = 2;
   int32 limit = 3;
 }
 
@@ -181,7 +181,7 @@ message Hashtag {
 
 message Hashtags {
   repeated Hashtag hashtags = 1;
-  bool has_more = 2;
+  string next_cursor = 2;
 }
 
 message SearchHashtagsRequest {
@@ -231,8 +231,8 @@ service ImageService {
 
 message SearchRequest {
   string query = 1;
-  int32 limit = 2;
-  int32 offset = 3;
+  string cursor = 2;
+  int32 limit = 3;
 }
 
 service SearchService {
