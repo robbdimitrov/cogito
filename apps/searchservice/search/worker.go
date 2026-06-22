@@ -56,38 +56,58 @@ func Run(ctx context.Context, db *pgxpool.Pool, meili *MeiliClient) {
 	}
 }
 
-func drainBatch(ctx context.Context, db *pgxpool.Pool, meili *MeiliClient) (int, error) {
-	txCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+// dequeueAndDelete selects up to 100 outbox rows and deletes them within a
+// short transaction. Meilisearch calls happen after the transaction commits,
+// so locks are held only for the duration of the delete, not the HTTP calls.
+func dequeueAndDelete(ctx context.Context, db *pgxpool.Pool) ([]OutboxRow, error) {
+	txCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	tx, err := db.BeginTx(txCtx, pgx.TxOptions{})
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 	defer func() { _ = tx.Rollback(txCtx) }()
 
 	rows, err := DrainOutbox(txCtx, tx)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 	if len(rows) == 0 {
-		return 0, nil
+		return nil, nil
 	}
 
-	for _, row := range rows {
-		if err := syncRow(txCtx, db, meili, tx, row); err != nil {
-			slog.Warn("worker: sync failed", "entity_type", row.EntityType, "entity_id", row.EntityID, "error", err)
-		}
+	ids := make([]int64, len(rows))
+	for i, r := range rows {
+		ids[i] = r.ID
+	}
+	if _, err := tx.Exec(txCtx, "DELETE FROM search_outbox WHERE id = ANY($1)", ids); err != nil {
+		return nil, err
 	}
 
-	return len(rows), tx.Commit(txCtx)
+	if err := tx.Commit(txCtx); err != nil {
+		return nil, err
+	}
+	return rows, nil
 }
 
-func syncRow(ctx context.Context, db *pgxpool.Pool, meili *MeiliClient, tx pgx.Tx, row OutboxRow) error {
+func drainBatch(ctx context.Context, db *pgxpool.Pool, meili *MeiliClient) (int, error) {
+	rows, err := dequeueAndDelete(ctx, db)
+	if err != nil || len(rows) == 0 {
+		return 0, err
+	}
+	for _, row := range rows {
+		if err := syncRow(ctx, db, meili, row); err != nil {
+			slog.Warn("worker: sync failed", "entity_type", row.EntityType, "entity_id", row.EntityID, "err", err)
+		}
+	}
+	return len(rows), nil
+}
+
+func syncRow(ctx context.Context, db *pgxpool.Pool, meili *MeiliClient, row OutboxRow) error {
 	idx := indexForType(row.EntityType)
 	if idx == "" {
-		_, _ = tx.Exec(ctx, "DELETE FROM search_outbox WHERE id = $1", row.ID)
-		return fmt.Errorf("unknown entity_type %q", row.EntityType)
+		return fmt.Errorf("unknown entity type: %s", row.EntityType)
 	}
 
 	var doc map[string]any
@@ -116,12 +136,10 @@ func syncRow(ctx context.Context, db *pgxpool.Pool, meili *MeiliClient, tx pgx.T
 
 	if fetchErr != nil {
 		if row.Attempts+1 >= maxAttempts {
-			slog.Warn("worker: giving up on row", "id", row.ID, "entity_type", row.EntityType, "entity_id", row.EntityID)
-			_, _ = tx.Exec(ctx, "DELETE FROM search_outbox WHERE id = $1", row.ID)
-		} else {
-			_, _ = tx.Exec(ctx, "UPDATE search_outbox SET attempts = attempts + 1 WHERE id = $1", row.ID)
+			slog.Warn("worker: giving up on row", "entity_type", row.EntityType, "entity_id", row.EntityID)
+			return nil
 		}
-		return fetchErr
+		return RequeueRow(ctx, db, row.EntityType, row.EntityID, row.Attempts+1)
 	}
 
 	var meiliErr error
@@ -140,15 +158,12 @@ func syncRow(ctx context.Context, db *pgxpool.Pool, meili *MeiliClient, tx pgx.T
 
 	if meiliErr != nil {
 		if row.Attempts+1 >= maxAttempts {
-			slog.Warn("worker: giving up on row after meili error", "id", row.ID, "entity_type", row.EntityType, "entity_id", row.EntityID, "error", meiliErr)
-			_, _ = tx.Exec(ctx, "DELETE FROM search_outbox WHERE id = $1", row.ID)
-		} else {
-			_, _ = tx.Exec(ctx, "UPDATE search_outbox SET attempts = attempts + 1 WHERE id = $1", row.ID)
+			slog.Warn("worker: giving up on row after meili error", "entity_type", row.EntityType, "entity_id", row.EntityID, "error", meiliErr)
+			return nil
 		}
-		return meiliErr
+		return RequeueRow(ctx, db, row.EntityType, row.EntityID, row.Attempts+1)
 	}
 
-	_, _ = tx.Exec(ctx, "DELETE FROM search_outbox WHERE id = $1", row.ID)
 	return nil
 }
 

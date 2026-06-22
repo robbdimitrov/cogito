@@ -172,6 +172,13 @@ func StreamHashtags(ctx context.Context, db *pgxpool.Pool, offset, limit int) ([
 	return out, rows.Err()
 }
 
+func RequeueRow(ctx context.Context, db *pgxpool.Pool, entityType, entityID string, attempts int32) error {
+	_, err := db.Exec(ctx,
+		"INSERT INTO search_outbox (entity_type, entity_id, attempts) VALUES ($1, $2, $3)",
+		entityType, entityID, attempts)
+	return err
+}
+
 func TryAcquireBackfillLock(ctx context.Context, conn *pgxpool.Conn) bool {
 	var ok bool
 	_ = conn.QueryRow(ctx, `SELECT pg_try_advisory_lock(774191)`).Scan(&ok)
