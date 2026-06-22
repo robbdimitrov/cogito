@@ -14,7 +14,9 @@
   let suggestions = $state<User[]>([]);
   let searchQuery = $state("");
   let showTypeahead = $state(false);
-  let hashtagSuggestions = $state<{ id: number; name: string; postCount: number }[]>([]);
+  let hashtagSuggestions = $state<
+    { id: number; name: string; postCount: number }[]
+  >([]);
   let hashtagQuery = $state("");
   let showHashtagTypeahead = $state(false);
   let imageBlob = $state<Blob | null>(null);
@@ -30,7 +32,9 @@
     const delayDebounceFn = setTimeout(async () => {
       if (searchQuery.length > 0) {
         try {
-          const response = await fetch(`/api/users/search?query=${encodeURIComponent(searchQuery)}&limit=5`);
+          const response = await fetch(
+            `/api/users/search?query=${encodeURIComponent(searchQuery)}&limit=5`,
+          );
           const res = await response.json();
           suggestions = res.items || [];
           showTypeahead = true;
@@ -50,7 +54,9 @@
     const delayDebounceFn = setTimeout(async () => {
       if (hashtagQuery.length > 0) {
         try {
-          const response = await fetch(`/api/hashtags/search?query=${encodeURIComponent(hashtagQuery)}&limit=5`);
+          const response = await fetch(
+            `/api/hashtags/search?query=${encodeURIComponent(hashtagQuery)}&limit=5`,
+          );
           const res = await response.json();
           hashtagSuggestions = res.items || [];
           showHashtagTypeahead = true;
@@ -126,11 +132,7 @@
     if (match) {
       const matchStart = textBeforeCursor.lastIndexOf("#" + match[1]);
       content =
-        content.substring(0, matchStart) +
-        "#" +
-        name +
-        " " +
-        textAfterCursor;
+        content.substring(0, matchStart) + "#" + name + " " + textAfterCursor;
     }
 
     showHashtagTypeahead = false;
@@ -257,11 +259,16 @@
                   onclick={() => handleSelectHashtag(h.name)}
                 >
                   <div class="overflow-hidden">
-                    <div class="truncate text-sm font-semibold text-slate-900 dark:text-white">
+                    <div
+                      class="truncate text-sm font-semibold text-slate-900 dark:text-white"
+                    >
                       #{h.name}
                     </div>
-                    <div class="truncate text-xs text-slate-500 dark:text-slate-400">
-                      {h.postCount} {h.postCount === 1 ? 'post' : 'posts'}
+                    <div
+                      class="truncate text-xs text-slate-500 dark:text-slate-400"
+                    >
+                      {h.postCount}
+                      {h.postCount === 1 ? "post" : "posts"}
                     </div>
                   </div>
                 </button>

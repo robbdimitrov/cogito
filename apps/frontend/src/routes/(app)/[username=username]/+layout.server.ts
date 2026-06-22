@@ -12,4 +12,3 @@ export const load = async (event) => {
     throw error(404, "User not found");
   }
 };
-

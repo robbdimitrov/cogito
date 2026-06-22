@@ -12,7 +12,11 @@
 
   // Optimistic UI for sessions
   let optimisticDeletedSessions = $state<Set<string>>(new Set());
-  let sessions = $derived(data.sessions?.filter(s => s.id && !optimisticDeletedSessions.has(s.id)) || []);
+  let sessions = $derived(
+    data.sessions?.filter(
+      (s) => s.id && !optimisticDeletedSessions.has(s.id),
+    ) || [],
+  );
 </script>
 
 {#if data.error || form?.error}

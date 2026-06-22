@@ -30,13 +30,17 @@
   let profilePreview = $derived(
     avatarFile
       ? URL.createObjectURL(avatarFile)
-      : (data.currentUser?.profilePhotoKey ? imageUrl(data.currentUser.profilePhotoKey) : "")
+      : data.currentUser?.profilePhotoKey
+        ? imageUrl(data.currentUser.profilePhotoKey)
+        : "",
   );
 
   let coverPreview = $derived(
     coverFile
       ? URL.createObjectURL(coverFile)
-      : (data.currentUser?.coverPhotoKey ? imageUrl(data.currentUser.coverPhotoKey) : "")
+      : data.currentUser?.coverPhotoKey
+        ? imageUrl(data.currentUser.coverPhotoKey)
+        : "",
   );
 
   let avatarInput: HTMLInputElement;

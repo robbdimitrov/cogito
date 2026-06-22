@@ -26,16 +26,28 @@
   let isOwnPost = $derived(currentUserId && post.userId === currentUserId);
 
   let optimisticLikeOverride = $state<boolean | null>(null);
-  let liked = $derived(optimisticLikeOverride !== null ? optimisticLikeOverride : (displayPost.liked ?? false));
+  let liked = $derived(
+    optimisticLikeOverride !== null
+      ? optimisticLikeOverride
+      : (displayPost.liked ?? false),
+  );
 
   let optimisticLikesDelta = $state(0);
-  let likes = $derived(Math.max(0, (displayPost.likes ?? 0) + optimisticLikesDelta));
+  let likes = $derived(
+    Math.max(0, (displayPost.likes ?? 0) + optimisticLikesDelta),
+  );
 
   let optimisticRepostOverride = $state<boolean | null>(null);
-  let reposted = $derived(optimisticRepostOverride !== null ? optimisticRepostOverride : (displayPost.reposted ?? false));
+  let reposted = $derived(
+    optimisticRepostOverride !== null
+      ? optimisticRepostOverride
+      : (displayPost.reposted ?? false),
+  );
 
   let optimisticRepostsDelta = $state(0);
-  let reposts = $derived(Math.max(0, (displayPost.reposts ?? 0) + optimisticRepostsDelta));
+  let reposts = $derived(
+    Math.max(0, (displayPost.reposts ?? 0) + optimisticRepostsDelta),
+  );
 
   let showDeleteModal = $state(false);
   let isLiking = $state(false);
@@ -184,7 +196,7 @@
                   isReposting = false;
                   optimisticRepostOverride = null;
                   optimisticRepostsDelta = 0;
-                  
+
                   if (result.type !== "failure") {
                     await update({ invalidateAll: false });
                   }
@@ -216,7 +228,7 @@
                   isLiking = false;
                   optimisticLikeOverride = null;
                   optimisticLikesDelta = 0;
-                  
+
                   if (result.type !== "failure") {
                     await update({ invalidateAll: false });
                   }
