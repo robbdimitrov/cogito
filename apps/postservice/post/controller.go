@@ -4,35 +4,11 @@ import (
 	"context"
 	"errors"
 	"log/slog"
-	"regexp"
-	"strings"
 
 	"google.golang.org/grpc/codes"
 
 	pb "thoughts/postservice/genproto"
 )
-
-var hashtagPattern = regexp.MustCompile(`^[A-Za-z0-9_]{1,50}$`)
-var extractHashtagsPattern = regexp.MustCompile(`(?:^|[^A-Za-z0-9_])#([A-Za-z0-9_]{1,50})`)
-
-func extractHashtags(content string) []string {
-	matches := extractHashtagsPattern.FindAllStringSubmatch(content, -1)
-	tagSet := make(map[string]bool)
-	var tags []string
-	for _, match := range matches {
-		if len(match) > 1 {
-			tag := strings.ToLower(match[1])
-			if !tagSet[tag] {
-				tagSet[tag] = true
-				tags = append(tags, tag)
-			}
-		}
-	}
-	if tags == nil {
-		tags = []string{}
-	}
-	return tags
-}
 
 type controller struct {
 	pb.UnsafePostServiceServer
@@ -54,7 +30,7 @@ func (c *controller) CreatePost(ctx context.Context, req *pb.CreatePostRequest) 
 		return nil, newError(codes.InvalidArgument)
 	}
 
-	tags := extractHashtags(req.Content)
+	tags := ExtractHashtags(req.Content)
 
 	res, err := c.dbClient.createPost(ctx, req.Content, tags, userID, req.MediaKey, req.InReplyToId, req.QuoteOfId)
 	if err != nil {
@@ -145,7 +121,7 @@ func (c *controller) GetHashtagPosts(ctx context.Context, req *pb.GetHashtagPost
 	if err != nil {
 		return nil, err
 	}
-	if !hashtagPattern.MatchString(req.Tag) {
+	if !ValidateHashtag(req.Tag) {
 		return nil, newError(codes.InvalidArgument)
 	}
 
@@ -165,6 +141,28 @@ func (c *controller) GetHashtagPosts(ctx context.Context, req *pb.GetHashtagPost
 	}
 
 	return &pb.Posts{Posts: posts}, nil
+}
+
+func (c *controller) SearchHashtags(ctx context.Context, req *pb.SearchHashtagsRequest) (*pb.Hashtags, error) {
+	if err := validateInternalAuth(ctx); err != nil {
+		return nil, err
+	}
+	if req.Query == "" {
+		return nil, newError(codes.InvalidArgument)
+	}
+	limit := req.Limit
+	if limit < 1 {
+		limit = 8
+	}
+	if limit > 20 {
+		limit = 20
+	}
+	tags, err := c.dbClient.searchHashtags(ctx, req.Query, limit)
+	if err != nil {
+		slog.Warn("searching hashtags failed", "request_id", requestID(ctx), "error", err)
+		return nil, newError(codes.Internal)
+	}
+	return &pb.Hashtags{Hashtags: tags}, nil
 }
 
 func (c *controller) GetPostsByIds(ctx context.Context, req *pb.Ids) (*pb.Posts, error) {

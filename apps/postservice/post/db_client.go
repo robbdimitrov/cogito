@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"iter"
+	"strconv"
 	"strings"
 
 	"github.com/jackc/pgconn"
@@ -45,20 +46,23 @@ func (c *DBClient) createPost(ctx context.Context, content string, tags []string
 		mk = *mediaKey
 	}
 
-	var row pgx.Row
-	if quoteOfID != nil {
-		query := `INSERT INTO posts (user_id, content, hashtags, media_key, in_reply_to_id, quote_of_id)
-			SELECT $1, $2, $3, $4, $5, COALESCE(p.repost_of_id, p.id)
-			FROM posts p WHERE p.id = $6
-			RETURNING id`
-		row = c.db.QueryRow(ctx, query, userID, content, tags, mk, inReplyToID, *quoteOfID)
-	} else {
-		query := "INSERT INTO posts (user_id, content, hashtags, media_key, in_reply_to_id, quote_of_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id"
-		row = c.db.QueryRow(ctx, query, userID, content, tags, mk, inReplyToID, nil)
+	tx, err := c.db.Begin(ctx)
+	if err != nil {
+		return 0, err
 	}
+	defer func() { _ = tx.Rollback(ctx) }()
 
-	var id int32
-	err := row.Scan(&id)
+	var postID int32
+	if quoteOfID != nil {
+		query := `INSERT INTO posts (user_id, content, media_key, in_reply_to_id, quote_of_id)
+			SELECT $1, $2, $3, $4, COALESCE(p.repost_of_id, p.id)
+			FROM posts p WHERE p.id = $5
+			RETURNING id`
+		err = tx.QueryRow(ctx, query, userID, content, mk, inReplyToID, *quoteOfID).Scan(&postID)
+	} else {
+		query := "INSERT INTO posts (user_id, content, media_key, in_reply_to_id, quote_of_id) VALUES ($1, $2, $3, $4, $5) RETURNING id"
+		err = tx.QueryRow(ctx, query, userID, content, mk, inReplyToID, nil).Scan(&postID)
+	}
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return 0, errInvalidReference
@@ -69,7 +73,33 @@ func (c *DBClient) createPost(ctx context.Context, content string, tags []string
 		}
 		return 0, err
 	}
-	return id, nil
+
+	_, err = tx.Exec(ctx, "INSERT INTO search_outbox (entity_type, entity_id) VALUES ('post', $1)", strconv.Itoa(int(postID)))
+	if err != nil {
+		return 0, err
+	}
+
+	for _, tag := range tags {
+		_, err = tx.Exec(ctx, "INSERT INTO hashtags (name) VALUES ($1) ON CONFLICT (name) DO NOTHING", tag)
+		if err != nil {
+			return 0, err
+		}
+		_, err = tx.Exec(ctx, "INSERT INTO post_hashtags (post_id, hashtag_id) SELECT $1, id FROM hashtags WHERE name = $2 ON CONFLICT DO NOTHING", postID, tag)
+		if err != nil {
+			return 0, err
+		}
+		_, err = tx.Exec(ctx, "INSERT INTO search_outbox (entity_type, entity_id) SELECT 'hashtag', id::text FROM hashtags WHERE name = $1", tag)
+		if err != nil {
+			return 0, err
+		}
+	}
+
+	_, err = tx.Exec(ctx, "SELECT pg_notify('search_outbox', '')")
+	if err != nil {
+		return 0, err
+	}
+
+	return postID, tx.Commit(ctx)
 }
 
 func (c *DBClient) getFeed(ctx context.Context, page int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
@@ -158,18 +188,20 @@ func (c *DBClient) getLikedPosts(ctx context.Context, userID int32, page int32, 
 }
 
 func (c *DBClient) getHashtagPosts(ctx context.Context, tag string, page int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
-	query := `SELECT id, user_id, content,
-		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
-		EXISTS (SELECT 1 FROM likes WHERE post_id = id AND likes.user_id = $1) AS liked,
-		(SELECT count(*) FROM posts AS rp WHERE rp.repost_of_id = id) AS reposts,
-		EXISTS (SELECT 1 FROM posts AS rp WHERE rp.repost_of_id = id AND rp.user_id = $1) AS reposted,
-		created, repost_of_id, media_key,
-		(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = id) AS replies,
-		COALESCE(in_reply_to_id, 0) AS in_reply_to_id,
-		COALESCE(quote_of_id, 0) AS quote_of_id
-		FROM posts
-		WHERE hashtags @> ARRAY[$2]::varchar[]
-		ORDER BY created DESC, id DESC
+	query := `SELECT p.id, p.user_id, p.content,
+		(SELECT count(*) FROM likes WHERE post_id = p.id) AS likes,
+		EXISTS (SELECT 1 FROM likes WHERE post_id = p.id AND likes.user_id = $1) AS liked,
+		(SELECT count(*) FROM posts AS rp WHERE rp.repost_of_id = p.id) AS reposts,
+		EXISTS (SELECT 1 FROM posts AS rp WHERE rp.repost_of_id = p.id AND rp.user_id = $1) AS reposted,
+		p.created, p.repost_of_id, p.media_key,
+		(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = p.id) AS replies,
+		COALESCE(p.in_reply_to_id, 0) AS in_reply_to_id,
+		COALESCE(p.quote_of_id, 0) AS quote_of_id
+		FROM posts p
+		JOIN post_hashtags ph ON ph.post_id = p.id
+		JOIN hashtags h ON h.id = ph.hashtag_id
+		WHERE h.name = $2
+		ORDER BY p.created DESC, p.id DESC
 		LIMIT $3 OFFSET $4`
 
 	rows, err := c.db.Query(ctx, query, currentUserID, strings.ToLower(tag), limit, page*limit)
@@ -221,15 +253,31 @@ func (c *DBClient) getPostsByIds(ctx context.Context, ids []int32, currentUserID
 }
 
 func (c *DBClient) deletePost(ctx context.Context, postID int32, userID int32) error {
-	query := "DELETE FROM posts WHERE id = $1 AND user_id = $2"
-	tag, err := c.db.Exec(ctx, query, postID, userID)
+	tx, err := c.db.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	_, err = tx.Exec(ctx, "INSERT INTO search_outbox (entity_type, entity_id) VALUES ('post', $1)", strconv.Itoa(int(postID)))
+	if err != nil {
+		return err
+	}
+
+	tag, err := tx.Exec(ctx, "DELETE FROM posts WHERE id = $1 AND user_id = $2", postID, userID)
 	if err != nil {
 		return err
 	}
 	if tag.RowsAffected() == 0 {
 		return errNotFound
 	}
-	return nil
+
+	_, err = tx.Exec(ctx, "SELECT pg_notify('search_outbox', '')")
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit(ctx)
 }
 
 func (c *DBClient) likePost(ctx context.Context, postID int32, userID int32) error {
@@ -289,4 +337,31 @@ func (c *DBClient) getReplies(ctx context.Context, postID int32, page int32, lim
 	}
 
 	return mapPosts(rows), nil
+}
+
+func (c *DBClient) searchHashtags(ctx context.Context, query string, limit int32) ([]*pb.Hashtag, error) {
+	sql := `SELECT h.id, h.name, COUNT(ph.post_id)::int AS post_count
+		FROM hashtags h
+		LEFT JOIN post_hashtags ph ON ph.hashtag_id = h.id
+		WHERE h.name % $1 OR h.name ILIKE $2
+		GROUP BY h.id
+		ORDER BY similarity(h.name, $1) DESC, post_count DESC
+		LIMIT $3`
+
+	q := strings.ToLower(query)
+	rows, err := c.db.Query(ctx, sql, q, q+"%", limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tags []*pb.Hashtag
+	for rows.Next() {
+		var h pb.Hashtag
+		if err := rows.Scan(&h.Id, &h.Name, &h.PostCount); err != nil {
+			return nil, err
+		}
+		tags = append(tags, &h)
+	}
+	return tags, rows.Err()
 }

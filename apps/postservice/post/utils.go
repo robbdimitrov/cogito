@@ -4,7 +4,9 @@ import (
 	"context"
 	"crypto/subtle"
 	"os"
+	"regexp"
 	"strconv"
+	"strings"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -12,6 +14,32 @@ import (
 )
 
 const defaultInternalGRPCToken = "dev-internal-grpc-token"
+
+var extractPattern = regexp.MustCompile(`(?:^|[^A-Za-z0-9_])#([A-Za-z0-9_]{1,50})`)
+var validTagPattern = regexp.MustCompile(`^[A-Za-z0-9_]{1,50}$`)
+
+func ExtractHashtags(content string) []string {
+	matches := extractPattern.FindAllStringSubmatch(content, -1)
+	tagSet := make(map[string]bool)
+	var tags []string
+	for _, match := range matches {
+		if len(match) > 1 {
+			tag := strings.ToLower(match[1])
+			if !tagSet[tag] {
+				tagSet[tag] = true
+				tags = append(tags, tag)
+			}
+		}
+	}
+	if tags == nil {
+		tags = []string{}
+	}
+	return tags
+}
+
+func ValidateHashtag(tag string) bool {
+	return validTagPattern.MatchString(tag)
+}
 
 func newError(c codes.Code) error {
 	return status.Error(c, c.String())
