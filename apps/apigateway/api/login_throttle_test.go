@@ -49,7 +49,12 @@ func (m *mockCreateSessionClient) CreateSession(_ context.Context, _ *pb.Credent
 }
 
 func newTestAuthController(throttle LoginThrottle, client pb.AuthServiceClient) *authController {
-	return &authController{client: client, throttle: throttle}
+	return &authController{
+		client:         client,
+		throttle:       throttle,
+		ipThreshold:    5,
+		emailThreshold: 50,
+	}
 }
 
 func loginRequest(email, password string) *http.Request {

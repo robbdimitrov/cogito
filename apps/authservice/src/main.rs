@@ -8,8 +8,10 @@ mod internal_auth;
 mod logging;
 
 use std::env;
+use std::sync::Arc;
 use std::time::Duration;
 use thoughts::auth_service_server::AuthServiceServer;
+use tokio::sync::Semaphore;
 use tonic::transport::Server;
 
 const SESSION_CLEANUP_INTERVAL: Duration = Duration::from_secs(3600);
@@ -49,7 +51,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     });
 
-    let controller = controller::Controller::new(db_client, session_hmac_secret);
+    let max_concurrency: usize = env::var("ARGON_MAX_CONCURRENCY")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(4);
+    let argon_sem = Arc::new(Semaphore::new(max_concurrency));
+    let controller = controller::Controller::new(db_client, session_hmac_secret, argon_sem);
 
     let shutdown_signal = async move {
         tokio::signal::ctrl_c()

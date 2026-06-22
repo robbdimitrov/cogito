@@ -11,11 +11,12 @@ import (
 	"github.com/valkey-io/valkey-go"
 )
 
-// recordFailureLua atomically increments the counter and sets a TTL on the
-// first write so the key self-expires after the reset window.
+// recordFailureLua atomically increments the counter and sets a TTL whenever
+// none exists, so a key stranded without expiry (e.g. by a failed Clear) does
+// not permanently lock out the account.
 const recordFailureLua = `
 local n = redis.call('INCR', KEYS[1])
-if n == 1 then
+if redis.call('PTTL', KEYS[1]) < 0 then
   redis.call('PEXPIRE', KEYS[1], tonumber(ARGV[1]))
 end
 return n
@@ -108,9 +109,7 @@ func loginFailureKeys(r *http.Request, email string) []string {
 	return []string{"ip:" + clientIP(r), "email:" + email}
 }
 
-func loginRateLimited(failures []LoginFailure) bool {
-	ipThreshold := envInt("THROTTLE_IP_FAILURES", 5)
-	emailThreshold := envInt("THROTTLE_EMAIL_FAILURES", 50)
+func loginRateLimited(failures []LoginFailure, ipThreshold, emailThreshold int) bool {
 	for _, f := range failures {
 		threshold := ipThreshold
 		if strings.HasPrefix(f.Key, "email:") {

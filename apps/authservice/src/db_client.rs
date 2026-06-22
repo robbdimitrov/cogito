@@ -131,6 +131,15 @@ impl crate::controller::AuthDb for DbClient {
             .await?;
         Ok(())
     }
+
+    async fn update_password_hash(&self, user_id: i32, new_hash: &str) -> Result<(), sqlx::Error> {
+        sqlx::query("UPDATE users SET password = $1 WHERE id = $2")
+            .bind(new_hash)
+            .bind(user_id)
+            .execute(&self.pool)
+            .await?;
+        Ok(())
+    }
 }
 
 #[cfg(test)]

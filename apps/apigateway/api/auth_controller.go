@@ -16,8 +16,10 @@ import (
 )
 
 type authController struct {
-	client   pb.AuthServiceClient
-	throttle LoginThrottle
+	client         pb.AuthServiceClient
+	throttle       LoginThrottle
+	ipThreshold    int
+	emailThreshold int
 }
 
 func newAuthController(addr string) *authController {
@@ -34,7 +36,12 @@ func newAuthController(addr string) *authController {
 	} else {
 		throttle = dt
 	}
-	return &authController{client: pb.NewAuthServiceClient(conn), throttle: throttle}
+	return &authController{
+		client:         pb.NewAuthServiceClient(conn),
+		throttle:       throttle,
+		ipThreshold:    envInt("THROTTLE_IP_FAILURES", 5),
+		emailThreshold: envInt("THROTTLE_EMAIL_FAILURES", 50),
+	}
 }
 
 func (ac *authController) createSession(w http.ResponseWriter, r *http.Request) {
@@ -54,14 +61,14 @@ func (ac *authController) createSession(w http.ResponseWriter, r *http.Request) 
 	}
 
 	keys := loginFailureKeys(r, body.Email)
-	tctx, tcancel := context.WithTimeout(r.Context(), 2*time.Second)
+	tctx, tcancel := context.WithTimeout(context.Background(), 2*time.Second)
 	failures, err := ac.throttle.GetFailures(tctx, keys)
 	tcancel()
 	if err != nil {
 		slog.Warn("login throttle unavailable, failing open", "request_id", getRequestID(r), "error", err)
 		failures = nil
 	}
-	if loginRateLimited(failures) {
+	if loginRateLimited(failures, ac.ipThreshold, ac.emailThreshold) {
 		jsonError(w, http.StatusTooManyRequests, "Too many requests")
 		return
 	}
@@ -75,26 +82,26 @@ func (ac *authController) createSession(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		slog.Warn("creating session failed", "request_id", getRequestID(r), "error_kind", status.Code(err).String())
 		if status.Code(err) == codes.Unauthenticated {
-			rctx, rcancel := context.WithTimeout(r.Context(), 2*time.Second)
 			for _, key := range keys {
+				rctx, rcancel := context.WithTimeout(context.Background(), 2*time.Second)
 				if rerr := ac.throttle.RecordFailure(rctx, key); rerr != nil {
 					slog.Warn("failed to record login failure", "request_id", getRequestID(r), "error", rerr)
 				}
+				rcancel()
 			}
-			rcancel()
 		}
 		grpcError(w, err)
 		return
 	}
 
-	cctx, ccancel := context.WithTimeout(r.Context(), 2*time.Second)
+	cctx, ccancel := context.WithTimeout(context.Background(), 2*time.Second)
 	if err := ac.throttle.Clear(cctx, keys); err != nil {
 		slog.Warn("failed to clear login failures", "request_id", getRequestID(r), "error", err)
 	}
 	ccancel()
 
 	createCookie(w, res.Id)
-	jsonResponse(w, 200, map[string]int32{"id": res.UserId})
+	jsonResponse(w, http.StatusOK, map[string]int32{"id": res.UserId})
 }
 
 func (ac *authController) validateSession(w http.ResponseWriter, r *http.Request) (*http.Request, error) {
