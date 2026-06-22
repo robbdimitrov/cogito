@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"time"
+	"unicode/utf8"
 
 	pb "thoughts/apigateway/genproto"
 )
@@ -26,6 +27,10 @@ func (sc *searchController) search(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("q")
 	if q == "" {
 		jsonError(w, http.StatusBadRequest, "Missing query parameter")
+		return
+	}
+	if utf8.RuneCountInString(q) > 255 {
+		jsonError(w, http.StatusBadRequest, "Query exceeds maximum length")
 		return
 	}
 
