@@ -3,17 +3,18 @@
 ## Architecture
 
 Thoughts is a stateless microservices application. The browser talks to a
-Next.js frontend/BFF, which talks to a Go HTTP gateway. The gateway coordinates
-gRPC backends and proxies image HTTP traffic.
+SvelteKit frontend/BFF, which talks to a Go HTTP gateway. The gateway
+coordinates gRPC backends and proxies image HTTP traffic.
 
 | Service | Stack | Responsibility |
 |---|---|---|
-| `apps/frontend` | Next.js, React, strict TypeScript | SSR UI and same-origin API proxy |
+| `apps/frontend` | SvelteKit 2, Svelte 5, TypeScript | SSR UI and same-origin API proxy |
 | `apps/apigateway` | Go, `net/http` | Public HTTP API, authentication boundary, orchestration |
 | `apps/postservice` | Go, gRPC | Posts, replies, likes, and reposts |
 | `apps/authservice` | Rust, Tonic | Sessions |
 | `apps/userservice` | Rust, Tonic | Users, credentials, and follows |
 | `apps/imageservice` | Rust, Tonic, Axum | Image upload staging, verification, serving, and cleanup |
+| `apps/searchservice` | Go, gRPC | Full-text search; Meilisearch outbox consumer |
 | `apps/database` | PostgreSQL migrations | Versioned shared schema |
 
 The protobuf contract is `pkg/pb/thoughts.proto`. gRPC services listen on port
@@ -177,3 +178,11 @@ Before reporting a change complete:
    duplication, stale comments, and unrelated changes.
 7. Run relevant formatters, linters, tests, and builds in proportion to risk.
 8. Report checks that could not run and remaining risk explicitly.
+
+## Specs
+
+- Before making any code changes, read the relevant spec in `docs/` (architecture,
+  api, data-model, security, business-rules, design-system, frontend, or infrastructure).
+- Update the relevant spec to reflect the change — new endpoints, schema changes,
+  rule additions, security controls, or infrastructure modifications — before marking
+  work complete.

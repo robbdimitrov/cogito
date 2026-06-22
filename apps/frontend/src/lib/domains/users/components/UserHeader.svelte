@@ -31,7 +31,7 @@
 
 <GlassCard class="overflow-hidden">
   <div
-    class="relative h-24 bg-gradient-to-tr from-primary via-primary/80 to-secondary sm:h-32"
+    class="relative h-24 bg-linear-to-tr from-primary via-primary/80 to-secondary sm:h-32"
   >
     {#if user.coverPhotoKey}
       <img
