@@ -28,6 +28,7 @@ vendor
 # Compiled binaries
 /apps/*/service
 /apps/*/*service
+/apps/*/*apigateway
 
 # Logs
 npm-debug.log*
