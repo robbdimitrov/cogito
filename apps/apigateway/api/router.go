@@ -16,6 +16,7 @@ type router struct {
 	auth             *authController
 	post             *postController
 	user             *userController
+	search           *searchController
 	imageAddr        string
 	imageHTTP        *http.Client
 	imageHTTPBreaker *circuitBreaker
@@ -31,12 +32,13 @@ func imageGRPCAddress(imageHTTPAddr string) string {
 	return imageHTTPAddr
 }
 
-func newRouter(authAddr, postAddr, userAddr, imageAddr string) *router {
+func newRouter(authAddr, postAddr, userAddr, imageAddr, searchAddr string) *router {
 	imageBreaker := newCircuitBreaker("image-http")
 	return &router{
 		auth:             newAuthController(authAddr),
-		post:             newPostController(postAddr, userAddr, imageAddr),
-		user:             newUserController(userAddr, authAddr, imageAddr),
+		post:             newPostController(postAddr, userAddr, imageAddr, searchAddr),
+		user:             newUserController(userAddr, authAddr, imageAddr, searchAddr),
+		search:           newSearchController(searchAddr),
 		imageAddr:        imageAddr,
 		imageHTTPBreaker: imageBreaker,
 		imageHTTP: &http.Client{
@@ -93,6 +95,9 @@ func (r *router) configureRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /posts/{postId}/reposts", r.post.repostPost)
 	mux.HandleFunc("DELETE /posts/{postId}/reposts", r.post.removeRepost)
 	mux.HandleFunc("GET /posts/{postId}/replies", r.post.getReplies)
+
+	// Search
+	mux.HandleFunc("GET /search", r.search.search)
 
 	// Image Gateway Orchestration
 	mux.HandleFunc("POST /uploads", r.proxyImageUpload)

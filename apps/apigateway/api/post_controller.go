@@ -15,12 +15,13 @@ import (
 )
 
 type postController struct {
-	client     pb.PostServiceClient
-	userClient pb.UserServiceClient
-	imgClient  pb.ImageServiceClient
+	client       pb.PostServiceClient
+	userClient   pb.UserServiceClient
+	imgClient    pb.ImageServiceClient
+	searchClient pb.SearchServiceClient
 }
 
-func newPostController(addr string, userAddr string, imageAddr string) *postController {
+func newPostController(addr string, userAddr string, imageAddr string, searchAddr string) *postController {
 	conn, err := newGatewayClient(addr, "post")
 	if err != nil {
 		slog.Error("unable to create post client", "error", err)
@@ -41,10 +42,20 @@ func newPostController(addr string, userAddr string, imageAddr string) *postCont
 		}
 		imgClient = pb.NewImageServiceClient(imgConn)
 	}
+	var searchClient pb.SearchServiceClient
+	if searchAddr != "" {
+		searchConn, err := newGatewayClient(searchAddr, "search")
+		if err != nil {
+			slog.Error("unable to create search client", "error", err)
+			os.Exit(1)
+		}
+		searchClient = pb.NewSearchServiceClient(searchConn)
+	}
 	return &postController{
-		client:     pb.NewPostServiceClient(conn),
-		userClient: pb.NewUserServiceClient(userConn),
-		imgClient:  imgClient,
+		client:       pb.NewPostServiceClient(conn),
+		userClient:   pb.NewUserServiceClient(userConn),
+		imgClient:    imgClient,
+		searchClient: searchClient,
 	}
 }
 
@@ -583,8 +594,26 @@ func (pc *postController) searchHashtags(w http.ResponseWriter, r *http.Request)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	ctx = appendInternalAuth(ctx)
+	ctx = appendInternalAuth(appendRequestIDHeader(ctx, r))
 	defer cancel()
+
+	if pc.searchClient != nil {
+		res, err := pc.searchClient.SearchHashtags(ctx, &pb.SearchRequest{
+			Query: q,
+			Limit: int32(limit),
+		})
+		if err != nil {
+			slog.Warn("searching hashtags failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
+			grpcError(w, err)
+			return
+		}
+		tags := make([]hashtag, 0, len(res.Hashtags))
+		for _, h := range res.Hashtags {
+			tags = append(tags, mapHashtag(h))
+		}
+		jsonResponse(w, http.StatusOK, map[string][]hashtag{"items": tags})
+		return
+	}
 
 	res, err := pc.client.SearchHashtags(ctx, &pb.SearchHashtagsRequest{
 		Query: q,

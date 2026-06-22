@@ -1,0 +1,101 @@
+package api
+
+import (
+	"context"
+	"log/slog"
+	"net/http"
+	"os"
+	"time"
+
+	pb "thoughts/apigateway/genproto"
+)
+
+type searchController struct {
+	client pb.SearchServiceClient
+}
+
+func newSearchController(addr string) *searchController {
+	if addr == "" {
+		return &searchController{}
+	}
+	conn, err := newGatewayClient(addr, "search")
+	if err != nil {
+		slog.Error("unable to create search client", "error", err)
+		os.Exit(1)
+	}
+	return &searchController{client: pb.NewSearchServiceClient(conn)}
+}
+
+func (sc *searchController) search(w http.ResponseWriter, r *http.Request) {
+	if sc.client == nil {
+		jsonError(w, http.StatusServiceUnavailable, "Search service unavailable")
+		return
+	}
+
+	q := r.URL.Query().Get("q")
+	if q == "" {
+		jsonError(w, http.StatusBadRequest, "Missing query parameter")
+		return
+	}
+
+	searchType := r.URL.Query().Get("type")
+	page, limit, err := getPageAndLimit(r)
+	if err != nil {
+		grpcError(w, err)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx = appendInternalAuth(appendRequestIDHeader(ctx, r))
+	defer cancel()
+
+	req := &pb.SearchRequest{
+		Query:  q,
+		Limit:  int32(limit),
+		Offset: int32(page * limit),
+	}
+
+	switch searchType {
+	case "users":
+		res, err := sc.client.SearchUsers(ctx, req)
+		if err != nil {
+			slog.Warn("search users failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
+			grpcError(w, err)
+			return
+		}
+		users := make([]user, 0, len(res.Users))
+		for _, u := range res.Users {
+			users = append(users, mapUser(u))
+		}
+		hasMore := len(users) == limit
+		jsonResponse(w, http.StatusOK, map[string]any{"items": users, "hasMore": hasMore})
+
+	case "hashtags":
+		res, err := sc.client.SearchHashtags(ctx, req)
+		if err != nil {
+			slog.Warn("search hashtags failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
+			grpcError(w, err)
+			return
+		}
+		tags := make([]hashtag, 0, len(res.Hashtags))
+		for _, h := range res.Hashtags {
+			tags = append(tags, mapHashtag(h))
+		}
+		hasMore := len(tags) == limit
+		jsonResponse(w, http.StatusOK, map[string]any{"items": tags, "hasMore": hasMore})
+
+	default: // "posts" and anything else
+		res, err := sc.client.SearchPosts(ctx, req)
+		if err != nil {
+			slog.Warn("search posts failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
+			grpcError(w, err)
+			return
+		}
+		posts := make([]post, 0, len(res.Posts))
+		for _, p := range res.Posts {
+			posts = append(posts, mapPost(p))
+		}
+		hasMore := len(posts) == limit
+		jsonResponse(w, http.StatusOK, map[string]any{"items": posts, "hasMore": hasMore})
+	}
+}

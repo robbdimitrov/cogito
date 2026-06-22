@@ -25,9 +25,10 @@ func main() {
 	if imageAddr == "" {
 		imageAddr = "imageservice:8081"
 	}
+	searchAddr := os.Getenv("SEARCH_SERVICE_ADDR")
 
 	api.ValidateSecrets()
-	handler := api.CreateServer(authAddr, postAddr, userAddr, imageAddr)
+	handler := api.CreateServer(authAddr, postAddr, userAddr, imageAddr, searchAddr)
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%s", port),
 		Handler: handler,

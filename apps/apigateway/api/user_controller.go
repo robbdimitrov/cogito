@@ -18,12 +18,13 @@ import (
 )
 
 type userController struct {
-	client     pb.UserServiceClient
-	authClient pb.AuthServiceClient
-	imgClient  pb.ImageServiceClient
+	client       pb.UserServiceClient
+	authClient   pb.AuthServiceClient
+	imgClient    pb.ImageServiceClient
+	searchClient pb.SearchServiceClient
 }
 
-func newUserController(addr string, authAddr string, imageAddr string) *userController {
+func newUserController(addr string, authAddr string, imageAddr string, searchAddr string) *userController {
 	conn, err := newGatewayClient(addr, "user")
 	if err != nil {
 		slog.Error("unable to create user client", "error", err)
@@ -44,10 +45,20 @@ func newUserController(addr string, authAddr string, imageAddr string) *userCont
 		}
 		imgClient = pb.NewImageServiceClient(imgConn)
 	}
+	var searchClient pb.SearchServiceClient
+	if searchAddr != "" {
+		searchConn, err := newGatewayClient(searchAddr, "search")
+		if err != nil {
+			slog.Error("unable to create search client", "error", err)
+			os.Exit(1)
+		}
+		searchClient = pb.NewSearchServiceClient(searchConn)
+	}
 	return &userController{
-		client:     pb.NewUserServiceClient(conn),
-		authClient: pb.NewAuthServiceClient(authConn),
-		imgClient:  imgClient,
+		client:       pb.NewUserServiceClient(conn),
+		authClient:   pb.NewAuthServiceClient(authConn),
+		imgClient:    imgClient,
+		searchClient: searchClient,
 	}
 }
 
@@ -329,8 +340,6 @@ func (s *userController) getFollowing(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *userController) searchUsers(w http.ResponseWriter, r *http.Request) {
-	client := s.client
-
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
@@ -347,12 +356,28 @@ func (s *userController) searchUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	req := pb.SearchUsersRequest{
-		Query: query,
-		Limit: int32(limit),
+	if s.searchClient != nil {
+		res, err := s.searchClient.SearchUsers(ctx, &pb.SearchRequest{
+			Query: query,
+			Limit: int32(limit),
+		})
+		if err != nil {
+			slog.Warn("searching users failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
+			grpcError(w, err)
+			return
+		}
+		users := make([]user, len(res.Users))
+		for i, v := range res.Users {
+			users[i] = mapUser(v)
+		}
+		jsonResponse(w, 200, map[string][]user{"items": users})
+		return
 	}
 
-	res, err := client.SearchUsers(ctx, &req)
+	res, err := s.client.SearchUsers(ctx, &pb.SearchUsersRequest{
+		Query: query,
+		Limit: int32(limit),
+	})
 	if err != nil {
 		slog.Warn("searching users failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)

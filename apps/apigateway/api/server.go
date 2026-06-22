@@ -8,10 +8,10 @@ import (
 )
 
 // CreateServer builds the gateway HTTP handler and middleware chain.
-func CreateServer(authAddr, postAddr, userAddr, imageAddr string) http.Handler {
+func CreateServer(authAddr, postAddr, userAddr, imageAddr, searchAddr string) http.Handler {
 	setupLogger()
 	mux := http.NewServeMux()
-	router := newRouter(authAddr, postAddr, userAddr, imageAddr)
+	router := newRouter(authAddr, postAddr, userAddr, imageAddr, searchAddr)
 	router.configureRoutes(mux)
 
 	var handler http.Handler = mux
