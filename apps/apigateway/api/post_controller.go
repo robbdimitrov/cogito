@@ -579,6 +579,10 @@ func (pc *postController) searchHashtags(w http.ResponseWriter, r *http.Request)
 		jsonError(w, http.StatusBadRequest, "Missing query parameter")
 		return
 	}
+	if utf8.RuneCountInString(q) > 255 {
+		jsonError(w, http.StatusBadRequest, "Query exceeds maximum length")
+		return
+	}
 	limit := 8
 	if l, err := strconv.Atoi(r.URL.Query().Get("limit")); err == nil && l > 0 {
 		limit = l

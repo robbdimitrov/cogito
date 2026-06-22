@@ -341,6 +341,14 @@ func (s *userController) searchUsers(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	query := r.URL.Query().Get("q")
+	if query == "" {
+		jsonError(w, http.StatusBadRequest, "Missing query parameter")
+		return
+	}
+	if utf8.RuneCountInString(query) > 255 {
+		jsonError(w, http.StatusBadRequest, "Query exceeds maximum length")
+		return
+	}
 	page, limit, err := getPageAndLimit(r)
 	if err != nil {
 		grpcError(w, err)
