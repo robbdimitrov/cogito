@@ -24,6 +24,7 @@
   <Navbar
     user={data.currentUser}
     sessionUnavailable={data.sessionUnavailable}
+    unreadCount={data.unreadCount}
   />
   <div class="relative z-0 flex min-h-[calc(100vh-4rem)] flex-col">
     {@render children()}

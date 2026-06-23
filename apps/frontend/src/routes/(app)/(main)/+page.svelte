@@ -4,8 +4,10 @@
   import CreatePost from "$lib/domains/posts/components/CreatePost.svelte";
   import PostList from "$lib/domains/posts/components/PostList.svelte";
   import QuoteComposeModal from "$lib/domains/posts/components/QuoteComposeModal.svelte";
+  import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
   import { createPagination } from "$lib/shared/createPagination.svelte";
   import type { Post } from "$lib/domains/posts/model";
+  import { Search } from "@lucide/svelte";
 
   let { data } = $props();
   let user = $derived(data.currentUser);
@@ -47,13 +49,27 @@
         </div>
         <CreatePost {user} />
       {/if}
-      <PostList
-        posts={pagination.items}
-        users={user ? [user] : []}
-        currentUserId={user?.id}
-        onQuote={handleQuote}
-        emptyMessage="No posts yet. Be the first to share!"
-      />
+      {#if data.isEmpty}
+        <GlassCard>
+          <div
+            class="card-body items-center py-12 text-center text-slate-600 dark:text-slate-300"
+          >
+            <Search class="mb-2 h-12 w-12 opacity-50" aria-hidden="true" />
+            <p>No posts in your feed yet.</p>
+            <a href="/search" class="btn btn-primary btn-sm mt-2 rounded-full">
+              Find people to follow
+            </a>
+          </div>
+        </GlassCard>
+      {:else}
+        <PostList
+          posts={pagination.items}
+          users={user ? [user] : []}
+          currentUserId={user?.id}
+          onQuote={handleQuote}
+          emptyMessage="No posts yet. Be the first to share!"
+        />
+      {/if}
       {#if !pagination.done}
         <div class="py-4 text-center">
           <button

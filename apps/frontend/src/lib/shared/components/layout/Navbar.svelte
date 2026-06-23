@@ -8,6 +8,7 @@
     Home,
     LogOut,
     Moon,
+    Bell,
     Search,
     Settings,
     Sun,
@@ -18,9 +19,11 @@
   let {
     user = null,
     sessionUnavailable = false,
+    unreadCount = 0,
   }: {
     user?: User | null;
     sessionUnavailable?: boolean;
+    unreadCount?: number;
   } = $props();
 
   const theme = getThemeContext();
@@ -62,6 +65,26 @@
       >
         <Search class="size-5 sm:size-6" aria-hidden="true" />
         <span class="hidden sm:inline">Search</span>
+      </a>
+      <a
+        href={resolve("/notifications")}
+        class="btn btn-ghost gap-2 text-base normal-case transition-transform duration-200 hover:scale-105 hover:bg-white/40 dark:hover:bg-white/10 sm:text-lg"
+        aria-current={page.url.pathname === "/notifications"
+          ? "page"
+          : undefined}
+      >
+        <span class="indicator">
+          {#if unreadCount > 0}
+            <span
+              class="badge badge-primary indicator-item badge-xs min-w-5 px-1 text-[0.65rem]"
+              aria-label={`${unreadCount} unread notifications`}
+            >
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
+          {/if}
+          <Bell class="size-5 sm:size-6" aria-hidden="true" />
+        </span>
+        <span class="hidden sm:inline">Notifications</span>
       </a>
     {/if}
   </div>

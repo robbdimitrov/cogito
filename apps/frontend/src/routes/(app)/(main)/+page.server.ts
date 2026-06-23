@@ -13,8 +13,10 @@ import { apiClient } from "$lib/server/api/client";
 
 export const load = async (event) => {
   const feed = await getFeed(apiClient(event), "");
+  const items = feed?.items ?? [];
   return {
-    feed: { items: feed?.items ?? [], nextCursor: feed?.nextCursor ?? null },
+    feed: { items, nextCursor: feed?.nextCursor ?? null },
+    isEmpty: items.length === 0,
   };
 };
 
