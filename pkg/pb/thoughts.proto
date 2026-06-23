@@ -240,3 +240,40 @@ service SearchService {
   rpc SearchPosts(SearchRequest) returns (Posts);
   rpc SearchHashtags(SearchRequest) returns (Hashtags);
 }
+
+message GetNotificationsRequest {
+  int32 user_id = 1;
+  string cursor = 2;
+  int32 limit = 3;
+}
+
+message Notification {
+  int32 id = 1;
+  int64 external_id = 2;
+  int32 user_id = 3;
+  int32 actor_id = 4;
+  string type = 5;
+  string entity_id = 6;
+  bool read = 7;
+  string created = 8;
+}
+
+message Notifications {
+  repeated Notification notifications = 1;
+  string next_cursor = 2;
+}
+
+message NotificationRequest {
+  int32 notification_id = 1;
+  int32 user_id = 2;
+}
+
+message UnreadCountResponse {
+  int32 count = 1;
+}
+
+service NotificationService {
+  rpc GetNotifications(GetNotificationsRequest) returns (Notifications);
+  rpc MarkNotificationRead(NotificationRequest) returns (Empty);
+  rpc GetUnreadCount(UserRequest) returns (UnreadCountResponse);
+}

@@ -1821,6 +1821,314 @@ func (x *SearchRequest) GetLimit() int32 {
 	return 0
 }
 
+type GetNotificationsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        int32                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Cursor        string                 `protobuf:"bytes,2,opt,name=cursor,proto3" json:"cursor,omitempty"`
+	Limit         int32                  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetNotificationsRequest) Reset() {
+	*x = GetNotificationsRequest{}
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetNotificationsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetNotificationsRequest) ProtoMessage() {}
+
+func (x *GetNotificationsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetNotificationsRequest.ProtoReflect.Descriptor instead.
+func (*GetNotificationsRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *GetNotificationsRequest) GetUserId() int32 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *GetNotificationsRequest) GetCursor() string {
+	if x != nil {
+		return x.Cursor
+	}
+	return ""
+}
+
+func (x *GetNotificationsRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+type Notification struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	ExternalId    int64                  `protobuf:"varint,2,opt,name=external_id,json=externalId,proto3" json:"external_id,omitempty"`
+	UserId        int32                  `protobuf:"varint,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	ActorId       int32                  `protobuf:"varint,4,opt,name=actor_id,json=actorId,proto3" json:"actor_id,omitempty"`
+	Type          string                 `protobuf:"bytes,5,opt,name=type,proto3" json:"type,omitempty"`
+	EntityId      string                 `protobuf:"bytes,6,opt,name=entity_id,json=entityId,proto3" json:"entity_id,omitempty"`
+	Read          bool                   `protobuf:"varint,7,opt,name=read,proto3" json:"read,omitempty"`
+	Created       string                 `protobuf:"bytes,8,opt,name=created,proto3" json:"created,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Notification) Reset() {
+	*x = Notification{}
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Notification) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Notification) ProtoMessage() {}
+
+func (x *Notification) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Notification.ProtoReflect.Descriptor instead.
+func (*Notification) Descriptor() ([]byte, []int) {
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *Notification) GetId() int32 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *Notification) GetExternalId() int64 {
+	if x != nil {
+		return x.ExternalId
+	}
+	return 0
+}
+
+func (x *Notification) GetUserId() int32 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *Notification) GetActorId() int32 {
+	if x != nil {
+		return x.ActorId
+	}
+	return 0
+}
+
+func (x *Notification) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+func (x *Notification) GetEntityId() string {
+	if x != nil {
+		return x.EntityId
+	}
+	return ""
+}
+
+func (x *Notification) GetRead() bool {
+	if x != nil {
+		return x.Read
+	}
+	return false
+}
+
+func (x *Notification) GetCreated() string {
+	if x != nil {
+		return x.Created
+	}
+	return ""
+}
+
+type Notifications struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Notifications []*Notification        `protobuf:"bytes,1,rep,name=notifications,proto3" json:"notifications,omitempty"`
+	NextCursor    string                 `protobuf:"bytes,2,opt,name=next_cursor,json=nextCursor,proto3" json:"next_cursor,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Notifications) Reset() {
+	*x = Notifications{}
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Notifications) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Notifications) ProtoMessage() {}
+
+func (x *Notifications) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Notifications.ProtoReflect.Descriptor instead.
+func (*Notifications) Descriptor() ([]byte, []int) {
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{32}
+}
+
+func (x *Notifications) GetNotifications() []*Notification {
+	if x != nil {
+		return x.Notifications
+	}
+	return nil
+}
+
+func (x *Notifications) GetNextCursor() string {
+	if x != nil {
+		return x.NextCursor
+	}
+	return ""
+}
+
+type NotificationRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	NotificationId int32                  `protobuf:"varint,1,opt,name=notification_id,json=notificationId,proto3" json:"notification_id,omitempty"`
+	UserId         int32                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *NotificationRequest) Reset() {
+	*x = NotificationRequest{}
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NotificationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NotificationRequest) ProtoMessage() {}
+
+func (x *NotificationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NotificationRequest.ProtoReflect.Descriptor instead.
+func (*NotificationRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{33}
+}
+
+func (x *NotificationRequest) GetNotificationId() int32 {
+	if x != nil {
+		return x.NotificationId
+	}
+	return 0
+}
+
+func (x *NotificationRequest) GetUserId() int32 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+type UnreadCountResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Count         int32                  `protobuf:"varint,1,opt,name=count,proto3" json:"count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UnreadCountResponse) Reset() {
+	*x = UnreadCountResponse{}
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UnreadCountResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UnreadCountResponse) ProtoMessage() {}
+
+func (x *UnreadCountResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_pb_thoughts_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UnreadCountResponse.ProtoReflect.Descriptor instead.
+func (*UnreadCountResponse) Descriptor() ([]byte, []int) {
+	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{34}
+}
+
+func (x *UnreadCountResponse) GetCount() int32 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
 var File_pkg_pb_thoughts_proto protoreflect.FileDescriptor
 
 const file_pkg_pb_thoughts_proto_rawDesc = "" +
@@ -1961,7 +2269,30 @@ const file_pkg_pb_thoughts_proto_rawDesc = "" +
 	"\rSearchRequest\x12\x14\n" +
 	"\x05query\x18\x01 \x01(\tR\x05query\x12\x16\n" +
 	"\x06cursor\x18\x02 \x01(\tR\x06cursor\x12\x14\n" +
-	"\x05limit\x18\x03 \x01(\x05R\x05limit2\xda\x04\n" +
+	"\x05limit\x18\x03 \x01(\x05R\x05limit\"`\n" +
+	"\x17GetNotificationsRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\x05R\x06userId\x12\x16\n" +
+	"\x06cursor\x18\x02 \x01(\tR\x06cursor\x12\x14\n" +
+	"\x05limit\x18\x03 \x01(\x05R\x05limit\"\xd2\x01\n" +
+	"\fNotification\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x1f\n" +
+	"\vexternal_id\x18\x02 \x01(\x03R\n" +
+	"externalId\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\x05R\x06userId\x12\x19\n" +
+	"\bactor_id\x18\x04 \x01(\x05R\aactorId\x12\x12\n" +
+	"\x04type\x18\x05 \x01(\tR\x04type\x12\x1b\n" +
+	"\tentity_id\x18\x06 \x01(\tR\bentityId\x12\x12\n" +
+	"\x04read\x18\a \x01(\bR\x04read\x12\x18\n" +
+	"\acreated\x18\b \x01(\tR\acreated\"n\n" +
+	"\rNotifications\x12<\n" +
+	"\rnotifications\x18\x01 \x03(\v2\x16.thoughts.NotificationR\rnotifications\x12\x1f\n" +
+	"\vnext_cursor\x18\x02 \x01(\tR\n" +
+	"nextCursor\"W\n" +
+	"\x13NotificationRequest\x12'\n" +
+	"\x0fnotification_id\x18\x01 \x01(\x05R\x0enotificationId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x05R\x06userId\"+\n" +
+	"\x13UnreadCountResponse\x12\x14\n" +
+	"\x05count\x18\x01 \x01(\x05R\x05count2\xda\x04\n" +
 	"\vUserService\x12?\n" +
 	"\n" +
 	"CreateUser\x12\x1b.thoughts.CreateUserRequest\x1a\x14.thoughts.Identifier\x120\n" +
@@ -2009,7 +2340,11 @@ const file_pkg_pb_thoughts_proto_rawDesc = "" +
 	"\rSearchService\x127\n" +
 	"\vSearchUsers\x12\x17.thoughts.SearchRequest\x1a\x0f.thoughts.Users\x127\n" +
 	"\vSearchPosts\x12\x17.thoughts.SearchRequest\x1a\x0f.thoughts.Posts\x12=\n" +
-	"\x0eSearchHashtags\x12\x17.thoughts.SearchRequest\x1a\x12.thoughts.HashtagsB\fZ\n" +
+	"\x0eSearchHashtags\x12\x17.thoughts.SearchRequest\x1a\x12.thoughts.Hashtags2\xf5\x01\n" +
+	"\x13NotificationService\x12N\n" +
+	"\x10GetNotifications\x12!.thoughts.GetNotificationsRequest\x1a\x17.thoughts.Notifications\x12F\n" +
+	"\x14MarkNotificationRead\x12\x1d.thoughts.NotificationRequest\x1a\x0f.thoughts.Empty\x12F\n" +
+	"\x0eGetUnreadCount\x12\x15.thoughts.UserRequest\x1a\x1d.thoughts.UnreadCountResponseB\fZ\n" +
 	"./genprotob\x06proto3"
 
 var (
@@ -2024,7 +2359,7 @@ func file_pkg_pb_thoughts_proto_rawDescGZIP() []byte {
 	return file_pkg_pb_thoughts_proto_rawDescData
 }
 
-var file_pkg_pb_thoughts_proto_msgTypes = make([]protoimpl.MessageInfo, 30)
+var file_pkg_pb_thoughts_proto_msgTypes = make([]protoimpl.MessageInfo, 35)
 var file_pkg_pb_thoughts_proto_goTypes = []any{
 	(*CreateUserRequest)(nil),        // 0: thoughts.CreateUserRequest
 	(*Identifier)(nil),               // 1: thoughts.Identifier
@@ -2056,6 +2391,11 @@ var file_pkg_pb_thoughts_proto_goTypes = []any{
 	(*ConsumeUploadRequest)(nil),     // 27: thoughts.ConsumeUploadRequest
 	(*DeleteImageRequest)(nil),       // 28: thoughts.DeleteImageRequest
 	(*SearchRequest)(nil),            // 29: thoughts.SearchRequest
+	(*GetNotificationsRequest)(nil),  // 30: thoughts.GetNotificationsRequest
+	(*Notification)(nil),             // 31: thoughts.Notification
+	(*Notifications)(nil),            // 32: thoughts.Notifications
+	(*NotificationRequest)(nil),      // 33: thoughts.NotificationRequest
+	(*UnreadCountResponse)(nil),      // 34: thoughts.UnreadCountResponse
 }
 var file_pkg_pb_thoughts_proto_depIdxs = []int32{
 	4,  // 0: thoughts.Users.users:type_name -> thoughts.User
@@ -2064,79 +2404,86 @@ var file_pkg_pb_thoughts_proto_depIdxs = []int32{
 	17, // 3: thoughts.Post.repost_of:type_name -> thoughts.Post
 	17, // 4: thoughts.Posts.posts:type_name -> thoughts.Post
 	23, // 5: thoughts.Hashtags.hashtags:type_name -> thoughts.Hashtag
-	0,  // 6: thoughts.UserService.CreateUser:input_type -> thoughts.CreateUserRequest
-	3,  // 7: thoughts.UserService.GetUser:input_type -> thoughts.UserRequest
-	8,  // 8: thoughts.UserService.GetUserByUsername:input_type -> thoughts.GetUserByUsernameRequest
-	2,  // 9: thoughts.UserService.GetUsersByIds:input_type -> thoughts.Ids
-	5,  // 10: thoughts.UserService.UpdateUser:input_type -> thoughts.UpdateUserRequest
-	6,  // 11: thoughts.UserService.GetFollowing:input_type -> thoughts.GetUsersRequest
-	6,  // 12: thoughts.UserService.GetFollowers:input_type -> thoughts.GetUsersRequest
-	3,  // 13: thoughts.UserService.FollowUser:input_type -> thoughts.UserRequest
-	3,  // 14: thoughts.UserService.UnfollowUser:input_type -> thoughts.UserRequest
-	9,  // 15: thoughts.UserService.SearchUsers:input_type -> thoughts.SearchUsersRequest
-	11, // 16: thoughts.AuthService.CreateSession:input_type -> thoughts.Credentials
-	12, // 17: thoughts.AuthService.GetSession:input_type -> thoughts.SessionRequest
-	12, // 18: thoughts.AuthService.DeleteSession:input_type -> thoughts.SessionRequest
-	3,  // 19: thoughts.AuthService.GetSessions:input_type -> thoughts.UserRequest
-	15, // 20: thoughts.PostService.CreatePost:input_type -> thoughts.CreatePostRequest
-	18, // 21: thoughts.PostService.GetFeed:input_type -> thoughts.GetFeedRequest
-	20, // 22: thoughts.PostService.GetPosts:input_type -> thoughts.GetPostsRequest
-	20, // 23: thoughts.PostService.GetLikedPosts:input_type -> thoughts.GetPostsRequest
-	21, // 24: thoughts.PostService.GetHashtagPosts:input_type -> thoughts.GetHashtagPostsRequest
-	16, // 25: thoughts.PostService.GetPost:input_type -> thoughts.PostRequest
-	2,  // 26: thoughts.PostService.GetPostsByIds:input_type -> thoughts.Ids
-	16, // 27: thoughts.PostService.DeletePost:input_type -> thoughts.PostRequest
-	16, // 28: thoughts.PostService.LikePost:input_type -> thoughts.PostRequest
-	16, // 29: thoughts.PostService.UnlikePost:input_type -> thoughts.PostRequest
-	16, // 30: thoughts.PostService.RepostPost:input_type -> thoughts.PostRequest
-	16, // 31: thoughts.PostService.RemoveRepost:input_type -> thoughts.PostRequest
-	22, // 32: thoughts.PostService.GetReplies:input_type -> thoughts.GetRepliesRequest
-	25, // 33: thoughts.PostService.SearchHashtags:input_type -> thoughts.SearchHashtagsRequest
-	26, // 34: thoughts.ImageService.VerifyUpload:input_type -> thoughts.VerifyUploadRequest
-	27, // 35: thoughts.ImageService.ConsumeUpload:input_type -> thoughts.ConsumeUploadRequest
-	28, // 36: thoughts.ImageService.DeleteImage:input_type -> thoughts.DeleteImageRequest
-	29, // 37: thoughts.SearchService.SearchUsers:input_type -> thoughts.SearchRequest
-	29, // 38: thoughts.SearchService.SearchPosts:input_type -> thoughts.SearchRequest
-	29, // 39: thoughts.SearchService.SearchHashtags:input_type -> thoughts.SearchRequest
-	1,  // 40: thoughts.UserService.CreateUser:output_type -> thoughts.Identifier
-	4,  // 41: thoughts.UserService.GetUser:output_type -> thoughts.User
-	4,  // 42: thoughts.UserService.GetUserByUsername:output_type -> thoughts.User
-	7,  // 43: thoughts.UserService.GetUsersByIds:output_type -> thoughts.Users
-	10, // 44: thoughts.UserService.UpdateUser:output_type -> thoughts.Empty
-	7,  // 45: thoughts.UserService.GetFollowing:output_type -> thoughts.Users
-	7,  // 46: thoughts.UserService.GetFollowers:output_type -> thoughts.Users
-	10, // 47: thoughts.UserService.FollowUser:output_type -> thoughts.Empty
-	10, // 48: thoughts.UserService.UnfollowUser:output_type -> thoughts.Empty
-	7,  // 49: thoughts.UserService.SearchUsers:output_type -> thoughts.Users
-	13, // 50: thoughts.AuthService.CreateSession:output_type -> thoughts.Session
-	13, // 51: thoughts.AuthService.GetSession:output_type -> thoughts.Session
-	10, // 52: thoughts.AuthService.DeleteSession:output_type -> thoughts.Empty
-	14, // 53: thoughts.AuthService.GetSessions:output_type -> thoughts.Sessions
-	1,  // 54: thoughts.PostService.CreatePost:output_type -> thoughts.Identifier
-	19, // 55: thoughts.PostService.GetFeed:output_type -> thoughts.Posts
-	19, // 56: thoughts.PostService.GetPosts:output_type -> thoughts.Posts
-	19, // 57: thoughts.PostService.GetLikedPosts:output_type -> thoughts.Posts
-	19, // 58: thoughts.PostService.GetHashtagPosts:output_type -> thoughts.Posts
-	17, // 59: thoughts.PostService.GetPost:output_type -> thoughts.Post
-	19, // 60: thoughts.PostService.GetPostsByIds:output_type -> thoughts.Posts
-	10, // 61: thoughts.PostService.DeletePost:output_type -> thoughts.Empty
-	10, // 62: thoughts.PostService.LikePost:output_type -> thoughts.Empty
-	10, // 63: thoughts.PostService.UnlikePost:output_type -> thoughts.Empty
-	10, // 64: thoughts.PostService.RepostPost:output_type -> thoughts.Empty
-	10, // 65: thoughts.PostService.RemoveRepost:output_type -> thoughts.Empty
-	19, // 66: thoughts.PostService.GetReplies:output_type -> thoughts.Posts
-	24, // 67: thoughts.PostService.SearchHashtags:output_type -> thoughts.Hashtags
-	10, // 68: thoughts.ImageService.VerifyUpload:output_type -> thoughts.Empty
-	10, // 69: thoughts.ImageService.ConsumeUpload:output_type -> thoughts.Empty
-	10, // 70: thoughts.ImageService.DeleteImage:output_type -> thoughts.Empty
-	7,  // 71: thoughts.SearchService.SearchUsers:output_type -> thoughts.Users
-	19, // 72: thoughts.SearchService.SearchPosts:output_type -> thoughts.Posts
-	24, // 73: thoughts.SearchService.SearchHashtags:output_type -> thoughts.Hashtags
-	40, // [40:74] is the sub-list for method output_type
-	6,  // [6:40] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	31, // 6: thoughts.Notifications.notifications:type_name -> thoughts.Notification
+	0,  // 7: thoughts.UserService.CreateUser:input_type -> thoughts.CreateUserRequest
+	3,  // 8: thoughts.UserService.GetUser:input_type -> thoughts.UserRequest
+	8,  // 9: thoughts.UserService.GetUserByUsername:input_type -> thoughts.GetUserByUsernameRequest
+	2,  // 10: thoughts.UserService.GetUsersByIds:input_type -> thoughts.Ids
+	5,  // 11: thoughts.UserService.UpdateUser:input_type -> thoughts.UpdateUserRequest
+	6,  // 12: thoughts.UserService.GetFollowing:input_type -> thoughts.GetUsersRequest
+	6,  // 13: thoughts.UserService.GetFollowers:input_type -> thoughts.GetUsersRequest
+	3,  // 14: thoughts.UserService.FollowUser:input_type -> thoughts.UserRequest
+	3,  // 15: thoughts.UserService.UnfollowUser:input_type -> thoughts.UserRequest
+	9,  // 16: thoughts.UserService.SearchUsers:input_type -> thoughts.SearchUsersRequest
+	11, // 17: thoughts.AuthService.CreateSession:input_type -> thoughts.Credentials
+	12, // 18: thoughts.AuthService.GetSession:input_type -> thoughts.SessionRequest
+	12, // 19: thoughts.AuthService.DeleteSession:input_type -> thoughts.SessionRequest
+	3,  // 20: thoughts.AuthService.GetSessions:input_type -> thoughts.UserRequest
+	15, // 21: thoughts.PostService.CreatePost:input_type -> thoughts.CreatePostRequest
+	18, // 22: thoughts.PostService.GetFeed:input_type -> thoughts.GetFeedRequest
+	20, // 23: thoughts.PostService.GetPosts:input_type -> thoughts.GetPostsRequest
+	20, // 24: thoughts.PostService.GetLikedPosts:input_type -> thoughts.GetPostsRequest
+	21, // 25: thoughts.PostService.GetHashtagPosts:input_type -> thoughts.GetHashtagPostsRequest
+	16, // 26: thoughts.PostService.GetPost:input_type -> thoughts.PostRequest
+	2,  // 27: thoughts.PostService.GetPostsByIds:input_type -> thoughts.Ids
+	16, // 28: thoughts.PostService.DeletePost:input_type -> thoughts.PostRequest
+	16, // 29: thoughts.PostService.LikePost:input_type -> thoughts.PostRequest
+	16, // 30: thoughts.PostService.UnlikePost:input_type -> thoughts.PostRequest
+	16, // 31: thoughts.PostService.RepostPost:input_type -> thoughts.PostRequest
+	16, // 32: thoughts.PostService.RemoveRepost:input_type -> thoughts.PostRequest
+	22, // 33: thoughts.PostService.GetReplies:input_type -> thoughts.GetRepliesRequest
+	25, // 34: thoughts.PostService.SearchHashtags:input_type -> thoughts.SearchHashtagsRequest
+	26, // 35: thoughts.ImageService.VerifyUpload:input_type -> thoughts.VerifyUploadRequest
+	27, // 36: thoughts.ImageService.ConsumeUpload:input_type -> thoughts.ConsumeUploadRequest
+	28, // 37: thoughts.ImageService.DeleteImage:input_type -> thoughts.DeleteImageRequest
+	29, // 38: thoughts.SearchService.SearchUsers:input_type -> thoughts.SearchRequest
+	29, // 39: thoughts.SearchService.SearchPosts:input_type -> thoughts.SearchRequest
+	29, // 40: thoughts.SearchService.SearchHashtags:input_type -> thoughts.SearchRequest
+	30, // 41: thoughts.NotificationService.GetNotifications:input_type -> thoughts.GetNotificationsRequest
+	33, // 42: thoughts.NotificationService.MarkNotificationRead:input_type -> thoughts.NotificationRequest
+	3,  // 43: thoughts.NotificationService.GetUnreadCount:input_type -> thoughts.UserRequest
+	1,  // 44: thoughts.UserService.CreateUser:output_type -> thoughts.Identifier
+	4,  // 45: thoughts.UserService.GetUser:output_type -> thoughts.User
+	4,  // 46: thoughts.UserService.GetUserByUsername:output_type -> thoughts.User
+	7,  // 47: thoughts.UserService.GetUsersByIds:output_type -> thoughts.Users
+	10, // 48: thoughts.UserService.UpdateUser:output_type -> thoughts.Empty
+	7,  // 49: thoughts.UserService.GetFollowing:output_type -> thoughts.Users
+	7,  // 50: thoughts.UserService.GetFollowers:output_type -> thoughts.Users
+	10, // 51: thoughts.UserService.FollowUser:output_type -> thoughts.Empty
+	10, // 52: thoughts.UserService.UnfollowUser:output_type -> thoughts.Empty
+	7,  // 53: thoughts.UserService.SearchUsers:output_type -> thoughts.Users
+	13, // 54: thoughts.AuthService.CreateSession:output_type -> thoughts.Session
+	13, // 55: thoughts.AuthService.GetSession:output_type -> thoughts.Session
+	10, // 56: thoughts.AuthService.DeleteSession:output_type -> thoughts.Empty
+	14, // 57: thoughts.AuthService.GetSessions:output_type -> thoughts.Sessions
+	1,  // 58: thoughts.PostService.CreatePost:output_type -> thoughts.Identifier
+	19, // 59: thoughts.PostService.GetFeed:output_type -> thoughts.Posts
+	19, // 60: thoughts.PostService.GetPosts:output_type -> thoughts.Posts
+	19, // 61: thoughts.PostService.GetLikedPosts:output_type -> thoughts.Posts
+	19, // 62: thoughts.PostService.GetHashtagPosts:output_type -> thoughts.Posts
+	17, // 63: thoughts.PostService.GetPost:output_type -> thoughts.Post
+	19, // 64: thoughts.PostService.GetPostsByIds:output_type -> thoughts.Posts
+	10, // 65: thoughts.PostService.DeletePost:output_type -> thoughts.Empty
+	10, // 66: thoughts.PostService.LikePost:output_type -> thoughts.Empty
+	10, // 67: thoughts.PostService.UnlikePost:output_type -> thoughts.Empty
+	10, // 68: thoughts.PostService.RepostPost:output_type -> thoughts.Empty
+	10, // 69: thoughts.PostService.RemoveRepost:output_type -> thoughts.Empty
+	19, // 70: thoughts.PostService.GetReplies:output_type -> thoughts.Posts
+	24, // 71: thoughts.PostService.SearchHashtags:output_type -> thoughts.Hashtags
+	10, // 72: thoughts.ImageService.VerifyUpload:output_type -> thoughts.Empty
+	10, // 73: thoughts.ImageService.ConsumeUpload:output_type -> thoughts.Empty
+	10, // 74: thoughts.ImageService.DeleteImage:output_type -> thoughts.Empty
+	7,  // 75: thoughts.SearchService.SearchUsers:output_type -> thoughts.Users
+	19, // 76: thoughts.SearchService.SearchPosts:output_type -> thoughts.Posts
+	24, // 77: thoughts.SearchService.SearchHashtags:output_type -> thoughts.Hashtags
+	32, // 78: thoughts.NotificationService.GetNotifications:output_type -> thoughts.Notifications
+	10, // 79: thoughts.NotificationService.MarkNotificationRead:output_type -> thoughts.Empty
+	34, // 80: thoughts.NotificationService.GetUnreadCount:output_type -> thoughts.UnreadCountResponse
+	44, // [44:81] is the sub-list for method output_type
+	7,  // [7:44] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_pkg_pb_thoughts_proto_init() }
@@ -2153,9 +2500,9 @@ func file_pkg_pb_thoughts_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_pb_thoughts_proto_rawDesc), len(file_pkg_pb_thoughts_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   30,
+			NumMessages:   35,
 			NumExtensions: 0,
-			NumServices:   5,
+			NumServices:   6,
 		},
 		GoTypes:           file_pkg_pb_thoughts_proto_goTypes,
 		DependencyIndexes: file_pkg_pb_thoughts_proto_depIdxs,
