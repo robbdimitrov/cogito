@@ -17,6 +17,9 @@ import (
 	"github.com/valkey-io/valkey-go"
 
 	eventsservice "thoughts/eventsservice"
+	"thoughts/eventsservice/internal/feed"
+	feedstore "thoughts/eventsservice/internal/feed/store/postgres"
+	"thoughts/eventsservice/internal/notifications"
 	notificationstore "thoughts/eventsservice/internal/notifications/store/postgres"
 )
 
@@ -25,7 +28,7 @@ func main() {
 
 	port := envOrDefault("PORT", "5050")
 	dbURL := os.Getenv("DATABASE_URL")
-	valkeyURL := envOrDefault("VALKEY_URL", "localhost:6379")
+	valkeyURL := envOrDefault("VALKEY_URL", "redis://localhost:6379")
 	brokers := splitCSV(envOrDefault("REDPANDA_BROKERS", "localhost:9092"))
 	threshold := envIntOrDefault("FAN_OUT_THRESHOLD", 10000)
 	_ = threshold
@@ -44,7 +47,11 @@ func main() {
 	}
 	defer db.Close()
 
-	valkeyClient, err := valkey.NewClient(valkey.ClientOption{InitAddress: []string{valkeyURL}})
+	valkeyOptions, err := valkey.ParseURL(valkeyURL)
+	if err != nil {
+		log.Fatalf("parsing valkey URL: %v", err)
+	}
+	valkeyClient, err := valkey.NewClient(valkeyOptions)
 	if err != nil {
 		log.Fatalf("initializing valkey client: %v", err)
 	}
@@ -64,8 +71,15 @@ func main() {
 
 	go runCleanup(ctx, db)
 
-	repo := notificationstore.NewStore(db)
-	service := eventsservice.NewService(repo)
+	notifRepo := notificationstore.NewStore(db)
+	feedRepo := feedstore.NewStore(db)
+	notifConsumer := notifications.NewConsumer(notifKafka, notifRepo)
+	feedConsumer := feed.NewConsumer(feedKafka, feedRepo, feed.NewValkeyFollowerCountCache(valkeyClient), threshold)
+
+	go notifConsumer.Run(ctx)
+	go feedConsumer.Run(ctx)
+
+	service := eventsservice.NewService(notifRepo)
 	server := eventsservice.CreateServer(service)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", port))
@@ -90,6 +104,7 @@ func openKafkaClient(brokers []string, groupID string) (*kgo.Client, error) {
 	return kgo.NewClient(
 		kgo.SeedBrokers(brokers...),
 		kgo.ConsumerGroup(groupID),
+		kgo.DisableAutoCommit(),
 	)
 }
 
