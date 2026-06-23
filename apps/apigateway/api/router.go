@@ -19,6 +19,7 @@ type router struct {
 	post             *postController
 	user             *userController
 	search           *searchController
+	notification     *notificationController
 	imageAddr        string
 	imageHTTP        *http.Client
 	imageHTTPBreaker *circuitBreaker
@@ -34,7 +35,7 @@ func imageGRPCAddress(imageHTTPAddr string) string {
 	return imageHTTPAddr
 }
 
-func newRouter(authAddr, postAddr, userAddr, imageAddr, searchAddr string) *router {
+func newRouter(authAddr, postAddr, userAddr, imageAddr, searchAddr, eventsAddr string) *router {
 	var searchClient pb.SearchServiceClient
 	if searchAddr != "" {
 		searchConn, err := newGatewayClient(searchAddr, "search")
@@ -50,6 +51,7 @@ func newRouter(authAddr, postAddr, userAddr, imageAddr, searchAddr string) *rout
 		post:             newPostController(postAddr, userAddr, imageAddr, searchClient),
 		user:             newUserController(userAddr, authAddr, imageAddr, searchClient),
 		search:           newSearchController(searchClient),
+		notification:     newNotificationController(eventsAddr),
 		imageAddr:        imageAddr,
 		imageHTTPBreaker: imageBreaker,
 		imageHTTP: &http.Client{
@@ -109,6 +111,11 @@ func (r *router) configureRoutes(mux *http.ServeMux) {
 
 	// Search
 	mux.HandleFunc("GET /search", r.search.search)
+
+	// Notifications
+	mux.HandleFunc("GET /notifications", r.notification.getNotifications)
+	mux.HandleFunc("PUT /notifications/{id}/read", r.notification.markNotificationRead)
+	mux.HandleFunc("GET /notifications/unread-count", r.notification.getUnreadCount)
 
 	// Image Gateway Orchestration
 	mux.HandleFunc("POST /uploads", r.proxyImageUpload)

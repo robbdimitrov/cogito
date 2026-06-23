@@ -85,13 +85,21 @@ Rate limit key: `{policy}:user:{id}` (authenticated) → `{policy}:session:{cook
 | POST | /users/{userId}/following | Follow user |
 | DELETE | /users/{userId}/following | Unfollow user |
 
+#### Notifications
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | /notifications | Keyset-paginated notifications for the authenticated user |
+| PUT | /notifications/{id}/read | Mark one authenticated user's notification as read |
+| GET | /notifications/unread-count | Count unread notifications for the authenticated user |
+
 #### Posts
 
 | Method | Path | Purpose |
 |---|---|---|
 | POST | /posts | Create post (content, mediaKey?, inReplyToId?, quoteOfId?) |
 | GET | /posts | Home feed (alias for /posts/feed) |
-| GET | /posts/feed | Non-reply posts, cursor-paginated |
+| GET | /posts/feed | Non-reply posts from followed accounts, cursor-paginated; backed by a materialized feed table with pull-merge for high-follower accounts |
 | GET | /posts/{postId} | Get single post |
 | DELETE | /posts/{postId} | Delete own post; removes associated image via ImageService |
 | POST | /posts/{postId}/likes | Like post (idempotent) |
