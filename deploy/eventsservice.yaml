@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: eventsservice
+  labels:
+    app: thoughts
+    tier: backend
+    component: eventsservice
+spec:
+  selector:
+    app: thoughts
+    tier: backend
+    component: eventsservice
+  ports:
+  - port: 5050
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eventsservice
+  labels:
+    app: thoughts
+    tier: backend
+    component: eventsservice
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: thoughts
+      tier: backend
+      component: eventsservice
+  template:
+    metadata:
+      labels:
+        app: thoughts
+        tier: backend
+        component: eventsservice
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 60
+      containers:
+      - name: eventsservice
+        image: localhost:5000/thoughts/eventsservice
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5050
+        resources:
+          limits:
+            memory: 128Mi
+          requests:
+            memory: 64Mi
+            cpu: 100m
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: thoughts-db-secret
+              key: database-url
+        - name: VALKEY_URL
+          value: redis://dragonfly:6379
+        - name: REDPANDA_BROKERS
+          value: broker:9092
+        - name: FAN_OUT_THRESHOLD
+          value: "10000"
+        - name: PORT
+          value: "5050"
+        - name: INTERNAL_GRPC_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: thoughts-db-secret
+              key: internal-grpc-token
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        livenessProbe:
+          tcpSocket:
+            port: 5050
+          initialDelaySeconds: 10
+          periodSeconds: 15
+        readinessProbe:
+          tcpSocket:
+            port: 5050
+          initialDelaySeconds: 5
+          periodSeconds: 10

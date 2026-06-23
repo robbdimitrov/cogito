@@ -59,7 +59,7 @@ Reposts resolve to the canonical original: `repost_of_id = COALESCE(source.repos
 | Replies | `in_reply_to_id = parent_id` | created ASC, id ASC |
 | Hashtag posts | Posts in post_hashtags for tag | created DESC, id DESC |
 
-Feed includes all non-reply posts from all users — there is no follow-graph filter in the feed query.
+Home feed is a hybrid follow graph query. Regular authors are pushed into the `feed` table for each follower plus the author; authors with `fan_out_disabled = true` are pulled in real time from the posts table for followers. Replies do not fan out. Reposts do fan out and provide a discovery path beyond original follows.
 
 ## Post Counters
 
@@ -109,16 +109,32 @@ Gateway also calls `ImageService.DeleteImage` when deleting a post with a `media
 | Tag search | Trigram (GIN index) + ILIKE; ordered by similarity DESC, post_count DESC |
 | `GetHashtagPosts` validation | Tag must match `^[A-Za-z0-9_]{1,50}$` |
 
-## Search Indexing
+## Event Relay and Search Indexing
 
-1. User created or profile updated → `INSERT INTO search_outbox(entity_type='user', entity_id)` + `pg_notify('search_outbox', '')`.
-2. Post created or deleted → `INSERT INTO search_outbox(entity_type='post', entity_id)` + notify.
-3. Each hashtag extracted at post creation → `INSERT INTO search_outbox(entity_type='hashtag', entity_id)` + notify.
-4. Worker dequeues `DISTINCT ON (entity_type, entity_id)` rows (LIMIT 100, `FOR UPDATE SKIP LOCKED`).
-5. Entity fetched from DB; if present → upsert to Meilisearch; if absent → remove from Meilisearch.
-6. On failure: requeue with `attempts + 1`. Give up after 5 attempts.
-7. Retry backoff: base 1 s, doubles per retry, max 30 s.
-8. Startup backfill: all entities streamed in 500-record batches under advisory lock.
+1. Mutating services insert `outbox(topic, payload)` rows in the same transaction as the domain change.
+2. Redpanda Connect reads PostgreSQL CDC for new `outbox` rows and publishes the payload to the row's topic.
+3. Topic `entity-changes` carries user, post, and hashtag upsert/delete events for Meilisearch sync, feed fan-out, and media cleanup.
+4. Topic `activity` carries like, unlike, repost, unrepost, reply, unreply, follow, and unfollow events for notifications and feed maintenance.
+5. Search sync is idempotent: upserts replace Meilisearch documents and deletes remove missing documents. Hashtags with `post_count = 0` are deleted from search.
+6. Backfill is a one-shot Redpanda Connect job that emits current users, posts, and hashtags to `entity-changes`.
+
+## Notifications
+
+| Event | Behavior |
+|---|---|
+| like/repost/reply/follow | Create a notification unless actor and recipient are the same user |
+| unlike/unrepost/unreply/unfollow | Delete the matching notification |
+| post delete | Delete like, repost, and reply notifications tied to the deleted post |
+
+Notification inserts use the outbox row ID as `external_id`, so replayed messages are discarded by a unique constraint. If a parent post deletion cascades reply rows before a corresponding unreply event is emitted, stale reply notifications are cleaned up only when an entity delete event for that reply is observed.
+
+## Feed Fan-Out
+
+1. New non-reply post/repost from a regular author writes `feed` rows for all followers and the author.
+2. If follower count is at least `FAN_OUT_THRESHOLD`, the author is marked `fan_out_disabled` and future feed reads pull that author's posts directly for followers.
+3. Following a regular author backfills the follower's feed with the author's latest 50 non-reply posts.
+4. Unfollowing prunes that followee's materialized feed rows for the follower.
+5. Post and user deletes rely on database CASCADE to remove feed rows; consumers do not separately delete them.
 
 ## Image Lifecycle
 

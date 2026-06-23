@@ -12,7 +12,9 @@
 | Upload | `uploads` | Staged image metadata |
 | Hashtag | `hashtags` | Unique tag extracted from post content |
 | PostHashtag | `post_hashtags` | Post–hashtag association |
-| SearchOutbox | `search_outbox` | Async Meilisearch indexing queue |
+| Outbox | `outbox` | Append-only CDC queue for Redpanda topics |
+| Notification | `notifications` | User-facing activity notifications |
+| FeedEntry | `feed` | Materialized home-feed membership |
 
 ## Entity Relationships
 
@@ -22,7 +24,9 @@ users ──< followers (follower → followed)
 users ──< posts ──< likes
                  ──< post_hashtags >── hashtags
 users ──< uploads
-search_outbox (outbox queue for Meilisearch sync)
+outbox (append-only CDC source for Redpanda relay)
+notifications (activity records)
+feed (materialized home-feed rows)
 ```
 
 ## Schema
@@ -39,6 +43,7 @@ search_outbox (outbox queue for Meilisearch sync)
 | bio | varchar(255) | DEFAULT '' |
 | profile_photo_key | varchar(255) | DEFAULT '' |
 | cover_photo_key | varchar(255) | DEFAULT '' |
+| fan_out_disabled | boolean | NOT NULL, DEFAULT false |
 | created | timestamptz | NOT NULL, DEFAULT now() |
 
 ### sessions
@@ -112,23 +117,46 @@ Unique: `(user_id, follower_id)`. Check: `user_id <> follower_id`.
 
 Primary key: `(post_id, hashtag_id)`.
 
-### search_outbox
+### outbox
 
 | Column | Type | Constraints |
 |---|---|---|
 | id | bigserial | PRIMARY KEY |
-| entity_type | varchar(20) | NOT NULL |
-| entity_id | text | NOT NULL |
-| attempts | integer | NOT NULL, DEFAULT 0 |
-| created_at | timestamptz | NOT NULL, DEFAULT now() |
+| topic | varchar(50) | NOT NULL |
+| payload | jsonb | NOT NULL |
+| created | timestamptz | NOT NULL, DEFAULT now() |
 
-Entity types: `'user'` (written by userservice on create/update), `'post'`, `'hashtag'` (written by postservice on create/delete).
+Topics: `entity-changes` for search/feed entity mutations and `activity` for notification/feed relationship events. Rows are append-only and retained for 7 days after CDC relay.
+
+### notifications
+
+| Column | Type | Constraints |
+|---|---|---|
+| id | bigserial | PRIMARY KEY |
+| external_id | bigint | NOT NULL, UNIQUE — outbox ID for idempotency |
+| user_id | integer | FK → users.id ON DELETE CASCADE |
+| actor_id | integer | FK → users.id ON DELETE CASCADE |
+| type | varchar(20) | NOT NULL |
+| entity_id | varchar(255) | NOT NULL |
+| read | boolean | NOT NULL, DEFAULT false |
+| created | timestamptz | NOT NULL, DEFAULT now() |
+
+### feed
+
+| Column | Type | Constraints |
+|---|---|---|
+| user_id | integer | NOT NULL, FK → users.id ON DELETE CASCADE |
+| post_id | integer | NOT NULL, FK → posts.id ON DELETE CASCADE |
+| created | timestamptz | NOT NULL |
+
+Primary key: `(user_id, post_id)`. Feed rows are retained for 30 days; post/user deletes cascade.
 
 ## Indexes
 
 | Table | Index | Purpose |
 |---|---|---|
 | users | `lower(username) text_pattern_ops` | LIKE prefix search on username |
+| users | `users_fan_out_disabled_idx` partial on `(id)` | High-follower feed pull path |
 | sessions | `sessions_user_id_idx` | Session lookup by user |
 | posts | `posts_user_id_created_idx (user_id, created DESC)` | User timeline pagination |
 | posts | `posts_created_idx (created DESC) WHERE in_reply_to_id IS NULL` | Feed ordering (partial) |
@@ -139,7 +167,10 @@ Entity types: `'user'` (written by userservice on create/update), `'post'`, `'ha
 | followers | `followers_follower_id_idx` | User's following list |
 | hashtags | `hashtags_name_trgm_idx` GIN trgm on `name` | Trigram typeahead |
 | post_hashtags | `post_hashtags_hashtag_id_idx` | Tag's posts |
-| search_outbox | `search_outbox_created_idx` | Worker polling order |
+| outbox | `outbox_created_idx` | CDC retention cleanup |
+| notifications | `notifications_user_id_created_idx` | Notification pagination |
+| notifications | `notifications_type_entity_idx` | Event-based notification cleanup |
+| feed | `feed_user_id_created_idx` | Home feed pagination |
 
 ## Meilisearch Indexes
 
@@ -155,6 +186,7 @@ Entity types: `'user'` (written by userservice on create/update), `'post'`, `'ha
 - A post is exactly one type: plain (content only), reply (content + in_reply_to_id), quote (content + quote_of_id), or repost (repost_of_id only). Repost exclusivity is enforced by DB CHECK; reply–quote exclusivity is enforced by the application.
 - Reposts resolve to the canonical original: `repost_of_id = COALESCE(source.repost_of_id, source.id)`. Chains never exceed one hop.
 - User counters (posts, likes, following, followers) and boolean states (liked, reposted, followed) are computed at read time via subqueries — no stored counter columns.
+- `fan_out_disabled` is one-way once set; high-follower authors are pulled at feed read time instead of materialized into every follower's feed.
 - Uploads are staged at `staging/{filename}` in S3 until `ConsumeUpload` moves them to `{filename}`.
 - Hashtag names are stored lowercase and are globally unique.
 - `posts.hashtags` (varchar array) mirrors the post_hashtags relational data but is not actively written by the application; the `hashtags` and `post_hashtags` tables are the authoritative source.

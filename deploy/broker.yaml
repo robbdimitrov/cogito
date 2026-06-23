@@ -1,0 +1,330 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: broker-pipelines
+  labels:
+    app: thoughts
+    tier: broker
+data:
+  relay.yaml: |
+    input:
+      pg_cdc:
+        dsn: "${POSTGRES_DSN}"
+        slot_name: outbox_relay
+        publication_name: outbox_relay
+        tables: [public.outbox]
+    pipeline:
+      processors:
+      - filter:
+          check: meta("operation") == "INSERT"
+      - mapping: |
+          root = this.data.payload.parse_json()
+          root._outbox_id = this.data.id
+          meta topic = this.data.topic
+    output:
+      kafka_franz:
+        seed_brokers: ["${REDPANDA_BROKERS}"]
+        topic: ${! meta("topic") }
+        key: ${! json("_outbox_id") }
+        idempotent: true
+        max_in_flight: 1
+  sync-search.yaml: |
+    input:
+      kafka_franz:
+        seed_brokers: ["${REDPANDA_BROKERS}"]
+        topics: [entity-changes]
+        consumer_group: sync-search
+    output:
+      switch:
+        cases:
+        - check: this.table == "users" && this.op == "upsert"
+          output:
+            http_client:
+              url: ${MEILI_HOST}/indexes/users/documents
+              verb: POST
+              headers:
+                Authorization: Bearer ${MEILI_MASTER_KEY}
+                Content-Type: application/json
+        - check: this.table == "posts" && this.op == "upsert" && !this.exists("in_reply_to_id") && !this.exists("repost_of_id")
+          output:
+            http_client:
+              url: ${MEILI_HOST}/indexes/posts/documents
+              verb: POST
+              headers:
+                Authorization: Bearer ${MEILI_MASTER_KEY}
+                Content-Type: application/json
+        - check: this.table == "posts" && this.op == "delete" && !this.exists("in_reply_to_id") && !this.exists("repost_of_id")
+          output:
+            http_client:
+              url: ${MEILI_HOST}/indexes/posts/documents/${! json("id") }
+              verb: DELETE
+              headers:
+                Authorization: Bearer ${MEILI_MASTER_KEY}
+        - check: this.table == "hashtags" && this.op == "upsert" && this.post_count > 0
+          output:
+            http_client:
+              url: ${MEILI_HOST}/indexes/hashtags/documents
+              verb: POST
+              headers:
+                Authorization: Bearer ${MEILI_MASTER_KEY}
+                Content-Type: application/json
+        - check: this.table == "hashtags" && this.op == "upsert" && this.post_count == 0
+          output:
+            http_client:
+              url: ${MEILI_HOST}/indexes/hashtags/documents/${! json("name") }
+              verb: DELETE
+              headers:
+                Authorization: Bearer ${MEILI_MASTER_KEY}
+  cleanup-s3.yaml: |
+    input:
+      kafka_franz:
+        seed_brokers: ["${REDPANDA_BROKERS}"]
+        topics: [entity-changes]
+        consumer_group: cleanup-s3
+    pipeline:
+      processors:
+      - filter:
+          check: this.table == "posts" && this.op == "delete" && this.media_key != ""
+    output:
+      http_client:
+        url: ${S3_ENDPOINT}/${S3_BUCKET}/${! json("media_key") }
+        verb: DELETE
+  backfill.yaml: |
+    input:
+      sql_select:
+        driver: postgres
+        dsn: "${POSTGRES_DSN}"
+        query: |
+          SELECT 'entity-changes' AS topic,
+                 jsonb_build_object('table','users','op','upsert','id',id,'username',username,'name',name,'bio',bio,'created',created) AS payload
+          FROM users
+          UNION ALL
+          SELECT 'entity-changes' AS topic,
+                 jsonb_build_object('table','posts','op','upsert','id',p.id,'author_id',p.user_id,'content',p.content,'hashtags',COALESCE(jsonb_agg(h.name) FILTER (WHERE h.name IS NOT NULL), '[]'::jsonb),'created',p.created) AS payload
+          FROM posts p
+          LEFT JOIN post_hashtags ph ON ph.post_id = p.id
+          LEFT JOIN hashtags h ON h.id = ph.hashtag_id
+          WHERE p.in_reply_to_id IS NULL AND p.repost_of_id IS NULL
+          GROUP BY p.id
+          UNION ALL
+          SELECT 'entity-changes' AS topic,
+                 jsonb_build_object('table','hashtags','op','upsert','name',h.name,'post_count',COUNT(ph.post_id)) AS payload
+          FROM hashtags h
+          LEFT JOIN post_hashtags ph ON ph.hashtag_id = h.id
+          GROUP BY h.id, h.name
+        batch_count: 500
+    pipeline:
+      processors:
+      - mapping: |
+          root = this.payload.parse_json()
+          meta topic = this.topic
+    output:
+      kafka_franz:
+        seed_brokers: ["${REDPANDA_BROKERS}"]
+        topic: ${! meta("topic") }
+        key: ${! json("table") + ":" + json("id").or(json("name")) }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: broker
+  labels:
+    app: thoughts
+    tier: broker
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  selector:
+    app: thoughts
+    tier: broker
+  ports:
+  - name: kafka
+    port: 9092
+    targetPort: kafka
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: broker
+  labels:
+    app: thoughts
+    tier: broker
+spec:
+  serviceName: broker
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: thoughts
+      tier: broker
+  template:
+    metadata:
+      labels:
+        app: thoughts
+        tier: broker
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 60
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: broker
+        image: redpandadata/redpanda:latest
+        imagePullPolicy: IfNotPresent
+        command: ["redpanda"]
+        args:
+        - start
+        - --smp=1
+        - --memory=512M
+        - --reserve-memory=0M
+        - --overprovisioned
+        - --node-id=0
+        - --check=false
+        - --kafka-addr=PLAINTEXT://0.0.0.0:9092
+        - --advertise-kafka-addr=PLAINTEXT://broker-0.broker:9092
+        ports:
+        - name: kafka
+          containerPort: 9092
+        - name: admin
+          containerPort: 9644
+        resources:
+          limits:
+            memory: 512Mi
+          requests:
+            memory: 256Mi
+            cpu: 100m
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: broker-data
+          mountPath: /var/lib/redpanda/data
+        - name: tmp
+          mountPath: /tmp
+        startupProbe:
+          httpGet:
+            path: /v1/status/ready
+            port: 9644
+          failureThreshold: 30
+          periodSeconds: 2
+        readinessProbe:
+          httpGet:
+            path: /v1/status/ready
+            port: 9644
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /v1/status/ready
+            port: 9644
+          initialDelaySeconds: 10
+          periodSeconds: 15
+      volumes:
+      - name: tmp
+        emptyDir: {}
+  volumeClaimTemplates:
+  - metadata:
+      name: broker-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 2Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: connect
+  labels:
+    app: thoughts
+    tier: broker
+    component: connect
+spec:
+  replicas: 1
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: thoughts
+      tier: broker
+      component: connect
+  template:
+    metadata:
+      labels:
+        app: thoughts
+        tier: broker
+        component: connect
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 60
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: relay
+        image: redpandadata/connect:latest
+        imagePullPolicy: IfNotPresent
+        args: ["-c", "/pipelines/relay.yaml"]
+        env: &connect-env
+        - name: REDPANDA_BROKERS
+          value: broker:9092
+        - name: POSTGRES_DSN
+          valueFrom:
+            secretKeyRef:
+              name: thoughts-db-secret
+              key: database-url
+        - name: MEILI_HOST
+          value: http://meilisearch:7700
+        - name: MEILI_MASTER_KEY
+          valueFrom:
+            secretKeyRef:
+              name: thoughts-db-secret
+              key: meili-master-key
+        - name: S3_ENDPOINT
+          value: http://seaweedfs:8333
+        - name: S3_BUCKET
+          value: thoughts-images
+        securityContext: &connect-container-security
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts: &connect-volume-mounts
+        - name: broker-pipelines
+          mountPath: /pipelines
+          readOnly: true
+        - name: tmp
+          mountPath: /tmp
+      - name: sync-search
+        image: redpandadata/connect:latest
+        imagePullPolicy: IfNotPresent
+        args: ["-c", "/pipelines/sync-search.yaml"]
+        env: *connect-env
+        securityContext: *connect-container-security
+        volumeMounts: *connect-volume-mounts
+      - name: cleanup-s3
+        image: redpandadata/connect:latest
+        imagePullPolicy: IfNotPresent
+        args: ["-c", "/pipelines/cleanup-s3.yaml"]
+        env: *connect-env
+        securityContext: *connect-container-security
+        volumeMounts: *connect-volume-mounts
+      volumes:
+      - name: broker-pipelines
+        configMap:
+          name: broker-pipelines
+      - name: tmp
+        emptyDir: {}

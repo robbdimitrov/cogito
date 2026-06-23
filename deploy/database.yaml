@@ -56,6 +56,7 @@ spec:
       - name: database
         image: postgres:18.4-alpine
         imagePullPolicy: IfNotPresent
+        args: ["-c", "wal_level=logical"]
         ports:
         - name: postgres
           containerPort: 5432
