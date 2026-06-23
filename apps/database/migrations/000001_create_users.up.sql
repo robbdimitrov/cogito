@@ -7,8 +7,11 @@ CREATE TABLE users (
   bio varchar(255) DEFAULT '',
   profile_photo_key varchar(255) DEFAULT '',
   cover_photo_key varchar(255) DEFAULT '',
+  fan_out_disabled boolean NOT NULL DEFAULT false,
   created timestamptz NOT NULL DEFAULT now()
 );
+
+CREATE INDEX users_fan_out_disabled_idx ON users (id) WHERE fan_out_disabled = true;
 
 CREATE TABLE followers (
   user_id integer REFERENCES users ON DELETE CASCADE,

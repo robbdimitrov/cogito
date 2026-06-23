@@ -16,12 +16,11 @@ CREATE TABLE post_hashtags (
 
 CREATE INDEX post_hashtags_hashtag_id_idx ON post_hashtags (hashtag_id);
 
-CREATE TABLE search_outbox (
-  id bigserial PRIMARY KEY,
-  entity_type varchar(20) NOT NULL,
-  entity_id text NOT NULL,
-  attempts integer NOT NULL DEFAULT 0,
-  created_at timestamptz NOT NULL DEFAULT now()
+CREATE TABLE outbox (
+  id      bigserial PRIMARY KEY,
+  topic   varchar(50) NOT NULL,
+  payload jsonb NOT NULL,
+  created timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE INDEX search_outbox_created_idx ON search_outbox (created_at);
+CREATE INDEX outbox_created_idx ON outbox (created);
