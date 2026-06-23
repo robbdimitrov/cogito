@@ -41,12 +41,18 @@ impl UserDb for DbClient {
         .fetch_one(&mut *tx)
         .await?;
 
-        sqlx::query("INSERT INTO search_outbox (entity_type, entity_id) VALUES ('user', $1)")
-            .bind(id.to_string())
-            .execute(&mut *tx)
-            .await?;
-
-        sqlx::query("SELECT pg_notify('search_outbox', '')")
+        sqlx::query("INSERT INTO outbox (topic, payload) VALUES ($1, $2::jsonb)")
+            .bind("entity-changes")
+            .bind(
+                serde_json::json!({
+                    "table": "users",
+                    "op": "upsert",
+                    "id": id,
+                    "username": username,
+                    "name": name,
+                })
+                .to_string(),
+            )
             .execute(&mut *tx)
             .await?;
 
@@ -210,12 +216,18 @@ impl UserDb for DbClient {
         .execute(&mut *tx)
         .await?;
 
-        sqlx::query("INSERT INTO search_outbox (entity_type, entity_id) VALUES ('user', $1)")
-            .bind(user_id.to_string())
-            .execute(&mut *tx)
-            .await?;
-
-        sqlx::query("SELECT pg_notify('search_outbox', '')")
+        sqlx::query("INSERT INTO outbox (topic, payload) VALUES ($1, $2::jsonb)")
+            .bind("entity-changes")
+            .bind(
+                serde_json::json!({
+                    "table": "users",
+                    "op": "upsert",
+                    "id": user_id,
+                    "username": fields.username,
+                    "name": fields.name,
+                })
+                .to_string(),
+            )
             .execute(&mut *tx)
             .await?;
 
@@ -365,22 +377,58 @@ impl UserDb for DbClient {
     }
 
     async fn follow_user(&self, user_id: i32, follower_id: i32) -> Result<(), SqlxError> {
-        sqlx::query(
+        let mut tx = self.pool.begin().await?;
+
+        let result = sqlx::query(
             "INSERT INTO followers (user_id, follower_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
         )
         .bind(user_id)
         .bind(follower_id)
-        .execute(&self.pool)
+        .execute(&mut *tx)
         .await?;
+
+        if result.rows_affected() > 0 {
+            sqlx::query("INSERT INTO outbox (topic, payload) VALUES ($1, $2::jsonb)")
+                .bind("activity")
+                .bind(
+                    serde_json::json!({
+                        "op": "follow",
+                        "actor_id": follower_id,
+                        "recipient_id": user_id,
+                    })
+                    .to_string(),
+                )
+                .execute(&mut *tx)
+                .await?;
+        }
+
+        tx.commit().await?;
         Ok(())
     }
 
     async fn unfollow_user(&self, user_id: i32, follower_id: i32) -> Result<(), SqlxError> {
+        let mut tx = self.pool.begin().await?;
+
         sqlx::query("DELETE FROM followers WHERE user_id = $1 AND follower_id = $2")
             .bind(user_id)
             .bind(follower_id)
-            .execute(&self.pool)
+            .execute(&mut *tx)
             .await?;
+
+        sqlx::query("INSERT INTO outbox (topic, payload) VALUES ($1, $2::jsonb)")
+            .bind("activity")
+            .bind(
+                serde_json::json!({
+                    "op": "unfollow",
+                    "actor_id": follower_id,
+                    "recipient_id": user_id,
+                })
+                .to_string(),
+            )
+            .execute(&mut *tx)
+            .await?;
+
+        tx.commit().await?;
         Ok(())
     }
 
