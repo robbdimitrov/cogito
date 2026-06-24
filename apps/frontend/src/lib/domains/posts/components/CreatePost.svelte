@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Pen, Send, Image as ImageIcon, X } from "@lucide/svelte";
+  import { Pen, Send, ImageIcon, X } from "@lucide/svelte";
   import Avatar from "$lib/shared/components/ui/Avatar.svelte";
   import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
   import type { User } from "$lib/domains/users/model";
