@@ -1883,7 +1883,7 @@ func (x *GetNotificationsRequest) GetLimit() int32 {
 
 type Notification struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            int32                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	ExternalId    int64                  `protobuf:"varint,2,opt,name=external_id,json=externalId,proto3" json:"external_id,omitempty"`
 	UserId        int32                  `protobuf:"varint,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	ActorId       int32                  `protobuf:"varint,4,opt,name=actor_id,json=actorId,proto3" json:"actor_id,omitempty"`
@@ -1925,7 +1925,7 @@ func (*Notification) Descriptor() ([]byte, []int) {
 	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{31}
 }
 
-func (x *Notification) GetId() int32 {
+func (x *Notification) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
@@ -2035,7 +2035,7 @@ func (x *Notifications) GetNextCursor() string {
 
 type NotificationRequest struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
-	NotificationId int32                  `protobuf:"varint,1,opt,name=notification_id,json=notificationId,proto3" json:"notification_id,omitempty"`
+	NotificationId int64                  `protobuf:"varint,1,opt,name=notification_id,json=notificationId,proto3" json:"notification_id,omitempty"`
 	UserId         int32                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
@@ -2071,7 +2071,7 @@ func (*NotificationRequest) Descriptor() ([]byte, []int) {
 	return file_pkg_pb_thoughts_proto_rawDescGZIP(), []int{33}
 }
 
-func (x *NotificationRequest) GetNotificationId() int32 {
+func (x *NotificationRequest) GetNotificationId() int64 {
 	if x != nil {
 		return x.NotificationId
 	}
@@ -2275,7 +2275,7 @@ const file_pkg_pb_thoughts_proto_rawDesc = "" +
 	"\x06cursor\x18\x02 \x01(\tR\x06cursor\x12\x14\n" +
 	"\x05limit\x18\x03 \x01(\x05R\x05limit\"\xd2\x01\n" +
 	"\fNotification\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x1f\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1f\n" +
 	"\vexternal_id\x18\x02 \x01(\x03R\n" +
 	"externalId\x12\x17\n" +
 	"\auser_id\x18\x03 \x01(\x05R\x06userId\x12\x19\n" +
@@ -2289,7 +2289,7 @@ const file_pkg_pb_thoughts_proto_rawDesc = "" +
 	"\vnext_cursor\x18\x02 \x01(\tR\n" +
 	"nextCursor\"W\n" +
 	"\x13NotificationRequest\x12'\n" +
-	"\x0fnotification_id\x18\x01 \x01(\x05R\x0enotificationId\x12\x17\n" +
+	"\x0fnotification_id\x18\x01 \x01(\x03R\x0enotificationId\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x05R\x06userId\"+\n" +
 	"\x13UnreadCountResponse\x12\x14\n" +
 	"\x05count\x18\x01 \x01(\x05R\x05count2\xda\x04\n" +

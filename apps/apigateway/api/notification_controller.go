@@ -28,7 +28,7 @@ func newNotificationController(addr string) *notificationController {
 }
 
 type notification struct {
-	ID         int32  `json:"id"`
+	ID         int64  `json:"id"`
 	ExternalID int64  `json:"externalId"`
 	UserID     int32  `json:"userId"`
 	ActorID    int32  `json:"actorId"`
@@ -89,7 +89,7 @@ func (nc *notificationController) markNotificationRead(w http.ResponseWriter, r 
 	if !ok {
 		return
 	}
-	notificationID, err := strconv.ParseInt(r.PathValue("id"), 10, 32)
+	notificationID, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
 	if err != nil {
 		jsonError(w, http.StatusBadRequest, "Invalid notification ID")
 		return
@@ -105,7 +105,7 @@ func (nc *notificationController) markNotificationRead(w http.ResponseWriter, r 
 	defer cancel()
 
 	_, err = nc.client.MarkNotificationRead(ctx, &pb.NotificationRequest{
-		NotificationId: int32(notificationID),
+		NotificationId: notificationID,
 		UserId:         userID,
 	})
 	if err != nil {
