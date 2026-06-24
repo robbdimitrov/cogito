@@ -1,42 +1,47 @@
+# System files
 .DS_Store
 Thumbs.db
 
-# Node
-node_modules
-build
-dist
-
-# React
+# Build
+dist/
+build/
+.svelte-kit/
 .next/
-.eslintcache
-*.tsbuildinfo
-.env*.local
-coverage/
-
-# Rust
+bin/
 target/
 **/src/cogito.rs
-
-# Python
-venv
-__pycache__
-
-# Go
-bin
-vendor
-
-# Compiled binaries
 /apps/*/service
 /apps/*/*service
 /apps/*/*apigateway
 
-# Logs
+# Dependencies
+node_modules/
+vendor/
+venv/
+__pycache__/
+
+# Logs & Caches
+*.log
 npm-debug.log*
+.eslintcache
+*.tsbuildinfo
+coverage/
+
+# Environment files
+.env
+.env.*
+!.env.example
 
 # Editors
-.vscode
+.vscode/
 *.code-workspace
+.idea/
 *.sw*
+
+# AI Assistants
 .antigravitycli
 antigravity*
 .claude
+
+# Misc
+scratch/

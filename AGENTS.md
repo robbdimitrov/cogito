@@ -88,6 +88,11 @@ copied into that stage.
 - Comments explain constraints, invariants, security decisions, or non-obvious
   intent. Do not narrate straightforward code or preserve implementation
   history.
+- Do not suppress compiler, linter, type-checker, or test warnings to make
+  checks pass. Fix the underlying issue so changed code is correct,
+  warning-free, and error-free. Use a narrowly scoped suppression only when
+  required by an external API, generated code, or a documented false positive,
+  and explain why it is safe.
 - Write behavior-oriented tests for critical paths, complex logic, and risky
   failure modes. Do not chase coverage percentages.
 
