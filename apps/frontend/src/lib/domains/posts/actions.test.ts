@@ -72,6 +72,11 @@ describe("toggleLike", () => {
     expect(calledMethod).toBe("DELETE");
   });
 
+  it("returns 400 when liked field is missing", async () => {
+    const result = await toggleLike(makeEvent({ postId: "1" }));
+    expect(result).toMatchObject({ status: 400, data: { error: "Missing liked" } });
+  });
+
   it("maps HTTP errors from the API to a failure response", async () => {
     const result = await toggleLike(makeEvent({ postId: "1", liked: "false" }, 403));
     expect(result).toMatchObject({ status: 403 });
@@ -133,6 +138,11 @@ describe("toggleRepost", () => {
     const result = await toggleRepost(event);
     expect(result).toEqual({ success: true });
     expect(calledMethod).toBe("DELETE");
+  });
+
+  it("returns 400 when reposted field is missing", async () => {
+    const result = await toggleRepost(makeEvent({ postId: "1" }));
+    expect(result).toMatchObject({ status: 400, data: { error: "Missing reposted" } });
   });
 
   it("maps HTTP errors from the API to a failure response", async () => {

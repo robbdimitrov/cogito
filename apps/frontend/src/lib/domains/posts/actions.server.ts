@@ -14,8 +14,10 @@ export const toggleLike = async (event: RequestEvent) => {
   const { request } = event;
   const data = await request.formData();
   const postId = data.get("postId")?.toString();
-  const isLiked = data.get("liked") === "true";
+  const liked = data.get("liked")?.toString();
   if (!postId) return fail(400, { error: "Missing postId" });
+  if (liked === undefined) return fail(400, { error: "Missing liked" });
+  const isLiked = liked === "true";
 
   try {
     if (isLiked) {
@@ -33,8 +35,10 @@ export const toggleRepost = async (event: RequestEvent) => {
   const { request } = event;
   const data = await request.formData();
   const postId = data.get("postId")?.toString();
-  const isReposted = data.get("reposted") === "true";
+  const reposted = data.get("reposted")?.toString();
   if (!postId) return fail(400, { error: "Missing postId" });
+  if (reposted === undefined) return fail(400, { error: "Missing reposted" });
+  const isReposted = reposted === "true";
 
   try {
     if (isReposted) {
