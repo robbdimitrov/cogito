@@ -15,13 +15,13 @@
 </script>
 
 <svelte:head>
-  <title>Log in · Thoughts</title>
+  <title>Log in · Cogito</title>
 </svelte:head>
 
 <div class="flex min-h-[calc(100vh-4rem)]">
   <AuthHero
     eyebrow="Welcome back"
-    title="Thoughts"
+    title="Cogito"
     description="Pick up where the conversation left off."
     points={[
       "Share ideas before they fade",

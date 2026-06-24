@@ -8,7 +8,7 @@ import (
 	"os"
 	"os/signal"
 
-	"thoughts/postservice/post"
+	"cogito/postservice/post"
 )
 
 func main() {

@@ -11,7 +11,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	pb "thoughts/apigateway/genproto"
+	pb "cogito/apigateway/genproto"
 )
 
 type mockUserServiceClient struct {

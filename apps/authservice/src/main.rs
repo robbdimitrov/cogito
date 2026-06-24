@@ -1,6 +1,6 @@
 #[allow(clippy::all)]
 #[rustfmt::skip]
-pub mod thoughts;
+pub mod cogito;
 
 mod controller;
 mod db_client;
@@ -10,7 +10,7 @@ mod logging;
 use std::env;
 use std::sync::Arc;
 use std::time::Duration;
-use thoughts::auth_service_server::AuthServiceServer;
+use cogito::auth_service_server::AuthServiceServer;
 use tokio::sync::Semaphore;
 use tonic::transport::Server;
 

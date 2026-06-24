@@ -3,12 +3,12 @@ kind: Service
 metadata:
   name: apigateway
   labels:
-    app: thoughts
+    app: cogito
     tier: backend
     component: apigateway
 spec:
   selector:
-    app: thoughts
+    app: cogito
     tier: backend
     component: apigateway
   ports:
@@ -19,36 +19,36 @@ kind: Deployment
 metadata:
   name: apigateway
   labels:
-    app: thoughts
+    app: cogito
     tier: backend
     component: apigateway
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: thoughts
+      app: cogito
       tier: backend
       component: apigateway
   template:
     metadata:
       labels:
-        app: thoughts
+        app: cogito
         tier: backend
         component: apigateway
     spec:
       initContainers:
       - name: migration
-        image: localhost:5000/thoughts/database
+        image: localhost:5000/cogito/database
         imagePullPolicy: IfNotPresent
         env:
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: thoughts-db-secret
+              name: cogito-db-secret
               key: postgres-password
       containers:
       - name: apigateway
-        image: localhost:5000/thoughts/apigateway
+        image: localhost:5000/cogito/apigateway
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
@@ -72,7 +72,7 @@ spec:
         - name: INTERNAL_GRPC_TOKEN
           valueFrom:
             secretKeyRef:
-              name: thoughts-db-secret
+              name: cogito-db-secret
               key: internal-grpc-token
         - name: DRAGONFLY_URL
           value: "redis://dragonfly:6379"
@@ -81,7 +81,7 @@ spec:
         - name: SESSION_HMAC_SECRET
           valueFrom:
             secretKeyRef:
-              name: thoughts-db-secret
+              name: cogito-db-secret
               key: session-hmac-secret
         livenessProbe:
           httpGet:

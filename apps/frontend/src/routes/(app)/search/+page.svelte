@@ -34,7 +34,7 @@
 </script>
 
 <svelte:head>
-  <title>{q ? `${q} - Search` : "Search"} - Thoughts</title>
+  <title>{q ? `${q} - Search` : "Search"} - Cogito</title>
 </svelte:head>
 
 <main class="container mx-auto max-w-2xl px-3 py-3 sm:px-4 sm:py-6">

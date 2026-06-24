@@ -3,12 +3,12 @@ kind: Service
 metadata:
   name: eventsservice
   labels:
-    app: thoughts
+    app: cogito
     tier: backend
     component: eventsservice
 spec:
   selector:
-    app: thoughts
+    app: cogito
     tier: backend
     component: eventsservice
   ports:
@@ -19,7 +19,7 @@ kind: Deployment
 metadata:
   name: eventsservice
   labels:
-    app: thoughts
+    app: cogito
     tier: backend
     component: eventsservice
 spec:
@@ -27,13 +27,13 @@ spec:
   revisionHistoryLimit: 3
   selector:
     matchLabels:
-      app: thoughts
+      app: cogito
       tier: backend
       component: eventsservice
   template:
     metadata:
       labels:
-        app: thoughts
+        app: cogito
         tier: backend
         component: eventsservice
     spec:
@@ -41,7 +41,7 @@ spec:
       terminationGracePeriodSeconds: 60
       containers:
       - name: eventsservice
-        image: localhost:5000/thoughts/eventsservice
+        image: localhost:5000/cogito/eventsservice
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5050
@@ -55,7 +55,7 @@ spec:
         - name: DATABASE_URL
           valueFrom:
             secretKeyRef:
-              name: thoughts-db-secret
+              name: cogito-db-secret
               key: database-url
         - name: VALKEY_URL
           value: redis://dragonfly:6379
@@ -68,7 +68,7 @@ spec:
         - name: INTERNAL_GRPC_TOKEN
           valueFrom:
             secretKeyRef:
-              name: thoughts-db-secret
+              name: cogito-db-secret
               key: internal-grpc-token
         securityContext:
           allowPrivilegeEscalation: false

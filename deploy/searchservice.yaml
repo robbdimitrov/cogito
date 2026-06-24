@@ -3,12 +3,12 @@ kind: Service
 metadata:
   name: searchservice
   labels:
-    app: thoughts
+    app: cogito
     tier: backend
     component: searchservice
 spec:
   selector:
-    app: thoughts
+    app: cogito
     tier: backend
     component: searchservice
   ports:
@@ -19,26 +19,26 @@ kind: Deployment
 metadata:
   name: searchservice
   labels:
-    app: thoughts
+    app: cogito
     tier: backend
     component: searchservice
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: thoughts
+      app: cogito
       tier: backend
       component: searchservice
   template:
     metadata:
       labels:
-        app: thoughts
+        app: cogito
         tier: backend
         component: searchservice
     spec:
       containers:
       - name: searchservice
-        image: localhost:5000/thoughts/searchservice
+        image: localhost:5000/cogito/searchservice
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5050
@@ -52,19 +52,19 @@ spec:
         - name: DATABASE_URL
           valueFrom:
             secretKeyRef:
-              name: thoughts-db-secret
+              name: cogito-db-secret
               key: database-url
         - name: MEILI_HOST
           value: http://meilisearch:7700
         - name: MEILI_MASTER_KEY
           valueFrom:
             secretKeyRef:
-              name: thoughts-db-secret
+              name: cogito-db-secret
               key: meili-master-key
         - name: INTERNAL_GRPC_TOKEN
           valueFrom:
             secretKeyRef:
-              name: thoughts-db-secret
+              name: cogito-db-secret
               key: internal-grpc-token
         livenessProbe:
           tcpSocket:

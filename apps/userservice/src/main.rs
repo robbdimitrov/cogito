@@ -6,7 +6,7 @@ pub mod logging;
 pub mod pagination;
 #[allow(clippy::all)]
 #[rustfmt::skip]
-pub mod thoughts;
+pub mod cogito;
 pub mod utils;
 
 #[cfg(test)]
@@ -17,7 +17,7 @@ use tokio::signal;
 use tonic::transport::Server;
 
 use controller::Controller;
-use thoughts::user_service_server::UserServiceServer;
+use cogito::user_service_server::UserServiceServer;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

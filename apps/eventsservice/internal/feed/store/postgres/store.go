@@ -7,7 +7,7 @@ import (
 
 	"github.com/jackc/pgx/v4/pgxpool"
 
-	"thoughts/eventsservice/internal/feed"
+	"cogito/eventsservice/internal/feed"
 )
 
 const bulkInsertBatchSize = 1000

@@ -8,8 +8,8 @@ use tonic::Request;
 use crate::blobstore::BlobStore;
 use crate::db_client::ImageDb;
 use crate::grpc::ImageGrpcService;
-use crate::thoughts::image_service_server::ImageService;
-use crate::thoughts::{ConsumeUploadRequest, DeleteImageRequest, VerifyUploadRequest};
+use crate::cogito::image_service_server::ImageService;
+use crate::cogito::{ConsumeUploadRequest, DeleteImageRequest, VerifyUploadRequest};
 
 struct MockDb {
     uploads: TokioMutex<Vec<(String, i32)>>,

@@ -1,4 +1,4 @@
-module thoughts/postservice
+module cogito/postservice
 
 go 1.26
 

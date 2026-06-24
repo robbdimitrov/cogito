@@ -1,6 +1,6 @@
-# Thoughts
+# Cogito
 
-**Thoughts** is a full-stack post-sharing platform built with a production-grade microservices architecture. Combining high-performance Go and Rust gRPC backends with a SvelteKit frontend, it provides a seamless experience for users to create, browse, and interact with posts.
+**Cogito** is a full-stack post-sharing platform built with a production-grade microservices architecture. Combining high-performance Go and Rust gRPC backends with a SvelteKit frontend, it provides a seamless experience for users to create, browse, and interact with posts.
 
 ## Features
 
@@ -121,15 +121,15 @@ Deploy the application to your active Kubernetes cluster using the provided scri
 ./scripts/deploy.sh
 ```
 
-The script builds the Docker images, creates the Kubernetes namespace (`thoughts` by default) and resources, waits for pods to be ready, and starts a port-forward to the frontend at http://localhost:8080/. It is idempotent and safe to re-run for updates.
+The script builds the Docker images, creates the Kubernetes namespace (`cogito` by default) and resources, waits for pods to be ready, and starts a port-forward to the frontend at http://localhost:8080/. It is idempotent and safe to re-run for updates.
 
 ## Cleanup
 
 To remove all deployed resources and the namespace:
 
 ```sh
-kubectl delete -f ./deploy -n thoughts
-kubectl delete namespace thoughts
+kubectl delete -f ./deploy -n cogito
+kubectl delete namespace cogito
 ```
 
 ## Testing

@@ -3,8 +3,8 @@ use tonic::{Request, Response, Status};
 
 use crate::blobstore::BlobStore;
 use crate::db_client::ImageDb;
-use crate::thoughts::image_service_server::ImageService;
-use crate::thoughts::{ConsumeUploadRequest, DeleteImageRequest, Empty, VerifyUploadRequest};
+use crate::cogito::image_service_server::ImageService;
+use crate::cogito::{ConsumeUploadRequest, DeleteImageRequest, Empty, VerifyUploadRequest};
 
 pub struct ImageGrpcService<D: ImageDb> {
     db: D,
@@ -30,7 +30,7 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
             .verify_upload(&req.filename, req.user_id)
             .await
             .map_err(|e| {
-                tracing::warn!(request_id = %request_id, method = "/thoughts.ImageService/VerifyUpload", error = %e, "verifying upload failed");
+                tracing::warn!(request_id = %request_id, method = "/cogito.ImageService/VerifyUpload", error = %e, "verifying upload failed");
                 Status::internal("Internal server error.")
             })?;
 
@@ -51,7 +51,7 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
             .consume_upload(&req.filename)
             .await
             .map_err(|e| {
-                tracing::warn!(request_id = %request_id, method = "/thoughts.ImageService/ConsumeUpload", error = %e, "consuming upload failed");
+                tracing::warn!(request_id = %request_id, method = "/cogito.ImageService/ConsumeUpload", error = %e, "consuming upload failed");
                 Status::internal("Internal server error.")
             })?;
 
@@ -62,7 +62,7 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
             )
             .await
             .map_err(|e| {
-                tracing::warn!(request_id = %request_id, method = "/thoughts.ImageService/ConsumeUpload", error = %e, "promoting staged upload failed");
+                tracing::warn!(request_id = %request_id, method = "/cogito.ImageService/ConsumeUpload", error = %e, "promoting staged upload failed");
                 Status::internal("Internal server error.")
             })?;
 
@@ -71,7 +71,7 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
             .delete(&format!("staging/{}", req.filename))
             .await
         {
-            tracing::warn!(request_id = %request_id, method = "/thoughts.ImageService/ConsumeUpload", error = %e, "deleting staged upload failed");
+            tracing::warn!(request_id = %request_id, method = "/cogito.ImageService/ConsumeUpload", error = %e, "deleting staged upload failed");
         }
 
         Ok(Response::new(Empty {}))
@@ -85,7 +85,7 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
         let req = request.into_inner();
 
         if let Err(e) = self.db.consume_upload(&req.filename).await {
-            tracing::warn!(request_id = %request_id, method = "/thoughts.ImageService/DeleteImage", error = %e, "cleaning up orphaned upload metadata failed");
+            tracing::warn!(request_id = %request_id, method = "/cogito.ImageService/DeleteImage", error = %e, "cleaning up orphaned upload metadata failed");
         }
 
         if req.filename.contains("..") || req.filename.contains('/') || req.filename.contains('\\')
@@ -97,7 +97,7 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
             .delete(&req.filename)
             .await
             .map_err(|e| {
-                tracing::warn!(request_id = %request_id, method = "/thoughts.ImageService/DeleteImage", error = %e, "deleting image failed");
+                tracing::warn!(request_id = %request_id, method = "/cogito.ImageService/DeleteImage", error = %e, "deleting image failed");
                 Status::internal("Internal server error.")
             })?;
 
@@ -106,7 +106,7 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
             .delete(&format!("staging/{}", req.filename))
             .await
         {
-            tracing::warn!(request_id = %request_id, method = "/thoughts.ImageService/DeleteImage", error = %e, "deleting staged image failed");
+            tracing::warn!(request_id = %request_id, method = "/cogito.ImageService/DeleteImage", error = %e, "deleting staged image failed");
         }
 
         Ok(Response::new(Empty {}))

@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	pb "thoughts/apigateway/genproto"
+	pb "cogito/apigateway/genproto"
 )
 
 type notificationController struct {

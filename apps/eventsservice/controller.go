@@ -7,9 +7,9 @@ import (
 
 	"google.golang.org/grpc/codes"
 
-	"thoughts/eventsservice/internal/notifications"
+	"cogito/eventsservice/internal/notifications"
 
-	pb "thoughts/eventsservice/genproto"
+	pb "cogito/eventsservice/genproto"
 )
 
 type Controller struct {

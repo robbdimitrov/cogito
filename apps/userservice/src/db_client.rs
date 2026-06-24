@@ -1,6 +1,6 @@
 use crate::controller::{UpdateUserFields, UserDb};
 use crate::pagination;
-use crate::thoughts::User;
+use crate::cogito::User;
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use sqlx::{Error as SqlxError, PgPool, Row};

@@ -8,12 +8,12 @@ import (
 
 func TestRetryableGRPCMethodOnlyRetriesReadsAndVerification(t *testing.T) {
 	retryable := []string{
-		"/thoughts.AuthService/GetSession",
-		"/thoughts.PostService/GetFeed",
-		"/thoughts.PostService/GetPost",
-		"/thoughts.UserService/GetUser",
-		"/thoughts.UserService/SearchUsers",
-		"/thoughts.ImageService/VerifyUpload",
+		"/cogito.AuthService/GetSession",
+		"/cogito.PostService/GetFeed",
+		"/cogito.PostService/GetPost",
+		"/cogito.UserService/GetUser",
+		"/cogito.UserService/SearchUsers",
+		"/cogito.ImageService/VerifyUpload",
 	}
 	for _, method := range retryable {
 		if !isRetryableGRPCMethod(method) {
@@ -22,14 +22,14 @@ func TestRetryableGRPCMethodOnlyRetriesReadsAndVerification(t *testing.T) {
 	}
 
 	notRetryable := []string{
-		"/thoughts.AuthService/DeleteSession",
-		"/thoughts.PostService/CreatePost",
-		"/thoughts.PostService/DeletePost",
-		"/thoughts.PostService/LikePost",
-		"/thoughts.UserService/UpdateUser",
-		"/thoughts.UserService/FollowUser",
-		"/thoughts.ImageService/ConsumeUpload",
-		"/thoughts.ImageService/DeleteImage",
+		"/cogito.AuthService/DeleteSession",
+		"/cogito.PostService/CreatePost",
+		"/cogito.PostService/DeletePost",
+		"/cogito.PostService/LikePost",
+		"/cogito.UserService/UpdateUser",
+		"/cogito.UserService/FollowUser",
+		"/cogito.ImageService/ConsumeUpload",
+		"/cogito.ImageService/DeleteImage",
 	}
 	for _, method := range notRetryable {
 		if isRetryableGRPCMethod(method) {

@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Bring up the full Thoughts stack on a local kind cluster.
+# Bring up the full Cogito stack on a local kind cluster.
 # Idempotent: safe to re-run; reuses the cluster, namespace, and port-forward.
 
-CLUSTER="${CLUSTER:-thoughts}"
-NS="${NS:-thoughts}"
+CLUSTER="${CLUSTER:-cogito}"
+NS="${NS:-cogito}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 K8S_DIR="$ROOT/deploy"
-REGISTRY="${REGISTRY:-localhost:5000/thoughts}"
-APP_HOST="${APP_HOST:-thoughts.localhost}"
+REGISTRY="${REGISTRY:-localhost:5000/cogito}"
+APP_HOST="${APP_HOST:-cogito.localhost}"
 LOCAL_PORT="${LOCAL_PORT:-8080}"
 REMOTE_PORT="${REMOTE_PORT:-8080}"
-PORT_FORWARD_LOG="${PORT_FORWARD_LOG:-/tmp/thoughts-port-forward-${LOCAL_PORT}.log}"
-PORT_FORWARD_PID_FILE="${PORT_FORWARD_PID_FILE:-/tmp/thoughts-port-forward-${LOCAL_PORT}.pid}"
+PORT_FORWARD_LOG="${PORT_FORWARD_LOG:-/tmp/cogito-port-forward-${LOCAL_PORT}.log}"
+PORT_FORWARD_PID_FILE="${PORT_FORWARD_PID_FILE:-/tmp/cogito-port-forward-${LOCAL_PORT}.pid}"
 
 ROLL_OUT_DATABASE=(statefulset/database)
 ROLL_OUT_REST=(
@@ -62,16 +62,16 @@ ensure_namespace() {
 }
 
 ensure_secret() {
-  if kubectl -n "${NS}" get secret thoughts-db-secret >/dev/null 2>&1; then
+  if kubectl -n "${NS}" get secret cogito-db-secret >/dev/null 2>&1; then
     return
   fi
 
   log "creating generated database and service secrets"
   local postgres_password
   postgres_password="$(random_secret)"
-  kubectl -n "${NS}" create secret generic thoughts-db-secret \
+  kubectl -n "${NS}" create secret generic cogito-db-secret \
     --from-literal=postgres-password="${postgres_password}" \
-    --from-literal=database-url="postgresql://postgres:${postgres_password}@database:5432/thoughts" \
+    --from-literal=database-url="postgresql://postgres:${postgres_password}@database:5432/cogito" \
     --from-literal=internal-grpc-token="$(random_secret)" \
     --from-literal=session-hmac-secret="$(random_secret)"
 }
@@ -227,7 +227,7 @@ start_port_forward_background() {
 print_summary() {
   cat <<EOF
 
-==> thoughts is up
+==> cogito is up
 
   Frontend       http://${APP_HOST}:${LOCAL_PORT}
   Gateway        in-cluster: http://apigateway:8080

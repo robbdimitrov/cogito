@@ -1,6 +1,6 @@
 #[allow(clippy::all)]
 #[rustfmt::skip]
-pub mod thoughts;
+pub mod cogito;
 
 mod blobstore;
 mod db_client;
@@ -14,7 +14,7 @@ mod tests;
 
 use std::env;
 use std::sync::Arc;
-use thoughts::image_service_server::ImageServiceServer;
+use cogito::image_service_server::ImageServiceServer;
 use tonic::transport::Server;
 
 use blobstore::S3BlobStore;

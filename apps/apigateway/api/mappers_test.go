@@ -3,7 +3,7 @@ package api
 import (
 	"testing"
 
-	pb "thoughts/apigateway/genproto"
+	pb "cogito/apigateway/genproto"
 )
 
 func TestMapUser(t *testing.T) {

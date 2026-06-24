@@ -1,6 +1,6 @@
 use super::controller::{Controller, UpdateUserFields, UserDb};
-use crate::thoughts::user_service_server::UserService;
-use crate::thoughts::{CreateUserRequest, User, UserRequest};
+use crate::cogito::user_service_server::UserService;
+use crate::cogito::{CreateUserRequest, User, UserRequest};
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use sqlx::Error as SqlxError;
@@ -232,7 +232,7 @@ async fn test_get_users_by_ids() {
         .create_user("Carol", "carol", "carol@x.com", "hash")
         .await;
 
-    let req = create_request(crate::thoughts::Ids { ids: vec![1, 3] }, 1);
+    let req = create_request(crate::cogito::Ids { ids: vec![1, 3] }, 1);
     let res = controller.get_users_by_ids(req).await;
 
     assert!(res.is_ok());
@@ -248,14 +248,14 @@ async fn test_get_users_by_ids_empty_returns_empty() {
     let db = Arc::new(MockDb::new());
     let controller = Controller::new(db.clone());
 
-    let req = create_request(crate::thoughts::Ids { ids: vec![] }, 1);
+    let req = create_request(crate::cogito::Ids { ids: vec![] }, 1);
     let res = controller.get_users_by_ids(req).await;
 
     assert!(res.is_ok());
     assert!(res.unwrap().into_inner().users.is_empty());
 }
 
-use crate::thoughts::{GetUserByUsernameRequest, SearchUsersRequest, UpdateUserRequest};
+use crate::cogito::{GetUserByUsernameRequest, SearchUsersRequest, UpdateUserRequest};
 
 #[tokio::test]
 async fn test_update_user() {

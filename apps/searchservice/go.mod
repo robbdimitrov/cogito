@@ -1,4 +1,4 @@
-module thoughts/searchservice
+module cogito/searchservice
 
 go 1.26
 

@@ -30,8 +30,8 @@ fn hash_session_id(secret: &str, session_id: &str) -> String {
     URL_SAFE_NO_PAD.encode(mac.finalize().into_bytes())
 }
 
-use crate::thoughts::auth_service_server::AuthService;
-use crate::thoughts::{Credentials, Empty, Session, SessionRequest, Sessions, UserRequest};
+use crate::cogito::auth_service_server::AuthService;
+use crate::cogito::{Credentials, Empty, Session, SessionRequest, Sessions, UserRequest};
 
 #[tonic::async_trait]
 pub trait AuthDb: Send + Sync + 'static {
@@ -72,7 +72,7 @@ impl<D: AuthDb + Clone> AuthService for Controller<D> {
         }
 
         let user_opt = self.db_client.get_user(&req.email).await.map_err(|e| {
-            tracing::warn!(request_id = %request_id, method = "/thoughts.AuthService/CreateSession", error = %e, "getting user failed");
+            tracing::warn!(request_id = %request_id, method = "/cogito.AuthService/CreateSession", error = %e, "getting user failed");
             Status::internal("Internal server error.")
         })?;
 
@@ -145,7 +145,7 @@ impl<D: AuthDb + Clone> AuthService for Controller<D> {
                     .create_session(&hashed_id, user_id)
                     .await
                     .map_err(|e| {
-                        tracing::warn!(request_id = %request_id, method = "/thoughts.AuthService/CreateSession", error = %e, "creating session failed");
+                        tracing::warn!(request_id = %request_id, method = "/cogito.AuthService/CreateSession", error = %e, "creating session failed");
                         Status::internal("Internal server error.")
                     })?;
 
@@ -173,7 +173,7 @@ impl<D: AuthDb + Clone> AuthService for Controller<D> {
         let hashed_id = hash_session_id(&self.session_hmac_secret, &req.session_id);
 
         let session_opt = self.db_client.get_session(&hashed_id).await.map_err(|e| {
-            tracing::warn!(request_id = %request_id, method = "/thoughts.AuthService/GetSession", error = %e, "getting session failed");
+            tracing::warn!(request_id = %request_id, method = "/cogito.AuthService/GetSession", error = %e, "getting session failed");
             Status::internal("Internal server error.")
         })?;
 
@@ -197,7 +197,7 @@ impl<D: AuthDb + Clone> AuthService for Controller<D> {
             .get_sessions(req.user_id)
             .await
             .map_err(|e| {
-                tracing::warn!(request_id = %request_id, method = "/thoughts.AuthService/GetSessions", error = %e, "getting sessions failed");
+                tracing::warn!(request_id = %request_id, method = "/cogito.AuthService/GetSessions", error = %e, "getting sessions failed");
                 Status::internal("Internal server error.")
             })?;
 
@@ -218,7 +218,7 @@ impl<D: AuthDb + Clone> AuthService for Controller<D> {
         let res2 = self.db_client.delete_session(&req.session_id).await;
 
         if res1.is_err() && res2.is_err() {
-            tracing::warn!(request_id = %request_id, method = "/thoughts.AuthService/DeleteSession", "deleting session failed");
+            tracing::warn!(request_id = %request_id, method = "/cogito.AuthService/DeleteSession", "deleting session failed");
             return Err(Status::internal("Internal server error."));
         }
 

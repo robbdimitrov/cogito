@@ -24,7 +24,7 @@
       >
         {user.posts ?? 0}
       </p>
-      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Thoughts</p>
+      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Cogito</p>
     </div>
     <div class={compact ? "" : "text-center"}>
       <p

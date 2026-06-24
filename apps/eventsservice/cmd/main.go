@@ -16,11 +16,11 @@ import (
 	"github.com/twmb/franz-go/pkg/kgo"
 	"github.com/valkey-io/valkey-go"
 
-	eventsservice "thoughts/eventsservice"
-	"thoughts/eventsservice/internal/feed"
-	feedstore "thoughts/eventsservice/internal/feed/store/postgres"
-	"thoughts/eventsservice/internal/notifications"
-	notificationstore "thoughts/eventsservice/internal/notifications/store/postgres"
+	eventsservice "cogito/eventsservice"
+	"cogito/eventsservice/internal/feed"
+	feedstore "cogito/eventsservice/internal/feed/store/postgres"
+	"cogito/eventsservice/internal/notifications"
+	notificationstore "cogito/eventsservice/internal/notifications/store/postgres"
 )
 
 func main() {

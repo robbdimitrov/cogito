@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
 
-	pb "thoughts/searchservice/genproto"
+	pb "cogito/searchservice/genproto"
 )
 
 func CreateServer(meili *MeiliClient) *grpc.Server {

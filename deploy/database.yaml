@@ -3,11 +3,11 @@ kind: Service
 metadata:
   name: database
   labels:
-    app: thoughts
+    app: cogito
     tier: database
 spec:
   selector:
-    app: thoughts
+    app: cogito
     tier: database
   ports:
   - name: postgres
@@ -19,12 +19,12 @@ kind: Service
 metadata:
   name: database-headless
   labels:
-    app: thoughts
+    app: cogito
     tier: database
 spec:
   clusterIP: None
   selector:
-    app: thoughts
+    app: cogito
     tier: database
   ports:
   - name: postgres
@@ -36,19 +36,19 @@ kind: StatefulSet
 metadata:
   name: database
   labels:
-    app: thoughts
+    app: cogito
     tier: database
 spec:
   serviceName: database-headless
   replicas: 1
   selector:
     matchLabels:
-      app: thoughts
+      app: cogito
       tier: database
   template:
     metadata:
       labels:
-        app: thoughts
+        app: cogito
         tier: database
     spec:
       terminationGracePeriodSeconds: 60
@@ -70,10 +70,10 @@ spec:
         - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: thoughts-db-secret
+              name: cogito-db-secret
               key: postgres-password
         - name: POSTGRES_DB
-          value: thoughts
+          value: cogito
         - name: PGDATA
           value: /var/lib/postgresql/18/docker
         volumeMounts:
@@ -86,7 +86,7 @@ spec:
             - -U
             - postgres
             - -d
-            - thoughts
+            - cogito
           failureThreshold: 30
           periodSeconds: 2
         readinessProbe:
@@ -96,7 +96,7 @@ spec:
             - -U
             - postgres
             - -d
-            - thoughts
+            - cogito
           initialDelaySeconds: 5
           periodSeconds: 5
           timeoutSeconds: 3
@@ -107,7 +107,7 @@ spec:
             - -U
             - postgres
             - -d
-            - thoughts
+            - cogito
           periodSeconds: 10
           timeoutSeconds: 3
           failureThreshold: 6

@@ -1,7 +1,7 @@
 use crate::crypto::{generate_hash, validate_password};
 use crate::pagination;
-use crate::thoughts::user_service_server::UserService;
-use crate::thoughts::{
+use crate::cogito::user_service_server::UserService;
+use crate::cogito::{
     CreateUserRequest, Empty, GetUserByUsernameRequest, GetUsersRequest, Identifier, Ids,
     SearchUsersRequest, UpdateUserRequest, User, UserRequest, Users,
 };
@@ -115,7 +115,7 @@ impl<D: UserDb> UserService for Controller<D> {
         }
 
         let hash = generate_hash(password).map_err(|e| {
-            tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/CreateUser", error = %e, "hashing failed");
+            tracing::warn!(request_id = %request_id, method = "/cogito.UserService/CreateUser", error = %e, "hashing failed");
             Status::internal("Internal server error.")
         })?;
 
@@ -131,7 +131,7 @@ impl<D: UserDb> UserService for Controller<D> {
                         "User with this username or email already exists.",
                     ))
                 } else {
-                    tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/CreateUser", error = %e, "creating user failed");
+                    tracing::warn!(request_id = %request_id, method = "/cogito.UserService/CreateUser", error = %e, "creating user failed");
                     Err(Status::internal("Internal server error."))
                 }
             }
@@ -147,7 +147,7 @@ impl<D: UserDb> UserService for Controller<D> {
             Ok(Some(user)) => Ok(Response::new(user)),
             Ok(None) => Err(Status::not_found("Resource not found.")),
             Err(e) => {
-                tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/GetUser", error = %e, "getting user failed");
+                tracing::warn!(request_id = %request_id, method = "/cogito.UserService/GetUser", error = %e, "getting user failed");
                 Err(Status::internal("Internal server error."))
             }
         }
@@ -173,7 +173,7 @@ impl<D: UserDb> UserService for Controller<D> {
                 .get_user_with_id(user_id)
                 .await
                 .map_err(|e| {
-                    tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/UpdateUser", error = %e, "getting user failed");
+                    tracing::warn!(request_id = %request_id, method = "/cogito.UserService/UpdateUser", error = %e, "getting user failed");
                     Status::internal("Internal server error.")
                 })?
                 .ok_or_else(|| Status::not_found("Resource not found."))?;
@@ -193,7 +193,7 @@ impl<D: UserDb> UserService for Controller<D> {
             }
 
             let new_hash = generate_hash(password).map_err(|e| {
-                tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/UpdateUser", error = %e, "hashing failed");
+                tracing::warn!(request_id = %request_id, method = "/cogito.UserService/UpdateUser", error = %e, "hashing failed");
                 Status::internal("Internal server error.")
             })?;
 
@@ -201,7 +201,7 @@ impl<D: UserDb> UserService for Controller<D> {
                 .update_password(user_id, &new_hash)
                 .await
                 .map_err(|e| {
-                    tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/UpdateUser", error = %e, "updating user failed");
+                    tracing::warn!(request_id = %request_id, method = "/cogito.UserService/UpdateUser", error = %e, "updating user failed");
                     Status::internal("Internal server error.")
                 })?;
 
@@ -247,7 +247,7 @@ impl<D: UserDb> UserService for Controller<D> {
                 if crate::utils::is_unique_violation(&e) {
                     Status::already_exists("User with this username or email already exists.")
                 } else {
-                    tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/UpdateUser", error = %e, "updating user failed");
+                    tracing::warn!(request_id = %request_id, method = "/cogito.UserService/UpdateUser", error = %e, "updating user failed");
                     Status::internal("Internal server error.")
                 }
             })?;
@@ -271,7 +271,7 @@ impl<D: UserDb> UserService for Controller<D> {
             Ok(Some(user)) => Ok(Response::new(user)),
             Ok(None) => Err(Status::not_found("Resource not found.")),
             Err(e) => {
-                tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/GetUserByUsername", error = %e, "getting user by username failed");
+                tracing::warn!(request_id = %request_id, method = "/cogito.UserService/GetUserByUsername", error = %e, "getting user by username failed");
                 Err(Status::internal("Internal server error."))
             }
         }
@@ -294,7 +294,7 @@ impl<D: UserDb> UserService for Controller<D> {
                 next_cursor: String::new(),
             })),
             Err(e) => {
-                tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/GetUsersByIds", error = %e, "getting users by ids failed");
+                tracing::warn!(request_id = %request_id, method = "/cogito.UserService/GetUsersByIds", error = %e, "getting users by ids failed");
                 Err(Status::internal("Internal server error."))
             }
         }
@@ -325,7 +325,7 @@ impl<D: UserDb> UserService for Controller<D> {
                 Ok(Response::new(Users { users, next_cursor }))
             }
             Err(e) => {
-                tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/GetFollowing", error = %e, "getting users failed");
+                tracing::warn!(request_id = %request_id, method = "/cogito.UserService/GetFollowing", error = %e, "getting users failed");
                 Err(Status::internal("Internal server error."))
             }
         }
@@ -356,7 +356,7 @@ impl<D: UserDb> UserService for Controller<D> {
                 Ok(Response::new(Users { users, next_cursor }))
             }
             Err(e) => {
-                tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/GetFollowers", error = %e, "getting users failed");
+                tracing::warn!(request_id = %request_id, method = "/cogito.UserService/GetFollowers", error = %e, "getting users failed");
                 Err(Status::internal("Internal server error."))
             }
         }
@@ -377,7 +377,7 @@ impl<D: UserDb> UserService for Controller<D> {
                 if crate::utils::is_foreign_key_violation(&e) {
                     Err(Status::not_found("User not found."))
                 } else {
-                    tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/FollowUser", error = %e, "following user failed");
+                    tracing::warn!(request_id = %request_id, method = "/cogito.UserService/FollowUser", error = %e, "following user failed");
                     Err(Status::internal("Internal server error."))
                 }
             }
@@ -395,7 +395,7 @@ impl<D: UserDb> UserService for Controller<D> {
         match self.db_client.unfollow_user(req.user_id, user_id).await {
             Ok(_) => Ok(Response::new(Empty {})),
             Err(e) => {
-                tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/UnfollowUser", error = %e, "unfollowing user failed");
+                tracing::warn!(request_id = %request_id, method = "/cogito.UserService/UnfollowUser", error = %e, "unfollowing user failed");
                 Err(Status::internal("Internal server error."))
             }
         }
@@ -419,7 +419,7 @@ impl<D: UserDb> UserService for Controller<D> {
                 next_cursor: String::new(),
             })),
             Err(e) => {
-                tracing::warn!(request_id = %request_id, method = "/thoughts.UserService/SearchUsers", error = %e, "searching users failed");
+                tracing::warn!(request_id = %request_id, method = "/cogito.UserService/SearchUsers", error = %e, "searching users failed");
                 Err(Status::internal("Internal server error."))
             }
         }

@@ -4,7 +4,7 @@ metadata:
   name: frontend
 spec:
   selector:
-    app: thoughts
+    app: cogito
     tier: frontend
   ports:
   - port: 8080
@@ -14,23 +14,23 @@ kind: Deployment
 metadata:
   name: frontend
   labels:
-    app: thoughts
+    app: cogito
     tier: frontend
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: thoughts
+      app: cogito
       tier: frontend
   template:
     metadata:
       labels:
-        app: thoughts
+        app: cogito
         tier: frontend
     spec:
       containers:
       - name: frontend
-        image: localhost:5000/thoughts/frontend
+        image: localhost:5000/cogito/frontend
         imagePullPolicy: IfNotPresent
         env:
         - name: API_URL
@@ -62,7 +62,7 @@ metadata:
   name: frontend-ingress
 spec:
   rules:
-  - host: thoughts.localhost
+  - host: cogito.localhost
     http:
       paths:
       - path: /

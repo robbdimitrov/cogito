@@ -15,7 +15,7 @@ coverage/
 
 # Rust
 target/
-**/src/thoughts.rs
+**/src/cogito.rs
 
 # Python
 venv

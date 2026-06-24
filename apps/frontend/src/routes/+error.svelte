@@ -4,7 +4,7 @@
 </script>
 
 <svelte:head>
-  <title>{page.status} · Thoughts</title>
+  <title>{page.status} · Cogito</title>
 </svelte:head>
 
 <main class="grid min-h-screen place-items-center px-4">

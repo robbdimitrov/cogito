@@ -91,8 +91,8 @@
 
   <div class="navbar-center">
     <span
-      class="bg-gradient-to-r from-primary via-fuchsia-500 to-secondary bg-clip-text text-xl font-black tracking-tight text-transparent drop-shadow-sm sm:text-2xl"
-      >Thoughts</span
+      class="bg-linear-to-r from-primary via-fuchsia-500 to-secondary bg-clip-text text-xl font-black tracking-tight text-transparent drop-shadow-sm sm:text-2xl"
+      >Cogito</span
     >
   </div>
 

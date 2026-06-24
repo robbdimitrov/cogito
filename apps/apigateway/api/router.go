@@ -11,7 +11,7 @@ import (
 	"os"
 	"time"
 
-	pb "thoughts/apigateway/genproto"
+	pb "cogito/apigateway/genproto"
 )
 
 type router struct {

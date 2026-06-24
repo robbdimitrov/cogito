@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
 
-	pb "thoughts/postservice/genproto"
+	pb "cogito/postservice/genproto"
 )
 
 func CreateServer(dbClient *DBClient) *grpc.Server {

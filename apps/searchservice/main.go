@@ -9,7 +9,7 @@ import (
 	"os"
 	"os/signal"
 
-	"thoughts/searchservice/search"
+	"cogito/searchservice/search"
 )
 
 func main() {

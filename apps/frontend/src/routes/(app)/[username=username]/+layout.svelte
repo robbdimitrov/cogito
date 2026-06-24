@@ -8,11 +8,11 @@
 </script>
 
 <svelte:head>
-  <title>{user.name} (@{user.username}) - Thoughts</title>
+  <title>{user.name} (@{user.username}) - Cogito</title>
   <meta property="og:title" content="{user.name} (@{user.username})" />
   <meta
     property="og:description"
-    content={user.bio || `View ${user.name}'s profile on Thoughts`}
+    content={user.bio || `View ${user.name}'s profile on Cogito`}
   />
 </svelte:head>
 

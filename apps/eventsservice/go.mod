@@ -1,4 +1,4 @@
-module thoughts/eventsservice
+module cogito/eventsservice
 
 go 1.26
 

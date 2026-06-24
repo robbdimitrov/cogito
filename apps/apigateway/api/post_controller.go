@@ -11,7 +11,7 @@ import (
 	"time"
 	"unicode/utf8"
 
-	pb "thoughts/apigateway/genproto"
+	pb "cogito/apigateway/genproto"
 )
 
 type postController struct {

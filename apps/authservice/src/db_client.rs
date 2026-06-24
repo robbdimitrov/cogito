@@ -57,7 +57,7 @@ impl crate::controller::AuthDb for DbClient {
         &self,
         session_id: &str,
         user_id: i32,
-    ) -> Result<crate::thoughts::Session, sqlx::Error> {
+    ) -> Result<crate::cogito::Session, sqlx::Error> {
         let row = sqlx::query_as::<_, (String, i32, DateTime<Utc>)>(
             r#"INSERT INTO sessions (id, user_id) VALUES ($1, $2)
                RETURNING id, user_id, created"#,
@@ -67,7 +67,7 @@ impl crate::controller::AuthDb for DbClient {
         .fetch_one(&self.pool)
         .await?;
 
-        Ok(crate::thoughts::Session {
+        Ok(crate::cogito::Session {
             id: row.0,
             user_id: row.1,
             created: row.2.format("%Y-%m-%dT%H:%M:%SZ").to_string(),
@@ -77,7 +77,7 @@ impl crate::controller::AuthDb for DbClient {
     async fn get_session(
         &self,
         session_id: &str,
-    ) -> Result<Option<crate::thoughts::Session>, sqlx::Error> {
+    ) -> Result<Option<crate::cogito::Session>, sqlx::Error> {
         let ttl = session_ttl_days();
         let row = sqlx::query_as::<_, (String, i32, DateTime<Utc>)>(
             r#"SELECT id, user_id, created
@@ -89,7 +89,7 @@ impl crate::controller::AuthDb for DbClient {
         .fetch_optional(&self.pool)
         .await?;
 
-        Ok(row.map(|r| crate::thoughts::Session {
+        Ok(row.map(|r| crate::cogito::Session {
             id: r.0,
             user_id: r.1,
             created: r.2.format("%Y-%m-%dT%H:%M:%SZ").to_string(),
@@ -99,7 +99,7 @@ impl crate::controller::AuthDb for DbClient {
     async fn get_sessions(
         &self,
         user_id: i32,
-    ) -> Result<Vec<crate::thoughts::Session>, sqlx::Error> {
+    ) -> Result<Vec<crate::cogito::Session>, sqlx::Error> {
         let ttl = session_ttl_days();
         let rows = sqlx::query_as::<_, (String, i32, DateTime<Utc>)>(
             r#"SELECT id, user_id, created
@@ -114,7 +114,7 @@ impl crate::controller::AuthDb for DbClient {
 
         let sessions = rows
             .into_iter()
-            .map(|r| crate::thoughts::Session {
+            .map(|r| crate::cogito::Session {
                 id: r.0,
                 user_id: r.1,
                 created: r.2.format("%Y-%m-%dT%H:%M:%SZ").to_string(),

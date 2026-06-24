@@ -9,7 +9,7 @@ import (
 
 	"github.com/jackc/pgx/v4/pgxpool"
 
-	"thoughts/eventsservice/internal/notifications"
+	"cogito/eventsservice/internal/notifications"
 )
 
 type Store struct {

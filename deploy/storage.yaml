@@ -7,11 +7,11 @@ data:
     {
       "identities": [
         {
-          "name": "thoughts",
+          "name": "cogito",
           "credentials": [
             {
-              "accessKey": "thoughts-access-key",
-              "secretKey": "thoughts-secret-key"
+              "accessKey": "cogito-access-key",
+              "secretKey": "cogito-secret-key"
             }
           ],
           "actions": ["Read", "Write", "List", "Tagging", "Admin"]
@@ -24,19 +24,19 @@ kind: StatefulSet
 metadata:
   name: seaweedfs
   labels:
-    app: thoughts
+    app: cogito
     component: seaweedfs
 spec:
   serviceName: seaweedfs
   replicas: 1
   selector:
     matchLabels:
-      app: thoughts
+      app: cogito
       component: seaweedfs
   template:
     metadata:
       labels:
-        app: thoughts
+        app: cogito
         component: seaweedfs
     spec:
       containers:
@@ -75,12 +75,12 @@ kind: Service
 metadata:
   name: seaweedfs
   labels:
-    app: thoughts
+    app: cogito
     component: seaweedfs
 spec:
   clusterIP: None
   selector:
-    app: thoughts
+    app: cogito
     component: seaweedfs
   ports:
   - name: s3

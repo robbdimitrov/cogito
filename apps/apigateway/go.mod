@@ -1,4 +1,4 @@
-module thoughts/apigateway
+module cogito/apigateway
 
 go 1.26
 

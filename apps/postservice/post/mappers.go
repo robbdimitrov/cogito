@@ -4,7 +4,7 @@ import (
 	"iter"
 	"time"
 
-	pb "thoughts/postservice/genproto"
+	pb "cogito/postservice/genproto"
 )
 
 type row interface {

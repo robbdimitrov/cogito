@@ -3,12 +3,12 @@ kind: Service
 metadata:
   name: postservice
   labels:
-    app: thoughts
+    app: cogito
     tier: backend
     component: postservice
 spec:
   selector:
-    app: thoughts
+    app: cogito
     tier: backend
     component: postservice
   ports:
@@ -19,26 +19,26 @@ kind: Deployment
 metadata:
   name: postservice
   labels:
-    app: thoughts
+    app: cogito
     tier: backend
     component: postservice
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: thoughts
+      app: cogito
       tier: backend
       component: postservice
   template:
     metadata:
       labels:
-        app: thoughts
+        app: cogito
         tier: backend
         component: postservice
     spec:
       containers:
       - name: postservice
-        image: localhost:5000/thoughts/postservice
+        image: localhost:5000/cogito/postservice
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5050
@@ -52,12 +52,12 @@ spec:
         - name: DATABASE_URL
           valueFrom:
             secretKeyRef:
-              name: thoughts-db-secret
+              name: cogito-db-secret
               key: database-url
         - name: INTERNAL_GRPC_TOKEN
           valueFrom:
             secretKeyRef:
-              name: thoughts-db-secret
+              name: cogito-db-secret
               key: internal-grpc-token
         livenessProbe:
           tcpSocket:

@@ -3,7 +3,7 @@ package eventsservice
 import (
 	"context"
 
-	"thoughts/eventsservice/internal/notifications"
+	"cogito/eventsservice/internal/notifications"
 )
 
 type Service struct {

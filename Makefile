@@ -2,7 +2,7 @@ export PATH := $(PATH):$(shell go env GOPATH)/bin
 
 .DEFAULT_GOAL := all
 
-IMAGE_PREFIX ?= localhost:5000/thoughts
+IMAGE_PREFIX ?= localhost:5000/cogito
 
 .PHONY: all
 all: apigateway authservice database eventsservice frontend imageservice postservice searchservice userservice
@@ -10,10 +10,10 @@ all: apigateway authservice database eventsservice frontend imageservice postser
 .PHONY: proto
 proto:
 	@echo "Generating protobufs for Go services..."
-	@cd apps/apigateway && protoc -I../.. --go_out=. --go-grpc_out=. ../../pkg/pb/thoughts.proto
-	@cd apps/eventsservice && protoc -I../.. --go_out=. --go-grpc_out=. ../../pkg/pb/thoughts.proto
-	@cd apps/postservice && protoc -I../.. --go_out=. --go-grpc_out=. ../../pkg/pb/thoughts.proto
-	@cd apps/searchservice && protoc -I../.. --go_out=. --go-grpc_out=. ../../pkg/pb/thoughts.proto
+	@cd apps/apigateway && protoc -I../.. --go_out=. --go-grpc_out=. ../../pkg/pb/cogito.proto
+	@cd apps/eventsservice && protoc -I../.. --go_out=. --go-grpc_out=. ../../pkg/pb/cogito.proto
+	@cd apps/postservice && protoc -I../.. --go_out=. --go-grpc_out=. ../../pkg/pb/cogito.proto
+	@cd apps/searchservice && protoc -I../.. --go_out=. --go-grpc_out=. ../../pkg/pb/cogito.proto
 
 .PHONY: apigateway
 apigateway: proto
@@ -55,13 +55,13 @@ userservice:
 format:
 	@gofmt -w $$(find apps/apigateway apps/eventsservice apps/postservice apps/searchservice -name '*.go' -not -path '*/genproto/*')
 	@find apps/authservice/src apps/userservice/src apps/imageservice/src \
-		-name '*.rs' -not -name thoughts.rs -print | xargs rustfmt --edition 2024
+		-name '*.rs' -not -name cogito.rs -print | xargs rustfmt --edition 2024
 
 .PHONY: lint
 lint:
 	@test -z "$$(gofmt -l $$(find apps/apigateway apps/eventsservice apps/postservice apps/searchservice -name '*.go' -not -path '*/genproto/*'))"
 	@find apps/authservice/src apps/userservice/src apps/imageservice/src \
-		-name '*.rs' -not -name thoughts.rs -print | xargs rustfmt --edition 2024 --check
+		-name '*.rs' -not -name cogito.rs -print | xargs rustfmt --edition 2024 --check
 	@cd apps/frontend && npm run lint
 
 .PHONY: test

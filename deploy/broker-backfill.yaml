@@ -3,7 +3,7 @@ kind: Job
 metadata:
   name: broker-backfill
   labels:
-    app: thoughts
+    app: cogito
     tier: broker
     component: broker-backfill
 spec:
@@ -11,7 +11,7 @@ spec:
   template:
     metadata:
       labels:
-        app: thoughts
+        app: cogito
         tier: broker
         component: broker-backfill
     spec:
@@ -35,7 +35,7 @@ spec:
         - name: POSTGRES_DSN
           valueFrom:
             secretKeyRef:
-              name: thoughts-db-secret
+              name: cogito-db-secret
               key: database-url
         securityContext:
           allowPrivilegeEscalation: false

@@ -128,23 +128,23 @@ func resilienceUnaryClientInterceptor(downstream string, breaker *circuitBreaker
 
 func isRetryableGRPCMethod(method string) bool {
 	switch method {
-	case "/thoughts.AuthService/GetSession",
-		"/thoughts.AuthService/GetSessions",
-		"/thoughts.PostService/GetFeed",
-		"/thoughts.PostService/GetPosts",
-		"/thoughts.PostService/GetLikedPosts",
-		"/thoughts.PostService/GetHashtagPosts",
-		"/thoughts.PostService/GetPost",
-		"/thoughts.PostService/GetReplies",
-		"/thoughts.UserService/GetUser",
-		"/thoughts.UserService/GetUserByUsername",
-		"/thoughts.UserService/GetFollowing",
-		"/thoughts.UserService/GetFollowers",
-		"/thoughts.UserService/SearchUsers",
-		"/thoughts.ImageService/VerifyUpload",
-		"/thoughts.SearchService/SearchUsers",
-		"/thoughts.SearchService/SearchPosts",
-		"/thoughts.SearchService/SearchHashtags":
+	case "/cogito.AuthService/GetSession",
+		"/cogito.AuthService/GetSessions",
+		"/cogito.PostService/GetFeed",
+		"/cogito.PostService/GetPosts",
+		"/cogito.PostService/GetLikedPosts",
+		"/cogito.PostService/GetHashtagPosts",
+		"/cogito.PostService/GetPost",
+		"/cogito.PostService/GetReplies",
+		"/cogito.UserService/GetUser",
+		"/cogito.UserService/GetUserByUsername",
+		"/cogito.UserService/GetFollowing",
+		"/cogito.UserService/GetFollowers",
+		"/cogito.UserService/SearchUsers",
+		"/cogito.ImageService/VerifyUpload",
+		"/cogito.SearchService/SearchUsers",
+		"/cogito.SearchService/SearchPosts",
+		"/cogito.SearchService/SearchHashtags":
 		return true
 	default:
 		return false

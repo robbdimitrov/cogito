@@ -68,7 +68,7 @@
 </script>
 
 <svelte:head>
-  <title>Notifications - Thoughts</title>
+  <title>Notifications - Cogito</title>
 </svelte:head>
 
 <main class="container mx-auto max-w-2xl px-3 py-3 sm:px-4 sm:py-6">

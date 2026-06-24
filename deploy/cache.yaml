@@ -3,19 +3,19 @@ kind: StatefulSet
 metadata:
   name: dragonfly
   labels:
-    app: thoughts
+    app: cogito
     component: dragonfly
 spec:
   serviceName: dragonfly
   replicas: 1
   selector:
     matchLabels:
-      app: thoughts
+      app: cogito
       component: dragonfly
   template:
     metadata:
       labels:
-        app: thoughts
+        app: cogito
         component: dragonfly
     spec:
       containers:
@@ -58,12 +58,12 @@ kind: Service
 metadata:
   name: dragonfly
   labels:
-    app: thoughts
+    app: cogito
     component: dragonfly
 spec:
   clusterIP: None
   selector:
-    app: thoughts
+    app: cogito
     component: dragonfly
   ports:
   - name: redis

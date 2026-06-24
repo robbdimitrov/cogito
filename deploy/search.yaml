@@ -3,12 +3,12 @@ kind: Service
 metadata:
   name: meilisearch
   labels:
-    app: thoughts
+    app: cogito
     tier: backend
     component: meilisearch
 spec:
   selector:
-    app: thoughts
+    app: cogito
     tier: backend
     component: meilisearch
   ports:
@@ -19,7 +19,7 @@ kind: StatefulSet
 metadata:
   name: meilisearch
   labels:
-    app: thoughts
+    app: cogito
     tier: backend
     component: meilisearch
 spec:
@@ -27,13 +27,13 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: thoughts
+      app: cogito
       tier: backend
       component: meilisearch
   template:
     metadata:
       labels:
-        app: thoughts
+        app: cogito
         tier: backend
         component: meilisearch
     spec:
@@ -54,7 +54,7 @@ spec:
         - name: MEILI_MASTER_KEY
           valueFrom:
             secretKeyRef:
-              name: thoughts-db-secret
+              name: cogito-db-secret
               key: meili-master-key
         - name: MEILI_DB_PATH
           value: /data/meilisearch

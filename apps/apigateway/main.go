@@ -10,7 +10,7 @@ import (
 	"os/signal"
 	"time"
 
-	"thoughts/apigateway/api"
+	"cogito/apigateway/api"
 )
 
 func main() {

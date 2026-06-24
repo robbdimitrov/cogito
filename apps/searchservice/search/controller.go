@@ -8,7 +8,7 @@ import (
 
 	"google.golang.org/grpc/codes"
 
-	pb "thoughts/searchservice/genproto"
+	pb "cogito/searchservice/genproto"
 )
 
 type controller struct {

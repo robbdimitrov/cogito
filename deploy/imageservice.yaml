@@ -3,26 +3,26 @@ kind: Deployment
 metadata:
   name: imageservice
   labels:
-    app: thoughts
+    app: cogito
     tier: backend
     component: imageservice
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: thoughts
+      app: cogito
       tier: backend
       component: imageservice
   template:
     metadata:
       labels:
-        app: thoughts
+        app: cogito
         tier: backend
         component: imageservice
     spec:
       containers:
       - name: imageservice
-        image: localhost:5000/thoughts/imageservice
+        image: localhost:5000/cogito/imageservice
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5050
@@ -39,28 +39,28 @@ spec:
         - name: DATABASE_URL
           valueFrom:
             secretKeyRef:
-              name: thoughts-db-secret
+              name: cogito-db-secret
               key: database-url
         - name: INTERNAL_GRPC_TOKEN
           valueFrom:
             secretKeyRef:
-              name: thoughts-db-secret
+              name: cogito-db-secret
               key: internal-grpc-token
         - name: S3_ENDPOINT
           value: "http://seaweedfs:8333"
         - name: S3_BUCKET
-          value: "thoughts-images"
+          value: "cogito-images"
         - name: S3_REGION
           value: "us-east-1"
         - name: S3_ACCESS_KEY
           valueFrom:
             secretKeyRef:
-              name: thoughts-db-secret
+              name: cogito-db-secret
               key: s3-access-key
         - name: S3_SECRET_KEY
           valueFrom:
             secretKeyRef:
-              name: thoughts-db-secret
+              name: cogito-db-secret
               key: s3-secret-key
         livenessProbe:
           tcpSocket:
@@ -78,13 +78,13 @@ kind: Service
 metadata:
   name: imageservice
   labels:
-    app: thoughts
+    app: cogito
     tier: backend
     component: imageservice
 spec:
   type: ClusterIP
   selector:
-    app: thoughts
+    app: cogito
     tier: backend
     component: imageservice
   ports:

@@ -28,7 +28,7 @@
 </script>
 
 <svelte:head>
-  <title>Thoughts</title>
+  <title>Cogito</title>
 </svelte:head>
 
 <main class="container mx-auto max-w-5xl px-3 py-3 sm:px-4 sm:py-6">

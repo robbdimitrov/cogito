@@ -19,17 +19,17 @@
 </script>
 
 <svelte:head>
-  <title>Sign up · Thoughts</title>
+  <title>Sign up · Cogito</title>
 </svelte:head>
 
 <div class="flex min-h-[calc(100vh-4rem)]">
   <AuthHero
     eyebrow="Start here"
-    title="Thoughts"
+    title="Cogito"
     description="Create a space for quick ideas and real conversations."
     points={[
       "Claim your profile and username",
-      "Post thoughts as they happen",
+      "Post cogito as they happen",
       "Find people worth following",
     ]}
   />

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package thoughts;
+package cogito;
 option go_package = "./genproto";
 
 // Users
