@@ -87,7 +87,7 @@ Set by SvelteKit nonce-based CSP (frontend only):
 | default-src | 'self' |
 | script-src | 'self' + nonce |
 | style-src | 'self' unsafe-inline |
-| img-src | 'self' data: |
+| img-src | 'self' data: blob: |
 | font-src | 'self' |
 | connect-src | 'self' |
 | object-src | 'none' |
