@@ -26,7 +26,6 @@ export default ts.config(
     },
     rules: {
       "no-undef": "off",
-      "svelte/no-navigation-without-resolve": "off",
       "@typescript-eslint/no-unused-vars": "off",
       "svelte/require-each-key": "off",
       "svelte/prefer-writable-derived": "off",

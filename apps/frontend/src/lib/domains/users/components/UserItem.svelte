@@ -1,4 +1,3 @@
-<!-- eslint-disable svelte/no-navigation-without-resolve -->
 <script lang="ts">
   import { enhance } from "$app/forms";
   import { resolve } from "$app/paths";

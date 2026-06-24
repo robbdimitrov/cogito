@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { resolve } from "$app/paths";
   import { untrack } from "svelte";
   import { goto } from "$app/navigation";
   import PostList from "$lib/domains/posts/components/PostList.svelte";
@@ -20,12 +21,12 @@
   function handleSubmit(e: Event) {
     e.preventDefault();
     const params = new URLSearchParams({ q: searchInput, tab });
-    goto(`/search?${params}`);
+    goto(resolve(`/search?${params}`));
   }
 
   function switchTab(newTab: string) {
     const params = new URLSearchParams({ q, tab: newTab });
-    goto(`/search?${params}`);
+    goto(resolve(`/search?${params}`));
   }
 
   function handleQuote(post: Post) {
@@ -87,7 +88,7 @@
       <div class="space-y-2">
         {#each data.users as user}
           <a
-            href={`/@${user.username}`}
+            href={resolve(`/@${user.username}`)}
             class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white/60 p-4 transition-colors hover:bg-white/80 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:bg-slate-900/80"
           >
             <div>
@@ -107,7 +108,7 @@
       <div class="space-y-2">
         {#each data.hashtags as hashtag}
           <a
-            href={`/search?q=%23${hashtag.name}&tab=posts`}
+            href={resolve(`/search?q=%23${hashtag.name}&tab=posts`)}
             class="flex items-center justify-between rounded-2xl border border-slate-200 bg-white/60 p-4 transition-colors hover:bg-white/80 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:bg-slate-900/80"
           >
             <span class="font-semibold text-primary">#{hashtag.name}</span>

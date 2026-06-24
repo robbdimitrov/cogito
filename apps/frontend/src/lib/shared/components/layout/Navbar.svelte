@@ -46,7 +46,7 @@
 </script>
 
 <nav
-  class="navbar sticky top-0 z-50 min-h-16 border-b border-white/40 bg-white/35 px-3 shadow-none backdrop-blur-2xl backdrop-saturate-150 transition-colors duration-300 supports-[backdrop-filter]:bg-white/25 dark:border-white/10 dark:bg-slate-950/35 dark:supports-[backdrop-filter]:bg-slate-950/25 sm:px-4"
+  class="navbar sticky top-0 z-50 min-h-16 border-b border-white/40 bg-white/35 px-3 shadow-none backdrop-blur-2xl backdrop-saturate-150 transition-colors duration-300 supports-backdrop-filter:bg-white/25 dark:border-white/10 dark:bg-slate-950/35 dark:supports-backdrop-filter:bg-slate-950/25 sm:px-4"
 >
   <div class="navbar-start">
     {#if user || sessionUnavailable}
@@ -123,7 +123,7 @@
         </button>
         {#if menuOpen}
           <ul
-            class="menu menu-sm dropdown-content z-[1001] mt-3 w-56 rounded-2xl border border-white/70 bg-white/90 p-2 shadow-2xl shadow-slate-900/20 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/95 dark:shadow-black/50"
+            class="menu menu-sm dropdown-content z-1001 mt-3 w-56 rounded-2xl border border-white/70 bg-white/90 p-2 shadow-2xl shadow-slate-900/20 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/95 dark:shadow-black/50"
           >
             <li class="menu-title px-3 py-1 text-xs opacity-60">
               Signed in as @{user.username || "user"}
@@ -131,7 +131,7 @@
             <li><hr class="my-1 border-base-200" /></li>
             <li>
               <a
-                href={`/@${user.username}`}
+                href={resolve(`/@${user.username}`)}
                 onclick={() => (menuOpen = false)}
                 class="gap-2 py-2"
               >
@@ -140,7 +140,7 @@
             </li>
             <li>
               <a
-                href="/settings"
+                href={resolve("/settings")}
                 onclick={() => (menuOpen = false)}
                 class="gap-2 py-2"
               >
@@ -161,8 +161,9 @@
     {:else if sessionUnavailable}
       <span class="text-xs text-base-content/60">Service unavailable</span>
     {:else}
-      <a href="/login" class="btn btn-primary btn-sm rounded-full px-6"
-        >Log In</a
+      <a
+        href={resolve("/login")}
+        class="btn btn-primary btn-sm rounded-full px-6">Log In</a
       >
     {/if}
   </div>

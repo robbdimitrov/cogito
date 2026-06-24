@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { resolve } from "$app/paths";
   import { untrack } from "svelte";
   import {
     AlertTriangle,
@@ -70,14 +71,19 @@
       <div class="card-body items-center py-12 text-center">
         <AlertTriangle class="mb-4 h-16 w-16 opacity-30" />
         <p class="text-slate-600 dark:text-slate-300">Post not found.</p>
-        <a href="/" class="btn btn-primary btn-sm mt-4">Back to Feed</a>
+        <a href={resolve("/")} class="btn btn-primary btn-sm mt-4"
+          >Back to Feed</a
+        >
       </div>
     </GlassCard>
   </div>
 {:else}
   <div class="container mx-auto max-w-2xl px-3 py-3 sm:px-4 sm:py-6">
     <div class="mb-3 sm:mb-4">
-      <a href="/" class="btn btn-ghost btn-sm gap-1 rounded-full px-3">
+      <a
+        href={resolve("/")}
+        class="btn btn-ghost btn-sm gap-1 rounded-full px-3"
+      >
         <ArrowLeft class="h-4 w-4" />
         Back
       </a>
@@ -86,7 +92,7 @@
     <GlassCard class="overflow-hidden">
       <div class="card-body p-4 sm:p-5">
         <div class="flex items-start gap-3 sm:gap-4">
-          <a href="/@{post.user.username}" class="shrink-0">
+          <a href={resolve(`/@${post.user.username}`)} class="shrink-0">
             <Avatar
               name={post.user.name}
               size="md"
@@ -97,7 +103,7 @@
             <div class="flex items-start justify-between gap-2">
               <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <a
-                  href="/@{post.user.username}"
+                  href={resolve(`/@${post.user.username}`)}
                   class="truncate font-semibold text-base-content hover:underline"
                 >
                   {post.user.name}
@@ -122,14 +128,14 @@
             </div>
             <FormattedContent
               content={post.content}
-              class="mt-3 whitespace-pre-wrap break-words text-[1.02rem] leading-relaxed sm:mt-4 sm:text-lg"
+              class="mt-3 whitespace-pre-wrap wrap-break-word text-[1.02rem] leading-relaxed sm:mt-4 sm:text-lg"
             />
             {#if post.mediaKey}
               <div class="mt-3 sm:mt-4">
                 <img
                   src={imageUrl(post.mediaKey)}
                   alt="Post attachment"
-                  class="max-h-[500px] w-auto rounded-xl border border-slate-200 object-contain dark:border-slate-800"
+                  class="max-h-125 w-auto rounded-xl border border-slate-200 object-contain dark:border-slate-800"
                 />
               </div>
             {/if}

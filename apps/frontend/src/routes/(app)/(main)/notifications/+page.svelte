@@ -89,7 +89,7 @@
         {#each pagination.items as notification (notification.id)}
           <GlassCard as="li" interactive class="hover:scale-[1.005]">
             <a
-              href={notificationHref(notification)}
+              href={resolve(notificationHref(notification) as any)}
               class="card-body flex-row items-start gap-3 p-4 sm:p-5"
             >
               <div

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { resolve } from "$app/paths";
   import Avatar from "$lib/shared/components/ui/Avatar.svelte";
   import FormattedContent from "$lib/domains/posts/components/FormattedContent.svelte";
   import { imageUrl } from "$lib/shared/imageUrl";
@@ -15,7 +16,7 @@
   <div class="flex items-center gap-2 mb-1.5">
     {#if author}
       <a
-        href="/@{author.username}"
+        href={resolve(`/@${author.username}`)}
         class="shrink-0 transition-transform duration-200 hover:scale-105"
       >
         <Avatar
@@ -28,13 +29,13 @@
     {#if author}
       <div class="flex items-center gap-1.5 min-w-0">
         <a
-          href="/@{author.username}"
+          href={resolve(`/@${author.username}`)}
           class="font-bold text-sm text-slate-900 dark:text-slate-100 hover:underline truncate"
         >
           {author.name}
         </a>
         <a
-          href="/@{author.username}"
+          href={resolve(`/@${author.username}`)}
           class="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors truncate"
         >
           @{author.username}
@@ -44,7 +45,7 @@
   </div>
   <FormattedContent
     content={post.content}
-    class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed line-clamp-4 break-words"
+    class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed line-clamp-4 wrap-break-word"
   />
   {#if post.mediaKey}
     <div class="mt-2">

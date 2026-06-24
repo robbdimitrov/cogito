@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { resolve } from "$app/paths";
   import { enhance } from "$app/forms";
   import Avatar from "$lib/shared/components/ui/Avatar.svelte";
   import { Trash2, Repeat, Heart, MessageSquare } from "@lucide/svelte";
@@ -85,7 +86,7 @@
     >
       <Repeat class="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
       <a
-        href="/@{repostedBy.username}"
+        href={resolve(`/@${repostedBy.username}`)}
         class="font-semibold hover:underline truncate min-w-0"
       >
         @{repostedBy.username}
@@ -101,7 +102,7 @@
       <div class="flex items-start gap-3 sm:gap-4">
         {#if author}
           <a
-            href="/@{author.username}"
+            href={resolve(`/@${author.username}`)}
             class="shrink-0 transition-transform duration-200 hover:scale-105"
           >
             <Avatar
@@ -116,13 +117,13 @@
             <div class="flex flex-col min-w-0">
               {#if author}
                 <a
-                  href="/@{author.username}"
+                  href={resolve(`/@${author.username}`)}
                   class="font-bold hover:underline truncate max-w-full text-base sm:text-lg text-slate-900 dark:text-slate-100 tracking-tight leading-none mb-0.5 sm:mb-1"
                 >
                   {author.name}
                 </a>
                 <a
-                  href="/@{author.username}"
+                  href={resolve(`/@${author.username}`)}
                   class="text-[0.9rem] sm:text-sm text-slate-500 dark:text-slate-400 truncate max-w-full hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
                 >
                   @{author.username}
@@ -142,7 +143,7 @@
           </div>
           <FormattedContent
             content={displayPost.content}
-            class="mt-3 sm:mt-3.5 whitespace-pre-wrap break-words text-[15px] sm:text-[1.05rem] leading-relaxed text-slate-800 dark:text-slate-200"
+            class="mt-3 sm:mt-3.5 whitespace-pre-wrap wrap-break-word text-[15px] sm:text-[1.05rem] leading-relaxed text-slate-800 dark:text-slate-200"
           />
           {#if displayPost.mediaKey}
             <div class="mt-3">
@@ -160,7 +161,7 @@
           {/if}
           <div class="mt-3">
             <a
-              href="/posts/{displayPost.id}"
+              href={resolve(`/posts/${displayPost.id}`)}
               class="text-[0.8rem] sm:text-sm font-medium text-slate-400 dark:text-slate-500 hover:text-primary transition-colors"
             >
               {formatPostDate(displayPost.created)}
@@ -170,7 +171,7 @@
             class="mt-3 sm:mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60 flex items-center gap-2 sm:gap-3"
           >
             <a
-              href="/posts/{displayPost.id}"
+              href={resolve(`/posts/${displayPost.id}`)}
               class="btn btn-ghost btn-sm gap-1.5 rounded-full px-3 text-slate-500 dark:text-slate-400 hover:text-primary hover:bg-primary/5 transition-all duration-150"
               aria-label="Replies"
             >

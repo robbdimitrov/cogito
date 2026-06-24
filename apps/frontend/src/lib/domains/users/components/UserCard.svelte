@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { resolve } from "$app/paths";
   import Avatar from "$lib/shared/components/ui/Avatar.svelte";
   import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
   import type { User } from "$lib/domains/users/model";
@@ -52,10 +53,10 @@
 {#if variant === "compact"}
   <GlassCard class="overflow-hidden">
     <div class="flex items-center gap-3 p-3">
-      <a href="/@{user.username}" class="shrink-0">
+      <a href={resolve(`/@${user.username}`)} class="shrink-0">
         <Avatar name={user.name} size="md" photoKey={user.profilePhotoKey} />
       </a>
-      <a href="/@{user.username}" class="min-w-0 flex-1">
+      <a href={resolve(`/@${user.username}`)} class="min-w-0 flex-1">
         <p
           class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
         >
@@ -67,7 +68,7 @@
         </p>
       </a>
       <a
-        href="/@{user.username}"
+        href={resolve(`/@${user.username}`)}
         class="btn btn-primary btn-xs rounded-full px-3"
       >
         View
@@ -79,7 +80,7 @@
   </GlassCard>
 {:else}
   <GlassCard class="sticky top-20 overflow-hidden">
-    <div class="relative h-16 bg-gradient-to-r from-primary/70 to-secondary/70">
+    <div class="relative h-16 bg-linear-to-r from-primary/70 to-secondary/70">
       {#if user.coverPhotoKey}
         <img
           src={imageUrl(user.coverPhotoKey)}
@@ -89,7 +90,7 @@
       {/if}
     </div>
     <div class="card-body relative z-10 -mt-8 p-4">
-      <a href="/@{user.username}">
+      <a href={resolve(`/@${user.username}`)}>
         <div class="flex items-center gap-3">
           <div
             class="rounded-full border border-base-200/50 bg-base-100 p-1 dark:bg-slate-800"

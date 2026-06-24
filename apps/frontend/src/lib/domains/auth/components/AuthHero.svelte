@@ -15,10 +15,10 @@
 </script>
 
 <div
-  class="relative hidden items-center justify-center overflow-hidden bg-gradient-to-br from-primary to-secondary p-12 lg:flex lg:w-1/2"
+  class="relative hidden items-center justify-center overflow-hidden bg-linear-to-br from-primary to-secondary p-12 lg:flex lg:w-1/2"
 >
   <div
-    class="absolute inset-0 opacity-10 [background-image:radial-gradient(circle_at_20%_80%,white_1px,transparent_1px),radial-gradient(circle_at_80%_20%,white_1px,transparent_1px)] [background-size:32px_32px]"
+    class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_20%_80%,white_1px,transparent_1px),radial-gradient(circle_at_80%_20%,white_1px,transparent_1px)] bg-size-[32px_32px]"
     aria-hidden="true"
   ></div>
   <div class="relative text-center text-primary-content">

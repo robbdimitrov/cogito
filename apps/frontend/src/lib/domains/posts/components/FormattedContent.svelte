@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { resolve } from "$app/paths";
+
   interface Props {
     content: string;
     class?: string;
@@ -90,7 +92,7 @@
         {token.text}
       {:else if token.type === "url"}
         <a
-          href={token.url}
+          href={resolve(token.url as any)}
           target="_blank"
           rel="noopener noreferrer"
           class="font-medium text-primary hover:underline break-all"
@@ -98,11 +100,17 @@
           {token.url}
         </a>
       {:else if token.type === "hashtag"}
-        <a href={token.href} class="font-medium text-primary hover:underline">
+        <a
+          href={resolve(token.href as any)}
+          class="font-medium text-primary hover:underline"
+        >
           #{token.tag}
         </a>
       {:else if token.type === "mention"}
-        <a href={token.href} class="font-medium text-primary hover:underline">
+        <a
+          href={resolve(token.href as any)}
+          class="font-medium text-primary hover:underline"
+        >
           @{token.handle}
         </a>
       {/if}

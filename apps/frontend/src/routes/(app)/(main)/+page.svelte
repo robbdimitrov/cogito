@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { resolve } from "$app/paths";
   import { page } from "$app/state";
   import UserCard from "$lib/domains/users/components/UserCard.svelte";
   import CreatePost from "$lib/domains/posts/components/CreatePost.svelte";
@@ -56,7 +57,10 @@
           >
             <Search class="mb-2 h-12 w-12 opacity-50" aria-hidden="true" />
             <p>No posts in your feed yet.</p>
-            <a href="/search" class="btn btn-primary btn-sm mt-2 rounded-full">
+            <a
+              href={resolve("/search")}
+              class="btn btn-primary btn-sm mt-2 rounded-full"
+            >
               Find people to follow
             </a>
           </div>
