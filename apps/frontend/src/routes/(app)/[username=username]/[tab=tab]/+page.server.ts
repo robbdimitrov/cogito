@@ -1,4 +1,4 @@
-import { fail, error } from "@sveltejs/kit";
+import { fail, error, isHttpError } from "@sveltejs/kit";
 import {
   getLikedPosts,
   like,
@@ -14,11 +14,16 @@ import {
   unfollow,
 } from "$lib/domains/users/api.server";
 import { apiClient } from "$lib/server/api/client";
+import { errorMessage } from "$lib/server/api/http";
 
 export const load = async (event) => {
   const { params, parent } = event;
   const { profileUser } = await parent();
   const tab = params.tab;
+
+  if (tab !== "likes" && tab !== "followers" && tab !== "following") {
+    throw error(404, "Not found");
+  }
 
   try {
     if (tab === "likes") {
@@ -37,7 +42,7 @@ export const load = async (event) => {
         nextCursor: userPage?.nextCursor ?? null,
         type: "users",
       };
-    } else if (tab === "following") {
+    } else {
       const userPage = await getFollowing(apiClient(event), profileUser.id, "");
       return {
         tab,
@@ -45,10 +50,9 @@ export const load = async (event) => {
         nextCursor: userPage?.nextCursor ?? null,
         type: "users",
       };
-    } else {
-      throw error(404, "Not found");
     }
   } catch (e) {
+    console.error("Failed to load tab data:", e);
     return {
       tab,
       items: [],
@@ -74,6 +78,7 @@ export const actions = {
       }
       return { success: true };
     } catch (e) {
+      if (isHttpError(e)) return fail(e.status, { error: errorMessage(e.status) });
       return fail(500, { error: "Action failed" });
     }
   },
@@ -92,6 +97,7 @@ export const actions = {
       }
       return { success: true };
     } catch (e) {
+      if (isHttpError(e)) return fail(e.status, { error: errorMessage(e.status) });
       return fail(500, { error: "Action failed" });
     }
   },
@@ -105,6 +111,7 @@ export const actions = {
       await deletePost(apiClient(event), postId);
       return { success: true };
     } catch (e) {
+      if (isHttpError(e)) return fail(e.status, { error: errorMessage(e.status) });
       return fail(500, { error: "Delete failed" });
     }
   },
@@ -124,6 +131,7 @@ export const actions = {
       }
       return { success: true };
     } catch (e) {
+      if (isHttpError(e)) return fail(e.status, { error: errorMessage(e.status) });
       return fail(500, { error: "Action failed" });
     }
   },

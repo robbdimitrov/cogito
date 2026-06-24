@@ -1,5 +1,6 @@
 import { login } from "$lib/domains/auth/api.server";
 import { formString } from "$lib/domains/auth/validation";
+import { errorMessage } from "$lib/server/api/http";
 import { fail, redirect, isHttpError } from "@sveltejs/kit";
 import type { Actions } from "./$types";
 
@@ -20,10 +21,11 @@ export const actions = {
         return fail(502, { error: "Login failed", email });
       }
     } catch (error) {
-      const message =
-        isHttpError(error) && error.status === 401
+      const message = !isHttpError(error)
+        ? "Login failed"
+        : error.status === 401
           ? "Incorrect email or password"
-          : "Login failed";
+          : errorMessage(error.status);
       return fail(isHttpError(error) ? error.status : 502, {
         error: message,
         email,

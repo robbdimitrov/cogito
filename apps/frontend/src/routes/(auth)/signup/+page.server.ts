@@ -1,6 +1,7 @@
 import { login } from "$lib/domains/auth/api.server";
 import { formString, validateSignup } from "$lib/domains/auth/validation";
 import { createUser } from "$lib/domains/users/api.server";
+import { errorMessage } from "$lib/server/api/http";
 import { fail, redirect, isHttpError } from "@sveltejs/kit";
 import type { Actions } from "./$types";
 
@@ -20,23 +21,27 @@ export const actions = {
 
     try {
       await createUser(fetch, name, username, email, password);
-      await login(fetch, email, password);
-      if (!cookies.get("session")) {
-        console.error("Signup login response did not include a session cookie");
-        return fail(502, {
-          error: "Account created, but login failed",
-          fields,
-        });
-      }
     } catch (error) {
-      const message =
-        isHttpError(error) && error.status === 409
+      const message = !isHttpError(error)
+        ? "Signup failed"
+        : error.status === 409
           ? "An account with those details already exists"
-          : "Signup failed";
+          : errorMessage(error.status);
       return fail(isHttpError(error) ? error.status : 502, {
         error: message,
         fields,
       });
+    }
+
+    try {
+      await login(fetch, email, password);
+      if (!cookies.get("session")) {
+        console.error("Signup login response did not include a session cookie");
+        return fail(502, { error: "Account created, but login failed", fields });
+      }
+    } catch (e) {
+      console.error("Post-signup login failed:", e);
+      return fail(502, { error: "Account created, but login failed", fields });
     }
 
     redirect(303, "/");

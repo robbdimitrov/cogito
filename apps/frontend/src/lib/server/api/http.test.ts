@@ -47,11 +47,9 @@ describe("unwrap", () => {
       [503, "The service is temporarily unavailable."],
       [504, "The service is temporarily unavailable."],
     ])("%i → '%s'", async (status, message) => {
-      const err = await unwrap(response(status)).catch((e) => e);
-      expect(isHttpError(err)).toBe(true);
-      if (!isHttpError(err)) return;
-      expect(err.status).toBe(status);
-      expect(err.body.message).toBe(message);
+      await expect(unwrap(response(status))).rejects.toSatisfy(
+        (e) => isHttpError(e) && e.status === status && e.body.message === message,
+      );
     });
   });
 
@@ -66,7 +64,7 @@ describe("unwrap", () => {
       throw new Error("expected unwrap to throw");
     } catch (error) {
       expect(isHttpError(error)).toBe(true);
-      if (!isHttpError(error)) return;
+      if (!isHttpError(error)) throw error;
       expect(error.status).toBe(400);
       expect(error.body.message).toBe("The request could not be completed.");
       expect(error.body.message).not.toContain("backend operational detail");
@@ -81,7 +79,7 @@ describe("unwrap", () => {
       throw new Error("expected unwrap to throw");
     } catch (error) {
       expect(isHttpError(error)).toBe(true);
-      if (!isHttpError(error)) return;
+      if (!isHttpError(error)) throw error;
       expect(error.status).toBe(503);
       expect(error.body.message).toBe(
         "The service is temporarily unavailable.",

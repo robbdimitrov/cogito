@@ -14,7 +14,8 @@ export const GET: RequestHandler = async (event) => {
   try {
     const res = await searchUsers(apiClient(event), query, limit);
     return json(res);
-  } catch (err: any) {
+  } catch (e) {
+    console.error("Failed to search users:", e);
     return json({ items: [] });
   }
 };

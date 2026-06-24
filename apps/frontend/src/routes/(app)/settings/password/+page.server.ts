@@ -1,6 +1,7 @@
 import { fail, isHttpError } from "@sveltejs/kit";
 import { updatePassword } from "$lib/domains/users/api.server";
 import { resolveCurrentUser } from "$lib/domains/auth/currentUser.server";
+import { errorMessage } from "$lib/server/api/http";
 
 export const actions = {
   default: async ({ request, fetch }) => {
@@ -27,7 +28,7 @@ export const actions = {
         const message =
           error.status === 401
             ? "Current password is incorrect"
-            : "Failed to update password";
+            : errorMessage(error.status);
         return fail(error.status, { error: message });
       }
       return fail(500, { error: "Failed to update password" });

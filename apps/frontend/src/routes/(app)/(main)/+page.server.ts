@@ -1,4 +1,4 @@
-import { fail } from "@sveltejs/kit";
+import { fail, isHttpError } from "@sveltejs/kit";
 import {
   getFeed,
   like,
@@ -10,6 +10,7 @@ import {
 } from "$lib/domains/posts/api.server";
 import { uploadImage } from "$lib/domains/posts/uploads.server";
 import { apiClient } from "$lib/server/api/client";
+import { errorMessage } from "$lib/server/api/http";
 
 export const load = async (event) => {
   const feed = await getFeed(apiClient(event), "");
@@ -48,6 +49,7 @@ export const actions = {
       });
       return { success: true };
     } catch (e) {
+      if (isHttpError(e)) return fail(e.status, { error: errorMessage(e.status) });
       return fail(500, { error: "Failed to post" });
     }
   },
@@ -66,6 +68,7 @@ export const actions = {
       }
       return { success: true };
     } catch (e) {
+      if (isHttpError(e)) return fail(e.status, { error: errorMessage(e.status) });
       return fail(500, { error: "Action failed" });
     }
   },
@@ -84,6 +87,7 @@ export const actions = {
       }
       return { success: true };
     } catch (e) {
+      if (isHttpError(e)) return fail(e.status, { error: errorMessage(e.status) });
       return fail(500, { error: "Action failed" });
     }
   },
@@ -97,6 +101,7 @@ export const actions = {
       await deletePost(apiClient(event), postId);
       return { success: true };
     } catch (e) {
+      if (isHttpError(e)) return fail(e.status, { error: errorMessage(e.status) });
       return fail(500, { error: "Delete failed" });
     }
   },

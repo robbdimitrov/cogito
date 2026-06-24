@@ -27,6 +27,7 @@ export const GET = async (event) => {
     }
     return json({ items: [], nextCursor: null });
   } catch (e) {
+    console.error("Failed to load tab data:", e);
     return json({ items: [], nextCursor: null });
   }
 };

@@ -16,7 +16,7 @@ export async function unwrap<T>(res: Response): Promise<T | null> {
   }
 }
 
-function errorMessage(status: number): string {
+export function errorMessage(status: number): string {
   switch (status) {
     case 400:
       return "The request could not be completed.";

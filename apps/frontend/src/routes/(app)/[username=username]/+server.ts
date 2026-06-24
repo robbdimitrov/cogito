@@ -12,6 +12,7 @@ export const GET = async (event) => {
     const feed = await getUserPosts(apiClient(event), user.id, cursor);
     return json(feed ?? { items: [], nextCursor: null });
   } catch (e) {
+    console.error("Failed to load user posts:", e);
     return json({ items: [], nextCursor: null });
   }
 };
