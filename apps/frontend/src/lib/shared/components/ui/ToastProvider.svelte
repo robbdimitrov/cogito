@@ -9,7 +9,7 @@
 
 {@render children()}
 
-<div class="toast toast-top toast-end z-[1100] gap-2" aria-live="polite">
+<div class="toast toast-top toast-end z-1100 gap-2" aria-live="polite">
   {#each toasts.items as toast (toast.id)}
     <div
       class={[

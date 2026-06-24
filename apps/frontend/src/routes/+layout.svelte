@@ -13,7 +13,7 @@
 {@render children()}
 
 {#if navigating.to}
-  <div class="fixed left-0 top-0 z-[100] h-1 w-full bg-primary/20">
+  <div class="fixed left-0 top-0 z-100 h-1 w-full bg-primary/20">
     <div
       class="h-full w-full origin-left animate-[progress_1.5s_ease-in-out_infinite] bg-primary"
     ></div>
