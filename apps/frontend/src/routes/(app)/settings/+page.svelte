@@ -5,6 +5,8 @@
 
 <div class="p-4 text-center">
   <p>
-    Redirecting to <a href={resolve("/settings/profile")} class="link">Profile Settings</a>...
+    Redirecting to <a href={resolve("/settings/profile")} class="link"
+      >Profile Settings</a
+    >...
   </p>
 </div>
