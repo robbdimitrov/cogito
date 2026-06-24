@@ -1,6 +1,6 @@
-import { fail, isHttpError } from "@sveltejs/kit";
+import { fail } from "@sveltejs/kit";
 import { getSessions, deleteSession } from "$lib/domains/auth/api.server";
-import { errorMessage } from "$lib/server/api/http";
+import { failFromError } from "$lib/server/api/http";
 
 export async function load({ fetch }) {
   try {
@@ -32,11 +32,8 @@ export const actions = {
     try {
       await deleteSession(fetch, sessionId);
       return { success: true };
-    } catch (error) {
-      if (isHttpError(error)) {
-        return fail(error.status, { error: errorMessage(error.status) });
-      }
-      return fail(500, { error: "Failed to terminate session" });
+    } catch (e) {
+      return failFromError(e, "Failed to terminate session");
     }
   },
 };

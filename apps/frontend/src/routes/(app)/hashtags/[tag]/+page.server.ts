@@ -1,13 +1,5 @@
-import { fail, isHttpError } from "@sveltejs/kit";
-import {
-  getHashtagPosts,
-  like,
-  unlike,
-  repost,
-  removeRepost,
-  deletePost,
-} from "$lib/domains/posts/api.server";
-import { errorMessage } from "$lib/server/api/http";
+import { getHashtagPosts } from "$lib/domains/posts/api.server";
+import { toggleLike, toggleRepost, deletePost } from "$lib/domains/posts/actions.server";
 import { apiClient } from "$lib/server/api/client";
 import type { Post } from "$lib/shared/types";
 
@@ -24,56 +16,7 @@ export const load = async (event) => {
 };
 
 export const actions = {
-  toggleLike: async (event) => {
-    const { request } = event;
-    const data = await request.formData();
-    const postId = data.get("postId")?.toString();
-    const isLiked = data.get("liked") === "true";
-    if (!postId) return fail(400, { error: "Missing postId" });
-
-    try {
-      if (isLiked) {
-        await unlike(apiClient(event), postId);
-      } else {
-        await like(apiClient(event), postId);
-      }
-      return { success: true };
-    } catch (e) {
-      if (isHttpError(e)) return fail(e.status, { error: errorMessage(e.status) });
-      return fail(500, { error: "Action failed" });
-    }
-  },
-  toggleRepost: async (event) => {
-    const { request } = event;
-    const data = await request.formData();
-    const postId = data.get("postId")?.toString();
-    const isReposted = data.get("reposted") === "true";
-    if (!postId) return fail(400, { error: "Missing postId" });
-
-    try {
-      if (isReposted) {
-        await removeRepost(apiClient(event), postId);
-      } else {
-        await repost(apiClient(event), postId);
-      }
-      return { success: true };
-    } catch (e) {
-      if (isHttpError(e)) return fail(e.status, { error: errorMessage(e.status) });
-      return fail(500, { error: "Action failed" });
-    }
-  },
-  deletePost: async (event) => {
-    const { request } = event;
-    const data = await request.formData();
-    const postId = data.get("postId")?.toString();
-    if (!postId) return fail(400, { error: "Missing postId" });
-
-    try {
-      await deletePost(apiClient(event), postId);
-      return { success: true };
-    } catch (e) {
-      if (isHttpError(e)) return fail(e.status, { error: errorMessage(e.status) });
-      return fail(500, { error: "Delete failed" });
-    }
-  },
+  toggleLike,
+  toggleRepost,
+  deletePost,
 };

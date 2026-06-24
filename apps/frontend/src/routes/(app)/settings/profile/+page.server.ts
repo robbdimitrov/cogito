@@ -1,8 +1,8 @@
-import { fail, isHttpError } from "@sveltejs/kit";
+import { fail } from "@sveltejs/kit";
 import { updateUser } from "$lib/domains/users/api.server";
 import { uploadImage } from "$lib/domains/posts/uploads.server";
 import { resolveCurrentUser } from "$lib/domains/auth/currentUser.server";
-import { errorMessage } from "$lib/server/api/http";
+import { failFromError } from "$lib/server/api/http";
 
 export const actions = {
   default: async ({ request, fetch }) => {
@@ -45,11 +45,8 @@ export const actions = {
       });
 
       return { success: true };
-    } catch (error) {
-      if (isHttpError(error)) {
-        return fail(error.status, { error: errorMessage(error.status) });
-      }
-      return fail(500, { error: "Failed to update profile" });
+    } catch (e) {
+      return failFromError(e, "Failed to update profile");
     }
   },
 };

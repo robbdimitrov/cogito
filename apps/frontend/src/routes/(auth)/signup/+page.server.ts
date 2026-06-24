@@ -22,15 +22,14 @@ export const actions = {
     try {
       await createUser(fetch, name, username, email, password);
     } catch (error) {
-      const message = !isHttpError(error)
-        ? "Signup failed"
-        : error.status === 409
+      if (!isHttpError(error)) {
+        return fail(502, { error: "Signup failed", fields });
+      }
+      const message =
+        error.status === 409
           ? "An account with those details already exists"
           : errorMessage(error.status);
-      return fail(isHttpError(error) ? error.status : 502, {
-        error: message,
-        fields,
-      });
+      return fail(error.status, { error: message, fields });
     }
 
     try {

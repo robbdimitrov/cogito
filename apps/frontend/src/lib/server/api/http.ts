@@ -1,4 +1,5 @@
-import { error } from "@sveltejs/kit";
+import { error, fail, isHttpError } from "@sveltejs/kit";
+import type { ActionFailure } from "@sveltejs/kit";
 import { camelizeKeys } from "$lib/shared/mappers";
 
 export async function unwrap<T>(res: Response): Promise<T | null> {
@@ -39,4 +40,15 @@ export function errorMessage(status: number): string {
     default:
       return "The request failed.";
   }
+}
+
+export function failFromError(
+  e: unknown,
+  fallback: string,
+  overrides?: Record<number, string>,
+): ActionFailure<{ error: string }> {
+  if (isHttpError(e)) {
+    return fail(e.status, { error: overrides?.[e.status] ?? errorMessage(e.status) });
+  }
+  return fail(500, { error: fallback });
 }

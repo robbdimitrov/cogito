@@ -21,15 +21,14 @@ export const actions = {
         return fail(502, { error: "Login failed", email });
       }
     } catch (error) {
-      const message = !isHttpError(error)
-        ? "Login failed"
-        : error.status === 401
+      if (!isHttpError(error)) {
+        return fail(502, { error: "Login failed", email });
+      }
+      const message =
+        error.status === 401
           ? "Incorrect email or password"
           : errorMessage(error.status);
-      return fail(isHttpError(error) ? error.status : 502, {
-        error: message,
-        email,
-      });
+      return fail(error.status, { error: message, email });
     }
 
     redirect(303, "/");

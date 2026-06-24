@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { isHttpError } from "@sveltejs/kit";
-import { unwrap } from "./http";
+import { error as kitError, isHttpError } from "@sveltejs/kit";
+import { unwrap, failFromError } from "./http";
+
+function caughtHttpError(status: number, body?: string): unknown {
+  try {
+    kitError(status, body);
+  } catch (e) {
+    return e;
+  }
+}
 
 function response(status: number, body: string = ""): Response {
   return new Response(body || null, { status });
@@ -86,5 +94,41 @@ describe("unwrap", () => {
       );
       expect(error.body.message).not.toContain("raw upstream failure text");
     }
+  });
+});
+
+describe("failFromError", () => {
+  it("returns the HTTP status and mapped message for an HttpError", () => {
+    const result = failFromError(caughtHttpError(404), "fallback");
+    expect(result.status).toBe(404);
+    expect(result.data).toEqual({ error: "Not found." });
+  });
+
+  it("applies an override message when the status matches", () => {
+    const result = failFromError(caughtHttpError(409), "fallback", {
+      409: "That username is taken",
+    });
+    expect(result.status).toBe(409);
+    expect(result.data).toEqual({ error: "That username is taken" });
+  });
+
+  it("falls through to errorMessage when status has no override", () => {
+    const result = failFromError(caughtHttpError(403), "fallback", {
+      409: "conflict override",
+    });
+    expect(result.status).toBe(403);
+    expect(result.data).toEqual({ error: "You do not have access to that action." });
+  });
+
+  it("returns 500 with the fallback message for non-HTTP errors", () => {
+    const result = failFromError(new Error("network failure"), "Upstream error");
+    expect(result.status).toBe(500);
+    expect(result.data).toEqual({ error: "Upstream error" });
+  });
+
+  it("returns 500 with fallback for thrown strings", () => {
+    const result = failFromError("oops", "Something went wrong");
+    expect(result.status).toBe(500);
+    expect(result.data).toEqual({ error: "Something went wrong" });
   });
 });
