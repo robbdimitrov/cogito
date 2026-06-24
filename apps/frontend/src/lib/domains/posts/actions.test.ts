@@ -16,7 +16,6 @@ function makeEvent(
   } as unknown as RequestEvent;
 }
 
-
 describe("toggleLike", () => {
   it("returns 400 when postId is missing", async () => {
     const result = await toggleLike(makeEvent({ liked: "false" }));

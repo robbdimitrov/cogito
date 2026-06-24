@@ -8,6 +8,7 @@ function caughtHttpError(status: number, body?: string): unknown {
   } catch (e) {
     return e;
   }
+  throw new Error("kitError did not throw");
 }
 
 function response(status: number, body: string = ""): Response {
