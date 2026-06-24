@@ -6,6 +6,7 @@ import (
 )
 
 var ErrInvalidCursor = errors.New("invalid cursor")
+var ErrNotFound = errors.New("not found")
 
 type Repository interface {
 	List(ctx context.Context, userID int32, cursor string, limit int32) ([]Notification, string, error)

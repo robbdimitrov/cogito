@@ -31,7 +31,6 @@ func main() {
 	valkeyURL := envOrDefault("VALKEY_URL", "redis://localhost:6379")
 	brokers := splitCSV(envOrDefault("REDPANDA_BROKERS", "localhost:9092"))
 	threshold := envIntOrDefault("FAN_OUT_THRESHOLD", 10000)
-	_ = threshold
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()

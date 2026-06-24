@@ -65,8 +65,14 @@ func (s *Store) Insert(ctx context.Context, externalID int64, userID, actorID in
 }
 
 func (s *Store) MarkRead(ctx context.Context, id int64, userID int32) error {
-	_, err := s.db.Exec(ctx, "UPDATE notifications SET read = true WHERE id = $1 AND user_id = $2", id, userID)
-	return err
+	tag, err := s.db.Exec(ctx, "UPDATE notifications SET read = true WHERE id = $1 AND user_id = $2", id, userID)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return notifications.ErrNotFound
+	}
+	return nil
 }
 
 func (s *Store) UnreadCount(ctx context.Context, userID int32) (int32, error) {

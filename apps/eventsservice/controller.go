@@ -31,16 +31,16 @@ func (c *Controller) GetNotifications(ctx context.Context, req *pb.GetNotificati
 	}
 	items, nextCursor, err := c.service.GetNotifications(ctx, req.UserId, req.Cursor, limit)
 	if err != nil {
-		slog.Warn("list notifications failed", "request_id", RequestID(ctx), "error", err)
 		if errors.Is(err, notifications.ErrInvalidCursor) {
 			return nil, NewError(codes.InvalidArgument)
 		}
+		slog.Warn("list notifications failed", "request_id", RequestID(ctx), "error", err)
 		return nil, NewError(codes.Internal)
 	}
 	out := make([]*pb.Notification, 0, len(items))
 	for _, item := range items {
 		out = append(out, &pb.Notification{
-			Id:         int32(item.ID),
+			Id:         item.ID,
 			ExternalId: item.ExternalID,
 			UserId:     item.UserID,
 			ActorId:    item.ActorID,
@@ -54,7 +54,10 @@ func (c *Controller) GetNotifications(ctx context.Context, req *pb.GetNotificati
 }
 
 func (c *Controller) MarkNotificationRead(ctx context.Context, req *pb.NotificationRequest) (*pb.Empty, error) {
-	if err := c.service.MarkNotificationRead(ctx, int64(req.NotificationId), req.UserId); err != nil {
+	if err := c.service.MarkNotificationRead(ctx, req.NotificationId, req.UserId); err != nil {
+		if errors.Is(err, notifications.ErrNotFound) {
+			return nil, NewError(codes.NotFound)
+		}
 		slog.Warn("mark notification read failed", "request_id", RequestID(ctx), "error", err)
 		return nil, NewError(codes.Internal)
 	}
