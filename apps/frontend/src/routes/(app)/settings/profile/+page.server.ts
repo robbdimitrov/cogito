@@ -46,7 +46,7 @@ export const actions = {
       return { success: true };
     } catch (error) {
       if (isHttpError(error)) {
-        return fail(400, { error: error.body.message });
+        return fail(error.status, { error: "Failed to update profile" });
       }
       return fail(500, { error: "Failed to update profile" });
     }

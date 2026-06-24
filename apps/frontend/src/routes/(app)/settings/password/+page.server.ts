@@ -24,7 +24,11 @@ export const actions = {
       return { success: true };
     } catch (error) {
       if (isHttpError(error)) {
-        return fail(400, { error: error.body.message });
+        const message =
+          error.status === 401
+            ? "Current password is incorrect"
+            : "Failed to update password";
+        return fail(error.status, { error: message });
       }
       return fail(500, { error: "Failed to update password" });
     }

@@ -30,8 +30,8 @@ export const actions = {
       }
     } catch (error) {
       const message =
-        isHttpError(error) && error.status < 500
-          ? error.body.message
+        isHttpError(error) && error.status === 409
+          ? "An account with those details already exists"
           : "Signup failed";
       return fail(isHttpError(error) ? error.status : 502, {
         error: message,

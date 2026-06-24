@@ -18,6 +18,7 @@ func TestGetStatusCode(t *testing.T) {
 		{codes.Unauthenticated, http.StatusUnauthorized},
 		{codes.PermissionDenied, http.StatusForbidden},
 		{codes.NotFound, http.StatusNotFound},
+		{codes.AlreadyExists, http.StatusConflict},
 		{codes.Internal, http.StatusInternalServerError},
 	}
 

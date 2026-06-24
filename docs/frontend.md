@@ -90,6 +90,14 @@ Everything runs in the Node server. `apiClient(event)` resolves backend paths ag
 
 Browser-initiated fetches for pagination hit same-origin SvelteKit `+server.ts` handlers, which call the backend server-side.
 
+Backend-authored error bodies are not UI copy. The shared backend response
+unwrap helper preserves HTTP status for route control flow, but maps failed
+responses to frontend-owned fallback messages instead of rendering backend
+`message` fields, raw response text, status text, or exception details. Form
+actions may choose more specific frontend-owned copy based on context and
+status. Normal response data, including user-authored content, is rendered
+unchanged after DTO mapping.
+
 ## Key Frontend Routes
 
 | Path                    | Method | Handler         | Backend call                                                              |

@@ -23,6 +23,8 @@ func getStatusCode(s *status.Status) int {
 		return http.StatusForbidden
 	case codes.NotFound:
 		return http.StatusNotFound
+	case codes.AlreadyExists:
+		return http.StatusConflict
 	default:
 		return http.StatusInternalServerError
 	}

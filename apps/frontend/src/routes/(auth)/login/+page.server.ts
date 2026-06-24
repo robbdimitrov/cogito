@@ -21,8 +21,8 @@ export const actions = {
       }
     } catch (error) {
       const message =
-        isHttpError(error) && error.status < 500
-          ? error.body.message
+        isHttpError(error) && error.status === 401
+          ? "Incorrect email or password"
           : "Login failed";
       return fail(isHttpError(error) ? error.status : 502, {
         error: message,

@@ -12,12 +12,13 @@ export async function login(
   api: ApiClient,
   email: string,
   password: string,
-): Promise<Response> {
-  return api("/sessions", {
+): Promise<void> {
+  const res = await api("/sessions", {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ email, password }),
   });
+  await unwrap<unknown>(res);
 }
 
 export async function logout(api: ApiClient): Promise<void> {

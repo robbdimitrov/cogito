@@ -4,8 +4,8 @@ import { camelizeKeys } from "$lib/shared/mappers";
 export async function unwrap<T>(res: Response): Promise<T | null> {
   if (res.status === 204) return null;
   if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw error(res.status, errorMessage(res.status, text));
+    await res.body?.cancel().catch(() => undefined);
+    throw error(res.status, errorMessage(res.status));
   }
   const text = await res.text();
   if (!text) return null;
@@ -16,22 +16,27 @@ export async function unwrap<T>(res: Response): Promise<T | null> {
   }
 }
 
-function errorMessage(status: number, text: string): string {
-  const fallback = `HTTP ${status}`;
-  if (!text) return fallback;
-
-  try {
-    const parsed = camelizeKeys(JSON.parse(text));
-    if (
-      parsed !== null &&
-      typeof parsed === "object" &&
-      "message" in parsed &&
-      typeof parsed.message === "string"
-    ) {
-      return parsed.message;
-    }
-  } catch {
-    return text.trim() || fallback;
+function errorMessage(status: number): string {
+  switch (status) {
+    case 400:
+      return "The request could not be completed.";
+    case 401:
+      return "Please sign in to continue.";
+    case 403:
+      return "You do not have access to that action.";
+    case 404:
+      return "Not found.";
+    case 409:
+      return "The request conflicts with existing data.";
+    case 413:
+      return "The request is too large.";
+    case 429:
+      return "Too many requests. Please try again later.";
+    case 502:
+    case 503:
+    case 504:
+      return "The service is temporarily unavailable.";
+    default:
+      return "The request failed.";
   }
-  return fallback;
 }

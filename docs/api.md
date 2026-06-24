@@ -44,6 +44,14 @@ Rate limit key: `{policy}:user:{id}` (authenticated) → `{policy}:session:{cook
 | read (GET/HEAD) | 64 | CONCURRENCY_READ_LIMIT |
 | mutation (all others) | 24 | CONCURRENCY_MUTATION_LIMIT |
 
+## Error Mapping
+
+The gateway preserves gRPC status for HTTP control flow while returning JSON
+error bodies. Standard mappings include `InvalidArgument` → 400,
+`Unauthenticated` → 401, `PermissionDenied` → 403, `NotFound` → 404, and
+`AlreadyExists` → 409. Other gRPC failures map to 500 unless a controller
+handles them explicitly.
+
 ## Pagination
 
 - All list endpoints accept `cursor` (opaque string) and `limit` (integer) query params.
