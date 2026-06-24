@@ -1,10 +1,10 @@
-use crate::crypto::{generate_hash, validate_password};
-use crate::pagination;
 use crate::cogito::user_service_server::UserService;
 use crate::cogito::{
     CreateUserRequest, Empty, GetUserByUsernameRequest, GetUsersRequest, Identifier, Ids,
     SearchUsersRequest, UpdateUserRequest, User, UserRequest, Users,
 };
+use crate::crypto::{generate_hash, validate_password};
+use crate::pagination;
 use crate::utils::{get_user_id, is_valid_email};
 use chrono::{DateTime, Utc};
 use sqlx::Error as SqlxError;

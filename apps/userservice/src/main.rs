@@ -16,8 +16,8 @@ use std::env;
 use tokio::signal;
 use tonic::transport::Server;
 
-use controller::Controller;
 use cogito::user_service_server::UserServiceServer;
+use controller::Controller;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

@@ -96,10 +96,7 @@ impl crate::controller::AuthDb for DbClient {
         }))
     }
 
-    async fn get_sessions(
-        &self,
-        user_id: i32,
-    ) -> Result<Vec<crate::cogito::Session>, sqlx::Error> {
+    async fn get_sessions(&self, user_id: i32) -> Result<Vec<crate::cogito::Session>, sqlx::Error> {
         let ttl = session_ttl_days();
         let rows = sqlx::query_as::<_, (String, i32, DateTime<Utc>)>(
             r#"SELECT id, user_id, created

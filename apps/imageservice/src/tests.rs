@@ -6,10 +6,10 @@ use tokio::sync::Mutex as TokioMutex;
 use tonic::Request;
 
 use crate::blobstore::BlobStore;
-use crate::db_client::ImageDb;
-use crate::grpc::ImageGrpcService;
 use crate::cogito::image_service_server::ImageService;
 use crate::cogito::{ConsumeUploadRequest, DeleteImageRequest, VerifyUploadRequest};
+use crate::db_client::ImageDb;
+use crate::grpc::ImageGrpcService;
 
 struct MockDb {
     uploads: TokioMutex<Vec<(String, i32)>>,

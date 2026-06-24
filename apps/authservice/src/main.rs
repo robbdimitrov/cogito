@@ -7,10 +7,10 @@ mod db_client;
 mod internal_auth;
 mod logging;
 
+use cogito::auth_service_server::AuthServiceServer;
 use std::env;
 use std::sync::Arc;
 use std::time::Duration;
-use cogito::auth_service_server::AuthServiceServer;
 use tokio::sync::Semaphore;
 use tonic::transport::Server;
 

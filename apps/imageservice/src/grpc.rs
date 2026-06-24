@@ -2,9 +2,9 @@ use std::sync::Arc;
 use tonic::{Request, Response, Status};
 
 use crate::blobstore::BlobStore;
-use crate::db_client::ImageDb;
 use crate::cogito::image_service_server::ImageService;
 use crate::cogito::{ConsumeUploadRequest, DeleteImageRequest, Empty, VerifyUploadRequest};
+use crate::db_client::ImageDb;
 
 pub struct ImageGrpcService<D: ImageDb> {
     db: D,

@@ -12,9 +12,9 @@ mod logging;
 #[cfg(test)]
 mod tests;
 
+use cogito::image_service_server::ImageServiceServer;
 use std::env;
 use std::sync::Arc;
-use cogito::image_service_server::ImageServiceServer;
 use tonic::transport::Server;
 
 use blobstore::S3BlobStore;
