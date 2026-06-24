@@ -51,9 +51,9 @@
   );
 
   let showDeleteModal = $state(false);
+  let isDeleting = $state(false);
   let isLiking = $state(false);
   let isReposting = $state(false);
-  let isDeleting = $state(false);
 
   let deleteForm: HTMLFormElement | null = $state(null);
   let repostForm: HTMLFormElement | null = $state(null);
@@ -205,6 +205,7 @@
               }}
             >
               <input type="hidden" name="postId" value={displayPost.id} />
+              <input type="hidden" name="reposted" value={String(displayPost.reposted ?? false)} />
             </form>
 
             <RepostMenu
@@ -237,6 +238,7 @@
               }}
             >
               <input type="hidden" name="postId" value={displayPost.id} />
+              <input type="hidden" name="liked" value={String(displayPost.liked ?? false)} />
               <button
                 type="submit"
                 class="btn btn-ghost btn-sm gap-2 rounded-full px-4 hover:scale-105 active:scale-95 transition-all duration-150 {liked
@@ -265,9 +267,10 @@
   <form
     bind:this={deleteForm}
     method="POST"
-    action="?/delete"
+    action="?/deletePost"
     class="hidden"
     use:enhance={() => {
+      if (isDeleting) return () => {};
       isDeleting = true;
       return async ({ update }) => {
         isDeleting = false;

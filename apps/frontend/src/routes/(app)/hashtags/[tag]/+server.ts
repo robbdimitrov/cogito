@@ -7,6 +7,7 @@ export const GET = async ({ fetch, params, url }) => {
     const feed = await getHashtagPosts(fetch, params.tag, cursor);
     return json(feed ?? { items: [], nextCursor: null });
   } catch (e) {
+    console.error("Failed to load hashtag posts:", e);
     return json({ items: [], nextCursor: null });
   }
 };
