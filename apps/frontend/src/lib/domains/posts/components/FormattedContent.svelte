@@ -41,7 +41,7 @@
         result.push({ type: "url", url, id: `url-${matchStart}` });
         lastIndex = matchStart + url.length;
       } else {
-        const [fullMatch, _, prefix, symbol, tagOrUser] = match;
+        const [fullMatch, , prefix, symbol, tagOrUser] = match;
         const matchStart = match.index! + (prefix || "").length;
 
         if (matchStart > lastIndex) {
@@ -92,7 +92,7 @@
         {token.text}
       {:else if token.type === "url"}
         <a
-          href={resolve(token.url as any)}
+          href={resolve(token.url as string)}
           target="_blank"
           rel="noopener noreferrer"
           class="font-medium text-primary hover:underline break-all"
@@ -101,14 +101,14 @@
         </a>
       {:else if token.type === "hashtag"}
         <a
-          href={resolve(token.href as any)}
+          href={resolve(token.href as string)}
           class="font-medium text-primary hover:underline"
         >
           #{token.tag}
         </a>
       {:else if token.type === "mention"}
         <a
-          href={resolve(token.href as any)}
+          href={resolve(token.href as string)}
           class="font-medium text-primary hover:underline"
         >
           @{token.handle}

@@ -1,5 +1,5 @@
-import { error, fail } from "@sveltejs/kit";
-import { getUser, follow, unfollow } from "$lib/domains/users/api.server";
+import { error } from "@sveltejs/kit";
+import { getUser } from "$lib/domains/users/api.server";
 import { apiClient } from "$lib/server/api/client";
 
 export const load = async (event) => {
@@ -8,7 +8,7 @@ export const load = async (event) => {
   try {
     const profileUser = await getUser(apiClient(event), cleanUsername);
     return { profileUser };
-  } catch (e) {
+  } catch {
     throw error(404, "User not found");
   }
 };

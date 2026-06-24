@@ -1,6 +1,5 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
-  import { page } from "$app/state";
   import UserCard from "$lib/domains/users/components/UserCard.svelte";
   import CreatePost from "$lib/domains/posts/components/CreatePost.svelte";
   import PostList from "$lib/domains/posts/components/PostList.svelte";

@@ -150,8 +150,8 @@
       const resized = await resizeImageForUpload(file);
       imageBlob = resized;
       imagePreview = URL.createObjectURL(resized);
-    } catch (e: any) {
-      toast.error(e.message || "Failed to attach image");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to attach image");
     } finally {
       uploadingImage = false;
       target.value = "";
@@ -189,7 +189,7 @@
             hashtagSuggestions = [];
             await update();
           } else if (result.type === "failure") {
-            toast.error((result.data as any)?.error || "Failed to post");
+            toast.error((result.data as Record<string, unknown>)?.error as string || "Failed to post");
           }
         };
       }}
@@ -221,7 +221,7 @@
             <div
               class="absolute left-0 top-[105%] z-10 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white/95 shadow-2xl backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/95"
             >
-              {#each suggestions as u}
+              {#each suggestions as u (u.id)}
                 <button
                   type="button"
                   class="flex w-full items-center gap-3 border-b border-slate-100 px-4 py-3 text-left transition-colors last:border-0 hover:bg-slate-100 dark:border-slate-800/50 dark:hover:bg-slate-800/80"
@@ -252,7 +252,7 @@
             <div
               class="absolute left-0 top-[105%] z-10 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white/95 shadow-2xl backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/95"
             >
-              {#each hashtagSuggestions as h}
+              {#each hashtagSuggestions as h (h.id)}
                 <button
                   type="button"
                   class="flex w-full items-center gap-3 border-b border-slate-100 px-4 py-3 text-left transition-colors last:border-0 hover:bg-slate-100 dark:border-slate-800/50 dark:hover:bg-slate-800/80"

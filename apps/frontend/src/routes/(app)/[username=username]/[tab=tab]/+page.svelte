@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { page } from "$app/state";
   import PostList from "$lib/domains/posts/components/PostList.svelte";
   import QuoteComposeModal from "$lib/domains/posts/components/QuoteComposeModal.svelte";
   import UserList from "$lib/domains/users/components/UserList.svelte";
@@ -14,7 +13,7 @@
   let tab = $derived(data.tab);
   let isPosts = $derived(data.type === "posts");
 
-  const pagination = createPagination<any>(
+  const pagination = createPagination<Post | User>(
     () => ({ items: data.items, nextCursor: data.nextCursor }),
     async (cursor) => {
       const res = await fetch(

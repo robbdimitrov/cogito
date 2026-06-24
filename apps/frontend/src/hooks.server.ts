@@ -1,4 +1,3 @@
-import { env } from "$env/dynamic/private";
 import type { Handle, HandleServerError } from "@sveltejs/kit";
 import { parseTheme } from "$lib/shared/theme";
 

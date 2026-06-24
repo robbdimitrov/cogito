@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { page } from "$app/state";
   import PostList from "$lib/domains/posts/components/PostList.svelte";
   import QuoteComposeModal from "$lib/domains/posts/components/QuoteComposeModal.svelte";
   import { createPagination } from "$lib/shared/createPagination.svelte";

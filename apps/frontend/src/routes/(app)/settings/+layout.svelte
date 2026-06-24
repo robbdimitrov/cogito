@@ -34,9 +34,9 @@
   <div class="flex flex-col gap-6 md:flex-row md:items-start md:gap-8">
     <aside class="shrink-0 md:w-64">
       <nav class="flex flex-col gap-1">
-        {#each settingsLinks as item}
+        {#each settingsLinks as item (item.href)}
           <a
-            href={resolve(item.href as any)}
+            href={resolve(item.href as string)}
             class="group flex items-center gap-3 rounded-xl p-3 outline-none transition-colors duration-200 hover:bg-base-200 focus-visible:bg-base-200 {page.url.pathname.startsWith(
               item.href,
             )
@@ -68,7 +68,7 @@
           role="radiogroup"
           aria-label="Theme"
         >
-          {#each themeOptions as option}
+          {#each themeOptions as option (option.value)}
             <button
               type="button"
               role="radio"

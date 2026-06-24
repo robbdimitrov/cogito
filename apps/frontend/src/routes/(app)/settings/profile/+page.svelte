@@ -58,8 +58,8 @@
       } else {
         coverFile = resized;
       }
-    } catch (e: any) {
-      toast.error(e.message || "Failed to process image");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to process image");
     } finally {
       target.value = "";
     }
