@@ -1,6 +1,5 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
-  import { untrack } from "svelte";
   import { goto } from "$app/navigation";
   import PostList from "$lib/domains/posts/components/PostList.svelte";
   import QuoteComposeModal from "$lib/domains/posts/components/QuoteComposeModal.svelte";
@@ -10,7 +9,8 @@
 
   let q = $derived(data.q);
   let tab = $derived(data.tab);
-  let searchInput = $state(untrack(() => data.q));
+  // eslint-disable-next-line svelte/prefer-writable-derived -- searchInput is bound to <input> so must stay writable
+  let searchInput = $state(data.q);
 
   $effect(() => {
     searchInput = q;
@@ -52,7 +52,7 @@
   </form>
 
   <div class="mb-6 flex gap-2 border-b border-slate-200 dark:border-slate-800">
-    {#each ["posts", "users", "hashtags"] as t}
+    {#each ["posts", "users", "hashtags"] as t (t)}
       <button
         type="button"
         class="px-4 py-2 text-sm font-medium transition-colors {tab === t
@@ -86,7 +86,7 @@
   {:else if tab === "users"}
     {#if data.users.length > 0}
       <div class="space-y-2">
-        {#each data.users as user}
+        {#each data.users as user (user.id)}
           <a
             href={resolve(`/@${user.username}`)}
             class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white/60 p-4 transition-colors hover:bg-white/80 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:bg-slate-900/80"
@@ -106,7 +106,7 @@
   {:else if tab === "hashtags"}
     {#if data.hashtags.length > 0}
       <div class="space-y-2">
-        {#each data.hashtags as hashtag}
+        {#each data.hashtags as hashtag (hashtag.id)}
           <a
             href={resolve(`/search?q=%23${hashtag.name}&tab=posts`)}
             class="flex items-center justify-between rounded-2xl border border-slate-200 bg-white/60 p-4 transition-colors hover:bg-white/80 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:bg-slate-900/80"

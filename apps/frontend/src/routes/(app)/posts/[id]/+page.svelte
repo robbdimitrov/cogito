@@ -1,6 +1,5 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
-  import { untrack } from "svelte";
   import {
     AlertTriangle,
     ArrowLeft,
@@ -26,17 +25,18 @@
 
   const toast = getToastContext();
 
-  let post = $state(untrack(() => data.post));
+  // eslint-disable-next-line svelte/prefer-writable-derived -- post is mutated for optimistic like/repost updates
+  let post = $state(data.post);
   let showDeleteModal = $state(false);
+
+  $effect(() => {
+    post = data.post;
+  });
   let quotingPost = $state<Post | null>(null);
 
   // Optimistic states for main post
   let isLiking = $state(false);
   let isReposting = $state(false);
-
-  $effect(() => {
-    post = data.post;
-  });
 
   function formatRelativeTime(dateString: string) {
     const date = new Date(dateString);
