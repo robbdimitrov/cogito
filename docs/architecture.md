@@ -28,14 +28,24 @@ Browser → Ingress (thoughts.localhost) → frontend:8080 (SvelteKit SSR)
                                               │
                                         apigateway:8080 (Go HTTP)
                                               │
-                          ┌───────────────────┼────────────────────┐
-                     authservice:5050    postservice:5050    userservice:5050
-                     (session auth)      (posts/feed)        (users/follows)
-                          │
-                     imageservice:5050   searchservice:5050
-                     (upload lifecycle)  (full-text search)
-                          │
-                     imageservice:8081 (HTTP proxied — upload bytes / serve)
+                    ┌─────────────────────────┼──────────────────────────┐
+               authservice:5050         postservice:5050          userservice:5050
+               (session auth)           (posts/feed)              (users/follows)
+                                              │
+                                    imageservice:5050         searchservice:5050
+                                    (upload lifecycle)        (full-text search)
+                                              │
+                                    imageservice:8081         eventsservice:5050
+                                    (HTTP proxied —           (notifications/feed)
+                                     upload bytes/serve)
+
+Async path (Redpanda):
+postservice / userservice
+    → outbox (PostgreSQL)
+        → Redpanda Connect (pg_cdc)
+            → Redpanda topics (entity-changes, activity)
+                → eventsservice (notifications, feed fan-out)
+                → connect pipelines (Meilisearch sync)
 ```
 
 The browser never contacts apigateway directly. `connect-src 'self'` CSP enforces the boundary. The frontend forwards the session cookie from its own cookie jar to apigateway on every server-side request.

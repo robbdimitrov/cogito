@@ -51,6 +51,7 @@ Rate limit key: `{policy}:user:{id}` (authenticated) → `{policy}:session:{cook
 - Response shape: `{ "items": [...], "nextCursor": "..." }` (`nextCursor` is empty string when no next page).
 - **PostService cursor** — base64url-encoded JSON: `{"created":"<RFC3339Nano>","id":<int32>}`
 - **SearchService cursor** — base64url-encoded JSON: `{"offset":<int32>}` (capped at 1000)
+- **NotificationService cursor** — base64url `<RFC3339Nano>,<id>` (created timestamp and notification ID)
 
 ## HTTP Endpoint Inventory
 
@@ -153,6 +154,16 @@ Rate limit key: `{policy}:user:{id}` (authenticated) → `{policy}:session:{cook
 ```
 Zero-value integer fields and null nested objects are omitted.
 
+**Notification**
+```json
+{
+  "id": 1, "externalId": 1, "userId": 1, "actorId": 1,
+  "type": "like", "entityId": "string",
+  "read": false, "created": "2024-01-01T00:00:00Z"
+}
+```
+`type` ∈ `like`, `repost`, `reply`, `follow`. `entityId` is the post ID (string) for post events, empty for follows.
+
 **Session** — `{ "id": "string", "userId": 1, "created": "2024-01-01T00:00:00Z" }`
 
 **Hashtag** — `{ "id": 1, "name": "string", "postCount": 0 }`
@@ -219,6 +230,14 @@ All gateway→backend calls carry `internal-token` and `user-id` metadata header
 | SearchUsers | query, cursor, limit | Users |
 | SearchPosts | query, cursor, limit | Posts |
 | SearchHashtags | query, cursor, limit | Hashtags |
+
+### NotificationService
+
+| Method | Key request fields | Response |
+|---|---|---|
+| GetNotifications | user_id, cursor, limit | Notifications (list + nextCursor) |
+| MarkNotificationRead | notification_id, user_id | Empty |
+| GetUnreadCount | user_id | UnreadCountResponse (count) |
 
 ## Image Proxy
 

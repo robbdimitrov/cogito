@@ -7,11 +7,13 @@
 - **Post interactions**: Create plain posts, replies, quotes, and reposts. Like, unlike, repost, and remove reposts.
 - **Hashtags**: Extracted from post content at write time, stored relationally, and searchable with trigram typeahead.
 - **Global search**: Full-text search across users, posts, and hashtags via Meilisearch, kept current by a transactional outbox.
+- **Activity notifications**: Like, repost, reply, and follow events generate per-user notifications. Persisted, keyset-paginated, and individually marked read.
+- **Materialized home feed**: Activity events fan out to a per-user feed table via Redpanda. High-follower accounts skip fan-out and merge on read instead.
 - **Image uploads**: Magic-byte validated, server-named, staged in SeaweedFS with a verify-then-consume lifecycle.
 - **Cache layer**: Dragonfly (Redis-protocol) backs rate-limit token buckets and login-failure counters, keeping the hot path off PostgreSQL.
 - **Session management**: Argon2id password hashing, HMAC-keyed session tokens, per-user session listing and remote revocation.
 - **Production-ready**: Stateless services, bounded concurrency, explicit gRPC timeouts, circuit breaker and retry on the image proxy, structured JSON logging.
-- **HA-ready**: Ships at `replicas: 1` but correct at `replicas: N`. No shared in-process state; the search outbox worker uses `SELECT FOR UPDATE SKIP LOCKED` with LISTEN/NOTIFY.
+- **HA-ready**: Ships at `replicas: 1` but correct at `replicas: N`. No shared in-process state; consumers use idempotent inserts and committed offsets.
 
 ## Architecture
 
@@ -29,6 +31,7 @@ graph TD
             Posts["Post Service<br>(Go)"]:::service
             Images["Image Service<br>(Rust)"]:::service
             Search["Search Service<br>(Go)"]:::service
+            Events["Events Service<br>(Go)"]:::service
         end
 
         subgraph data ["Data & Storage"]
@@ -36,6 +39,7 @@ graph TD
             Cache[("Dragonfly<br>rate limiting")]:::cache
             Blob[("SeaweedFS<br>image objects")]:::storage
             Meili[("Meilisearch<br>search index")]:::search
+            Redpanda[("Redpanda<br>event broker")]:::cache
         end
     end
 
@@ -46,6 +50,7 @@ graph TD
     API --> Posts
     API --> Images
     API --> Search
+    API --> Events
     Auth --> DB
     Users --> DB
     Posts --> DB
@@ -53,6 +58,9 @@ graph TD
     Images --> Blob
     Search --> DB
     Search --> Meili
+    Events --> DB
+    DB --> Redpanda
+    Redpanda --> Events
     API --> Cache
 
     classDef frontend fill:#0ea5e9,stroke:#0284c7,stroke-width:2px,color:#fff
@@ -77,16 +85,18 @@ graph TD
 | [postservice](/apps/postservice) | Go | Posts, replies, quotes, reposts, likes, hashtags, and feed. |
 | [imageservice](/apps/imageservice) | Rust | Image upload staging, verification, and serving via SeaweedFS. |
 | [searchservice](/apps/searchservice) | Go | Full-text search; consumes the PostgreSQL outbox and syncs to Meilisearch. |
+| [eventsservice](/apps/eventsservice) | Go | Notification persistence and home-feed fan-out; consumes Redpanda topics and exposes NotificationService gRPC. |
 | [database](/apps/database) | PostgreSQL | Versioned schema migrations managed by `migrate/migrate`. |
 
 ### Infrastructure
 
-Four in-cluster stateful services run alongside the application:
+Five in-cluster stateful services run alongside the application:
 
 - **PostgreSQL** — Primary source of truth for all application data.
 - **Dragonfly** — Redis-protocol cache backing rate-limit token buckets and login-failure counters. The API fails open on unavailability.
 - **SeaweedFS** — S3-compatible object store holding image bytes. Images are staged under `staging/` on upload and promoted on post creation.
-- **Meilisearch** — Derived search index. PostgreSQL is the only source of truth; Meilisearch is populated and kept current by the transactional outbox worker. The index can be rebuilt by replaying the outbox.
+- **Meilisearch** — Derived search index. PostgreSQL is the only source of truth; Meilisearch is populated and kept current by Redpanda Connect pipelines. The index can be rebuilt by replaying the outbox.
+- **Redpanda** — Kafka-compatible event broker. Redpanda Connect relays PostgreSQL CDC (`outbox` table) to `entity-changes` and `activity` topics consumed by `eventsservice` and the search sync pipeline.
 
 ## Docs
 

@@ -160,7 +160,7 @@ The frontend code reads `BACKEND_URL` (`env.BACKEND_URL` in `src/lib/server/api/
 - Applied by `apigateway` init container at startup using `migrate/migrate`.
 - Applied history is append-only. Deployed schemas are corrected with new migrations, never by editing existing ones.
 - Mixed-version compatibility required when a schema change affects multiple independently deployed services.
-- Current: 9 migration pairs (000001 through 000009).
+- Current: 10 migration pairs (000001 through 000010).
 
 ## Deployment Script
 
