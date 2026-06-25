@@ -176,17 +176,13 @@ spec:
       - name: broker
         image: redpandadata/redpanda:latest
         imagePullPolicy: IfNotPresent
-        command: ["redpanda"]
         args:
+        - redpanda
         - start
-        - --smp=1
-        - --memory=512M
-        - --reserve-memory=0M
-        - --overprovisioned
-        - --node-id=0
-        - --check=false
+        - --mode=dev-container
         - --kafka-addr=PLAINTEXT://0.0.0.0:9092
         - --advertise-kafka-addr=PLAINTEXT://broker-0.broker:9092
+        - --advertise-rpc-addr=broker-0.broker:33145
         ports:
         - name: kafka
           containerPort: 9092
@@ -194,10 +190,10 @@ spec:
           containerPort: 9644
         resources:
           limits:
-            memory: 512Mi
+            memory: 2Gi
           requests:
-            memory: 256Mi
-            cpu: 100m
+            memory: 512Mi
+            cpu: 50m
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
@@ -209,6 +205,8 @@ spec:
           mountPath: /var/lib/redpanda/data
         - name: tmp
           mountPath: /tmp
+        - name: redpanda-config
+          mountPath: /etc/redpanda
         startupProbe:
           httpGet:
             path: /v1/status/ready
@@ -229,6 +227,8 @@ spec:
           periodSeconds: 15
       volumes:
       - name: tmp
+        emptyDir: {}
+      - name: redpanda-config
         emptyDir: {}
   volumeClaimTemplates:
   - metadata:

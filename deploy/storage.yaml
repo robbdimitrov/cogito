@@ -51,7 +51,7 @@ spec:
             memory: 256Mi
           requests:
             memory: 64Mi
-            cpu: 100m
+            cpu: 50m
         volumeMounts:
         - name: seaweedfs-data
           mountPath: /data

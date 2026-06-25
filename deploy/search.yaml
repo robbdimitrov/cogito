@@ -47,7 +47,7 @@ spec:
             memory: 512Mi
           requests:
             memory: 256Mi
-            cpu: 100m
+            cpu: 50m
         env:
         - name: MEILI_ENV
           value: production

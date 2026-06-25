@@ -52,7 +52,7 @@ spec:
             memory: 256Mi
           requests:
             memory: 128Mi
-            cpu: 100m
+            cpu: 50m
         env:
         - name: DATABASE_URL
           valueFrom:

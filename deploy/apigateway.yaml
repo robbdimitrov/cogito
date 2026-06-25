@@ -66,7 +66,7 @@ spec:
             memory: 128Mi
           requests:
             memory: 64Mi
-            cpu: 100m
+            cpu: 50m
         env:
         - name: AUTH_SERVICE_ADDR
           value: authservice:5050

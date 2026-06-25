@@ -65,7 +65,7 @@ spec:
             memory: 512Mi
           requests:
             memory: 512Mi
-            cpu: 500m
+            cpu: 50m
         env:
         - name: POSTGRES_PASSWORD
           valueFrom:

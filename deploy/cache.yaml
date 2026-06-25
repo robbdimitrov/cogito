@@ -21,16 +21,16 @@ spec:
       containers:
       - name: dragonfly
         image: docker.dragonflydb.io/dragonflydb/dragonfly
-        args: ["--maxmemory=200mb"]
+        args: ["--proactor_threads=1", "--maxmemory=300mb"]
         ports:
         - containerPort: 6379
           name: redis
         resources:
           limits:
-            memory: 256Mi
+            memory: 400Mi
           requests:
-            memory: 64Mi
-            cpu: 100m
+            memory: 300Mi
+            cpu: 50m
         volumeMounts:
         - name: dragonfly-data
           mountPath: /data

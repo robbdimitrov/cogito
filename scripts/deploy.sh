@@ -19,6 +19,7 @@ ROLL_OUT_DATABASE=(statefulset/database)
 ROLL_OUT_REST=(
   deployment/apigateway
   deployment/authservice
+  deployment/flowservice
   deployment/frontend
   deployment/imageservice
   deployment/postservice
@@ -73,7 +74,10 @@ ensure_secret() {
     --from-literal=postgres-password="${postgres_password}" \
     --from-literal=database-url="postgresql://postgres:${postgres_password}@database:5432/cogito" \
     --from-literal=internal-grpc-token="$(random_secret)" \
-    --from-literal=session-hmac-secret="$(random_secret)"
+    --from-literal=session-hmac-secret="$(random_secret)" \
+    --from-literal=meili-master-key="$(random_secret)" \
+    --from-literal=s3-access-key="cogito-access-key" \
+    --from-literal=s3-secret-key="cogito-secret-key"
 }
 
 port_pids() {
