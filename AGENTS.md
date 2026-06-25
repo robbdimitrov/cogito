@@ -14,7 +14,7 @@ coordinates gRPC backends and proxies image HTTP traffic.
 | `apps/authservice` | Rust, Tonic | Sessions |
 | `apps/userservice` | Rust, Tonic | Users, credentials, and follows |
 | `apps/imageservice` | Rust, Tonic, Axum | Image upload staging, verification, serving, and cleanup |
-| `apps/flowservice` | Rust, Tonic | Notifications and feed fan-out (Kafka consumer); full-text search (Meilisearch) |
+| `apps/flowservice` | Rust, Tonic | Notifications and feed fan-out; full-text search (Meilisearch) |
 | `apps/database` | PostgreSQL migrations | Versioned shared schema |
 
 The protobuf contract is `pkg/pb/cogito.proto`. gRPC services listen on port

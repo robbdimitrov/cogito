@@ -81,7 +81,7 @@ graph TD
 | [userservice](/apps/userservice) | Rust | User accounts, credentials, and follow graph. |
 | [postservice](/apps/postservice) | Go | Posts, replies, quotes, reposts, likes, hashtags, and feed. |
 | [imageservice](/apps/imageservice) | Rust | Image upload staging, verification, and serving via SeaweedFS. |
-| [flowservice](/apps/flowservice) | Rust | Notifications and feed fan-out (Kafka consumer); full-text search backed by Meilisearch. |
+| [flowservice](/apps/flowservice) | Rust | Notifications and feed fan-out; full-text search (Meilisearch). |
 | [database](/apps/database) | PostgreSQL | Versioned schema migrations managed by `migrate/migrate`. |
 
 ### Infrastructure
