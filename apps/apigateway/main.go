@@ -25,8 +25,9 @@ func main() {
 	if imageAddr == "" {
 		imageAddr = "imageservice:8081"
 	}
-	searchAddr := os.Getenv("SEARCH_SERVICE_ADDR")
-	eventsAddr := os.Getenv("EVENTS_SERVICE_ADDR")
+	flowAddr := os.Getenv("FLOW_SERVICE_ADDR")
+	searchAddr := flowAddr
+	eventsAddr := flowAddr
 
 	api.ValidateSecrets()
 	handler := api.CreateServer(authAddr, postAddr, userAddr, imageAddr, searchAddr, eventsAddr)

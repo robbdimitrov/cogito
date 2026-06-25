@@ -65,10 +65,8 @@ spec:
           value: postservice:5050
         - name: USER_SERVICE_ADDR
           value: userservice:5050
-        - name: SEARCH_SERVICE_ADDR
-          value: searchservice:5050
-        - name: EVENTS_SERVICE_ADDR
-          value: eventsservice:5050
+        - name: FLOW_SERVICE_ADDR
+          value: flowservice:5050
         - name: INTERNAL_GRPC_TOKEN
           valueFrom:
             secretKeyRef:
