@@ -30,8 +30,7 @@ graph TD
             Users["User Service<br>(Rust)"]:::service
             Posts["Post Service<br>(Go)"]:::service
             Images["Image Service<br>(Rust)"]:::service
-            Search["Search Service<br>(Go)"]:::service
-            Events["Events Service<br>(Go)"]:::service
+            Flow["Flow Service<br>(Rust)"]:::service
         end
 
         subgraph data ["Data & Storage"]
@@ -49,18 +48,16 @@ graph TD
     API --> Users
     API --> Posts
     API --> Images
-    API --> Search
-    API --> Events
+    API --> Flow
     Auth --> DB
     Users --> DB
     Posts --> DB
     Images --> DB
     Images --> Blob
-    Search --> DB
-    Search --> Meili
-    Events --> DB
+    Flow --> DB
+    Flow --> Meili
     DB --> Redpanda
-    Redpanda --> Events
+    Redpanda --> Flow
     API --> Cache
 
     classDef frontend fill:#0ea5e9,stroke:#0284c7,stroke-width:2px,color:#fff
@@ -84,8 +81,7 @@ graph TD
 | [userservice](/apps/userservice) | Rust | User accounts, credentials, and follow graph. |
 | [postservice](/apps/postservice) | Go | Posts, replies, quotes, reposts, likes, hashtags, and feed. |
 | [imageservice](/apps/imageservice) | Rust | Image upload staging, verification, and serving via SeaweedFS. |
-| [searchservice](/apps/searchservice) | Go | Full-text search; consumes the PostgreSQL outbox and syncs to Meilisearch. |
-| [eventsservice](/apps/eventsservice) | Go | Notification persistence and home-feed fan-out; consumes Redpanda topics and exposes NotificationService gRPC. |
+| [flowservice](/apps/flowservice) | Rust | Notifications and feed fan-out (Kafka consumer); full-text search backed by Meilisearch. |
 | [database](/apps/database) | PostgreSQL | Versioned schema migrations managed by `migrate/migrate`. |
 
 ### Infrastructure
@@ -96,7 +92,7 @@ Five in-cluster stateful services run alongside the application:
 - **Dragonfly** — Redis-protocol cache backing rate-limit token buckets and login-failure counters. The API fails open on unavailability.
 - **SeaweedFS** — S3-compatible object store holding image bytes. Images are staged under `staging/` on upload and promoted on post creation.
 - **Meilisearch** — Derived search index. PostgreSQL is the only source of truth; Meilisearch is populated and kept current by Redpanda Connect pipelines. The index can be rebuilt by replaying the outbox.
-- **Redpanda** — Kafka-compatible event broker. Redpanda Connect relays PostgreSQL CDC (`outbox` table) to `entity-changes` and `activity` topics consumed by `eventsservice` and the search sync pipeline.
+- **Redpanda** — Kafka-compatible event broker. Redpanda Connect relays PostgreSQL CDC (`outbox` table) to `entity-changes` and `activity` topics consumed by `flowservice`.
 
 ## Docs
 

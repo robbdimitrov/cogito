@@ -14,7 +14,7 @@ coordinates gRPC backends and proxies image HTTP traffic.
 | `apps/authservice` | Rust, Tonic | Sessions |
 | `apps/userservice` | Rust, Tonic | Users, credentials, and follows |
 | `apps/imageservice` | Rust, Tonic, Axum | Image upload staging, verification, serving, and cleanup |
-| `apps/searchservice` | Go, gRPC | Full-text search; Meilisearch outbox consumer |
+| `apps/flowservice` | Rust, Tonic | Notifications and feed fan-out (Kafka consumer); full-text search (Meilisearch) |
 | `apps/database` | PostgreSQL migrations | Versioned shared schema |
 
 The protobuf contract is `pkg/pb/cogito.proto`. gRPC services listen on port
@@ -136,7 +136,7 @@ These rules apply to `apigateway` and `postservice`.
 
 ## Rust Conventions
 
-These rules apply to `authservice`, `userservice`, and `imageservice`.
+These rules apply to `authservice`, `userservice`, `imageservice`, and `flowservice`.
 
 - Keep handwritten code `rustfmt`-clean and address Clippy findings in changed
   code unless a narrowly scoped suppression documents a generated-code or API
