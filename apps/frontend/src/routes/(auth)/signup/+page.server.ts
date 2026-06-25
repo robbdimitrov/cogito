@@ -36,7 +36,10 @@ export const actions = {
       await login(fetch, email, password);
       if (!cookies.get("session")) {
         console.error("Signup login response did not include a session cookie");
-        return fail(502, { error: "Account created, but login failed", fields });
+        return fail(502, {
+          error: "Account created, but login failed",
+          fields,
+        });
       }
     } catch (e) {
       console.error("Post-signup login failed:", e);

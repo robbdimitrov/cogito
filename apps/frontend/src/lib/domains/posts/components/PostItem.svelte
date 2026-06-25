@@ -205,7 +205,11 @@
               }}
             >
               <input type="hidden" name="postId" value={displayPost.id} />
-              <input type="hidden" name="reposted" value={String(displayPost.reposted ?? false)} />
+              <input
+                type="hidden"
+                name="reposted"
+                value={String(displayPost.reposted ?? false)}
+              />
             </form>
 
             <RepostMenu
@@ -238,7 +242,11 @@
               }}
             >
               <input type="hidden" name="postId" value={displayPost.id} />
-              <input type="hidden" name="liked" value={String(displayPost.liked ?? false)} />
+              <input
+                type="hidden"
+                name="liked"
+                value={String(displayPost.liked ?? false)}
+              />
               <button
                 type="submit"
                 class="btn btn-ghost btn-sm gap-2 rounded-full px-4 hover:scale-105 active:scale-95 transition-all duration-150 {liked

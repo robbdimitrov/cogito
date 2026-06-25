@@ -1,5 +1,9 @@
 import { getHashtagPosts } from "$lib/domains/posts/api.server";
-import { toggleLike, toggleRepost, deletePost } from "$lib/domains/posts/actions.server";
+import {
+  toggleLike,
+  toggleRepost,
+  deletePost,
+} from "$lib/domains/posts/actions.server";
 import { apiClient } from "$lib/server/api/client";
 import type { Post } from "$lib/shared/types";
 

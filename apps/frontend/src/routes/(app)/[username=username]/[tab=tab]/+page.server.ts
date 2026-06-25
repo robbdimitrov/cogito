@@ -1,6 +1,10 @@
 import { fail, error } from "@sveltejs/kit";
 import { getLikedPosts } from "$lib/domains/posts/api.server";
-import { toggleLike, toggleRepost, deletePost } from "$lib/domains/posts/actions.server";
+import {
+  toggleLike,
+  toggleRepost,
+  deletePost,
+} from "$lib/domains/posts/actions.server";
 import {
   getFollowers,
   getFollowing,

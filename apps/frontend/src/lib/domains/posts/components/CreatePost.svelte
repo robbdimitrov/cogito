@@ -189,7 +189,10 @@
             hashtagSuggestions = [];
             await update();
           } else if (result.type === "failure") {
-            toast.error((result.data as Record<string, unknown>)?.error as string || "Failed to post");
+            toast.error(
+              ((result.data as Record<string, unknown>)?.error as string) ||
+                "Failed to post",
+            );
           }
         };
       }}

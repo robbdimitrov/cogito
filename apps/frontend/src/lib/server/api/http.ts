@@ -47,7 +47,9 @@ export function failFromError(
   overrides?: Record<number, string>,
 ): ActionFailure<{ error: string }> {
   if (isHttpError(e)) {
-    return fail(e.status, { error: overrides?.[e.status] ?? errorMessage(e.status) });
+    return fail(e.status, {
+      error: overrides?.[e.status] ?? errorMessage(e.status),
+    });
   }
   return fail(500, { error: fallback });
 }

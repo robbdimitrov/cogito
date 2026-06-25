@@ -1,6 +1,10 @@
 import { fail } from "@sveltejs/kit";
 import { getPost, getReplies, create } from "$lib/domains/posts/api.server";
-import { toggleLike, toggleRepost, deletePost } from "$lib/domains/posts/actions.server";
+import {
+  toggleLike,
+  toggleRepost,
+  deletePost,
+} from "$lib/domains/posts/actions.server";
 import { apiClient } from "$lib/server/api/client";
 import { failFromError } from "$lib/server/api/http";
 

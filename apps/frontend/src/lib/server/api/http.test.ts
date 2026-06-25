@@ -57,7 +57,8 @@ describe("unwrap", () => {
       [504, "The service is temporarily unavailable."],
     ])("%i → '%s'", async (status, message) => {
       await expect(unwrap(response(status))).rejects.toSatisfy(
-        (e) => isHttpError(e) && e.status === status && e.body.message === message,
+        (e) =>
+          isHttpError(e) && e.status === status && e.body.message === message,
       );
     });
   });
@@ -118,11 +119,16 @@ describe("failFromError", () => {
       409: "conflict override",
     });
     expect(result.status).toBe(403);
-    expect(result.data).toEqual({ error: "You do not have access to that action." });
+    expect(result.data).toEqual({
+      error: "You do not have access to that action.",
+    });
   });
 
   it("returns 500 with the fallback message for non-HTTP errors", () => {
-    const result = failFromError(new Error("network failure"), "Upstream error");
+    const result = failFromError(
+      new Error("network failure"),
+      "Upstream error",
+    );
     expect(result.status).toBe(500);
     expect(result.data).toEqual({ error: "Upstream error" });
   });

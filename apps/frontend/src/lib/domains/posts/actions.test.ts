@@ -19,7 +19,10 @@ function makeEvent(
 describe("toggleLike", () => {
   it("returns 400 when postId is missing", async () => {
     const result = await toggleLike(makeEvent({ liked: "false" }));
-    expect(result).toMatchObject({ status: 400, data: { error: "Missing postId" } });
+    expect(result).toMatchObject({
+      status: 400,
+      data: { error: "Missing postId" },
+    });
   });
 
   it("calls like when liked=false and returns success", async () => {
@@ -73,11 +76,16 @@ describe("toggleLike", () => {
 
   it("returns 400 when liked field is missing", async () => {
     const result = await toggleLike(makeEvent({ postId: "1" }));
-    expect(result).toMatchObject({ status: 400, data: { error: "Missing liked" } });
+    expect(result).toMatchObject({
+      status: 400,
+      data: { error: "Missing liked" },
+    });
   });
 
   it("maps HTTP errors from the API to a failure response", async () => {
-    const result = await toggleLike(makeEvent({ postId: "1", liked: "false" }, 403));
+    const result = await toggleLike(
+      makeEvent({ postId: "1", liked: "false" }, 403),
+    );
     expect(result).toMatchObject({ status: 403 });
   });
 });
@@ -85,7 +93,10 @@ describe("toggleLike", () => {
 describe("toggleRepost", () => {
   it("returns 400 when postId is missing", async () => {
     const result = await toggleRepost(makeEvent({ reposted: "false" }));
-    expect(result).toMatchObject({ status: 400, data: { error: "Missing postId" } });
+    expect(result).toMatchObject({
+      status: 400,
+      data: { error: "Missing postId" },
+    });
   });
 
   it("calls repost when reposted=false", async () => {
@@ -141,11 +152,16 @@ describe("toggleRepost", () => {
 
   it("returns 400 when reposted field is missing", async () => {
     const result = await toggleRepost(makeEvent({ postId: "1" }));
-    expect(result).toMatchObject({ status: 400, data: { error: "Missing reposted" } });
+    expect(result).toMatchObject({
+      status: 400,
+      data: { error: "Missing reposted" },
+    });
   });
 
   it("maps HTTP errors from the API to a failure response", async () => {
-    const result = await toggleRepost(makeEvent({ postId: "1", reposted: "false" }, 403));
+    const result = await toggleRepost(
+      makeEvent({ postId: "1", reposted: "false" }, 403),
+    );
     expect(result).toMatchObject({ status: 403 });
   });
 });
@@ -153,7 +169,10 @@ describe("toggleRepost", () => {
 describe("deletePost", () => {
   it("returns 400 when postId is missing", async () => {
     const result = await deletePost(makeEvent({}));
-    expect(result).toMatchObject({ status: 400, data: { error: "Missing postId" } });
+    expect(result).toMatchObject({
+      status: 400,
+      data: { error: "Missing postId" },
+    });
   });
 
   it("deletes the post and returns success", async () => {
