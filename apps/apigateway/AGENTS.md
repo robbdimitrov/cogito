@@ -28,5 +28,4 @@ These rules extend the repository-level `AGENTS.md` for `apps/apigateway/`.
 - Proxy only the intended image paths and headers. Do not forward arbitrary
   client-supplied internal authentication or identity headers.
 
-Use typed client fakes and `httptest` to verify status, JSON shape, headers,
-cookies, authorization, body limits, and upstream failure mapping.
+Test with typed client fakes and `httptest`: verify status, JSON shape, headers, cookies, authorization, body limits, and upstream failure mapping.
