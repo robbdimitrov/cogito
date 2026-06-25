@@ -8,7 +8,7 @@ COPY pkg/pb ./pkg/pb
 COPY apps/flowservice ./apps/flowservice
 
 WORKDIR /app/apps/flowservice
-RUN RUSTFLAGS="-C target-feature=-crt-static" cargo build --release
+RUN RUSTFLAGS="-C target-feature=-crt-static" cargo build --release --features docker
 
 # rdkafka (librdkafka) requires dynamic linking; scratch is not viable here.
 FROM alpine:3.21

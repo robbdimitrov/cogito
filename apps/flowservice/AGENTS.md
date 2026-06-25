@@ -12,3 +12,5 @@ These rules extend the repository-level `AGENTS.md` for `apps/flowservice/`.
   explicitly deciding to take over that responsibility.
 - The scoped Meilisearch API key is provisioned once at startup with UID
   `flowservice-scoped-key`. It grants only `search` and `indexes.get` actions.
+- `cmake` is only required inside the Docker build (`--features docker` enables
+  `rdkafka/cmake-build`). Local `cargo check` and `cargo test` run without it.
