@@ -9,3 +9,11 @@ pub fn init() {
         .with_max_level(level)
         .try_init();
 }
+
+pub fn request_id<T>(request: &tonic::Request<T>) -> &str {
+    request
+        .metadata()
+        .get("x-request-id")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("")
+}

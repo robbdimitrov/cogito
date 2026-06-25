@@ -42,6 +42,7 @@ impl SearchService for SearchController {
         &self,
         request: Request<SearchRequest>,
     ) -> Result<Response<Users>, Status> {
+        let request_id = crate::logging::request_id(&request).to_owned();
         let req = request.into_inner();
         let (query, limit, offset) = validate_request(&req)?;
 
@@ -50,7 +51,7 @@ impl SearchService for SearchController {
             .search_users(&query, limit + 1, offset)
             .await
             .map_err(|e| {
-                tracing::warn!(error = %e, "meili search_users failed");
+                tracing::warn!(request_id = %request_id, method = "/cogito.SearchService/SearchUsers", error = %e, "meili search_users failed");
                 Status::internal("Internal server error.")
             })?;
 
@@ -71,6 +72,7 @@ impl SearchService for SearchController {
         &self,
         request: Request<SearchRequest>,
     ) -> Result<Response<Posts>, Status> {
+        let request_id = crate::logging::request_id(&request).to_owned();
         let req = request.into_inner();
         let (query, limit, offset) = validate_request(&req)?;
 
@@ -79,7 +81,7 @@ impl SearchService for SearchController {
             .search_posts(&query, limit + 1, offset)
             .await
             .map_err(|e| {
-                tracing::warn!(error = %e, "meili search_posts failed");
+                tracing::warn!(request_id = %request_id, method = "/cogito.SearchService/SearchPosts", error = %e, "meili search_posts failed");
                 Status::internal("Internal server error.")
             })?;
 
@@ -100,6 +102,7 @@ impl SearchService for SearchController {
         &self,
         request: Request<SearchRequest>,
     ) -> Result<Response<Hashtags>, Status> {
+        let request_id = crate::logging::request_id(&request).to_owned();
         let req = request.into_inner();
         let (query, limit, offset) = validate_request(&req)?;
 
@@ -108,7 +111,7 @@ impl SearchService for SearchController {
             .search_hashtags(&query, limit + 1, offset)
             .await
             .map_err(|e| {
-                tracing::warn!(error = %e, "meili search_hashtags failed");
+                tracing::warn!(request_id = %request_id, method = "/cogito.SearchService/SearchHashtags", error = %e, "meili search_hashtags failed");
                 Status::internal("Internal server error.")
             })?;
 

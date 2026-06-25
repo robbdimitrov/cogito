@@ -24,6 +24,7 @@ impl<D: NotificationDb + Clone> NotificationService for NotificationController<D
         &self,
         request: Request<GetNotificationsRequest>,
     ) -> Result<Response<Notifications>, Status> {
+        let request_id = crate::logging::request_id(&request).to_owned();
         let req = request.into_inner();
 
         let limit = match req.limit {
@@ -40,7 +41,7 @@ impl<D: NotificationDb + Clone> NotificationService for NotificationController<D
                 if e.is::<InvalidCursor>() {
                     Status::invalid_argument("Invalid cursor.")
                 } else {
-                    tracing::warn!(error = %e, "list notifications failed");
+                    tracing::warn!(request_id = %request_id, method = "/cogito.NotificationService/GetNotifications", error = %e, "list notifications failed");
                     Status::internal("Internal server error.")
                 }
             })?;
@@ -69,6 +70,7 @@ impl<D: NotificationDb + Clone> NotificationService for NotificationController<D
         &self,
         request: Request<NotificationRequest>,
     ) -> Result<Response<Empty>, Status> {
+        let request_id = crate::logging::request_id(&request).to_owned();
         let req = request.into_inner();
 
         let found = self
@@ -76,7 +78,7 @@ impl<D: NotificationDb + Clone> NotificationService for NotificationController<D
             .mark_read(req.notification_id, req.user_id)
             .await
             .map_err(|e| {
-                tracing::warn!(error = %e, "mark notification read failed");
+                tracing::warn!(request_id = %request_id, method = "/cogito.NotificationService/MarkNotificationRead", error = %e, "mark notification read failed");
                 Status::internal("Internal server error.")
             })?;
 
@@ -91,10 +93,11 @@ impl<D: NotificationDb + Clone> NotificationService for NotificationController<D
         &self,
         request: Request<UserRequest>,
     ) -> Result<Response<UnreadCountResponse>, Status> {
+        let request_id = crate::logging::request_id(&request).to_owned();
         let req = request.into_inner();
 
         let count = self.db.unread_count(req.user_id).await.map_err(|e| {
-            tracing::warn!(error = %e, "get unread count failed");
+            tracing::warn!(request_id = %request_id, method = "/cogito.NotificationService/GetUnreadCount", error = %e, "get unread count failed");
             Status::internal("Internal server error.")
         })?;
 
