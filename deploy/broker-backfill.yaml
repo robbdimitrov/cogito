@@ -26,9 +26,15 @@ spec:
           type: RuntimeDefault
       containers:
       - name: backfill
-        image: redpandadata/connect:latest
+        image: redpandadata/connect:4.97.0
         imagePullPolicy: IfNotPresent
         args: ["-c", "/pipelines/backfill.yaml"]
+        resources:
+          limits:
+            memory: 256Mi
+          requests:
+            memory: 64Mi
+            cpu: 50m
         env:
         - name: REDPANDA_BROKERS
           value: broker:9092

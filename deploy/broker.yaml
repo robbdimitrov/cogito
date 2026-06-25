@@ -183,7 +183,7 @@ spec:
           type: RuntimeDefault
       containers:
       - name: broker
-        image: redpandadata/redpanda:latest
+        image: redpandadata/redpanda:v26.1.10
         imagePullPolicy: IfNotPresent
         args:
         - redpanda
@@ -283,9 +283,15 @@ spec:
           type: RuntimeDefault
       containers:
       - name: relay
-        image: redpandadata/connect:latest
+        image: redpandadata/connect:4.97.0
         imagePullPolicy: IfNotPresent
         args: ["-c", "/pipelines/relay.yaml"]
+        resources:
+          limits:
+            memory: 128Mi
+          requests:
+            memory: 32Mi
+            cpu: 25m
         env: &connect-env
         - name: REDPANDA_BROKERS
           value: broker:9092
@@ -318,16 +324,28 @@ spec:
         - name: tmp
           mountPath: /tmp
       - name: sync-search
-        image: redpandadata/connect:latest
+        image: redpandadata/connect:4.97.0
         imagePullPolicy: IfNotPresent
         args: ["-c", "/pipelines/sync-search.yaml"]
+        resources:
+          limits:
+            memory: 128Mi
+          requests:
+            memory: 32Mi
+            cpu: 25m
         env: *connect-env
         securityContext: *connect-container-security
         volumeMounts: *connect-volume-mounts
       - name: cleanup-s3
-        image: redpandadata/connect:latest
+        image: redpandadata/connect:4.97.0
         imagePullPolicy: IfNotPresent
         args: ["-c", "/pipelines/cleanup-s3.yaml"]
+        resources:
+          limits:
+            memory: 128Mi
+          requests:
+            memory: 32Mi
+            cpu: 25m
         env: *connect-env
         securityContext: *connect-container-security
         volumeMounts: *connect-volume-mounts
