@@ -1,0 +1,22 @@
+[package]
+name = "flowservice"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tonic  = "0.11"
+prost  = "0.12"
+tokio  = { version = "1.36", features = ["macros", "rt-multi-thread", "signal", "sync", "time"] }
+sqlx   = { version = "0.8", features = ["postgres", "runtime-tokio", "chrono"] }
+rdkafka = { version = "0.36", features = ["tokio", "cmake"] }
+fred   = { version = "9", features = ["tokio-runtime"] }
+meilisearch-sdk = "0.27"
+serde      = { version = "1", features = ["derive"] }
+serde_json = "1"
+async-trait = "0.1"
+base64 = "0.22"
+tracing            = "0.1"
+tracing-subscriber = { version = "0.3", features = ["json"] }
+
+[build-dependencies]
+tonic-build = "0.11"

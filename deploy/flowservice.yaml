@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: flowservice
+  labels:
+    app: cogito
+    tier: backend
+    component: flowservice
+spec:
+  selector:
+    app: cogito
+    tier: backend
+    component: flowservice
+  ports:
+  - port: 5050
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flowservice
+  labels:
+    app: cogito
+    tier: backend
+    component: flowservice
+spec:
+  replicas: 2
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: cogito
+      tier: backend
+      component: flowservice
+  template:
+    metadata:
+      labels:
+        app: cogito
+        tier: backend
+        component: flowservice
+    spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 60
+      containers:
+      - name: flowservice
+        image: localhost:5000/cogito/flowservice
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5050
+        resources:
+          limits:
+            memory: 256Mi
+          requests:
+            memory: 128Mi
+            cpu: 100m
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: cogito-db-secret
+              key: database-url
+        - name: VALKEY_URL
+          value: redis://dragonfly:6379
+        - name: REDPANDA_BROKERS
+          value: broker:9092
+        - name: FAN_OUT_THRESHOLD
+          value: "10000"
+        - name: MEILI_HOST
+          value: http://meilisearch:7700
+        - name: MEILI_MASTER_KEY
+          valueFrom:
+            secretKeyRef:
+              name: cogito-db-secret
+              key: meili-master-key
+        - name: PORT
+          value: "5050"
+        - name: INTERNAL_GRPC_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: cogito-db-secret
+              key: internal-grpc-token
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        livenessProbe:
+          tcpSocket:
+            port: 5050
+          initialDelaySeconds: 10
+          periodSeconds: 15
+        readinessProbe:
+          tcpSocket:
+            port: 5050
+          initialDelaySeconds: 5
+          periodSeconds: 10
