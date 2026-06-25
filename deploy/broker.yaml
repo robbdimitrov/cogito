@@ -8,25 +8,36 @@ metadata:
 data:
   relay.yaml: |
     input:
-      pg_cdc:
-        dsn: "${POSTGRES_DSN}"
-        slot_name: outbox_relay
-        publication_name: outbox_relay
-        tables: [public.outbox]
+      generate:
+        interval: 2s
+        count: 0
+        mapping: root = {}
     pipeline:
       processors:
-      - filter:
-          check: meta("operation") == "INSERT"
+      - sql_raw:
+          driver: postgres
+          dsn: "${POSTGRES_DSN}"
+          query: |
+            DELETE FROM outbox
+            WHERE id IN (
+              SELECT id FROM outbox ORDER BY id
+              FOR UPDATE SKIP LOCKED
+              LIMIT 100
+            )
+            RETURNING id, topic, payload::text AS payload
+      - mapping: root = if this.length() == 0 { deleted() }
+      - unarchive:
+          format: json_array
       - mapping: |
-          root = this.data.payload.parse_json()
-          root._outbox_id = this.data.id
-          meta topic = this.data.topic
+          root = this.payload.parse_json()
+          root._outbox_id = this.id
+          meta topic = this.topic
     output:
       kafka_franz:
         seed_brokers: ["${REDPANDA_BROKERS}"]
         topic: ${! meta("topic") }
         key: ${! json("_outbox_id") }
-        idempotent: true
+        idempotent_write: true
         max_in_flight: 1
   sync-search.yaml: |
     input:
@@ -83,15 +94,14 @@ data:
         consumer_group: cleanup-s3
     pipeline:
       processors:
-      - filter:
-          check: this.table == "posts" && this.op == "delete" && this.media_key != ""
+      - mapping: root = if this.table != "posts" || this.op != "delete" || this.media_key.or("") == "" { deleted() }
     output:
       http_client:
         url: ${S3_ENDPOINT}/${S3_BUCKET}/${! json("media_key") }
         verb: DELETE
   backfill.yaml: |
     input:
-      sql_select:
+      sql_raw:
         driver: postgres
         dsn: "${POSTGRES_DSN}"
         query: |
@@ -112,7 +122,6 @@ data:
           FROM hashtags h
           LEFT JOIN post_hashtags ph ON ph.hashtag_id = h.id
           GROUP BY h.id, h.name
-        batch_count: 500
     pipeline:
       processors:
       - mapping: |
