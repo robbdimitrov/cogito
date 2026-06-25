@@ -8,6 +8,7 @@ metadata:
     component: imageservice
 spec:
   replicas: 1
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       app: cogito
@@ -20,10 +21,18 @@ spec:
         tier: backend
         component: imageservice
     spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 60
       containers:
       - name: imageservice
         image: localhost:5000/cogito/imageservice
         imagePullPolicy: IfNotPresent
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
         ports:
         - containerPort: 5050
           name: grpc

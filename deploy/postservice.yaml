@@ -24,6 +24,7 @@ metadata:
     component: postservice
 spec:
   replicas: 1
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       app: cogito
@@ -36,10 +37,18 @@ spec:
         tier: backend
         component: postservice
     spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 60
       containers:
       - name: postservice
         image: localhost:5000/cogito/postservice
         imagePullPolicy: IfNotPresent
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
         ports:
         - containerPort: 5050
         resources:

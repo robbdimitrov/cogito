@@ -23,6 +23,8 @@ metadata:
     tier: backend
     component: flowservice
 spec:
+  # Two replicas: each Kafka consumer group assigns partitions per pod.
+  # Requires activity and entity-changes topics to have >= 2 partitions.
   replicas: 2
   revisionHistoryLimit: 3
   selector:

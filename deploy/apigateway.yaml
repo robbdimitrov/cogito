@@ -24,6 +24,7 @@ metadata:
     component: apigateway
 spec:
   replicas: 1
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       app: cogito
@@ -36,6 +37,8 @@ spec:
         tier: backend
         component: apigateway
     spec:
+      automountServiceAccountToken: false
+      terminationGracePeriodSeconds: 60
       initContainers:
       - name: migration
         image: localhost:5000/cogito/database
@@ -50,6 +53,12 @@ spec:
       - name: apigateway
         image: localhost:5000/cogito/apigateway
         imagePullPolicy: IfNotPresent
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
         ports:
         - containerPort: 8080
         resources:
