@@ -9,6 +9,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/valkey-io/valkey-go"
@@ -63,31 +64,94 @@ type RateLimiterStore interface {
 	Allow(ctx context.Context, identifier string, policy RateLimitPolicy) (RateLimitDecision, error)
 }
 
-type DragonflyStore struct {
-	client    valkey.Client
-	scriptSHA string
-	failOpen  bool
+type noopRateLimiterStore struct{}
+
+func (noopRateLimiterStore) Allow(_ context.Context, _ string, _ RateLimitPolicy) (RateLimitDecision, error) {
+	return RateLimitDecision{Allowed: true}, nil
 }
 
-func NewDragonflyStore() *DragonflyStore {
+// swappableStore holds the active store behind a read lock so the background
+// retry goroutine can promote it from no-op to real without restarting.
+type swappableStore struct {
+	mu    sync.RWMutex
+	inner RateLimiterStore
+}
+
+func (s *swappableStore) set(store RateLimiterStore) {
+	s.mu.Lock()
+	s.inner = store
+	s.mu.Unlock()
+}
+
+func (s *swappableStore) Allow(ctx context.Context, identifier string, policy RateLimitPolicy) (RateLimitDecision, error) {
+	s.mu.RLock()
+	inner := s.inner
+	s.mu.RUnlock()
+	return inner.Allow(ctx, identifier, policy)
+}
+
+type DragonflyStore struct {
+	client   valkey.Client
+	script   *valkey.Lua
+	failOpen bool
+}
+
+func newDragonflyStore(url string, failOpen bool) (*DragonflyStore, error) {
+	client, err := valkey.NewClient(valkey.ClientOption{InitAddress: []string{parseDragonflyAddr(url)}})
+	if err != nil {
+		return nil, err
+	}
+	return &DragonflyStore{
+		client:   client,
+		script:   valkey.NewLuaScript(tokenBucketScript),
+		failOpen: failOpen,
+	}, nil
+}
+
+// NewDragonflyStore returns a RateLimiterStore backed by Dragonfly. It attempts
+// a synchronous connection first so rate limiting is active immediately when
+// Dragonfly is available. If the initial attempt fails and RATE_LIMIT_FAIL_OPEN
+// is true, it returns a no-op store and promotes it to the real store in the
+// background once Dragonfly becomes reachable. If fail-open is false, a startup
+// failure is fatal.
+func NewDragonflyStore(ctx context.Context) RateLimiterStore {
 	url := os.Getenv("DRAGONFLY_URL")
 	failOpen := envBool("RATE_LIMIT_FAIL_OPEN", false)
 
-	client, err := valkey.NewClient(valkey.ClientOption{InitAddress: []string{parseDragonflyAddr(url)}})
-	if err != nil {
+	if store, err := newDragonflyStore(url, failOpen); err == nil {
+		return store
+	} else if !failOpen {
 		slog.Error("unable to connect to dragonfly", "error", err)
 		os.Exit(1)
+	} else {
+		slog.Warn("dragonfly unavailable, rate limiting degraded — retrying in background", "error", err)
 	}
 
-	ctx := context.Background()
-	result := client.Do(ctx, client.B().ScriptLoad().Script(tokenBucketScript).Build())
-	sha, err := result.ToString()
-	if err != nil {
-		slog.Error("unable to load rate limit script", "error", err)
-		os.Exit(1)
-	}
+	ss := &swappableStore{inner: noopRateLimiterStore{}}
 
-	return &DragonflyStore{client: client, scriptSHA: sha, failOpen: failOpen}
+	go func() {
+		backoff := time.Second
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-time.After(backoff):
+			}
+			store, err := newDragonflyStore(url, failOpen)
+			if err != nil {
+				slog.Warn("dragonfly retry failed", "error", err, "backoff", backoff)
+				if backoff < 30*time.Second {
+					backoff *= 2
+				}
+				continue
+			}
+			ss.set(store)
+			slog.Info("dragonfly rate limiter connected")
+			return
+		}
+	}()
+
+	return ss
 }
 
 func parseDragonflyAddr(url string) string {
@@ -100,13 +164,14 @@ func parseDragonflyAddr(url string) string {
 
 func (s *DragonflyStore) Allow(ctx context.Context, identifier string, policy RateLimitPolicy) (RateLimitDecision, error) {
 	nowMs := time.Now().UnixMilli()
-	cmd := s.client.B().Evalsha().Sha1(s.scriptSHA).Numkeys(1).Key(identifier).
-		Arg(strconv.Itoa(policy.Burst)).
-		Arg(strconv.FormatFloat(policy.Rate, 'f', -1, 64)).
-		Arg(strconv.FormatInt(nowMs, 10)).
-		Build()
+	result := s.script.Exec(ctx, s.client,
+		[]string{identifier},
+		[]string{
+			strconv.Itoa(policy.Burst),
+			strconv.FormatFloat(policy.Rate, 'f', -1, 64),
+			strconv.FormatInt(nowMs, 10),
+		})
 
-	result := s.client.Do(ctx, cmd)
 	if err := result.Error(); err != nil {
 		return RateLimitDecision{Allowed: s.failOpen}, err
 	}

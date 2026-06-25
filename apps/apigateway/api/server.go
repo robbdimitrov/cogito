@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -8,7 +9,7 @@ import (
 )
 
 // CreateServer builds the gateway HTTP handler and middleware chain.
-func CreateServer(authAddr, postAddr, userAddr, imageAddr, searchAddr, eventsAddr string) http.Handler {
+func CreateServer(ctx context.Context, authAddr, postAddr, userAddr, imageAddr, searchAddr, eventsAddr string) http.Handler {
 	setupLogger()
 	mux := http.NewServeMux()
 	router := newRouter(authAddr, postAddr, userAddr, imageAddr, searchAddr, eventsAddr)
@@ -16,7 +17,7 @@ func CreateServer(authAddr, postAddr, userAddr, imageAddr, searchAddr, eventsAdd
 
 	var handler http.Handler = mux
 
-	rlStore := NewDragonflyStore()
+	rlStore := NewDragonflyStore(ctx)
 
 	// authGuard runs before rateLimitMiddleware so the user ID is in context
 	// when the rate limit key is computed. Per-user keying is critical: without

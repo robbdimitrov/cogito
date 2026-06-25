@@ -29,8 +29,11 @@ func main() {
 	searchAddr := flowAddr
 	eventsAddr := flowAddr
 
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer stop()
+
 	api.ValidateSecrets()
-	handler := api.CreateServer(authAddr, postAddr, userAddr, imageAddr, searchAddr, eventsAddr)
+	handler := api.CreateServer(ctx, authAddr, postAddr, userAddr, imageAddr, searchAddr, eventsAddr)
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%s", port),
 		Handler: handler,
@@ -43,15 +46,14 @@ func main() {
 		}
 	}()
 
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, os.Interrupt)
-	<-quit
+	<-ctx.Done()
+	stop()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	slog.Info("server shutting down")
-	if err := server.Shutdown(ctx); err != nil {
+	if err := server.Shutdown(shutdownCtx); err != nil {
 		log.Fatal(err)
 	}
 }
