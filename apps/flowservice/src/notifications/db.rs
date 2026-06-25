@@ -197,13 +197,13 @@ impl NotificationDb for PgPool {
     }
 
     async fn unread_count(&self, user_id: i32) -> Result<i32, sqlx::Error> {
-        let (count,): (i32,) = sqlx::query_as(
-            "SELECT COUNT(*)::int FROM notifications WHERE user_id = $1 AND read = false",
+        let (count,): (i64,) = sqlx::query_as(
+            "SELECT COUNT(*) FROM notifications WHERE user_id = $1 AND read = false",
         )
         .bind(user_id)
         .fetch_one(self)
         .await?;
-        Ok(count)
+        Ok(count.min(i32::MAX as i64) as i32)
     }
 
     async fn delete_by_entity(&self, entity_id: &str, types: &[&str]) -> Result<(), sqlx::Error> {

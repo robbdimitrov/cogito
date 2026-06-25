@@ -143,7 +143,13 @@ async fn handle_entity_change(
             };
             fan_out_post(db, cache, author_id, post_id, created, fan_out_threshold).await?;
         }
-        "delete" => {}
+        "delete" => {
+            let post_id = match event.id {
+                Some(id) => id,
+                None => return Ok(()),
+            };
+            db.delete_by_post(post_id).await?;
+        }
         op => {
             tracing::warn!(op, "feed entity-change event has unknown op");
         }
@@ -175,14 +181,7 @@ async fn handle_activity(
             actor_id,
             recipient_id,
         } => {
-            if let Err(e) = db.prune_by_followee(actor_id, recipient_id).await {
-                tracing::warn!(
-                    actor_id,
-                    recipient_id,
-                    error = %e,
-                    "feed prune by followee failed"
-                );
-            }
+            db.prune_by_followee(actor_id, recipient_id).await?;
         }
         ActivityEvent::Unknown => {}
     }
@@ -246,6 +245,8 @@ async fn backfill_follow(
     followee_id: i32,
 ) -> Result<(), sqlx::Error> {
     if db.get_fan_out_disabled(followee_id).await? {
+        // High-follower accounts use a pull model: postservice's GetFeed queries their
+        // posts directly at read time. No push-backfill is needed or correct here.
         return Ok(());
     }
 

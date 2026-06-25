@@ -4,6 +4,7 @@
 use base64::{Engine as _, engine::general_purpose::URL_SAFE_NO_PAD};
 use meilisearch_sdk::{
     client::Client,
+    errors::{Error as MeiliError, ErrorCode},
     key::{Action, KeyBuilder},
     search::SearchQuery,
 };
@@ -149,7 +150,11 @@ async fn ensure_indexes(master: &Client) -> Result<(), Box<dyn std::error::Error
     ];
 
     for def in DEFS {
-        let is_new = master.get_index(def.uid).await.is_err();
+        let is_new = match master.get_index(def.uid).await {
+            Ok(_) => false,
+            Err(MeiliError::Meilisearch(ref e)) if e.error_code == ErrorCode::IndexNotFound => true,
+            Err(e) => return Err(Box::new(e)),
+        };
         if is_new {
             let task_info = master.create_index(def.uid, Some("id")).await?;
             master.wait_for_task(task_info, None, None).await?;
@@ -202,7 +207,13 @@ pub(crate) fn decode_cursor(cursor: &str) -> u32 {
 }
 
 /// Encode a page offset as a base64url cursor string.
+/// Returns an empty string (end-of-results) when offset >= MAX_OFFSET.
+/// Meilisearch's default maxTotalHits (1000) matches this cap; if maxTotalHits
+/// is raised, results beyond MAX_OFFSET become inaccessible via cursor pagination.
 pub(crate) fn encode_cursor(offset: u32) -> String {
+    if offset >= MAX_OFFSET {
+        return String::new();
+    }
     let payload = CursorPayload { offset };
     let json = serde_json::to_vec(&payload).expect("cursor serialization is infallible");
     URL_SAFE_NO_PAD.encode(json)
@@ -229,8 +240,16 @@ mod tests {
     }
 
     #[test]
-    fn cursor_clamps_to_max_offset() {
-        let encoded = encode_cursor(2000);
+    fn encode_cursor_returns_empty_at_max_offset() {
+        assert_eq!(encode_cursor(MAX_OFFSET), String::new());
+        assert_eq!(encode_cursor(MAX_OFFSET + 1), String::new());
+    }
+
+    #[test]
+    fn decode_cursor_clamps_to_max_offset() {
+        // A cursor that somehow encodes a value >= MAX_OFFSET is clamped on decode.
+        let payload = serde_json::to_vec(&CursorPayload { offset: 2000 }).unwrap();
+        let encoded = URL_SAFE_NO_PAD.encode(&payload);
         assert_eq!(decode_cursor(&encoded), MAX_OFFSET);
     }
 }

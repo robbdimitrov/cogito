@@ -1,6 +1,6 @@
 use std::env;
 use std::sync::OnceLock;
-use subtle::ConstantTimeEq;
+use subtle::{Choice, ConstantTimeEq};
 use tonic::{Request, Status};
 
 #[allow(clippy::result_large_err)]
@@ -17,11 +17,29 @@ fn authenticate(req: Request<()>, expected: &str) -> Result<Request<()>, Status>
         .and_then(|value| value.to_str().ok())
         .unwrap_or("");
 
-    if provided.as_bytes().ct_eq(expected.as_bytes()).into() {
+    if ct_eq_str(provided, expected) {
         Ok(req)
     } else {
         Err(Status::unauthenticated("Unauthenticated."))
     }
+}
+
+// Compare two strings in constant time regardless of length. subtle::ConstantTimeEq
+// for slices short-circuits on unequal lengths, leaking the expected token length.
+// Pad both sides to equal length and use a constant-time length check to close the
+// timing channel.
+fn ct_eq_str(a: &str, b: &str) -> bool {
+    let a = a.as_bytes();
+    let b = b.as_bytes();
+    let max_len = a.len().max(b.len());
+    let mut a_buf = vec![0u8; max_len];
+    let mut b_buf = vec![0u8; max_len];
+    a_buf[..a.len()].copy_from_slice(a);
+    b_buf[..b.len()].copy_from_slice(b);
+    // Compare lengths via constant-time u64 equality to avoid a data-dependent branch.
+    let len_eq: Choice = (a.len() as u64).ct_eq(&(b.len() as u64));
+    let bytes_eq: Choice = a_buf.ct_eq(&b_buf);
+    (len_eq & bytes_eq).into()
 }
 
 fn internal_grpc_token() -> &'static str {
@@ -36,7 +54,15 @@ mod tests {
     #[test]
     fn rejects_missing_internal_token() {
         let result = authenticate(Request::new(()), "test-token");
+        assert!(result.is_err());
+    }
 
+    #[test]
+    fn rejects_token_with_correct_prefix_wrong_length() {
+        let mut req = Request::new(());
+        req.metadata_mut()
+            .insert("internal-token", "test-token-extra".parse().unwrap());
+        let result = authenticate(req, "test-token");
         assert!(result.is_err());
     }
 

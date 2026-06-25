@@ -112,7 +112,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 async fn run_cleanup(pool: sqlx::PgPool, mut shutdown_rx: tokio::sync::watch::Receiver<bool>) {
-    let mut interval = tokio::time::interval(std::time::Duration::from_secs(CLEANUP_INTERVAL_SECS));
+    let delay = std::time::Duration::from_secs(CLEANUP_INTERVAL_SECS);
+    let mut interval = tokio::time::interval_at(tokio::time::Instant::now() + delay, delay);
     loop {
         tokio::select! {
             _ = interval.tick() => {
@@ -124,8 +125,10 @@ async fn run_cleanup(pool: sqlx::PgPool, mut shutdown_rx: tokio::sync::watch::Re
                 }
             }
             _ = shutdown_rx.changed() => {
-                tracing::info!("cleanup task shutting down");
-                break;
+                if *shutdown_rx.borrow() {
+                    tracing::info!("cleanup task shutting down");
+                    break;
+                }
             }
         }
     }

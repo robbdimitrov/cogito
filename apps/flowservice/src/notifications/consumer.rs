@@ -123,14 +123,26 @@ async fn dispatch_entity_change(
     db: &PgPool,
     payload: &[u8],
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let event: EntityChangeEvent = serde_json::from_slice(payload)?;
+    let event: EntityChangeEvent = match serde_json::from_slice(payload) {
+        Ok(e) => e,
+        Err(e) => {
+            tracing::warn!(error = %e, "notifications entity-change event has invalid json");
+            return Ok(());
+        }
+    };
 
     if event.table != "posts" {
         return Ok(());
     }
 
     if event.op == "delete" {
-        let post_id = event.id.ok_or("entity-change delete event missing id")?;
+        let post_id = match event.id {
+            Some(id) => id,
+            None => {
+                tracing::warn!("notifications entity-change delete event missing id");
+                return Ok(());
+            }
+        };
         db.delete_by_entity(&post_id.to_string(), &["like", "repost", "reply"])
             .await?;
     } else {
@@ -148,7 +160,13 @@ async fn dispatch_activity(
     db: &PgPool,
     payload: &[u8],
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let event: ActivityEvent = serde_json::from_slice(payload)?;
+    let event: ActivityEvent = match serde_json::from_slice(payload) {
+        Ok(e) => e,
+        Err(e) => {
+            tracing::warn!(error = %e, "notifications activity event has invalid json");
+            return Ok(());
+        }
+    };
 
     match event {
         ActivityEvent::Like {
