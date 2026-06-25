@@ -33,7 +33,7 @@ spec:
         image: localhost:5000/cogito/frontend
         imagePullPolicy: IfNotPresent
         env:
-        - name: API_URL
+        - name: BACKEND_URL
           value: http://apigateway:8080
         ports:
         - containerPort: 8080
@@ -41,17 +41,17 @@ spec:
           limits:
             memory: 512Mi
           requests:
-            memory: 256Mi
-            cpu: 250m
+            memory: 128Mi
+            cpu: 50m
         livenessProbe:
           httpGet:
-            path: /
+            path: /health
             port: 8080
           initialDelaySeconds: 5
           periodSeconds: 15
         readinessProbe:
           httpGet:
-            path: /
+            path: /health
             port: 8080
           initialDelaySeconds: 3
           periodSeconds: 10
