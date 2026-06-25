@@ -10,7 +10,7 @@ use meilisearch_sdk::{
 };
 use serde::{Deserialize, Serialize};
 
-const SCOPED_KEY_UID: &str = "flowservice-scoped-key";
+const SCOPED_KEY_UID: &str = "f105e1c0-e000-4000-8000-000000000001";
 const MAX_OFFSET: u32 = 1000;
 
 #[derive(Deserialize)]
