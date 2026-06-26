@@ -39,7 +39,7 @@ pub trait AuthDb: Send + Sync + 'static {
     async fn create_session(&self, session_id: &str, user_id: i32) -> Result<Session, sqlx::Error>;
     async fn get_session(&self, session_id: &str) -> Result<Option<Session>, sqlx::Error>;
     async fn get_sessions(&self, user_id: i32) -> Result<Vec<Session>, sqlx::Error>;
-    async fn delete_session(&self, session_id: &str) -> Result<(), sqlx::Error>;
+    async fn delete_session(&self, session_id: &str) -> Result<u64, sqlx::Error>;
     async fn update_password_hash(&self, user_id: i32, new_hash: &str) -> Result<(), sqlx::Error>;
 }
 
@@ -214,15 +214,22 @@ impl<D: AuthDb + Clone> AuthService for Controller<D> {
         let req = request.into_inner();
         let hashed_id = hash_session_id(&self.session_hmac_secret, &req.session_id);
 
-        let res1 = self.db_client.delete_session(&hashed_id).await;
-        let res2 = self.db_client.delete_session(&req.session_id).await;
-
-        if res1.is_err() && res2.is_err() {
-            tracing::warn!(request_id = %request_id, method = "/cogito.AuthService/DeleteSession", "deleting session failed");
-            return Err(Status::internal("Internal server error."));
+        match self.db_client.delete_session(&hashed_id).await {
+            Ok(n) if n > 0 => Ok(Response::new(Empty {})),
+            Ok(_) => {
+                match self.db_client.delete_session(&req.session_id).await {
+                    Ok(_) => Ok(Response::new(Empty {})),
+                    Err(e) => {
+                        tracing::warn!(request_id = %request_id, method = "/cogito.AuthService/DeleteSession", error = %e, "deleting session failed");
+                        Err(Status::internal("Internal server error."))
+                    }
+                }
+            }
+            Err(e) => {
+                tracing::warn!(request_id = %request_id, method = "/cogito.AuthService/DeleteSession", error = %e, "deleting session failed");
+                Err(Status::internal("Internal server error."))
+            }
         }
-
-        Ok(Response::new(Empty {}))
     }
 }
 
@@ -292,8 +299,8 @@ mod tests {
             }
         }
 
-        async fn delete_session(&self, _session_id: &str) -> Result<(), sqlx::Error> {
-            Ok(())
+        async fn delete_session(&self, _session_id: &str) -> Result<u64, sqlx::Error> {
+            Ok(0)
         }
 
         async fn update_password_hash(
@@ -486,8 +493,8 @@ mod tests {
                 Ok(vec![])
             }
 
-            async fn delete_session(&self, _session_id: &str) -> Result<(), sqlx::Error> {
-                Ok(())
+            async fn delete_session(&self, _session_id: &str) -> Result<u64, sqlx::Error> {
+                Ok(0)
             }
 
             async fn update_password_hash(

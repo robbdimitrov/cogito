@@ -33,7 +33,7 @@ impl DbClient {
     pub async fn delete_expired_sessions(&self) -> Result<(), sqlx::Error> {
         let ttl = session_ttl_days();
         sqlx::query("DELETE FROM sessions WHERE created <= now() - ($1 * interval '1 day')")
-            .bind(ttl as f64)
+            .bind(ttl as i64)
             .execute(&self.pool)
             .await?;
         Ok(())
@@ -85,7 +85,7 @@ impl crate::controller::AuthDb for DbClient {
                WHERE id = $1 AND created > now() - ($2 * interval '1 day')"#,
         )
         .bind(session_id)
-        .bind(ttl as f64)
+        .bind(ttl as i64)
         .fetch_optional(&self.pool)
         .await?;
 
@@ -105,7 +105,7 @@ impl crate::controller::AuthDb for DbClient {
                ORDER BY created DESC"#,
         )
         .bind(user_id)
-        .bind(ttl as f64)
+        .bind(ttl as i64)
         .fetch_all(&self.pool)
         .await?;
 
@@ -121,12 +121,12 @@ impl crate::controller::AuthDb for DbClient {
         Ok(sessions)
     }
 
-    async fn delete_session(&self, session_id: &str) -> Result<(), sqlx::Error> {
-        sqlx::query("DELETE FROM sessions WHERE id = $1")
+    async fn delete_session(&self, session_id: &str) -> Result<u64, sqlx::Error> {
+        let result = sqlx::query("DELETE FROM sessions WHERE id = $1")
             .bind(session_id)
             .execute(&self.pool)
             .await?;
-        Ok(())
+        Ok(result.rows_affected())
     }
 
     async fn update_password_hash(&self, user_id: i32, new_hash: &str) -> Result<(), sqlx::Error> {

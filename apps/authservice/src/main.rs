@@ -19,6 +19,7 @@ const SESSION_CLEANUP_INTERVAL: Duration = Duration::from_secs(3600);
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     logging::init();
+    internal_auth::init();
     let port = env::var("PORT").unwrap_or_else(|_| "5050".to_string());
     let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let session_hmac_secret =
