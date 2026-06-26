@@ -1,9 +1,11 @@
 use tonic::{Request, Response, Status};
+use tonic::transport::Channel;
 
 use crate::cogito::search_service_server::SearchService;
-use crate::cogito::{Hashtag, Hashtags, Post, Posts, SearchRequest, User, Users};
+use crate::cogito::user_service_client::UserServiceClient;
+use crate::cogito::{Hashtag, Hashtags, Ids, Post, Posts, SearchRequest, User, Users};
 
-use super::meili::{MeiliClient, decode_cursor, encode_cursor};
+use super::meili::{MeiliClient, UserHit, decode_cursor, encode_cursor};
 
 const MAX_QUERY_CHARS: usize = 255;
 const DEFAULT_LIMIT: u32 = 20;
@@ -11,12 +13,58 @@ const MAX_LIMIT: u32 = 50;
 
 #[derive(Clone)]
 pub struct SearchController {
-    meili: MeiliClient,
+    meili: Option<MeiliClient>,
+    user_client: Option<UserServiceClient<Channel>>,
 }
 
 impl SearchController {
-    pub fn new(meili: MeiliClient) -> Self {
-        Self { meili }
+    pub fn new(meili: Option<MeiliClient>, user_client: Option<UserServiceClient<Channel>>) -> Self {
+        Self { meili, user_client }
+    }
+
+    async fn fetch_full_users(&self, hits: &[UserHit], request_id: &str) -> Vec<User> {
+        let ids: Vec<i32> = hits.iter().map(|h| h.id).collect();
+
+        if let Some(ref client) = self.user_client {
+            let mut client = client.clone();
+            let mut req = tonic::Request::new(Ids { ids: ids.clone() });
+            if let Ok(val) = crate::internal_auth::token().parse() {
+                req.metadata_mut().insert("internal-token", val);
+            }
+            match client.get_users_by_ids(req).await {
+                Ok(resp) => {
+                    let by_id: std::collections::HashMap<i32, User> = resp
+                        .into_inner()
+                        .users
+                        .into_iter()
+                        .map(|u| (u.id, u))
+                        .collect();
+                    return hits
+                        .iter()
+                        .map(|h| {
+                            by_id.get(&h.id).cloned().unwrap_or_else(|| User {
+                                id: h.id,
+                                username: h.username.clone(),
+                                name: h.name.clone(),
+                                ..Default::default()
+                            })
+                        })
+                        .collect();
+                }
+                Err(e) => {
+                    tracing::warn!(request_id = %request_id, error = %e, "userservice lookup failed, returning partial search results");
+                }
+            }
+        }
+
+        hits.iter()
+            .map(|h| User {
+                id: h.id,
+                username: h.username.clone(),
+                name: h.name.clone(),
+                ..Default::default()
+            })
+            .collect()
     }
 }
 
@@ -46,8 +94,12 @@ impl SearchService for SearchController {
         let req = request.into_inner();
         let (query, limit, offset) = validate_request(&req)?;
 
-        let hits = self
+        let meili = self
             .meili
+            .as_ref()
+            .ok_or_else(|| Status::unavailable("Search is temporarily unavailable"))?;
+
+        let mut hits = meili
             .search_users(&query, limit + 1, offset)
             .await
             .map_err(|e| {
@@ -55,15 +107,20 @@ impl SearchService for SearchController {
                 Status::internal("Internal server error.")
             })?;
 
-        let (items, next_cursor) = paginate(hits, limit, offset, |h| User {
-            id: h.id,
-            username: h.username,
-            name: h.name,
-            ..Default::default()
-        });
+        let has_next = hits.len() as u32 > limit;
+        if has_next {
+            hits.truncate(limit as usize);
+        }
+        let next_cursor = if has_next {
+            encode_cursor(offset + limit)
+        } else {
+            String::new()
+        };
+
+        let users = self.fetch_full_users(&hits, &request_id).await;
 
         Ok(Response::new(Users {
-            users: items,
+            users,
             next_cursor,
         }))
     }
@@ -76,8 +133,12 @@ impl SearchService for SearchController {
         let req = request.into_inner();
         let (query, limit, offset) = validate_request(&req)?;
 
-        let hits = self
+        let meili = self
             .meili
+            .as_ref()
+            .ok_or_else(|| Status::unavailable("Search is temporarily unavailable"))?;
+
+        let hits = meili
             .search_posts(&query, limit + 1, offset)
             .await
             .map_err(|e| {
@@ -106,8 +167,12 @@ impl SearchService for SearchController {
         let req = request.into_inner();
         let (query, limit, offset) = validate_request(&req)?;
 
-        let hits = self
+        let meili = self
             .meili
+            .as_ref()
+            .ok_or_else(|| Status::unavailable("Search is temporarily unavailable"))?;
+
+        let hits = meili
             .search_hashtags(&query, limit + 1, offset)
             .await
             .map_err(|e| {

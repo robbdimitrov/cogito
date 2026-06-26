@@ -105,8 +105,10 @@ impl MeiliClient {
 async fn provision_scoped_key(master: &Client) -> Result<String, Box<dyn std::error::Error>> {
     // Meilisearch REST API v1 GET /keys/{keyOrUid} accepts both the key token and the UID,
     // so a direct lookup by UID is idempotent and avoids pagination edge-cases from get_keys().
-    if let Ok(key) = master.get_key(SCOPED_KEY_UID).await {
-        return Ok(key.key);
+    match master.get_key(SCOPED_KEY_UID).await {
+        Ok(key) => return Ok(key.key),
+        Err(e) if is_not_found(&e) => {}
+        Err(e) => return Err(Box::new(e)),
     }
 
     let mut builder = KeyBuilder::new();
@@ -118,6 +120,10 @@ async fn provision_scoped_key(master: &Client) -> Result<String, Box<dyn std::er
 
     let key = master.create_key(&builder).await?;
     Ok(key.key)
+}
+
+fn is_not_found(e: &MeiliError) -> bool {
+    matches!(e, MeiliError::Meilisearch(me) if me.error_code == ErrorCode::ApiKeyNotFound)
 }
 
 async fn ensure_indexes(master: &Client) -> Result<(), Box<dyn std::error::Error>> {

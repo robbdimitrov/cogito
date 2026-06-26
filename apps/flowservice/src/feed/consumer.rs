@@ -30,7 +30,7 @@ enum ActivityEvent {
 struct EntityChangeEvent {
     table: String,
     op: String,
-    id: Option<i32>,
+    id: Option<i64>,
     author_id: Option<i32>,
     created: Option<String>,
     in_reply_to_id: Option<i32>,
@@ -42,10 +42,8 @@ pub async fn run(
     cache: FollowerCache,
     fan_out_threshold: i32,
     mut shutdown_rx: tokio::sync::watch::Receiver<bool>,
-) {
-    consumer
-        .subscribe(&["activity", "entity-changes"])
-        .expect("kafka topic subscription failed");
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    consumer.subscribe(&["activity", "entity-changes"])?;
 
     // Mark the initial watch value as seen so changed() only fires on a real transition.
     shutdown_rx.borrow_and_update();
@@ -54,7 +52,7 @@ pub async fn run(
         tokio::select! {
             _ = shutdown_rx.changed() => {
                 tracing::info!("feed consumer shutting down");
-                return;
+                return Ok(());
             }
             result = consumer.recv() => {
                 let msg = match result {
@@ -130,7 +128,7 @@ async fn handle_entity_change(
                 return Ok(());
             }
             let post_id = match event.id {
-                Some(id) => id,
+                Some(id) => id as i32,
                 None => return Ok(()),
             };
             let author_id = match event.author_id {
@@ -145,7 +143,7 @@ async fn handle_entity_change(
         }
         "delete" => {
             let post_id = match event.id {
-                Some(id) => id,
+                Some(id) => id as i32,
                 None => return Ok(()),
             };
             db.delete_by_post(post_id).await?;

@@ -66,10 +66,8 @@ pub async fn run(
     consumer: rdkafka::consumer::StreamConsumer,
     db: PgPool,
     mut shutdown_rx: tokio::sync::watch::Receiver<bool>,
-) {
-    consumer
-        .subscribe(&["activity", "entity-changes"])
-        .expect("kafka topic subscription failed");
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    consumer.subscribe(&["activity", "entity-changes"])?;
 
     // Mark the initial watch value as seen so changed() only fires on a real transition.
     shutdown_rx.borrow_and_update();
@@ -99,6 +97,8 @@ pub async fn run(
             }
         }
     }
+
+    Ok(())
 }
 
 async fn dispatch(

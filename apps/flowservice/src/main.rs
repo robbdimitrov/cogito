@@ -20,10 +20,12 @@ use rdkafka::error::KafkaError;
 
 const DEFAULT_FAN_OUT_THRESHOLD: i32 = 10_000;
 const CLEANUP_INTERVAL_SECS: u64 = 3600;
+const MEILI_CONNECT_TIMEOUT_SECS: u64 = 5;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     logging::init();
+    internal_auth::init();
 
     let port = env::var("PORT").unwrap_or_else(|_| "5050".to_string());
     let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
@@ -45,7 +47,36 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .connect(&db_url)
         .await?;
 
-    let meili = search::meili::MeiliClient::new(&meili_host, &meili_master_key).await?;
+    let user_service_addr = env::var("USER_SERVICE_ADDR").ok();
+    let user_client = user_service_addr.and_then(|addr| {
+        match tonic::transport::Endpoint::from_shared(addr) {
+            Ok(endpoint) => {
+                let channel = endpoint.connect_lazy();
+                Some(cogito::user_service_client::UserServiceClient::new(channel))
+            }
+            Err(e) => {
+                tracing::warn!(error = %e, "invalid USER_SERVICE_ADDR, search returns partial results");
+                None
+            }
+        }
+    });
+
+    let meili = match tokio::time::timeout(
+        std::time::Duration::from_secs(MEILI_CONNECT_TIMEOUT_SECS),
+        search::meili::MeiliClient::new(&meili_host, &meili_master_key),
+    )
+    .await
+    {
+        Ok(Ok(client)) => Some(client),
+        Ok(Err(e)) => {
+            tracing::warn!(error = %e, "meilisearch unavailable at startup, search degraded");
+            None
+        }
+        Err(_) => {
+            tracing::warn!("meilisearch connection timed out at startup, search degraded");
+            None
+        }
+    };
 
     let valkey_config = fred::prelude::RedisConfig::from_url(&valkey_url)?;
     let valkey_client = fred::prelude::RedisClient::new(valkey_config, None, None, None);
@@ -62,14 +93,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let db = pool.clone();
         let rx = shutdown_rx.clone();
         tokio::spawn(async move {
-            notifications::consumer::run(notif_consumer, db, rx).await;
+            if let Err(e) = notifications::consumer::run(notif_consumer, db, rx).await {
+                tracing::error!(error = %e, "notification consumer exited with error");
+                std::process::exit(1);
+            }
         })
     };
     let feed_handle = {
         let db = pool.clone();
         let rx = shutdown_rx.clone();
         tokio::spawn(async move {
-            feed::consumer::run(feed_consumer, db, follower_cache, fan_out_threshold, rx).await;
+            if let Err(e) = feed::consumer::run(feed_consumer, db, follower_cache, fan_out_threshold, rx).await {
+                tracing::error!(error = %e, "feed consumer exited with error");
+                std::process::exit(1);
+            }
         })
     };
     let cleanup_handle = {
@@ -80,7 +117,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         })
     };
 
-    let search_ctrl = search::controller::SearchController::new(meili);
+    let search_ctrl = search::controller::SearchController::new(meili, user_client);
     let notif_ctrl = notifications::controller::NotificationController::new(pool.clone());
 
     let shutdown_signal = async move {
@@ -106,7 +143,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     // Drain background tasks before closing the pool so in-flight DB writes can finish.
-    let _ = tokio::join!(notif_handle, feed_handle, cleanup_handle);
+    let (nr, fr, cr) = tokio::join!(notif_handle, feed_handle, cleanup_handle);
+    if let Err(e) = nr {
+        tracing::error!(error = ?e, "notification consumer task failed");
+    }
+    if let Err(e) = fr {
+        tracing::error!(error = ?e, "feed consumer task failed");
+    }
+    if let Err(e) = cr {
+        tracing::error!(error = ?e, "cleanup task failed");
+    }
     pool.close().await;
     Ok(())
 }
