@@ -190,8 +190,13 @@ spec:
         - start
         - --mode=dev-container
         - --kafka-addr=PLAINTEXT://0.0.0.0:9092
-        - --advertise-kafka-addr=PLAINTEXT://broker-0.broker:9092
-        - --advertise-rpc-addr=broker-0.broker:33145
+        - --advertise-kafka-addr=PLAINTEXT://$(POD_NAME).broker:9092
+        - --advertise-rpc-addr=$(POD_NAME).broker:33145
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
         ports:
         - name: kafka
           containerPort: 9092
@@ -378,6 +383,16 @@ spec:
           value: http://seaweedfs:8333
         - name: S3_BUCKET
           value: cogito-images
+        - name: S3_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: seaweedfs-credentials
+              key: accessKey
+        - name: S3_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: seaweedfs-credentials
+              key: secretKey
         securityContext: &connect-container-security
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true

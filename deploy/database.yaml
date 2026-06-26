@@ -1,4 +1,19 @@
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+  namespace: cogito
+data:
+  init.sql: |
+    CREATE USER cogito_app WITH PASSWORD 'cogito-app-password';
+    GRANT CONNECT ON DATABASE cogito TO cogito_app;
+    GRANT USAGE ON SCHEMA public TO cogito_app;
+    GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO cogito_app;
+    GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO cogito_app;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO cogito_app;
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO cogito_app;
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: database
@@ -41,6 +56,7 @@ metadata:
 spec:
   serviceName: database-headless
   replicas: 1
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       app: cogito
@@ -52,6 +68,10 @@ spec:
         tier: database
     spec:
       terminationGracePeriodSeconds: 60
+      volumes:
+      - name: postgres-init
+        configMap:
+          name: postgres-init
       containers:
       - name: database
         image: postgres:18.4-alpine
@@ -76,9 +96,18 @@ spec:
           value: cogito
         - name: PGDATA
           value: /var/lib/postgresql/18/docker
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          capabilities:
+            drop:
+            - ALL
         volumeMounts:
         - mountPath: /var/lib/postgresql
           name: database-storage
+        - mountPath: /docker-entrypoint-initdb.d
+          name: postgres-init
+          readOnly: true
         startupProbe:
           exec:
             command:

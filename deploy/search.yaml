@@ -25,6 +25,7 @@ metadata:
 spec:
   serviceName: meilisearch
   replicas: 1
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       app: cogito
@@ -39,7 +40,7 @@ spec:
     spec:
       containers:
       - name: meilisearch
-        image: getmeili/meilisearch:v1.15
+        image: getmeili/meilisearch:v1.15.0
         ports:
         - containerPort: 7700
         resources:
@@ -58,9 +59,21 @@ spec:
               key: meili-master-key
         - name: MEILI_DB_PATH
           value: /data/meilisearch
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          capabilities:
+            drop:
+            - ALL
         volumeMounts:
         - name: data
           mountPath: /data
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 7700
+          failureThreshold: 30
+          periodSeconds: 5
         readinessProbe:
           httpGet:
             path: /health

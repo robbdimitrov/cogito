@@ -72,7 +72,8 @@ ensure_secret() {
   postgres_password="$(random_secret)"
   kubectl -n "${NS}" create secret generic cogito-db-secret \
     --from-literal=postgres-password="${postgres_password}" \
-    --from-literal=database-url="postgresql://postgres:${postgres_password}@database:5432/cogito" \
+    --from-literal=cogito-app-password="cogito-app-password" \
+    --from-literal=database-url="postgresql://cogito_app:cogito-app-password@database:5432/cogito" \
     --from-literal=internal-grpc-token="$(random_secret)" \
     --from-literal=session-hmac-secret="$(random_secret)" \
     --from-literal=meili-master-key="$(random_secret)" \

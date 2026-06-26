@@ -8,6 +8,7 @@ metadata:
 spec:
   serviceName: dragonfly
   replicas: 1
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       app: cogito
@@ -20,7 +21,7 @@ spec:
     spec:
       containers:
       - name: dragonfly
-        image: docker.dragonflydb.io/dragonflydb/dragonfly
+        image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.25.0
         args: ["--proactor_threads=1", "--maxmemory=300mb"]
         ports:
         - containerPort: 6379
@@ -31,6 +32,12 @@ spec:
           requests:
             memory: 300Mi
             cpu: 50m
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          capabilities:
+            drop:
+            - ALL
         volumeMounts:
         - name: dragonfly-data
           mountPath: /data
@@ -61,7 +68,6 @@ metadata:
     app: cogito
     component: dragonfly
 spec:
-  clusterIP: None
   selector:
     app: cogito
     component: dragonfly

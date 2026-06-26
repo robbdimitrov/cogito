@@ -72,6 +72,8 @@ spec:
             secretKeyRef:
               name: cogito-db-secret
               key: meili-master-key
+        - name: USER_SERVICE_ADDR
+          value: http://userservice:5050
         - name: PORT
           value: "5050"
         - name: INTERNAL_GRPC_TOKEN
@@ -82,6 +84,9 @@ spec:
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 65534
+          runAsGroup: 65534
           capabilities:
             drop:
             - ALL

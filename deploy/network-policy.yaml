@@ -1,0 +1,360 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: authservice
+  namespace: cogito
+spec:
+  podSelector:
+    matchLabels:
+      app: cogito
+      tier: backend
+      component: authservice
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: backend
+          component: apigateway
+    ports:
+    - protocol: TCP
+      port: 5050
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: userservice
+  namespace: cogito
+spec:
+  podSelector:
+    matchLabels:
+      app: cogito
+      tier: backend
+      component: userservice
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: backend
+          component: apigateway
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: backend
+          component: flowservice
+    ports:
+    - protocol: TCP
+      port: 5050
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postservice
+  namespace: cogito
+spec:
+  podSelector:
+    matchLabels:
+      app: cogito
+      tier: backend
+      component: postservice
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: backend
+          component: apigateway
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: backend
+          component: flowservice
+    ports:
+    - protocol: TCP
+      port: 5050
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: imageservice
+  namespace: cogito
+spec:
+  podSelector:
+    matchLabels:
+      app: cogito
+      tier: backend
+      component: imageservice
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: backend
+          component: apigateway
+    ports:
+    - protocol: TCP
+      port: 5050
+    - protocol: TCP
+      port: 8081
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: flowservice
+  namespace: cogito
+spec:
+  podSelector:
+    matchLabels:
+      app: cogito
+      tier: backend
+      component: flowservice
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: backend
+          component: apigateway
+    ports:
+    - protocol: TCP
+      port: 5050
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: frontend
+  namespace: cogito
+spec:
+  podSelector:
+    matchLabels:
+      app: cogito
+      tier: frontend
+  policyTypes:
+  - Ingress
+  ingress:
+  - ports:
+    - protocol: TCP
+      port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: apigateway
+  namespace: cogito
+spec:
+  podSelector:
+    matchLabels:
+      app: cogito
+      tier: backend
+      component: apigateway
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: frontend
+    ports:
+    - protocol: TCP
+      port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: seaweedfs
+  namespace: cogito
+spec:
+  podSelector:
+    matchLabels:
+      app: cogito
+      component: seaweedfs
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: backend
+          component: apigateway
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: backend
+          component: imageservice
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: broker
+          component: connect
+    ports:
+    - protocol: TCP
+      port: 8333
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: database
+  namespace: cogito
+spec:
+  podSelector:
+    matchLabels:
+      app: cogito
+      tier: database
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: backend
+          component: authservice
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: backend
+          component: userservice
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: backend
+          component: postservice
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: backend
+          component: imageservice
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: backend
+          component: flowservice
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: broker
+          component: connect
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: broker
+          component: broker-backfill
+    ports:
+    - protocol: TCP
+      port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: dragonfly
+  namespace: cogito
+spec:
+  podSelector:
+    matchLabels:
+      app: cogito
+      component: dragonfly
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: backend
+          component: apigateway
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: backend
+          component: flowservice
+    ports:
+    - protocol: TCP
+      port: 6379
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: meilisearch
+  namespace: cogito
+spec:
+  podSelector:
+    matchLabels:
+      app: cogito
+      tier: backend
+      component: meilisearch
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: backend
+          component: flowservice
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: broker
+          component: connect
+    ports:
+    - protocol: TCP
+      port: 7700
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: broker
+  namespace: cogito
+spec:
+  podSelector:
+    matchLabels:
+      app: cogito
+      tier: broker
+    matchExpressions:
+    - key: component
+      operator: DoesNotExist
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: backend
+          component: postservice
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: backend
+          component: userservice
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: backend
+          component: flowservice
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: broker
+          component: connect
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: broker
+          component: broker-backfill
+    ports:
+    - protocol: TCP
+      port: 9092
