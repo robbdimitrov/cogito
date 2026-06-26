@@ -34,10 +34,6 @@ spec:
             cpu: 50m
         securityContext:
           allowPrivilegeEscalation: false
-          runAsNonRoot: true
-          capabilities:
-            drop:
-            - ALL
         volumeMounts:
         - name: dragonfly-data
           mountPath: /data

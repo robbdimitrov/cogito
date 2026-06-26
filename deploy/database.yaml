@@ -98,10 +98,6 @@ spec:
           value: /var/lib/postgresql/18/docker
         securityContext:
           allowPrivilegeEscalation: false
-          runAsNonRoot: true
-          capabilities:
-            drop:
-            - ALL
         volumeMounts:
         - mountPath: /var/lib/postgresql
           name: database-storage

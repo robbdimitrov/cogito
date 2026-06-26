@@ -40,7 +40,7 @@ spec:
     spec:
       containers:
       - name: meilisearch
-        image: getmeili/meilisearch:v1.15.0
+        image: getmeili/meilisearch:v1.15.2
         ports:
         - containerPort: 7700
         resources:
@@ -61,10 +61,6 @@ spec:
           value: /data/meilisearch
         securityContext:
           allowPrivilegeEscalation: false
-          runAsNonRoot: true
-          capabilities:
-            drop:
-            - ALL
         volumeMounts:
         - name: data
           mountPath: /data

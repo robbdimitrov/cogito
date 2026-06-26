@@ -252,6 +252,11 @@ spec:
           app: cogito
           tier: broker
           component: broker-backfill
+    - podSelector:
+        matchLabels:
+          app: cogito
+          tier: backend
+          component: apigateway
     ports:
     - protocol: TCP
       port: 5432
