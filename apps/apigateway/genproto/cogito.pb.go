@@ -363,12 +363,12 @@ func (x *User) GetCoverPhotoKey() string {
 
 type UpdateUserRequest struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
-	Name            string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Username        string                 `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
-	Email           string                 `protobuf:"bytes,3,opt,name=email,proto3" json:"email,omitempty"`
+	Name            *string                `protobuf:"bytes,1,opt,name=name,proto3,oneof" json:"name,omitempty"`
+	Username        *string                `protobuf:"bytes,2,opt,name=username,proto3,oneof" json:"username,omitempty"`
+	Email           *string                `protobuf:"bytes,3,opt,name=email,proto3,oneof" json:"email,omitempty"`
 	Password        string                 `protobuf:"bytes,4,opt,name=password,proto3" json:"password,omitempty"`
 	OldPassword     string                 `protobuf:"bytes,5,opt,name=old_password,json=oldPassword,proto3" json:"old_password,omitempty"`
-	Bio             string                 `protobuf:"bytes,6,opt,name=bio,proto3" json:"bio,omitempty"`
+	Bio             *string                `protobuf:"bytes,6,opt,name=bio,proto3,oneof" json:"bio,omitempty"`
 	ProfilePhotoKey *string                `protobuf:"bytes,7,opt,name=profile_photo_key,json=profilePhotoKey,proto3,oneof" json:"profile_photo_key,omitempty"`
 	CoverPhotoKey   *string                `protobuf:"bytes,8,opt,name=cover_photo_key,json=coverPhotoKey,proto3,oneof" json:"cover_photo_key,omitempty"`
 	unknownFields   protoimpl.UnknownFields
@@ -406,22 +406,22 @@ func (*UpdateUserRequest) Descriptor() ([]byte, []int) {
 }
 
 func (x *UpdateUserRequest) GetName() string {
-	if x != nil {
-		return x.Name
+	if x != nil && x.Name != nil {
+		return *x.Name
 	}
 	return ""
 }
 
 func (x *UpdateUserRequest) GetUsername() string {
-	if x != nil {
-		return x.Username
+	if x != nil && x.Username != nil {
+		return *x.Username
 	}
 	return ""
 }
 
 func (x *UpdateUserRequest) GetEmail() string {
-	if x != nil {
-		return x.Email
+	if x != nil && x.Email != nil {
+		return *x.Email
 	}
 	return ""
 }
@@ -441,8 +441,8 @@ func (x *UpdateUserRequest) GetOldPassword() string {
 }
 
 func (x *UpdateUserRequest) GetBio() string {
-	if x != nil {
-		return x.Bio
+	if x != nil && x.Bio != nil {
+		return *x.Bio
 	}
 	return ""
 }
@@ -2160,16 +2160,20 @@ const file_pkg_pb_cogito_proto_rawDesc = "" +
 	" \x01(\bR\bfollowed\x12\x18\n" +
 	"\acreated\x18\v \x01(\tR\acreated\x12*\n" +
 	"\x11profile_photo_key\x18\f \x01(\tR\x0fprofilePhotoKey\x12&\n" +
-	"\x0fcover_photo_key\x18\r \x01(\tR\rcoverPhotoKey\"\xb2\x02\n" +
-	"\x11UpdateUserRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1a\n" +
-	"\busername\x18\x02 \x01(\tR\busername\x12\x14\n" +
-	"\x05email\x18\x03 \x01(\tR\x05email\x12\x1a\n" +
+	"\x0fcover_photo_key\x18\r \x01(\tR\rcoverPhotoKey\"\xee\x02\n" +
+	"\x11UpdateUserRequest\x12\x17\n" +
+	"\x04name\x18\x01 \x01(\tH\x00R\x04name\x88\x01\x01\x12\x1f\n" +
+	"\busername\x18\x02 \x01(\tH\x01R\busername\x88\x01\x01\x12\x19\n" +
+	"\x05email\x18\x03 \x01(\tH\x02R\x05email\x88\x01\x01\x12\x1a\n" +
 	"\bpassword\x18\x04 \x01(\tR\bpassword\x12!\n" +
-	"\fold_password\x18\x05 \x01(\tR\voldPassword\x12\x10\n" +
-	"\x03bio\x18\x06 \x01(\tR\x03bio\x12/\n" +
-	"\x11profile_photo_key\x18\a \x01(\tH\x00R\x0fprofilePhotoKey\x88\x01\x01\x12+\n" +
-	"\x0fcover_photo_key\x18\b \x01(\tH\x01R\rcoverPhotoKey\x88\x01\x01B\x14\n" +
+	"\fold_password\x18\x05 \x01(\tR\voldPassword\x12\x15\n" +
+	"\x03bio\x18\x06 \x01(\tH\x03R\x03bio\x88\x01\x01\x12/\n" +
+	"\x11profile_photo_key\x18\a \x01(\tH\x04R\x0fprofilePhotoKey\x88\x01\x01\x12+\n" +
+	"\x0fcover_photo_key\x18\b \x01(\tH\x05R\rcoverPhotoKey\x88\x01\x01B\a\n" +
+	"\x05_nameB\v\n" +
+	"\t_usernameB\b\n" +
+	"\x06_emailB\x06\n" +
+	"\x04_bioB\x14\n" +
 	"\x12_profile_photo_keyB\x12\n" +
 	"\x10_cover_photo_key\"X\n" +
 	"\x0fGetUsersRequest\x12\x17\n" +

@@ -206,10 +206,10 @@ impl<D: UserDb> UserService for Controller<D> {
                 })?;
         }
 
-        let name = req.name.trim();
-        let username = req.username.trim().to_lowercase();
-        let email = req.email.trim().to_lowercase();
-        let bio = req.bio.trim();
+        let name = req.name.as_deref().unwrap_or("").trim();
+        let username = req.username.as_deref().unwrap_or("").trim().to_lowercase();
+        let email = req.email.as_deref().unwrap_or("").trim().to_lowercase();
+        let bio = req.bio.as_deref().unwrap_or("").trim();
         let profile_photo_key = req
             .profile_photo_key
             .as_deref()
@@ -231,11 +231,11 @@ impl<D: UserDb> UserService for Controller<D> {
             return Ok(Response::new(Empty {}));
         }
 
-        if !req.name.is_empty() && name.is_empty() {
+        if req.name.as_deref().map(|s| !s.is_empty()).unwrap_or(false) && name.is_empty() {
             return Err(Status::invalid_argument("Name cannot be empty."));
         } else if !name.is_empty() && name.len() > 255 {
             return Err(Status::invalid_argument("Name cannot exceed 255 characters."));
-        } else if !req.bio.is_empty() && bio.is_empty() {
+        } else if req.bio.as_deref().map(|s| !s.is_empty()).unwrap_or(false) && bio.is_empty() {
             return Err(Status::invalid_argument("Bio cannot be empty."));
         } else if !bio.is_empty() && bio.len() > 255 {
             return Err(Status::invalid_argument("Bio cannot exceed 255 characters."));

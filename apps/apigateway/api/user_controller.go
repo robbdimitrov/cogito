@@ -162,10 +162,10 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var body struct {
-		Name            string  `json:"name"`
-		Username        string  `json:"username"`
-		Email           string  `json:"email"`
-		Bio             string  `json:"bio"`
+		Name            *string `json:"name"`
+		Username        *string `json:"username"`
+		Email           *string `json:"email"`
+		Bio             *string `json:"bio"`
 		Password        string  `json:"password"`
 		OldPassword     string  `json:"oldPassword"`
 		ProfilePhotoKey *string `json:"profilePhotoKey"`
@@ -176,7 +176,23 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if utf8.RuneCountInString(body.Name) > 255 || utf8.RuneCountInString(body.Username) > 255 || utf8.RuneCountInString(body.Email) > 255 || utf8.RuneCountInString(body.Bio) > 255 {
+	nameLen := 0
+	if body.Name != nil {
+		nameLen = utf8.RuneCountInString(*body.Name)
+	}
+	usernameLen := 0
+	if body.Username != nil {
+		usernameLen = utf8.RuneCountInString(*body.Username)
+	}
+	emailLen := 0
+	if body.Email != nil {
+		emailLen = utf8.RuneCountInString(*body.Email)
+	}
+	bioLen := 0
+	if body.Bio != nil {
+		bioLen = utf8.RuneCountInString(*body.Bio)
+	}
+	if nameLen > 255 || usernameLen > 255 || emailLen > 255 || bioLen > 255 {
 		jsonError(w, http.StatusBadRequest, "Profile fields cannot exceed 255 characters")
 		return
 	}
@@ -215,12 +231,20 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	req := pb.UpdateUserRequest{
-		Name:        body.Name,
-		Username:    body.Username,
-		Email:       body.Email,
-		Bio:         body.Bio,
 		Password:    body.Password,
 		OldPassword: body.OldPassword,
+	}
+	if body.Name != nil {
+		req.Name = body.Name
+	}
+	if body.Username != nil {
+		req.Username = body.Username
+	}
+	if body.Email != nil {
+		req.Email = body.Email
+	}
+	if body.Bio != nil {
+		req.Bio = body.Bio
 	}
 	if body.ProfilePhotoKey != nil {
 		req.ProfilePhotoKey = body.ProfilePhotoKey

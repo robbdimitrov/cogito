@@ -278,10 +278,10 @@ async fn test_update_user() {
 
     let req = create_request(
         UpdateUserRequest {
-            name: "Updated Name".into(),
-            username: "updateduser".into(),
-            email: "updated@example.com".into(),
-            bio: "New Bio".into(),
+            name: Some("Updated Name".into()),
+            username: Some("updateduser".into()),
+            email: Some("updated@example.com".into()),
+            bio: Some("New Bio".into()),
             password: "".into(),
             old_password: "".into(),
             profile_photo_key: Some("key1".into()),
@@ -313,10 +313,10 @@ async fn test_update_user_bio_only_does_not_require_username() {
 
     let req = create_request(
         UpdateUserRequest {
-            name: String::new(),
-            username: String::new(),
-            email: String::new(),
-            bio: "Updated bio".into(),
+            name: None,
+            username: None,
+            email: None,
+            bio: Some("Updated bio".into()),
             password: String::new(),
             old_password: String::new(),
             profile_photo_key: None,
@@ -342,10 +342,10 @@ async fn test_update_user_photo_only_does_not_require_username() {
 
     let req = create_request(
         UpdateUserRequest {
-            name: String::new(),
-            username: String::new(),
-            email: String::new(),
-            bio: String::new(),
+            name: None,
+            username: None,
+            email: None,
+            bio: None,
             password: String::new(),
             old_password: String::new(),
             profile_photo_key: Some("photo.jpg".into()),
@@ -370,10 +370,10 @@ async fn test_update_user_partial_preserves_existing_fields() {
 
     let req = create_request(
         UpdateUserRequest {
-            name: String::new(),
-            username: String::new(),
-            email: String::new(),
-            bio: "Updated bio".into(),
+            name: None,
+            username: None,
+            email: None,
+            bio: Some("Updated bio".into()),
             password: String::new(),
             old_password: String::new(),
             profile_photo_key: None,
@@ -400,10 +400,10 @@ async fn test_update_user_rejects_invalid_username() {
         .await;
     let req = create_request(
         UpdateUserRequest {
-            name: "Updated Name".into(),
-            username: "invalid/user".into(),
-            email: "updated@example.com".into(),
-            bio: String::new(),
+            name: Some("Updated Name".into()),
+            username: Some("invalid/user".into()),
+            email: Some("updated@example.com".into()),
+            bio: None,
             password: String::new(),
             old_password: String::new(),
             profile_photo_key: None,

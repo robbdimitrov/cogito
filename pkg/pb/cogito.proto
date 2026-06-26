@@ -41,12 +41,12 @@ message User {
 }
 
 message UpdateUserRequest {
-  string name = 1;
-  string username = 2;
-  string email = 3;
+  optional string name = 1;
+  optional string username = 2;
+  optional string email = 3;
   string password = 4;
   string old_password = 5;
-  string bio = 6;
+  optional string bio = 6;
   optional string profile_photo_key = 7;
   optional string cover_photo_key = 8;
 }
