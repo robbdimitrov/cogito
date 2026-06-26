@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"google.golang.org/grpc/codes"
@@ -47,7 +48,7 @@ func newAuthController(addr string) *authController {
 func (ac *authController) createSession(w http.ResponseWriter, r *http.Request) {
 	client := ac.client
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	ctx = appendInternalAuthForRequest(ctx, r)
 	defer cancel()
 
@@ -60,8 +61,13 @@ func (ac *authController) createSession(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	if body.Email == "" || body.Password == "" {
+		jsonError(w, http.StatusBadRequest, "Email and password are required")
+		return
+	}
+
 	keys := loginFailureKeys(r, body.Email)
-	tctx, tcancel := context.WithTimeout(context.Background(), 2*time.Second)
+	tctx, tcancel := context.WithTimeout(r.Context(), 2*time.Second)
 	failures, err := ac.throttle.GetFailures(tctx, keys)
 	tcancel()
 	if err != nil {
@@ -82,19 +88,32 @@ func (ac *authController) createSession(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		slog.Warn("creating session failed", "request_id", getRequestID(r), "error_kind", status.Code(err).String())
 		if status.Code(err) == codes.Unauthenticated {
+			throttled := false
 			for _, key := range keys {
-				rctx, rcancel := context.WithTimeout(context.Background(), 2*time.Second)
-				if rerr := ac.throttle.RecordFailure(rctx, key); rerr != nil {
+				rctx, rcancel := context.WithTimeout(r.Context(), 2*time.Second)
+				count, rerr := ac.throttle.RecordFailure(rctx, key)
+				if rerr != nil {
 					slog.Warn("failed to record login failure", "request_id", getRequestID(r), "error", rerr)
 				}
 				rcancel()
+				threshold := ac.ipThreshold
+				if strings.HasPrefix(key, "email:") {
+					threshold = ac.emailThreshold
+				}
+				if count >= threshold {
+					throttled = true
+				}
+			}
+			if throttled {
+				jsonError(w, http.StatusTooManyRequests, "Too many requests")
+				return
 			}
 		}
 		grpcError(w, err)
 		return
 	}
 
-	cctx, ccancel := context.WithTimeout(context.Background(), 2*time.Second)
+	cctx, ccancel := context.WithTimeout(r.Context(), 2*time.Second)
 	if err := ac.throttle.Clear(cctx, keys); err != nil {
 		slog.Warn("failed to clear login failures", "request_id", getRequestID(r), "error", err)
 	}
@@ -113,7 +132,7 @@ func (ac *authController) validateSession(w http.ResponseWriter, r *http.Request
 
 	client := ac.client
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	ctx = appendInternalAuthForRequest(ctx, r)
 	defer cancel()
 
@@ -130,7 +149,6 @@ func (ac *authController) validateSession(w http.ResponseWriter, r *http.Request
 		return nil, err
 	}
 
-	createCookie(w, res.Id)
 	r = setUserID(r, strconv.Itoa(int(res.UserId)))
 
 	return r, nil
@@ -145,7 +163,7 @@ func (ac *authController) deleteSession(w http.ResponseWriter, r *http.Request) 
 
 	client := ac.client
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	ctx = appendInternalAuthForRequest(ctx, r)
 	defer cancel()
 
@@ -169,19 +187,6 @@ func (ac *authController) deleteSessionByID(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	client := ac.client
-
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx = appendInternalAuthForRequest(ctx, r)
-	defer cancel()
-
-	sess, err := client.GetSession(ctx, &pb.SessionRequest{SessionId: sessionID})
-	if err != nil {
-		slog.Warn("getting session for ownership check failed", "request_id", getRequestID(r), "error_kind", status.Code(err).String())
-		grpcError(w, err)
-		return
-	}
-
 	userIDStr := getUserID(r)
 	userID, err := strconv.ParseInt(userIDStr, 10, 32)
 	if err != nil || userID == 0 {
@@ -189,7 +194,28 @@ func (ac *authController) deleteSessionByID(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	if sess.UserId != int32(userID) {
+	client := ac.client
+
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	ctx = appendInternalAuthForRequest(ctx, r)
+	defer cancel()
+
+	sessions, err := client.GetSessions(ctx, &pb.UserRequest{UserId: int32(userID)})
+	if err != nil {
+		slog.Warn("getting sessions for ownership check failed", "request_id", getRequestID(r), "error_kind", status.Code(err).String())
+		grpcError(w, err)
+		return
+	}
+
+	found := false
+	for _, s := range sessions.Sessions {
+		if s.Id == sessionID {
+			found = true
+			break
+		}
+	}
+
+	if !found {
 		jsonError(w, http.StatusForbidden, "Cannot delete another user's session")
 		return
 	}
@@ -213,7 +239,7 @@ func (ac *authController) getSessions(w http.ResponseWriter, r *http.Request) {
 
 	client := ac.client
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	ctx = appendInternalAuthForRequest(ctx, r)
 	defer cancel()
 
@@ -247,8 +273,7 @@ func (ac *authController) getSessions(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonResponse(w, 200, map[string]interface{}{
-		"sessions":         sessions,
-		"currentSessionId": cookie.Value,
-		"userId":           validateRes.UserId,
+		"sessions": sessions,
+		"userId":   validateRes.UserId,
 	})
 }

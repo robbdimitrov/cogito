@@ -87,10 +87,14 @@ func defaultRetryConfig() retryConfig {
 }
 
 func newGatewayClient(addr string, downstream string) (*grpc.ClientConn, error) {
+	return newGatewayClientWithBreaker(addr, downstream, newCircuitBreaker(downstream))
+}
+
+func newGatewayClientWithBreaker(addr string, downstream string, breaker *circuitBreaker) (*grpc.ClientConn, error) {
 	return grpc.NewClient(
 		addr,
 		insecureCredentials(),
-		grpc.WithUnaryInterceptor(resilienceUnaryClientInterceptor(downstream, newCircuitBreaker(downstream), defaultRetryConfig())),
+		grpc.WithUnaryInterceptor(resilienceUnaryClientInterceptor(downstream, breaker, defaultRetryConfig())),
 	)
 }
 

@@ -31,7 +31,7 @@ type LoginFailure struct {
 
 type LoginThrottle interface {
 	GetFailures(ctx context.Context, keys []string) ([]LoginFailure, error)
-	RecordFailure(ctx context.Context, key string) error
+	RecordFailure(ctx context.Context, key string) (int, error)
 	Clear(ctx context.Context, keys []string) error
 }
 
@@ -84,12 +84,17 @@ func (t *DragonflyLoginThrottle) GetFailures(ctx context.Context, keys []string)
 	return failures, nil
 }
 
-func (t *DragonflyLoginThrottle) RecordFailure(ctx context.Context, key string) error {
+func (t *DragonflyLoginThrottle) RecordFailure(ctx context.Context, key string) (int, error) {
 	windowMs := strconv.FormatInt(t.window.Milliseconds(), 10)
-	return t.script.Exec(ctx, t.client,
+	result := t.script.Exec(ctx, t.client,
 		[]string{throttleKeyPrefix + key},
 		[]string{windowMs},
-	).Error()
+	)
+	if err := result.Error(); err != nil {
+		return 0, err
+	}
+	count, err := result.ToInt64()
+	return int(count), err
 }
 
 func (t *DragonflyLoginThrottle) Clear(ctx context.Context, keys []string) error {
@@ -102,7 +107,7 @@ func (NoopLoginThrottle) GetFailures(_ context.Context, _ []string) ([]LoginFail
 	return nil, nil
 }
 
-func (NoopLoginThrottle) RecordFailure(_ context.Context, _ string) error { return nil }
+func (NoopLoginThrottle) RecordFailure(_ context.Context, _ string) (int, error) { return 0, nil }
 func (NoopLoginThrottle) Clear(_ context.Context, _ []string) error       { return nil }
 
 func loginFailureKeys(r *http.Request, email string) []string {

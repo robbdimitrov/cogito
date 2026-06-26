@@ -13,10 +13,11 @@ import (
 
 type searchController struct {
 	client pb.SearchServiceClient
+	post   *postController
 }
 
-func newSearchController(client pb.SearchServiceClient) *searchController {
-	return &searchController{client: client}
+func newSearchController(client pb.SearchServiceClient, post *postController) *searchController {
+	return &searchController{client: client, post: post}
 }
 
 func (sc *searchController) search(w http.ResponseWriter, r *http.Request) {
@@ -42,8 +43,13 @@ func (sc *searchController) search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	ctx = appendInternalAuth(appendRequestIDHeader(ctx, r))
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
+	ctx, err = appendUserIDHeader(ctx, r)
+	if err != nil {
+		jsonError(w, http.StatusUnauthorized, "Unauthorized")
+		cancel()
+		return
+	}
 	defer cancel()
 
 	req := &pb.SearchRequest{
@@ -86,11 +92,7 @@ func (sc *searchController) search(w http.ResponseWriter, r *http.Request) {
 			grpcError(w, err)
 			return
 		}
-		posts := make([]post, 0, len(res.Posts))
-		for _, p := range res.Posts {
-			posts = append(posts, mapPost(p))
-		}
-		jsonResponse(w, http.StatusOK, map[string]any{"items": posts, "nextCursor": res.NextCursor})
+		jsonResponse(w, http.StatusOK, map[string]any{"items": sc.post.buildPosts(ctx, res.Posts), "nextCursor": res.NextCursor})
 
 	default:
 		jsonError(w, http.StatusBadRequest, "Invalid type parameter")

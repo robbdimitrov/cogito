@@ -21,30 +21,15 @@ type postController struct {
 	searchClient pb.SearchServiceClient
 }
 
-func newPostController(addr string, userAddr string, imageAddr string, searchClient pb.SearchServiceClient) *postController {
+func newPostController(addr string, userClient pb.UserServiceClient, imgClient pb.ImageServiceClient, searchClient pb.SearchServiceClient) *postController {
 	conn, err := newGatewayClient(addr, "post")
 	if err != nil {
 		slog.Error("unable to create post client", "error", err)
 		os.Exit(1)
 	}
-	userConn, err := newGatewayClient(userAddr, "user")
-	if err != nil {
-		slog.Error("unable to create user client", "error", err)
-		os.Exit(1)
-	}
-	var imgClient pb.ImageServiceClient
-	imageGRPCAddr := imageGRPCAddress(imageAddr)
-	if imageGRPCAddr != "" {
-		imgConn, err := newGatewayClient(imageGRPCAddr, "image-grpc")
-		if err != nil {
-			slog.Error("unable to create image client", "error", err)
-			os.Exit(1)
-		}
-		imgClient = pb.NewImageServiceClient(imgConn)
-	}
 	return &postController{
 		client:       pb.NewPostServiceClient(conn),
-		userClient:   pb.NewUserServiceClient(userConn),
+		userClient:   userClient,
 		imgClient:    imgClient,
 		searchClient: searchClient,
 	}
@@ -53,7 +38,7 @@ func newPostController(addr string, userAddr string, imageAddr string, searchCli
 func (pc *postController) createPost(w http.ResponseWriter, r *http.Request) {
 	client := pc.client
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
 		jsonError(w, http.StatusUnauthorized, "Unauthorized")
@@ -77,6 +62,19 @@ func (pc *postController) createPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if body.MediaKey != nil && *body.MediaKey != "" && pc.imgClient != nil {
+		userIDInt, err := strconv.ParseInt(getUserID(r), 10, 32)
+		if err != nil {
+			jsonError(w, http.StatusUnauthorized, "Unauthorized")
+			return
+		}
+		_, err = pc.imgClient.VerifyUpload(ctx, &pb.VerifyUploadRequest{Filename: *body.MediaKey, UserId: int32(userIDInt)})
+		if err != nil {
+			jsonError(w, http.StatusForbidden, "Forbidden")
+			return
+		}
+	}
+
 	req := pb.CreatePostRequest{Content: body.Content}
 	if body.MediaKey != nil {
 		req.MediaKey = body.MediaKey
@@ -93,6 +91,13 @@ func (pc *postController) createPost(w http.ResponseWriter, r *http.Request) {
 		slog.Warn("creating post failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
 		return
+	}
+
+	if body.MediaKey != nil && *body.MediaKey != "" && pc.imgClient != nil {
+		_, err := pc.imgClient.ConsumeUpload(ctx, &pb.ConsumeUploadRequest{Filename: *body.MediaKey})
+		if err != nil {
+			slog.Warn("consuming upload failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
+		}
 	}
 
 	jsonResponse(w, 201, map[string]int32{"id": res.Id})
@@ -202,7 +207,7 @@ func (pc *postController) buildPost(ctx context.Context, raw *pb.Post) post {
 func (pc *postController) getFeed(w http.ResponseWriter, r *http.Request) {
 	client := pc.client
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
 		jsonError(w, http.StatusUnauthorized, "Unauthorized")
@@ -235,7 +240,7 @@ func (pc *postController) getFeed(w http.ResponseWriter, r *http.Request) {
 func (pc *postController) getPosts(w http.ResponseWriter, r *http.Request) {
 	client := pc.client
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
 		jsonError(w, http.StatusUnauthorized, "Unauthorized")
@@ -244,7 +249,7 @@ func (pc *postController) getPosts(w http.ResponseWriter, r *http.Request) {
 	}
 	defer cancel()
 
-	userID, err := strconv.Atoi(r.PathValue("userId"))
+	userID, err := strconv.ParseInt(r.PathValue("userId"), 10, 32)
 	if err != nil {
 		jsonError(w, http.StatusBadRequest, "Invalid user ID")
 		return
@@ -274,7 +279,7 @@ func (pc *postController) getPosts(w http.ResponseWriter, r *http.Request) {
 func (pc *postController) getLikedPosts(w http.ResponseWriter, r *http.Request) {
 	client := pc.client
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
 		jsonError(w, http.StatusUnauthorized, "Unauthorized")
@@ -283,7 +288,7 @@ func (pc *postController) getLikedPosts(w http.ResponseWriter, r *http.Request) 
 	}
 	defer cancel()
 
-	userID, err := strconv.Atoi(r.PathValue("userId"))
+	userID, err := strconv.ParseInt(r.PathValue("userId"), 10, 32)
 	if err != nil {
 		jsonError(w, http.StatusBadRequest, "Invalid user ID")
 		return
@@ -313,7 +318,7 @@ func (pc *postController) getLikedPosts(w http.ResponseWriter, r *http.Request) 
 func (pc *postController) getHashtagPosts(w http.ResponseWriter, r *http.Request) {
 	client := pc.client
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
 		jsonError(w, http.StatusUnauthorized, "Unauthorized")
@@ -347,7 +352,7 @@ func (pc *postController) getHashtagPosts(w http.ResponseWriter, r *http.Request
 func (pc *postController) getPost(w http.ResponseWriter, r *http.Request) {
 	client := pc.client
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
 		jsonError(w, http.StatusUnauthorized, "Unauthorized")
@@ -356,7 +361,7 @@ func (pc *postController) getPost(w http.ResponseWriter, r *http.Request) {
 	}
 	defer cancel()
 
-	postID, err := strconv.Atoi(r.PathValue("postId"))
+	postID, err := strconv.ParseInt(r.PathValue("postId"), 10, 32)
 	if err != nil {
 		jsonError(w, http.StatusBadRequest, "Invalid post ID")
 		return
@@ -376,7 +381,7 @@ func (pc *postController) getPost(w http.ResponseWriter, r *http.Request) {
 func (pc *postController) deletePost(w http.ResponseWriter, r *http.Request) {
 	client := pc.client
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
 		jsonError(w, http.StatusUnauthorized, "Unauthorized")
@@ -385,7 +390,7 @@ func (pc *postController) deletePost(w http.ResponseWriter, r *http.Request) {
 	}
 	defer cancel()
 
-	postID, err := strconv.Atoi(r.PathValue("postId"))
+	postID, err := strconv.ParseInt(r.PathValue("postId"), 10, 32)
 	if err != nil {
 		jsonError(w, http.StatusBadRequest, "Invalid post ID")
 		return
@@ -421,7 +426,7 @@ func (pc *postController) deletePost(w http.ResponseWriter, r *http.Request) {
 func (pc *postController) likePost(w http.ResponseWriter, r *http.Request) {
 	client := pc.client
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
 		jsonError(w, http.StatusUnauthorized, "Unauthorized")
@@ -430,7 +435,7 @@ func (pc *postController) likePost(w http.ResponseWriter, r *http.Request) {
 	}
 	defer cancel()
 
-	postID, err := strconv.Atoi(r.PathValue("postId"))
+	postID, err := strconv.ParseInt(r.PathValue("postId"), 10, 32)
 	if err != nil {
 		jsonError(w, http.StatusBadRequest, "Invalid post ID")
 		return
@@ -450,7 +455,7 @@ func (pc *postController) likePost(w http.ResponseWriter, r *http.Request) {
 func (pc *postController) unlikePost(w http.ResponseWriter, r *http.Request) {
 	client := pc.client
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
 		jsonError(w, http.StatusUnauthorized, "Unauthorized")
@@ -459,7 +464,7 @@ func (pc *postController) unlikePost(w http.ResponseWriter, r *http.Request) {
 	}
 	defer cancel()
 
-	postID, err := strconv.Atoi(r.PathValue("postId"))
+	postID, err := strconv.ParseInt(r.PathValue("postId"), 10, 32)
 	if err != nil {
 		jsonError(w, http.StatusBadRequest, "Invalid post ID")
 		return
@@ -479,7 +484,7 @@ func (pc *postController) unlikePost(w http.ResponseWriter, r *http.Request) {
 func (pc *postController) repostPost(w http.ResponseWriter, r *http.Request) {
 	client := pc.client
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
 		jsonError(w, http.StatusUnauthorized, "Unauthorized")
@@ -488,7 +493,7 @@ func (pc *postController) repostPost(w http.ResponseWriter, r *http.Request) {
 	}
 	defer cancel()
 
-	postID, err := strconv.Atoi(r.PathValue("postId"))
+	postID, err := strconv.ParseInt(r.PathValue("postId"), 10, 32)
 	if err != nil {
 		jsonError(w, http.StatusBadRequest, "Invalid post ID")
 		return
@@ -508,7 +513,7 @@ func (pc *postController) repostPost(w http.ResponseWriter, r *http.Request) {
 func (pc *postController) removeRepost(w http.ResponseWriter, r *http.Request) {
 	client := pc.client
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
 		jsonError(w, http.StatusUnauthorized, "Unauthorized")
@@ -517,7 +522,7 @@ func (pc *postController) removeRepost(w http.ResponseWriter, r *http.Request) {
 	}
 	defer cancel()
 
-	postID, err := strconv.Atoi(r.PathValue("postId"))
+	postID, err := strconv.ParseInt(r.PathValue("postId"), 10, 32)
 	if err != nil {
 		jsonError(w, http.StatusBadRequest, "Invalid post ID")
 		return
@@ -537,7 +542,7 @@ func (pc *postController) removeRepost(w http.ResponseWriter, r *http.Request) {
 func (pc *postController) getReplies(w http.ResponseWriter, r *http.Request) {
 	client := pc.client
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
 		jsonError(w, http.StatusUnauthorized, "Unauthorized")
@@ -546,7 +551,7 @@ func (pc *postController) getReplies(w http.ResponseWriter, r *http.Request) {
 	}
 	defer cancel()
 
-	postID, err := strconv.Atoi(r.PathValue("postId"))
+	postID, err := strconv.ParseInt(r.PathValue("postId"), 10, 32)
 	if err != nil {
 		jsonError(w, http.StatusBadRequest, "Invalid post ID")
 		return
@@ -591,7 +596,7 @@ func (pc *postController) searchHashtags(w http.ResponseWriter, r *http.Request)
 		limit = 20
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	ctx = appendInternalAuth(appendRequestIDHeader(ctx, r))
 	defer cancel()
 
@@ -627,5 +632,7 @@ func (pc *postController) searchHashtags(w http.ResponseWriter, r *http.Request)
 	for _, h := range res.Hashtags {
 		tags = append(tags, mapHashtag(h))
 	}
+	slog.Info("hashtag search in fallback mode, cursor-based pagination unavailable", "request_id", getRequestID(r))
+	w.Header().Set("X-Pagination-Degraded", "true")
 	jsonResponse(w, http.StatusOK, map[string]any{"items": tags, "nextCursor": ""})
 }

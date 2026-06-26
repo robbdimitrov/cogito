@@ -24,29 +24,14 @@ type userController struct {
 	searchClient pb.SearchServiceClient
 }
 
-func newUserController(addr string, authAddr string, imageAddr string, searchClient pb.SearchServiceClient) *userController {
-	conn, err := newGatewayClient(addr, "user")
-	if err != nil {
-		slog.Error("unable to create user client", "error", err)
-		os.Exit(1)
-	}
+func newUserController(userClient pb.UserServiceClient, authAddr string, imgClient pb.ImageServiceClient, searchClient pb.SearchServiceClient) *userController {
 	authConn, err := newGatewayClient(authAddr, "auth")
 	if err != nil {
 		slog.Error("unable to create auth client", "error", err)
 		os.Exit(1)
 	}
-	var imgClient pb.ImageServiceClient
-	imageGRPCAddr := imageGRPCAddress(imageAddr)
-	if imageGRPCAddr != "" {
-		imgConn, err := newGatewayClient(imageGRPCAddr, "image-grpc")
-		if err != nil {
-			slog.Error("unable to create image client", "error", err)
-			os.Exit(1)
-		}
-		imgClient = pb.NewImageServiceClient(imgConn)
-	}
 	return &userController{
-		client:       pb.NewUserServiceClient(conn),
+		client:       userClient,
 		authClient:   pb.NewAuthServiceClient(authConn),
 		imgClient:    imgClient,
 		searchClient: searchClient,
@@ -56,7 +41,7 @@ func newUserController(addr string, authAddr string, imageAddr string, searchCli
 func (s *userController) createUser(w http.ResponseWriter, r *http.Request) {
 	client := s.client
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	ctx = appendInternalAuthForRequest(ctx, r)
 	defer cancel()
 
@@ -68,6 +53,11 @@ func (s *userController) createUser(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		jsonError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	if body.Email == "" || body.Password == "" {
+		jsonError(w, http.StatusBadRequest, "Email and password are required")
 		return
 	}
 
@@ -96,13 +86,13 @@ func (s *userController) createUser(w http.ResponseWriter, r *http.Request) {
 func (s *userController) getUser(w http.ResponseWriter, r *http.Request) {
 	client := s.client
 
-	userID, err := strconv.Atoi(r.PathValue("userId"))
+	userID, err := strconv.ParseInt(r.PathValue("userId"), 10, 32)
 	if err != nil {
 		jsonError(w, http.StatusBadRequest, "Invalid user ID")
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
 		jsonError(w, http.StatusUnauthorized, "Unauthorized")
@@ -130,7 +120,7 @@ func (s *userController) getUser(w http.ResponseWriter, r *http.Request) {
 func (s *userController) getUserByUsername(w http.ResponseWriter, r *http.Request) {
 	client := s.client
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
 		jsonError(w, http.StatusUnauthorized, "Unauthorized")
@@ -148,7 +138,12 @@ func (s *userController) getUserByUsername(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	jsonResponse(w, 200, mapUser(res))
+	currentUserID, _ := strconv.ParseInt(getUserID(r), 10, 32)
+	if res.Id == int32(currentUserID) {
+		jsonResponse(w, 200, mapCurrentUser(res))
+	} else {
+		jsonResponse(w, 200, mapUser(res))
+	}
 }
 
 func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
@@ -160,14 +155,11 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	ctx, errCtx := appendUserIDHeader(ctx, r)
+	baseCtx, errCtx := appendUserIDHeader(r.Context(), r)
 	if errCtx != nil {
 		jsonError(w, http.StatusUnauthorized, "Unauthorized")
-		cancel()
 		return
 	}
-	defer cancel()
 
 	var body struct {
 		Name            string  `json:"name"`
@@ -191,9 +183,9 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 
 	userIDInt, _ := strconv.Atoi(currentUserID)
 
-	// Fetch existing user to get old photos
-	oldUserReq := pb.UserRequest{UserId: int32(userIDInt)}
-	oldUserRes, err := client.GetUser(ctx, &oldUserReq)
+	getCtx, getCancel := context.WithTimeout(baseCtx, 5*time.Second)
+	oldUserRes, err := client.GetUser(getCtx, &pb.UserRequest{UserId: int32(userIDInt)})
+	getCancel()
 	if err != nil {
 		slog.Warn("getting old user failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
@@ -202,22 +194,26 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 
 	imgClient := s.imgClient
 	if (body.ProfilePhotoKey != nil || body.CoverPhotoKey != nil) && imgClient != nil {
-
 		if body.ProfilePhotoKey != nil && *body.ProfilePhotoKey != "" {
-			_, err = imgClient.VerifyUpload(ctx, &pb.VerifyUploadRequest{Filename: *body.ProfilePhotoKey, UserId: int32(userIDInt)})
+			verCtx, verCancel := context.WithTimeout(baseCtx, 5*time.Second)
+			_, err = imgClient.VerifyUpload(verCtx, &pb.VerifyUploadRequest{Filename: *body.ProfilePhotoKey, UserId: int32(userIDInt)})
+			verCancel()
 			if err != nil {
 				grpcError(w, err)
 				return
 			}
 		}
 		if body.CoverPhotoKey != nil && *body.CoverPhotoKey != "" {
-			_, err = imgClient.VerifyUpload(ctx, &pb.VerifyUploadRequest{Filename: *body.CoverPhotoKey, UserId: int32(userIDInt)})
+			verCtx, verCancel := context.WithTimeout(baseCtx, 5*time.Second)
+			_, err = imgClient.VerifyUpload(verCtx, &pb.VerifyUploadRequest{Filename: *body.CoverPhotoKey, UserId: int32(userIDInt)})
+			verCancel()
 			if err != nil {
 				grpcError(w, err)
 				return
 			}
 		}
 	}
+
 	req := pb.UpdateUserRequest{
 		Name:        body.Name,
 		Username:    body.Username,
@@ -233,7 +229,9 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 		req.CoverPhotoKey = body.CoverPhotoKey
 	}
 
-	_, err = client.UpdateUser(ctx, &req)
+	updCtx, updCancel := context.WithTimeout(baseCtx, 10*time.Second)
+	_, err = client.UpdateUser(updCtx, &req)
+	updCancel()
 	if err != nil {
 		slog.Warn("updating user failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
@@ -243,18 +241,26 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 	if imgClient != nil {
 		if body.ProfilePhotoKey != nil {
 			if *body.ProfilePhotoKey != "" {
-				_, _ = imgClient.ConsumeUpload(ctx, &pb.ConsumeUploadRequest{Filename: *body.ProfilePhotoKey})
+				cleanCtx, cleanCancel := context.WithTimeout(baseCtx, 5*time.Second)
+				_, _ = imgClient.ConsumeUpload(cleanCtx, &pb.ConsumeUploadRequest{Filename: *body.ProfilePhotoKey})
+				cleanCancel()
 			}
 			if oldUserRes.ProfilePhotoKey != "" && oldUserRes.ProfilePhotoKey != *body.ProfilePhotoKey {
-				_, _ = imgClient.DeleteImage(ctx, &pb.DeleteImageRequest{Filename: oldUserRes.ProfilePhotoKey})
+				cleanCtx, cleanCancel := context.WithTimeout(baseCtx, 5*time.Second)
+				_, _ = imgClient.DeleteImage(cleanCtx, &pb.DeleteImageRequest{Filename: oldUserRes.ProfilePhotoKey})
+				cleanCancel()
 			}
 		}
 		if body.CoverPhotoKey != nil {
 			if *body.CoverPhotoKey != "" {
-				_, _ = imgClient.ConsumeUpload(ctx, &pb.ConsumeUploadRequest{Filename: *body.CoverPhotoKey})
+				cleanCtx, cleanCancel := context.WithTimeout(baseCtx, 5*time.Second)
+				_, _ = imgClient.ConsumeUpload(cleanCtx, &pb.ConsumeUploadRequest{Filename: *body.CoverPhotoKey})
+				cleanCancel()
 			}
 			if oldUserRes.CoverPhotoKey != "" && oldUserRes.CoverPhotoKey != *body.CoverPhotoKey {
-				_, _ = imgClient.DeleteImage(ctx, &pb.DeleteImageRequest{Filename: oldUserRes.CoverPhotoKey})
+				cleanCtx, cleanCancel := context.WithTimeout(baseCtx, 5*time.Second)
+				_, _ = imgClient.DeleteImage(cleanCtx, &pb.DeleteImageRequest{Filename: oldUserRes.CoverPhotoKey})
+				cleanCancel()
 			}
 		}
 	}
@@ -262,7 +268,6 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 	if body.Password != "" {
 		authClient := s.authClient
 		if authClient != nil {
-
 			var currentSessionID string
 			if cookie, err := r.Cookie("session"); err == nil {
 				currentSessionID = cookie.Value
@@ -272,14 +277,16 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 			h.Write([]byte(currentSessionID))
 			currentHashedSessionID := base64.RawURLEncoding.EncodeToString(h.Sum(nil))
 
-			sessionsRes, err := authClient.GetSessions(ctx, &pb.UserRequest{UserId: int32(userIDInt)})
+			sessCtx, sessCancel := context.WithTimeout(baseCtx, 5*time.Second)
+			sessionsRes, err := authClient.GetSessions(sessCtx, &pb.UserRequest{UserId: int32(userIDInt)})
 			if err == nil {
 				for _, sess := range sessionsRes.Sessions {
 					if sess.Id != currentHashedSessionID {
-						_, _ = authClient.DeleteSession(ctx, &pb.SessionRequest{SessionId: sess.Id})
+						_, _ = authClient.DeleteSession(sessCtx, &pb.SessionRequest{SessionId: sess.Id})
 					}
 				}
 			}
+			sessCancel()
 		}
 	}
 
@@ -289,7 +296,7 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 func (s *userController) getFollowing(w http.ResponseWriter, r *http.Request) {
 	client := s.client
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
 		jsonError(w, http.StatusUnauthorized, "Unauthorized")
@@ -298,7 +305,7 @@ func (s *userController) getFollowing(w http.ResponseWriter, r *http.Request) {
 	}
 	defer cancel()
 
-	userID, err := strconv.Atoi(r.PathValue("userId"))
+	userID, err := strconv.ParseInt(r.PathValue("userId"), 10, 32)
 	if err != nil {
 		jsonError(w, http.StatusBadRequest, "Invalid user ID")
 		return
@@ -331,7 +338,7 @@ func (s *userController) getFollowing(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *userController) searchUsers(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
 		jsonError(w, http.StatusUnauthorized, "Unauthorized")
@@ -390,13 +397,15 @@ func (s *userController) searchUsers(w http.ResponseWriter, r *http.Request) {
 		users[i] = mapUser(v)
 	}
 
+	slog.Info("user search in fallback mode, cursor-based pagination unavailable", "request_id", getRequestID(r))
+	w.Header().Set("X-Pagination-Degraded", "true")
 	jsonResponse(w, http.StatusOK, map[string]any{"items": users, "nextCursor": ""})
 }
 
 func (s *userController) getFollowers(w http.ResponseWriter, r *http.Request) {
 	client := s.client
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
 		jsonError(w, http.StatusUnauthorized, "Unauthorized")
@@ -405,7 +414,7 @@ func (s *userController) getFollowers(w http.ResponseWriter, r *http.Request) {
 	}
 	defer cancel()
 
-	userID, err := strconv.Atoi(r.PathValue("userId"))
+	userID, err := strconv.ParseInt(r.PathValue("userId"), 10, 32)
 	if err != nil {
 		jsonError(w, http.StatusBadRequest, "Invalid user ID")
 		return
@@ -440,7 +449,7 @@ func (s *userController) getFollowers(w http.ResponseWriter, r *http.Request) {
 func (s *userController) followUser(w http.ResponseWriter, r *http.Request) {
 	client := s.client
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
 		jsonError(w, http.StatusUnauthorized, "Unauthorized")
@@ -449,7 +458,7 @@ func (s *userController) followUser(w http.ResponseWriter, r *http.Request) {
 	}
 	defer cancel()
 
-	userID, err := strconv.Atoi(r.PathValue("userId"))
+	userID, err := strconv.ParseInt(r.PathValue("userId"), 10, 32)
 	if err != nil {
 		jsonError(w, http.StatusBadRequest, "Invalid user ID")
 		return
@@ -469,7 +478,7 @@ func (s *userController) followUser(w http.ResponseWriter, r *http.Request) {
 func (s *userController) unfollowUser(w http.ResponseWriter, r *http.Request) {
 	client := s.client
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	ctx, errCtx := appendUserIDHeader(ctx, r)
 	if errCtx != nil {
 		jsonError(w, http.StatusUnauthorized, "Unauthorized")
@@ -478,7 +487,7 @@ func (s *userController) unfollowUser(w http.ResponseWriter, r *http.Request) {
 	}
 	defer cancel()
 
-	userID, err := strconv.Atoi(r.PathValue("userId"))
+	userID, err := strconv.ParseInt(r.PathValue("userId"), 10, 32)
 	if err != nil {
 		jsonError(w, http.StatusBadRequest, "Invalid user ID")
 		return

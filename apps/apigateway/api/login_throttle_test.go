@@ -26,9 +26,9 @@ func (f *fakeThrottle) GetFailures(_ context.Context, _ []string) ([]LoginFailur
 	return f.failures, f.err
 }
 
-func (f *fakeThrottle) RecordFailure(_ context.Context, key string) error {
+func (f *fakeThrottle) RecordFailure(_ context.Context, key string) (int, error) {
 	f.recordedKeys = append(f.recordedKeys, key)
-	return nil
+	return 0, nil
 }
 
 func (f *fakeThrottle) Clear(_ context.Context, keys []string) error {

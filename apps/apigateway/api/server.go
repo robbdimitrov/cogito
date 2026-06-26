@@ -39,13 +39,26 @@ func requestIDMiddleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			requestID := r.Header.Get("X-Request-ID")
-			if requestID == "" {
+			if !isValidRequestID(requestID) {
 				requestID = newRequestID()
 			}
 			w.Header().Set("X-Request-ID", requestID)
 			next.ServeHTTP(w, setRequestID(r, requestID))
 		})
 	}
+}
+
+func isValidRequestID(id string) bool {
+	if id == "" || len(id) > 64 {
+		return false
+	}
+	for i := 0; i < len(id); i++ {
+		b := id[i]
+		if b < 0x20 || b > 0x7e {
+			return false
+		}
+	}
+	return true
 }
 
 func loggerMiddleware() func(http.Handler) http.Handler {
@@ -72,6 +85,7 @@ func loggerMiddleware() func(http.Handler) http.Handler {
 func secureHeadersMiddleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
 			w.Header().Set("X-Content-Type-Options", "nosniff")
 			w.Header().Set("X-Frame-Options", "SAMEORIGIN")
 			w.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")

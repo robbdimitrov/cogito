@@ -33,7 +33,15 @@ func getStatusCode(s *status.Status) int {
 // grpcError writes grpc error to http response
 func grpcError(w http.ResponseWriter, err error) {
 	s := status.Convert(err)
-	jsonError(w, getStatusCode(s), s.Proto().GetMessage())
+	httpStatus := getStatusCode(s)
+	var msg string
+	switch s.Code() {
+	case codes.InvalidArgument, codes.NotFound, codes.AlreadyExists:
+		msg = s.Message()
+	default:
+		msg = http.StatusText(httpStatus)
+	}
+	jsonError(w, httpStatus, msg)
 }
 
 func grpcCode(err error) string {

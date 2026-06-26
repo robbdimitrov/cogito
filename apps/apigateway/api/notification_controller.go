@@ -53,7 +53,7 @@ func (nc *notificationController) getNotifications(w http.ResponseWriter, r *htt
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	ctx, err = appendUserIDHeader(ctx, r)
 	if err != nil {
 		jsonError(w, http.StatusUnauthorized, "Unauthorized")
@@ -77,7 +77,7 @@ func (nc *notificationController) getNotifications(w http.ResponseWriter, r *htt
 	for _, item := range res.Notifications {
 		items = append(items, mapNotification(item))
 	}
-	jsonResponse(w, http.StatusOK, map[string]any{"notifications": items, "nextCursor": res.NextCursor})
+	jsonResponse(w, http.StatusOK, map[string]any{"items": items, "nextCursor": res.NextCursor})
 }
 
 func (nc *notificationController) markNotificationRead(w http.ResponseWriter, r *http.Request) {
@@ -95,7 +95,7 @@ func (nc *notificationController) markNotificationRead(w http.ResponseWriter, r 
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	ctx, err = appendUserIDHeader(ctx, r)
 	if err != nil {
 		jsonError(w, http.StatusUnauthorized, "Unauthorized")
@@ -126,7 +126,7 @@ func (nc *notificationController) getUnreadCount(w http.ResponseWriter, r *http.
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	ctx, err := appendUserIDHeader(ctx, r)
 	if err != nil {
 		jsonError(w, http.StatusUnauthorized, "Unauthorized")

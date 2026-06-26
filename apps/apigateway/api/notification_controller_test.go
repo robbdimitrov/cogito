@@ -87,13 +87,13 @@ func TestNotificationControllerGetNotifications(t *testing.T) {
 	assertNotificationMetadata(t, client.outgoingMD)
 
 	var body struct {
-		Notifications []notification `json:"notifications"`
-		NextCursor    string         `json:"nextCursor"`
+		Items      []notification `json:"items"`
+		NextCursor string         `json:"nextCursor"`
 	}
 	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
 		t.Fatalf("invalid json: %v", err)
 	}
-	if body.NextCursor != "next" || len(body.Notifications) != 1 || body.Notifications[0].ExternalID != 42 {
+	if body.NextCursor != "next" || len(body.Items) != 1 || body.Items[0].ExternalID != 42 {
 		t.Fatalf("unexpected body: %+v", body)
 	}
 }

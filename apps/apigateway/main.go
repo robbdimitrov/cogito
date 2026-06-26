@@ -35,8 +35,12 @@ func main() {
 	api.ValidateSecrets()
 	handler := api.CreateServer(ctx, authAddr, postAddr, userAddr, imageAddr, searchAddr, eventsAddr)
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%s", port),
-		Handler: handler,
+		Addr:              fmt.Sprintf(":%s", port),
+		Handler:           handler,
+		ReadHeaderTimeout: 10 * time.Second,
+		ReadTimeout:       30 * time.Second,
+		WriteTimeout:      60 * time.Second,
+		IdleTimeout:       120 * time.Second,
 	}
 
 	go func() {

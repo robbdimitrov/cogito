@@ -45,19 +45,44 @@ func newRouter(authAddr, postAddr, userAddr, imageAddr, searchAddr, eventsAddr s
 		}
 		searchClient = pb.NewSearchServiceClient(searchConn)
 	}
-	imageBreaker := newCircuitBreaker("image-http")
+
+	// Shared circuit breaker for user service — postController and userController
+	// must see the same failure count so the circuit opens on the correct threshold.
+	userBreaker := newCircuitBreaker("user")
+	userConn, err := newGatewayClientWithBreaker(userAddr, "user", userBreaker)
+	if err != nil {
+		slog.Error("unable to create user client", "error", err)
+		os.Exit(1)
+	}
+	sharedUserClient := pb.NewUserServiceClient(userConn)
+
+	// Shared image gRPC client for the same reason.
+	var sharedImgClient pb.ImageServiceClient
+	imageGRPCAddr := imageGRPCAddress(imageAddr)
+	if imageGRPCAddr != "" {
+		imgBreaker := newCircuitBreaker("image-grpc")
+		imgConn, err := newGatewayClientWithBreaker(imageGRPCAddr, "image-grpc", imgBreaker)
+		if err != nil {
+			slog.Error("unable to create image grpc client", "error", err)
+			os.Exit(1)
+		}
+		sharedImgClient = pb.NewImageServiceClient(imgConn)
+	}
+
+	imageHTTPBreaker := newCircuitBreaker("image-http")
+	post := newPostController(postAddr, sharedUserClient, sharedImgClient, searchClient)
 	return &router{
 		auth:             newAuthController(authAddr),
-		post:             newPostController(postAddr, userAddr, imageAddr, searchClient),
-		user:             newUserController(userAddr, authAddr, imageAddr, searchClient),
-		search:           newSearchController(searchClient),
+		post:             post,
+		user:             newUserController(sharedUserClient, authAddr, sharedImgClient, searchClient),
+		search:           newSearchController(searchClient, post),
 		notification:     newNotificationController(eventsAddr),
 		imageAddr:        imageAddr,
-		imageHTTPBreaker: imageBreaker,
+		imageHTTPBreaker: imageHTTPBreaker,
 		imageHTTP: &http.Client{
 			Transport: &retryHTTPTransport{
 				base:    http.DefaultTransport,
-				breaker: imageBreaker,
+				breaker: imageHTTPBreaker,
 				retries: envInt("HTTP_RETRY_MAX_ATTEMPTS", 3),
 				backoff: time.Duration(envInt("HTTP_RETRY_BACKOFF_MS", 100)) * time.Millisecond,
 			},
@@ -156,7 +181,6 @@ func (r *router) proxyImageRequest(path string, configure func(*http.Request)) h
 		proxy := &httputil.ReverseProxy{
 			Rewrite: func(proxyReq *httputil.ProxyRequest) {
 				proxyReq.SetURL(targetURL)
-				proxyReq.Out.Host = proxyReq.In.Host
 				proxyReq.Out.URL.Path = path
 				proxyReq.Out.URL.RawPath = ""
 				proxyReq.SetXForwarded()
