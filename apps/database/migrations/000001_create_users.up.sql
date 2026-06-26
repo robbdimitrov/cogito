@@ -11,11 +11,9 @@ CREATE TABLE users (
   created timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE INDEX users_fan_out_disabled_idx ON users (id) WHERE fan_out_disabled = true;
-
 CREATE TABLE followers (
-  user_id integer REFERENCES users ON DELETE CASCADE,
-  follower_id integer REFERENCES users ON DELETE CASCADE,
+  user_id integer NOT NULL REFERENCES users ON DELETE CASCADE,
+  follower_id integer NOT NULL REFERENCES users ON DELETE CASCADE,
   created timestamptz NOT NULL DEFAULT now(),
   CHECK (user_id <> follower_id),
   UNIQUE(user_id, follower_id)

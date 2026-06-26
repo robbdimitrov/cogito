@@ -2208,7 +2208,7 @@ const file_pkg_pb_cogito_proto_rawDesc = "" +
 	"\x0f_in_reply_to_idB\x0e\n" +
 	"\f_quote_of_id\"&\n" +
 	"\vPostRequest\x12\x17\n" +
-	"\apost_id\x18\x01 \x01(\x05R\x06postId\"\xd1\x03\n" +
+	"\apost_id\x18\x01 \x01(\x05R\x06postId\"\xd7\x03\n" +
 	"\x04Post\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x05R\x06userId\x12\x18\n" +
@@ -2227,7 +2227,8 @@ const file_pkg_pb_cogito_proto_rawDesc = "" +
 	"\n" +
 	"quote_post\x18\x0f \x01(\v2\f.cogito.PostR\tquotePost\x12)\n" +
 	"\trepost_of\x18\x10 \x01(\v2\f.cogito.PostR\brepostOfB\x0f\n" +
-	"\r_repost_of_id\">\n" +
+	"\r_repost_of_idJ\x04\b\n" +
+	"\x10\v\">\n" +
 	"\x0eGetFeedRequest\x12\x16\n" +
 	"\x06cursor\x18\x01 \x01(\tR\x06cursor\x12\x14\n" +
 	"\x05limit\x18\x02 \x01(\x05R\x05limit\"L\n" +

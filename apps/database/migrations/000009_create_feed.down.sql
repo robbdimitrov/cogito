@@ -1,1 +1,1 @@
-DROP TABLE feed;
+DROP TABLE IF EXISTS feed;

@@ -137,6 +137,7 @@ message Post {
   bool reposted = 7;
   string created = 8;
   optional int32 repost_of_id = 9;
+  reserved 10;
   string media_key = 11;
   int32 replies = 12;
   int32 in_reply_to_id = 13;
