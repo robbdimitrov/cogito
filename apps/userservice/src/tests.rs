@@ -291,6 +291,64 @@ async fn test_update_user() {
 }
 
 #[tokio::test]
+async fn test_update_user_bio_only_does_not_require_username() {
+    // A request that updates only the bio field (username and email absent/empty)
+    // must not be rejected with a username-validation error.
+    let db = Arc::new(MockDb::new());
+    let controller = Controller::new(db.clone());
+
+    let _ = db
+        .create_user("Test", "testuser", "test@example.com", "hash")
+        .await;
+
+    let req = create_request(
+        UpdateUserRequest {
+            name: String::new(),
+            username: String::new(),
+            email: String::new(),
+            bio: "Updated bio".into(),
+            password: String::new(),
+            old_password: String::new(),
+            profile_photo_key: None,
+            cover_photo_key: None,
+        },
+        1,
+    );
+
+    let res = controller.update_user(req).await;
+    assert!(res.is_ok(), "bio-only update should succeed, got: {:?}", res.err());
+}
+
+#[tokio::test]
+async fn test_update_user_photo_only_does_not_require_username() {
+    // A request that updates only the profile photo (all text fields absent)
+    // must not be rejected with a username-validation error.
+    let db = Arc::new(MockDb::new());
+    let controller = Controller::new(db.clone());
+
+    let _ = db
+        .create_user("Test", "testuser", "test@example.com", "hash")
+        .await;
+
+    let req = create_request(
+        UpdateUserRequest {
+            name: String::new(),
+            username: String::new(),
+            email: String::new(),
+            bio: String::new(),
+            password: String::new(),
+            old_password: String::new(),
+            profile_photo_key: Some("photo.jpg".into()),
+            cover_photo_key: None,
+        },
+        1,
+    );
+
+    let res = controller.update_user(req).await;
+    assert!(res.is_ok(), "photo-only update should succeed, got: {:?}", res.err());
+}
+
+#[tokio::test]
 async fn test_update_user_rejects_invalid_username() {
     let db = Arc::new(MockDb::new());
     let controller = Controller::new(db.clone());

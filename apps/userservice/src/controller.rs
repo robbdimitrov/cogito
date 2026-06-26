@@ -239,11 +239,11 @@ impl<D: UserDb> UserService for Controller<D> {
             return Err(Status::invalid_argument("Bio cannot be empty."));
         } else if !bio.is_empty() && bio.len() > 500 {
             return Err(Status::invalid_argument("Bio cannot exceed 500 characters."));
-        } else if !is_valid_username(&username) {
+        } else if !username.is_empty() && !is_valid_username(&username) {
             return Err(Status::invalid_argument(
                 "Username may contain only letters, numbers, and underscores.",
             ));
-        } else if !is_valid_email(&email) {
+        } else if !email.is_empty() && !is_valid_email(&email) {
             return Err(Status::invalid_argument("Invalid email address."));
         }
 

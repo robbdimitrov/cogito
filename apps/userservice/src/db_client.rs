@@ -203,8 +203,17 @@ impl UserDb for DbClient {
     ) -> Result<(), SqlxError> {
         let mut tx = self.pool.begin().await?;
 
+        // Use COALESCE(NULLIF($n, ''), col) so that an empty string (field absent
+        // from the request) keeps the existing column value rather than clearing it.
         sqlx::query(
-            "UPDATE users SET name = $1, username = $2, email = $3, bio = $4, profile_photo_key = COALESCE($5, profile_photo_key), cover_photo_key = COALESCE($6, cover_photo_key) WHERE id = $7",
+            "UPDATE users SET \
+             name = COALESCE(NULLIF($1, ''), name), \
+             username = COALESCE(NULLIF($2, ''), username), \
+             email = COALESCE(NULLIF($3, ''), email), \
+             bio = COALESCE(NULLIF($4, ''), bio), \
+             profile_photo_key = COALESCE($5, profile_photo_key), \
+             cover_photo_key = COALESCE($6, cover_photo_key) \
+             WHERE id = $7",
         )
         .bind(fields.name)
         .bind(fields.username)
@@ -216,20 +225,33 @@ impl UserDb for DbClient {
         .execute(&mut *tx)
         .await?;
 
-        sqlx::query("INSERT INTO outbox (topic, payload) VALUES ($1, $2::jsonb)")
-            .bind("entity-changes")
-            .bind(
-                serde_json::json!({
-                    "table": "users",
-                    "op": "upsert",
-                    "id": user_id,
-                    "username": fields.username,
-                    "name": fields.name,
-                })
-                .to_string(),
-            )
-            .execute(&mut *tx)
-            .await?;
+        // Only publish to the search outbox when a searchable field (name or username)
+        // is actually changing. Because the UPDATE above may preserve existing values via
+        // COALESCE, we re-read both columns within the same transaction to get the
+        // effective post-update values — the outbox must carry complete, correct data so
+        // the search-index pipeline does not overwrite a preserved field with an empty string.
+        if !fields.name.is_empty() || !fields.username.is_empty() {
+            let (effective_username, effective_name): (String, String) =
+                sqlx::query_as("SELECT username, name FROM users WHERE id = $1")
+                    .bind(user_id)
+                    .fetch_one(&mut *tx)
+                    .await?;
+
+            sqlx::query("INSERT INTO outbox (topic, payload) VALUES ($1, $2::jsonb)")
+                .bind("entity-changes")
+                .bind(
+                    serde_json::json!({
+                        "table": "users",
+                        "op": "upsert",
+                        "id": user_id,
+                        "username": effective_username,
+                        "name": effective_name,
+                    })
+                    .to_string(),
+                )
+                .execute(&mut *tx)
+                .await?;
+        }
 
         tx.commit().await?;
         Ok(())
