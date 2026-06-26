@@ -16,7 +16,7 @@ pub fn decode_cursor(s: &str) -> Option<Cursor> {
 }
 
 pub fn encode_cursor(created: DateTime<Utc>, id: i32) -> String {
-    let bytes = serde_json::to_vec(&Cursor { created, id }).unwrap_or_default();
+    let bytes = serde_json::to_vec(&Cursor { created, id }).expect("cursor serialization failed");
     URL_SAFE_NO_PAD.encode(bytes)
 }
 

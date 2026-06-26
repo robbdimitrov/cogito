@@ -28,6 +28,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let addr = format!("0.0.0.0:{}", port).parse()?;
     tracing::info!(port = %port, "server starting");
 
+    internal_auth::init();
+
     let db_client = db_client::DbClient::new(&db_url).await?;
     let pool = db_client.pool.clone();
     let controller = Controller::new(db_client);

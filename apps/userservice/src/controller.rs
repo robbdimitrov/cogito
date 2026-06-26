@@ -96,7 +96,7 @@ impl<D: UserDb> UserService for Controller<D> {
         let name = req.name.trim();
         let username = req.username.trim().to_lowercase();
         let email = req.email.trim().to_lowercase();
-        let password = req.password.trim();
+        let password = req.password.as_str();
 
         if name.is_empty() || username.is_empty() || email.is_empty() || password.is_empty() {
             return Err(Status::invalid_argument(
@@ -185,7 +185,7 @@ impl<D: UserDb> UserService for Controller<D> {
                 ));
             }
 
-            let password = req.password.trim();
+            let password = req.password.as_str();
             if password.len() < 8 || password.len() > 1024 {
                 return Err(Status::invalid_argument(
                     "New password must be at least 8 characters long.",
@@ -204,8 +204,6 @@ impl<D: UserDb> UserService for Controller<D> {
                     tracing::warn!(request_id = %request_id, method = "/cogito.UserService/UpdateUser", error = %e, "updating user failed");
                     Status::internal("Internal server error.")
                 })?;
-
-            return Ok(Response::new(Empty {}));
         }
 
         let name = req.name.trim();
@@ -223,7 +221,25 @@ impl<D: UserDb> UserService for Controller<D> {
             .map(str::trim)
             .filter(|s| !s.is_empty());
 
-        if !is_valid_username(&username) {
+        if username.is_empty()
+            && email.is_empty()
+            && name.is_empty()
+            && bio.is_empty()
+            && profile_photo_key.is_none()
+            && cover_photo_key.is_none()
+        {
+            return Ok(Response::new(Empty {}));
+        }
+
+        if !req.name.is_empty() && name.is_empty() {
+            return Err(Status::invalid_argument("Name cannot be empty."));
+        } else if !name.is_empty() && name.len() > 255 {
+            return Err(Status::invalid_argument("Name cannot exceed 255 characters."));
+        } else if !req.bio.is_empty() && bio.is_empty() {
+            return Err(Status::invalid_argument("Bio cannot be empty."));
+        } else if !bio.is_empty() && bio.len() > 500 {
+            return Err(Status::invalid_argument("Bio cannot exceed 500 characters."));
+        } else if !is_valid_username(&username) {
             return Err(Status::invalid_argument(
                 "Username may contain only letters, numbers, and underscores.",
             ));
@@ -288,7 +304,15 @@ impl<D: UserDb> UserService for Controller<D> {
             }));
         }
 
-        match self.db_client.get_users_by_ids(&req.ids).await {
+        if req.ids.len() > 200 {
+            return Err(Status::invalid_argument("Too many IDs."));
+        }
+
+        let mut ids = req.ids;
+        ids.sort_unstable();
+        ids.dedup();
+
+        match self.db_client.get_users_by_ids(&ids).await {
             Ok(users) => Ok(Response::new(Users {
                 users,
                 next_cursor: String::new(),
@@ -307,20 +331,21 @@ impl<D: UserDb> UserService for Controller<D> {
         let request_id = crate::logging::request_id(&request).to_string();
         let user_id = get_user_id(&request)?;
         let req = request.into_inner();
+        let limit = req.limit.max(1).min(100);
 
         match self
             .db_client
-            .get_following(req.user_id, &req.cursor, req.limit, user_id)
+            .get_following(req.user_id, &req.cursor, limit, user_id)
             .await
         {
             Ok(mut rows) => {
-                let next_cursor = if rows.len() > req.limit as usize {
-                    let last = &rows[req.limit as usize - 1];
+                let next_cursor = if rows.len() > limit as usize {
+                    let last = &rows[limit as usize - 1];
                     pagination::encode_cursor(last.1, last.0.id)
                 } else {
                     String::new()
                 };
-                rows.truncate(req.limit as usize);
+                rows.truncate(limit as usize);
                 let users: Vec<User> = rows.into_iter().map(|(u, _)| u).collect();
                 Ok(Response::new(Users { users, next_cursor }))
             }
@@ -338,20 +363,21 @@ impl<D: UserDb> UserService for Controller<D> {
         let request_id = crate::logging::request_id(&request).to_string();
         let user_id = get_user_id(&request)?;
         let req = request.into_inner();
+        let limit = req.limit.max(1).min(100);
 
         match self
             .db_client
-            .get_followers(req.user_id, &req.cursor, req.limit, user_id)
+            .get_followers(req.user_id, &req.cursor, limit, user_id)
             .await
         {
             Ok(mut rows) => {
-                let next_cursor = if rows.len() > req.limit as usize {
-                    let last = &rows[req.limit as usize - 1];
+                let next_cursor = if rows.len() > limit as usize {
+                    let last = &rows[limit as usize - 1];
                     pagination::encode_cursor(last.1, last.0.id)
                 } else {
                     String::new()
                 };
-                rows.truncate(req.limit as usize);
+                rows.truncate(limit as usize);
                 let users: Vec<User> = rows.into_iter().map(|(u, _)| u).collect();
                 Ok(Response::new(Users { users, next_cursor }))
             }
@@ -408,10 +434,11 @@ impl<D: UserDb> UserService for Controller<D> {
         let request_id = crate::logging::request_id(&request).to_string();
         let user_id = get_user_id(&request)?;
         let req = request.into_inner();
+        let limit = req.limit.max(1).min(100);
 
         match self
             .db_client
-            .search_users(&req.query, req.limit, user_id)
+            .search_users(&req.query, limit, user_id)
             .await
         {
             Ok(users) => Ok(Response::new(Users {

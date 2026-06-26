@@ -256,7 +256,7 @@ impl UserDb for DbClient {
         let cur_id: Option<i32> = cur.as_ref().map(|c| c.id);
         let rows = sqlx::query(
             r#"SELECT followers.created AS cursor_ts,
-                users.id, users.name, users.username, users.email, users.bio, users.profile_photo_key, users.cover_photo_key,
+                users.id, users.name, users.username, users.bio, users.profile_photo_key, users.cover_photo_key,
                 (SELECT count(*)::int FROM posts WHERE user_id = users.id) AS posts,
                 (SELECT count(*)::int FROM likes WHERE user_id = users.id) AS likes,
                 (SELECT count(*)::int FROM followers WHERE follower_id = users.id) AS following,
@@ -288,7 +288,7 @@ impl UserDb for DbClient {
                     id: r.get("id"),
                     name: r.get("name"),
                     username: r.get("username"),
-                    email: r.get("email"),
+                    email: String::new(),
                     bio: r.get::<'_, Option<String>, _>("bio").unwrap_or_default(),
                     posts: r.get::<'_, Option<i32>, _>("posts").unwrap_or(0),
                     likes: r.get::<'_, Option<i32>, _>("likes").unwrap_or(0),
@@ -296,7 +296,8 @@ impl UserDb for DbClient {
                     followers: r.get::<'_, Option<i32>, _>("followers").unwrap_or(0),
                     followed: r.get::<'_, Option<bool>, _>("followed").unwrap_or(false),
                     created: r
-                        .get::<'_, Option<String>, _>("created")
+                        .get::<'_, Option<DateTime<Utc>>, _>("created")
+                        .map(|dt| dt.format("%Y-%m-%dT%H:%M:%SZ").to_string())
                         .unwrap_or_default(),
                     profile_photo_key: r
                         .get::<'_, Option<String>, _>("profile_photo_key")
@@ -322,7 +323,7 @@ impl UserDb for DbClient {
         let cur_id: Option<i32> = cur.as_ref().map(|c| c.id);
         let rows = sqlx::query(
             r#"SELECT followers.created AS cursor_ts,
-                users.id, users.name, users.username, users.email, users.bio, users.profile_photo_key, users.cover_photo_key,
+                users.id, users.name, users.username, users.bio, users.profile_photo_key, users.cover_photo_key,
                 (SELECT count(*)::int FROM posts WHERE user_id = users.id) AS posts,
                 (SELECT count(*)::int FROM likes WHERE user_id = users.id) AS likes,
                 (SELECT count(*)::int FROM followers WHERE follower_id = users.id) AS following,
@@ -354,7 +355,7 @@ impl UserDb for DbClient {
                     id: r.get("id"),
                     name: r.get("name"),
                     username: r.get("username"),
-                    email: r.get("email"),
+                    email: String::new(),
                     bio: r.get::<'_, Option<String>, _>("bio").unwrap_or_default(),
                     posts: r.get::<'_, Option<i32>, _>("posts").unwrap_or(0),
                     likes: r.get::<'_, Option<i32>, _>("likes").unwrap_or(0),
@@ -362,7 +363,8 @@ impl UserDb for DbClient {
                     followers: r.get::<'_, Option<i32>, _>("followers").unwrap_or(0),
                     followed: r.get::<'_, Option<bool>, _>("followed").unwrap_or(false),
                     created: r
-                        .get::<'_, Option<String>, _>("created")
+                        .get::<'_, Option<DateTime<Utc>>, _>("created")
+                        .map(|dt| dt.format("%Y-%m-%dT%H:%M:%SZ").to_string())
                         .unwrap_or_default(),
                     profile_photo_key: r
                         .get::<'_, Option<String>, _>("profile_photo_key")
@@ -409,24 +411,26 @@ impl UserDb for DbClient {
     async fn unfollow_user(&self, user_id: i32, follower_id: i32) -> Result<(), SqlxError> {
         let mut tx = self.pool.begin().await?;
 
-        sqlx::query("DELETE FROM followers WHERE user_id = $1 AND follower_id = $2")
+        let result = sqlx::query("DELETE FROM followers WHERE user_id = $1 AND follower_id = $2")
             .bind(user_id)
             .bind(follower_id)
             .execute(&mut *tx)
             .await?;
 
-        sqlx::query("INSERT INTO outbox (topic, payload) VALUES ($1, $2::jsonb)")
-            .bind("activity")
-            .bind(
-                serde_json::json!({
-                    "op": "unfollow",
-                    "actor_id": follower_id,
-                    "recipient_id": user_id,
-                })
-                .to_string(),
-            )
-            .execute(&mut *tx)
-            .await?;
+        if result.rows_affected() > 0 {
+            sqlx::query("INSERT INTO outbox (topic, payload) VALUES ($1, $2::jsonb)")
+                .bind("activity")
+                .bind(
+                    serde_json::json!({
+                        "op": "unfollow",
+                        "actor_id": follower_id,
+                        "recipient_id": user_id,
+                    })
+                    .to_string(),
+                )
+                .execute(&mut *tx)
+                .await?;
+        }
 
         tx.commit().await?;
         Ok(())
@@ -446,7 +450,7 @@ impl UserDb for DbClient {
             .replace('_', "\\_");
         let pattern = format!("{}%", escaped);
         let rows = sqlx::query(
-            r#"SELECT id, name, username, email, bio, profile_photo_key, cover_photo_key,
+            r#"SELECT id, name, username, bio, profile_photo_key, cover_photo_key,
                 0::int AS posts,
                 0::int AS likes,
                 0::int AS following,
@@ -467,7 +471,7 @@ impl UserDb for DbClient {
                 id: r.get("id"),
                 name: r.get("name"),
                 username: r.get("username"),
-                email: r.get("email"),
+                email: String::new(),
                 bio: r.get::<'_, Option<String>, _>("bio").unwrap_or_default(),
                 posts: r.get::<'_, Option<i32>, _>("posts").unwrap_or(0),
                 likes: r.get::<'_, Option<i32>, _>("likes").unwrap_or(0),
@@ -475,7 +479,8 @@ impl UserDb for DbClient {
                 followers: r.get::<'_, Option<i32>, _>("followers").unwrap_or(0),
                 followed: r.get::<'_, Option<bool>, _>("followed").unwrap_or(false),
                 created: r
-                    .get::<'_, Option<String>, _>("created")
+                    .get::<'_, Option<DateTime<Utc>>, _>("created")
+                    .map(|dt| dt.format("%Y-%m-%dT%H:%M:%SZ").to_string())
                     .unwrap_or_default(),
                 profile_photo_key: r
                     .get::<'_, Option<String>, _>("profile_photo_key")
