@@ -237,8 +237,8 @@ impl<D: UserDb> UserService for Controller<D> {
             return Err(Status::invalid_argument("Name cannot exceed 255 characters."));
         } else if !req.bio.is_empty() && bio.is_empty() {
             return Err(Status::invalid_argument("Bio cannot be empty."));
-        } else if !bio.is_empty() && bio.len() > 500 {
-            return Err(Status::invalid_argument("Bio cannot exceed 500 characters."));
+        } else if !bio.is_empty() && bio.len() > 255 {
+            return Err(Status::invalid_argument("Bio cannot exceed 255 characters."));
         } else if !username.is_empty() && !is_valid_username(&username) {
             return Err(Status::invalid_argument(
                 "Username may contain only letters, numbers, and underscores.",

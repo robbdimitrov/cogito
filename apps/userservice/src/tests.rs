@@ -92,10 +92,20 @@ impl UserDb for Arc<MockDb> {
     ) -> Result<(), SqlxError> {
         let mut users = self.users.lock().await;
         if let Some(u) = users.iter_mut().find(|u| u.id == user_id) {
-            u.name = fields.name.to_string();
-            u.username = fields.username.to_string();
-            u.email = fields.email.to_string();
-            u.bio = fields.bio.to_string();
+            // Mirror the COALESCE(NULLIF($n, ''), col) SQL: keep the existing
+            // value when the incoming field is empty (proto3 default / omitted).
+            if !fields.name.is_empty() {
+                u.name = fields.name.to_string();
+            }
+            if !fields.username.is_empty() {
+                u.username = fields.username.to_string();
+            }
+            if !fields.email.is_empty() {
+                u.email = fields.email.to_string();
+            }
+            if !fields.bio.is_empty() {
+                u.bio = fields.bio.to_string();
+            }
             if let Some(key) = fields.profile_photo_key {
                 u.profile_photo_key = key.to_string();
             }
@@ -346,6 +356,39 @@ async fn test_update_user_photo_only_does_not_require_username() {
 
     let res = controller.update_user(req).await;
     assert!(res.is_ok(), "photo-only update should succeed, got: {:?}", res.err());
+}
+
+#[tokio::test]
+async fn test_update_user_partial_preserves_existing_fields() {
+    // A bio-only update must not overwrite name/username/email with empty strings.
+    let db = Arc::new(MockDb::new());
+    let controller = Controller::new(db.clone());
+
+    let _ = db
+        .create_user("Test", "testuser", "test@example.com", "hash")
+        .await;
+
+    let req = create_request(
+        UpdateUserRequest {
+            name: String::new(),
+            username: String::new(),
+            email: String::new(),
+            bio: "Updated bio".into(),
+            password: String::new(),
+            old_password: String::new(),
+            profile_photo_key: None,
+            cover_photo_key: None,
+        },
+        1,
+    );
+
+    controller.update_user(req).await.unwrap();
+
+    let user = db.get_user(1, 1).await.unwrap().unwrap();
+    assert_eq!(user.name, "Test", "name must be preserved on bio-only update");
+    assert_eq!(user.username, "testuser", "username must be preserved on bio-only update");
+    assert_eq!(user.email, "test@example.com", "email must be preserved on bio-only update");
+    assert_eq!(user.bio, "Updated bio", "bio must be updated");
 }
 
 #[tokio::test]

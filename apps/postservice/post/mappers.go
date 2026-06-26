@@ -184,21 +184,6 @@ func mapPosts(r rows) iter.Seq2[*pb.Post, error] {
 	}
 }
 
-func mapFeedPosts(r rows) iter.Seq2[*pb.Post, error] {
-	return func(yield func(*pb.Post, error) bool) {
-		defer r.Close()
-		for r.Next() {
-			post, _, err := mapFeedPost(r)
-			if !yield(post, err) {
-				return
-			}
-		}
-		if err := r.Err(); err != nil {
-			yield(nil, err)
-		}
-	}
-}
-
 func mapPostCursorRows(r rows) iter.Seq2[postCursorRow, error] {
 	return func(yield func(postCursorRow, error) bool) {
 		defer r.Close()
