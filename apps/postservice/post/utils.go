@@ -67,10 +67,24 @@ func validateInternalAuth(ctx context.Context) error {
 		return newError(codes.Unauthenticated)
 	}
 	values := md.Get("internal-token")
-	if len(values) == 0 || subtle.ConstantTimeCompare([]byte(values[0]), []byte(internalGRPCToken())) != 1 {
+	if len(values) == 0 || !constantTimeEqualStr(values[0], internalGRPCToken()) {
 		return newError(codes.Unauthenticated)
 	}
 	return nil
+}
+
+func constantTimeEqualStr(a, b string) bool {
+	lenEq := subtle.ConstantTimeEq(int32(len(a)), int32(len(b)))
+	maxLen := len(a)
+	if len(b) > maxLen {
+		maxLen = len(b)
+	}
+	aPad := make([]byte, maxLen)
+	bPad := make([]byte, maxLen)
+	copy(aPad, a)
+	copy(bPad, b)
+	bytesEq := subtle.ConstantTimeCompare(aPad, bPad)
+	return subtle.ConstantTimeSelect(lenEq&bytesEq, 1, 0) == 1
 }
 
 func requestID(ctx context.Context) string {

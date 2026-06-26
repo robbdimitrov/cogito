@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
-	"time"
+	"unicode/utf8"
 
 	"google.golang.org/grpc/codes"
 
@@ -28,6 +28,13 @@ func (c *controller) CreatePost(ctx context.Context, req *pb.CreatePostRequest) 
 	}
 
 	if req.InReplyToId != nil && req.QuoteOfId != nil {
+		return nil, newError(codes.InvalidArgument)
+	}
+
+	if req.Content == "" {
+		return nil, newError(codes.InvalidArgument)
+	}
+	if utf8.RuneCountInString(req.Content) > 255 {
 		return nil, newError(codes.InvalidArgument)
 	}
 
@@ -62,25 +69,25 @@ func (c *controller) GetFeed(ctx context.Context, req *pb.GetFeedRequest) (*pb.P
 		return nil, newError(codes.Internal)
 	}
 
-	var posts []*pb.Post
-	for post, err := range resIter {
+	var items []feedPostItem
+	for item, err := range resIter {
 		if err != nil {
 			slog.Warn("mapping post failed", "request_id", requestID(ctx), "error", err)
 			return nil, newError(codes.Internal)
 		}
-		posts = append(posts, post)
+		items = append(items, item)
 	}
 
 	var nextCursor string
-	if len(posts) > int(req.Limit) {
-		last := posts[req.Limit-1]
-		t, err := time.Parse(time.RFC3339Nano, last.Created)
-		if err != nil {
-			slog.Warn("parsing cursor timestamp failed", "request_id", requestID(ctx), "error", err)
-			return nil, newError(codes.Internal)
-		}
-		nextCursor = EncodeCursor(t, last.Id)
-		posts = posts[:req.Limit]
+	if len(items) > int(req.Limit) {
+		last := items[req.Limit-1]
+		nextCursor = EncodeCursor(last.created, last.post.Id)
+		items = items[:req.Limit]
+	}
+
+	posts := make([]*pb.Post, len(items))
+	for i, item := range items {
+		posts[i] = item.post
 	}
 
 	return &pb.Posts{Posts: posts, NextCursor: nextCursor}, nil
@@ -97,31 +104,39 @@ func (c *controller) GetPosts(ctx context.Context, req *pb.GetPostsRequest) (*pb
 		return nil, newError(codes.InvalidArgument)
 	}
 
-	resIter, err := c.dbClient.getPosts(ctx, req.UserId, cur, hasCur, req.Limit, userID)
+	limit := req.Limit
+	if limit < 1 {
+		limit = 10
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
+	resIter, err := c.dbClient.getPosts(ctx, req.UserId, cur, hasCur, limit, userID)
 	if err != nil {
 		slog.Warn("getting posts failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
 	}
 
-	var posts []*pb.Post
-	for post, err := range resIter {
+	var rows []postCursorRow
+	for row, err := range resIter {
 		if err != nil {
 			slog.Warn("mapping post failed", "request_id", requestID(ctx), "error", err)
 			return nil, newError(codes.Internal)
 		}
-		posts = append(posts, post)
+		rows = append(rows, row)
 	}
 
 	var nextCursor string
-	if len(posts) > int(req.Limit) {
-		last := posts[req.Limit-1]
-		t, err := time.Parse(time.RFC3339Nano, last.Created)
-		if err != nil {
-			slog.Warn("parsing cursor timestamp failed", "request_id", requestID(ctx), "error", err)
-			return nil, newError(codes.Internal)
-		}
-		nextCursor = EncodeCursor(t, last.Id)
-		posts = posts[:req.Limit]
+	if len(rows) > int(limit) {
+		last := rows[limit-1]
+		nextCursor = EncodeCursor(last.CursorTS, last.Post.Id)
+		rows = rows[:limit]
+	}
+
+	posts := make([]*pb.Post, len(rows))
+	for i, r := range rows {
+		posts[i] = r.Post
 	}
 
 	return &pb.Posts{Posts: posts, NextCursor: nextCursor}, nil
@@ -138,7 +153,15 @@ func (c *controller) GetLikedPosts(ctx context.Context, req *pb.GetPostsRequest)
 		return nil, newError(codes.InvalidArgument)
 	}
 
-	resIter, err := c.dbClient.getLikedPosts(ctx, req.UserId, cur, hasCur, req.Limit, userID)
+	limit := req.Limit
+	if limit < 1 {
+		limit = 10
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
+	resIter, err := c.dbClient.getLikedPosts(ctx, req.UserId, cur, hasCur, limit, userID)
 	if err != nil {
 		slog.Warn("getting liked posts failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
@@ -154,10 +177,10 @@ func (c *controller) GetLikedPosts(ctx context.Context, req *pb.GetPostsRequest)
 	}
 
 	var nextCursor string
-	if len(rows) > int(req.Limit) {
-		last := rows[req.Limit-1]
+	if len(rows) > int(limit) {
+		last := rows[limit-1]
 		nextCursor = EncodeCursor(last.CursorTS, last.Post.Id)
-		rows = rows[:req.Limit]
+		rows = rows[:limit]
 	}
 
 	posts := make([]*pb.Post, len(rows))
@@ -182,40 +205,45 @@ func (c *controller) GetHashtagPosts(ctx context.Context, req *pb.GetHashtagPost
 		return nil, newError(codes.InvalidArgument)
 	}
 
-	resIter, err := c.dbClient.getHashtagPosts(ctx, req.Tag, cur, hasCur, req.Limit, userID)
+	limit := req.Limit
+	if limit < 1 {
+		limit = 10
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
+	resIter, err := c.dbClient.getHashtagPosts(ctx, req.Tag, cur, hasCur, limit, userID)
 	if err != nil {
 		slog.Warn("getting hashtag posts failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
 	}
 
-	var posts []*pb.Post
-	for post, err := range resIter {
+	var rows []postCursorRow
+	for row, err := range resIter {
 		if err != nil {
 			slog.Warn("mapping post failed", "request_id", requestID(ctx), "error", err)
 			return nil, newError(codes.Internal)
 		}
-		posts = append(posts, post)
+		rows = append(rows, row)
 	}
 
 	var nextCursor string
-	if len(posts) > int(req.Limit) {
-		last := posts[req.Limit-1]
-		t, err := time.Parse(time.RFC3339Nano, last.Created)
-		if err != nil {
-			slog.Warn("parsing cursor timestamp failed", "request_id", requestID(ctx), "error", err)
-			return nil, newError(codes.Internal)
-		}
-		nextCursor = EncodeCursor(t, last.Id)
-		posts = posts[:req.Limit]
+	if len(rows) > int(limit) {
+		last := rows[limit-1]
+		nextCursor = EncodeCursor(last.CursorTS, last.Post.Id)
+		rows = rows[:limit]
+	}
+
+	posts := make([]*pb.Post, len(rows))
+	for i, r := range rows {
+		posts[i] = r.Post
 	}
 
 	return &pb.Posts{Posts: posts, NextCursor: nextCursor}, nil
 }
 
 func (c *controller) SearchHashtags(ctx context.Context, req *pb.SearchHashtagsRequest) (*pb.Hashtags, error) {
-	if err := validateInternalAuth(ctx); err != nil {
-		return nil, err
-	}
 	if req.Query == "" {
 		return nil, newError(codes.InvalidArgument)
 	}
@@ -242,6 +270,9 @@ func (c *controller) GetPostsByIds(ctx context.Context, req *pb.Ids) (*pb.Posts,
 
 	if len(req.Ids) == 0 {
 		return &pb.Posts{}, nil
+	}
+	if len(req.Ids) > 200 {
+		return nil, newError(codes.InvalidArgument)
 	}
 
 	resIter, err := c.dbClient.getPostsByIds(ctx, req.Ids, userID)
@@ -291,31 +322,39 @@ func (c *controller) GetReplies(ctx context.Context, req *pb.GetRepliesRequest) 
 		return nil, newError(codes.InvalidArgument)
 	}
 
-	resIter, err := c.dbClient.getReplies(ctx, req.PostId, cur, hasCur, req.Limit, userID)
+	limit := req.Limit
+	if limit < 1 {
+		limit = 10
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
+	resIter, err := c.dbClient.getReplies(ctx, req.PostId, cur, hasCur, limit, userID)
 	if err != nil {
 		slog.Warn("getting replies failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
 	}
 
-	var posts []*pb.Post
-	for post, err := range resIter {
+	var rows []postCursorRow
+	for row, err := range resIter {
 		if err != nil {
 			slog.Warn("mapping post failed", "request_id", requestID(ctx), "error", err)
 			return nil, newError(codes.Internal)
 		}
-		posts = append(posts, post)
+		rows = append(rows, row)
 	}
 
 	var nextCursor string
-	if len(posts) > int(req.Limit) {
-		last := posts[req.Limit-1]
-		t, err := time.Parse(time.RFC3339Nano, last.Created)
-		if err != nil {
-			slog.Warn("parsing cursor timestamp failed", "request_id", requestID(ctx), "error", err)
-			return nil, newError(codes.Internal)
-		}
-		nextCursor = EncodeCursor(t, last.Id)
-		posts = posts[:req.Limit]
+	if len(rows) > int(limit) {
+		last := rows[limit-1]
+		nextCursor = EncodeCursor(last.CursorTS, last.Post.Id)
+		rows = rows[:limit]
+	}
+
+	posts := make([]*pb.Post, len(rows))
+	for i, r := range rows {
+		posts[i] = r.Post
 	}
 
 	return &pb.Posts{Posts: posts, NextCursor: nextCursor}, nil
@@ -362,6 +401,9 @@ func (c *controller) UnlikePost(ctx context.Context, req *pb.PostRequest) (*pb.E
 	}
 
 	if err = c.dbClient.unlikePost(ctx, req.PostId, userID); err != nil {
+		if errors.Is(err, errInvalidReference) {
+			return nil, newError(codes.NotFound)
+		}
 		slog.Warn("unliking post failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
 	}

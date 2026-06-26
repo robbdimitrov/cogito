@@ -55,12 +55,13 @@ func (c *DBClient) createPost(ctx context.Context, content string, tags []string
 
 	var postID int32
 	var created time.Time
+	var storedQuoteOfID int32
 	if quoteOfID != nil {
 		query := `INSERT INTO posts (user_id, content, media_key, in_reply_to_id, quote_of_id)
 			SELECT $1, $2, $3, $4, COALESCE(p.repost_of_id, p.id)
 			FROM posts p WHERE p.id = $5
-			RETURNING id, created`
-		err = tx.QueryRow(ctx, query, userID, content, mk, inReplyToID, *quoteOfID).Scan(&postID, &created)
+			RETURNING id, created, quote_of_id`
+		err = tx.QueryRow(ctx, query, userID, content, mk, inReplyToID, *quoteOfID).Scan(&postID, &created, &storedQuoteOfID)
 	} else {
 		query := "INSERT INTO posts (user_id, content, media_key, in_reply_to_id, quote_of_id) VALUES ($1, $2, $3, $4, $5) RETURNING id, created"
 		err = tx.QueryRow(ctx, query, userID, content, mk, inReplyToID, nil).Scan(&postID, &created)
@@ -92,6 +93,11 @@ func (c *DBClient) createPost(ctx context.Context, content string, tags []string
 			'table', 'posts', 'op', 'upsert', 'id', $1, 'author_id', $2,
 			'content', $3, 'hashtags', $4::text[], 'created', $5, 'in_reply_to_id', $6
 		))`, postID, userID, content, tags, created, *inReplyToID)
+	} else if quoteOfID != nil {
+		_, err = tx.Exec(ctx, `INSERT INTO outbox (topic, payload) VALUES ('entity-changes', jsonb_build_object(
+			'table', 'posts', 'op', 'upsert', 'id', $1, 'author_id', $2,
+			'content', $3, 'hashtags', $4::text[], 'created', $5, 'quote_of_id', $6
+		))`, postID, userID, content, tags, created, storedQuoteOfID)
 	} else {
 		_, err = tx.Exec(ctx, `INSERT INTO outbox (topic, payload) VALUES ('entity-changes', jsonb_build_object(
 			'table', 'posts', 'op', 'upsert', 'id', $1, 'author_id', $2,
@@ -133,7 +139,7 @@ func (c *DBClient) createPost(ctx context.Context, content string, tags []string
 	return postID, tx.Commit(ctx)
 }
 
-func (c *DBClient) getFeed(ctx context.Context, cursor Cursor, hasCursor bool, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
+func (c *DBClient) getFeed(ctx context.Context, cursor Cursor, hasCursor bool, limit int32, currentUserID int32) (iter.Seq2[feedPostItem, error], error) {
 	querySelect := `SELECT
 		p.id, p.user_id, p.content,
 		(SELECT count(*) FROM likes WHERE post_id = COALESCE(o.id, p.id)) AS likes,
@@ -148,7 +154,7 @@ func (c *DBClient) getFeed(ctx context.Context, cursor Cursor, hasCursor bool, l
 		o.created AS o_created, o.media_key AS o_media_key,
 		COALESCE(o.in_reply_to_id, 0) AS o_in_reply_to_id,
 		COALESCE(o.quote_of_id, 0) AS o_quote_of_id`
-	materializedQuery := querySelect + `
+	materializedQuery := querySelect + `, f.created AS fan_out_created
 		FROM feed f
 		JOIN posts p ON p.id = f.post_id
 		JOIN users u ON u.id = p.user_id
@@ -191,7 +197,7 @@ func (c *DBClient) getFeed(ctx context.Context, cursor Cursor, hasCursor bool, l
 	if err != nil {
 		return nil, err
 	}
-	materialized, err := collectFeedPosts(materializedRows)
+	materialized, err := collectMaterializedFeedPosts(materializedRows)
 	if err != nil {
 		return nil, err
 	}
@@ -216,9 +222,9 @@ func (c *DBClient) getFeed(ctx context.Context, cursor Cursor, hasCursor bool, l
 		merged = merged[:limit+1]
 	}
 
-	return func(yield func(*pb.Post, error) bool) {
+	return func(yield func(feedPostItem, error) bool) {
 		for _, item := range merged {
-			if !yield(item.post, nil) {
+			if !yield(item, nil) {
 				return
 			}
 		}
@@ -247,7 +253,7 @@ func collectFeedPosts(r rows) ([]feedPostItem, error) {
 	return out, r.Err()
 }
 
-func (c *DBClient) getPosts(ctx context.Context, userID int32, cursor Cursor, hasCursor bool, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
+func (c *DBClient) getPosts(ctx context.Context, userID int32, cursor Cursor, hasCursor bool, limit int32, currentUserID int32) (iter.Seq2[postCursorRow, error], error) {
 	query := `SELECT
 		p.id, p.user_id, p.content,
 		(SELECT count(*) FROM likes WHERE post_id = COALESCE(o.id, p.id)) AS likes,
@@ -282,7 +288,7 @@ func (c *DBClient) getPosts(ctx context.Context, userID int32, cursor Cursor, ha
 		return nil, err
 	}
 
-	return mapFeedPosts(rows), nil
+	return mapFeedPostCursorRows(rows), nil
 }
 
 func (c *DBClient) getLikedPosts(ctx context.Context, userID int32, cursor Cursor, hasCursor bool, limit int32, currentUserID int32) (iter.Seq2[likedPostRow, error], error) {
@@ -317,7 +323,7 @@ func (c *DBClient) getLikedPosts(ctx context.Context, userID int32, cursor Curso
 	return mapLikedPosts(rows), nil
 }
 
-func (c *DBClient) getHashtagPosts(ctx context.Context, tag string, cursor Cursor, hasCursor bool, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
+func (c *DBClient) getHashtagPosts(ctx context.Context, tag string, cursor Cursor, hasCursor bool, limit int32, currentUserID int32) (iter.Seq2[postCursorRow, error], error) {
 	query := `SELECT p.id, p.user_id, p.content,
 		(SELECT count(*) FROM likes WHERE post_id = p.id) AS likes,
 		EXISTS (SELECT 1 FROM likes WHERE post_id = p.id AND likes.user_id = $1) AS liked,
@@ -331,6 +337,7 @@ func (c *DBClient) getHashtagPosts(ctx context.Context, tag string, cursor Curso
 		JOIN post_hashtags ph ON ph.post_id = p.id
 		JOIN hashtags h ON h.id = ph.hashtag_id
 		WHERE h.name = $2
+		AND p.in_reply_to_id IS NULL
 		AND ($3::timestamptz IS NULL OR (p.created, p.id) < ($3::timestamptz, $4::int))
 		ORDER BY p.created DESC, p.id DESC
 		LIMIT $5`
@@ -346,7 +353,7 @@ func (c *DBClient) getHashtagPosts(ctx context.Context, tag string, cursor Curso
 		return nil, err
 	}
 
-	return mapPosts(rows), nil
+	return mapPostCursorRows(rows), nil
 }
 
 func (c *DBClient) getPost(ctx context.Context, id int32, currentUserID int32) (*pb.Post, error) {
@@ -531,15 +538,17 @@ func (c *DBClient) unlikePost(ctx context.Context, postID int32, userID int32) e
 		}
 		return err
 	}
-	_, err = tx.Exec(ctx, "DELETE FROM likes WHERE post_id = $1 AND user_id = $2", postID, userID)
+	tag, err := tx.Exec(ctx, "DELETE FROM likes WHERE post_id = $1 AND user_id = $2", postID, userID)
 	if err != nil {
 		return err
 	}
-	_, err = tx.Exec(ctx, `INSERT INTO outbox (topic, payload) VALUES ('activity', jsonb_build_object(
-		'op', 'unlike', 'post_id', $1, 'actor_id', $2, 'recipient_id', $3
-	))`, postID, userID, recipientID)
-	if err != nil {
-		return err
+	if tag.RowsAffected() > 0 {
+		_, err = tx.Exec(ctx, `INSERT INTO outbox (topic, payload) VALUES ('activity', jsonb_build_object(
+			'op', 'unlike', 'post_id', $1, 'actor_id', $2, 'recipient_id', $3
+		))`, postID, userID, recipientID)
+		if err != nil {
+			return err
+		}
 	}
 	return tx.Commit(ctx)
 }
@@ -631,7 +640,7 @@ func (c *DBClient) removeRepost(ctx context.Context, postID int32, userID int32)
 	return tx.Commit(ctx)
 }
 
-func (c *DBClient) getReplies(ctx context.Context, postID int32, cursor Cursor, hasCursor bool, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
+func (c *DBClient) getReplies(ctx context.Context, postID int32, cursor Cursor, hasCursor bool, limit int32, currentUserID int32) (iter.Seq2[postCursorRow, error], error) {
 	query := `SELECT id, user_id, content,
 		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
 		EXISTS (SELECT 1 FROM likes WHERE post_id = id AND likes.user_id = $1) AS liked,
@@ -658,7 +667,7 @@ func (c *DBClient) getReplies(ctx context.Context, postID int32, cursor Cursor, 
 		return nil, err
 	}
 
-	return mapPosts(rows), nil
+	return mapPostCursorRows(rows), nil
 }
 
 func (c *DBClient) searchHashtags(ctx context.Context, query string, limit int32) ([]*pb.Hashtag, error) {

@@ -107,6 +107,32 @@ func TestMapFeedPost(t *testing.T) {
 	}
 }
 
+func TestMapMaterializedFeedPost(t *testing.T) {
+	mr := &mockRow{}
+	post, fanOutCreated, err := mapMaterializedFeedPost(mr)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if post.Id != 0 || post.UserId != 1 {
+		t.Errorf("mapping failed: %+v", post)
+	}
+	if post.RepostOfId == nil {
+		t.Errorf("expected repost_of_id to be set")
+	}
+	if post.RepostOf == nil {
+		t.Errorf("expected repost_of to be populated")
+	}
+	if !fanOutCreated.IsZero() {
+		t.Errorf("expected zero fan_out_created from mock, got %v", fanOutCreated)
+	}
+
+	mr = &mockRow{err: errors.New("scan error")}
+	_, _, err = mapMaterializedFeedPost(mr)
+	if err == nil {
+		t.Errorf("expected error")
+	}
+}
+
 func TestMapPostsPropagatesRowsError(t *testing.T) {
 	rowsErr := errors.New("rows error")
 	rows := &mockRows{rowsErr: rowsErr}
