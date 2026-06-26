@@ -69,7 +69,7 @@ graph TD
 
 ### Infrastructure
 
-Five in-cluster stateful services run alongside the application:
+Five in-cluster services run alongside the application:
 
 - **PostgreSQL** — Primary source of truth for all application data.
 - **Dragonfly** — Redis-protocol cache backing rate-limit token buckets and login-failure counters. The API fails open on unavailability.
