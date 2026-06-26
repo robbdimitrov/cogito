@@ -47,13 +47,6 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
     ) -> Result<Response<Empty>, Status> {
         let request_id = crate::logging::grpc_request_id(&request).to_string();
         let req = request.into_inner();
-        self.db
-            .consume_upload(&req.filename)
-            .await
-            .map_err(|e| {
-                tracing::warn!(request_id = %request_id, method = "/cogito.ImageService/ConsumeUpload", error = %e, "consuming upload failed");
-                Status::internal("Internal server error.")
-            })?;
 
         self.blobstore
             .copy(
@@ -63,6 +56,14 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
             .await
             .map_err(|e| {
                 tracing::warn!(request_id = %request_id, method = "/cogito.ImageService/ConsumeUpload", error = %e, "promoting staged upload failed");
+                Status::internal("Internal server error.")
+            })?;
+
+        self.db
+            .consume_upload(&req.filename)
+            .await
+            .map_err(|e| {
+                tracing::warn!(request_id = %request_id, method = "/cogito.ImageService/ConsumeUpload", error = %e, "consuming upload failed");
                 Status::internal("Internal server error.")
             })?;
 
@@ -84,13 +85,13 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
         let request_id = crate::logging::grpc_request_id(&request).to_string();
         let req = request.into_inner();
 
-        if let Err(e) = self.db.consume_upload(&req.filename).await {
-            tracing::warn!(request_id = %request_id, method = "/cogito.ImageService/DeleteImage", error = %e, "cleaning up orphaned upload metadata failed");
-        }
-
         if req.filename.contains("..") || req.filename.contains('/') || req.filename.contains('\\')
         {
             return Err(Status::invalid_argument("Invalid filename"));
+        }
+
+        if let Err(e) = self.db.consume_upload(&req.filename).await {
+            tracing::warn!(request_id = %request_id, method = "/cogito.ImageService/DeleteImage", error = %e, "cleaning up orphaned upload metadata failed");
         }
 
         self.blobstore

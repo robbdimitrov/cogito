@@ -22,6 +22,7 @@ use blobstore::S3BlobStore;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     logging::init();
+    internal_auth::init();
     let grpc_port = env::var("PORT").unwrap_or_else(|_| "5050".to_string());
     let http_port = env::var("HTTP_PORT").unwrap_or_else(|_| "8081".to_string());
     let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");

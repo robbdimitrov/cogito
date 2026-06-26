@@ -33,7 +33,7 @@ pub fn create_router<D: ImageDb, B: BlobStore + 'static>(db: D, blobstore: Arc<B
         )
         .route("/uploads/:filename", get(get_handler::<D, B>))
         .layer(middleware::from_fn(cache_image_responses))
-        .layer(axum::extract::DefaultBodyLimit::max(1024 * 1024))
+        .layer(axum::extract::DefaultBodyLimit::max(1024 * 1024 + 8192))
         .with_state(state)
 }
 
@@ -44,7 +44,7 @@ async fn require_internal_token(request: Request, next: Next) -> Response {
         .and_then(|value| value.to_str().ok())
         .unwrap_or("");
 
-    if crate::internal_auth::token_matches(provided, &crate::internal_auth::internal_grpc_token()) {
+    if crate::internal_auth::verify(provided) {
         next.run(request).await
     } else {
         (StatusCode::UNAUTHORIZED, "Unauthorized").into_response()
@@ -412,7 +412,7 @@ mod tests {
                     .uri("/uploads")
                     .header(
                         "internal-token",
-                        crate::internal_auth::internal_grpc_token(),
+                        crate::internal_auth::init_for_test(),
                     )
                     .body(Body::empty())
                     .unwrap(),
@@ -458,7 +458,7 @@ mod tests {
                     .uri("/uploads")
                     .header(
                         "internal-token",
-                        crate::internal_auth::internal_grpc_token(),
+                        crate::internal_auth::init_for_test(),
                     )
                     .header("x-user-id", "1")
                     .header(
@@ -489,7 +489,7 @@ mod tests {
                     .uri("/uploads")
                     .header(
                         "internal-token",
-                        crate::internal_auth::internal_grpc_token(),
+                        crate::internal_auth::init_for_test(),
                     )
                     .header("x-user-id", "1")
                     .header(
@@ -518,7 +518,7 @@ mod tests {
                     .uri("/uploads")
                     .header(
                         "internal-token",
-                        crate::internal_auth::internal_grpc_token(),
+                        crate::internal_auth::init_for_test(),
                     )
                     .header("x-user-id", "1")
                     .header(
