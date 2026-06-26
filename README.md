@@ -26,47 +26,30 @@ graph TD
         API["API Gateway<br>(Go)"]:::gateway
 
         subgraph services ["gRPC Services"]
-            Auth["Auth Service<br>(Rust)"]:::service
-            Users["User Service<br>(Rust)"]:::service
-            Posts["Post Service<br>(Go)"]:::service
-            Images["Image Service<br>(Rust)"]:::service
-            Flow["Flow Service<br>(Rust)"]:::service
+            Auth["Auth<br>(Rust)"]:::service
+            Users["User<br>(Rust)"]:::service
+            Posts["Post<br>(Go)"]:::service
+            Images["Image<br>(Rust)"]:::service
+            Flow["Flow<br>(Rust)"]:::service
         end
 
         subgraph data ["Data & Storage"]
-            DB[("PostgreSQL<br>source of truth")]:::database
-            Cache[("Dragonfly<br>rate limiting")]:::cache
-            Blob[("SeaweedFS<br>image objects")]:::storage
-            Meili[("Meilisearch<br>search index")]:::search
-            Redpanda[("Redpanda<br>event broker")]:::cache
+            DB[("PostgreSQL<br>(source of truth)")]:::database
+            Meili[("Meilisearch<br>(search index)")]:::search
         end
     end
 
     Browser --> Web
     Web --> API
-    API --> Auth
-    API --> Users
-    API --> Posts
-    API --> Images
-    API --> Flow
-    Auth --> DB
-    Users --> DB
-    Posts --> DB
-    Images --> DB
-    Images --> Blob
-    Flow --> DB
+    API --> Auth & Users & Posts & Images & Flow
+    Auth & Users & Posts & Images & Flow --> DB
     Flow --> Meili
-    DB --> Redpanda
-    Redpanda --> Flow
-    API --> Cache
 
     classDef frontend fill:#0ea5e9,stroke:#0284c7,stroke-width:2px,color:#fff
     classDef gateway fill:#6366f1,stroke:#4f46e5,stroke-width:2px,color:#fff
     classDef service fill:#10b981,stroke:#059669,stroke-width:2px,color:#fff
     classDef database fill:#f59e0b,stroke:#d97706,stroke-width:2px,color:#fff
-    classDef storage fill:#8b5cf6,stroke:#7c3aed,stroke-width:2px,color:#fff
-    classDef cache fill:#ef4444,stroke:#dc2626,stroke-width:2px,color:#fff
-    classDef search fill:#6366f1,stroke:#4f46e5,stroke-width:2px,color:#fff
+    classDef search fill:#06b6d4,stroke:#0891b2,stroke-width:2px,color:#fff
 
     style cluster fill:transparent,stroke:#64748b
     style services fill:transparent,stroke:transparent
