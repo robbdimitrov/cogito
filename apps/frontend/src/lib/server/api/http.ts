@@ -1,5 +1,18 @@
 import { error, fail, isHttpError, type ActionFailure } from "@sveltejs/kit";
 
+function camelize(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(camelize);
+  if (value !== null && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([k, v]) => [
+        k.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase()),
+        camelize(v),
+      ]),
+    );
+  }
+  return value;
+}
+
 export async function unwrap<T>(res: Response): Promise<T | null> {
   if (res.status === 204) return null;
   if (!res.ok) {
@@ -9,7 +22,7 @@ export async function unwrap<T>(res: Response): Promise<T | null> {
   const text = await res.text();
   if (!text) return null;
   try {
-    return JSON.parse(text) as T;
+    return camelize(JSON.parse(text)) as T;
   } catch {
     throw error(502, "Received non-JSON response from server");
   }
