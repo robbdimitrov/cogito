@@ -1,10 +1,11 @@
 import { fail } from "@sveltejs/kit";
 import { getSessions, deleteSession } from "$lib/domains/auth/api.server";
+import { apiClient } from "$lib/server/api/client";
 import { failFromError } from "$lib/server/api/http";
 
-export async function load({ fetch }) {
+export async function load(event) {
   try {
-    const data = await getSessions(fetch);
+    const data = await getSessions(apiClient(event));
     return {
       sessions: data.sessions || [],
       currentSessionId: data.currentSessionId || null,
@@ -21,8 +22,8 @@ export async function load({ fetch }) {
 }
 
 export const actions = {
-  deleteSession: async ({ request, fetch }) => {
-    const formData = await request.formData();
+  deleteSession: async (event) => {
+    const formData = await event.request.formData();
     const sessionId = formData.get("sessionId") as string;
 
     if (!sessionId) {
@@ -30,7 +31,7 @@ export const actions = {
     }
 
     try {
-      await deleteSession(fetch, sessionId);
+      await deleteSession(apiClient(event), sessionId);
       return { success: true };
     } catch (e) {
       return failFromError(e, "Failed to terminate session");

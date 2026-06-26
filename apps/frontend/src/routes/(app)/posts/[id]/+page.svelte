@@ -244,7 +244,7 @@
         const input = document.createElement("input");
         input.type = "hidden";
         input.name = "postId";
-        input.value = post.id;
+        input.value = String(post.id);
         form.appendChild(input);
         document.body.appendChild(form);
         form.submit();

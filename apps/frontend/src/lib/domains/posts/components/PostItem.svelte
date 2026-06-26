@@ -14,7 +14,7 @@
   interface Props {
     post: Post;
     user?: User;
-    currentUserId?: string | null;
+    currentUserId?: number | null;
     onQuote?: (post: Post) => void;
   }
 

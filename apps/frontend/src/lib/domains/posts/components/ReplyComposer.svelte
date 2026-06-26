@@ -13,11 +13,6 @@
 
   let content = $state("");
   let isSubmitting = $state(false);
-
-  // We use form action directly instead of passing onReply, since it's a mutation.
-  // Wait, wait... The React component took `onReply: (content: string) => Promise<void>`.
-  // Svelte 5 `ReplyComposer` shouldn't take a callback if we are using native forms.
-  // We can just use `<form action="?/reply" use:enhance>` directly in this component!
 </script>
 
 <form
@@ -33,7 +28,6 @@
     };
   }}
 >
-  <input type="hidden" name="replyToId" value={replyToPost.id} />
   <div class="shrink-0">
     <Avatar
       name={currentUser?.name}

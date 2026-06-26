@@ -10,7 +10,7 @@
     emptyMessage = "No users to show.",
   } = $props<{
     users: User[] | null | undefined;
-    currentUserId?: string | null;
+    currentUserId?: number | null;
     emptyMessage?: string;
   }>();
 </script>

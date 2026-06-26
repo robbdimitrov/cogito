@@ -1,5 +1,6 @@
 import type { PageServerLoad } from "./$types";
 import { apiClient } from "$lib/server/api/client";
+import { unwrap } from "$lib/server/api/http";
 import type { Post } from "$lib/domains/posts/model";
 import type { User } from "$lib/domains/users/model";
 import type { Hashtag } from "$lib/domains/posts/api.server";
@@ -24,12 +25,10 @@ export const load: PageServerLoad = async (event) => {
       const res = await api(
         `/search?q=${encodeURIComponent(q)}&type=${type}&limit=20`,
       );
-      if (res.ok) {
-        const data = await res.json();
-        if (tab === "posts") posts = data.items ?? [];
-        else if (tab === "users") users = data.items ?? [];
-        else if (tab === "hashtags") hashtags = data.items ?? [];
-      }
+      const data = await unwrap<{ items: unknown[] }>(res);
+      if (tab === "posts") posts = (data?.items ?? []) as Post[];
+      else if (tab === "users") users = (data?.items ?? []) as User[];
+      else if (tab === "hashtags") hashtags = (data?.items ?? []) as Hashtag[];
     } catch {
       // fall through with empty results
     }

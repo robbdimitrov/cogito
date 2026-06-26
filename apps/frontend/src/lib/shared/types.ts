@@ -1,5 +1,5 @@
 export interface User {
-  id: string;
+  id: number;
   name: string;
   username: string;
   email: string;
@@ -11,29 +11,26 @@ export interface User {
   followed?: boolean;
   profilePhotoKey?: string;
   coverPhotoKey?: string;
+  created?: string;
 }
 
 export interface Post {
-  id: string;
+  id: number;
   content: string;
-  userId: string;
+  userId: number;
   created: string;
   likes: number;
   reposts: number;
   liked?: boolean;
   reposted?: boolean;
   user?: User;
-  repostOfId?: string;
+  repostOfId?: number;
   repostOf?: Post;
   mediaKey?: string;
   replies: number;
-  inReplyToId?: string;
-  quoteOfId?: string;
+  inReplyToId?: number;
+  quoteOfId?: number;
   quotePost?: Post;
 }
 
-export interface Session {
-  id: string;
-  userId: string;
-  token?: string;
-}
+export type { Session } from "$lib/domains/auth/model";

@@ -25,7 +25,7 @@ export const load = async (event) => {
 };
 
 export const actions = {
-  createReply: async (event) => {
+  reply: async (event) => {
     const { request, params } = event;
     const data = await request.formData();
     const content = data.get("content")?.toString() || "";
@@ -42,6 +42,30 @@ export const actions = {
       return { success: true };
     } catch (e) {
       return failFromError(e, "Failed to post reply");
+    }
+  },
+  quote: async (event) => {
+    const { request } = event;
+    const data = await request.formData();
+    const content = data.get("content")?.toString() || "";
+    const quoteOfId = data.get("quotePostId")?.toString();
+
+    if (!content.trim()) {
+      return fail(400, { error: "Quote cannot be empty" });
+    }
+
+    if (!quoteOfId) {
+      return fail(400, { error: "Missing quoted post" });
+    }
+
+    try {
+      await create(apiClient(event), {
+        content: content.trim(),
+        quoteOfId,
+      });
+      return { success: true };
+    } catch (e) {
+      return failFromError(e, "Failed to post quote");
     }
   },
   toggleLike,

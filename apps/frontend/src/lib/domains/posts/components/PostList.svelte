@@ -7,7 +7,7 @@
   interface Props {
     posts: Post[];
     users?: User[];
-    currentUserId?: string | null;
+    currentUserId?: number | null;
     onQuote?: (post: Post) => void;
     emptyMessage?: string;
   }
@@ -33,7 +33,7 @@
 {:else}
   <ul class="space-y-3">
     {#each posts as post (post.id + (post.repostOfId ? `-repost-${post.userId}` : ""))}
-      <PostItem {post} user={users[0]} {currentUserId} {onQuote} />
+      <PostItem {post} user={users.find(u => u.id === post.userId) ?? users[0]} {currentUserId} {onQuote} />
     {/each}
   </ul>
 {/if}

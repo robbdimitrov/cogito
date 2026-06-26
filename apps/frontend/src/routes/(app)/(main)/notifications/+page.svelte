@@ -1,5 +1,6 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
+  import type { Pathname } from "$app/types";
   import Avatar from "$lib/shared/components/ui/Avatar.svelte";
   import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
   import { createPagination } from "$lib/shared/createPagination.svelte";
@@ -89,7 +90,7 @@
         {#each pagination.items as notification (notification.id)}
           <GlassCard as="li" interactive class="hover:scale-[1.005]">
             <a
-              href={resolve(notificationHref(notification) as string)}
+              href={resolve(notificationHref(notification) as Pathname)}
               class="card-body flex-row items-start gap-3 p-4 sm:p-5"
             >
               <div

@@ -8,6 +8,9 @@ import {
 import { apiClient } from "$lib/server/api/client";
 
 export const GET = async (event) => {
+  if (!event.cookies.get("session")) {
+    return json({ error: "Unauthorized" }, { status: 401 });
+  }
   const { params, url } = event;
   const cursor = url.searchParams.get("cursor") ?? "";
   const tab = params.tab;

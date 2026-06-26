@@ -1,5 +1,6 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
+  import type { Pathname } from "$app/types";
   import { User, Lock, Monitor, Laptop, Sun, Moon } from "@lucide/svelte";
   import { page } from "$app/state";
   import { getThemeContext } from "$lib/shared/theme.svelte";
@@ -36,7 +37,7 @@
       <nav class="flex flex-col gap-1">
         {#each settingsLinks as item (item.href)}
           <a
-            href={resolve(item.href as string)}
+            href={resolve(item.href as Pathname)}
             class="group flex items-center gap-3 rounded-xl p-3 outline-none transition-colors duration-200 hover:bg-base-200 focus-visible:bg-base-200 {page.url.pathname.startsWith(
               item.href,
             )

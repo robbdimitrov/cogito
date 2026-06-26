@@ -1,11 +1,12 @@
 import { logout } from "$lib/domains/auth/api.server";
+import { apiClient } from "$lib/server/api/client";
 import { redirect, isHttpError } from "@sveltejs/kit";
 import type { Actions } from "./$types";
 
 export const actions = {
-  default: async ({ fetch, cookies }) => {
+  default: async (event) => {
     try {
-      await logout(fetch);
+      await logout(apiClient(event));
     } catch (error) {
       if (!(isHttpError(error) && error.status === 401)) {
         console.error("Backend logout failed", {
@@ -13,10 +14,10 @@ export const actions = {
         });
       }
     } finally {
-      cookies.delete("session", {
+      event.cookies.delete("session", {
         path: "/",
         httpOnly: true,
-        secure: false,
+        secure: true,
         sameSite: "strict",
       });
     }

@@ -2,11 +2,13 @@ import { fail } from "@sveltejs/kit";
 import { updateUser } from "$lib/domains/users/api.server";
 import { uploadImage } from "$lib/domains/posts/uploads.server";
 import { resolveCurrentUser } from "$lib/domains/auth/currentUser.server";
+import { apiClient } from "$lib/server/api/client";
 import { failFromError } from "$lib/server/api/http";
 
 export const actions = {
-  default: async ({ request, fetch }) => {
-    const userResult = await resolveCurrentUser(fetch);
+  default: async (event) => {
+    const { request } = event;
+    const userResult = await resolveCurrentUser(apiClient(event));
     if (userResult.status !== "authenticated") {
       return fail(401, { error: "Unauthorized" });
     }
@@ -26,16 +28,16 @@ export const actions = {
 
     try {
       if (avatarFile && avatarFile.size > 0) {
-        const res = await uploadImage(fetch, avatarFile);
+        const res = await uploadImage(apiClient(event), avatarFile);
         profilePhotoKey = res.key;
       }
 
       if (coverFile && coverFile.size > 0) {
-        const res = await uploadImage(fetch, coverFile);
+        const res = await uploadImage(apiClient(event), coverFile);
         coverPhotoKey = res.key;
       }
 
-      await updateUser(fetch, user.id, {
+      await updateUser(apiClient(event), user.id, {
         name,
         username,
         email,

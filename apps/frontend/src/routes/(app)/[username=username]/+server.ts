@@ -4,6 +4,9 @@ import { getUser } from "$lib/domains/users/api.server";
 import { apiClient } from "$lib/server/api/client";
 
 export const GET = async (event) => {
+  if (!event.cookies.get("session")) {
+    return json({ error: "Unauthorized" }, { status: 401 });
+  }
   const { params, url } = event;
   const cursor = url.searchParams.get("cursor") ?? "";
   const cleanUsername = decodeURIComponent(params.username).replace(/^@/, "");

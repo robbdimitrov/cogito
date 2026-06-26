@@ -1,5 +1,6 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
+  import type { Pathname } from "$app/types";
 
   interface Props {
     content: string;
@@ -57,7 +58,7 @@
           result.push({
             type: "hashtag",
             tag: tagOrUserStr,
-            href: `/search?q=%23${tagOrUserStr.toLowerCase()}`,
+            href: `/hashtags/${encodeURIComponent(tagOrUserStr.toLowerCase())}`,
             id: `hashtag-${matchStart}`,
           });
         } else if (symbol === "@") {
@@ -92,7 +93,7 @@
         {token.text}
       {:else if token.type === "url"}
         <a
-          href={resolve(token.url as string)}
+          href={token.url}
           target="_blank"
           rel="noopener noreferrer"
           class="font-medium text-primary hover:underline break-all"
@@ -101,14 +102,14 @@
         </a>
       {:else if token.type === "hashtag"}
         <a
-          href={resolve(token.href as string)}
+          href={resolve(token.href as Pathname)}
           class="font-medium text-primary hover:underline"
         >
           #{token.tag}
         </a>
       {:else if token.type === "mention"}
         <a
-          href={resolve(token.href as string)}
+          href={resolve(token.href as Pathname)}
           class="font-medium text-primary hover:underline"
         >
           @{token.handle}

@@ -8,7 +8,7 @@
 
   let { user, currentUserId } = $props<{
     user: User;
-    currentUserId?: string | null;
+    currentUserId?: number | null;
   }>();
 
   let isCurrentUser = $derived(currentUserId && user.id === currentUserId);

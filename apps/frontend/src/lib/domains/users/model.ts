@@ -1,5 +1,5 @@
 export interface User {
-  id: string;
+  id: number;
   name: string;
   username: string;
   email: string;
@@ -11,4 +11,5 @@ export interface User {
   followed?: boolean;
   profilePhotoKey?: string;
   coverPhotoKey?: string;
+  created?: string;
 }

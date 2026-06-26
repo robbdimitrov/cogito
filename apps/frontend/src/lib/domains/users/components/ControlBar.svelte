@@ -1,5 +1,6 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
+  import type { Pathname } from "$app/types";
   import { page } from "$app/state";
   import type { User } from "$lib/shared/types";
 
@@ -42,7 +43,7 @@
 >
   {#each tabs as tab (tab.name)}
     <a
-      href={resolve(tab.href as string)}
+      href={resolve(tab.href as Pathname)}
       data-sveltekit-preload-data="hover"
       class={`tab group h-10 min-w-0 items-center justify-center gap-1 rounded-xl px-1 text-xs font-medium transition-all duration-300 sm:gap-1.5 sm:px-4 sm:text-sm ${
         tab.isActive

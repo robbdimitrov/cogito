@@ -1,5 +1,4 @@
 import { error, fail, isHttpError, type ActionFailure } from "@sveltejs/kit";
-import { camelizeKeys } from "$lib/shared/mappers";
 
 export async function unwrap<T>(res: Response): Promise<T | null> {
   if (res.status === 204) return null;
@@ -10,7 +9,7 @@ export async function unwrap<T>(res: Response): Promise<T | null> {
   const text = await res.text();
   if (!text) return null;
   try {
-    return camelizeKeys(JSON.parse(text)) as T;
+    return JSON.parse(text) as T;
   } catch {
     throw error(502, "Received non-JSON response from server");
   }

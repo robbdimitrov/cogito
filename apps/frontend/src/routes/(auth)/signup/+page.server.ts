@@ -2,11 +2,13 @@ import { login } from "$lib/domains/auth/api.server";
 import { formString, validateSignup } from "$lib/domains/auth/validation";
 import { createUser } from "$lib/domains/users/api.server";
 import { errorMessage } from "$lib/server/api/http";
+import { apiClient } from "$lib/server/api/client";
 import { fail, redirect, isHttpError } from "@sveltejs/kit";
 import type { Actions } from "./$types";
 
 export const actions = {
-  default: async ({ request, fetch, cookies }) => {
+  default: async (event) => {
+    const { request, cookies } = event;
     const data = await request.formData();
     const name = formString(data, "name").trim();
     const username = formString(data, "username").trim();
@@ -20,7 +22,7 @@ export const actions = {
     }
 
     try {
-      await createUser(fetch, name, username, email, password);
+      await createUser(apiClient(event), name, username, email, password);
     } catch (error) {
       if (!isHttpError(error)) {
         return fail(502, { error: "Signup failed", fields });
@@ -33,7 +35,7 @@ export const actions = {
     }
 
     try {
-      await login(fetch, email, password);
+      await login(apiClient(event), email, password);
       if (!cookies.get("session")) {
         console.error("Signup login response did not include a session cookie");
         return fail(502, {

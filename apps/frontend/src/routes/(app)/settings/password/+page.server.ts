@@ -1,11 +1,13 @@
 import { fail } from "@sveltejs/kit";
 import { updatePassword } from "$lib/domains/users/api.server";
 import { resolveCurrentUser } from "$lib/domains/auth/currentUser.server";
+import { apiClient } from "$lib/server/api/client";
 import { failFromError } from "$lib/server/api/http";
 
 export const actions = {
-  default: async ({ request, fetch }) => {
-    const userResult = await resolveCurrentUser(fetch);
+  default: async (event) => {
+    const { request } = event;
+    const userResult = await resolveCurrentUser(apiClient(event));
     if (userResult.status !== "authenticated") {
       return fail(401, { error: "Unauthorized" });
     }
@@ -21,7 +23,7 @@ export const actions = {
     }
 
     try {
-      await updatePassword(fetch, userResult.user.id, password, oldPassword);
+      await updatePassword(apiClient(event), userResult.user.id, password, oldPassword);
       return { success: true };
     } catch (e) {
       return failFromError(e, "Failed to update password", {

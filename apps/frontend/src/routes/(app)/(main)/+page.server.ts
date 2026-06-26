@@ -20,7 +20,7 @@ export const load = async (event) => {
 
 export const actions = {
   createPost: async (event) => {
-    const { request, fetch } = event;
+    const { request } = event;
     const data = await request.formData();
     const content = data.get("content")?.toString() || "";
     const inReplyToId = data.get("inReplyToId")?.toString();
@@ -34,7 +34,7 @@ export const actions = {
     try {
       let mediaKey = data.get("mediaKey")?.toString();
       if (!mediaKey && file && file.size > 0) {
-        const uploadRes = await uploadImage(fetch, file);
+        const uploadRes = await uploadImage(apiClient(event), file);
         mediaKey = uploadRes.key;
       }
 

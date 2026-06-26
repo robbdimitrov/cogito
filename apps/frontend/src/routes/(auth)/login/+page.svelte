@@ -9,7 +9,7 @@
   import type { ActionData } from "./$types";
 
   let { form }: { form: ActionData } = $props();
-  let email = $state(untrack(() => form?.email ?? ""));
+  let email = $state(untrack(() => form?.fields?.email ?? ""));
   let password = $state("");
   let pending = $state(false);
 </script>
