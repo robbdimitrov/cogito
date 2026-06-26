@@ -2,6 +2,7 @@ package post
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"iter"
 	"sort"
@@ -11,6 +12,7 @@ import (
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgtype"
 
 	pb "cogito/postservice/genproto"
 )
@@ -28,6 +30,10 @@ func NewDBClient(dbURL string) (*DBClient, error) {
 		return nil, err
 	}
 	config.MaxConns = 5
+	// PostgreSQL 18 tightened type-inference for unspecified parameter OIDs in
+	// extended query protocol. Simple protocol avoids this by sending complete SQL
+	// text; pgx handles value escaping so there is no injection risk.
+	config.ConnConfig.PreferSimpleProtocol = true
 
 	db, err := pgxpool.ConnectConfig(context.Background(), config)
 	if err != nil {
@@ -39,6 +45,17 @@ func NewDBClient(dbURL string) (*DBClient, error) {
 
 func (c *DBClient) Close() {
 	c.db.Close()
+}
+
+func outbox(tx pgx.Tx, ctx context.Context, topic string, payload any) error {
+	b, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+	j := &pgtype.JSONB{Bytes: b, Status: pgtype.Present}
+	_, err = tx.Exec(ctx, "INSERT INTO outbox (topic, payload) VALUES ($1, $2)",
+		pgtype.Text{String: topic, Status: pgtype.Present}, j)
+	return err
 }
 
 func (c *DBClient) createPost(ctx context.Context, content string, tags []string, userID int32, mediaKey *string, inReplyToID *int32, quoteOfID *int32) (int32, error) {
@@ -56,15 +73,23 @@ func (c *DBClient) createPost(ctx context.Context, content string, tags []string
 	var postID int32
 	var created time.Time
 	var storedQuoteOfID int32
+
+	var replyID pgtype.Int4
+	if inReplyToID != nil {
+		replyID = pgtype.Int4{Int: *inReplyToID, Status: pgtype.Present}
+	} else {
+		replyID = pgtype.Int4{Status: pgtype.Null}
+	}
+
 	if quoteOfID != nil {
 		query := `INSERT INTO posts (user_id, content, media_key, in_reply_to_id, quote_of_id)
 			SELECT $1, $2, $3, $4, COALESCE(p.repost_of_id, p.id)
 			FROM posts p WHERE p.id = $5
 			RETURNING id, created, quote_of_id`
-		err = tx.QueryRow(ctx, query, userID, content, mk, inReplyToID, *quoteOfID).Scan(&postID, &created, &storedQuoteOfID)
+		err = tx.QueryRow(ctx, query, userID, content, mk, replyID, *quoteOfID).Scan(&postID, &created, &storedQuoteOfID)
 	} else {
-		query := "INSERT INTO posts (user_id, content, media_key, in_reply_to_id, quote_of_id) VALUES ($1, $2, $3, $4, $5) RETURNING id, created"
-		err = tx.QueryRow(ctx, query, userID, content, mk, inReplyToID, nil).Scan(&postID, &created)
+		query := "INSERT INTO posts (user_id, content, media_key, in_reply_to_id, quote_of_id) VALUES ($1, $2, $3, $4, NULL) RETURNING id, created"
+		err = tx.QueryRow(ctx, query, userID, content, mk, replyID).Scan(&postID, &created)
 	}
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -88,23 +113,17 @@ func (c *DBClient) createPost(ctx context.Context, content string, tags []string
 		}
 	}
 
-	if inReplyToID != nil {
-		_, err = tx.Exec(ctx, `INSERT INTO outbox (topic, payload) VALUES ('entity-changes', jsonb_build_object(
-			'table', 'posts', 'op', 'upsert', 'id', $1, 'author_id', $2,
-			'content', $3, 'hashtags', $4::text[], 'created', $5, 'in_reply_to_id', $6
-		))`, postID, userID, content, tags, created, *inReplyToID)
-	} else if quoteOfID != nil {
-		_, err = tx.Exec(ctx, `INSERT INTO outbox (topic, payload) VALUES ('entity-changes', jsonb_build_object(
-			'table', 'posts', 'op', 'upsert', 'id', $1, 'author_id', $2,
-			'content', $3, 'hashtags', $4::text[], 'created', $5, 'quote_of_id', $6
-		))`, postID, userID, content, tags, created, storedQuoteOfID)
-	} else {
-		_, err = tx.Exec(ctx, `INSERT INTO outbox (topic, payload) VALUES ('entity-changes', jsonb_build_object(
-			'table', 'posts', 'op', 'upsert', 'id', $1, 'author_id', $2,
-			'content', $3, 'hashtags', $4::text[], 'created', $5
-		))`, postID, userID, content, tags, created)
+	payload := map[string]any{
+		"table": "posts", "op": "upsert",
+		"id": postID, "author_id": userID,
+		"content": content, "hashtags": tags, "created": created,
 	}
-	if err != nil {
+	if inReplyToID != nil {
+		payload["in_reply_to_id"] = *inReplyToID
+	} else if quoteOfID != nil {
+		payload["quote_of_id"] = storedQuoteOfID
+	}
+	if err = outbox(tx, ctx, "entity-changes", payload); err != nil {
 		return 0, err
 	}
 
@@ -114,9 +133,10 @@ func (c *DBClient) createPost(ctx context.Context, content string, tags []string
 		if err != nil {
 			return 0, err
 		}
-		_, err = tx.Exec(ctx, `INSERT INTO outbox (topic, payload) VALUES ('activity', jsonb_build_object(
-			'op', 'reply', 'reply_post_id', $1, 'post_id', $2, 'actor_id', $3, 'recipient_id', $4
-		))`, postID, *inReplyToID, userID, parentOwner)
+		err = outbox(tx, ctx, "activity", map[string]any{
+			"op": "reply", "reply_post_id": postID, "post_id": *inReplyToID,
+			"actor_id": userID, "recipient_id": parentOwner,
+		})
 		if err != nil {
 			return 0, err
 		}
@@ -128,9 +148,9 @@ func (c *DBClient) createPost(ctx context.Context, content string, tags []string
 		if err != nil {
 			return 0, err
 		}
-		_, err = tx.Exec(ctx, `INSERT INTO outbox (topic, payload) VALUES ('entity-changes', jsonb_build_object(
-			'table', 'hashtags', 'op', 'upsert', 'name', $1, 'post_count', $2
-		))`, tag, count)
+		err = outbox(tx, ctx, "entity-changes", map[string]any{
+			"table": "hashtags", "op": "upsert", "name": tag, "post_count": count,
+		})
 		if err != nil {
 			return 0, err
 		}
@@ -433,17 +453,17 @@ func (c *DBClient) deletePost(ctx context.Context, postID int32, userID int32) e
 		return err
 	}
 
-	_, err = tx.Exec(ctx, `INSERT INTO outbox (topic, payload) VALUES ('entity-changes', jsonb_build_object(
-		'table', 'posts', 'op', 'delete', 'id', $1, 'author_id', $2, 'media_key', $3
-	))`, postID, userID, mediaKey)
+	err = outbox(tx, ctx, "entity-changes", map[string]any{
+		"table": "posts", "op": "delete", "id": postID, "author_id": userID, "media_key": mediaKey,
+	})
 	if err != nil {
 		return err
 	}
 
 	if inReplyToID != 0 {
-		_, err = tx.Exec(ctx, `INSERT INTO outbox (topic, payload) VALUES ('activity', jsonb_build_object(
-			'op', 'unreply', 'reply_post_id', $1, 'actor_id', $2
-		))`, postID, userID)
+		err = outbox(tx, ctx, "activity", map[string]any{
+			"op": "unreply", "reply_post_id": postID, "actor_id": userID,
+		})
 		if err != nil {
 			return err
 		}
@@ -477,9 +497,9 @@ func (c *DBClient) deletePost(ctx context.Context, postID int32, userID int32) e
 		}
 		rows.Close()
 		for _, item := range counts {
-			_, err = tx.Exec(ctx, `INSERT INTO outbox (topic, payload) VALUES ('entity-changes', jsonb_build_object(
-				'table', 'hashtags', 'op', 'upsert', 'name', $1, 'post_count', $2
-			))`, item.name, item.count)
+			err = outbox(tx, ctx, "entity-changes", map[string]any{
+				"table": "hashtags", "op": "upsert", "name": item.name, "post_count": item.count,
+			})
 			if err != nil {
 				return err
 			}
@@ -510,9 +530,9 @@ func (c *DBClient) likePost(ctx context.Context, postID int32, userID int32) err
 		if err := tx.QueryRow(ctx, "SELECT user_id FROM posts WHERE id = $1", postID).Scan(&recipientID); err != nil {
 			return err
 		}
-		_, err = tx.Exec(ctx, `INSERT INTO outbox (topic, payload) VALUES ('activity', jsonb_build_object(
-			'op', 'like', 'post_id', $1, 'actor_id', $2, 'recipient_id', $3
-		))`, postID, userID, recipientID)
+		err = outbox(tx, ctx, "activity", map[string]any{
+			"op": "like", "post_id": postID, "actor_id": userID, "recipient_id": recipientID,
+		})
 		if err != nil {
 			return err
 		}
@@ -539,9 +559,9 @@ func (c *DBClient) unlikePost(ctx context.Context, postID int32, userID int32) e
 		return err
 	}
 	if tag.RowsAffected() > 0 {
-		_, err = tx.Exec(ctx, `INSERT INTO outbox (topic, payload) VALUES ('activity', jsonb_build_object(
-			'op', 'unlike', 'post_id', $1, 'actor_id', $2, 'recipient_id', $3
-		))`, postID, userID, recipientID)
+		err = outbox(tx, ctx, "activity", map[string]any{
+			"op": "unlike", "post_id": postID, "actor_id": userID, "recipient_id": recipientID,
+		})
 		if err != nil {
 			return err
 		}
@@ -581,16 +601,17 @@ func (c *DBClient) repostPost(ctx context.Context, postID int32, userID int32) e
 	if err := tx.QueryRow(ctx, "SELECT user_id FROM posts WHERE id = $1", repostOfID).Scan(&recipientID); err != nil {
 		return err
 	}
-	_, err = tx.Exec(ctx, `INSERT INTO outbox (topic, payload) VALUES ('entity-changes', jsonb_build_object(
-		'table', 'posts', 'op', 'upsert', 'id', $1, 'author_id', $2,
-		'repost_of_id', $3, 'created', $4
-	))`, newPostID, userID, repostOfID, created)
+	err = outbox(tx, ctx, "entity-changes", map[string]any{
+		"table": "posts", "op": "upsert",
+		"id": newPostID, "author_id": userID,
+		"repost_of_id": repostOfID, "created": created,
+	})
 	if err != nil {
 		return err
 	}
-	_, err = tx.Exec(ctx, `INSERT INTO outbox (topic, payload) VALUES ('activity', jsonb_build_object(
-		'op', 'repost', 'post_id', $1, 'actor_id', $2, 'recipient_id', $3
-	))`, repostOfID, userID, recipientID)
+	err = outbox(tx, ctx, "activity", map[string]any{
+		"op": "repost", "post_id": repostOfID, "actor_id": userID, "recipient_id": recipientID,
+	})
 	if err != nil {
 		return err
 	}
@@ -621,15 +642,15 @@ func (c *DBClient) removeRepost(ctx context.Context, postID int32, userID int32)
 	if err := tx.QueryRow(ctx, "SELECT user_id FROM posts WHERE id = $1", repostOfID).Scan(&recipientID); err != nil {
 		return err
 	}
-	_, err = tx.Exec(ctx, `INSERT INTO outbox (topic, payload) VALUES ('entity-changes', jsonb_build_object(
-		'table', 'posts', 'op', 'delete', 'id', $1, 'author_id', $2, 'media_key', ''
-	))`, repostRowID, userID)
+	err = outbox(tx, ctx, "entity-changes", map[string]any{
+		"table": "posts", "op": "delete", "id": repostRowID, "author_id": userID, "media_key": "",
+	})
 	if err != nil {
 		return err
 	}
-	_, err = tx.Exec(ctx, `INSERT INTO outbox (topic, payload) VALUES ('activity', jsonb_build_object(
-		'op', 'unrepost', 'post_id', $1, 'actor_id', $2, 'recipient_id', $3
-	))`, repostOfID, userID, recipientID)
+	err = outbox(tx, ctx, "activity", map[string]any{
+		"op": "unrepost", "post_id": repostOfID, "actor_id": userID, "recipient_id": recipientID,
+	})
 	if err != nil {
 		return err
 	}
