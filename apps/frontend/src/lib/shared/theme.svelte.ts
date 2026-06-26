@@ -47,7 +47,8 @@ function createTheme(initialMode: ThemeMode): ThemeController {
     } else {
       localStorage.setItem(STORAGE_KEY, nextMode);
     }
-    document.cookie = `${STORAGE_KEY}=${nextMode}; Path=/; Max-Age=${COOKIE_MAX_AGE}; SameSite=Lax`;
+    const secure = location.protocol === "https:" ? "; Secure" : "";
+    document.cookie = `${STORAGE_KEY}=${nextMode}; Path=/; Max-Age=${COOKIE_MAX_AGE}; SameSite=Lax${secure}`;
     apply();
   }
 
