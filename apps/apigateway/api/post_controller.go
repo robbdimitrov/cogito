@@ -70,7 +70,7 @@ func (pc *postController) createPost(w http.ResponseWriter, r *http.Request) {
 		}
 		_, err = pc.imgClient.VerifyUpload(ctx, &pb.VerifyUploadRequest{Filename: *body.MediaKey, UserId: int32(userIDInt)})
 		if err != nil {
-			jsonError(w, http.StatusForbidden, "Forbidden")
+			grpcError(w, err)
 			return
 		}
 	}
