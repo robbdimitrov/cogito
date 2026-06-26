@@ -85,7 +85,7 @@ func TestMapPost(t *testing.T) {
 
 func TestMapFeedPost(t *testing.T) {
 	mr := &mockRow{}
-	post, err := mapFeedPost(mr)
+	post, _, err := mapFeedPost(mr)
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
 	}
@@ -101,7 +101,7 @@ func TestMapFeedPost(t *testing.T) {
 	}
 
 	mr = &mockRow{err: errors.New("scan error")}
-	_, err = mapFeedPost(mr)
+	_, _, err = mapFeedPost(mr)
 	if err == nil {
 		t.Errorf("expected error")
 	}

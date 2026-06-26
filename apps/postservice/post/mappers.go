@@ -44,7 +44,9 @@ func mapPost(r row) (*pb.Post, error) {
 }
 
 // mapFeedPost maps feed queries that may include repost shells (21 columns).
-func mapFeedPost(r row) (*pb.Post, error) {
+// It returns the raw post created timestamp alongside the post so callers can
+// use it directly as a cursor without a string round-trip.
+func mapFeedPost(r row) (*pb.Post, time.Time, error) {
 	post := pb.Post{}
 	var created time.Time
 	var content *string
@@ -64,7 +66,7 @@ func mapFeedPost(r row) (*pb.Post, error) {
 		&oID, &oUserID, &oContent, &oCreated, &oMediaKey,
 		&oInReplyToID, &oQuoteOfID)
 	if err != nil {
-		return nil, err
+		return nil, time.Time{}, err
 	}
 
 	post.Created = created.UTC().Format(time.RFC3339Nano)
@@ -95,7 +97,7 @@ func mapFeedPost(r row) (*pb.Post, error) {
 		}
 		post.RepostOf = orig
 	}
-	return &post, nil
+	return &post, created, nil
 }
 
 // mapMaterializedFeedPost maps materialized feed rows that include f.created (22 columns).
@@ -186,7 +188,7 @@ func mapFeedPosts(r rows) iter.Seq2[*pb.Post, error] {
 	return func(yield func(*pb.Post, error) bool) {
 		defer r.Close()
 		for r.Next() {
-			post, err := mapFeedPost(r)
+			post, _, err := mapFeedPost(r)
 			if !yield(post, err) {
 				return
 			}

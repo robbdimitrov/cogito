@@ -240,11 +240,7 @@ func collectFeedPosts(r rows) ([]feedPostItem, error) {
 	defer r.Close()
 	var out []feedPostItem
 	for r.Next() {
-		post, err := mapFeedPost(r)
-		if err != nil {
-			return nil, err
-		}
-		created, err := time.Parse(time.RFC3339Nano, post.Created)
+		post, created, err := mapFeedPost(r)
 		if err != nil {
 			return nil, err
 		}

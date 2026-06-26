@@ -63,7 +63,15 @@ func (c *controller) GetFeed(ctx context.Context, req *pb.GetFeedRequest) (*pb.P
 		return nil, newError(codes.InvalidArgument)
 	}
 
-	resIter, err := c.dbClient.getFeed(ctx, cur, hasCur, req.Limit, userID)
+	limit := req.Limit
+	if limit < 1 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
+	resIter, err := c.dbClient.getFeed(ctx, cur, hasCur, limit, userID)
 	if err != nil {
 		slog.Warn("getting posts failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
@@ -79,10 +87,10 @@ func (c *controller) GetFeed(ctx context.Context, req *pb.GetFeedRequest) (*pb.P
 	}
 
 	var nextCursor string
-	if len(items) > int(req.Limit) {
-		last := items[req.Limit-1]
+	if len(items) > int(limit) {
+		last := items[limit-1]
 		nextCursor = EncodeCursor(last.created, last.post.Id)
-		items = items[:req.Limit]
+		items = items[:limit]
 	}
 
 	posts := make([]*pb.Post, len(items))
