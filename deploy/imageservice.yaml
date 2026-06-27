@@ -74,6 +74,16 @@ spec:
             secretKeyRef:
               name: cogito-db-secret
               key: s3-secret-key
+        - name: S3_PROVISIONING_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: cogito-db-secret
+              key: s3-provisioning-access-key
+        - name: S3_PROVISIONING_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: cogito-db-secret
+              key: s3-provisioning-secret-key
         livenessProbe:
           tcpSocket:
             port: 5050

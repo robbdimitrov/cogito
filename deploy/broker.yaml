@@ -387,13 +387,13 @@ spec:
         - name: S3_ACCESS_KEY
           valueFrom:
             secretKeyRef:
-              name: seaweedfs-credentials
-              key: accessKey
+              name: cogito-db-secret
+              key: s3-access-key
         - name: S3_SECRET_KEY
           valueFrom:
             secretKeyRef:
-              name: seaweedfs-credentials
-              key: secretKey
+              name: cogito-db-secret
+              key: s3-secret-key
         securityContext: &connect-container-security
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true

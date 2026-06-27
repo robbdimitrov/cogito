@@ -14,6 +14,7 @@ LOCAL_PORT="${LOCAL_PORT:-8080}"
 REMOTE_PORT="${REMOTE_PORT:-8080}"
 PORT_FORWARD_LOG="${PORT_FORWARD_LOG:-/tmp/cogito-port-forward-${LOCAL_PORT}.log}"
 PORT_FORWARD_PID_FILE="${PORT_FORWARD_PID_FILE:-/tmp/cogito-port-forward-${LOCAL_PORT}.pid}"
+CREATED_NAMESPACE=false
 
 ROLL_OUT_DATABASE=(statefulset/database)
 ROLL_OUT_REST=(
@@ -58,27 +59,51 @@ random_secret() {
   printf '%s\n' "${secret}"
 }
 
+secret_has_key() {
+  local key="$1"
+  [[ -n "$(kubectl -n "${NS}" get secret cogito-db-secret -o "go-template={{ index .data \"${key}\" }}" 2>/dev/null || true)" ]]
+}
+
+ensure_secret_key() {
+  local key="$1"
+  if secret_has_key "${key}"; then
+    return
+  fi
+
+  log "adding missing generated secret key: ${key}"
+  kubectl -n "${NS}" patch secret cogito-db-secret --type merge \
+    -p "{\"stringData\":{\"${key}\":\"$(random_secret)\"}}"
+}
+
 ensure_namespace() {
-  kubectl create namespace "${NS}" 2>/dev/null || true
+  if kubectl create namespace "${NS}" 2>/dev/null; then
+    CREATED_NAMESPACE=true
+  fi
 }
 
 ensure_secret() {
   if kubectl -n "${NS}" get secret cogito-db-secret >/dev/null 2>&1; then
+    ensure_secret_key s3-provisioning-access-key
+    ensure_secret_key s3-provisioning-secret-key
     return
   fi
 
   log "creating generated database and service secrets"
   local postgres_password
+  local app_password
   postgres_password="$(random_secret)"
+  app_password="$(random_secret)"
   kubectl -n "${NS}" create secret generic cogito-db-secret \
     --from-literal=postgres-password="${postgres_password}" \
-    --from-literal=cogito-app-password="cogito-app-password" \
-    --from-literal=database-url="postgresql://cogito_app:cogito-app-password@database:5432/cogito" \
+    --from-literal=cogito-app-password="${app_password}" \
+    --from-literal=database-url="postgresql://cogito_app:${app_password}@database:5432/cogito" \
     --from-literal=internal-grpc-token="$(random_secret)" \
     --from-literal=session-hmac-secret="$(random_secret)" \
     --from-literal=meili-master-key="$(random_secret)" \
-    --from-literal=s3-access-key="cogito-access-key" \
-    --from-literal=s3-secret-key="cogito-secret-key"
+    --from-literal=s3-access-key="$(random_secret)" \
+    --from-literal=s3-secret-key="$(random_secret)" \
+    --from-literal=s3-provisioning-access-key="$(random_secret)" \
+    --from-literal=s3-provisioning-secret-key="$(random_secret)"
 }
 
 port_pids() {
@@ -165,6 +190,13 @@ wait_for_rollouts() {
 }
 
 restart_stack() {
+  if [[ "${CREATED_NAMESPACE}" == "true" ]]; then
+    log "waiting for newly created stack"
+    wait_for_rollouts "${ROLL_OUT_DATABASE[@]}"
+    wait_for_rollouts "${ROLL_OUT_REST[@]}"
+    return
+  fi
+
   log "restarting all services"
   # Restarting them together ensures the backends drop their DB connections,
   # allowing the database's graceful shutdown to complete instantly.

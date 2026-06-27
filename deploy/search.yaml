@@ -38,6 +38,7 @@ spec:
         tier: backend
         component: meilisearch
     spec:
+      automountServiceAccountToken: false
       containers:
       - name: meilisearch
         image: getmeili/meilisearch:v1.15.2

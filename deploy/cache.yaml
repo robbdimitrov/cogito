@@ -19,6 +19,7 @@ spec:
         app: cogito
         component: dragonfly
     spec:
+      automountServiceAccountToken: false
       containers:
       - name: dragonfly
         image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.25.0

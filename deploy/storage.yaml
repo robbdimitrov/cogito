@@ -1,34 +1,3 @@
-apiVersion: v1
-kind: Secret
-metadata:
-  name: seaweedfs-credentials
-  namespace: cogito
-type: Opaque
-stringData:
-  accessKey: cogito-access-key
-  secretKey: cogito-secret-key
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: seaweedfs-config
-data:
-  s3.json: |
-    {
-      "identities": [
-        {
-          "name": "cogito",
-          "credentials": [
-            {
-              "accessKey": "cogito-access-key",
-              "secretKey": "cogito-secret-key"
-            }
-          ],
-          "actions": ["Read", "Write", "List", "Tagging", "Admin"]
-        }
-      ]
-    }
----
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -50,11 +19,41 @@ spec:
         app: cogito
         component: seaweedfs
     spec:
+      automountServiceAccountToken: false
       containers:
       - name: seaweedfs
         # Pin to a specific version; verify against running cluster before upgrading.
         image: chrislusf/seaweedfs:3.68
-        args: ["server", "-s3", "-s3.config=/etc/seaweed/s3.json"]
+        command: ["/bin/sh", "-ec"]
+        args:
+        - |
+          cat > /etc/seaweed/s3.json <<EOF
+          {
+            "identities": [
+              {
+                "name": "cogito",
+                "credentials": [
+                  {
+                    "accessKey": "$(cat /etc/seaweed-secrets/s3-access-key)",
+                    "secretKey": "$(cat /etc/seaweed-secrets/s3-secret-key)"
+                  }
+                ],
+                "actions": ["Read", "Write", "List", "Tagging"]
+              },
+              {
+                "name": "cogito-provisioning",
+                "credentials": [
+                  {
+                    "accessKey": "$(cat /etc/seaweed-secrets/s3-provisioning-access-key)",
+                    "secretKey": "$(cat /etc/seaweed-secrets/s3-provisioning-secret-key)"
+                  }
+                ],
+                "actions": ["Admin"]
+              }
+            ]
+          }
+          EOF
+          exec weed server -s3 -s3.config=/etc/seaweed/s3.json
         securityContext:
           allowPrivilegeEscalation: false
         ports:
@@ -71,10 +70,25 @@ spec:
           mountPath: /data
         - name: seaweedfs-config
           mountPath: /etc/seaweed
+        - name: seaweedfs-credentials
+          mountPath: /etc/seaweed-secrets
+          readOnly: true
       volumes:
       - name: seaweedfs-config
-        configMap:
-          name: seaweedfs-config
+        emptyDir:
+          medium: Memory
+      - name: seaweedfs-credentials
+        secret:
+          secretName: cogito-db-secret
+          items:
+          - key: s3-access-key
+            path: s3-access-key
+          - key: s3-secret-key
+            path: s3-secret-key
+          - key: s3-provisioning-access-key
+            path: s3-provisioning-access-key
+          - key: s3-provisioning-secret-key
+            path: s3-provisioning-secret-key
   volumeClaimTemplates:
   - metadata:
       name: seaweedfs-data

@@ -4,14 +4,16 @@ metadata:
   name: postgres-init
   namespace: cogito
 data:
-  init.sql: |
-    CREATE USER cogito_app WITH PASSWORD 'cogito-app-password';
+  init.sh: |
+    psql --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" --set=app_password="$COGITO_APP_PASSWORD" <<'SQL'
+    CREATE USER cogito_app WITH PASSWORD :'app_password';
     GRANT CONNECT ON DATABASE cogito TO cogito_app;
     GRANT USAGE ON SCHEMA public TO cogito_app;
     GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO cogito_app;
     GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO cogito_app;
     ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO cogito_app;
     ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO cogito_app;
+    SQL
 ---
 apiVersion: v1
 kind: Service
@@ -67,6 +69,7 @@ spec:
         app: cogito
         tier: database
     spec:
+      automountServiceAccountToken: false
       terminationGracePeriodSeconds: 60
       volumes:
       - name: postgres-init
@@ -92,6 +95,11 @@ spec:
             secretKeyRef:
               name: cogito-db-secret
               key: postgres-password
+        - name: COGITO_APP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cogito-db-secret
+              key: cogito-app-password
         - name: POSTGRES_DB
           value: cogito
         - name: PGDATA
