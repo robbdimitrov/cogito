@@ -22,15 +22,15 @@ graph TD
     Browser["Browser"]
 
     subgraph cluster ["Kubernetes Cluster"]
-        Web["Frontend / BFF<br>(SvelteKit SSR)"]:::frontend
-        API["API Gateway<br>(Go)"]:::gateway
+        Frontend["Frontend<br>(SvelteKit)"]:::frontend
+        Gateway["API Gateway<br>(Go)"]:::gateway
 
         subgraph services ["gRPC Services"]
-            Auth["Auth<br>(Rust)"]:::service
-            Users["User<br>(Rust)"]:::service
-            Posts["Post<br>(Go)"]:::service
-            Images["Image<br>(Rust)"]:::service
-            Flow["Flow<br>(Rust)"]:::service
+            Auth["Auth Service<br>(Rust)"]:::backend
+            Users["User Service<br>(Rust)"]:::backend
+            Posts["Post Service<br>(Go)"]:::backend
+            Images["Image Service<br>(Rust)"]:::backend
+            Flow["Flow Service<br>(Rust)"]:::backend
         end
 
         subgraph data ["Data & Storage"]
@@ -39,15 +39,15 @@ graph TD
         end
     end
 
-    Browser --> Web
-    Web --> API
-    API --> Auth & Users & Posts & Images & Flow
+    Browser --> Frontend
+    Frontend --> Gateway
+    Gateway --> Auth & Users & Posts & Images & Flow
     Auth & Users & Posts & Images & Flow --> DB
     Flow --> Meili
 
     classDef frontend fill:#0ea5e9,stroke:#0284c7,stroke-width:2px,color:#fff
     classDef gateway fill:#6366f1,stroke:#4f46e5,stroke-width:2px,color:#fff
-    classDef service fill:#10b981,stroke:#059669,stroke-width:2px,color:#fff
+    classDef backend fill:#10b981,stroke:#059669,stroke-width:2px,color:#fff
     classDef database fill:#f59e0b,stroke:#d97706,stroke-width:2px,color:#fff
     classDef search fill:#06b6d4,stroke:#0891b2,stroke-width:2px,color:#fff
 

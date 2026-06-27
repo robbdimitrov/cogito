@@ -19,6 +19,7 @@ Applied in this order (outermost to innermost):
 | Method | Path |
 |---|---|
 | GET | / |
+| GET / HEAD | /uploads/{filename} |
 | POST | /users |
 | POST | /sessions |
 | DELETE | /sessions |
@@ -49,8 +50,9 @@ Rate limit key: `{policy}:user:{id}` (authenticated) → `{policy}:session:{cook
 The gateway preserves gRPC status for HTTP control flow while returning JSON
 error bodies. Standard mappings include `InvalidArgument` → 400,
 `Unauthenticated` → 401, `PermissionDenied` → 403, `NotFound` → 404, and
-`AlreadyExists` → 409. Other gRPC failures map to 500 unless a controller
-handles them explicitly.
+`AlreadyExists` → 409, `ResourceExhausted` → 429, `Unavailable` → 503, and
+`DeadlineExceeded` → 504. Gateway body-limit failures return 413. Other gRPC
+failures map to 500 unless a controller handles them explicitly.
 
 ## Pagination
 
@@ -68,6 +70,7 @@ handles them explicitly.
 | Method | Path | Purpose |
 |---|---|---|
 | GET | / | Liveness — returns "OK" |
+| GET / HEAD | /uploads/{filename} | Serve image — proxied to imageservice |
 | POST | /users | Create account (name, username, email, password) |
 | POST | /sessions | Login — sets `session` cookie; returns `{ id: userId }` |
 | DELETE | /sessions | Logout — clears `session` cookie |
@@ -132,7 +135,6 @@ handles them explicitly.
 | Method | Path | Purpose |
 |---|---|---|
 | POST | /uploads | Upload image — proxied to imageservice (requires auth) |
-| GET | /uploads/{filename} | Serve image — proxied to imageservice (no auth required) |
 
 ## JSON Response Shapes
 
@@ -174,6 +176,9 @@ Zero-value integer fields and null nested objects are omitted.
 
 **Session** — `{ "id": "string", "userId": 1, "created": "2024-01-01T00:00:00Z" }`
 
+Session `id` values returned by `GET /sessions` are public revocation handles,
+not stored session hashes or cookie credentials.
+
 **Hashtag** — `{ "id": 1, "name": "string", "postCount": 0 }`
 
 ## gRPC Services
@@ -200,9 +205,9 @@ All gateway→backend calls carry `internal-token` and `user-id` metadata header
 | Method | Key request fields | Response |
 |---|---|---|
 | CreateSession | email, password | Session (id, user_id, created) |
-| GetSession | session_id | Session |
-| DeleteSession | session_id | Empty |
-| GetSessions | user_id | Sessions |
+| GetSession | raw session_id | Session (includes internal handle) |
+| DeleteSession | raw session_id or public handle | Empty |
+| GetSessions | user_id | Sessions with public handles in `id` |
 
 ### PostService
 
@@ -228,7 +233,7 @@ All gateway→backend calls carry `internal-token` and `user-id` metadata header
 | Method | Key request fields | Response |
 |---|---|---|
 | VerifyUpload | filename, user_id | Empty |
-| ConsumeUpload | filename | Empty |
+| ConsumeUpload | filename, user_id | Empty |
 | DeleteImage | filename | Empty |
 
 ### SearchService
@@ -250,7 +255,8 @@ All gateway→backend calls carry `internal-token` and `user-id` metadata header
 ## Image Proxy
 
 - `POST /uploads` — forwards multipart body to `imageservice:8081/uploads`; injects `x-user-id` (from session) and `internal-token` headers.
-- `GET /uploads/{filename}` — forwards to `imageservice:8081/uploads/{filename}`.
+- `GET /uploads/{filename}` and `HEAD /uploads/{filename}` — public image reads forwarded to `imageservice:8081/uploads/{filename}`.
+- The gateway strips client-supplied `internal-token`, `x-user-id`, and `user-id` before proxying image HTTP requests, then injects its own `internal-token`. Authenticated upload proxying also injects gateway-derived `x-user-id`.
 - GET retry: 3 attempts, linear backoff 100 ms × attempt number.
 - Circuit breaker: opens after 5 consecutive transient errors (502/503/504); 30-second cooldown.
 - Non-GET requests: no retry.

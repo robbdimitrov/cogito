@@ -51,6 +51,7 @@ feed (materialized home-feed rows)
 | Column | Type | Constraints |
 |---|---|---|
 | id | varchar(255) | PRIMARY KEY — stores HMAC-SHA256 hash of the raw session ID, never the raw value |
+| handle | varchar(255) | NOT NULL, UNIQUE — public session revocation handle |
 | user_id | integer | FK → users.id ON DELETE CASCADE |
 | created | timestamptz | NOT NULL, DEFAULT now() |
 
@@ -182,11 +183,11 @@ Primary key: `(user_id, post_id)`. Feed rows are retained for 30 days; post/user
 
 ## Domain Invariants
 
-- Sessions store the HMAC-SHA256 hash of the session ID. The raw 28-char ID is returned to the client; only the hash is persisted.
+- Sessions store the HMAC-SHA256 hash of the cookie session ID plus a separate random public handle for listing and revocation. Stored hashes are never returned by session listing.
 - A post is exactly one type: plain (content only), reply (content + in_reply_to_id), quote (content + quote_of_id), or repost (repost_of_id only). Repost exclusivity is enforced by DB CHECK; reply–quote exclusivity is enforced by the application.
 - Reposts resolve to the canonical original: `repost_of_id = COALESCE(source.repost_of_id, source.id)`. Chains never exceed one hop.
 - User counters (posts, likes, following, followers) and boolean states (liked, reposted, followed) are computed at read time via subqueries — no stored counter columns.
 - `fan_out_disabled` is one-way once set; high-follower authors are pulled at feed read time instead of materialized into every follower's feed.
-- Uploads are staged at `staging/{filename}` in S3 until `ConsumeUpload` moves them to `{filename}`.
+- Uploads are staged at `staging/{filename}` in S3 until owner-checked `ConsumeUpload` moves them to `{filename}`.
 - Hashtag names are stored lowercase and are globally unique.
 - `posts.hashtags` (varchar array) mirrors the post_hashtags relational data but is not actively written by the application; the `hashtags` and `post_hashtags` tables are the authoritative source.

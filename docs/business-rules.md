@@ -17,7 +17,8 @@
 ## Credential Updates
 
 - Changing password requires `old_password`; wrong value returns `unauthenticated`.
-- On password change, the gateway invalidates all sessions belonging to the user except the current one. Current session is identified by HMAC-SHA256 of the session ID.
+- Password changes and profile-field changes must be submitted separately.
+- On password change, the gateway invalidates all sessions belonging to the user except the current one. Current session is identified by the public session handle returned by AuthService.
 
 ## Follow Rules
 
@@ -82,7 +83,7 @@ Lightweight projections (`GetUsersByIds`, `SearchUsers`) return 0 for all counts
 | LikePost | `INSERT … ON CONFLICT DO NOTHING` |
 | UnlikePost | `DELETE` — silent if no matching row |
 | RepostPost | `INSERT … ON CONFLICT (user_id, repost_of_id) DO NOTHING` |
-| RemoveRepost | `DELETE` — silent if no matching row |
+| RemoveRepost | Resolve requested ID to canonical original, then `DELETE` — silent if no matching row |
 
 ## Post Deletion Cascade
 
@@ -135,10 +136,13 @@ Notification inserts use the outbox row ID as `external_id`, so replayed message
 3. Following a regular author backfills the follower's feed with the author's latest 50 non-reply posts.
 4. Unfollowing prunes that followee's materialized feed rows for the follower.
 5. Post and user deletes rely on database CASCADE to remove feed rows; consumers do not separately delete them.
+6. Feed consumer processing is at-least-once: malformed or unsupported messages are logged and acknowledged as deliberate skips, while retryable handler failures are left uncommitted after bounded in-process retries so Kafka can redeliver them.
 
 ## Image Lifecycle
 
 1. `POST /uploads` — image validated by magic bytes and stored at `staging/{filename}` in S3; `uploads` row created.
 2. `POST /posts` with `mediaKey` — gateway calls `VerifyUpload` (ownership check) then `ConsumeUpload` (moves to `{filename}`).
-3. `DELETE /posts/{postId}` — gateway calls `DeleteImage` if post had a `mediaKey`.
-4. If post creation fails after a successful upload, the staged file is not cleaned up automatically.
+3. `ConsumeUpload` validates the key and atomically claims upload metadata by filename and user ID before promotion.
+4. If post creation succeeds but image consumption fails, the gateway attempts to delete the post and reports the image failure.
+5. `DELETE /posts/{postId}` — gateway calls `DeleteImage` if post had a `mediaKey` and surfaces cleanup failures.
+6. Profile and cover images are consumed before their keys are stored on the user record; old-image deletion failures are reported.

@@ -33,7 +33,7 @@
 | /posts/{id}           | Post + replies                                                  | createReply, toggleLike, toggleRepost, deletePost  |
 | /hashtags/{tag}       | Tag post feed                                                   | toggleLike, toggleRepost, deletePost               |
 | /search               | Search results (q, type params)                                 | —                                                  |
-| /notifications        | Notifications (unread rows marked read server-side after fetch) | —                                                  |
+| /notifications        | Notifications (initial unread rows marked read server-side after fetch) | —                                                  |
 | /settings             | Redirect to /settings/profile                                   | —                                                  |
 | /settings/profile     | Current user profile                                            | default — update name/username/email/bio/photos    |
 | /settings/password    | Password form                                                   | default — change password (old + new)              |
@@ -67,7 +67,7 @@ Route params: `username` (any string), `tab` (matches `likes`, `followers`, `fol
 | Prevent authed users | (auth)/+layout.server.ts | `resolveCurrentUser` → authenticated | 303 to /      |
 | Require auth         | (app)/+layout.server.ts  | Session absent or invalid            | 303 to /login |
 
-`resolveCurrentUser(fetch)`:
+`resolveCurrentUser(apiClient(event))`:
 
 1. Calls `GET /sessions` → returns `currentSessionId` and `userId`.
 2. Calls `GET /users/{userId}` → returns full user object.
@@ -89,6 +89,8 @@ No data is fetched on component mount. The browser never calls the backend direc
 Everything runs in the Node server. `apiClient(event)` resolves backend paths against `BACKEND_URL` and forwards the session cookie. These are server-to-server requests; they never cross CORS.
 
 Browser-initiated fetches for pagination hit same-origin SvelteKit `+server.ts` handlers, which call the backend server-side.
+
+Backend-bound server requests use `BACKEND_TIMEOUT_MS` (default 10000 ms) as an abort deadline.
 
 Backend-authored error bodies are not UI copy. The shared backend response
 unwrap helper preserves HTTP status for route control flow, but maps failed
@@ -118,7 +120,7 @@ unchanged after DTO mapping.
 | `/search`               | GET    | page load       | GET /search?q=&type=                                                      |
 | `/notifications`        | GET    | app layout load | GET /notifications/unread-count                                           |
 | `/notifications`        | GET    | page load       | GET /notifications + PUT /notifications/{id}/read for unread rows         |
-| `/notifications`        | GET    | +server.ts      | GET /notifications?cursor= + PUT /notifications/{id}/read for unread rows |
+| `/notifications`        | GET    | +server.ts      | GET /notifications?cursor=                                                |
 | `/api/users/search`     | GET    | +server.ts      | GET /users/search?q=                                                      |
 | `/api/hashtags/search`  | GET    | +server.ts      | GET /hashtags/search?q=                                                   |
 | `/uploads/{key}`        | GET    | +server.ts      | GET /uploads/{key} (proxied)                                              |
@@ -130,6 +132,7 @@ unchanged after DTO mapping.
 
 - Validates `key` against `^[A-Za-z0-9._-]{1,255}$`; rejects keys containing `..` — 404 on failure.
 - Streams response body from backend without buffering in the Node process.
+- Does not attach a session cookie; backend image reads are public through the gateway.
 - Forwards: `content-type`, `content-length`, `etag`, `last-modified`, `cache-control`.
 
 ## Pagination
@@ -141,8 +144,8 @@ unchanged after DTO mapping.
 - Used in: feed, user posts, liked posts, followers, following, hashtag feed.
 - The feed renders a first-page empty state linking to `/search` when
   `/posts/feed` returns no items and no cursor.
-- `/notifications` paginates through same-origin `+server.ts`; each fetched
-  unread notification is marked read server-side after the page is retrieved.
+- `/notifications` initial page marks unread rows as read after retrieval.
+  Pagination through same-origin `+server.ts` is read-only.
 
 ## Image Upload Flow
 
