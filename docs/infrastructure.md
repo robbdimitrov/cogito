@@ -4,167 +4,184 @@
 
 ### Application Deployments
 
-| Service | Replicas | CPU req | Mem req | Mem limit |
-|---|---|---|---|---|
-| frontend | 1 | 250m | 256Mi | 512Mi |
-| apigateway | 1 | 100m | 64Mi | 128Mi |
-| authservice | 1 | 50m | 32Mi | 128Mi |
-| postservice | 1 | 100m | 64Mi | 128Mi |
-| userservice | 1 | 50m | 32Mi | 128Mi |
-| imageservice | 1 | 75m | 64Mi | 256Mi |
-| flowservice | 2 | 100m | 128Mi | 256Mi |
+| Service      | Replicas | CPU req | Mem req | Mem limit |
+| ------------ | -------- | ------- | ------- | --------- |
+| frontend     | 1        | 250m    | 256Mi   | 512Mi     |
+| apigateway   | 1        | 100m    | 64Mi    | 128Mi     |
+| authservice  | 1        | 50m     | 32Mi    | 128Mi     |
+| postservice  | 1        | 100m    | 64Mi    | 128Mi     |
+| userservice  | 1        | 50m     | 32Mi    | 128Mi     |
+| imageservice | 1        | 75m     | 64Mi    | 256Mi     |
+| flowservice  | 2        | 100m    | 128Mi   | 256Mi     |
 
 ### Infrastructure StatefulSets
 
-| Service | CPU req | Mem req | Mem limit | PVC size |
-|---|---|---|---|---|
-| database (postgres:18.4-alpine) | 500m | 512Mi | 512Mi | 5 Gi |
-| dragonfly (dragonflydb) | 100m | 64Mi | 256Mi | 1 Gi |
-| seaweedfs (chrislusf/seaweedfs) | 100m | 64Mi | 256Mi | 5 Gi |
-| meilisearch (getmeili/meilisearch:v1.15) | 100m | 256Mi | 512Mi | 1 Gi |
-| redpanda (redpandadata/redpanda) | 100m | 256Mi | 512Mi | 2 Gi |
+| Service                                  | CPU req | Mem req | Mem limit | PVC size |
+| ---------------------------------------- | ------- | ------- | --------- | -------- |
+| database (postgres:18.4-alpine)          | 500m    | 512Mi   | 512Mi     | 5 Gi     |
+| dragonfly (dragonflydb)                  | 100m    | 64Mi    | 256Mi     | 1 Gi     |
+| seaweedfs (chrislusf/seaweedfs)          | 100m    | 64Mi    | 256Mi     | 5 Gi     |
+| meilisearch (getmeili/meilisearch:v1.15) | 100m    | 256Mi   | 512Mi     | 1 Gi     |
+| redpanda (redpandadata/redpanda)         | 100m    | 256Mi   | 512Mi     | 2 Gi     |
 
-Redpanda Connect runs as a Deployment and mounts broker pipeline configuration from a ConfigMap. All PVCs: ReadWriteOnce. All StatefulSets: 1 replica.
+Redpanda Connect runs as a Deployment and mounts broker pipeline configuration
+from a ConfigMap. All PVCs: ReadWriteOnce. All StatefulSets: 1 replica.
 
 ## Health Probes
 
-| Service | Type | Path / Port | Readiness delay/period | Liveness delay/period |
-|---|---|---|---|---|
-| frontend | HTTP | / | 3s / 10s | 5s / 15s |
-| apigateway | HTTP | / | 3s / 10s | 5s / 15s |
-| authservice | TCP | 5050 | 5s / 10s | 10s / 15s |
-| postservice | TCP | 5050 | 5s / 10s | 10s / 15s |
-| userservice | TCP | 5050 | 5s / 10s | 10s / 15s |
-| imageservice | TCP | 5050 | 5s / 10s | 10s / 15s |
-| flowservice | TCP | 5050 | 5s / 10s | 10s / 15s |
-| database | exec pg_isready | — | 5s / 5s (timeout 3s) | period 10s, timeout 3s, failure 6 |
-| meilisearch | HTTP | /health | 5s / 10s | 10s / 15s |
-| redpanda | HTTP | /v1/status/ready on 9644 | startup + readiness | liveness |
+| Service      | Type            | Path / Port              | Readiness delay/period | Liveness delay/period             |
+| ------------ | --------------- | ------------------------ | ---------------------- | --------------------------------- |
+| frontend     | HTTP            | /                        | 3s / 10s               | 5s / 15s                          |
+| apigateway   | HTTP            | /                        | 3s / 10s               | 5s / 15s                          |
+| authservice  | TCP             | 5050                     | 5s / 10s               | 10s / 15s                         |
+| postservice  | TCP             | 5050                     | 5s / 10s               | 10s / 15s                         |
+| userservice  | TCP             | 5050                     | 5s / 10s               | 10s / 15s                         |
+| imageservice | TCP             | 5050                     | 5s / 10s               | 10s / 15s                         |
+| flowservice  | TCP             | 5050                     | 5s / 10s               | 10s / 15s                         |
+| database     | exec pg_isready | —                        | 5s / 5s (timeout 3s)   | period 10s, timeout 3s, failure 6 |
+| meilisearch  | HTTP            | /health                  | 5s / 10s               | 10s / 15s                         |
+| redpanda     | HTTP            | /v1/status/ready on 9644 | startup + readiness    | liveness                          |
 
-database startup probe: failureThreshold=30, periodSeconds=2. terminationGracePeriodSeconds=60.
+database startup probe: failureThreshold=30, periodSeconds=2.
+terminationGracePeriodSeconds=60.
 
 ## Init Containers
 
-| Deployment | Init image | Action |
-|---|---|---|
+| Deployment | Init image                     | Action                                            |
+| ---------- | ------------------------------ | ------------------------------------------------- |
 | apigateway | localhost:5000/cogito/database | Runs all pending migrations before gateway starts |
 
 ## Networking
 
-| Resource | Kind | Host | Backend |
-|---|---|---|---|
+| Resource       | Kind    | Host             | Backend       |
+| -------------- | ------- | ---------------- | ------------- |
 | cogito-ingress | Ingress | cogito.localhost | frontend:8080 |
 
-All inter-service communication uses ClusterIP via Kubernetes DNS (`service-name:port`). imageservice exposes two ClusterIP ports: 5050 (gRPC) and 8081 (HTTP). NetworkPolicies apply default-deny egress in the `cogito` namespace, allow DNS to kube-system, and allow explicit in-namespace service ports.
+All inter-service communication uses ClusterIP via Kubernetes DNS
+(`service-name:port`). imageservice exposes two ClusterIP ports: 5050 (gRPC) and
+8081 (HTTP). NetworkPolicies apply default-deny egress in the `cogito`
+namespace, allow DNS to kube-system, and allow explicit in-namespace service
+ports.
 
 ## Secrets
 
 All secrets live in a single Kubernetes Secret named `cogito-db-secret`:
 
-| Key | Consumers |
-|---|---|
-| postgres-password | database (POSTGRES_PASSWORD) |
-| cogito-app-password | database init script |
-| database-url | authservice, userservice, postservice, imageservice, flowservice (DATABASE_URL) |
-| internal-grpc-token | All gRPC services + apigateway (INTERNAL_GRPC_TOKEN) |
-| session-hmac-secret | apigateway + authservice (SESSION_HMAC_SECRET) |
-| meili-master-key | meilisearch (MEILI_MASTER_KEY) + flowservice (MEILI_MASTER_KEY) |
-| s3-access-key | seaweedfs (config) + imageservice (S3_ACCESS_KEY) |
-| s3-secret-key | seaweedfs (config) + imageservice (S3_SECRET_KEY) |
-| s3-provisioning-access-key | seaweedfs (config) + imageservice startup (S3_PROVISIONING_ACCESS_KEY) |
-| s3-provisioning-secret-key | seaweedfs (config) + imageservice startup (S3_PROVISIONING_SECRET_KEY) |
+| Key                        | Consumers                                                                       |
+| -------------------------- | ------------------------------------------------------------------------------- |
+| postgres-password          | database (POSTGRES_PASSWORD)                                                    |
+| cogito-app-password        | database init script                                                            |
+| database-url               | authservice, userservice, postservice, imageservice, flowservice (DATABASE_URL) |
+| internal-grpc-token        | All gRPC services + apigateway (INTERNAL_GRPC_TOKEN)                            |
+| session-hmac-secret        | apigateway + authservice (SESSION_HMAC_SECRET)                                  |
+| meili-master-key           | meilisearch (MEILI_MASTER_KEY) + flowservice (MEILI_MASTER_KEY)                 |
+| s3-access-key              | seaweedfs (config) + imageservice (S3_ACCESS_KEY)                               |
+| s3-secret-key              | seaweedfs (config) + imageservice (S3_SECRET_KEY)                               |
+| s3-provisioning-access-key | seaweedfs (config) + imageservice startup (S3_PROVISIONING_ACCESS_KEY)          |
+| s3-provisioning-secret-key | seaweedfs (config) + imageservice startup (S3_PROVISIONING_SECRET_KEY)          |
 
-Generated by `scripts/deploy.sh` using `openssl rand -hex 32` (or equivalent), including the PostgreSQL app password. Not regenerated on re-runs.
-SeaweedFS renders its S3 identity config from these Secret keys into an in-memory pod volume at startup; the rendered config is not stored in a ConfigMap. The normal S3 identity is limited to image object reads, writes, listing, and tagging. The separate provisioning identity is used by imageservice only during startup to create or verify the image bucket.
+Generated by `scripts/deploy.sh` using `openssl rand -hex 32` (or equivalent),
+including the PostgreSQL app password. Not regenerated on re-runs. SeaweedFS
+renders its S3 identity config from these Secret keys into an in-memory pod
+volume at startup; the rendered config is not stored in a ConfigMap. The normal
+S3 identity is limited to image object reads, writes, listing, and tagging. The
+separate provisioning identity is used by imageservice only during startup to
+create or verify the image bucket.
 
 ## Environment Variables
 
 ### apigateway
 
-| Var | Value |
-|---|---|
-| AUTH_SERVICE_ADDR | authservice:5050 |
-| POST_SERVICE_ADDR | postservice:5050 |
-| USER_SERVICE_ADDR | userservice:5050 |
-| FLOW_SERVICE_ADDR | flowservice:5050 |
-| DRAGONFLY_URL | redis://dragonfly:6379 |
-| RATE_LIMIT_FAIL_OPEN | true |
-| SESSION_HMAC_SECRET | from secret |
-| INTERNAL_GRPC_TOKEN | from secret |
+| Var                  | Value                  |
+| -------------------- | ---------------------- |
+| AUTH_SERVICE_ADDR    | authservice:5050       |
+| POST_SERVICE_ADDR    | postservice:5050       |
+| USER_SERVICE_ADDR    | userservice:5050       |
+| FLOW_SERVICE_ADDR    | flowservice:5050       |
+| DRAGONFLY_URL        | redis://dragonfly:6379 |
+| RATE_LIMIT_FAIL_OPEN | true                   |
+| SESSION_HMAC_SECRET  | from secret            |
+| INTERNAL_GRPC_TOKEN  | from secret            |
 
 ### imageservice
 
-| Var | Value |
-|---|---|
-| S3_ENDPOINT | http://seaweedfs:8333 |
-| S3_BUCKET | cogito-images |
-| S3_REGION | us-east-1 |
-| S3_ACCESS_KEY | from secret |
-| S3_SECRET_KEY | from secret |
-| S3_PROVISIONING_ACCESS_KEY | from secret |
-| S3_PROVISIONING_SECRET_KEY | from secret |
-| HTTP_PORT | 8081 (default) |
-| PORT | 5050 (default, gRPC) |
+| Var                        | Value                 |
+| -------------------------- | --------------------- |
+| S3_ENDPOINT                | http://seaweedfs:8333 |
+| S3_BUCKET                  | cogito-images         |
+| S3_REGION                  | us-east-1             |
+| S3_ACCESS_KEY              | from secret           |
+| S3_SECRET_KEY              | from secret           |
+| S3_PROVISIONING_ACCESS_KEY | from secret           |
+| S3_PROVISIONING_SECRET_KEY | from secret           |
+| HTTP_PORT                  | 8081 (default)        |
+| PORT                       | 5050 (default, gRPC)  |
 
 ### userservice
 
-| Var | Value |
-|---|---|
-| DATABASE_URL | from secret |
-| INTERNAL_GRPC_TOKEN | from secret |
+| Var                   | Value       |
+| --------------------- | ----------- |
+| DATABASE_URL          | from secret |
+| INTERNAL_GRPC_TOKEN   | from secret |
 | ARGON_MAX_CONCURRENCY | 4 (default) |
 
 ### flowservice
 
-| Var | Value |
-|---|---|
-| DATABASE_URL | from secret |
-| REDPANDA_BROKERS | broker:9092 |
-| FAN_OUT_THRESHOLD | 10000 |
-| MEILI_HOST | http://meilisearch:7700 |
-| MEILI_MASTER_KEY | from secret |
-| PORT | 5050 |
-| INTERNAL_GRPC_TOKEN | from secret |
+| Var                 | Value                   |
+| ------------------- | ----------------------- |
+| DATABASE_URL        | from secret             |
+| REDPANDA_BROKERS    | broker:9092             |
+| FAN_OUT_THRESHOLD   | 10000                   |
+| MEILI_HOST          | http://meilisearch:7700 |
+| MEILI_MASTER_KEY    | from secret             |
+| PORT                | 5050                    |
+| INTERNAL_GRPC_TOKEN | from secret             |
 
 ### broker/connect
 
-| Var | Value |
-|---|---|
-| REDPANDA_BROKERS | broker:9092 |
-| POSTGRES_DSN | from secret |
-| MEILI_HOST | http://meilisearch:7700 |
-| MEILI_MASTER_KEY | from secret |
-| S3_ENDPOINT | http://seaweedfs:8333 |
-| S3_BUCKET | cogito-images |
+| Var              | Value                   |
+| ---------------- | ----------------------- |
+| REDPANDA_BROKERS | broker:9092             |
+| POSTGRES_DSN     | from secret             |
+| MEILI_HOST       | http://meilisearch:7700 |
+| MEILI_MASTER_KEY | from secret             |
+| S3_ENDPOINT      | http://seaweedfs:8333   |
+| S3_BUCKET        | cogito-images           |
 
-PostgreSQL must run with `wal_level=logical` so Redpanda Connect `pg_cdc` can relay `outbox` inserts. Migration `000010` creates the required `outbox_relay` publication (`CREATE PUBLICATION outbox_relay FOR TABLE outbox`); the `connect` deployment will crash-loop until this publication exists.
+PostgreSQL must run with `wal_level=logical` so Redpanda Connect `pg_cdc` can
+relay `outbox` inserts. Migration `000010` creates the required `outbox_relay`
+publication (`CREATE PUBLICATION outbox_relay FOR TABLE outbox`); the `connect`
+deployment will crash-loop until this publication exists.
 
 All services: `DATABASE_URL` (from secret), `INTERNAL_GRPC_TOKEN` (from secret).
 
 ### frontend
 
-| Var | Value |
-|---|---|
-| BACKEND_URL | http://apigateway:8080 |
-| BODY_SIZE_LIMIT | 2097152 |
+| Var                | Value                    |
+| ------------------ | ------------------------ |
+| BACKEND_URL        | http://apigateway:8080   |
+| BODY_SIZE_LIMIT    | 2097152                  |
 | BACKEND_TIMEOUT_MS | 10000 (default if unset) |
 
 ## Storage
 
-| Store | Service | Path | Purpose |
-|---|---|---|---|
-| SeaweedFS | imageservice | `staging/{filename}`, `{filename}` | Image binaries (S3-compatible, bucket: cogito-images) |
-| Meilisearch | flowservice | /data/meilisearch | Full-text search index (users, posts, hashtags) |
-| PostgreSQL | all backends | /var/lib/postgresql/18/docker | Shared relational data |
-| Dragonfly | apigateway | /data/dragonfly | Rate limit counters and login throttle (max 200 MB) |
-| Redpanda | connect/flowservice | /var/lib/redpanda/data | Kafka-compatible event log |
+| Store       | Service             | Path                               | Purpose                                               |
+| ----------- | ------------------- | ---------------------------------- | ----------------------------------------------------- |
+| SeaweedFS   | imageservice        | `staging/{filename}`, `{filename}` | Image binaries (S3-compatible, bucket: cogito-images) |
+| Meilisearch | flowservice         | /data/meilisearch                  | Full-text search index (users, posts, hashtags)       |
+| PostgreSQL  | all backends        | /var/lib/postgresql/18/docker      | Shared relational data                                |
+| Dragonfly   | apigateway          | /data/dragonfly                    | Rate limit counters and login throttle (max 200 MB)   |
+| Redpanda    | connect/flowservice | /var/lib/redpanda/data             | Kafka-compatible event log                            |
 
 ## Migration Strategy
 
-- Migrations in `apps/database/migrations/` as paired `NNNNNN_name.up.sql` / `.down.sql`.
+- Migrations in `apps/database/migrations/` as paired `NNNNNN_name.up.sql` /
+  `.down.sql`.
 - Applied by `apigateway` init container at startup using `migrate/migrate`.
-- Applied history is append-only. Deployed schemas are corrected with new migrations, never by editing existing ones.
-- Mixed-version compatibility required when a schema change affects multiple independently deployed services.
+- Applied history is append-only. Deployed schemas are corrected with new
+  migrations, never by editing existing ones.
+- Mixed-version compatibility required when a schema change affects multiple
+  independently deployed services.
 - Current: 12 migration pairs (000001 through 000012).
 
 ## Deployment Script

@@ -23,23 +23,24 @@
 
 ### Protected (session required)
 
-| Route                 | Load                                                            | Actions                                            |
-| --------------------- | --------------------------------------------------------------- | -------------------------------------------------- |
-| /                     | Feed (posts, nextCursor)                                        | createPost, toggleLike, toggleRepost, deletePost   |
-| /{username}           | Profile + user posts                                            | toggleLike, toggleRepost, deletePost, toggleFollow |
-| /{username}/likes     | User's liked posts                                              | same post/follow actions                           |
-| /{username}/followers | Followers list                                                  | toggleFollow                                       |
-| /{username}/following | Following list                                                  | toggleFollow                                       |
-| /posts/{id}           | Post + replies                                                  | createReply, toggleLike, toggleRepost, deletePost  |
-| /hashtags/{tag}       | Tag post feed                                                   | toggleLike, toggleRepost, deletePost               |
-| /search               | Search results (q, type params)                                 | —                                                  |
+| Route                 | Load                                                                    | Actions                                            |
+| --------------------- | ----------------------------------------------------------------------- | -------------------------------------------------- |
+| /                     | Feed (posts, nextCursor)                                                | createPost, toggleLike, toggleRepost, deletePost   |
+| /{username}           | Profile + user posts                                                    | toggleLike, toggleRepost, deletePost, toggleFollow |
+| /{username}/likes     | User's liked posts                                                      | same post/follow actions                           |
+| /{username}/followers | Followers list                                                          | toggleFollow                                       |
+| /{username}/following | Following list                                                          | toggleFollow                                       |
+| /posts/{id}           | Post + replies                                                          | createReply, toggleLike, toggleRepost, deletePost  |
+| /hashtags/{tag}       | Tag post feed                                                           | toggleLike, toggleRepost, deletePost               |
+| /search               | Search results (q, type params)                                         | —                                                  |
 | /notifications        | Notifications (initial unread rows marked read server-side after fetch) | —                                                  |
-| /settings             | Redirect to /settings/profile                                   | —                                                  |
-| /settings/profile     | Current user profile                                            | default — update name/username/email/bio/photos    |
-| /settings/password    | Password form                                                   | default — change password (old + new)              |
-| /settings/sessions    | Active sessions                                                 | deleteSession                                      |
+| /settings             | Redirect to /settings/profile                                           | —                                                  |
+| /settings/profile     | Current user profile                                                    | default — update name/username/email/bio/photos    |
+| /settings/password    | Password form                                                           | default — change password (old + new)              |
+| /settings/sessions    | Active sessions                                                         | deleteSession                                      |
 
-Route params: `username` (any string), `tab` (matches `likes`, `followers`, `following`).
+Route params: `username` (any string), `tab` (matches `likes`, `followers`,
+`following`).
 
 ## Layout Hierarchy
 
@@ -71,7 +72,8 @@ Route params: `username` (any string), `tab` (matches `likes`, `followers`, `fol
 
 1. Calls `GET /sessions` → returns `currentSessionId` and `userId`.
 2. Calls `GET /users/{userId}` → returns full user object.
-3. On any failure: returns `{ status: "unavailable" }` — layout redirects to /login.
+3. On any failure: returns `{ status: "unavailable" }` — layout redirects to
+   /login.
 
 ## Data Fetching Strategy
 
@@ -82,15 +84,20 @@ Route params: `username` (any string), `tab` (matches `likes`, `followers`, `fol
 | `+server.ts` `GET`          | Client-driven pagination "load more" — returns JSON |
 | `createPagination<T>()`     | Client-side state for progressive list loading      |
 
-No data is fetched on component mount. The browser never calls the backend directly.
+No data is fetched on component mount. The browser never calls the backend
+directly.
 
 ## SSR Boundary
 
-Everything runs in the Node server. `apiClient(event)` resolves backend paths against `BACKEND_URL` and forwards the session cookie. These are server-to-server requests; they never cross CORS.
+Everything runs in the Node server. `apiClient(event)` resolves backend paths
+against `BACKEND_URL` and forwards the session cookie. These are
+server-to-server requests; they never cross CORS.
 
-Browser-initiated fetches for pagination hit same-origin SvelteKit `+server.ts` handlers, which call the backend server-side.
+Browser-initiated fetches for pagination hit same-origin SvelteKit `+server.ts`
+handlers, which call the backend server-side.
 
-Backend-bound server requests use `BACKEND_TIMEOUT_MS` (default 10000 ms) as an abort deadline.
+Backend-bound server requests use `BACKEND_TIMEOUT_MS` (default 10000 ms) as an
+abort deadline.
 
 Backend-authored error bodies are not UI copy. The shared backend response
 unwrap helper preserves HTTP status for route control flow, but maps failed
@@ -102,45 +109,50 @@ unchanged after DTO mapping.
 
 ## Key Frontend Routes
 
-| Path                    | Method | Handler         | Backend call                                                              |
-| ----------------------- | ------ | --------------- | ------------------------------------------------------------------------- |
-| `/`                     | GET    | page load       | GET /posts/feed                                                           |
-| `/`                     | GET    | +server.ts      | GET /posts/feed?cursor=                                                   |
-| `/{username}`           | GET    | page load       | GET /users?username= + GET /users/{id}/posts                              |
-| `/{username}`           | GET    | +server.ts      | GET /users/{id}/posts?cursor=                                             |
-| `/{username}/likes`     | GET    | page load       | GET /users/{id}/likes                                                     |
-| `/{username}/likes`     | GET    | +server.ts      | GET /users/{id}/likes?cursor=                                             |
-| `/{username}/followers` | GET    | page load       | GET /users/{id}/followers                                                 |
-| `/{username}/followers` | GET    | +server.ts      | GET /users/{id}/followers?cursor=                                         |
-| `/{username}/following` | GET    | page load       | GET /users/{id}/following                                                 |
-| `/{username}/following` | GET    | +server.ts      | GET /users/{id}/following?cursor=                                         |
-| `/posts/{id}`           | GET    | page load       | GET /posts/{id} + GET /posts/{id}/replies                                 |
-| `/hashtags/{tag}`       | GET    | page load       | GET /hashtags/{tag}/posts                                                 |
-| `/hashtags/{tag}`       | GET    | +server.ts      | GET /hashtags/{tag}/posts?cursor=                                         |
-| `/search`               | GET    | page load       | GET /search?q=&type=                                                      |
-| `/notifications`        | GET    | app layout load | GET /notifications/unread-count                                           |
-| `/notifications`        | GET    | page load       | GET /notifications + PUT /notifications/{id}/read for unread rows         |
-| `/notifications`        | GET    | +server.ts      | GET /notifications?cursor=                                                |
-| `/api/users/search`     | GET    | +server.ts      | GET /users/search?q=                                                      |
-| `/api/hashtags/search`  | GET    | +server.ts      | GET /hashtags/search?q=                                                   |
-| `/uploads/{key}`        | GET    | +server.ts      | GET /uploads/{key} (proxied)                                              |
-| `/health`               | GET    | +server.ts      | returns "ok"                                                              |
+| Path                    | Method | Handler         | Backend call                                                      |
+| ----------------------- | ------ | --------------- | ----------------------------------------------------------------- |
+| `/`                     | GET    | page load       | GET /posts/feed                                                   |
+| `/`                     | GET    | +server.ts      | GET /posts/feed?cursor=                                           |
+| `/{username}`           | GET    | page load       | GET /users?username= + GET /users/{id}/posts                      |
+| `/{username}`           | GET    | +server.ts      | GET /users/{id}/posts?cursor=                                     |
+| `/{username}/likes`     | GET    | page load       | GET /users/{id}/likes                                             |
+| `/{username}/likes`     | GET    | +server.ts      | GET /users/{id}/likes?cursor=                                     |
+| `/{username}/followers` | GET    | page load       | GET /users/{id}/followers                                         |
+| `/{username}/followers` | GET    | +server.ts      | GET /users/{id}/followers?cursor=                                 |
+| `/{username}/following` | GET    | page load       | GET /users/{id}/following                                         |
+| `/{username}/following` | GET    | +server.ts      | GET /users/{id}/following?cursor=                                 |
+| `/posts/{id}`           | GET    | page load       | GET /posts/{id} + GET /posts/{id}/replies                         |
+| `/hashtags/{tag}`       | GET    | page load       | GET /hashtags/{tag}/posts                                         |
+| `/hashtags/{tag}`       | GET    | +server.ts      | GET /hashtags/{tag}/posts?cursor=                                 |
+| `/search`               | GET    | page load       | GET /search?q=&type=                                              |
+| `/notifications`        | GET    | app layout load | GET /notifications/unread-count                                   |
+| `/notifications`        | GET    | page load       | GET /notifications + PUT /notifications/{id}/read for unread rows |
+| `/notifications`        | GET    | +server.ts      | GET /notifications?cursor=                                        |
+| `/api/users/search`     | GET    | +server.ts      | GET /users/search?q=                                              |
+| `/api/hashtags/search`  | GET    | +server.ts      | GET /hashtags/search?q=                                           |
+| `/uploads/{key}`        | GET    | +server.ts      | GET /uploads/{key} (proxied)                                      |
+| `/health`               | GET    | +server.ts      | returns "ok"                                                      |
 
 ## Image Proxy
 
 `GET /uploads/[key]` in `src/routes/uploads/[key]/+server.ts`:
 
-- Validates `key` against `^[A-Za-z0-9._-]{1,255}$`; rejects keys containing `..` — 404 on failure.
+- Validates `key` against `^[A-Za-z0-9._-]{1,255}$`; rejects keys containing
+  `..` — 404 on failure.
 - Streams response body from backend without buffering in the Node process.
-- Does not attach a session cookie; backend image reads are public through the gateway.
-- Forwards: `content-type`, `content-length`, `etag`, `last-modified`, `cache-control`.
+- Does not attach a session cookie; backend image reads are public through the
+  gateway.
+- Forwards: `content-type`, `content-length`, `etag`, `last-modified`,
+  `cache-control`.
 
 ## Pagination
 
 - Initial paginated data returned by `load` functions follows each page's
   existing prop names, with `nextCursor: string | null`.
-- Subsequent pages: client calls the corresponding same-origin `+server.ts` GET route with `?cursor=`.
-- `createPagination<T>()` state: `items`, `cursor`, `loading`. `more()` appends and advances cursor.
+- Subsequent pages: client calls the corresponding same-origin `+server.ts` GET
+  route with `?cursor=`.
+- `createPagination<T>()` state: `items`, `cursor`, `loading`. `more()` appends
+  and advances cursor.
 - Used in: feed, user posts, liked posts, followers, following, hashtag feed.
 - The feed renders a first-page empty state linking to `/search` when
   `/posts/feed` returns no items and no cursor.
@@ -150,15 +162,23 @@ unchanged after DTO mapping.
 ## Image Upload Flow
 
 1. User selects file in form.
-2. Server action calls `uploadImage(api, file)` — `POST /uploads` (multipart, field name `image`).
+2. Server action calls `uploadImage(api, file)` — `POST /uploads` (multipart,
+   field name `image`).
 3. Response: `{ filename: string }`.
-4. `filename` used as `mediaKey` in subsequent `createPost` or `updateUser` request.
+4. `filename` used as `mediaKey` in subsequent `createPost` or `updateUser`
+   request.
 
 ## Session Cookie Relay
 
-The login action calls `POST /sessions` via `event.fetch`. SvelteKit propagates the `Set-Cookie` response header from the backend through to the browser on the SvelteKit origin. After redirect, `event.cookies.get("session")` is non-null and `apiClient` includes it on all subsequent server-side backend calls as `Cookie: session={value}`.
+The login action calls `POST /sessions` via `event.fetch`. SvelteKit propagates
+the `Set-Cookie` response header from the backend through to the browser on the
+SvelteKit origin. After redirect, `event.cookies.get("session")` is non-null and
+`apiClient` includes it on all subsequent server-side backend calls as
+`Cookie: session={value}`.
 
-On logout: `cookies.delete("session", { path: "/", httpOnly: true, sameSite: "strict" })` clears the cookie on the SvelteKit origin regardless of backend response.
+On logout:
+`cookies.delete("session", { path: "/", httpOnly: true, sameSite: "strict" })`
+clears the cookie on the SvelteKit origin regardless of backend response.
 
 ## Security Headers (hooks.server.ts)
 
