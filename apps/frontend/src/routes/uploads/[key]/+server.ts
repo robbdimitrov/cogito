@@ -4,6 +4,11 @@ import { env } from "$env/dynamic/private";
 
 // Opaque backend filename; reject traversal so the key addresses only one object.
 const keyPattern = /^[A-Za-z0-9._-]{1,255}$/;
+const backendBase = (): string => env.BACKEND_URL ?? "http://localhost:8080";
+const backendTimeoutMs = (): number => {
+  const configured = Number(env.BACKEND_TIMEOUT_MS ?? "10000");
+  return Number.isFinite(configured) && configured > 0 ? configured : 10000;
+};
 
 // Forwarded from the backend response; caching semantics stay the backend's.
 const forwardedHeaders = [
@@ -19,9 +24,9 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
     error(404, "Not found");
   }
 
-  const upstream = await fetch(
-    `${env.BACKEND_URL ?? "http://localhost:8080"}/uploads/${params.key}`,
-  );
+  const upstream = await fetch(`${backendBase()}/uploads/${params.key}`, {
+    signal: AbortSignal.timeout(backendTimeoutMs()),
+  });
 
   if (!upstream.ok) {
     error(upstream.status === 404 ? 404 : 502, "Image unavailable");

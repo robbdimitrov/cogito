@@ -16,6 +16,7 @@ const config = {
         "connect-src": ["self"],
         "font-src": ["self"],
         "object-src": ["none"],
+        "frame-ancestors": ["self"],
         "base-uri": ["self"],
         "form-action": ["self"],
       },

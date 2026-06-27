@@ -1,4 +1,4 @@
-import { json } from "@sveltejs/kit";
+import { error, isHttpError, json } from "@sveltejs/kit";
 import { getUserPosts } from "$lib/domains/posts/api.server";
 import { getUser } from "$lib/domains/users/api.server";
 import { apiClient } from "$lib/server/api/client";
@@ -16,6 +16,12 @@ export const GET = async (event) => {
     return json(feed ?? { items: [], nextCursor: null });
   } catch (e) {
     console.error("Failed to load user posts:", e);
-    return json({ items: [], nextCursor: null });
+    if (isHttpError(e)) {
+      return json(
+        { message: e.body.message ?? "The request could not be completed." },
+        { status: e.status },
+      );
+    }
+    error(502, "Unable to load profile posts");
   }
 };

@@ -7,10 +7,17 @@ import {
 } from "$lib/domains/notifications/api.server";
 import type { Notification } from "./model";
 
-export async function loadNotificationPage(api: ApiClient, cursor: string) {
+export async function loadNotificationPage(
+  api: ApiClient,
+  cursor: string,
+  options: { markRead?: boolean } = {},
+) {
   const page = await getNotifications(api, cursor);
   const notifications = await attachActors(api, page.notifications);
-  const markedRead = await markUnreadAsRead(api, notifications);
+  const markedRead =
+    options.markRead === false
+      ? new Set<number>()
+      : await markUnreadAsRead(api, notifications);
 
   return {
     items: notifications.map((notification) =>

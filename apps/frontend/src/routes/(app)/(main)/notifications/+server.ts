@@ -7,6 +7,8 @@ export const GET = async (event) => {
     return json({ error: "Unauthorized" }, { status: 401 });
   }
   const cursor = event.url.searchParams.get("cursor") ?? "";
-  const page = await loadNotificationPage(apiClient(event), cursor);
+  const page = await loadNotificationPage(apiClient(event), cursor, {
+    markRead: false,
+  });
   return json(page);
 };
