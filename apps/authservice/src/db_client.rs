@@ -57,13 +57,15 @@ impl crate::controller::AuthDb for DbClient {
         &self,
         session_id: &str,
         user_id: i32,
+        handle: &str,
     ) -> Result<crate::cogito::Session, sqlx::Error> {
-        let row = sqlx::query_as::<_, (String, i32, DateTime<Utc>)>(
-            r#"INSERT INTO sessions (id, user_id) VALUES ($1, $2)
-               RETURNING id, user_id, created"#,
+        let row = sqlx::query_as::<_, (String, i32, DateTime<Utc>, String)>(
+            r#"INSERT INTO sessions (id, user_id, handle) VALUES ($1, $2, $3)
+               RETURNING id, user_id, created, handle"#,
         )
         .bind(session_id)
         .bind(user_id)
+        .bind(handle)
         .fetch_one(&self.pool)
         .await?;
 
@@ -71,6 +73,7 @@ impl crate::controller::AuthDb for DbClient {
             id: row.0,
             user_id: row.1,
             created: row.2.format("%Y-%m-%dT%H:%M:%SZ").to_string(),
+            handle: row.3,
         })
     }
 
@@ -79,8 +82,8 @@ impl crate::controller::AuthDb for DbClient {
         session_id: &str,
     ) -> Result<Option<crate::cogito::Session>, sqlx::Error> {
         let ttl = session_ttl_days();
-        let row = sqlx::query_as::<_, (String, i32, DateTime<Utc>)>(
-            r#"SELECT id, user_id, created
+        let row = sqlx::query_as::<_, (String, i32, DateTime<Utc>, String)>(
+            r#"SELECT id, user_id, created, handle
                FROM sessions
                WHERE id = $1 AND created > now() - ($2 * interval '1 day')"#,
         )
@@ -93,13 +96,14 @@ impl crate::controller::AuthDb for DbClient {
             id: r.0,
             user_id: r.1,
             created: r.2.format("%Y-%m-%dT%H:%M:%SZ").to_string(),
+            handle: r.3,
         }))
     }
 
     async fn get_sessions(&self, user_id: i32) -> Result<Vec<crate::cogito::Session>, sqlx::Error> {
         let ttl = session_ttl_days();
-        let rows = sqlx::query_as::<_, (String, i32, DateTime<Utc>)>(
-            r#"SELECT id, user_id, created
+        let rows = sqlx::query_as::<_, (String, i32, DateTime<Utc>, String)>(
+            r#"SELECT id, user_id, created, handle
                FROM sessions
                WHERE user_id = $1 AND created > now() - ($2 * interval '1 day')
                ORDER BY created DESC"#,
@@ -115,15 +119,24 @@ impl crate::controller::AuthDb for DbClient {
                 id: r.0,
                 user_id: r.1,
                 created: r.2.format("%Y-%m-%dT%H:%M:%SZ").to_string(),
+                handle: r.3,
             })
             .collect();
 
         Ok(sessions)
     }
 
-    async fn delete_session(&self, session_id: &str) -> Result<u64, sqlx::Error> {
+    async fn delete_session_by_id(&self, session_id: &str) -> Result<u64, sqlx::Error> {
         let result = sqlx::query("DELETE FROM sessions WHERE id = $1")
             .bind(session_id)
+            .execute(&self.pool)
+            .await?;
+        Ok(result.rows_affected())
+    }
+
+    async fn delete_session_by_handle(&self, handle: &str) -> Result<u64, sqlx::Error> {
+        let result = sqlx::query("DELETE FROM sessions WHERE handle = $1")
+            .bind(handle)
             .execute(&self.pool)
             .await?;
         Ok(result.rows_affected())

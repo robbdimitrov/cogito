@@ -2,10 +2,6 @@ package api
 
 import (
 	"context"
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/base64"
-	"encoding/json"
 	"log/slog"
 	"net/http"
 	"os"
@@ -13,6 +9,8 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"google.golang.org/grpc/codes"
 
 	pb "cogito/apigateway/genproto"
 )
@@ -51,7 +49,11 @@ func (s *userController) createUser(w http.ResponseWriter, r *http.Request) {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+	if err := decodeJSONBody(r, &body); err != nil {
+		if grpcCode(err) == codes.ResourceExhausted.String() {
+			jsonError(w, http.StatusRequestEntityTooLarge, "Payload too large")
+			return
+		}
 		jsonError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
@@ -171,7 +173,11 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 		ProfilePhotoKey *string `json:"profilePhotoKey"`
 		CoverPhotoKey   *string `json:"coverPhotoKey"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+	if err := decodeJSONBody(r, &body); err != nil {
+		if grpcCode(err) == codes.ResourceExhausted.String() {
+			jsonError(w, http.StatusRequestEntityTooLarge, "Payload too large")
+			return
+		}
 		jsonError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
@@ -230,6 +236,37 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	consumedImages := make([]string, 0, 2)
+	if imgClient != nil {
+		if body.ProfilePhotoKey != nil && *body.ProfilePhotoKey != "" {
+			consumeCtx, consumeCancel := context.WithTimeout(baseCtx, 5*time.Second)
+			_, err = imgClient.ConsumeUpload(consumeCtx, &pb.ConsumeUploadRequest{Filename: *body.ProfilePhotoKey, UserId: int32(userIDInt)})
+			consumeCancel()
+			if err != nil {
+				slog.Warn("consuming profile image failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
+				grpcError(w, err)
+				return
+			}
+			consumedImages = append(consumedImages, *body.ProfilePhotoKey)
+		}
+		if body.CoverPhotoKey != nil && *body.CoverPhotoKey != "" {
+			consumeCtx, consumeCancel := context.WithTimeout(baseCtx, 5*time.Second)
+			_, err = imgClient.ConsumeUpload(consumeCtx, &pb.ConsumeUploadRequest{Filename: *body.CoverPhotoKey, UserId: int32(userIDInt)})
+			consumeCancel()
+			if err != nil {
+				slog.Warn("consuming cover image failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
+				for _, filename := range consumedImages {
+					cleanupCtx, cleanupCancel := context.WithTimeout(baseCtx, 5*time.Second)
+					_, _ = imgClient.DeleteImage(cleanupCtx, &pb.DeleteImageRequest{Filename: filename})
+					cleanupCancel()
+				}
+				grpcError(w, err)
+				return
+			}
+			consumedImages = append(consumedImages, *body.CoverPhotoKey)
+		}
+	}
+
 	req := pb.UpdateUserRequest{
 		Password:    body.Password,
 		OldPassword: body.OldPassword,
@@ -258,33 +295,38 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 	updCancel()
 	if err != nil {
 		slog.Warn("updating user failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
+		for _, filename := range consumedImages {
+			cleanupCtx, cleanupCancel := context.WithTimeout(baseCtx, 5*time.Second)
+			_, _ = imgClient.DeleteImage(cleanupCtx, &pb.DeleteImageRequest{Filename: filename})
+			cleanupCancel()
+		}
 		grpcError(w, err)
 		return
 	}
 
 	if imgClient != nil {
 		if body.ProfilePhotoKey != nil {
-			if *body.ProfilePhotoKey != "" {
-				cleanCtx, cleanCancel := context.WithTimeout(baseCtx, 5*time.Second)
-				_, _ = imgClient.ConsumeUpload(cleanCtx, &pb.ConsumeUploadRequest{Filename: *body.ProfilePhotoKey})
-				cleanCancel()
-			}
 			if oldUserRes.ProfilePhotoKey != "" && oldUserRes.ProfilePhotoKey != *body.ProfilePhotoKey {
 				cleanCtx, cleanCancel := context.WithTimeout(baseCtx, 5*time.Second)
-				_, _ = imgClient.DeleteImage(cleanCtx, &pb.DeleteImageRequest{Filename: oldUserRes.ProfilePhotoKey})
+				_, err = imgClient.DeleteImage(cleanCtx, &pb.DeleteImageRequest{Filename: oldUserRes.ProfilePhotoKey})
 				cleanCancel()
+				if err != nil {
+					slog.Warn("deleting old profile image failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
+					grpcError(w, err)
+					return
+				}
 			}
 		}
 		if body.CoverPhotoKey != nil {
-			if *body.CoverPhotoKey != "" {
-				cleanCtx, cleanCancel := context.WithTimeout(baseCtx, 5*time.Second)
-				_, _ = imgClient.ConsumeUpload(cleanCtx, &pb.ConsumeUploadRequest{Filename: *body.CoverPhotoKey})
-				cleanCancel()
-			}
 			if oldUserRes.CoverPhotoKey != "" && oldUserRes.CoverPhotoKey != *body.CoverPhotoKey {
 				cleanCtx, cleanCancel := context.WithTimeout(baseCtx, 5*time.Second)
-				_, _ = imgClient.DeleteImage(cleanCtx, &pb.DeleteImageRequest{Filename: oldUserRes.CoverPhotoKey})
+				_, err = imgClient.DeleteImage(cleanCtx, &pb.DeleteImageRequest{Filename: oldUserRes.CoverPhotoKey})
 				cleanCancel()
+				if err != nil {
+					slog.Warn("deleting old cover image failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
+					grpcError(w, err)
+					return
+				}
 			}
 		}
 	}
@@ -293,20 +335,22 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 		authClient := s.authClient
 		if authClient != nil {
 			var currentSessionID string
+			var currentSessionHandle string
 			if cookie, err := r.Cookie("session"); err == nil {
 				currentSessionID = cookie.Value
+				currentCtx, currentCancel := context.WithTimeout(baseCtx, 5*time.Second)
+				if currentRes, err := authClient.GetSession(currentCtx, &pb.SessionRequest{SessionId: currentSessionID}); err == nil {
+					currentSessionHandle = currentRes.Handle
+				}
+				currentCancel()
 			}
-
-			h := hmac.New(sha256.New, []byte(sessionHMACSecret()))
-			h.Write([]byte(currentSessionID))
-			currentHashedSessionID := base64.RawURLEncoding.EncodeToString(h.Sum(nil))
 
 			sessCtx, sessCancel := context.WithTimeout(baseCtx, 5*time.Second)
 			sessionsRes, err := authClient.GetSessions(sessCtx, &pb.UserRequest{UserId: int32(userIDInt)})
 			if err == nil {
 				for _, sess := range sessionsRes.Sessions {
-					if sess.Id != currentHashedSessionID {
-						_, _ = authClient.DeleteSession(sessCtx, &pb.SessionRequest{SessionId: sess.Id})
+					if sess.Handle != currentSessionHandle {
+						_, _ = authClient.DeleteSession(sessCtx, &pb.SessionRequest{SessionId: sess.Handle})
 					}
 				}
 			}

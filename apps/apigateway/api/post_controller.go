@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"encoding/json"
 	"log/slog"
 	"net/http"
 	"os"
@@ -10,6 +9,8 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"google.golang.org/grpc/codes"
 
 	pb "cogito/apigateway/genproto"
 )
@@ -53,11 +54,15 @@ func (pc *postController) createPost(w http.ResponseWriter, r *http.Request) {
 		InReplyToID *int32  `json:"inReplyToId"`
 		QuoteOfID   *int32  `json:"quoteOfId"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+	if err := decodeJSONBody(r, &body); err != nil {
+		if grpcCode(err) == codes.ResourceExhausted.String() {
+			jsonError(w, http.StatusRequestEntityTooLarge, "Payload too large")
+			return
+		}
 		jsonError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
-	if utf8.RuneCountInString(body.Content) == 0 || utf8.RuneCountInString(body.Content) > 255 {
+	if strings.TrimSpace(body.Content) == "" || utf8.RuneCountInString(body.Content) > 255 {
 		jsonError(w, http.StatusBadRequest, "Content must be between 1 and 255 characters")
 		return
 	}
@@ -94,9 +99,19 @@ func (pc *postController) createPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if body.MediaKey != nil && *body.MediaKey != "" && pc.imgClient != nil {
-		_, err := pc.imgClient.ConsumeUpload(ctx, &pb.ConsumeUploadRequest{Filename: *body.MediaKey})
+		userIDInt, err := strconv.ParseInt(getUserID(r), 10, 32)
+		if err != nil {
+			jsonError(w, http.StatusUnauthorized, "Unauthorized")
+			return
+		}
+		_, err = pc.imgClient.ConsumeUpload(ctx, &pb.ConsumeUploadRequest{Filename: *body.MediaKey, UserId: int32(userIDInt)})
 		if err != nil {
 			slog.Warn("consuming upload failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
+			if _, deleteErr := client.DeletePost(ctx, &pb.PostRequest{PostId: res.Id}); deleteErr != nil {
+				slog.Warn("compensating post delete failed", "request_id", getRequestID(r), "error_kind", grpcCode(deleteErr))
+			}
+			grpcError(w, err)
+			return
 		}
 	}
 
@@ -417,6 +432,8 @@ func (pc *postController) deletePost(w http.ResponseWriter, r *http.Request) {
 		_, err := pc.imgClient.DeleteImage(ctx, &pb.DeleteImageRequest{Filename: postRes.MediaKey})
 		if err != nil {
 			slog.Warn("deleting image failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
+			grpcError(w, err)
+			return
 		}
 	}
 

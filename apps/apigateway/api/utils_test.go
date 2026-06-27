@@ -19,6 +19,9 @@ func TestGetStatusCode(t *testing.T) {
 		{codes.PermissionDenied, http.StatusForbidden},
 		{codes.NotFound, http.StatusNotFound},
 		{codes.AlreadyExists, http.StatusConflict},
+		{codes.ResourceExhausted, http.StatusTooManyRequests},
+		{codes.Unavailable, http.StatusServiceUnavailable},
+		{codes.DeadlineExceeded, http.StatusGatewayTimeout},
 		{codes.Internal, http.StatusInternalServerError},
 	}
 
@@ -37,6 +40,9 @@ func TestGrpcError(t *testing.T) {
 
 	if rec.Code != http.StatusNotFound {
 		t.Errorf("expected 404, got %v", rec.Code)
+	}
+	if got := rec.Body.String(); got != "{\"message\":\"not found\"}\n" {
+		t.Errorf("expected JSON message body, got %q", got)
 	}
 }
 

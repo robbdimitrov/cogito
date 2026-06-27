@@ -9,6 +9,7 @@ mod notifications;
 mod search;
 
 use std::env;
+use std::sync::Arc;
 
 use cogito::notification_service_server::NotificationServiceServer;
 use cogito::search_service_server::SearchServiceServer;
@@ -20,6 +21,8 @@ use rdkafka::error::KafkaError;
 const DEFAULT_FAN_OUT_THRESHOLD: i32 = 10_000;
 const CLEANUP_INTERVAL_SECS: u64 = 3600;
 const MEILI_CONNECT_TIMEOUT_SECS: u64 = 5;
+const MEILI_RECONNECT_INITIAL_SECS: u64 = 1;
+const MEILI_RECONNECT_MAX_SECS: u64 = 60;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -74,6 +77,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             None
         }
     };
+    let meili = Arc::new(tokio::sync::RwLock::new(meili));
 
     let notif_consumer = build_kafka_consumer(&kafka_brokers, "flowservice-notifications")?;
     let feed_consumer = build_kafka_consumer(&kafka_brokers, "flowservice-feed")?;
@@ -107,6 +111,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             run_cleanup(db, rx).await;
         })
     };
+    let meili_reconnect_handle = {
+        let client = Arc::clone(&meili);
+        let host = meili_host.clone();
+        let master_key = meili_master_key.clone();
+        let rx = shutdown_rx.clone();
+        tokio::spawn(async move {
+            run_meili_reconnect(client, host, master_key, rx).await;
+        })
+    };
 
     let search_ctrl = search::controller::SearchController::new(meili, user_client);
     let notif_ctrl = notifications::controller::NotificationController::new(pool.clone());
@@ -134,7 +147,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     // Drain background tasks before closing the pool so in-flight DB writes can finish.
-    let (nr, fr, cr) = tokio::join!(notif_handle, feed_handle, cleanup_handle);
+    let (nr, fr, cr, mr) = tokio::join!(
+        notif_handle,
+        feed_handle,
+        cleanup_handle,
+        meili_reconnect_handle
+    );
     if let Err(e) = nr {
         tracing::error!(error = ?e, "notification consumer task failed");
     }
@@ -144,8 +162,58 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     if let Err(e) = cr {
         tracing::error!(error = ?e, "cleanup task failed");
     }
+    if let Err(e) = mr {
+        tracing::error!(error = ?e, "meilisearch reconnect task failed");
+    }
     pool.close().await;
     Ok(())
+}
+
+async fn run_meili_reconnect(
+    client_slot: Arc<tokio::sync::RwLock<Option<search::meili::MeiliClient>>>,
+    host: String,
+    master_key: String,
+    mut shutdown_rx: tokio::sync::watch::Receiver<bool>,
+) {
+    if client_slot.read().await.is_some() {
+        return;
+    }
+
+    let mut delay = std::time::Duration::from_secs(MEILI_RECONNECT_INITIAL_SECS);
+    loop {
+        tokio::select! {
+            _ = tokio::time::sleep(delay) => {
+                let recovered = match tokio::time::timeout(
+                    std::time::Duration::from_secs(MEILI_CONNECT_TIMEOUT_SECS),
+                    search::meili::MeiliClient::new(&host, &master_key),
+                ).await {
+                    Ok(Ok(client)) => {
+                        Some(client)
+                    }
+                    Ok(Err(e)) => {
+                        tracing::warn!(error = %e, retry_seconds = delay.as_secs(), "meilisearch reconnect failed");
+                        None
+                    }
+                    Err(_) => {
+                        tracing::warn!(retry_seconds = delay.as_secs(), "meilisearch reconnect timed out");
+                        None
+                    }
+                };
+                if let Some(client) = recovered {
+                    *client_slot.write().await = Some(client);
+                    tracing::info!("meilisearch recovered, search enabled");
+                    return;
+                }
+                delay = std::cmp::min(delay * 2, std::time::Duration::from_secs(MEILI_RECONNECT_MAX_SECS));
+            }
+            _ = shutdown_rx.changed() => {
+                if *shutdown_rx.borrow() {
+                    tracing::info!("meilisearch reconnect task shutting down");
+                    return;
+                }
+            }
+        }
+    }
 }
 
 async fn run_cleanup(pool: sqlx::PgPool, mut shutdown_rx: tokio::sync::watch::Receiver<bool>) {

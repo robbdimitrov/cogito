@@ -27,34 +27,62 @@ impl S3BlobStore {
         region: &str,
         access_key: &str,
         secret_key: &str,
+        provisioning_credentials: Option<(&str, &str)>,
     ) -> Result<Self, String> {
-        let credentials = Credentials::new(access_key, secret_key, None, None, "static");
-        let sdk_config = aws_config::defaults(BehaviorVersion::latest())
-            .endpoint_url(endpoint)
-            .region(Region::new(region.to_string()))
-            .credentials_provider(credentials)
-            .load()
-            .await;
-        let config = aws_sdk_s3::config::Builder::from(&sdk_config)
-            .force_path_style(true)
-            .build();
-        let client = Client::from_conf(config);
-
-        match client.create_bucket().bucket(bucket).send().await {
-            Ok(_) => {}
-            Err(e) => {
-                let svc_err = e.into_service_error();
-                if !svc_err.is_bucket_already_owned_by_you() && !svc_err.is_bucket_already_exists()
-                {
-                    return Err(format!("failed to create bucket: {svc_err}"));
-                }
+        let client = build_s3_client(endpoint, region, access_key, secret_key).await;
+        let provisioning_client = match provisioning_credentials {
+            Some((provisioning_access_key, provisioning_secret_key)) => {
+                build_s3_client(
+                    endpoint,
+                    region,
+                    provisioning_access_key,
+                    provisioning_secret_key,
+                )
+                .await
             }
-        }
+            None => client.clone(),
+        };
+
+        ensure_bucket(&provisioning_client, bucket).await?;
 
         Ok(Self {
             client,
             bucket: bucket.to_string(),
         })
+    }
+}
+
+async fn build_s3_client(
+    endpoint: &str,
+    region: &str,
+    access_key: &str,
+    secret_key: &str,
+) -> Client {
+    let credentials = Credentials::new(access_key, secret_key, None, None, "static");
+    let sdk_config = aws_config::defaults(BehaviorVersion::latest())
+        .endpoint_url(endpoint)
+        .region(Region::new(region.to_string()))
+        .credentials_provider(credentials)
+        .load()
+        .await;
+
+    let config = aws_sdk_s3::config::Builder::from(&sdk_config)
+        .force_path_style(true)
+        .build();
+
+    Client::from_conf(config)
+}
+
+async fn ensure_bucket(client: &Client, bucket: &str) -> Result<(), String> {
+    match client.create_bucket().bucket(bucket).send().await {
+        Ok(_) => Ok(()),
+        Err(e) => {
+            let svc_err = e.into_service_error();
+            if svc_err.is_bucket_already_owned_by_you() || svc_err.is_bucket_already_exists() {
+                return Ok(());
+            }
+            Err(format!("failed to create bucket: {svc_err}"))
+        }
     }
 }
 

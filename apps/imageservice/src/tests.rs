@@ -36,7 +36,14 @@ impl ImageDb for Arc<MockDb> {
         Ok(uploads.contains(&(filename.to_string(), user_id)))
     }
 
-    async fn consume_upload(&self, filename: &str) -> Result<(), sqlx::Error> {
+    async fn consume_upload(&self, filename: &str, user_id: i32) -> Result<bool, sqlx::Error> {
+        let mut uploads = self.uploads.lock().await;
+        let before = uploads.len();
+        uploads.retain(|(f, owner)| !(f == filename && *owner == user_id));
+        Ok(uploads.len() != before)
+    }
+
+    async fn delete_upload_metadata(&self, filename: &str) -> Result<(), sqlx::Error> {
         let mut uploads = self.uploads.lock().await;
         uploads.retain(|(f, _)| f != filename);
         Ok(())
@@ -154,6 +161,7 @@ async fn test_consume_upload_promotes_and_cleans_staging() {
 
     let req = Request::new(ConsumeUploadRequest {
         filename: "test.jpg".to_string(),
+        user_id: 1,
     });
 
     let res = service.consume_upload(req).await;
@@ -164,4 +172,42 @@ async fn test_consume_upload_promotes_and_cleans_staging() {
 
     assert!(store.contains("test.jpg"));
     assert!(!store.contains("staging/test.jpg"));
+}
+
+#[tokio::test]
+async fn test_consume_upload_rejects_wrong_owner() {
+    let db = Arc::new(MockDb::new());
+    let store = MockBlobStore::new();
+    store.seed("staging/test.jpg", "image/jpeg", vec![0xff, 0xd8, 0xff]);
+
+    let service = make_service(db.clone(), store.clone());
+
+    let req = Request::new(ConsumeUploadRequest {
+        filename: "test.jpg".to_string(),
+        user_id: 2,
+    });
+
+    let res = service.consume_upload(req).await;
+    assert!(res.is_err());
+    assert_eq!(res.unwrap_err().code(), tonic::Code::NotFound);
+
+    let uploads = db.uploads.lock().await;
+    assert_eq!(uploads.len(), 1);
+    assert!(!store.contains("test.jpg"));
+    assert!(store.contains("staging/test.jpg"));
+}
+
+#[tokio::test]
+async fn test_verify_upload_rejects_invalid_filename() {
+    let db = Arc::new(MockDb::new());
+    let service = make_service(db, MockBlobStore::new());
+
+    let req = Request::new(VerifyUploadRequest {
+        filename: "../test.jpg".to_string(),
+        user_id: 1,
+    });
+
+    let res = service.verify_upload(req).await;
+    assert!(res.is_err());
+    assert_eq!(res.unwrap_err().code(), tonic::Code::InvalidArgument);
 }

@@ -8,7 +8,11 @@ use crate::pagination;
 use crate::utils::{get_user_id, is_valid_email};
 use chrono::{DateTime, Utc};
 use sqlx::Error as SqlxError;
+use std::sync::Arc;
+use tokio::sync::Semaphore;
 use tonic::{Request, Response, Status};
+
+const DEFAULT_ARGON_MAX_CONCURRENCY: usize = 4;
 
 pub struct UpdateUserFields<'a> {
     pub name: &'a str,
@@ -69,11 +73,22 @@ pub trait UserDb: Send + Sync + 'static {
 
 pub struct Controller<D: UserDb> {
     pub db_client: D,
+    semaphore: Arc<Semaphore>,
 }
 
 impl<D: UserDb> Controller<D> {
     pub fn new(db_client: D) -> Self {
-        Self { db_client }
+        Self::with_semaphore(
+            db_client,
+            Arc::new(Semaphore::new(DEFAULT_ARGON_MAX_CONCURRENCY)),
+        )
+    }
+
+    pub fn with_semaphore(db_client: D, semaphore: Arc<Semaphore>) -> Self {
+        Self {
+            db_client,
+            semaphore,
+        }
     }
 }
 
@@ -114,10 +129,16 @@ impl<D: UserDb> UserService for Controller<D> {
             return Err(Status::invalid_argument("Invalid email address."));
         }
 
-        let hash = generate_hash(password).map_err(|e| {
-            tracing::warn!(request_id = %request_id, method = "/cogito.UserService/CreateUser", error = %e, "hashing failed");
-            Status::internal("Internal server error.")
-        })?;
+        let hash = {
+            let _permit = self
+                .semaphore
+                .try_acquire()
+                .map_err(|_| Status::resource_exhausted("Server busy, retry later."))?;
+            generate_hash(password).map_err(|e| {
+                tracing::warn!(request_id = %request_id, method = "/cogito.UserService/CreateUser", error = %e, "hashing failed");
+                Status::internal("Internal server error.")
+            })?
+        };
 
         match self
             .db_client
@@ -161,6 +182,18 @@ impl<D: UserDb> UserService for Controller<D> {
         let user_id = get_user_id(&request)?;
         let req = request.into_inner();
 
+        let has_profile_changes = req.name.is_some()
+            || req.username.is_some()
+            || req.email.is_some()
+            || req.bio.is_some()
+            || req.profile_photo_key.is_some()
+            || req.cover_photo_key.is_some();
+        if !req.password.is_empty() && has_profile_changes {
+            return Err(Status::invalid_argument(
+                "Password and profile changes must be submitted separately.",
+            ));
+        }
+
         if !req.password.is_empty() {
             if req.old_password.is_empty() {
                 return Err(Status::invalid_argument(
@@ -179,7 +212,14 @@ impl<D: UserDb> UserService for Controller<D> {
                 .ok_or_else(|| Status::not_found("Resource not found."))?;
 
             let (_, hash_str) = user;
-            if !validate_password(&req.old_password, &hash_str).unwrap_or(false) {
+            let password_matches = {
+                let _permit = self
+                    .semaphore
+                    .try_acquire()
+                    .map_err(|_| Status::resource_exhausted("Server busy, retry later."))?;
+                validate_password(&req.old_password, &hash_str).unwrap_or(false)
+            };
+            if !password_matches {
                 return Err(Status::unauthenticated(
                     "Wrong password. Enter the correct current password.",
                 ));
@@ -192,10 +232,16 @@ impl<D: UserDb> UserService for Controller<D> {
                 ));
             }
 
-            let new_hash = generate_hash(password).map_err(|e| {
-                tracing::warn!(request_id = %request_id, method = "/cogito.UserService/UpdateUser", error = %e, "hashing failed");
-                Status::internal("Internal server error.")
-            })?;
+            let new_hash = {
+                let _permit = self
+                    .semaphore
+                    .try_acquire()
+                    .map_err(|_| Status::resource_exhausted("Server busy, retry later."))?;
+                generate_hash(password).map_err(|e| {
+                    tracing::warn!(request_id = %request_id, method = "/cogito.UserService/UpdateUser", error = %e, "hashing failed");
+                    Status::internal("Internal server error.")
+                })?
+            };
 
             self.db_client
                 .update_password(user_id, &new_hash)

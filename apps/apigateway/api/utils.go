@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -25,6 +26,12 @@ func getStatusCode(s *status.Status) int {
 		return http.StatusNotFound
 	case codes.AlreadyExists:
 		return http.StatusConflict
+	case codes.ResourceExhausted:
+		return http.StatusTooManyRequests
+	case codes.Unavailable:
+		return http.StatusServiceUnavailable
+	case codes.DeadlineExceeded:
+		return http.StatusGatewayTimeout
 	default:
 		return http.StatusInternalServerError
 	}
@@ -57,11 +64,20 @@ func jsonResponse(w http.ResponseWriter, status int, data interface{}) {
 }
 
 type errorResponse struct {
-	Error string `json:"error"`
+	Message string `json:"message"`
 }
 
 func jsonError(w http.ResponseWriter, status int, msg string) {
-	jsonResponse(w, status, errorResponse{Error: msg})
+	jsonResponse(w, status, errorResponse{Message: msg})
+}
+
+func decodeJSONBody(r *http.Request, dst any) error {
+	err := json.NewDecoder(r.Body).Decode(dst)
+	var maxBytesErr *http.MaxBytesError
+	if errors.As(err, &maxBytesErr) {
+		return status.Error(codes.ResourceExhausted, "Payload too large")
+	}
+	return err
 }
 
 func insecureCredentials() grpc.DialOption {

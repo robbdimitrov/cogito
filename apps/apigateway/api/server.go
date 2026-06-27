@@ -22,7 +22,7 @@ func CreateServer(ctx context.Context, authAddr, postAddr, userAddr, imageAddr, 
 	// authGuard runs before rateLimitMiddleware so the user ID is in context
 	// when the rate limit key is computed. Per-user keying is critical: without
 	// it, every request falls back to the IP key and all users share one bucket
-	// (all browser traffic arrives via the Next.js proxy pod, so RemoteAddr is
+	// (all browser traffic arrives via the SvelteKit proxy pod, so RemoteAddr is
 	// always the same host).
 	handler = newConcurrencyLimiter().middleware(handler)
 	handler = rateLimitMiddleware(rlStore)(handler)

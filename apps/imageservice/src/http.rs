@@ -248,7 +248,15 @@ mod tests {
             Ok(true)
         }
 
-        async fn consume_upload(&self, _filename: &str) -> Result<(), sqlx::Error> {
+        async fn consume_upload(
+            &self,
+            _filename: &str,
+            _user_id: i32,
+        ) -> Result<bool, sqlx::Error> {
+            Ok(true)
+        }
+
+        async fn delete_upload_metadata(&self, _filename: &str) -> Result<(), sqlx::Error> {
             Ok(())
         }
     }

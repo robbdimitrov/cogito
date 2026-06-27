@@ -156,7 +156,6 @@ func (r *router) proxyImageUpload(w http.ResponseWriter, req *http.Request) {
 
 	r.proxyImageRequest("/uploads", func(proxyReq *http.Request) {
 		proxyReq.Header.Set("x-user-id", userID)
-		proxyReq.Header.Set("internal-token", internalGRPCToken())
 	})(w, req)
 }
 
@@ -184,6 +183,8 @@ func (r *router) proxyImageRequest(path string, configure func(*http.Request)) h
 				proxyReq.Out.URL.Path = path
 				proxyReq.Out.URL.RawPath = ""
 				proxyReq.SetXForwarded()
+				stripInternalImageProxyHeaders(proxyReq.Out.Header)
+				proxyReq.Out.Header.Set("internal-token", internalGRPCToken())
 				if requestID := getRequestID(proxyReq.In); requestID != "" {
 					proxyReq.Out.Header.Set("X-Request-ID", requestID)
 				}
@@ -197,6 +198,11 @@ func (r *router) proxyImageRequest(path string, configure func(*http.Request)) h
 		}
 		proxy.ErrorHandler = func(w http.ResponseWriter, req *http.Request, err error) {
 			slog.Warn("image proxy failed", "request_id", getRequestID(req), "error", err)
+			var maxBytesErr *http.MaxBytesError
+			if errors.As(err, &maxBytesErr) {
+				jsonError(w, http.StatusRequestEntityTooLarge, "Payload too large")
+				return
+			}
 			jsonError(w, http.StatusServiceUnavailable, "Image service unavailable")
 		}
 
@@ -204,6 +210,12 @@ func (r *router) proxyImageRequest(path string, configure func(*http.Request)) h
 		defer cancel()
 		proxy.ServeHTTP(w, req.WithContext(ctx))
 	}
+}
+
+func stripInternalImageProxyHeaders(headers http.Header) {
+	headers.Del("internal-token")
+	headers.Del("x-user-id")
+	headers.Del("user-id")
 }
 
 type retryHTTPTransport struct {

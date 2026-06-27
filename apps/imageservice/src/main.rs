@@ -31,6 +31,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let s3_region = env::var("S3_REGION").expect("S3_REGION must be set");
     let s3_access_key = env::var("S3_ACCESS_KEY").expect("S3_ACCESS_KEY must be set");
     let s3_secret_key = env::var("S3_SECRET_KEY").expect("S3_SECRET_KEY must be set");
+    let s3_provisioning_access_key = env::var("S3_PROVISIONING_ACCESS_KEY").ok();
+    let s3_provisioning_secret_key = env::var("S3_PROVISIONING_SECRET_KEY").ok();
+    let provisioning_credentials = match (
+        s3_provisioning_access_key.as_deref(),
+        s3_provisioning_secret_key.as_deref(),
+    ) {
+        (Some(access_key), Some(secret_key)) => Some((access_key, secret_key)),
+        (None, None) => None,
+        _ => {
+            return Err(
+                "S3_PROVISIONING_ACCESS_KEY and S3_PROVISIONING_SECRET_KEY must be set together"
+                    .into(),
+            );
+        }
+    };
 
     let db_client = db_client::DbClient::new(&db_url).await?;
 
@@ -41,6 +56,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             &s3_region,
             &s3_access_key,
             &s3_secret_key,
+            provisioning_credentials,
         )
         .await?,
     );

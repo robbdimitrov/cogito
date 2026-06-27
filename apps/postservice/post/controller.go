@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"strings"
 	"unicode/utf8"
 
 	"google.golang.org/grpc/codes"
@@ -31,7 +32,7 @@ func (c *controller) CreatePost(ctx context.Context, req *pb.CreatePostRequest) 
 		return nil, newError(codes.InvalidArgument)
 	}
 
-	if req.Content == "" {
+	if strings.TrimSpace(req.Content) == "" {
 		return nil, newError(codes.InvalidArgument)
 	}
 	if utf8.RuneCountInString(req.Content) > 255 {

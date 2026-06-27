@@ -1,6 +1,9 @@
 package api
 
-import "net/http"
+import (
+	"net/http"
+	"strings"
+)
 
 type route struct {
 	method string
@@ -23,6 +26,10 @@ func authGuard(ac *authController) func(http.Handler) http.Handler {
 					return
 				}
 			}
+			if isPublicUploadRead(r) {
+				next.ServeHTTP(w, r)
+				return
+			}
 			newReq, err := ac.validateSession(w, r)
 			if err != nil {
 				return // validation already wrote error to w
@@ -30,4 +37,12 @@ func authGuard(ac *authController) func(http.Handler) http.Handler {
 			next.ServeHTTP(w, newReq)
 		})
 	}
+}
+
+func isPublicUploadRead(r *http.Request) bool {
+	if r.Method != http.MethodGet && r.Method != http.MethodHead {
+		return false
+	}
+	filename, ok := strings.CutPrefix(r.URL.Path, "/uploads/")
+	return ok && filename != "" && !strings.Contains(filename, "/")
 }

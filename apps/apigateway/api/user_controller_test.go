@@ -48,6 +48,10 @@ func (m *mockAuthServiceClient) GetSessions(ctx context.Context, in *pb.UserRequ
 	return &pb.Sessions{Sessions: m.sessions}, nil
 }
 
+func (m *mockAuthServiceClient) GetSession(ctx context.Context, in *pb.SessionRequest, opts ...grpc.CallOption) (*pb.Session, error) {
+	return &pb.Session{Handle: "current-session"}, nil
+}
+
 func (m *mockAuthServiceClient) DeleteSession(ctx context.Context, in *pb.SessionRequest, opts ...grpc.CallOption) (*pb.Empty, error) {
 	m.deleteSessionCalled++
 	m.deletedSessionIDs = append(m.deletedSessionIDs, in.SessionId)
@@ -128,16 +132,19 @@ func TestImageUploadProxy_ForwardsFrontendRouteWithUserHeader(t *testing.T) {
 func TestImageFileProxy_ForwardsCacheAndValidatorHeaders(t *testing.T) {
 	var gotPath string
 	var gotMethod string
+	var gotInternalToken string
 
 	imageServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		gotPath = r.URL.Path
 		gotMethod = r.Method
+		gotInternalToken = r.Header.Get("internal-token")
 		w.Header().Set("Cache-Control", "private, max-age=86400")
 		w.Header().Set("Last-Modified", "Sat, 06 Jun 2026 10:00:00 GMT")
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer imageServer.Close()
 
+	t.Setenv("INTERNAL_GRPC_TOKEN", "test-internal-token")
 	imageAddr := strings.TrimPrefix(imageServer.URL, "http://")
 	router := &router{imageAddr: imageAddr}
 
@@ -156,11 +163,54 @@ func TestImageFileProxy_ForwardsCacheAndValidatorHeaders(t *testing.T) {
 	if gotMethod != http.MethodGet {
 		t.Errorf("Expected proxied method GET, got %s", gotMethod)
 	}
+	if gotInternalToken != "test-internal-token" {
+		t.Errorf("Expected internal-token header test-internal-token, got %s", gotInternalToken)
+	}
 	if got := w.Header().Get("Cache-Control"); got != "private, max-age=86400" {
 		t.Errorf("Expected cache header to be forwarded, got %q", got)
 	}
 	if got := w.Header().Get("Last-Modified"); got != "Sat, 06 Jun 2026 10:00:00 GMT" {
 		t.Errorf("Expected Last-Modified to be forwarded, got %q", got)
+	}
+}
+
+func TestImageFileProxy_StripsClientInternalHeaders(t *testing.T) {
+	var gotInternalToken string
+	var gotUserID string
+	var gotGRPCUserID string
+
+	imageServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotInternalToken = r.Header.Get("internal-token")
+		gotUserID = r.Header.Get("x-user-id")
+		gotGRPCUserID = r.Header.Get("user-id")
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer imageServer.Close()
+
+	t.Setenv("INTERNAL_GRPC_TOKEN", "gateway-owned-token")
+	imageAddr := strings.TrimPrefix(imageServer.URL, "http://")
+	router := &router{imageAddr: imageAddr}
+
+	req := httptest.NewRequest("GET", "/uploads/profile.jpg", nil)
+	req.Header.Set("internal-token", "attacker-token")
+	req.Header.Set("x-user-id", "99")
+	req.Header.Set("user-id", "99")
+	req.SetPathValue("filename", "profile.jpg")
+	w := httptest.NewRecorder()
+
+	router.proxyImageFile(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("Expected status 200, got %d", w.Code)
+	}
+	if gotInternalToken != "gateway-owned-token" {
+		t.Errorf("Expected gateway-owned internal-token, got %q", gotInternalToken)
+	}
+	if gotUserID != "" {
+		t.Errorf("Expected client x-user-id to be stripped, got %q", gotUserID)
+	}
+	if gotGRPCUserID != "" {
+		t.Errorf("Expected client user-id to be stripped, got %q", gotGRPCUserID)
 	}
 }
 
@@ -259,8 +309,8 @@ func TestUpdateUser_ImageAndSessionOrchestration(t *testing.T) {
 	}
 	mockAuth := &mockAuthServiceClient{
 		sessions: []*pb.Session{
-			{Id: "current-hashed-session"},
-			{Id: "other-session"},
+			{Handle: "current-session"},
+			{Handle: "other-session"},
 		},
 	}
 	mockImage := &mockImageServiceClientForUser{}

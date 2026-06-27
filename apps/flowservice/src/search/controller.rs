@@ -1,3 +1,5 @@
+use std::sync::Arc;
+use tokio::sync::RwLock;
 use tonic::transport::Channel;
 use tonic::{Request, Response, Status};
 
@@ -13,16 +15,24 @@ const MAX_LIMIT: u32 = 50;
 
 #[derive(Clone)]
 pub struct SearchController {
-    meili: Option<MeiliClient>,
+    meili: Arc<RwLock<Option<MeiliClient>>>,
     user_client: Option<UserServiceClient<Channel>>,
 }
 
 impl SearchController {
     pub fn new(
-        meili: Option<MeiliClient>,
+        meili: Arc<RwLock<Option<MeiliClient>>>,
         user_client: Option<UserServiceClient<Channel>>,
     ) -> Self {
         Self { meili, user_client }
+    }
+
+    async fn meili_client(&self) -> Result<MeiliClient, Status> {
+        self.meili
+            .read()
+            .await
+            .clone()
+            .ok_or_else(|| Status::unavailable("Search is temporarily unavailable"))
     }
 
     async fn fetch_full_users(&self, hits: &[UserHit], request_id: &str) -> Vec<User> {
@@ -97,10 +107,7 @@ impl SearchService for SearchController {
         let req = request.into_inner();
         let (query, limit, offset) = validate_request(&req)?;
 
-        let meili = self
-            .meili
-            .as_ref()
-            .ok_or_else(|| Status::unavailable("Search is temporarily unavailable"))?;
+        let meili = self.meili_client().await?;
 
         let mut hits = meili
             .search_users(&query, limit + 1, offset)
@@ -133,10 +140,7 @@ impl SearchService for SearchController {
         let req = request.into_inner();
         let (query, limit, offset) = validate_request(&req)?;
 
-        let meili = self
-            .meili
-            .as_ref()
-            .ok_or_else(|| Status::unavailable("Search is temporarily unavailable"))?;
+        let meili = self.meili_client().await?;
 
         let hits = meili
             .search_posts(&query, limit + 1, offset)
@@ -167,10 +171,7 @@ impl SearchService for SearchController {
         let req = request.into_inner();
         let (query, limit, offset) = validate_request(&req)?;
 
-        let meili = self
-            .meili
-            .as_ref()
-            .ok_or_else(|| Status::unavailable("Search is temporarily unavailable"))?;
+        let meili = self.meili_client().await?;
 
         let hits = meili
             .search_hashtags(&query, limit + 1, offset)

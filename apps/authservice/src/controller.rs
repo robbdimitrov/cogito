@@ -8,6 +8,8 @@ use tokio::sync::Semaphore;
 use tonic::{Request, Response, Status};
 
 type HmacSha256 = Hmac<Sha256>;
+const MIN_PASSWORD_LEN: usize = 8;
+const MAX_PASSWORD_LEN: usize = 1024;
 
 // A precomputed Argon2 hash used to equalize verification time when an email is
 // not found, so response timing does not reveal whether an account exists.
@@ -30,16 +32,28 @@ fn hash_session_id(secret: &str, session_id: &str) -> String {
     URL_SAFE_NO_PAD.encode(mac.finalize().into_bytes())
 }
 
+fn new_public_handle() -> String {
+    let mut key = [0u8; 21];
+    rand::thread_rng().fill_bytes(&mut key);
+    URL_SAFE_NO_PAD.encode(key)
+}
+
 use crate::cogito::auth_service_server::AuthService;
 use crate::cogito::{Credentials, Empty, Session, SessionRequest, Sessions, UserRequest};
 
 #[tonic::async_trait]
 pub trait AuthDb: Send + Sync + 'static {
     async fn get_user(&self, email: &str) -> Result<Option<(i32, String)>, sqlx::Error>;
-    async fn create_session(&self, session_id: &str, user_id: i32) -> Result<Session, sqlx::Error>;
+    async fn create_session(
+        &self,
+        session_id: &str,
+        user_id: i32,
+        handle: &str,
+    ) -> Result<Session, sqlx::Error>;
     async fn get_session(&self, session_id: &str) -> Result<Option<Session>, sqlx::Error>;
     async fn get_sessions(&self, user_id: i32) -> Result<Vec<Session>, sqlx::Error>;
-    async fn delete_session(&self, session_id: &str) -> Result<u64, sqlx::Error>;
+    async fn delete_session_by_id(&self, session_id: &str) -> Result<u64, sqlx::Error>;
+    async fn delete_session_by_handle(&self, handle: &str) -> Result<u64, sqlx::Error>;
     async fn update_password_hash(&self, user_id: i32, new_hash: &str) -> Result<(), sqlx::Error>;
 }
 
@@ -67,11 +81,17 @@ impl<D: AuthDb + Clone> AuthService for Controller<D> {
     ) -> Result<Response<Session>, Status> {
         let request_id = crate::logging::request_id(&request).to_string();
         let req = request.into_inner();
-        if req.email.is_empty() || req.password.is_empty() {
+        let email = req.email.trim().to_lowercase();
+        if email.is_empty() || req.password.is_empty() {
             return Err(Status::invalid_argument("Missing credentials."));
         }
+        if req.password.len() < MIN_PASSWORD_LEN || req.password.len() > MAX_PASSWORD_LEN {
+            return Err(Status::invalid_argument(
+                "Password must be between 8 and 1024 characters.",
+            ));
+        }
 
-        let user_opt = self.db_client.get_user(&req.email).await.map_err(|e| {
+        let user_opt = self.db_client.get_user(&email).await.map_err(|e| {
             tracing::warn!(request_id = %request_id, method = "/cogito.AuthService/CreateSession", error = %e, "getting user failed");
             Status::internal("Internal server error.")
         })?;
@@ -134,15 +154,14 @@ impl<D: AuthDb + Clone> AuthService for Controller<D> {
                 drop(_permit);
 
                 // Generate a 21-byte token and encode it as URL-safe base64 (28 characters)
-                let mut key = [0u8; 21];
-                rand::thread_rng().fill_bytes(&mut key);
-                let session_id = URL_SAFE_NO_PAD.encode(key);
+                let session_id = new_public_handle();
 
                 let hashed_id = hash_session_id(&self.session_hmac_secret, &session_id);
+                let handle = new_public_handle();
 
                 let mut session = self
                     .db_client
-                    .create_session(&hashed_id, user_id)
+                    .create_session(&hashed_id, user_id, &handle)
                     .await
                     .map_err(|e| {
                         tracing::warn!(request_id = %request_id, method = "/cogito.AuthService/CreateSession", error = %e, "creating session failed");
@@ -202,7 +221,13 @@ impl<D: AuthDb + Clone> AuthService for Controller<D> {
             })?;
 
         Ok(Response::new(Sessions {
-            sessions: sessions_list,
+            sessions: sessions_list
+                .into_iter()
+                .map(|mut session| {
+                    session.id = session.handle.clone();
+                    session
+                })
+                .collect(),
         }))
     }
 
@@ -214,10 +239,15 @@ impl<D: AuthDb + Clone> AuthService for Controller<D> {
         let req = request.into_inner();
         let hashed_id = hash_session_id(&self.session_hmac_secret, &req.session_id);
 
-        match self.db_client.delete_session(&hashed_id).await {
+        match self.db_client.delete_session_by_id(&hashed_id).await {
             Ok(n) if n > 0 => Ok(Response::new(Empty {})),
-            Ok(_) => match self.db_client.delete_session(&req.session_id).await {
-                Ok(_) => Ok(Response::new(Empty {})),
+            Ok(_) => match self
+                .db_client
+                .delete_session_by_handle(&req.session_id)
+                .await
+            {
+                Ok(n) if n > 0 => Ok(Response::new(Empty {})),
+                Ok(_) => Err(Status::not_found("Session not found.")),
                 Err(e) => {
                     tracing::warn!(request_id = %request_id, method = "/cogito.AuthService/DeleteSession", error = %e, "deleting session failed");
                     Err(Status::internal("Internal server error."))
@@ -264,11 +294,13 @@ mod tests {
             &self,
             session_id: &str,
             user_id: i32,
+            handle: &str,
         ) -> Result<Session, sqlx::Error> {
             Ok(Session {
                 id: session_id.to_string(),
                 user_id,
                 created: "2026-06-02T00:00:00Z".to_string(),
+                handle: handle.to_string(),
             })
         }
 
@@ -279,6 +311,7 @@ mod tests {
                     id: session_id.to_string(),
                     user_id: 1,
                     created: "2026-06-02T00:00:00Z".to_string(),
+                    handle: "valid_handle".to_string(),
                 }))
             } else {
                 Ok(None)
@@ -291,13 +324,22 @@ mod tests {
                     id: "valid_session".to_string(),
                     user_id,
                     created: "2026-06-02T00:00:00Z".to_string(),
+                    handle: "valid_handle".to_string(),
                 }])
             } else {
                 Ok(vec![])
             }
         }
 
-        async fn delete_session(&self, _session_id: &str) -> Result<u64, sqlx::Error> {
+        async fn delete_session_by_id(&self, session_id: &str) -> Result<u64, sqlx::Error> {
+            if session_id == hash_session_id("test-secret", "valid_session") {
+                Ok(1)
+            } else {
+                Ok(0)
+            }
+        }
+
+        async fn delete_session_by_handle(&self, _handle: &str) -> Result<u64, sqlx::Error> {
             Ok(0)
         }
 
@@ -338,6 +380,17 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn test_create_session_normalizes_email() {
+        let controller = Controller::new(MockAuthDb, "test-secret".to_string(), make_semaphore(8));
+        let req = Request::new(Credentials {
+            email: " Test@Example.COM ".to_string(),
+            password: "password".to_string(),
+        });
+        let res = controller.create_session(req).await;
+        assert!(res.is_ok());
+    }
+
+    #[tokio::test]
     async fn test_create_session_missing_credentials() {
         let controller = Controller::new(MockAuthDb, "test-secret".to_string(), make_semaphore(8));
         let req = Request::new(Credentials {
@@ -354,11 +407,35 @@ mod tests {
         let controller = Controller::new(MockAuthDb, "test-secret".to_string(), make_semaphore(8));
         let req = Request::new(Credentials {
             email: "test@example.com".to_string(),
-            password: "wrong".to_string(),
+            password: "wrongpassword".to_string(),
         });
         let res = controller.create_session(req).await;
         assert!(res.is_err());
         assert_eq!(res.unwrap_err().code(), tonic::Code::Unauthenticated);
+    }
+
+    #[tokio::test]
+    async fn test_create_session_short_password_rejected_before_verification() {
+        let controller = Controller::new(MockAuthDb, "test-secret".to_string(), make_semaphore(8));
+        let req = Request::new(Credentials {
+            email: "test@example.com".to_string(),
+            password: "short".to_string(),
+        });
+        let res = controller.create_session(req).await;
+        assert!(res.is_err());
+        assert_eq!(res.unwrap_err().code(), tonic::Code::InvalidArgument);
+    }
+
+    #[tokio::test]
+    async fn test_create_session_long_password_rejected_before_lookup() {
+        let controller = Controller::new(MockAuthDb, "test-secret".to_string(), make_semaphore(8));
+        let req = Request::new(Credentials {
+            email: "db_error@example.com".to_string(),
+            password: "a".repeat(MAX_PASSWORD_LEN + 1),
+        });
+        let res = controller.create_session(req).await;
+        assert!(res.is_err());
+        assert_eq!(res.unwrap_err().code(), tonic::Code::InvalidArgument);
     }
 
     #[tokio::test]
@@ -428,7 +505,7 @@ mod tests {
         assert!(res.is_ok());
         let sessions = res.unwrap().into_inner().sessions;
         assert_eq!(sessions.len(), 1);
-        assert_eq!(sessions[0].id, "valid_session");
+        assert_eq!(sessions[0].id, "valid_handle");
     }
 
     #[tokio::test]
@@ -475,11 +552,13 @@ mod tests {
                 &self,
                 session_id: &str,
                 user_id: i32,
+                handle: &str,
             ) -> Result<Session, sqlx::Error> {
                 Ok(Session {
                     id: session_id.to_string(),
                     user_id,
                     created: "2026-06-02T00:00:00Z".to_string(),
+                    handle: handle.to_string(),
                 })
             }
 
@@ -491,7 +570,11 @@ mod tests {
                 Ok(vec![])
             }
 
-            async fn delete_session(&self, _session_id: &str) -> Result<u64, sqlx::Error> {
+            async fn delete_session_by_id(&self, _session_id: &str) -> Result<u64, sqlx::Error> {
+                Ok(0)
+            }
+
+            async fn delete_session_by_handle(&self, _handle: &str) -> Result<u64, sqlx::Error> {
                 Ok(0)
             }
 

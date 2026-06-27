@@ -5,7 +5,8 @@ use sqlx::postgres::PgPool;
 pub trait ImageDb: Send + Sync + 'static {
     async fn insert_upload(&self, filename: &str, user_id: i32) -> Result<(), sqlx::Error>;
     async fn verify_upload(&self, filename: &str, user_id: i32) -> Result<bool, sqlx::Error>;
-    async fn consume_upload(&self, filename: &str) -> Result<(), sqlx::Error>;
+    async fn consume_upload(&self, filename: &str, user_id: i32) -> Result<bool, sqlx::Error>;
+    async fn delete_upload_metadata(&self, filename: &str) -> Result<(), sqlx::Error>;
 }
 
 #[derive(Clone)]
@@ -45,7 +46,16 @@ impl ImageDb for DbClient {
         Ok(count > 0)
     }
 
-    async fn consume_upload(&self, filename: &str) -> Result<(), sqlx::Error> {
+    async fn consume_upload(&self, filename: &str, user_id: i32) -> Result<bool, sqlx::Error> {
+        let result = sqlx::query("DELETE FROM uploads WHERE filename = $1 AND user_id = $2")
+            .bind(filename)
+            .bind(user_id)
+            .execute(&self.pool)
+            .await?;
+        Ok(result.rows_affected() > 0)
+    }
+
+    async fn delete_upload_metadata(&self, filename: &str) -> Result<(), sqlx::Error> {
         sqlx::query("DELETE FROM uploads WHERE filename = $1")
             .bind(filename)
             .execute(&self.pool)

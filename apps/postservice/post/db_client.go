@@ -592,16 +592,26 @@ func (c *DBClient) repostPost(ctx context.Context, postID int32, userID int32) e
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
 
-	query := `INSERT INTO posts (user_id, repost_of_id)
-		SELECT $1, COALESCE(p.repost_of_id, p.id)
-		FROM posts p WHERE p.id = $2
-		AND p.in_reply_to_id IS NULL
-		ON CONFLICT (user_id, repost_of_id) DO NOTHING
-		RETURNING id, repost_of_id, created`
-	var newPostID int32
 	var repostOfID int32
+	var targetIsReply bool
+	err = tx.QueryRow(ctx, "SELECT COALESCE(repost_of_id, id), in_reply_to_id IS NOT NULL FROM posts WHERE id = $1", postID).Scan(&repostOfID, &targetIsReply)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return errInvalidReference
+	}
+	if err != nil {
+		return err
+	}
+	if targetIsReply {
+		return errInvalidReference
+	}
+
+	query := `INSERT INTO posts (user_id, repost_of_id)
+		VALUES ($1, $2)
+		ON CONFLICT (user_id, repost_of_id) DO NOTHING
+		RETURNING id, created`
+	var newPostID int32
 	var created time.Time
-	err = tx.QueryRow(ctx, query, userID, postID).Scan(&newPostID, &repostOfID, &created)
+	err = tx.QueryRow(ctx, query, userID, repostOfID).Scan(&newPostID, &created)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return tx.Commit(ctx)
 	}
@@ -648,7 +658,14 @@ func (c *DBClient) removeRepost(ctx context.Context, postID int32, userID int32)
 
 	var repostRowID int32
 	var repostOfID int32
-	err = tx.QueryRow(ctx, "SELECT id, repost_of_id FROM posts WHERE user_id = $1 AND repost_of_id = $2", userID, postID).Scan(&repostRowID, &repostOfID)
+	err = tx.QueryRow(ctx, "SELECT COALESCE(repost_of_id, id) FROM posts WHERE id = $1", postID).Scan(&repostOfID)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return tx.Commit(ctx)
+	}
+	if err != nil {
+		return err
+	}
+	err = tx.QueryRow(ctx, "SELECT id FROM posts WHERE user_id = $1 AND repost_of_id = $2", userID, repostOfID).Scan(&repostRowID)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return tx.Commit(ctx)
 	}

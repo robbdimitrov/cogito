@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"encoding/json"
 	"log/slog"
 	"net/http"
 	"os"
@@ -56,7 +55,11 @@ func (ac *authController) createSession(w http.ResponseWriter, r *http.Request) 
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+	if err := decodeJSONBody(r, &body); err != nil {
+		if status.Code(err) == codes.ResourceExhausted {
+			jsonError(w, http.StatusRequestEntityTooLarge, "Payload too large")
+			return
+		}
 		jsonError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
@@ -264,16 +267,22 @@ func (ac *authController) getSessions(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sessions := make([]session, len(res.Sessions))
+	currentSessionID := validateRes.Handle
 	for i, s := range res.Sessions {
+		id := s.Handle
+		if id == "" {
+			id = s.Id
+		}
 		sessions[i] = session{
-			ID:      s.Id,
+			ID:      id,
 			UserID:  s.UserId,
 			Created: s.Created,
 		}
 	}
 
 	jsonResponse(w, 200, map[string]interface{}{
-		"sessions": sessions,
-		"userId":   validateRes.UserId,
+		"sessions":         sessions,
+		"userId":           validateRes.UserId,
+		"currentSessionId": currentSessionID,
 	})
 }

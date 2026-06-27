@@ -806,6 +806,7 @@ type Session struct {
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	UserId        int32                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	Created       string                 `protobuf:"bytes,3,opt,name=created,proto3" json:"created,omitempty"`
+	Handle        string                 `protobuf:"bytes,4,opt,name=handle,proto3" json:"handle,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -857,6 +858,13 @@ func (x *Session) GetUserId() int32 {
 func (x *Session) GetCreated() string {
 	if x != nil {
 		return x.Created
+	}
+	return ""
+}
+
+func (x *Session) GetHandle() string {
+	if x != nil {
+		return x.Handle
 	}
 	return ""
 }
@@ -1676,6 +1684,7 @@ func (x *VerifyUploadRequest) GetUserId() int32 {
 type ConsumeUploadRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Filename      string                 `protobuf:"bytes,1,opt,name=filename,proto3" json:"filename,omitempty"`
+	UserId        int32                  `protobuf:"varint,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1715,6 +1724,13 @@ func (x *ConsumeUploadRequest) GetFilename() string {
 		return x.Filename
 	}
 	return ""
+}
+
+func (x *ConsumeUploadRequest) GetUserId() int32 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
 }
 
 type DeleteImageRequest struct {
@@ -2195,11 +2211,12 @@ const file_pkg_pb_cogito_proto_rawDesc = "" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\"/\n" +
 	"\x0eSessionRequest\x12\x1d\n" +
 	"\n" +
-	"session_id\x18\x01 \x01(\tR\tsessionId\"L\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\"d\n" +
 	"\aSession\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x05R\x06userId\x12\x18\n" +
-	"\acreated\x18\x03 \x01(\tR\acreated\"7\n" +
+	"\acreated\x18\x03 \x01(\tR\acreated\x12\x16\n" +
+	"\x06handle\x18\x04 \x01(\tR\x06handle\"7\n" +
 	"\bSessions\x12+\n" +
 	"\bsessions\x18\x01 \x03(\v2\x0f.cogito.SessionR\bsessions\"\xcf\x01\n" +
 	"\x11CreatePostRequest\x12\x18\n" +
@@ -2266,9 +2283,10 @@ const file_pkg_pb_cogito_proto_rawDesc = "" +
 	"\x05limit\x18\x02 \x01(\x05R\x05limit\"J\n" +
 	"\x13VerifyUploadRequest\x12\x1a\n" +
 	"\bfilename\x18\x01 \x01(\tR\bfilename\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\x05R\x06userId\"2\n" +
+	"\auser_id\x18\x02 \x01(\x05R\x06userId\"K\n" +
 	"\x14ConsumeUploadRequest\x12\x1a\n" +
-	"\bfilename\x18\x01 \x01(\tR\bfilename\"0\n" +
+	"\bfilename\x18\x01 \x01(\tR\bfilename\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\x05R\x06userId\"0\n" +
 	"\x12DeleteImageRequest\x12\x1a\n" +
 	"\bfilename\x18\x01 \x01(\tR\bfilename\"S\n" +
 	"\rSearchRequest\x12\x14\n" +

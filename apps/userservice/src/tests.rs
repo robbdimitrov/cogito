@@ -5,7 +5,7 @@ use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use sqlx::Error as SqlxError;
 use std::sync::Arc;
-use tokio::sync::Mutex;
+use tokio::sync::{Mutex, Semaphore};
 use tonic::Request;
 
 struct MockDb {
@@ -173,9 +173,7 @@ fn create_request<T>(msg: T, user_id: i32) -> Request<T> {
 #[tokio::test]
 async fn test_create_user() {
     let db = Arc::new(MockDb::new());
-    let controller = Controller {
-        db_client: db.clone(),
-    };
+    let controller = Controller::new(db.clone());
 
     let req = create_request(
         CreateUserRequest {
@@ -191,6 +189,26 @@ async fn test_create_user() {
     assert!(res.is_ok());
     let id = res.unwrap().into_inner().id;
     assert_eq!(id, 1);
+}
+
+#[tokio::test]
+async fn test_create_user_rejects_when_password_hashing_saturated() {
+    let db = Arc::new(MockDb::new());
+    let controller = Controller::with_semaphore(db.clone(), Arc::new(Semaphore::new(0)));
+
+    let req = create_request(
+        CreateUserRequest {
+            name: "Test".into(),
+            username: "testuser".into(),
+            email: "test@example.com".into(),
+            password: "password".into(),
+        },
+        1,
+    );
+
+    let error = controller.create_user(req).await.unwrap_err();
+    assert_eq!(error.code(), tonic::Code::ResourceExhausted);
+    assert!(db.users.lock().await.is_empty());
 }
 
 #[tokio::test]
@@ -364,6 +382,36 @@ async fn test_update_user_photo_only_does_not_require_username() {
         "photo-only update should succeed, got: {:?}",
         res.err()
     );
+}
+
+#[tokio::test]
+async fn test_update_user_rejects_mixed_password_and_profile_changes() {
+    let db = Arc::new(MockDb::new());
+    let controller = Controller::new(db.clone());
+
+    let _ = db
+        .create_user("Test", "testuser", "test@example.com", "hash")
+        .await;
+
+    let req = create_request(
+        UpdateUserRequest {
+            name: Some("Updated Name".into()),
+            username: None,
+            email: None,
+            bio: None,
+            password: "new-password".into(),
+            old_password: "old-password".into(),
+            profile_photo_key: None,
+            cover_photo_key: None,
+        },
+        1,
+    );
+
+    let error = controller.update_user(req).await.unwrap_err();
+    assert_eq!(error.code(), tonic::Code::InvalidArgument);
+
+    let user = db.get_user(1, 1).await.unwrap().unwrap();
+    assert_eq!(user.name, "Test");
 }
 
 #[tokio::test]

@@ -101,6 +101,7 @@ message Session {
   string id = 1;
   int32 user_id = 2;
   string created = 3;
+  string handle = 4;
 }
 
 message Sessions {
@@ -216,6 +217,7 @@ message VerifyUploadRequest {
 
 message ConsumeUploadRequest {
   string filename = 1;
+  int32 user_id = 2;
 }
 
 message DeleteImageRequest {

@@ -11,6 +11,13 @@ const FEED_EVENT_RETRY_DELAY: Duration = Duration::from_millis(250);
 
 use crate::feed::db::{Entry, FanOutSnapshot, FeedDb};
 
+struct FeedMessage<'a> {
+    topic: &'a str,
+    payload: &'a [u8],
+    partition: i32,
+    offset: i64,
+}
+
 #[derive(serde::Deserialize)]
 #[serde(tag = "op", rename_all = "snake_case")]
 enum ActivityEvent {
@@ -64,47 +71,63 @@ pub async fn run(
                     }
                 };
 
-                let topic = msg.topic();
-                let payload = msg.payload().unwrap_or_default();
+                let feed_msg = FeedMessage {
+                    topic: msg.topic(),
+                    payload: msg.payload().unwrap_or_default(),
+                    partition: msg.partition(),
+                    offset: msg.offset(),
+                };
 
-                let mut processed = false;
-                for attempt in 1..=MAX_FEED_EVENT_ATTEMPTS {
-                    match handle_message(topic, payload, &db, fan_out_threshold).await {
-                        Ok(()) => {
-                            consumer.commit_message(&msg, CommitMode::Async).ok();
-                            processed = true;
-                            break;
-                        }
-                        Err(e) if attempt < MAX_FEED_EVENT_ATTEMPTS => {
-                            tracing::warn!(
-                                topic,
-                                partition = msg.partition(),
-                                offset = msg.offset(),
-                                attempt,
-                                max_attempts = MAX_FEED_EVENT_ATTEMPTS,
-                                error = %e,
-                                "feed event processing failed, retrying before commit"
-                            );
-                            sleep(FEED_EVENT_RETRY_DELAY).await;
-                        }
-                        Err(e) => {
-                            tracing::error!(
-                                topic,
-                                partition = msg.partition(),
-                                offset = msg.offset(),
-                                attempts = attempt,
-                                error = %e,
-                                "feed event processing failed after retries, committing offset to skip poison pill"
-                            );
-                        }
-                    }
-                }
-                if !processed {
+                if process_message_with_retries(
+                    &feed_msg,
+                    &db,
+                    fan_out_threshold,
+                    FEED_EVENT_RETRY_DELAY,
+                )
+                .await
+                {
                     consumer.commit_message(&msg, CommitMode::Async).ok();
                 }
             }
         }
     }
+}
+
+async fn process_message_with_retries(
+    msg: &FeedMessage<'_>,
+    db: &(impl FeedDb + ?Sized),
+    fan_out_threshold: i32,
+    retry_delay: Duration,
+) -> bool {
+    for attempt in 1..=MAX_FEED_EVENT_ATTEMPTS {
+        match handle_message(msg.topic, msg.payload, db, fan_out_threshold).await {
+            Ok(()) => return true,
+            Err(e) if attempt < MAX_FEED_EVENT_ATTEMPTS => {
+                tracing::warn!(
+                    topic = msg.topic,
+                    partition = msg.partition,
+                    offset = msg.offset,
+                    attempt,
+                    max_attempts = MAX_FEED_EVENT_ATTEMPTS,
+                    error = %e,
+                    "feed event processing failed, retrying before commit"
+                );
+                sleep(retry_delay).await;
+            }
+            Err(e) => {
+                tracing::error!(
+                    topic = msg.topic,
+                    partition = msg.partition,
+                    offset = msg.offset,
+                    attempts = attempt,
+                    error = %e,
+                    "feed event processing failed after retries, leaving offset uncommitted for redelivery"
+                );
+                return false;
+            }
+        }
+    }
+    false
 }
 
 async fn handle_message(
@@ -321,6 +344,7 @@ mod tests {
         followers: Vec<i32>,
         follower_count: i32,
         fan_out_disabled: bool,
+        fail_bulk_insert: bool,
         entries: Mutex<Vec<Entry>>,
         latch_sets: Mutex<usize>,
     }
@@ -328,6 +352,11 @@ mod tests {
     #[async_trait]
     impl FeedDb for FakeDb {
         async fn bulk_insert(&self, entries: &[Entry]) -> Result<(), sqlx::Error> {
+            if self.fail_bulk_insert {
+                return Err(sqlx::Error::Protocol(
+                    "simulated feed insert failure".into(),
+                ));
+            }
             self.entries
                 .lock()
                 .unwrap()
@@ -474,5 +503,47 @@ mod tests {
         let user_ids: Vec<i32> = entries.iter().map(|e| e.user_id).collect();
         assert_eq!(user_ids, vec![11, 12, 7]);
         assert_eq!(*db.latch_sets.lock().unwrap(), 0);
+    }
+
+    #[tokio::test]
+    async fn malformed_event_commits_as_deliberate_skip() {
+        let db = FakeDb::default();
+        let msg = FeedMessage {
+            topic: "activity",
+            payload: b"not-json",
+            partition: 0,
+            offset: 42,
+        };
+
+        let should_commit = process_message_with_retries(&msg, &db, 10, Duration::ZERO).await;
+
+        assert!(should_commit);
+    }
+
+    #[tokio::test]
+    async fn retryable_processing_failure_stays_uncommitted() {
+        let db = FakeDb {
+            followers: vec![11],
+            fail_bulk_insert: true,
+            ..Default::default()
+        };
+        let msg = FeedMessage {
+            topic: "entity-changes",
+            payload: br#"{
+                "table":"posts",
+                "op":"upsert",
+                "id":99,
+                "author_id":7,
+                "follower_count":1,
+                "fan_out_disabled":false,
+                "created":"2026-06-27T10:00:00Z"
+            }"#,
+            partition: 0,
+            offset: 43,
+        };
+
+        let should_commit = process_message_with_retries(&msg, &db, 10, Duration::ZERO).await;
+
+        assert!(!should_commit);
     }
 }

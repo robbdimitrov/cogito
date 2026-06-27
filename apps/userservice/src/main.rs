@@ -12,8 +12,9 @@ pub mod utils;
 #[cfg(test)]
 mod tests;
 
-use std::env;
+use std::{env, sync::Arc};
 use tokio::signal;
+use tokio::sync::Semaphore;
 use tonic::transport::Server;
 
 use cogito::user_service_server::UserServiceServer;
@@ -32,7 +33,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let db_client = db_client::DbClient::new(&db_url).await?;
     let pool = db_client.pool.clone();
-    let controller = Controller::new(db_client);
+    let max_concurrency: usize = env::var("ARGON_MAX_CONCURRENCY")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(4);
+    let controller =
+        Controller::with_semaphore(db_client, Arc::new(Semaphore::new(max_concurrency)));
 
     // Graceful shutdown handler
     let shutdown = async {
