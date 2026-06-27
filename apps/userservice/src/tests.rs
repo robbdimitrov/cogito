@@ -326,7 +326,11 @@ async fn test_update_user_bio_only_does_not_require_username() {
     );
 
     let res = controller.update_user(req).await;
-    assert!(res.is_ok(), "bio-only update should succeed, got: {:?}", res.err());
+    assert!(
+        res.is_ok(),
+        "bio-only update should succeed, got: {:?}",
+        res.err()
+    );
 }
 
 #[tokio::test]
@@ -355,7 +359,11 @@ async fn test_update_user_photo_only_does_not_require_username() {
     );
 
     let res = controller.update_user(req).await;
-    assert!(res.is_ok(), "photo-only update should succeed, got: {:?}", res.err());
+    assert!(
+        res.is_ok(),
+        "photo-only update should succeed, got: {:?}",
+        res.err()
+    );
 }
 
 #[tokio::test]
@@ -385,9 +393,18 @@ async fn test_update_user_partial_preserves_existing_fields() {
     controller.update_user(req).await.unwrap();
 
     let user = db.get_user(1, 1).await.unwrap().unwrap();
-    assert_eq!(user.name, "Test", "name must be preserved on bio-only update");
-    assert_eq!(user.username, "testuser", "username must be preserved on bio-only update");
-    assert_eq!(user.email, "test@example.com", "email must be preserved on bio-only update");
+    assert_eq!(
+        user.name, "Test",
+        "name must be preserved on bio-only update"
+    );
+    assert_eq!(
+        user.username, "testuser",
+        "username must be preserved on bio-only update"
+    );
+    assert_eq!(
+        user.email, "test@example.com",
+        "email must be preserved on bio-only update"
+    );
     assert_eq!(user.bio, "Updated bio", "bio must be updated");
 }
 

@@ -106,16 +106,17 @@ data:
         dsn: "${POSTGRES_DSN}"
         query: |
           SELECT 'entity-changes' AS topic,
-                 jsonb_build_object('table','users','op','upsert','id',id,'username',username,'name',name,'bio',bio,'created',created) AS payload
-          FROM users
+                 jsonb_build_object('table','users','op','upsert','id',u.id,'username',u.username,'name',u.name,'bio',u.bio,'created',u.created,'follower_count',(SELECT COUNT(*)::int FROM followers WHERE user_id = u.id),'fan_out_disabled',u.fan_out_disabled) AS payload
+          FROM users u
           UNION ALL
           SELECT 'entity-changes' AS topic,
-                 jsonb_build_object('table','posts','op','upsert','id',p.id,'author_id',p.user_id,'content',p.content,'hashtags',COALESCE(jsonb_agg(h.name) FILTER (WHERE h.name IS NOT NULL), '[]'::jsonb),'created',p.created) AS payload
+                 jsonb_build_object('table','posts','op','upsert','id',p.id,'author_id',p.user_id,'follower_count',(SELECT COUNT(*)::int FROM followers WHERE user_id = p.user_id),'fan_out_disabled',u.fan_out_disabled,'content',p.content,'hashtags',COALESCE(jsonb_agg(h.name) FILTER (WHERE h.name IS NOT NULL), '[]'::jsonb),'created',p.created) AS payload
           FROM posts p
+          JOIN users u ON u.id = p.user_id
           LEFT JOIN post_hashtags ph ON ph.post_id = p.id
           LEFT JOIN hashtags h ON h.id = ph.hashtag_id
           WHERE p.in_reply_to_id IS NULL AND p.repost_of_id IS NULL
-          GROUP BY p.id
+          GROUP BY p.id, u.fan_out_disabled
           UNION ALL
           SELECT 'entity-changes' AS topic,
                  jsonb_build_object('table','hashtags','op','upsert','name',h.name,'post_count',COUNT(ph.post_id)) AS payload

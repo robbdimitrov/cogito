@@ -9,7 +9,10 @@ export const GET: RequestHandler = async (event) => {
     return json({ items: [] });
   }
 
-  const limit = Math.min(parseInt(event.url.searchParams.get("limit") || "5", 10) || 5, 50);
+  const limit = Math.min(
+    parseInt(event.url.searchParams.get("limit") || "5", 10) || 5,
+    50,
+  );
 
   try {
     const res = await searchHashtags(apiClient(event), query, limit);

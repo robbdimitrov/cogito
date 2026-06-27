@@ -13,7 +13,6 @@ use std::env;
 use cogito::notification_service_server::NotificationServiceServer;
 use cogito::search_service_server::SearchServiceServer;
 use feed::db::FeedDb;
-use fred::interfaces::ClientLike;
 use rdkafka::ClientConfig;
 use rdkafka::consumer::StreamConsumer;
 use rdkafka::error::KafkaError;
@@ -31,8 +30,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let kafka_brokers =
         env::var("REDPANDA_BROKERS").unwrap_or_else(|_| "localhost:9092".to_string());
-    let valkey_url =
-        env::var("VALKEY_URL").unwrap_or_else(|_| "redis://localhost:6379".to_string());
     let meili_host = env::var("MEILI_HOST").expect("MEILI_HOST must be set");
     let meili_master_key = env::var("MEILI_MASTER_KEY").expect("MEILI_MASTER_KEY must be set");
     let fan_out_threshold = env::var("FAN_OUT_THRESHOLD")
@@ -78,12 +75,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     };
 
-    let valkey_config = fred::prelude::RedisConfig::from_url(&valkey_url)?;
-    let valkey_client = fred::prelude::RedisClient::new(valkey_config, None, None, None);
-    let _valkey_conn = valkey_client.connect(); // detached; errors surface via get/set failures
-    valkey_client.wait_for_connect().await?;
-    let follower_cache = feed::cache::FollowerCache::new(valkey_client);
-
     let notif_consumer = build_kafka_consumer(&kafka_brokers, "flowservice-notifications")?;
     let feed_consumer = build_kafka_consumer(&kafka_brokers, "flowservice-feed")?;
 
@@ -103,7 +94,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let db = pool.clone();
         let rx = shutdown_rx.clone();
         tokio::spawn(async move {
-            if let Err(e) = feed::consumer::run(feed_consumer, db, follower_cache, fan_out_threshold, rx).await {
+            if let Err(e) = feed::consumer::run(feed_consumer, db, fan_out_threshold, rx).await {
                 tracing::error!(error = %e, "feed consumer exited with error");
                 std::process::exit(1);
             }

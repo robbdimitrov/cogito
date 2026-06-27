@@ -10,6 +10,11 @@ pub struct Entry {
     pub created: DateTime<Utc>,
 }
 
+pub struct FanOutSnapshot {
+    pub follower_count: i32,
+    pub fan_out_disabled: bool,
+}
+
 #[async_trait]
 pub trait FeedDb: Send + Sync + 'static {
     async fn bulk_insert(&self, entries: &[Entry]) -> Result<(), sqlx::Error>;
@@ -18,9 +23,9 @@ pub trait FeedDb: Send + Sync + 'static {
         follower_id: i32,
         followee_id: i32,
     ) -> Result<(), sqlx::Error>;
-    async fn count_followers(&self, author_id: i32) -> Result<i32, sqlx::Error>;
     async fn get_followers(&self, author_id: i32, limit: i32) -> Result<Vec<i32>, sqlx::Error>;
     async fn get_last_posts(&self, user_id: i32, limit: i32) -> Result<Vec<Entry>, sqlx::Error>;
+    async fn get_fan_out_snapshot(&self, user_id: i32) -> Result<FanOutSnapshot, sqlx::Error>;
     async fn get_fan_out_disabled(&self, user_id: i32) -> Result<bool, sqlx::Error>;
     async fn set_fan_out_disabled(&self, user_id: i32) -> Result<(), sqlx::Error>;
     async fn delete_by_post(&self, post_id: i32) -> Result<(), sqlx::Error>;
@@ -70,14 +75,6 @@ impl FeedDb for PgPool {
         Ok(())
     }
 
-    async fn count_followers(&self, author_id: i32) -> Result<i32, sqlx::Error> {
-        let row = sqlx::query_as::<_, (i64,)>("SELECT COUNT(*) FROM followers WHERE user_id = $1")
-            .bind(author_id)
-            .fetch_one(self)
-            .await?;
-        Ok(row.0.min(i32::MAX as i64) as i32)
-    }
-
     async fn get_followers(&self, author_id: i32, limit: i32) -> Result<Vec<i32>, sqlx::Error> {
         let rows = sqlx::query_as::<_, (i32,)>(
             "SELECT follower_id FROM followers WHERE user_id = $1 LIMIT $2",
@@ -108,6 +105,21 @@ impl FeedDb for PgPool {
                 created,
             })
             .collect())
+    }
+
+    async fn get_fan_out_snapshot(&self, user_id: i32) -> Result<FanOutSnapshot, sqlx::Error> {
+        let row = sqlx::query_as::<_, (i64, bool)>(
+            r#"SELECT
+                 (SELECT COUNT(*) FROM followers WHERE user_id = $1),
+                 COALESCE((SELECT fan_out_disabled FROM users WHERE id = $1), false)"#,
+        )
+        .bind(user_id)
+        .fetch_one(self)
+        .await?;
+        Ok(FanOutSnapshot {
+            follower_count: row.0.min(i32::MAX as i64) as i32,
+            fan_out_disabled: row.1,
+        })
     }
 
     async fn get_fan_out_disabled(&self, user_id: i32) -> Result<bool, sqlx::Error> {

@@ -50,6 +50,8 @@ impl UserDb for DbClient {
                     "id": id,
                     "username": username,
                     "name": name,
+                    "follower_count": 0,
+                    "fan_out_disabled": false,
                 })
                 .to_string(),
             )
@@ -231,8 +233,17 @@ impl UserDb for DbClient {
         // effective post-update values — the outbox must carry complete, correct data so
         // the search-index pipeline does not overwrite a preserved field with an empty string.
         if !fields.name.is_empty() || !fields.username.is_empty() {
-            let (effective_username, effective_name): (String, String) =
-                sqlx::query_as("SELECT username, name FROM users WHERE id = $1")
+            let (effective_username, effective_name, follower_count, fan_out_disabled): (
+                String,
+                String,
+                i32,
+                bool,
+            ) = sqlx::query_as(
+                r#"SELECT username, name,
+                    (SELECT count(*)::int FROM followers WHERE user_id = users.id) AS follower_count,
+                    fan_out_disabled
+                   FROM users WHERE id = $1"#,
+            )
                     .bind(user_id)
                     .fetch_one(&mut *tx)
                     .await?;
@@ -246,6 +257,8 @@ impl UserDb for DbClient {
                         "id": user_id,
                         "username": effective_username,
                         "name": effective_name,
+                        "follower_count": follower_count,
+                        "fan_out_disabled": fan_out_disabled,
                     })
                     .to_string(),
                 )

@@ -92,6 +92,7 @@
       {#if token.type === "text"}
         {token.text}
       {:else if token.type === "url"}
+        <!-- eslint-disable svelte/no-navigation-without-resolve -- external URLs are not SvelteKit routes -->
         <a
           href={token.url}
           target="_blank"
@@ -100,6 +101,7 @@
         >
           {token.url}
         </a>
+        <!-- eslint-enable svelte/no-navigation-without-resolve -->
       {:else if token.type === "hashtag"}
         <a
           href={resolve(token.href as Pathname)}

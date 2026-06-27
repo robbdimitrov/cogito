@@ -19,7 +19,9 @@ export const GET: RequestHandler = async ({ fetch, params }) => {
     error(404, "Not found");
   }
 
-  const upstream = await fetch(`${env.BACKEND_URL ?? "http://localhost:8080"}/uploads/${params.key}`);
+  const upstream = await fetch(
+    `${env.BACKEND_URL ?? "http://localhost:8080"}/uploads/${params.key}`,
+  );
 
   if (!upstream.ok) {
     error(upstream.status === 404 ? 404 : 502, "Image unavailable");

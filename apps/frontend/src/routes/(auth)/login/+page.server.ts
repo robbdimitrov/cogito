@@ -13,7 +13,10 @@ export const actions = {
     const password = formString(data, "password");
 
     if (!email || !password) {
-      return fail(400, { error: "Email and password are required", fields: { email } });
+      return fail(400, {
+        error: "Email and password are required",
+        fields: { email },
+      });
     }
 
     try {

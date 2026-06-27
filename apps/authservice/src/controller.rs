@@ -216,15 +216,13 @@ impl<D: AuthDb + Clone> AuthService for Controller<D> {
 
         match self.db_client.delete_session(&hashed_id).await {
             Ok(n) if n > 0 => Ok(Response::new(Empty {})),
-            Ok(_) => {
-                match self.db_client.delete_session(&req.session_id).await {
-                    Ok(_) => Ok(Response::new(Empty {})),
-                    Err(e) => {
-                        tracing::warn!(request_id = %request_id, method = "/cogito.AuthService/DeleteSession", error = %e, "deleting session failed");
-                        Err(Status::internal("Internal server error."))
-                    }
+            Ok(_) => match self.db_client.delete_session(&req.session_id).await {
+                Ok(_) => Ok(Response::new(Empty {})),
+                Err(e) => {
+                    tracing::warn!(request_id = %request_id, method = "/cogito.AuthService/DeleteSession", error = %e, "deleting session failed");
+                    Err(Status::internal("Internal server error."))
                 }
-            }
+            },
             Err(e) => {
                 tracing::warn!(request_id = %request_id, method = "/cogito.AuthService/DeleteSession", error = %e, "deleting session failed");
                 Err(Status::internal("Internal server error."))

@@ -3,13 +3,13 @@ use rdkafka::{
     Message,
     consumer::{CommitMode, Consumer, StreamConsumer},
 };
+use tokio::time::{Duration, sleep};
 
 const BACKFILL_POST_LIMIT: i32 = 50;
+const MAX_FEED_EVENT_ATTEMPTS: usize = 3;
+const FEED_EVENT_RETRY_DELAY: Duration = Duration::from_millis(250);
 
-use crate::feed::{
-    cache::FollowerCache,
-    db::{Entry, FeedDb},
-};
+use crate::feed::db::{Entry, FanOutSnapshot, FeedDb};
 
 #[derive(serde::Deserialize)]
 #[serde(tag = "op", rename_all = "snake_case")]
@@ -32,6 +32,8 @@ struct EntityChangeEvent {
     op: String,
     id: Option<i64>,
     author_id: Option<i32>,
+    follower_count: Option<i32>,
+    fan_out_disabled: Option<bool>,
     created: Option<String>,
     in_reply_to_id: Option<i32>,
 }
@@ -39,7 +41,6 @@ struct EntityChangeEvent {
 pub async fn run(
     consumer: StreamConsumer,
     db: sqlx::PgPool,
-    cache: FollowerCache,
     fan_out_threshold: i32,
     mut shutdown_rx: tokio::sync::watch::Receiver<bool>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
@@ -66,20 +67,40 @@ pub async fn run(
                 let topic = msg.topic();
                 let payload = msg.payload().unwrap_or_default();
 
-                match handle_message(topic, payload, &db, &cache, fan_out_threshold).await {
-                    Ok(()) => {
-                        consumer.commit_message(&msg, CommitMode::Async).ok();
+                let mut processed = false;
+                for attempt in 1..=MAX_FEED_EVENT_ATTEMPTS {
+                    match handle_message(topic, payload, &db, fan_out_threshold).await {
+                        Ok(()) => {
+                            consumer.commit_message(&msg, CommitMode::Async).ok();
+                            processed = true;
+                            break;
+                        }
+                        Err(e) if attempt < MAX_FEED_EVENT_ATTEMPTS => {
+                            tracing::warn!(
+                                topic,
+                                partition = msg.partition(),
+                                offset = msg.offset(),
+                                attempt,
+                                max_attempts = MAX_FEED_EVENT_ATTEMPTS,
+                                error = %e,
+                                "feed event processing failed, retrying before commit"
+                            );
+                            sleep(FEED_EVENT_RETRY_DELAY).await;
+                        }
+                        Err(e) => {
+                            tracing::error!(
+                                topic,
+                                partition = msg.partition(),
+                                offset = msg.offset(),
+                                attempts = attempt,
+                                error = %e,
+                                "feed event processing failed after retries, committing offset to skip poison pill"
+                            );
+                        }
                     }
-                    Err(e) => {
-                        tracing::warn!(
-                            topic,
-                            partition = msg.partition(),
-                            offset = msg.offset(),
-                            error = %e,
-                            "feed event processing failed"
-                        );
-                        // No commit — let the message be redelivered on next start.
-                    }
+                }
+                if !processed {
+                    consumer.commit_message(&msg, CommitMode::Async).ok();
                 }
             }
         }
@@ -89,12 +110,11 @@ pub async fn run(
 async fn handle_message(
     topic: &str,
     payload: &[u8],
-    db: &sqlx::PgPool,
-    cache: &FollowerCache,
+    db: &(impl FeedDb + ?Sized),
     fan_out_threshold: i32,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     match topic {
-        "entity-changes" => handle_entity_change(payload, db, cache, fan_out_threshold).await,
+        "entity-changes" => handle_entity_change(payload, db, fan_out_threshold).await,
         "activity" => handle_activity(payload, db).await,
         _ => {
             tracing::warn!(topic, "feed event on unknown topic");
@@ -105,8 +125,7 @@ async fn handle_message(
 
 async fn handle_entity_change(
     payload: &[u8],
-    db: &sqlx::PgPool,
-    cache: &FollowerCache,
+    db: &(impl FeedDb + ?Sized),
     fan_out_threshold: i32,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let event: EntityChangeEvent = match serde_json::from_slice(payload) {
@@ -139,7 +158,30 @@ async fn handle_entity_change(
                 Some(t) => t,
                 None => return Ok(()),
             };
-            fan_out_post(db, cache, author_id, post_id, created, fan_out_threshold).await?;
+            let snapshot = match (event.follower_count, event.fan_out_disabled) {
+                (Some(follower_count), Some(fan_out_disabled)) => FanOutSnapshot {
+                    follower_count,
+                    fan_out_disabled,
+                },
+                _ => {
+                    tracing::warn!(
+                        author_id,
+                        post_id,
+                        "feed entity-change post upsert missing fan-out snapshot, using legacy database lookup"
+                    );
+                    db.get_fan_out_snapshot(author_id).await?
+                }
+            };
+            fan_out_post(
+                db,
+                author_id,
+                post_id,
+                created,
+                snapshot.follower_count,
+                snapshot.fan_out_disabled,
+                fan_out_threshold,
+            )
+            .await?;
         }
         "delete" => {
             let post_id = match event.id {
@@ -158,7 +200,7 @@ async fn handle_entity_change(
 
 async fn handle_activity(
     payload: &[u8],
-    db: &sqlx::PgPool,
+    db: &(impl FeedDb + ?Sized),
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let event: ActivityEvent = match serde_json::from_slice(payload) {
         Ok(e) => e,
@@ -188,32 +230,22 @@ async fn handle_activity(
 }
 
 async fn fan_out_post(
-    db: &sqlx::PgPool,
-    cache: &FollowerCache,
+    db: &(impl FeedDb + ?Sized),
     author_id: i32,
     post_id: i32,
     created: DateTime<Utc>,
+    follower_count: i32,
+    fan_out_disabled: bool,
     fan_out_threshold: i32,
 ) -> Result<(), sqlx::Error> {
-    let count = match cache.get(author_id).await {
-        Some(c) => c,
-        None => {
-            let c = db.count_followers(author_id).await?;
-            cache.set(author_id, c).await;
-            c
-        }
-    };
-
-    if count >= fan_out_threshold {
+    if fan_out_disabled || follower_count >= fan_out_threshold {
         db.bulk_insert(&[Entry {
             user_id: author_id,
             post_id,
             created,
         }])
         .await?;
-        // Guard the UPDATE — set_fan_out_disabled is idempotent but the write is
-        // wasted on every post once the flag is already set.
-        if !db.get_fan_out_disabled(author_id).await? {
+        if !fan_out_disabled {
             db.set_fan_out_disabled(author_id).await?;
         }
     } else {
@@ -238,7 +270,7 @@ async fn fan_out_post(
 }
 
 async fn backfill_follow(
-    db: &sqlx::PgPool,
+    db: &(impl FeedDb + ?Sized),
     follower_id: i32,
     followee_id: i32,
 ) -> Result<(), sqlx::Error> {
@@ -274,4 +306,173 @@ fn parse_created(value: &str) -> Option<DateTime<Utc>> {
     }
     tracing::warn!(value, "failed to parse created timestamp");
     None
+}
+
+#[cfg(test)]
+mod tests {
+    use std::sync::Mutex;
+
+    use async_trait::async_trait;
+
+    use super::*;
+
+    #[derive(Default)]
+    struct FakeDb {
+        followers: Vec<i32>,
+        follower_count: i32,
+        fan_out_disabled: bool,
+        entries: Mutex<Vec<Entry>>,
+        latch_sets: Mutex<usize>,
+    }
+
+    #[async_trait]
+    impl FeedDb for FakeDb {
+        async fn bulk_insert(&self, entries: &[Entry]) -> Result<(), sqlx::Error> {
+            self.entries
+                .lock()
+                .unwrap()
+                .extend(entries.iter().map(|e| Entry {
+                    user_id: e.user_id,
+                    post_id: e.post_id,
+                    created: e.created,
+                }));
+            Ok(())
+        }
+
+        async fn prune_by_followee(
+            &self,
+            _follower_id: i32,
+            _followee_id: i32,
+        ) -> Result<(), sqlx::Error> {
+            Ok(())
+        }
+
+        async fn get_followers(
+            &self,
+            _author_id: i32,
+            _limit: i32,
+        ) -> Result<Vec<i32>, sqlx::Error> {
+            Ok(self.followers.clone())
+        }
+
+        async fn get_last_posts(
+            &self,
+            _user_id: i32,
+            _limit: i32,
+        ) -> Result<Vec<Entry>, sqlx::Error> {
+            Ok(Vec::new())
+        }
+
+        async fn get_fan_out_snapshot(&self, _user_id: i32) -> Result<FanOutSnapshot, sqlx::Error> {
+            Ok(FanOutSnapshot {
+                follower_count: self.follower_count,
+                fan_out_disabled: self.fan_out_disabled,
+            })
+        }
+
+        async fn get_fan_out_disabled(&self, _user_id: i32) -> Result<bool, sqlx::Error> {
+            Ok(self.fan_out_disabled)
+        }
+
+        async fn set_fan_out_disabled(&self, _user_id: i32) -> Result<(), sqlx::Error> {
+            *self.latch_sets.lock().unwrap() += 1;
+            Ok(())
+        }
+
+        async fn delete_by_post(&self, _post_id: i32) -> Result<(), sqlx::Error> {
+            Ok(())
+        }
+
+        async fn delete_old_feed(&self) -> Result<(), sqlx::Error> {
+            Ok(())
+        }
+
+        async fn delete_old_outbox(&self) -> Result<(), sqlx::Error> {
+            Ok(())
+        }
+    }
+
+    #[tokio::test]
+    async fn regular_post_uses_payload_follower_count_for_push_fanout() {
+        let db = FakeDb {
+            followers: vec![11, 12],
+            ..Default::default()
+        };
+        let created = DateTime::parse_from_rfc3339("2026-06-27T10:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+
+        fan_out_post(&db, 7, 99, created, 2, false, 10)
+            .await
+            .unwrap();
+
+        let entries = db.entries.lock().unwrap();
+        let user_ids: Vec<i32> = entries.iter().map(|e| e.user_id).collect();
+        assert_eq!(user_ids, vec![11, 12, 7]);
+        assert_eq!(*db.latch_sets.lock().unwrap(), 0);
+    }
+
+    #[tokio::test]
+    async fn threshold_post_sets_latch_and_only_materializes_author_entry() {
+        let db = FakeDb {
+            followers: vec![11, 12],
+            ..Default::default()
+        };
+        let created = DateTime::parse_from_rfc3339("2026-06-27T10:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+
+        fan_out_post(&db, 7, 99, created, 10, false, 10)
+            .await
+            .unwrap();
+
+        let entries = db.entries.lock().unwrap();
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].user_id, 7);
+        assert_eq!(entries[0].post_id, 99);
+        assert_eq!(*db.latch_sets.lock().unwrap(), 1);
+    }
+
+    #[tokio::test]
+    async fn existing_latch_only_materializes_author_entry_without_rewriting_latch() {
+        let db = FakeDb {
+            followers: vec![11, 12],
+            ..Default::default()
+        };
+        let created = DateTime::parse_from_rfc3339("2026-06-27T10:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+
+        fan_out_post(&db, 7, 99, created, 2, true, 10)
+            .await
+            .unwrap();
+
+        let entries = db.entries.lock().unwrap();
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].user_id, 7);
+        assert_eq!(*db.latch_sets.lock().unwrap(), 0);
+    }
+
+    #[tokio::test]
+    async fn post_upsert_without_snapshot_uses_legacy_database_lookup() {
+        let db = FakeDb {
+            followers: vec![11, 12],
+            follower_count: 2,
+            ..Default::default()
+        };
+        let payload = br#"{
+            "table":"posts",
+            "op":"upsert",
+            "id":99,
+            "author_id":7,
+            "created":"2026-06-27T10:00:00Z"
+        }"#;
+
+        handle_entity_change(payload, &db, 10).await.unwrap();
+
+        let entries = db.entries.lock().unwrap();
+        let user_ids: Vec<i32> = entries.iter().map(|e| e.user_id).collect();
+        assert_eq!(user_ids, vec![11, 12, 7]);
+        assert_eq!(*db.latch_sets.lock().unwrap(), 0);
+    }
 }

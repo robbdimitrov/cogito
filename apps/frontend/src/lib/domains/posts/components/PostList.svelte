@@ -33,7 +33,12 @@
 {:else}
   <ul class="space-y-3">
     {#each posts as post (post.id + (post.repostOfId ? `-repost-${post.userId}` : ""))}
-      <PostItem {post} user={users.find(u => u.id === post.userId) ?? users[0]} {currentUserId} {onQuote} />
+      <PostItem
+        {post}
+        user={users.find((u) => u.id === post.userId) ?? users[0]}
+        {currentUserId}
+        {onQuote}
+      />
     {/each}
   </ul>
 {/if}

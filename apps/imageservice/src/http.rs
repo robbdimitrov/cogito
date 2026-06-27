@@ -410,10 +410,7 @@ mod tests {
                 Request::builder()
                     .method(Method::POST)
                     .uri("/uploads")
-                    .header(
-                        "internal-token",
-                        crate::internal_auth::init_for_test(),
-                    )
+                    .header("internal-token", crate::internal_auth::init_for_test())
                     .body(Body::empty())
                     .unwrap(),
             )
@@ -456,10 +453,7 @@ mod tests {
                 Request::builder()
                     .method(Method::POST)
                     .uri("/uploads")
-                    .header(
-                        "internal-token",
-                        crate::internal_auth::init_for_test(),
-                    )
+                    .header("internal-token", crate::internal_auth::init_for_test())
                     .header("x-user-id", "1")
                     .header(
                         "content-type",
@@ -487,10 +481,7 @@ mod tests {
                 Request::builder()
                     .method(Method::POST)
                     .uri("/uploads")
-                    .header(
-                        "internal-token",
-                        crate::internal_auth::init_for_test(),
-                    )
+                    .header("internal-token", crate::internal_auth::init_for_test())
                     .header("x-user-id", "1")
                     .header(
                         "content-type",
@@ -516,10 +507,7 @@ mod tests {
                 Request::builder()
                     .method(Method::POST)
                     .uri("/uploads")
-                    .header(
-                        "internal-token",
-                        crate::internal_auth::init_for_test(),
-                    )
+                    .header("internal-token", crate::internal_auth::init_for_test())
                     .header("x-user-id", "1")
                     .header(
                         "content-type",

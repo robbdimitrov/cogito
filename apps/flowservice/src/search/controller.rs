@@ -1,5 +1,5 @@
-use tonic::{Request, Response, Status};
 use tonic::transport::Channel;
+use tonic::{Request, Response, Status};
 
 use crate::cogito::search_service_server::SearchService;
 use crate::cogito::user_service_client::UserServiceClient;
@@ -18,7 +18,10 @@ pub struct SearchController {
 }
 
 impl SearchController {
-    pub fn new(meili: Option<MeiliClient>, user_client: Option<UserServiceClient<Channel>>) -> Self {
+    pub fn new(
+        meili: Option<MeiliClient>,
+        user_client: Option<UserServiceClient<Channel>>,
+    ) -> Self {
         Self { meili, user_client }
     }
 
@@ -119,10 +122,7 @@ impl SearchService for SearchController {
 
         let users = self.fetch_full_users(&hits, &request_id).await;
 
-        Ok(Response::new(Users {
-            users,
-            next_cursor,
-        }))
+        Ok(Response::new(Users { users, next_cursor }))
     }
 
     async fn search_posts(

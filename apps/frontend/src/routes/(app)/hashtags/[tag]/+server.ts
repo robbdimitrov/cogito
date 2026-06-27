@@ -8,7 +8,11 @@ export const GET = async (event) => {
   }
   const cursor = event.url.searchParams.get("cursor") ?? "";
   try {
-    const feed = await getHashtagPosts(apiClient(event), event.params.tag, cursor);
+    const feed = await getHashtagPosts(
+      apiClient(event),
+      event.params.tag,
+      cursor,
+    );
     return json(feed ?? { items: [], nextCursor: null });
   } catch (e) {
     console.error("Failed to load hashtag posts:", e);

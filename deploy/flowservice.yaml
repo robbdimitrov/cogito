@@ -59,8 +59,6 @@ spec:
             secretKeyRef:
               name: cogito-db-secret
               key: database-url
-        - name: VALKEY_URL
-          value: redis://dragonfly:6379
         - name: REDPANDA_BROKERS
           value: broker:9092
         - name: FAN_OUT_THRESHOLD

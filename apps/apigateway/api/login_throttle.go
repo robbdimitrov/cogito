@@ -108,7 +108,7 @@ func (NoopLoginThrottle) GetFailures(_ context.Context, _ []string) ([]LoginFail
 }
 
 func (NoopLoginThrottle) RecordFailure(_ context.Context, _ string) (int, error) { return 0, nil }
-func (NoopLoginThrottle) Clear(_ context.Context, _ []string) error       { return nil }
+func (NoopLoginThrottle) Clear(_ context.Context, _ []string) error              { return nil }
 
 func loginFailureKeys(r *http.Request, email string) []string {
 	return []string{"ip:" + clientIP(r), "email:" + email}

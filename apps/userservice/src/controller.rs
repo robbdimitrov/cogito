@@ -234,11 +234,15 @@ impl<D: UserDb> UserService for Controller<D> {
         if req.name.as_deref().map(|s| !s.is_empty()).unwrap_or(false) && name.is_empty() {
             return Err(Status::invalid_argument("Name cannot be empty."));
         } else if !name.is_empty() && name.len() > 255 {
-            return Err(Status::invalid_argument("Name cannot exceed 255 characters."));
+            return Err(Status::invalid_argument(
+                "Name cannot exceed 255 characters.",
+            ));
         } else if req.bio.as_deref().map(|s| !s.is_empty()).unwrap_or(false) && bio.is_empty() {
             return Err(Status::invalid_argument("Bio cannot be empty."));
         } else if !bio.is_empty() && bio.len() > 255 {
-            return Err(Status::invalid_argument("Bio cannot exceed 255 characters."));
+            return Err(Status::invalid_argument(
+                "Bio cannot exceed 255 characters.",
+            ));
         } else if !username.is_empty() && !is_valid_username(&username) {
             return Err(Status::invalid_argument(
                 "Username may contain only letters, numbers, and underscores.",

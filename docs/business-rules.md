@@ -113,7 +113,7 @@ Gateway also calls `ImageService.DeleteImage` when deleting a post with a `media
 
 1. Mutating services insert `outbox(topic, payload)` rows in the same transaction as the domain change.
 2. Redpanda Connect reads PostgreSQL CDC for new `outbox` rows and publishes the payload to the row's topic.
-3. Topic `entity-changes` carries user, post, and hashtag upsert/delete events for Meilisearch sync, feed fan-out, and media cleanup.
+3. Topic `entity-changes` carries user, post, and hashtag upsert/delete events for Meilisearch sync, feed fan-out, and media cleanup. User and post upserts include `follower_count` and `fan_out_disabled` as a point-in-time fan-out routing snapshot.
 4. Topic `activity` carries like, unlike, repost, unrepost, reply, unreply, follow, and unfollow events for notifications and feed maintenance.
 5. Search sync is idempotent: upserts replace Meilisearch documents and deletes remove missing documents. Hashtags with `post_count = 0` are deleted from search.
 6. Backfill is a one-shot Redpanda Connect job that emits current users, posts, and hashtags to `entity-changes`.
@@ -131,7 +131,7 @@ Notification inserts use the outbox row ID as `external_id`, so replayed message
 ## Feed Fan-Out
 
 1. New non-reply post/repost from a regular author writes `feed` rows for all followers and the author.
-2. If follower count is at least `FAN_OUT_THRESHOLD`, the author is marked `fan_out_disabled` and future feed reads pull that author's posts directly for followers.
+2. If the post event's follower snapshot is at least `FAN_OUT_THRESHOLD`, the author is marked `fan_out_disabled` and future feed reads pull that author's posts directly for followers. During mixed-version rollout only, legacy post events that lack this snapshot are routed from a database snapshot instead of being dropped.
 3. Following a regular author backfills the follower's feed with the author's latest 50 non-reply posts.
 4. Unfollowing prunes that followee's materialized feed rows for the follower.
 5. Post and user deletes rely on database CASCADE to remove feed rows; consumers do not separately delete them.

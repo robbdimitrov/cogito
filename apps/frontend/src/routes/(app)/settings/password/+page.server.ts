@@ -23,7 +23,12 @@ export const actions = {
     }
 
     try {
-      await updatePassword(apiClient(event), userResult.user.id, password, oldPassword);
+      await updatePassword(
+        apiClient(event),
+        userResult.user.id,
+        password,
+        oldPassword,
+      );
       return { success: true };
     } catch (e) {
       return failFromError(e, "Failed to update password", {

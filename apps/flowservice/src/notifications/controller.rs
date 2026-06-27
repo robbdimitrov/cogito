@@ -263,6 +263,24 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn test_get_notifications_db_error() {
+        let db = mock_db(
+            MockListResult::DbError,
+            MockMarkReadResult::Found,
+            MockUnreadCountResult::Ok(0),
+        );
+        let controller = NotificationController::new(db);
+        let req = Request::new(GetNotificationsRequest {
+            user_id: 10,
+            cursor: String::new(),
+            limit: 10,
+        });
+        let res = controller.get_notifications(req).await;
+        assert!(res.is_err());
+        assert_eq!(res.unwrap_err().code(), tonic::Code::Internal);
+    }
+
+    #[tokio::test]
     async fn test_mark_notification_read_found() {
         let db = mock_db(
             MockListResult::Ok(vec![], String::new()),
@@ -293,6 +311,23 @@ mod tests {
         let res = controller.mark_notification_read(req).await;
         assert!(res.is_err());
         assert_eq!(res.unwrap_err().code(), tonic::Code::NotFound);
+    }
+
+    #[tokio::test]
+    async fn test_mark_notification_read_db_error() {
+        let db = mock_db(
+            MockListResult::Ok(vec![], String::new()),
+            MockMarkReadResult::DbError,
+            MockUnreadCountResult::Ok(0),
+        );
+        let controller = NotificationController::new(db);
+        let req = Request::new(NotificationRequest {
+            notification_id: 1,
+            user_id: 10,
+        });
+        let res = controller.mark_notification_read(req).await;
+        assert!(res.is_err());
+        assert_eq!(res.unwrap_err().code(), tonic::Code::Internal);
     }
 
     #[tokio::test]

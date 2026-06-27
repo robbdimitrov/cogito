@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/jackc/pgconn"
+	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/jackc/pgtype"
 
 	pb "cogito/postservice/genproto"
 )
@@ -56,6 +56,17 @@ func outbox(tx pgx.Tx, ctx context.Context, topic string, payload any) error {
 	_, err = tx.Exec(ctx, "INSERT INTO outbox (topic, payload) VALUES ($1, $2)",
 		pgtype.Text{String: topic, Status: pgtype.Present}, j)
 	return err
+}
+
+func authorFanOutSnapshot(ctx context.Context, tx pgx.Tx, userID int32) (int32, bool, error) {
+	var followerCount int32
+	var fanOutDisabled bool
+	err := tx.QueryRow(ctx, `SELECT
+		(SELECT COUNT(*)::int FROM followers WHERE user_id = $1),
+		COALESCE((SELECT fan_out_disabled FROM users WHERE id = $1), false)`,
+		userID,
+	).Scan(&followerCount, &fanOutDisabled)
+	return followerCount, fanOutDisabled, err
 }
 
 func (c *DBClient) createPost(ctx context.Context, content string, tags []string, userID int32, mediaKey *string, inReplyToID *int32, quoteOfID *int32) (int32, error) {
@@ -113,9 +124,14 @@ func (c *DBClient) createPost(ctx context.Context, content string, tags []string
 		}
 	}
 
+	followerCount, fanOutDisabled, err := authorFanOutSnapshot(ctx, tx, userID)
+	if err != nil {
+		return 0, err
+	}
 	payload := map[string]any{
 		"table": "posts", "op": "upsert",
 		"id": postID, "author_id": userID,
+		"follower_count": followerCount, "fan_out_disabled": fanOutDisabled,
 		"content": content, "hashtags": tags, "created": created,
 	}
 	if inReplyToID != nil {
@@ -601,9 +617,14 @@ func (c *DBClient) repostPost(ctx context.Context, postID int32, userID int32) e
 	if err := tx.QueryRow(ctx, "SELECT user_id FROM posts WHERE id = $1", repostOfID).Scan(&recipientID); err != nil {
 		return err
 	}
+	followerCount, fanOutDisabled, err := authorFanOutSnapshot(ctx, tx, userID)
+	if err != nil {
+		return err
+	}
 	err = outbox(tx, ctx, "entity-changes", map[string]any{
 		"table": "posts", "op": "upsert",
 		"id": newPostID, "author_id": userID,
+		"follower_count": followerCount, "fan_out_disabled": fanOutDisabled,
 		"repost_of_id": repostOfID, "created": created,
 	})
 	if err != nil {
