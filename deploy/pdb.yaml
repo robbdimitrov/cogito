@@ -1,0 +1,179 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: database-pdb
+  labels:
+    app: cogito
+spec:
+  maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: cogito
+      tier: database
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cache-pdb
+  labels:
+    app: cogito
+spec:
+  maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: cogito
+      component: cache
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: storage-pdb
+  labels:
+    app: cogito
+spec:
+  maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: cogito
+      component: storage
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: search-pdb
+  labels:
+    app: cogito
+spec:
+  maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: cogito
+      tier: backend
+      component: search
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: broker-pdb
+  labels:
+    app: cogito
+spec:
+  maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: cogito
+      tier: broker
+    matchExpressions:
+    - key: component
+      operator: DoesNotExist
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: apigateway-pdb
+  labels:
+    app: cogito
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: cogito
+      tier: backend
+      component: apigateway
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: authservice-pdb
+  labels:
+    app: cogito
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: cogito
+      tier: backend
+      component: authservice
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: userservice-pdb
+  labels:
+    app: cogito
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: cogito
+      tier: backend
+      component: userservice
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: postservice-pdb
+  labels:
+    app: cogito
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: cogito
+      tier: backend
+      component: postservice
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: imageservice-pdb
+  labels:
+    app: cogito
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: cogito
+      tier: backend
+      component: imageservice
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: flowservice-pdb
+  labels:
+    app: cogito
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: cogito
+      tier: backend
+      component: flowservice
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: connect-pdb
+  labels:
+    app: cogito
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: cogito
+      tier: broker
+      component: connect
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: frontend-pdb
+  labels:
+    app: cogito
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: cogito
+      tier: frontend
