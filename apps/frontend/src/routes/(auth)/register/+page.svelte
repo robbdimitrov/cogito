@@ -19,7 +19,7 @@
 </script>
 
 <svelte:head>
-  <title>Sign up · Cogito</title>
+  <title>Register · Cogito</title>
 </svelte:head>
 
 <div class="flex min-h-[calc(100vh-4rem)]">
@@ -62,12 +62,12 @@
             }}
           >
             <div class="form-control">
-              <label class="label" for="signup-name">
+              <label class="label" for="register-name">
                 <span class="label-text font-medium">Name</span>
               </label>
               <IconInput
                 icon={User}
-                id="signup-name"
+                id="register-name"
                 name="name"
                 placeholder="Your name"
                 bind:value={name}
@@ -76,12 +76,12 @@
               />
             </div>
             <div class="form-control">
-              <label class="label" for="signup-username">
+              <label class="label" for="register-username">
                 <span class="label-text font-medium">Username</span>
               </label>
               <IconInput
                 icon={User}
-                id="signup-username"
+                id="register-username"
                 name="username"
                 placeholder="@username"
                 bind:value={username}
@@ -96,12 +96,12 @@
               {/if}
             </div>
             <div class="form-control">
-              <label class="label" for="signup-email">
+              <label class="label" for="register-email">
                 <span class="label-text font-medium">Email</span>
               </label>
               <IconInput
                 icon={Mail}
-                id="signup-email"
+                id="register-email"
                 type="email"
                 name="email"
                 placeholder="you@example.com"
@@ -111,12 +111,12 @@
               />
             </div>
             <div class="form-control">
-              <label class="label" for="signup-password">
+              <label class="label" for="register-password">
                 <span class="label-text font-medium">Password</span>
               </label>
               <IconInput
                 icon={Lock}
-                id="signup-password"
+                id="register-password"
                 type="password"
                 name="password"
                 placeholder="Enter your password"

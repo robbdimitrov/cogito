@@ -113,7 +113,7 @@ followers/following lists and search results.
 
 ### Auth, Primitives, Containers
 
-`AuthHero` — hero panel on login/signup (eyebrow text, title, feature bullets).
+`AuthHero` — hero panel on login/register (eyebrow text, title, feature bullets).
 `ConfirmModal` — accessible `role="dialog"` confirmation. `Field` — label +
 input wrapper. `FormInput` / `FormTextarea` — apply `.form-input` /
 `.form-textarea` utilities. `GlassCard` — `.glass-card` wrapper. `IconInput` —

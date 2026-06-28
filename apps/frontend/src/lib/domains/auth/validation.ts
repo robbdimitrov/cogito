@@ -2,13 +2,13 @@ const USERNAME_PATTERN = /^[a-zA-Z0-9_]+$/;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 8;
 
-export interface SignupFields {
+export interface RegisterFields {
   name: string;
   username: string;
   email: string;
 }
 
-export function validateSignup(
+export function validateRegister(
   name: string,
   username: string,
   email: string,

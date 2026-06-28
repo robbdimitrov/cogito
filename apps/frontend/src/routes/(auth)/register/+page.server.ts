@@ -1,5 +1,5 @@
 import { login } from "$lib/domains/auth/api.server";
-import { formString, validateSignup } from "$lib/domains/auth/validation";
+import { formString, validateRegister } from "$lib/domains/auth/validation";
 import { createUser } from "$lib/domains/users/api.server";
 import { errorMessage } from "$lib/server/api/http";
 import { apiClient } from "$lib/server/api/client";
@@ -15,7 +15,7 @@ export const actions = {
     const email = formString(data, "email").trim();
     const password = formString(data, "password");
     const fields = { name, username, email };
-    const validationError = validateSignup(name, username, email, password);
+    const validationError = validateRegister(name, username, email, password);
 
     if (validationError) {
       return fail(400, { error: validationError, fields });
@@ -25,7 +25,7 @@ export const actions = {
       await createUser(apiClient(event), name, username, email, password);
     } catch (error) {
       if (!isHttpError(error)) {
-        return fail(502, { error: "Signup failed", fields });
+        return fail(502, { error: "Registration failed", fields });
       }
       const message =
         error.status === 409
@@ -37,14 +37,16 @@ export const actions = {
     try {
       await login(apiClient(event), email, password);
       if (!cookies.get("session")) {
-        console.error("Signup login response did not include a session cookie");
+        console.error(
+          "Registration login response did not include a session cookie",
+        );
         return fail(502, {
           error: "Account created, but login failed",
           fields,
         });
       }
     } catch (e) {
-      console.error("Post-signup login failed:", e);
+      console.error("Post-registration login failed:", e);
       return fail(502, { error: "Account created, but login failed", fields });
     }
 

@@ -104,8 +104,8 @@
           <div class="divider my-4">or</div>
           <p class="text-center text-sm text-base-content/60">
             Don&apos;t have an account?
-            <a href={resolve("/signup")} class="link link-primary font-medium"
-              >Sign Up</a
+            <a href={resolve("/register")} class="link link-primary font-medium"
+              >Register</a
             >
           </p>
         </div>

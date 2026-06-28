@@ -17,7 +17,7 @@
 | Route   | Action / purpose                                                             |
 | ------- | ---------------------------------------------------------------------------- |
 | /login  | POST — email + password → session cookie → redirect /                        |
-| /signup | POST — name + username + email + password → create user + login → redirect / |
+| /register | POST — name + username + email + password → create user + login → redirect / |
 | /logout | POST — DELETE /sessions, clear cookie → redirect /login                      |
 | /health | GET — health check                                                           |
 
@@ -47,7 +47,7 @@ Route params: `username` (any string), `tab` (matches `likes`, `followers`,
 ```
 +layout.svelte            root — reads theme cookie, sets ThemeContext
   (auth)/+layout.svelte   guard: redirect / if already authenticated
-    /login, /signup
+    /login, /register
   (app)/+layout.svelte    guard: redirect /login if unauthenticated; loads currentUser
     /(main)/+page.svelte  feed
     /[username]/+layout.svelte  loads profile user (404 if not found)
