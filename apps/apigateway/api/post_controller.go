@@ -605,12 +605,10 @@ func (pc *postController) searchHashtags(w http.ResponseWriter, r *http.Request)
 		jsonError(w, http.StatusBadRequest, "Query exceeds maximum length")
 		return
 	}
-	limit := 8
-	if l, err := strconv.Atoi(r.URL.Query().Get("limit")); err == nil && l > 0 {
-		limit = l
-	}
-	if limit > 20 {
-		limit = 20
+	cursor, limit, err := getCursorAndLimitRange(r, 8, 20)
+	if err != nil {
+		grpcError(w, err)
+		return
 	}
 
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
@@ -619,8 +617,9 @@ func (pc *postController) searchHashtags(w http.ResponseWriter, r *http.Request)
 
 	if pc.searchClient != nil {
 		res, err := pc.searchClient.SearchHashtags(ctx, &pb.SearchRequest{
-			Query: q,
-			Limit: int32(limit),
+			Query:  q,
+			Cursor: cursor,
+			Limit:  int32(limit),
 		})
 		if err != nil {
 			slog.Warn("searching hashtags failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))

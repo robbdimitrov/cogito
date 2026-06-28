@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -75,6 +76,21 @@ func (m *mockBatchUserClient) GetUsersByIds(ctx context.Context, in *pb.Ids, opt
 		}
 	}
 	return &pb.Users{Users: out}, nil
+}
+
+type mockSearchHashtagsClient struct {
+	pb.SearchServiceClient
+	called bool
+	req    *pb.SearchRequest
+}
+
+func (m *mockSearchHashtagsClient) SearchHashtags(ctx context.Context, in *pb.SearchRequest, opts ...grpc.CallOption) (*pb.Hashtags, error) {
+	m.called = true
+	m.req = in
+	return &pb.Hashtags{
+		Hashtags:   []*pb.Hashtag{{Id: 1, Name: "go", PostCount: 2}},
+		NextCursor: "next",
+	}, nil
 }
 
 func TestBuildPosts_EmbedsAuthorsAndQuotes(t *testing.T) {
@@ -171,5 +187,75 @@ func TestDeletePost_ImageOrchestration(t *testing.T) {
 	}
 	if mockImage.deletedFilename != "test-image.jpg" {
 		t.Errorf("Expected DeleteImage to be called with test-image.jpg, got %s", mockImage.deletedFilename)
+	}
+}
+
+func TestSearchHashtags_ForwardsCursorAndLimit(t *testing.T) {
+	searchClient := &mockSearchHashtagsClient{}
+	pc := &postController{searchClient: searchClient}
+
+	req := httptest.NewRequest(http.MethodGet, "/hashtags/search?q=go&cursor=abc&limit=20", nil)
+	rec := httptest.NewRecorder()
+
+	pc.searchHashtags(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", rec.Code, rec.Body.String())
+	}
+	if !searchClient.called {
+		t.Fatalf("expected search service to be called")
+	}
+	if searchClient.req.Query != "go" || searchClient.req.Cursor != "abc" || searchClient.req.Limit != 20 {
+		t.Fatalf("unexpected search request: %+v", searchClient.req)
+	}
+	var body struct {
+		NextCursor string `json:"nextCursor"`
+	}
+	if err := json.NewDecoder(rec.Body).Decode(&body); err != nil {
+		t.Fatalf("decode response: %v", err)
+	}
+	if body.NextCursor != "next" {
+		t.Fatalf("expected next cursor, got %q", body.NextCursor)
+	}
+}
+
+func TestSearchHashtags_UsesDefaultLimit(t *testing.T) {
+	searchClient := &mockSearchHashtagsClient{}
+	pc := &postController{searchClient: searchClient}
+
+	req := httptest.NewRequest(http.MethodGet, "/hashtags/search?q=go", nil)
+	rec := httptest.NewRecorder()
+
+	pc.searchHashtags(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", rec.Code, rec.Body.String())
+	}
+	if searchClient.req.Limit != 8 {
+		t.Fatalf("expected default limit 8, got %d", searchClient.req.Limit)
+	}
+}
+
+func TestSearchHashtags_RejectsInvalidLimit(t *testing.T) {
+	tests := []string{
+		"/hashtags/search?q=go&limit=abc",
+		"/hashtags/search?q=go&limit=0",
+		"/hashtags/search?q=go&limit=21",
+	}
+
+	for _, target := range tests {
+		searchClient := &mockSearchHashtagsClient{}
+		pc := &postController{searchClient: searchClient}
+		req := httptest.NewRequest(http.MethodGet, target, nil)
+		rec := httptest.NewRecorder()
+
+		pc.searchHashtags(rec, req)
+
+		if rec.Code != http.StatusBadRequest {
+			t.Fatalf("%s: expected 400, got %d", target, rec.Code)
+		}
+		if searchClient.called {
+			t.Fatalf("%s: search service should not be called", target)
+		}
 	}
 }
