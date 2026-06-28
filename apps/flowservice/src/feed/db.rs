@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
-use sqlx::PgPool;
+use sqlx::PgPool as DatabasePool;
 
 const BULK_INSERT_BATCH_SIZE: usize = 1000;
 
@@ -34,7 +34,7 @@ pub trait FeedDb: Send + Sync + 'static {
 }
 
 #[async_trait]
-impl FeedDb for PgPool {
+impl FeedDb for DatabasePool {
     async fn bulk_insert(&self, entries: &[Entry]) -> Result<(), sqlx::Error> {
         if entries.is_empty() {
             return Ok(());

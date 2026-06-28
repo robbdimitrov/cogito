@@ -7,7 +7,7 @@ use crate::cogito::search_service_server::SearchService;
 use crate::cogito::user_service_client::UserServiceClient;
 use crate::cogito::{Hashtag, Hashtags, Ids, Post, Posts, SearchRequest, User, Users};
 
-use super::meili::{MeiliClient, UserHit, decode_cursor, encode_cursor};
+use super::client::{SearchClient, UserHit, decode_cursor, encode_cursor};
 
 const MAX_QUERY_CHARS: usize = 255;
 const DEFAULT_LIMIT: u32 = 20;
@@ -15,20 +15,23 @@ const MAX_LIMIT: u32 = 50;
 
 #[derive(Clone)]
 pub struct SearchController {
-    meili: Arc<RwLock<Option<MeiliClient>>>,
+    search: Arc<RwLock<Option<SearchClient>>>,
     user_client: Option<UserServiceClient<Channel>>,
 }
 
 impl SearchController {
     pub fn new(
-        meili: Arc<RwLock<Option<MeiliClient>>>,
+        search: Arc<RwLock<Option<SearchClient>>>,
         user_client: Option<UserServiceClient<Channel>>,
     ) -> Self {
-        Self { meili, user_client }
+        Self {
+            search,
+            user_client,
+        }
     }
 
-    async fn meili_client(&self) -> Result<MeiliClient, Status> {
-        self.meili
+    async fn search_client(&self) -> Result<SearchClient, Status> {
+        self.search
             .read()
             .await
             .clone()
@@ -107,13 +110,13 @@ impl SearchService for SearchController {
         let req = request.into_inner();
         let (query, limit, offset) = validate_request(&req)?;
 
-        let meili = self.meili_client().await?;
+        let search = self.search_client().await?;
 
-        let mut hits = meili
+        let mut hits = search
             .search_users(&query, limit + 1, offset)
             .await
             .map_err(|e| {
-                tracing::warn!(request_id = %request_id, method = "/cogito.SearchService/SearchUsers", error = %e, "meili search_users failed");
+                tracing::warn!(request_id = %request_id, method = "/cogito.SearchService/SearchUsers", error = %e, "search client search_users failed");
                 Status::internal("Internal server error.")
             })?;
 
@@ -140,13 +143,13 @@ impl SearchService for SearchController {
         let req = request.into_inner();
         let (query, limit, offset) = validate_request(&req)?;
 
-        let meili = self.meili_client().await?;
+        let search = self.search_client().await?;
 
-        let hits = meili
+        let hits = search
             .search_posts(&query, limit + 1, offset)
             .await
             .map_err(|e| {
-                tracing::warn!(request_id = %request_id, method = "/cogito.SearchService/SearchPosts", error = %e, "meili search_posts failed");
+                tracing::warn!(request_id = %request_id, method = "/cogito.SearchService/SearchPosts", error = %e, "search client search_posts failed");
                 Status::internal("Internal server error.")
             })?;
 
@@ -171,13 +174,13 @@ impl SearchService for SearchController {
         let req = request.into_inner();
         let (query, limit, offset) = validate_request(&req)?;
 
-        let meili = self.meili_client().await?;
+        let search = self.search_client().await?;
 
-        let hits = meili
+        let hits = search
             .search_hashtags(&query, limit + 1, offset)
             .await
             .map_err(|e| {
-                tracing::warn!(request_id = %request_id, method = "/cogito.SearchService/SearchHashtags", error = %e, "meili search_hashtags failed");
+                tracing::warn!(request_id = %request_id, method = "/cogito.SearchService/SearchHashtags", error = %e, "search client search_hashtags failed");
                 Status::internal("Internal server error.")
             })?;
 
@@ -268,7 +271,7 @@ mod tests {
         assert_eq!(items, [1, 2]);
         assert!(!next_cursor.is_empty());
         // next offset should be 0 + 2 = 2
-        assert_eq!(super::super::meili::decode_cursor(&next_cursor), 2);
+        assert_eq!(super::super::client::decode_cursor(&next_cursor), 2);
     }
 
     #[test]

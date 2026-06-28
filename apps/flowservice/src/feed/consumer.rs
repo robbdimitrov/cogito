@@ -3,6 +3,7 @@ use rdkafka::{
     Message,
     consumer::{CommitMode, Consumer, StreamConsumer},
 };
+use sqlx::PgPool as DatabasePool;
 use tokio::time::{Duration, sleep};
 
 const BACKFILL_POST_LIMIT: i32 = 50;
@@ -47,7 +48,7 @@ struct EntityChangeEvent {
 
 pub async fn run(
     consumer: StreamConsumer,
-    db: sqlx::PgPool,
+    db: DatabasePool,
     fan_out_threshold: i32,
     mut shutdown_rx: tokio::sync::watch::Receiver<bool>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {

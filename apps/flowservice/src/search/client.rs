@@ -4,7 +4,7 @@
 use base64::{Engine as _, engine::general_purpose::URL_SAFE_NO_PAD};
 use meilisearch_sdk::{
     client::Client,
-    errors::{Error as MeiliError, ErrorCode},
+    errors::{Error as SearchClientError, ErrorCode},
     key::{Action, KeyBuilder},
     search::SearchQuery,
 };
@@ -35,11 +35,11 @@ pub(crate) struct HashtagHit {
 }
 
 #[derive(Clone)]
-pub(crate) struct MeiliClient {
+pub(crate) struct SearchClient {
     client: Client,
 }
 
-impl MeiliClient {
+impl SearchClient {
     /// Connect with `master_key`, provision a scoped API key (idempotent), ensure
     /// the three indexes exist with correct attribute settings, then return a client
     /// configured with the scoped key. The master key is not retained.
@@ -122,8 +122,8 @@ async fn provision_scoped_key(master: &Client) -> Result<String, Box<dyn std::er
     Ok(key.key)
 }
 
-fn is_not_found(e: &MeiliError) -> bool {
-    matches!(e, MeiliError::Meilisearch(me) if me.error_code == ErrorCode::ApiKeyNotFound)
+fn is_not_found(e: &SearchClientError) -> bool {
+    matches!(e, SearchClientError::Meilisearch(me) if me.error_code == ErrorCode::ApiKeyNotFound)
 }
 
 async fn ensure_indexes(master: &Client) -> Result<(), Box<dyn std::error::Error>> {
@@ -158,13 +158,17 @@ async fn ensure_indexes(master: &Client) -> Result<(), Box<dyn std::error::Error
     for def in DEFS {
         let is_new = match master.get_index(def.uid).await {
             Ok(_) => false,
-            Err(MeiliError::Meilisearch(ref e)) if e.error_code == ErrorCode::IndexNotFound => true,
+            Err(SearchClientError::Meilisearch(ref e))
+                if e.error_code == ErrorCode::IndexNotFound =>
+            {
+                true
+            }
             Err(e) => return Err(Box::new(e)),
         };
         if is_new {
             let task_info = master.create_index(def.uid, Some("id")).await?;
             master.wait_for_task(task_info, None, None).await?;
-            tracing::info!(index = def.uid, "created meilisearch index");
+            tracing::info!(index = def.uid, "created search index");
 
             // Only configure attributes on new indexes. Re-applying on every startup
             // triggers a full Meilisearch re-index and can block search availability.

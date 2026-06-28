@@ -1,6 +1,6 @@
 use rdkafka::Message;
 use rdkafka::consumer::Consumer as _;
-use sqlx::PgPool;
+use sqlx::PgPool as DatabasePool;
 
 use crate::notifications::db::NotificationDb;
 
@@ -64,7 +64,7 @@ struct EntityChangeEvent {
 
 pub async fn run(
     consumer: rdkafka::consumer::StreamConsumer,
-    db: PgPool,
+    db: DatabasePool,
     mut shutdown_rx: tokio::sync::watch::Receiver<bool>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     consumer.subscribe(&["activity", "entity-changes"])?;
@@ -76,7 +76,7 @@ pub async fn run(
         tokio::select! {
             _ = shutdown_rx.changed() => break,
             result = consumer.recv() => match result {
-                Err(e) => tracing::warn!(error = %e, "kafka recv error"),
+                Err(e) => tracing::warn!(error = %e, "broker recv error"),
                 Ok(msg) => {
                     let payload = msg.payload().unwrap_or_default();
                     if let Err(e) = dispatch(&db, msg.topic(), payload).await {
@@ -102,7 +102,7 @@ pub async fn run(
 }
 
 async fn dispatch(
-    db: &PgPool,
+    db: &DatabasePool,
     topic: &str,
     payload: &[u8],
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
@@ -120,7 +120,7 @@ async fn dispatch(
 }
 
 async fn dispatch_entity_change(
-    db: &PgPool,
+    db: &DatabasePool,
     payload: &[u8],
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let event: EntityChangeEvent = match serde_json::from_slice(payload) {
@@ -157,7 +157,7 @@ async fn dispatch_entity_change(
 }
 
 async fn dispatch_activity(
-    db: &PgPool,
+    db: &DatabasePool,
     payload: &[u8],
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let event: ActivityEvent = match serde_json::from_slice(payload) {
