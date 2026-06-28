@@ -2,7 +2,6 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: default-deny-egress
-  namespace: cogito
 spec:
   podSelector: {}
   policyTypes:
@@ -12,7 +11,6 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: allow-dns-egress
-  namespace: cogito
 spec:
   podSelector: {}
   policyTypes:
@@ -32,7 +30,6 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: allow-cogito-service-egress
-  namespace: cogito
 spec:
   podSelector: {}
   policyTypes:
@@ -64,7 +61,6 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: authservice
-  namespace: cogito
 spec:
   podSelector:
     matchLabels:
@@ -88,7 +84,6 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: userservice
-  namespace: cogito
 spec:
   podSelector:
     matchLabels:
@@ -117,7 +112,6 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: postservice
-  namespace: cogito
 spec:
   podSelector:
     matchLabels:
@@ -146,7 +140,6 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: imageservice
-  namespace: cogito
 spec:
   podSelector:
     matchLabels:
@@ -172,7 +165,6 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: flowservice
-  namespace: cogito
 spec:
   podSelector:
     matchLabels:
@@ -196,7 +188,6 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: frontend
-  namespace: cogito
 spec:
   podSelector:
     matchLabels:
@@ -213,7 +204,6 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: apigateway
-  namespace: cogito
 spec:
   podSelector:
     matchLabels:
@@ -236,7 +226,6 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: storage
-  namespace: cogito
 spec:
   podSelector:
     matchLabels:
@@ -269,7 +258,6 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: database
-  namespace: cogito
 spec:
   podSelector:
     matchLabels:
@@ -327,7 +315,6 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: cache
-  namespace: cogito
 spec:
   podSelector:
     matchLabels:
@@ -355,7 +342,6 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: search
-  namespace: cogito
 spec:
   podSelector:
     matchLabels:
@@ -384,7 +370,6 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: broker
-  namespace: cogito
 spec:
   podSelector:
     matchLabels:

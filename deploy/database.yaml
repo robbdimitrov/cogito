@@ -2,7 +2,6 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: database-init
-  namespace: cogito
 data:
   init.sh: |
     psql --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" --set=app_password="$COGITO_APP_PASSWORD" <<'SQL'
@@ -71,15 +70,29 @@ spec:
     spec:
       automountServiceAccountToken: false
       terminationGracePeriodSeconds: 60
+      securityContext:
+        fsGroup: 70
       volumes:
       - name: database-init
         configMap:
           name: database-init
+      - name: database-tls
+        secret:
+          secretName: database-tls
+          defaultMode: 0640
       containers:
       - name: database
         image: postgres:18.4-alpine
         imagePullPolicy: IfNotPresent
-        args: ["-c", "wal_level=logical"]
+        args:
+        - -c
+        - wal_level=logical
+        - -c
+        - ssl=on
+        - -c
+        - ssl_cert_file=/certs/tls.crt
+        - -c
+        - ssl_key_file=/certs/tls.key
         ports:
         - name: database
           containerPort: 5432
@@ -111,6 +124,9 @@ spec:
           name: database-storage
         - mountPath: /docker-entrypoint-initdb.d
           name: database-init
+          readOnly: true
+        - mountPath: /certs
+          name: database-tls
           readOnly: true
         startupProbe:
           exec:

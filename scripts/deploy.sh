@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Bring up the full Cogito stack on a local kind cluster.
+# Bring up the full Cogito stack on the current Kubernetes context.
 # Idempotent: safe to re-run; reuses the cluster, namespace, and port-forward.
 
-CLUSTER="${CLUSTER:-cogito}"
 NS="${NS:-cogito}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 K8S_DIR="$ROOT/deploy"
@@ -17,14 +16,31 @@ PORT_FORWARD_PID_FILE="${PORT_FORWARD_PID_FILE:-/tmp/cogito-port-forward-${LOCAL
 CREATED_NAMESPACE=false
 
 ROLL_OUT_DATABASE=(statefulset/database)
-ROLL_OUT_REST=(
+ROLL_OUT_STATEFUL=(
+  statefulset/cache
+  statefulset/storage
+  statefulset/search
+  statefulset/broker
+)
+ROLL_OUT_DEPLOYMENTS=(
   deployment/apigateway
   deployment/authservice
+  deployment/connect
   deployment/flowservice
   deployment/frontend
   deployment/imageservice
   deployment/postservice
   deployment/userservice
+)
+DEPLOYMENT_REPLICAS=(
+  apigateway=1
+  authservice=1
+  connect=1
+  flowservice=2
+  frontend=1
+  imageservice=1
+  postservice=1
+  userservice=1
 )
 
 log() {
@@ -38,7 +54,7 @@ die() {
 
 require_tools() {
   local tool
-  for tool in kubectl docker make; do
+  for tool in kubectl docker make openssl; do
     command -v "$tool" >/dev/null || die "missing required tool: $tool"
   done
 }
@@ -64,6 +80,11 @@ secret_has_key() {
   [[ -n "$(kubectl -n "${NS}" get secret cogito-db-secret -o "go-template={{ index .data \"${key}\" }}" 2>/dev/null || true)" ]]
 }
 
+secret_value() {
+  local key="$1"
+  kubectl -n "${NS}" get secret cogito-db-secret -o "go-template={{ index .data \"${key}\" | base64decode }}" 2>/dev/null || true
+}
+
 ensure_secret_key() {
   local key="$1"
   if secret_has_key "${key}"; then
@@ -75,6 +96,39 @@ ensure_secret_key() {
     -p "{\"stringData\":{\"${key}\":\"$(random_secret)\"}}"
 }
 
+database_url_with_sslmode() {
+  local url="$1"
+  if [[ "${url}" == *"sslmode=require"* ]]; then
+    printf '%s\n' "${url}"
+  elif [[ "${url}" =~ ^(.*[\?\&]sslmode=)[^\&]*(.*)$ ]]; then
+    printf '%srequire%s\n' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}"
+  elif [[ "${url}" == *"?"* ]]; then
+    printf '%s&sslmode=require\n' "${url}"
+  else
+    printf '%s?sslmode=require\n' "${url}"
+  fi
+}
+
+ensure_database_url() {
+  local app_password url required_url
+  app_password="$(secret_value cogito-app-password)"
+  [[ -n "${app_password}" ]] || die "cogito-app-password is required before database-url can be generated"
+
+  url="$(secret_value database-url)"
+  if [[ -z "${url}" ]]; then
+    log "adding missing generated secret key: database-url"
+    required_url="postgresql://cogito_app:${app_password}@database:5432/cogito?sslmode=require"
+  else
+    required_url="$(database_url_with_sslmode "${url}")"
+  fi
+
+  if [[ "${url}" != "${required_url}" ]]; then
+    log "updating database-url to require PostgreSQL TLS"
+    kubectl -n "${NS}" patch secret cogito-db-secret --type merge \
+      -p "{\"stringData\":{\"database-url\":\"${required_url}\"}}"
+  fi
+}
+
 ensure_namespace() {
   if kubectl create namespace "${NS}" 2>/dev/null; then
     CREATED_NAMESPACE=true
@@ -83,6 +137,14 @@ ensure_namespace() {
 
 ensure_secret() {
   if kubectl -n "${NS}" get secret cogito-db-secret >/dev/null 2>&1; then
+    ensure_secret_key database-password
+    ensure_secret_key cogito-app-password
+    ensure_database_url
+    ensure_secret_key internal-grpc-token
+    ensure_secret_key session-hmac-secret
+    ensure_secret_key search-master-key
+    ensure_secret_key s3-access-key
+    ensure_secret_key s3-secret-key
     ensure_secret_key s3-provisioning-access-key
     ensure_secret_key s3-provisioning-secret-key
     return
@@ -96,7 +158,7 @@ ensure_secret() {
   kubectl -n "${NS}" create secret generic cogito-db-secret \
     --from-literal=database-password="${postgres_password}" \
     --from-literal=cogito-app-password="${app_password}" \
-    --from-literal=database-url="postgresql://cogito_app:${app_password}@database:5432/cogito" \
+    --from-literal=database-url="postgresql://cogito_app:${app_password}@database:5432/cogito?sslmode=require" \
     --from-literal=internal-grpc-token="$(random_secret)" \
     --from-literal=session-hmac-secret="$(random_secret)" \
     --from-literal=search-master-key="$(random_secret)" \
@@ -104,6 +166,29 @@ ensure_secret() {
     --from-literal=s3-secret-key="$(random_secret)" \
     --from-literal=s3-provisioning-access-key="$(random_secret)" \
     --from-literal=s3-provisioning-secret-key="$(random_secret)"
+}
+
+ensure_database_tls_secret() {
+  local secret_name="database-tls"
+  local tmpdir
+  if kubectl -n "${NS}" get secret "${secret_name}" >/dev/null 2>&1; then
+    return
+  fi
+  command -v openssl >/dev/null || die "missing required tool for database TLS secret: openssl"
+
+  log "creating self-signed TLS secret for database"
+  tmpdir="$(mktemp -d)"
+  trap 'rm -rf "${tmpdir}"' RETURN
+  openssl req -x509 -newkey rsa:2048 -sha256 -days 365 -nodes \
+    -keyout "${tmpdir}/tls.key" \
+    -out "${tmpdir}/tls.crt" \
+    -subj "/CN=database" \
+    -addext "subjectAltName=DNS:database,DNS:database.${NS}.svc.cluster.local" >/dev/null 2>&1
+  kubectl -n "${NS}" create secret tls "${secret_name}" \
+    --cert="${tmpdir}/tls.crt" \
+    --key="${tmpdir}/tls.key" >/dev/null
+  trap - RETURN
+  rm -rf "${tmpdir}"
 }
 
 port_pids() {
@@ -149,14 +234,22 @@ handle_existing_port_forward() {
 build_images() {
   log "building images"
   export DOCKER_BUILDKIT=1
-  make -C "${ROOT}"
+  make -C "${ROOT}" IMAGE_PREFIX="${REGISTRY}"
 }
 
 apply_manifests() {
   log "creating namespace and applying manifests"
   ensure_namespace
   ensure_secret
+  ensure_database_tls_secret
   kubectl apply -f "${K8S_DIR}" -n "${NS}"
+  kubectl -n "${NS}" set image deployment/apigateway migration="${REGISTRY}/database" apigateway="${REGISTRY}/apigateway" >/dev/null
+  kubectl -n "${NS}" set image deployment/authservice authservice="${REGISTRY}/authservice" >/dev/null
+  kubectl -n "${NS}" set image deployment/flowservice flowservice="${REGISTRY}/flowservice" >/dev/null
+  kubectl -n "${NS}" set image deployment/frontend frontend="${REGISTRY}/frontend" >/dev/null
+  kubectl -n "${NS}" set image deployment/imageservice imageservice="${REGISTRY}/imageservice" >/dev/null
+  kubectl -n "${NS}" set image deployment/postservice postservice="${REGISTRY}/postservice" >/dev/null
+  kubectl -n "${NS}" set image deployment/userservice userservice="${REGISTRY}/userservice" >/dev/null
 }
 
 rollout_restart() {
@@ -190,23 +283,26 @@ wait_for_rollouts() {
 }
 
 restart_stack() {
-  if [[ "${CREATED_NAMESPACE}" == "true" ]]; then
-    log "waiting for newly created stack"
-    wait_for_rollouts "${ROLL_OUT_DATABASE[@]}"
-    wait_for_rollouts "${ROLL_OUT_REST[@]}"
-    return
-  fi
+  local deployment replica
+  log "pausing deployments while dependencies restart"
+  for deployment in "${DEPLOYMENT_REPLICAS[@]}"; do
+    kubectl -n "${NS}" scale "deployment/${deployment%%=*}" --replicas=0
+  done
 
-  log "restarting all services"
-  # Restarting them together ensures the backends drop their DB connections,
-  # allowing the database's graceful shutdown to complete instantly.
-  rollout_restart "${ROLL_OUT_DATABASE[@]}" "${ROLL_OUT_REST[@]}"
-
-  log "waiting for database"
+  log "restarting database"
+  rollout_restart "${ROLL_OUT_DATABASE[@]}"
   wait_for_rollouts "${ROLL_OUT_DATABASE[@]}"
 
-  log "waiting for application services"
-  wait_for_rollouts "${ROLL_OUT_REST[@]}"
+  log "restarting stateful services"
+  rollout_restart "${ROLL_OUT_STATEFUL[@]}"
+  wait_for_rollouts "${ROLL_OUT_STATEFUL[@]}"
+
+  log "starting deployments"
+  for deployment in "${DEPLOYMENT_REPLICAS[@]}"; do
+    replica="${deployment#*=}"
+    kubectl -n "${NS}" scale "deployment/${deployment%%=*}" --replicas="${replica}"
+  done
+  wait_for_rollouts "${ROLL_OUT_DEPLOYMENTS[@]}"
 }
 
 start_port_forward_background() {
@@ -269,6 +365,7 @@ print_summary() {
   Frontend       http://${APP_HOST}:${LOCAL_PORT}
   Gateway        in-cluster: http://apigateway:8080
   Namespace      ${NS}
+  Registry       ${REGISTRY}
   Context        $(kubectl config current-context 2>/dev/null || echo "unknown")
 
   Port-forward   supervisor pid: $(cat "${PORT_FORWARD_PID_FILE}" 2>/dev/null || echo "unknown")
