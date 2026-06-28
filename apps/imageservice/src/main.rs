@@ -17,7 +17,7 @@ use std::env;
 use std::sync::Arc;
 use tonic::transport::Server;
 
-use blobstore::S3BlobStore;
+use blobstore::StorageBlobStore;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -26,16 +26,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let grpc_port = env::var("PORT").unwrap_or_else(|_| "5050".to_string());
     let http_port = env::var("HTTP_PORT").unwrap_or_else(|_| "8081".to_string());
     let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let s3_endpoint = env::var("S3_ENDPOINT").expect("S3_ENDPOINT must be set");
-    let s3_bucket = env::var("S3_BUCKET").expect("S3_BUCKET must be set");
-    let s3_region = env::var("S3_REGION").expect("S3_REGION must be set");
-    let s3_access_key = env::var("S3_ACCESS_KEY").expect("S3_ACCESS_KEY must be set");
-    let s3_secret_key = env::var("S3_SECRET_KEY").expect("S3_SECRET_KEY must be set");
-    let s3_provisioning_access_key = env::var("S3_PROVISIONING_ACCESS_KEY").ok();
-    let s3_provisioning_secret_key = env::var("S3_PROVISIONING_SECRET_KEY").ok();
+    let storage_endpoint = env::var("S3_ENDPOINT").expect("S3_ENDPOINT must be set");
+    let storage_bucket = env::var("S3_BUCKET").expect("S3_BUCKET must be set");
+    let storage_region = env::var("S3_REGION").expect("S3_REGION must be set");
+    let storage_access_key = env::var("S3_ACCESS_KEY").expect("S3_ACCESS_KEY must be set");
+    let storage_secret_key = env::var("S3_SECRET_KEY").expect("S3_SECRET_KEY must be set");
+    let storage_provisioning_access_key = env::var("S3_PROVISIONING_ACCESS_KEY").ok();
+    let storage_provisioning_secret_key = env::var("S3_PROVISIONING_SECRET_KEY").ok();
     let provisioning_credentials = match (
-        s3_provisioning_access_key.as_deref(),
-        s3_provisioning_secret_key.as_deref(),
+        storage_provisioning_access_key.as_deref(),
+        storage_provisioning_secret_key.as_deref(),
     ) {
         (Some(access_key), Some(secret_key)) => Some((access_key, secret_key)),
         (None, None) => None,
@@ -50,12 +50,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let db_client = db_client::DbClient::new(&db_url).await?;
 
     let blobstore = Arc::new(
-        S3BlobStore::new(
-            &s3_endpoint,
-            &s3_bucket,
-            &s3_region,
-            &s3_access_key,
-            &s3_secret_key,
+        StorageBlobStore::new(
+            &storage_endpoint,
+            &storage_bucket,
+            &storage_region,
+            &storage_access_key,
+            &storage_secret_key,
             provisioning_credentials,
         )
         .await?,

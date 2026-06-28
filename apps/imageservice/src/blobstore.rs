@@ -15,12 +15,12 @@ pub trait BlobStore: Send + Sync {
     async fn copy(&self, src_key: &str, dst_key: &str) -> Result<(), String>;
 }
 
-pub struct S3BlobStore {
+pub struct StorageBlobStore {
     client: Client,
     bucket: String,
 }
 
-impl S3BlobStore {
+impl StorageBlobStore {
     pub async fn new(
         endpoint: &str,
         bucket: &str,
@@ -29,10 +29,10 @@ impl S3BlobStore {
         secret_key: &str,
         provisioning_credentials: Option<(&str, &str)>,
     ) -> Result<Self, String> {
-        let client = build_s3_client(endpoint, region, access_key, secret_key).await;
+        let client = build_storage_client(endpoint, region, access_key, secret_key).await;
         let provisioning_client = match provisioning_credentials {
             Some((provisioning_access_key, provisioning_secret_key)) => {
-                build_s3_client(
+                build_storage_client(
                     endpoint,
                     region,
                     provisioning_access_key,
@@ -52,7 +52,7 @@ impl S3BlobStore {
     }
 }
 
-async fn build_s3_client(
+async fn build_storage_client(
     endpoint: &str,
     region: &str,
     access_key: &str,
@@ -87,7 +87,7 @@ async fn ensure_bucket(client: &Client, bucket: &str) -> Result<(), String> {
 }
 
 #[async_trait]
-impl BlobStore for S3BlobStore {
+impl BlobStore for StorageBlobStore {
     async fn put(&self, key: &str, content_type: &str, data: Bytes) -> Result<(), String> {
         self.client
             .put_object()
@@ -97,7 +97,7 @@ impl BlobStore for S3BlobStore {
             .content_type(content_type)
             .send()
             .await
-            .map_err(|e| format!("s3 put failed: {e}"))?;
+            .map_err(|e| format!("storage put failed: {e}"))?;
         Ok(())
     }
 
@@ -116,7 +116,7 @@ impl BlobStore for S3BlobStore {
                 if svc_err.is_no_such_key() {
                     return Ok(None);
                 }
-                return Err(format!("s3 get failed: {svc_err}"));
+                return Err(format!("storage get failed: {svc_err}"));
             }
         };
 
@@ -128,7 +128,7 @@ impl BlobStore for S3BlobStore {
             .body
             .collect()
             .await
-            .map_err(|e| format!("s3 body read failed: {e}"))?
+            .map_err(|e| format!("storage body read failed: {e}"))?
             .into_bytes();
 
         Ok(Some((data, content_type)))
@@ -141,7 +141,7 @@ impl BlobStore for S3BlobStore {
             .key(key)
             .send()
             .await
-            .map_err(|e| format!("s3 delete failed: {e}"))?;
+            .map_err(|e| format!("storage delete failed: {e}"))?;
         Ok(())
     }
 
@@ -153,7 +153,7 @@ impl BlobStore for S3BlobStore {
             .key(dst_key)
             .send()
             .await
-            .map_err(|e| format!("s3 copy failed: {e}"))?;
+            .map_err(|e| format!("storage copy failed: {e}"))?;
         Ok(())
     }
 }
