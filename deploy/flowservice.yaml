@@ -64,12 +64,12 @@ spec:
         - name: FAN_OUT_THRESHOLD
           value: "10000"
         - name: MEILI_HOST
-          value: http://meilisearch:7700
+          value: http://search:7700
         - name: MEILI_MASTER_KEY
           valueFrom:
             secretKeyRef:
               name: cogito-db-secret
-              key: meili-master-key
+              key: search-master-key
         - name: USER_SERVICE_ADDR
           value: http://userservice:5050
         - name: PORT

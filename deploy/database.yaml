@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: postgres-init
+  name: database-init
   namespace: cogito
 data:
   init.sh: |
@@ -27,9 +27,9 @@ spec:
     app: cogito
     tier: database
   ports:
-  - name: postgres
+  - name: database
     port: 5432
-    targetPort: postgres
+    targetPort: database
 ---
 apiVersion: v1
 kind: Service
@@ -44,9 +44,9 @@ spec:
     app: cogito
     tier: database
   ports:
-  - name: postgres
+  - name: database
     port: 5432
-    targetPort: postgres
+    targetPort: database
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -72,16 +72,16 @@ spec:
       automountServiceAccountToken: false
       terminationGracePeriodSeconds: 60
       volumes:
-      - name: postgres-init
+      - name: database-init
         configMap:
-          name: postgres-init
+          name: database-init
       containers:
       - name: database
         image: postgres:18.4-alpine
         imagePullPolicy: IfNotPresent
         args: ["-c", "wal_level=logical"]
         ports:
-        - name: postgres
+        - name: database
           containerPort: 5432
         resources:
           limits:
@@ -94,7 +94,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: cogito-db-secret
-              key: postgres-password
+              key: database-password
         - name: COGITO_APP_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -110,7 +110,7 @@ spec:
         - mountPath: /var/lib/postgresql
           name: database-storage
         - mountPath: /docker-entrypoint-initdb.d
-          name: postgres-init
+          name: database-init
           readOnly: true
         startupProbe:
           exec:

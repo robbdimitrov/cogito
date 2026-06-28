@@ -1,32 +1,32 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: dragonfly
+  name: cache
   labels:
     app: cogito
-    component: dragonfly
+    component: cache
 spec:
-  serviceName: dragonfly
+  serviceName: cache
   replicas: 1
   revisionHistoryLimit: 3
   selector:
     matchLabels:
       app: cogito
-      component: dragonfly
+      component: cache
   template:
     metadata:
       labels:
         app: cogito
-        component: dragonfly
+        component: cache
     spec:
       automountServiceAccountToken: false
       containers:
-      - name: dragonfly
+      - name: cache
         image: docker.dragonflydb.io/dragonflydb/dragonfly:v1.25.0
         args: ["--proactor_threads=1", "--maxmemory=300mb"]
         ports:
         - containerPort: 6379
-          name: redis
+          name: cache
         resources:
           limits:
             memory: 400Mi
@@ -36,7 +36,7 @@ spec:
         securityContext:
           allowPrivilegeEscalation: false
         volumeMounts:
-        - name: dragonfly-data
+        - name: cache-data
           mountPath: /data
         livenessProbe:
           tcpSocket:
@@ -50,7 +50,7 @@ spec:
           periodSeconds: 10
   volumeClaimTemplates:
   - metadata:
-      name: dragonfly-data
+      name: cache-data
     spec:
       accessModes: ["ReadWriteOnce"]
       resources:
@@ -60,15 +60,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: dragonfly
+  name: cache
   labels:
     app: cogito
-    component: dragonfly
+    component: cache
 spec:
   selector:
     app: cogito
-    component: dragonfly
+    component: cache
   ports:
-  - name: redis
+  - name: cache
     port: 6379
-    targetPort: 6379
+    targetPort: cache

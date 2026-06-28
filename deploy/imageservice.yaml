@@ -59,7 +59,7 @@ spec:
               name: cogito-db-secret
               key: internal-grpc-token
         - name: S3_ENDPOINT
-          value: "http://seaweedfs:8333"
+          value: "http://storage:8333"
         - name: S3_BUCKET
           value: "cogito-images"
         - name: S3_REGION

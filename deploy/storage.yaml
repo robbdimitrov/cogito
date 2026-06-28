@@ -1,27 +1,27 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: seaweedfs
+  name: storage
   labels:
     app: cogito
-    component: seaweedfs
+    component: storage
 spec:
-  serviceName: seaweedfs
+  serviceName: storage
   replicas: 1
   revisionHistoryLimit: 3
   selector:
     matchLabels:
       app: cogito
-      component: seaweedfs
+      component: storage
   template:
     metadata:
       labels:
         app: cogito
-        component: seaweedfs
+        component: storage
     spec:
       automountServiceAccountToken: false
       containers:
-      - name: seaweedfs
+      - name: storage
         # Pin to a specific version; verify against running cluster before upgrading.
         image: chrislusf/seaweedfs:3.68
         command: ["/bin/sh", "-ec"]
@@ -66,18 +66,18 @@ spec:
             memory: 64Mi
             cpu: 50m
         volumeMounts:
-        - name: seaweedfs-data
+        - name: storage-data
           mountPath: /data
-        - name: seaweedfs-config
+        - name: storage-config
           mountPath: /etc/seaweed
-        - name: seaweedfs-credentials
+        - name: storage-credentials
           mountPath: /etc/seaweed-secrets
           readOnly: true
       volumes:
-      - name: seaweedfs-config
+      - name: storage-config
         emptyDir:
           medium: Memory
-      - name: seaweedfs-credentials
+      - name: storage-credentials
         secret:
           secretName: cogito-db-secret
           items:
@@ -91,7 +91,7 @@ spec:
             path: s3-provisioning-secret-key
   volumeClaimTemplates:
   - metadata:
-      name: seaweedfs-data
+      name: storage-data
     spec:
       accessModes: ["ReadWriteOnce"]
       resources:
@@ -101,16 +101,16 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: seaweedfs
+  name: storage
   labels:
     app: cogito
-    component: seaweedfs
+    component: storage
 spec:
   clusterIP: None
   selector:
     app: cogito
-    component: seaweedfs
+    component: storage
   ports:
   - name: s3
     port: 8333
-    targetPort: 8333
+    targetPort: s3

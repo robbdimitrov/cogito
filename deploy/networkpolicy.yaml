@@ -235,13 +235,13 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: seaweedfs
+  name: storage
   namespace: cogito
 spec:
   podSelector:
     matchLabels:
       app: cogito
-      component: seaweedfs
+      component: storage
   policyTypes:
   - Ingress
   ingress:
@@ -326,13 +326,13 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: dragonfly
+  name: cache
   namespace: cogito
 spec:
   podSelector:
     matchLabels:
       app: cogito
-      component: dragonfly
+      component: cache
   policyTypes:
   - Ingress
   ingress:
@@ -354,14 +354,14 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: meilisearch
+  name: search
   namespace: cogito
 spec:
   podSelector:
     matchLabels:
       app: cogito
       tier: backend
-      component: meilisearch
+      component: search
   policyTypes:
   - Ingress
   ingress:

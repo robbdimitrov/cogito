@@ -42,7 +42,7 @@ type DragonflyLoginThrottle struct {
 }
 
 func NewDragonflyLoginThrottle() (*DragonflyLoginThrottle, error) {
-	url := os.Getenv("DRAGONFLY_URL")
+	url := os.Getenv("CACHE_URL")
 	addr := parseDragonflyAddr(url)
 	client, err := valkey.NewClient(valkey.ClientOption{InitAddress: []string{addr}})
 	if err != nil {

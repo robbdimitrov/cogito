@@ -12,11 +12,11 @@
 | imageservice | Rust, Tonic + Axum      | 5050 (gRPC), 8081 (HTTP) | Image upload staging, verification, serving                                     |
 | flowservice  | Rust, Tonic             | 5050                     | Notifications and feed fan-out (Kafka consumer); full-text search (Meilisearch) |
 | database     | PostgreSQL 18.4         | 5432                     | Shared persistent store                                                         |
-| dragonfly    | Redis-compatible        | 6379                     | Rate limiting and login throttle                                                |
-| redpanda     | Kafka-compatible broker | 9092, 9644               | Event topics for CDC fan-out                                                    |
-| connect      | Redpanda Connect        | —                        | CDC relay, search sync, backfill, and cleanup pipelines                         |
-| seaweedfs    | S3-compatible           | 8333                     | Binary image storage                                                            |
-| meilisearch  | Meilisearch v1.15       | 7700                     | Full-text search index                                                          |
+| cache        | Dragonfly (Redis-compatible)   | 6379                     | Rate limiting and login throttle                                                |
+| broker       | Redpanda (Kafka-compatible)    | 9092, 9644               | Event topics for CDC fan-out                                                    |
+| connect      | Redpanda Connect               | —                        | CDC relay, search sync, backfill, and cleanup pipelines                         |
+| storage      | SeaweedFS (S3-compatible)      | 8333                     | Binary image storage                                                            |
+| search       | Meilisearch v1.15              | 7700                     | Full-text search index                                                          |
 
 ## Request Flow
 

@@ -94,12 +94,12 @@ ensure_secret() {
   postgres_password="$(random_secret)"
   app_password="$(random_secret)"
   kubectl -n "${NS}" create secret generic cogito-db-secret \
-    --from-literal=postgres-password="${postgres_password}" \
+    --from-literal=database-password="${postgres_password}" \
     --from-literal=cogito-app-password="${app_password}" \
     --from-literal=database-url="postgresql://cogito_app:${app_password}@database:5432/cogito" \
     --from-literal=internal-grpc-token="$(random_secret)" \
     --from-literal=session-hmac-secret="$(random_secret)" \
-    --from-literal=meili-master-key="$(random_secret)" \
+    --from-literal=search-master-key="$(random_secret)" \
     --from-literal=s3-access-key="$(random_secret)" \
     --from-literal=s3-secret-key="$(random_secret)" \
     --from-literal=s3-provisioning-access-key="$(random_secret)" \

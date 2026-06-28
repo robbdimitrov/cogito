@@ -1,46 +1,46 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: meilisearch
+  name: search
   labels:
     app: cogito
     tier: backend
-    component: meilisearch
+    component: search
 spec:
   selector:
     app: cogito
     tier: backend
-    component: meilisearch
+    component: search
   ports:
   - port: 7700
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: meilisearch
+  name: search
   labels:
     app: cogito
     tier: backend
-    component: meilisearch
+    component: search
 spec:
-  serviceName: meilisearch
+  serviceName: search
   replicas: 1
   revisionHistoryLimit: 3
   selector:
     matchLabels:
       app: cogito
       tier: backend
-      component: meilisearch
+      component: search
   template:
     metadata:
       labels:
         app: cogito
         tier: backend
-        component: meilisearch
+        component: search
     spec:
       automountServiceAccountToken: false
       containers:
-      - name: meilisearch
+      - name: search
         image: getmeili/meilisearch:v1.15.2
         ports:
         - containerPort: 7700
@@ -57,9 +57,9 @@ spec:
           valueFrom:
             secretKeyRef:
               name: cogito-db-secret
-              key: meili-master-key
+              key: search-master-key
         - name: MEILI_DB_PATH
-          value: /data/meilisearch
+          value: /data/search
         securityContext:
           allowPrivilegeEscalation: false
         volumeMounts:

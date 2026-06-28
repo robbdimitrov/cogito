@@ -115,7 +115,7 @@ func newDragonflyStore(url string, failOpen bool) (*DragonflyStore, error) {
 // background once Dragonfly becomes reachable. If fail-open is false, a startup
 // failure is fatal.
 func NewDragonflyStore(ctx context.Context) RateLimiterStore {
-	url := os.Getenv("DRAGONFLY_URL")
+	url := os.Getenv("CACHE_URL")
 	failOpen := envBool("RATE_LIMIT_FAIL_OPEN", false)
 
 	if store, err := newDragonflyStore(url, failOpen); err == nil {

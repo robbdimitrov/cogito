@@ -16,7 +16,7 @@ data:
       processors:
       - sql_raw:
           driver: postgres
-          dsn: "${POSTGRES_DSN}"
+          dsn: "${DATABASE_DSN}"
           query: |
             DELETE FROM outbox
             WHERE id IN (
@@ -103,7 +103,7 @@ data:
     input:
       sql_raw:
         driver: postgres
-        dsn: "${POSTGRES_DSN}"
+        dsn: "${DATABASE_DSN}"
         query: |
           SELECT 'entity-changes' AS topic,
                  jsonb_build_object('table','users','op','upsert','id',u.id,'username',u.username,'name',u.name,'bio',u.bio,'created',u.created,'follower_count',(SELECT COUNT(*)::int FROM followers WHERE user_id = u.id),'fan_out_disabled',u.fan_out_disabled) AS payload
@@ -148,9 +148,9 @@ spec:
     app: cogito
     tier: broker
   ports:
-  - name: kafka
+  - name: broker
     port: 9092
-    targetPort: kafka
+    targetPort: broker
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -199,7 +199,7 @@ spec:
             fieldRef:
               fieldPath: metadata.name
         ports:
-        - name: kafka
+        - name: broker
           containerPort: 9092
         - name: admin
           containerPort: 9644
@@ -220,7 +220,7 @@ spec:
           mountPath: /var/lib/redpanda/data
         - name: tmp
           mountPath: /tmp
-        - name: redpanda-config
+        - name: broker-config
           mountPath: /etc/redpanda
         startupProbe:
           httpGet:
@@ -243,7 +243,7 @@ spec:
       volumes:
       - name: tmp
         emptyDir: {}
-      - name: redpanda-config
+      - name: broker-config
         emptyDir: {}
   volumeClaimTemplates:
   - metadata:
@@ -295,7 +295,7 @@ spec:
         env:
         - name: REDPANDA_BROKERS
           value: broker:9092
-        - name: POSTGRES_DSN
+        - name: DATABASE_DSN
           valueFrom:
             secretKeyRef:
               name: cogito-db-secret
@@ -368,20 +368,20 @@ spec:
         env: &connect-env
         - name: REDPANDA_BROKERS
           value: broker:9092
-        - name: POSTGRES_DSN
+        - name: DATABASE_DSN
           valueFrom:
             secretKeyRef:
               name: cogito-db-secret
               key: database-url
         - name: MEILI_HOST
-          value: http://meilisearch:7700
+          value: http://search:7700
         - name: MEILI_MASTER_KEY
           valueFrom:
             secretKeyRef:
               name: cogito-db-secret
-              key: meili-master-key
+              key: search-master-key
         - name: S3_ENDPOINT
-          value: http://seaweedfs:8333
+          value: http://storage:8333
         - name: S3_BUCKET
           value: cogito-images
         - name: S3_ACCESS_KEY

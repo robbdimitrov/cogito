@@ -53,7 +53,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: cogito-db-secret
-              key: postgres-password
+              key: database-password
       containers:
       - name: apigateway
         image: localhost:5000/cogito/apigateway
@@ -89,8 +89,8 @@ spec:
             secretKeyRef:
               name: cogito-db-secret
               key: internal-grpc-token
-        - name: DRAGONFLY_URL
-          value: "redis://dragonfly:6379"
+        - name: CACHE_URL
+          value: "redis://cache:6379"
         - name: RATE_LIMIT_FAIL_OPEN
           value: "true"
         - name: SESSION_HMAC_SECRET
