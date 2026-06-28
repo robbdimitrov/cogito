@@ -63,6 +63,7 @@ failures map to 500 unless a controller handles them explicitly.
 
 - All list endpoints accept `cursor` (opaque string) and `limit` (integer) query
   params.
+- Malformed `limit` values and values outside the endpoint range return 400.
 - Default limit: 20. Min: 1. Max: 100 (except `GET /hashtags/search`: default 8,
   max 20).
 - Response shape: `{ "items": [...], "nextCursor": "..." }` (`nextCursor` is

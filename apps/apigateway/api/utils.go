@@ -92,19 +92,23 @@ func getIntQuery(r *http.Request, key string, defaultValue int) (int, error) {
 	}
 	parsed, err := strconv.Atoi(value)
 	if err != nil {
-		return 0, err
+		return 0, status.Errorf(codes.InvalidArgument, "Invalid %s", key)
 	}
 	return parsed, nil
 }
 
 func getCursorAndLimit(r *http.Request) (cursor string, limit int, err error) {
+	return getCursorAndLimitRange(r, 20, 100)
+}
+
+func getCursorAndLimitRange(r *http.Request, defaultLimit, maxLimit int) (cursor string, limit int, err error) {
 	cursor = r.URL.Query().Get("cursor")
-	limit, err = getIntQuery(r, "limit", 20)
+	limit, err = getIntQuery(r, "limit", defaultLimit)
 	if err != nil {
 		return
 	}
-	if limit < 1 || limit > 100 {
-		err = status.Error(codes.InvalidArgument, "Limit must be between 1 and 100")
+	if limit < 1 || limit > maxLimit {
+		err = status.Errorf(codes.InvalidArgument, "Limit must be between 1 and %d", maxLimit)
 	}
 	return
 }
