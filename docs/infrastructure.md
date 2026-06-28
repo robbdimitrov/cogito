@@ -183,6 +183,14 @@ All services: `DATABASE_URL` (from secret), `INTERNAL_GRPC_TOKEN` (from secret).
 | cache       | apigateway          | /data                              | Rate limit counters and login throttle (max 200 MB)   |
 | broker      | connect/flowservice | /var/lib/redpanda/data             | Kafka-compatible event log                            |
 
+## Search Migration Notes
+
+`deploy/search.yaml` sets `MEILI_DB_PATH` to `/data/search`; earlier clusters
+used `/data/meilisearch`. On an existing cluster with a populated search PVC,
+Meilisearch will start with an empty index at `/data/search` while the old data
+remains under `/data/meilisearch`. After the `search` StatefulSet rolls out,
+trigger a full reindex by running the `broker-backfill` Job.
+
 ## Migration Strategy
 
 - Migrations in `apps/database/migrations/` as paired `NNNNNN_name.up.sql` /
