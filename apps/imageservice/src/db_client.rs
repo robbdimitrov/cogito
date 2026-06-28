@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use sqlx::postgres::PgPool;
+use sqlx::postgres::PgPool as DatabasePool;
 
 #[async_trait]
 pub trait ImageDb: Send + Sync + 'static {
@@ -11,7 +11,7 @@ pub trait ImageDb: Send + Sync + 'static {
 
 #[derive(Clone)]
 pub struct DbClient {
-    pub pool: PgPool,
+    pub pool: DatabasePool,
 }
 
 impl DbClient {

@@ -106,8 +106,8 @@ func (c *DBClient) createPost(ctx context.Context, content string, tags []string
 		if errors.Is(err, pgx.ErrNoRows) {
 			return 0, errInvalidReference
 		}
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgErr.Code == "23503" {
+		var databaseErr *pgconn.PgError
+		if errors.As(err, &databaseErr) && databaseErr.Code == "23503" {
 			return 0, errInvalidReference
 		}
 		return 0, err
@@ -534,8 +534,8 @@ func (c *DBClient) likePost(ctx context.Context, postID int32, userID int32) err
 
 	query := "INSERT INTO likes (post_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING"
 	tag, err := tx.Exec(ctx, query, postID, userID)
-	var pgErr *pgconn.PgError
-	if errors.As(err, &pgErr) && pgErr.Code == "23503" {
+	var databaseErr *pgconn.PgError
+	if errors.As(err, &databaseErr) && databaseErr.Code == "23503" {
 		return errInvalidReference
 	}
 	if err != nil {
@@ -615,8 +615,8 @@ func (c *DBClient) repostPost(ctx context.Context, postID int32, userID int32) e
 	if errors.Is(err, pgx.ErrNoRows) {
 		return tx.Commit(ctx)
 	}
-	var pgErr *pgconn.PgError
-	if errors.As(err, &pgErr) && pgErr.Code == "23503" {
+	var databaseErr *pgconn.PgError
+	if errors.As(err, &databaseErr) && databaseErr.Code == "23503" {
 		return errInvalidReference
 	}
 	if err != nil {

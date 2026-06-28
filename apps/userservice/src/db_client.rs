@@ -3,11 +3,11 @@ use crate::controller::{UpdateUserFields, UserDb};
 use crate::pagination;
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
-use sqlx::{Error as SqlxError, PgPool, Row};
+use sqlx::{Error as SqlxError, PgPool as DatabasePool, Row};
 
 #[derive(Debug, Clone)]
 pub struct DbClient {
-    pub pool: PgPool,
+    pub pool: DatabasePool,
 }
 
 impl DbClient {

@@ -1,4 +1,4 @@
-use sqlx::PgPool;
+use sqlx::PgPool as DatabasePool;
 use sqlx::types::chrono::{DateTime, Utc};
 use std::env;
 
@@ -18,7 +18,7 @@ fn parse_session_ttl_days(value: Option<&str>) -> i32 {
 
 #[derive(Debug, Clone)]
 pub struct DbClient {
-    pub pool: PgPool,
+    pub pool: DatabasePool,
 }
 
 impl DbClient {
