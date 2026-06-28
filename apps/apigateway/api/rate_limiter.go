@@ -90,41 +90,41 @@ func (s *swappableStore) Allow(ctx context.Context, identifier string, policy Ra
 	return inner.Allow(ctx, identifier, policy)
 }
 
-type DragonflyStore struct {
+type CacheStore struct {
 	client   valkey.Client
 	script   *valkey.Lua
 	failOpen bool
 }
 
-func newDragonflyStore(url string, failOpen bool) (*DragonflyStore, error) {
-	client, err := valkey.NewClient(valkey.ClientOption{InitAddress: []string{parseDragonflyAddr(url)}})
+func newCacheStore(url string, failOpen bool) (*CacheStore, error) {
+	client, err := valkey.NewClient(valkey.ClientOption{InitAddress: []string{parseCacheAddr(url)}})
 	if err != nil {
 		return nil, err
 	}
-	return &DragonflyStore{
+	return &CacheStore{
 		client:   client,
 		script:   valkey.NewLuaScript(tokenBucketScript),
 		failOpen: failOpen,
 	}, nil
 }
 
-// NewDragonflyStore returns a RateLimiterStore backed by Dragonfly. It attempts
+// NewCacheStore returns a RateLimiterStore backed by the cache. It attempts
 // a synchronous connection first so rate limiting is active immediately when
-// Dragonfly is available. If the initial attempt fails and RATE_LIMIT_FAIL_OPEN
+// the cache is available. If the initial attempt fails and RATE_LIMIT_FAIL_OPEN
 // is true, it returns a no-op store and promotes it to the real store in the
-// background once Dragonfly becomes reachable. If fail-open is false, a startup
+// background once the cache becomes reachable. If fail-open is false, a startup
 // failure is fatal.
-func NewDragonflyStore(ctx context.Context) RateLimiterStore {
+func NewCacheStore(ctx context.Context) RateLimiterStore {
 	url := os.Getenv("CACHE_URL")
 	failOpen := envBool("RATE_LIMIT_FAIL_OPEN", false)
 
-	if store, err := newDragonflyStore(url, failOpen); err == nil {
+	if store, err := newCacheStore(url, failOpen); err == nil {
 		return store
 	} else if !failOpen {
-		slog.Error("unable to connect to dragonfly", "error", err)
+		slog.Error("unable to connect to cache", "error", err)
 		os.Exit(1)
 	} else {
-		slog.Warn("dragonfly unavailable, rate limiting degraded — retrying in background", "error", err)
+		slog.Warn("cache unavailable, rate limiting degraded — retrying in background", "error", err)
 	}
 
 	ss := &swappableStore{inner: noopRateLimiterStore{}}
@@ -137,16 +137,16 @@ func NewDragonflyStore(ctx context.Context) RateLimiterStore {
 				return
 			case <-time.After(backoff):
 			}
-			store, err := newDragonflyStore(url, failOpen)
+			store, err := newCacheStore(url, failOpen)
 			if err != nil {
-				slog.Warn("dragonfly retry failed", "error", err, "backoff", backoff)
+				slog.Warn("cache retry failed", "error", err, "backoff", backoff)
 				if backoff < 30*time.Second {
 					backoff *= 2
 				}
 				continue
 			}
 			ss.set(store)
-			slog.Info("dragonfly rate limiter connected")
+			slog.Info("cache rate limiter connected")
 			return
 		}
 	}()
@@ -154,7 +154,7 @@ func NewDragonflyStore(ctx context.Context) RateLimiterStore {
 	return ss
 }
 
-func parseDragonflyAddr(url string) string {
+func parseCacheAddr(url string) string {
 	addr := url
 	if after, ok := strings.CutPrefix(url, "redis://"); ok {
 		addr = after
@@ -162,7 +162,7 @@ func parseDragonflyAddr(url string) string {
 	return addr
 }
 
-func (s *DragonflyStore) Allow(ctx context.Context, identifier string, policy RateLimitPolicy) (RateLimitDecision, error) {
+func (s *CacheStore) Allow(ctx context.Context, identifier string, policy RateLimitPolicy) (RateLimitDecision, error) {
 	nowMs := time.Now().UnixMilli()
 	result := s.script.Exec(ctx, s.client,
 		[]string{identifier},

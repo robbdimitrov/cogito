@@ -17,7 +17,7 @@ func CreateServer(ctx context.Context, authAddr, postAddr, userAddr, imageAddr, 
 
 	var handler http.Handler = mux
 
-	rlStore := NewDragonflyStore(ctx)
+	rlStore := NewCacheStore(ctx)
 
 	// authGuard runs before rateLimitMiddleware so the user ID is in context
 	// when the rate limit key is computed. Per-user keying is critical: without

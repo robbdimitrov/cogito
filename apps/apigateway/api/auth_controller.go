@@ -29,7 +29,7 @@ func newAuthController(addr string) *authController {
 		os.Exit(1)
 	}
 	var throttle LoginThrottle
-	dt, err := NewDragonflyLoginThrottle()
+	dt, err := NewCacheLoginThrottle()
 	if err != nil {
 		slog.Warn("login throttle unavailable, using noop", "error", err)
 		throttle = NoopLoginThrottle{}

@@ -168,7 +168,7 @@ func TestCreateSessionSuccessClearsBothKeys(t *testing.T) {
 }
 
 func TestCreateSessionThrottleErrorFailsOpen(t *testing.T) {
-	throttle := &fakeThrottle{err: errors.New("dragonfly unavailable")}
+	throttle := &fakeThrottle{err: errors.New("cache unavailable")}
 	client := &mockCreateSessionClient{res: &pb.Session{Id: "s1", UserId: 1}}
 
 	ac := newTestAuthController(throttle, client)

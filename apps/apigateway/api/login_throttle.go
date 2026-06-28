@@ -35,21 +35,21 @@ type LoginThrottle interface {
 	Clear(ctx context.Context, keys []string) error
 }
 
-type DragonflyLoginThrottle struct {
+type CacheLoginThrottle struct {
 	client valkey.Client
 	script *valkey.Lua
 	window time.Duration
 }
 
-func NewDragonflyLoginThrottle() (*DragonflyLoginThrottle, error) {
+func NewCacheLoginThrottle() (*CacheLoginThrottle, error) {
 	url := os.Getenv("CACHE_URL")
-	addr := parseDragonflyAddr(url)
+	addr := parseCacheAddr(url)
 	client, err := valkey.NewClient(valkey.ClientOption{InitAddress: []string{addr}})
 	if err != nil {
 		return nil, err
 	}
 	window := time.Duration(envInt("THROTTLE_WINDOW_SECS", 900)) * time.Second
-	return &DragonflyLoginThrottle{
+	return &CacheLoginThrottle{
 		client: client,
 		script: valkey.NewLuaScript(recordFailureLua),
 		window: window,
@@ -64,7 +64,7 @@ func prefixKeys(keys []string) []string {
 	return out
 }
 
-func (t *DragonflyLoginThrottle) GetFailures(ctx context.Context, keys []string) ([]LoginFailure, error) {
+func (t *CacheLoginThrottle) GetFailures(ctx context.Context, keys []string) ([]LoginFailure, error) {
 	res, err := t.client.Do(ctx, t.client.B().Mget().Key(prefixKeys(keys)...).Build()).ToArray()
 	if err != nil {
 		return nil, err
@@ -84,7 +84,7 @@ func (t *DragonflyLoginThrottle) GetFailures(ctx context.Context, keys []string)
 	return failures, nil
 }
 
-func (t *DragonflyLoginThrottle) RecordFailure(ctx context.Context, key string) (int, error) {
+func (t *CacheLoginThrottle) RecordFailure(ctx context.Context, key string) (int, error) {
 	windowMs := strconv.FormatInt(t.window.Milliseconds(), 10)
 	result := t.script.Exec(ctx, t.client,
 		[]string{throttleKeyPrefix + key},
@@ -97,7 +97,7 @@ func (t *DragonflyLoginThrottle) RecordFailure(ctx context.Context, key string) 
 	return int(count), err
 }
 
-func (t *DragonflyLoginThrottle) Clear(ctx context.Context, keys []string) error {
+func (t *CacheLoginThrottle) Clear(ctx context.Context, keys []string) error {
 	return t.client.Do(ctx, t.client.B().Del().Key(prefixKeys(keys)...).Build()).Error()
 }
 
