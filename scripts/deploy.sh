@@ -8,6 +8,7 @@ NS="${NS:-cogito}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 K8S_DIR="$ROOT/deploy"
 REGISTRY="${REGISTRY:-localhost:5000/cogito}"
+GIT_SHA="${GIT_SHA:-$(git -C "${ROOT}" rev-parse --short HEAD)}"
 APP_HOST="${APP_HOST:-cogito.localhost}"
 LOCAL_PORT="${LOCAL_PORT:-8080}"
 REMOTE_PORT="${REMOTE_PORT:-8080}"
@@ -234,7 +235,8 @@ handle_existing_port_forward() {
 build_images() {
   log "building images"
   export DOCKER_BUILDKIT=1
-  make -C "${ROOT}" IMAGE_PREFIX="${REGISTRY}"
+  export GIT_SHA
+  make -C "${ROOT}" IMAGE_PREFIX="${REGISTRY}" GIT_SHA="${GIT_SHA}"
 }
 
 apply_manifests() {
@@ -243,13 +245,13 @@ apply_manifests() {
   ensure_secret
   ensure_database_tls_secret
   kubectl apply -f "${K8S_DIR}" -n "${NS}"
-  kubectl -n "${NS}" set image deployment/apigateway migration="${REGISTRY}/database" apigateway="${REGISTRY}/apigateway" >/dev/null
-  kubectl -n "${NS}" set image deployment/authservice authservice="${REGISTRY}/authservice" >/dev/null
-  kubectl -n "${NS}" set image deployment/flowservice flowservice="${REGISTRY}/flowservice" >/dev/null
-  kubectl -n "${NS}" set image deployment/frontend frontend="${REGISTRY}/frontend" >/dev/null
-  kubectl -n "${NS}" set image deployment/imageservice imageservice="${REGISTRY}/imageservice" >/dev/null
-  kubectl -n "${NS}" set image deployment/postservice postservice="${REGISTRY}/postservice" >/dev/null
-  kubectl -n "${NS}" set image deployment/userservice userservice="${REGISTRY}/userservice" >/dev/null
+  kubectl -n "${NS}" set image deployment/apigateway migration="${REGISTRY}/database:${GIT_SHA}" apigateway="${REGISTRY}/apigateway:${GIT_SHA}" >/dev/null
+  kubectl -n "${NS}" set image deployment/authservice authservice="${REGISTRY}/authservice:${GIT_SHA}" >/dev/null
+  kubectl -n "${NS}" set image deployment/flowservice flowservice="${REGISTRY}/flowservice:${GIT_SHA}" >/dev/null
+  kubectl -n "${NS}" set image deployment/frontend frontend="${REGISTRY}/frontend:${GIT_SHA}" >/dev/null
+  kubectl -n "${NS}" set image deployment/imageservice imageservice="${REGISTRY}/imageservice:${GIT_SHA}" >/dev/null
+  kubectl -n "${NS}" set image deployment/postservice postservice="${REGISTRY}/postservice:${GIT_SHA}" >/dev/null
+  kubectl -n "${NS}" set image deployment/userservice userservice="${REGISTRY}/userservice:${GIT_SHA}" >/dev/null
 }
 
 rollout_restart() {

@@ -3,9 +3,20 @@ export PATH := $(PATH):$(shell go env GOPATH)/bin
 .DEFAULT_GOAL := all
 
 IMAGE_PREFIX ?= localhost:5000/cogito
+GIT_SHA ?= $(shell git rev-parse --short HEAD)
 
 .PHONY: all
 all: apigateway authservice database flowservice frontend imageservice postservice userservice
+
+.PHONY: help
+help:
+	@printf 'Cogito support targets:\n'
+	@printf '  make              Build and push all images\n'
+	@printf '  make <service>    Build and push one service image\n'
+	@printf '  make proto        Regenerate Go protobuf bindings\n'
+	@printf '  make format       Format handwritten Go and Rust\n'
+	@printf '  make lint         Formatting checks and frontend lint\n'
+	@printf '  make test         Run all unit tests\n'
 
 .PHONY: proto
 proto:
@@ -15,35 +26,43 @@ proto:
 
 .PHONY: apigateway
 apigateway: proto
-	docker build -t $(IMAGE_PREFIX)/apigateway apps/apigateway
+	docker build -t $(IMAGE_PREFIX)/apigateway:$(GIT_SHA) apps/apigateway
+	docker push $(IMAGE_PREFIX)/apigateway:$(GIT_SHA)
 
 .PHONY: authservice
 authservice:
-	docker build -t $(IMAGE_PREFIX)/authservice -f apps/authservice/Dockerfile .
+	docker build -t $(IMAGE_PREFIX)/authservice:$(GIT_SHA) -f apps/authservice/Dockerfile .
+	docker push $(IMAGE_PREFIX)/authservice:$(GIT_SHA)
 
 .PHONY: database
 database:
-	docker build -t $(IMAGE_PREFIX)/database apps/database
+	docker build -t $(IMAGE_PREFIX)/database:$(GIT_SHA) apps/database
+	docker push $(IMAGE_PREFIX)/database:$(GIT_SHA)
 
 .PHONY: frontend
 frontend:
-	docker build -t $(IMAGE_PREFIX)/frontend apps/frontend
+	docker build -t $(IMAGE_PREFIX)/frontend:$(GIT_SHA) apps/frontend
+	docker push $(IMAGE_PREFIX)/frontend:$(GIT_SHA)
 
 .PHONY: flowservice
 flowservice:
-	docker build -t $(IMAGE_PREFIX)/flowservice -f apps/flowservice/Dockerfile .
+	docker build -t $(IMAGE_PREFIX)/flowservice:$(GIT_SHA) -f apps/flowservice/Dockerfile .
+	docker push $(IMAGE_PREFIX)/flowservice:$(GIT_SHA)
 
 .PHONY: imageservice
 imageservice:
-	docker build -t $(IMAGE_PREFIX)/imageservice -f apps/imageservice/Dockerfile .
+	docker build -t $(IMAGE_PREFIX)/imageservice:$(GIT_SHA) -f apps/imageservice/Dockerfile .
+	docker push $(IMAGE_PREFIX)/imageservice:$(GIT_SHA)
 
 .PHONY: postservice
 postservice: proto
-	docker build -t $(IMAGE_PREFIX)/postservice apps/postservice
+	docker build -t $(IMAGE_PREFIX)/postservice:$(GIT_SHA) apps/postservice
+	docker push $(IMAGE_PREFIX)/postservice:$(GIT_SHA)
 
 .PHONY: userservice
 userservice:
-	docker build -t $(IMAGE_PREFIX)/userservice -f apps/userservice/Dockerfile .
+	docker build -t $(IMAGE_PREFIX)/userservice:$(GIT_SHA) -f apps/userservice/Dockerfile .
+	docker push $(IMAGE_PREFIX)/userservice:$(GIT_SHA)
 
 .PHONY: format
 format:
