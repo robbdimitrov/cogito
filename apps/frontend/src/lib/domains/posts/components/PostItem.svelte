@@ -181,91 +181,117 @@
               >
             </a>
 
-            <form
-              bind:this={repostForm}
-              method="POST"
-              action="?/toggleRepost"
-              class="hidden"
-              use:enhance={() => {
-                if (isReposting) return () => {};
-                isReposting = true;
-                const wasReposted = reposted;
-                optimisticRepostOverride = !wasReposted;
-                optimisticRepostsDelta += wasReposted ? -1 : 1;
+            {#if currentUserId}
+              <form
+                bind:this={repostForm}
+                method="POST"
+                action="?/toggleRepost"
+                class="hidden"
+                use:enhance={() => {
+                  if (isReposting) return () => {};
+                  isReposting = true;
+                  const wasReposted = reposted;
+                  optimisticRepostOverride = !wasReposted;
+                  optimisticRepostsDelta += wasReposted ? -1 : 1;
 
-                return async ({ result, update }) => {
-                  isReposting = false;
-                  optimisticRepostOverride = null;
-                  optimisticRepostsDelta = 0;
+                  return async ({ result, update }) => {
+                    isReposting = false;
+                    optimisticRepostOverride = null;
+                    optimisticRepostsDelta = 0;
 
-                  if (result.type !== "failure") {
-                    await update({ invalidateAll: false });
-                  }
-                };
-              }}
-            >
-              <input type="hidden" name="postId" value={displayPost.id} />
-              <input
-                type="hidden"
-                name="reposted"
-                value={String(displayPost.reposted ?? false)}
-              />
-            </form>
-
-            <RepostMenu
-              {reposted}
-              {reposts}
-              {isReposting}
-              onRepost={triggerRepost}
-              onQuote={() => onQuote?.(displayPost)}
-            />
-
-            <form
-              method="POST"
-              action="?/toggleLike"
-              use:enhance={() => {
-                if (isLiking) return () => {};
-                isLiking = true;
-                const wasLiked = liked;
-                optimisticLikeOverride = !wasLiked;
-                optimisticLikesDelta += wasLiked ? -1 : 1;
-
-                return async ({ result, update }) => {
-                  isLiking = false;
-                  optimisticLikeOverride = null;
-                  optimisticLikesDelta = 0;
-
-                  if (result.type !== "failure") {
-                    await update({ invalidateAll: false });
-                  }
-                };
-              }}
-            >
-              <input type="hidden" name="postId" value={displayPost.id} />
-              <input
-                type="hidden"
-                name="liked"
-                value={String(displayPost.liked ?? false)}
-              />
-              <button
-                type="submit"
-                class="btn btn-ghost btn-sm gap-2 rounded-full px-4 hover:scale-105 active:scale-95 transition-all duration-150 {liked
-                  ? 'text-error bg-error/10'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-error hover:bg-error/5'}"
-                disabled={isLiking}
-                aria-label={liked ? "Unlike post" : "Like post"}
+                    if (result.type !== "failure") {
+                      await update({ invalidateAll: false });
+                    }
+                  };
+                }}
               >
-                <Heart
-                  class="h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] {liked
-                    ? 'scale-125'
-                    : 'scale-100'}"
-                  fill={liked ? "currentColor" : "none"}
+                <input type="hidden" name="postId" value={displayPost.id} />
+                <input
+                  type="hidden"
+                  name="reposted"
+                  value={String(displayPost.reposted ?? false)}
                 />
+              </form>
+
+              <RepostMenu
+                {reposted}
+                {reposts}
+                {isReposting}
+                onRepost={triggerRepost}
+                onQuote={() => onQuote?.(displayPost)}
+              />
+            {:else}
+              <a
+                href={resolve("/login")}
+                class="btn btn-ghost btn-sm gap-2 rounded-full px-4 text-slate-500 dark:text-slate-400"
+                aria-label="Log in to repost"
+              >
+                <Repeat class="h-4 w-4" />
+                <span class="text-xs sm:text-sm font-semibold tracking-wide"
+                  >{reposts}</span
+                >
+              </a>
+            {/if}
+
+            {#if currentUserId}
+              <form
+                method="POST"
+                action="?/toggleLike"
+                use:enhance={() => {
+                  if (isLiking) return () => {};
+                  isLiking = true;
+                  const wasLiked = liked;
+                  optimisticLikeOverride = !wasLiked;
+                  optimisticLikesDelta += wasLiked ? -1 : 1;
+
+                  return async ({ result, update }) => {
+                    isLiking = false;
+                    optimisticLikeOverride = null;
+                    optimisticLikesDelta = 0;
+
+                    if (result.type !== "failure") {
+                      await update({ invalidateAll: false });
+                    }
+                  };
+                }}
+              >
+                <input type="hidden" name="postId" value={displayPost.id} />
+                <input
+                  type="hidden"
+                  name="liked"
+                  value={String(displayPost.liked ?? false)}
+                />
+                <button
+                  type="submit"
+                  class="btn btn-ghost btn-sm gap-2 rounded-full px-4 hover:scale-105 active:scale-95 transition-all duration-150 {liked
+                    ? 'text-error bg-error/10'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-error hover:bg-error/5'}"
+                  disabled={isLiking}
+                  aria-label={liked ? "Unlike post" : "Like post"}
+                >
+                  <Heart
+                    class="h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] {liked
+                      ? 'scale-125'
+                      : 'scale-100'}"
+                    fill={liked ? "currentColor" : "none"}
+                  />
+                  <span class="text-xs sm:text-sm font-semibold tracking-wide"
+                    >{likes}</span
+                  >
+                </button>
+              </form>
+            {:else}
+              <a
+                href={resolve("/login")}
+                class="btn btn-ghost btn-sm gap-2 rounded-full px-4 text-slate-500 dark:text-slate-400"
+                aria-label="Log in to like"
+              >
+                <Heart class="h-4 w-4" />
                 <span class="text-xs sm:text-sm font-semibold tracking-wide"
                   >{likes}</span
                 >
-              </button>
-            </form>
+              </a>
+            {/if}
           </div>
         </div>
       </div>

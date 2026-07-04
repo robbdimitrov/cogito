@@ -61,7 +61,7 @@
           <span class="hidden xs:inline">Edit Profile</span>
           <span class="xs:hidden">Edit</span>
         </a>
-      {:else}
+      {:else if currentUser}
         <form
           method="POST"
           action="?/toggleFollow"
@@ -95,6 +95,14 @@
             {/if}
           </button>
         </form>
+      {:else}
+        <a
+          href={resolve("/login")}
+          class="btn btn-primary btn-sm gap-1 rounded-full px-3 sm:px-4"
+        >
+          <UserPlus class="h-4 w-4" />
+          Follow
+        </a>
       {/if}
     </div>
     <div class="mt-3 sm:mt-4">

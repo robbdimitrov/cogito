@@ -26,6 +26,10 @@ func (m *mockPostServiceClient) GetPost(ctx context.Context, in *pb.PostRequest,
 	return &pb.Post{MediaKey: m.mediaKey}, m.errGet
 }
 
+func (m *mockPostServiceClient) GetPosts(ctx context.Context, in *pb.GetPostsRequest, opts ...grpc.CallOption) (*pb.Posts, error) {
+	return &pb.Posts{Posts: []*pb.Post{{MediaKey: m.mediaKey}}}, m.errGet
+}
+
 func (m *mockPostServiceClient) DeletePost(ctx context.Context, in *pb.PostRequest, opts ...grpc.CallOption) (*pb.Empty, error) {
 	m.deletePostCalled = true
 	return &pb.Empty{}, m.errDelete
@@ -213,6 +217,38 @@ func TestDeletePost_ImageDeleteFailurePreservesPost(t *testing.T) {
 	}
 	if mockPost.deletePostCalled {
 		t.Errorf("Expected DeletePost not to be called when image deletion fails, to avoid orphaning the image")
+	}
+}
+
+func TestGetPost_NoSessionSucceeds(t *testing.T) {
+	mockPost := &mockPostServiceClient{}
+	pc := &postController{client: mockPost}
+
+	req := httptest.NewRequest("GET", "/posts/123", nil)
+	req.SetPathValue("postId", "123")
+	// No setUserID call: simulates an anonymous visitor.
+
+	w := httptest.NewRecorder()
+	pc.getPost(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected anonymous getPost to succeed, got status %d: %s", w.Code, w.Body.String())
+	}
+}
+
+func TestGetPosts_NoSessionSucceeds(t *testing.T) {
+	mockPost := &mockPostServiceClient{}
+	pc := &postController{client: mockPost}
+
+	req := httptest.NewRequest("GET", "/users/123/posts", nil)
+	req.SetPathValue("userId", "123")
+	// No setUserID call: simulates an anonymous visitor.
+
+	w := httptest.NewRecorder()
+	pc.getPosts(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected anonymous getPosts to succeed, got status %d: %s", w.Code, w.Body.String())
 	}
 }
 

@@ -54,6 +54,15 @@
 Image files are publicly readable at `GET /uploads/{filename}` — no ownership
 check on serve.
 
+`GET /posts/{postId}`, `GET /users/{userId}`, `GET /users/{userId}/posts`, and
+`GET /users?username=` are viewer-optional: `authGuard` (apigateway) validates
+a `session` cookie if present but does not require one, so an anonymous caller
+reaches the handler with no user ID. Ownership-sensitive fields degrade
+correctly for that case — `liked`/`reposted`/`followed` read as `false`, and
+`email` is hidden — the same way they already do for a different (non-owner)
+authenticated caller. All other reads and every mutation remain
+session-required with no anonymous path.
+
 ## Internal Service Authentication
 
 - Header name: `internal-token`
@@ -125,3 +134,7 @@ Set by SvelteKit nonce-based CSP (frontend only):
 2. Returned `user_id` stored in request context as string key `"userId"`.
 3. Forwarded to gRPC backends as `user-id` metadata header.
 4. Never trusted from client-supplied request fields.
+5. On the viewer-optional routes (see Ownership Rules above), validation still
+   runs if a `session` cookie is present — it's just not required. A missing
+   or invalid cookie forwards no `user-id` header rather than rejecting the
+   request.

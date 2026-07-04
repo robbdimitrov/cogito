@@ -5,7 +5,7 @@ use crate::cogito::{
 };
 use crate::crypto::{generate_hash, validate_password};
 use crate::pagination;
-use crate::utils::{get_user_id, is_valid_email};
+use crate::utils::{get_user_id, is_valid_email, optional_user_id};
 use chrono::{DateTime, Utc};
 use sqlx::Error as SqlxError;
 use std::sync::Arc;
@@ -161,7 +161,7 @@ impl<D: UserDb> UserService for Controller<D> {
 
     async fn get_user(&self, request: Request<UserRequest>) -> Result<Response<User>, Status> {
         let request_id = crate::logging::request_id(&request).to_string();
-        let user_id = get_user_id(&request)?;
+        let user_id = optional_user_id(&request);
         let target_user_id = request.into_inner().user_id;
 
         match self.db_client.get_user(target_user_id, user_id).await {
@@ -326,7 +326,7 @@ impl<D: UserDb> UserService for Controller<D> {
         request: Request<GetUserByUsernameRequest>,
     ) -> Result<Response<User>, Status> {
         let request_id = crate::logging::request_id(&request).to_string();
-        let user_id = get_user_id(&request)?;
+        let user_id = optional_user_id(&request);
         let req = request.into_inner();
 
         match self

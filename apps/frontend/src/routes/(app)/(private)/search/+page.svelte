@@ -9,6 +9,7 @@
 
   let q = $derived(data.q);
   let tab = $derived(data.tab);
+  // svelte-ignore state_referenced_locally
   // eslint-disable-next-line svelte/prefer-writable-derived -- searchInput is bound to <input> so must stay writable
   let searchInput = $state(data.q);
 

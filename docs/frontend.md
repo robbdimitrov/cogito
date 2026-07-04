@@ -21,16 +21,21 @@
 | /logout | POST — DELETE /sessions, clear cookie → redirect /login                      |
 | /health | GET — health check                                                           |
 
+### Anonymous-readable (no session required)
+
+| Route        | Load                                            | Actions                                            |
+| ------------ | ------------------------------------------------ | -------------------------------------------------- |
+| /{username}  | Profile + user posts (paginates without a session) | toggleLike, toggleRepost, deletePost, toggleFollow — render as `/login` links for anonymous visitors |
+| /posts/{id}  | Post; replies only loaded/shown when logged in    | createReply, toggleLike, toggleRepost, deletePost — render as `/login` links for anonymous visitors |
+
 ### Protected (session required)
 
 | Route                 | Load                                                                    | Actions                                            |
 | --------------------- | ----------------------------------------------------------------------- | -------------------------------------------------- |
 | /                     | Feed (posts, nextCursor)                                                | createPost, toggleLike, toggleRepost, deletePost   |
-| /{username}           | Profile + user posts                                                    | toggleLike, toggleRepost, deletePost, toggleFollow |
 | /{username}/likes     | User's liked posts                                                      | same post/follow actions                           |
 | /{username}/followers | Followers list                                                          | toggleFollow                                       |
 | /{username}/following | Following list                                                          | toggleFollow                                       |
-| /posts/{id}           | Post + replies                                                          | createReply, toggleLike, toggleRepost, deletePost  |
 | /hashtags/{tag}       | Tag post feed                                                           | toggleLike, toggleRepost, deletePost               |
 | /search               | Search results (q, type params)                                         | —                                                  |
 | /notifications        | Notifications (initial unread rows marked read server-side after fetch) | —                                                  |
@@ -40,7 +45,8 @@
 | /settings/sessions    | Active sessions                                                         | deleteSession                                      |
 
 Route params: `username` (any string), `tab` (matches `likes`, `followers`,
-`following`).
+`following` — the `[tab=tab]` route itself always requires a session, even
+though its parent profile route doesn't).
 
 ## Layout Hierarchy
 
@@ -48,32 +54,41 @@ Route params: `username` (any string), `tab` (matches `likes`, `followers`,
 +layout.svelte            root — reads theme cookie, sets ThemeContext
   (auth)/+layout.svelte   guard: redirect / if already authenticated
     /login, /register
-  (app)/+layout.svelte    guard: redirect /login if unauthenticated; loads currentUser
-    /(main)/+page.svelte  feed
+  (app)/+layout.svelte    no redirect; loads currentUser: User | null
     /[username]/+layout.svelte  loads profile user (404 if not found)
-      /[username]/+page.svelte  posts tab
-      /[username]/[tab]/+page.svelte  likes / followers / following
-    /posts/[id]/+page.svelte
-    /hashtags/[tag]/+page.svelte
-    /search/+page.svelte
-    /notifications/+page.svelte
-    settings/+layout.svelte  settings sidebar nav
-      /settings/profile, /settings/password, /settings/sessions
+      /[username]/+page.svelte  posts tab — anonymous-readable
+      /[username]/[tab]/+page.svelte  likes / followers / following — guards for a session itself
+    /posts/[id]/+page.svelte  anonymous-readable; replies/composer require a session
+    (private)/+layout.server.ts  guard: redirect /login if unauthenticated
+      /(main)/+page.svelte  feed
+      /(main)/notifications/+page.svelte
+      hashtags/[tag]/+page.svelte
+      search/+page.svelte
+      settings/+layout.svelte  settings sidebar nav
+        /settings/profile, /settings/password, /settings/sessions
 ```
 
 ## Auth Guards
 
-| Guard                | File                     | Condition                            | Redirect      |
-| -------------------- | ------------------------ | ------------------------------------ | ------------- |
-| Prevent authed users | (auth)/+layout.server.ts | `resolveCurrentUser` → authenticated | 303 to /      |
-| Require auth         | (app)/+layout.server.ts  | Session absent or invalid            | 303 to /login |
+| Guard                | File                              | Condition                            | Redirect      |
+| -------------------- | ---------------------------------- | ------------------------------------ | ------------- |
+| Prevent authed users | (auth)/+layout.server.ts           | `resolveCurrentUser` → authenticated | 303 to /      |
+| Require auth         | (app)/(private)/+layout.server.ts  | `currentUser` absent (from parent)    | 303 to /login |
+
+`(app)/+layout.server.ts` itself no longer redirects — it resolves
+`currentUser: User | null` for every route under `(app)`, including the
+anonymous-readable `/posts/{id}` and `/{username}` routes, and skips the
+unread-count fetch entirely when there's no session. The `(private)` group
+is where the hard require-auth boundary now lives, one level down.
 
 `resolveCurrentUser(apiClient(event))`:
 
 1. Calls `GET /sessions` → returns `currentSessionId` and `userId`.
 2. Calls `GET /users/{userId}` → returns full user object.
-3. On any failure: returns `{ status: "unavailable" }` — layout redirects to
-   /login.
+3. On any failure: returns `{ status: "unauthenticated" }` or
+   `{ status: "unavailable" }` — no session cookie is the common
+   `"unauthenticated"` case and no longer forces a redirect by itself; only
+   the `(private)` layout guard redirects.
 
 ## Data Fetching Strategy
 

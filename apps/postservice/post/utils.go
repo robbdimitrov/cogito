@@ -61,6 +61,14 @@ func getUserID(ctx context.Context) (int32, error) {
 	return int32(userID), nil
 }
 
+func optionalUserID(ctx context.Context) int32 {
+	id, err := getUserID(ctx)
+	if err != nil {
+		return 0
+	}
+	return id
+}
+
 func validateInternalAuth(ctx context.Context) error {
 	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {

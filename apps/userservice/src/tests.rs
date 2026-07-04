@@ -248,6 +248,30 @@ async fn test_get_user() {
 }
 
 #[tokio::test]
+async fn test_get_user_without_viewer_succeeds() {
+    let db = Arc::new(MockDb::new());
+    let controller = Controller::new(db.clone());
+
+    let _ = db
+        .create_user("Test", "testuser", "test@example.com", "hash")
+        .await;
+
+    // No "user-id" metadata attached: an anonymous profile view must
+    // succeed rather than return Status::unauthenticated.
+    let req = Request::new(UserRequest { user_id: 1 });
+    let res = controller.get_user(req).await;
+
+    assert!(
+        res.is_ok(),
+        "anonymous get_user should succeed, got: {:?}",
+        res.err()
+    );
+    let user = res.unwrap().into_inner();
+    assert_eq!(user.username, "testuser");
+    assert!(!user.followed);
+}
+
+#[tokio::test]
 async fn test_get_users_by_ids() {
     let db = Arc::new(MockDb::new());
     let controller = Controller::new(db.clone());
@@ -501,6 +525,32 @@ async fn test_get_user_by_username() {
     assert!(res.is_ok());
     let user = res.unwrap().into_inner();
     assert_eq!(user.username, "testuser");
+}
+
+#[tokio::test]
+async fn test_get_user_by_username_without_viewer_succeeds() {
+    let db = Arc::new(MockDb::new());
+    let controller = Controller::new(db.clone());
+
+    let _ = db
+        .create_user("Test", "testuser", "test@example.com", "hash")
+        .await;
+
+    // No "user-id" metadata attached: an anonymous profile view must
+    // succeed rather than return Status::unauthenticated.
+    let req = Request::new(GetUserByUsernameRequest {
+        username: "testuser".into(),
+    });
+    let res = controller.get_user_by_username(req).await;
+
+    assert!(
+        res.is_ok(),
+        "anonymous get_user_by_username should succeed, got: {:?}",
+        res.err()
+    );
+    let user = res.unwrap().into_inner();
+    assert_eq!(user.username, "testuser");
+    assert!(!user.followed);
 }
 
 #[tokio::test]

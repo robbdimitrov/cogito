@@ -25,7 +25,8 @@
 
   const toast = getToastContext();
 
-  // eslint-disable-next-line svelte/prefer-writable-derived -- post is mutated for optimistic like/repost updates
+  // svelte-ignore state_referenced_locally
+  // eslint-disable-next-line svelte/prefer-writable-derived -- post is mutated for optimistic like/repost updates, then re-synced by the $effect below
   let post = $state(data.post);
   let showDeleteModal = $state(false);
 
@@ -143,87 +144,110 @@
             <div
               class="mt-4 flex items-center gap-2 border-t border-slate-200 pt-3 sm:mt-6 sm:gap-6 sm:pt-4 dark:border-slate-700"
             >
-              <form
-                method="POST"
-                action="?/toggleRepost"
-                use:enhance={() => {
-                  if (!post) return;
-                  const prev = {
-                    reposted: post.reposted,
-                    reposts: post.reposts,
-                  };
-                  post.reposted = !post.reposted;
-                  post.reposts += post.reposted ? 1 : -1;
-                  isReposting = true;
-                  return async ({ result, update }) => {
+              {#if user}
+                <form
+                  method="POST"
+                  action="?/toggleRepost"
+                  use:enhance={() => {
                     if (!post) return;
-                    isReposting = false;
-                    if (result.type === "failure") {
-                      post.reposted = prev.reposted;
-                      post.reposts = prev.reposts;
-                      toast.error("Action failed");
-                    } else {
-                      await update({ invalidateAll: false });
-                    }
-                  };
-                }}
-              >
-                <input type="hidden" name="postId" value={post.id} />
-                <input
-                  type="hidden"
-                  name="reposted"
-                  value={String(!post.reposted)}
-                />
-                <button
-                  type="submit"
-                  class="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 transition-all duration-150 hover:scale-105 active:scale-95 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4 {post.reposted
-                    ? 'bg-success/10 text-success'
-                    : 'text-slate-500 hover:bg-success/10 hover:text-success dark:text-slate-400'}"
-                  disabled={isReposting}
+                    const prev = {
+                      reposted: post.reposted,
+                      reposts: post.reposts,
+                    };
+                    post.reposted = !post.reposted;
+                    post.reposts += post.reposted ? 1 : -1;
+                    isReposting = true;
+                    return async ({ result, update }) => {
+                      if (!post) return;
+                      isReposting = false;
+                      if (result.type === "failure") {
+                        post.reposted = prev.reposted;
+                        post.reposts = prev.reposts;
+                        toast.error("Action failed");
+                      } else {
+                        await update({ invalidateAll: false });
+                      }
+                    };
+                  }}
+                >
+                  <input type="hidden" name="postId" value={post.id} />
+                  <input
+                    type="hidden"
+                    name="reposted"
+                    value={String(!post.reposted)}
+                  />
+                  <button
+                    type="submit"
+                    class="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 transition-all duration-150 hover:scale-105 active:scale-95 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4 {post.reposted
+                      ? 'bg-success/10 text-success'
+                      : 'text-slate-500 hover:bg-success/10 hover:text-success dark:text-slate-400'}"
+                    disabled={isReposting}
+                  >
+                    <Repeat class="h-4 w-4 sm:h-5 sm:w-5" />
+                    {post.reposts}
+                  </button>
+                </form>
+
+                <form
+                  method="POST"
+                  action="?/toggleLike"
+                  use:enhance={() => {
+                    if (!post) return;
+                    const prev = { liked: post.liked, likes: post.likes };
+                    post.liked = !post.liked;
+                    post.likes += post.liked ? 1 : -1;
+                    isLiking = true;
+                    return async ({ result, update }) => {
+                      if (!post) return;
+                      isLiking = false;
+                      if (result.type === "failure") {
+                        post.liked = prev.liked;
+                        post.likes = prev.likes;
+                        toast.error("Action failed");
+                      } else {
+                        await update({ invalidateAll: false });
+                      }
+                    };
+                  }}
+                >
+                  <input type="hidden" name="postId" value={post.id} />
+                  <input
+                    type="hidden"
+                    name="liked"
+                    value={String(!post.liked)}
+                  />
+                  <button
+                    type="submit"
+                    class="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 transition-all duration-150 hover:scale-105 active:scale-95 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4 {post.liked
+                      ? 'bg-error/10 text-error'
+                      : 'text-slate-500 hover:bg-error/10 hover:text-error dark:text-slate-400'}"
+                    disabled={isLiking}
+                  >
+                    <Heart
+                      class="h-4 w-4 sm:h-5 sm:w-5"
+                      fill={post.liked ? "currentColor" : "none"}
+                    />
+                    {post.likes}
+                  </button>
+                </form>
+              {:else}
+                <a
+                  href={resolve("/login")}
+                  class="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 text-slate-500 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4 dark:text-slate-400"
+                  aria-label="Log in to repost"
                 >
                   <Repeat class="h-4 w-4 sm:h-5 sm:w-5" />
                   {post.reposts}
-                </button>
-              </form>
-
-              <form
-                method="POST"
-                action="?/toggleLike"
-                use:enhance={() => {
-                  if (!post) return;
-                  const prev = { liked: post.liked, likes: post.likes };
-                  post.liked = !post.liked;
-                  post.likes += post.liked ? 1 : -1;
-                  isLiking = true;
-                  return async ({ result, update }) => {
-                    if (!post) return;
-                    isLiking = false;
-                    if (result.type === "failure") {
-                      post.liked = prev.liked;
-                      post.likes = prev.likes;
-                      toast.error("Action failed");
-                    } else {
-                      await update({ invalidateAll: false });
-                    }
-                  };
-                }}
-              >
-                <input type="hidden" name="postId" value={post.id} />
-                <input type="hidden" name="liked" value={String(!post.liked)} />
-                <button
-                  type="submit"
-                  class="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 transition-all duration-150 hover:scale-105 active:scale-95 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4 {post.liked
-                    ? 'bg-error/10 text-error'
-                    : 'text-slate-500 hover:bg-error/10 hover:text-error dark:text-slate-400'}"
-                  disabled={isLiking}
+                </a>
+                <a
+                  href={resolve("/login")}
+                  class="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 text-slate-500 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4 dark:text-slate-400"
+                  aria-label="Log in to like"
                 >
-                  <Heart
-                    class="h-4 w-4 sm:h-5 sm:w-5"
-                    fill={post.liked ? "currentColor" : "none"}
-                  />
+                  <Heart class="h-4 w-4 sm:h-5 sm:w-5" />
                   {post.likes}
-                </button>
-              </form>
+                </a>
+              {/if}
             </div>
           </div>
         </div>
@@ -258,17 +282,25 @@
       </div>
     {/if}
 
-    {#if replies.length > 0}
-      <div
-        class="mt-2 space-y-0 divide-y divide-slate-100 dark:divide-slate-800/60"
-      >
-        {#each replies as reply (reply.id)}
-          <PostItem
-            post={reply}
-            currentUserId={user?.id}
-            onQuote={(p) => (quotingPost = p)}
-          />
-        {/each}
+    {#if user}
+      {#if replies.length > 0}
+        <div
+          class="mt-2 space-y-0 divide-y divide-slate-100 dark:divide-slate-800/60"
+        >
+          {#each replies as reply (reply.id)}
+            <PostItem
+              post={reply}
+              currentUserId={user?.id}
+              onQuote={(p) => (quotingPost = p)}
+            />
+          {/each}
+        </div>
+      {/if}
+    {:else}
+      <div class="mt-3 text-center">
+        <a href={resolve("/login")} class="link link-primary text-sm">
+          Log in to see replies
+        </a>
       </div>
     {/if}
 

@@ -256,12 +256,7 @@ func (pc *postController) getPosts(w http.ResponseWriter, r *http.Request) {
 	client := pc.client
 
 	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
-	ctx, errCtx := appendUserIDHeader(ctx, r)
-	if errCtx != nil {
-		jsonError(w, http.StatusUnauthorized, "Unauthorized")
-		cancel()
-		return
-	}
+	ctx = appendOptionalUserIDHeader(ctx, r)
 	defer cancel()
 
 	userID, err := strconv.ParseInt(r.PathValue("userId"), 10, 32)
@@ -368,12 +363,7 @@ func (pc *postController) getPost(w http.ResponseWriter, r *http.Request) {
 	client := pc.client
 
 	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
-	ctx, errCtx := appendUserIDHeader(ctx, r)
-	if errCtx != nil {
-		jsonError(w, http.StatusUnauthorized, "Unauthorized")
-		cancel()
-		return
-	}
+	ctx = appendOptionalUserIDHeader(ctx, r)
 	defer cancel()
 
 	postID, err := strconv.ParseInt(r.PathValue("postId"), 10, 32)

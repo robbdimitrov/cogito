@@ -111,6 +111,18 @@ func appendUserIDHeader(ctx context.Context, r *http.Request) (context.Context, 
 	return appendInternalAuth(appendRequestIDHeader(metadata.AppendToOutgoingContext(ctx, "user-id", uid), r)), nil
 }
 
+// appendOptionalUserIDHeader attaches user-id metadata when a session is
+// present, but never errors — for handlers whose backend read tolerates an
+// anonymous viewer (e.g. GetPost, GetUser) and degrades booleans like
+// liked/followed to false rather than requiring a session.
+func appendOptionalUserIDHeader(ctx context.Context, r *http.Request) context.Context {
+	ctx = appendInternalAuthForRequest(ctx, r)
+	if uid := getUserID(r); uid != "" {
+		ctx = metadata.AppendToOutgoingContext(ctx, "user-id", uid)
+	}
+	return ctx
+}
+
 func appendInternalAuth(ctx context.Context) context.Context {
 	return metadata.AppendToOutgoingContext(ctx, "internal-token", internalGRPCToken())
 }

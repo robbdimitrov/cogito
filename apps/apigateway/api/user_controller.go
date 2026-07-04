@@ -95,12 +95,7 @@ func (s *userController) getUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
-	ctx, errCtx := appendUserIDHeader(ctx, r)
-	if errCtx != nil {
-		jsonError(w, http.StatusUnauthorized, "Unauthorized")
-		cancel()
-		return
-	}
+	ctx = appendOptionalUserIDHeader(ctx, r)
 	defer cancel()
 
 	req := pb.UserRequest{UserId: int32(userID)}
@@ -123,12 +118,7 @@ func (s *userController) getUserByUsername(w http.ResponseWriter, r *http.Reques
 	client := s.client
 
 	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
-	ctx, errCtx := appendUserIDHeader(ctx, r)
-	if errCtx != nil {
-		jsonError(w, http.StatusUnauthorized, "Unauthorized")
-		cancel()
-		return
-	}
+	ctx = appendOptionalUserIDHeader(ctx, r)
 	defer cancel()
 
 	req := pb.GetUserByUsernameRequest{Username: r.URL.Query().Get("username")}

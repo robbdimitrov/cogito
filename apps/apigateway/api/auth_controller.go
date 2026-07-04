@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"net/http"
 	"os"
@@ -14,6 +15,10 @@ import (
 
 	pb "cogito/apigateway/genproto"
 )
+
+// errNoSessionCookie distinguishes "no session cookie was sent" from a
+// session cookie that was sent but failed to validate.
+var errNoSessionCookie = errors.New("no session cookie")
 
 type authController struct {
 	client         pb.AuthServiceClient
@@ -127,10 +132,52 @@ func (ac *authController) createSession(w http.ResponseWriter, r *http.Request) 
 }
 
 func (ac *authController) validateSession(w http.ResponseWriter, r *http.Request) (*http.Request, error) {
+	newReq, err := ac.resolveSession(r)
+	if err != nil {
+		if errors.Is(err, errNoSessionCookie) {
+			jsonError(w, http.StatusUnauthorized, "Unauthorized")
+			return nil, err
+		}
+		slog.Warn("validating session failed", "request_id", getRequestID(r), "error_kind", status.Code(err).String())
+		if status.Code(err) == codes.Unauthenticated {
+			clearCookie(w)
+		}
+		grpcError(w, err)
+		return nil, err
+	}
+
+	return newReq, nil
+}
+
+// validateSessionOptional attaches the caller's user id when a valid session
+// cookie is present, but never blocks the request — for viewer-optional reads
+// (public post/profile pages) that must serve anonymous and stale-session
+// callers alike rather than requiring a session. A confirmed-invalid cookie
+// is still logged and cleared, same as the required-session path, so this
+// degrades observability and cookie hygiene the same way; only a missing
+// cookie (the common case) skips straight to anonymous silently.
+func (ac *authController) validateSessionOptional(w http.ResponseWriter, r *http.Request) *http.Request {
+	newReq, err := ac.resolveSession(r)
+	if err != nil {
+		if !errors.Is(err, errNoSessionCookie) {
+			slog.Warn("optional session validation failed", "request_id", getRequestID(r), "error_kind", status.Code(err).String())
+			if status.Code(err) == codes.Unauthenticated {
+				clearCookie(w)
+			}
+		}
+		return r
+	}
+
+	return newReq
+}
+
+// resolveSession extracts and validates the session cookie against
+// authservice, returning a request with the resolved user id attached to its
+// context. Returns errNoSessionCookie if no cookie was present.
+func (ac *authController) resolveSession(r *http.Request) (*http.Request, error) {
 	cookie, err := r.Cookie("session")
 	if err != nil {
-		jsonError(w, http.StatusUnauthorized, "Unauthorized")
-		return nil, err
+		return nil, errNoSessionCookie
 	}
 
 	client := ac.client
@@ -143,18 +190,10 @@ func (ac *authController) validateSession(w http.ResponseWriter, r *http.Request
 
 	res, err := client.GetSession(ctx, &req)
 	if err != nil {
-		slog.Warn("validating session failed", "request_id", getRequestID(r), "error_kind", status.Code(err).String())
-		s := status.Convert(err)
-		if s.Code() == codes.Unauthenticated {
-			clearCookie(w)
-		}
-		grpcError(w, err)
 		return nil, err
 	}
 
-	r = setUserID(r, strconv.Itoa(int(res.UserId)))
-
-	return r, nil
+	return setUserID(r, strconv.Itoa(int(res.UserId))), nil
 }
 
 func (ac *authController) deleteSession(w http.ResponseWriter, r *http.Request) {
@@ -280,7 +319,7 @@ func (ac *authController) getSessions(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	jsonResponse(w, 200, map[string]interface{}{
+	jsonResponse(w, 200, map[string]any{
 		"sessions":         sessions,
 		"userId":           validateRes.UserId,
 		"currentSessionId": currentSessionID,

@@ -27,8 +27,19 @@ Applied in this order (outermost to innermost):
 | POST       | /users              |
 | POST       | /sessions           |
 | DELETE     | /sessions           |
+| GET        | /users              |
+| GET        | /users/{userId}     |
+| GET        | /users/{userId}/posts |
+| GET        | /posts/{postId}     |
 
-All other routes require a valid `session` cookie.
+All other routes require a valid `session` cookie. The last four rows above
+are matched by path shape (`isPublicPostRead`/`isPublicUserRead` in
+`auth_guard.go`), not full anonymity like account creation/login — the
+handler still reads a session if one is present and degrades gracefully
+without one (`liked`/`reposted`/`followed` come back `false`, email is
+hidden). `GET /posts/feed` and `GET /users/search` have the same
+single-path-segment shape but are explicitly excluded and stay
+session-required.
 
 ## Rate Limit Policies
 
@@ -87,6 +98,20 @@ failures map to 500 unless a controller handles them explicitly.
 | POST       | /sessions           | Login — sets `session` cookie; returns `{ id: userId }` |
 | DELETE     | /sessions           | Logout — clears `session` cookie                        |
 
+### Anonymous-readable (viewer-optional)
+
+Unlike the routes above, these accept an optional session — an absent one
+isn't a bypass so much as a degrade: `liked`/`reposted`/`followed` come back
+`false` and `email` is hidden, exactly as they would for a viewer who isn't
+the resource owner.
+
+| Method | Path                  | Purpose                                                       |
+| ------ | --------------------- | -------------------------------------------------------------- |
+| GET    | /users?username=      | Get user by username (email hidden unless self)                |
+| GET    | /users/{userId}       | Get user profile (email field included for own profile only)   |
+| GET    | /users/{userId}/posts | Paginated user timeline                                         |
+| GET    | /posts/{postId}       | Get single post                                                 |
+
 ### Protected (session cookie required)
 
 #### Sessions
@@ -98,11 +123,12 @@ failures map to 500 unless a controller handles them explicitly.
 
 #### Users
 
+`GET /users?username=`, `GET /users/{userId}`, and `GET /users/{userId}/posts`
+are anonymous-readable — see above. Everything below still requires a session.
+
 | Method | Path                      | Purpose                                                      |
 | ------ | ------------------------- | ------------------------------------------------------------ |
-| GET    | /users?username=          | Get user by username                                         |
 | GET    | /users/search?q=          | Search users by username/name (cursor + limit)               |
-| GET    | /users/{userId}           | Get user profile (email field included for own profile only) |
 | PUT    | /users/{userId}           | Update profile or credentials (self only; 403 otherwise)     |
 | GET    | /users/{userId}/following | Paginated following list                                     |
 | GET    | /users/{userId}/followers | Paginated followers list                                     |
@@ -119,19 +145,20 @@ failures map to 500 unless a controller handles them explicitly.
 
 #### Posts
 
+`GET /posts/{postId}` is anonymous-readable — see above. Everything below
+still requires a session.
+
 | Method | Path                    | Purpose                                                                                                                                  |
 | ------ | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | POST   | /posts                  | Create post (content, mediaKey?, inReplyToId?, quoteOfId?)                                                                               |
 | GET    | /posts                  | Home feed (alias for /posts/feed)                                                                                                        |
 | GET    | /posts/feed             | Non-reply posts from followed accounts, cursor-paginated; backed by a materialized feed table with pull-merge for high-follower accounts |
-| GET    | /posts/{postId}         | Get single post                                                                                                                          |
 | DELETE | /posts/{postId}         | Delete own post; removes associated image via ImageService                                                                               |
 | POST   | /posts/{postId}/likes   | Like post (idempotent)                                                                                                                   |
 | DELETE | /posts/{postId}/likes   | Unlike post                                                                                                                              |
 | POST   | /posts/{postId}/reposts | Repost (idempotent; resolves to original post)                                                                                           |
 | DELETE | /posts/{postId}/reposts | Remove repost                                                                                                                            |
 | GET    | /posts/{postId}/replies | Paginated replies (oldest-first)                                                                                                         |
-| GET    | /users/{userId}/posts   | Paginated user timeline                                                                                                                  |
 | GET    | /users/{userId}/likes   | Paginated posts liked by user                                                                                                            |
 | GET    | /hashtags/{tag}/posts   | Paginated posts with hashtag                                                                                                             |
 | GET    | /hashtags/search?q=     | Hashtag prefix/trigram search                                                                                                            |
@@ -170,8 +197,9 @@ failures map to 500 unless a controller handles them explicitly.
 }
 ```
 
-`email` omitted for other users. `profilePhotoKey`/`coverPhotoKey` omitted when
-empty.
+`email` is always present as a key but empty-stringed for anyone other than
+the account owner (no `omitempty` on this field — unlike `profilePhotoKey`/
+`coverPhotoKey`, which are omitted when empty).
 
 **Post**
 

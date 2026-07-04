@@ -5,9 +5,6 @@ import { apiClient } from "$lib/server/api/client";
 import { parseIdParam } from "$lib/server/api/http";
 
 export const GET = async (event) => {
-  if (!event.cookies.get("session")) {
-    return json({ error: "Unauthorized" }, { status: 401 });
-  }
   const { params, url } = event;
   const cursor = url.searchParams.get("cursor") ?? "";
   try {

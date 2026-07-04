@@ -25,9 +25,15 @@ type mockUserServiceClient struct {
 
 func (m *mockUserServiceClient) GetUser(ctx context.Context, in *pb.UserRequest, opts ...grpc.CallOption) (*pb.User, error) {
 	return &pb.User{
+		Id:              in.UserId,
+		Email:           "owner@example.com",
 		ProfilePhotoKey: m.oldProfileKey,
 		CoverPhotoKey:   m.oldCoverKey,
 	}, m.errGet
+}
+
+func (m *mockUserServiceClient) GetUserByUsername(ctx context.Context, in *pb.GetUserByUsernameRequest, opts ...grpc.CallOption) (*pb.User, error) {
+	return &pb.User{Id: 1, Username: in.Username, Email: "owner@example.com"}, m.errGet
 }
 
 func (m *mockUserServiceClient) UpdateUser(ctx context.Context, in *pb.UpdateUserRequest, opts ...grpc.CallOption) (*pb.Empty, error) {
@@ -41,6 +47,8 @@ type mockAuthServiceClient struct {
 	deleteSessionCalled int
 	deletedSessionIDs   []string
 	sessions            []*pb.Session
+	sessionUserID       int32
+	errGetSession       error
 }
 
 func (m *mockAuthServiceClient) GetSessions(ctx context.Context, in *pb.UserRequest, opts ...grpc.CallOption) (*pb.Sessions, error) {
@@ -49,7 +57,10 @@ func (m *mockAuthServiceClient) GetSessions(ctx context.Context, in *pb.UserRequ
 }
 
 func (m *mockAuthServiceClient) GetSession(ctx context.Context, in *pb.SessionRequest, opts ...grpc.CallOption) (*pb.Session, error) {
-	return &pb.Session{Handle: "current-session"}, nil
+	if m.errGetSession != nil {
+		return nil, m.errGetSession
+	}
+	return &pb.Session{Handle: "current-session", UserId: m.sessionUserID}, nil
 }
 
 func (m *mockAuthServiceClient) DeleteSession(ctx context.Context, in *pb.SessionRequest, opts ...grpc.CallOption) (*pb.Empty, error) {
@@ -299,6 +310,43 @@ func TestImageFileProxy_ForwardsConditionalRequest(t *testing.T) {
 	}
 	if got := w.Header().Get("Cache-Control"); got != "private, max-age=86400" {
 		t.Errorf("Expected cache header to be forwarded, got %q", got)
+	}
+}
+
+func TestGetUser_NoSessionSucceedsAndHidesEmail(t *testing.T) {
+	mockUser := &mockUserServiceClient{}
+	uc := &userController{client: mockUser}
+
+	req := httptest.NewRequest("GET", "/users/1", nil)
+	req.SetPathValue("userId", "1")
+	// No setUserID call: simulates an anonymous visitor.
+
+	w := httptest.NewRecorder()
+	uc.getUser(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected anonymous getUser to succeed, got status %d: %s", w.Code, w.Body.String())
+	}
+	if strings.Contains(w.Body.String(), "owner@example.com") {
+		t.Errorf("expected email to be hidden from an anonymous viewer, got: %s", w.Body.String())
+	}
+}
+
+func TestGetUserByUsername_NoSessionSucceedsAndHidesEmail(t *testing.T) {
+	mockUser := &mockUserServiceClient{}
+	uc := &userController{client: mockUser}
+
+	req := httptest.NewRequest("GET", "/users?username=alice", nil)
+	// No setUserID call: simulates an anonymous visitor.
+
+	w := httptest.NewRecorder()
+	uc.getUserByUsername(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected anonymous getUserByUsername to succeed, got status %d: %s", w.Code, w.Body.String())
+	}
+	if strings.Contains(w.Body.String(), "owner@example.com") {
+		t.Errorf("expected email to be hidden from an anonymous viewer, got: %s", w.Body.String())
 	}
 }
 

@@ -103,10 +103,7 @@ func (c *controller) GetFeed(ctx context.Context, req *pb.GetFeedRequest) (*pb.P
 }
 
 func (c *controller) GetPosts(ctx context.Context, req *pb.GetPostsRequest) (*pb.Posts, error) {
-	userID, err := getUserID(ctx)
-	if err != nil {
-		return nil, err
-	}
+	userID := optionalUserID(ctx)
 
 	cur, hasCur, err := DecodeCursor(req.Cursor)
 	if err != nil {
@@ -272,10 +269,11 @@ func (c *controller) SearchHashtags(ctx context.Context, req *pb.SearchHashtagsR
 }
 
 func (c *controller) GetPostsByIds(ctx context.Context, req *pb.Ids) (*pb.Posts, error) {
-	userID, err := getUserID(ctx)
-	if err != nil {
-		return nil, err
-	}
+	// Viewer-optional: this is only called internally by the gateway to
+	// resolve embedded quote posts for GetPost/GetPosts, both of which are
+	// viewer-optional themselves — an anonymous caller must not lose quote
+	// embeds just because this batch lookup required a session.
+	userID := optionalUserID(ctx)
 
 	if len(req.Ids) == 0 {
 		return &pb.Posts{}, nil
@@ -303,10 +301,7 @@ func (c *controller) GetPostsByIds(ctx context.Context, req *pb.Ids) (*pb.Posts,
 }
 
 func (c *controller) GetPost(ctx context.Context, req *pb.PostRequest) (*pb.Post, error) {
-	userID, err := getUserID(ctx)
-	if err != nil {
-		return nil, err
-	}
+	userID := optionalUserID(ctx)
 
 	res, err := c.dbClient.getPost(ctx, req.PostId, userID)
 	if err != nil {
