@@ -17,8 +17,8 @@
 
 ## Credential Updates
 
-- Changing password requires `old_password`; wrong value returns
-  `unauthenticated`.
+- Changing password requires `oldPassword` in the request body (`old_password`
+  at the gRPC layer); wrong value returns `unauthenticated`.
 - Password changes and profile-field changes must be submitted separately.
 - On password change, the gateway invalidates all sessions belonging to the user
   except the current one. Current session is identified by the public session
