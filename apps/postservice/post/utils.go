@@ -83,10 +83,7 @@ func validateInternalAuth(ctx context.Context) error {
 
 func constantTimeEqualStr(a, b string) bool {
 	lenEq := subtle.ConstantTimeEq(int32(len(a)), int32(len(b)))
-	maxLen := len(a)
-	if len(b) > maxLen {
-		maxLen = len(b)
-	}
+	maxLen := max(len(a), len(b))
 	aPad := make([]byte, maxLen)
 	bPad := make([]byte, maxLen)
 	copy(aPad, a)
