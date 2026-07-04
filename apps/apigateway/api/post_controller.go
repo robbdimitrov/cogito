@@ -420,14 +420,11 @@ func (pc *postController) deletePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = client.DeletePost(ctx, &req)
-	if err != nil {
-		slog.Warn("deleting post failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
-		grpcError(w, err)
-		return
-	}
-
-	// Gateway Orchestration for Images: delete image if one exists
+	// Delete the image before the post: deleting the post is the point of no
+	// return, so an image-delete failure must abort here rather than leave an
+	// orphaned image with no post left to reference it. This is safe to
+	// retry: image storage deletes are idempotent, so a retry after a prior
+	// image delete succeeded but the post delete failed will no-op here.
 	if postRes.MediaKey != "" && pc.imgClient != nil {
 		_, err := pc.imgClient.DeleteImage(ctx, &pb.DeleteImageRequest{Filename: postRes.MediaKey})
 		if err != nil {
@@ -435,6 +432,13 @@ func (pc *postController) deletePost(w http.ResponseWriter, r *http.Request) {
 			grpcError(w, err)
 			return
 		}
+	}
+
+	_, err = client.DeletePost(ctx, &req)
+	if err != nil {
+		slog.Warn("deleting post failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
+		grpcError(w, err)
+		return
 	}
 
 	w.WriteHeader(204)

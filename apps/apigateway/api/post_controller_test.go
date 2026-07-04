@@ -8,6 +8,8 @@ import (
 	"testing"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	pb "cogito/apigateway/genproto"
 )
@@ -187,6 +189,30 @@ func TestDeletePost_ImageOrchestration(t *testing.T) {
 	}
 	if mockImage.deletedFilename != "test-image.jpg" {
 		t.Errorf("Expected DeleteImage to be called with test-image.jpg, got %s", mockImage.deletedFilename)
+	}
+}
+
+func TestDeletePost_ImageDeleteFailurePreservesPost(t *testing.T) {
+	mockPost := &mockPostServiceClient{mediaKey: "test-image.jpg"}
+	mockImage := &mockImageServiceClient{errDelete: status.Error(codes.Internal, "storage unavailable")}
+
+	pc := &postController{
+		client:    mockPost,
+		imgClient: mockImage,
+	}
+
+	req := httptest.NewRequest("DELETE", "/posts/123", nil)
+	req.SetPathValue("postId", "123")
+	req = setUserID(req, "1")
+
+	w := httptest.NewRecorder()
+	pc.deletePost(w, req)
+
+	if w.Code == http.StatusNoContent {
+		t.Errorf("Expected deletePost to fail when image deletion fails")
+	}
+	if mockPost.deletePostCalled {
+		t.Errorf("Expected DeletePost not to be called when image deletion fails, to avoid orphaning the image")
 	}
 }
 
