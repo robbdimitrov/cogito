@@ -198,6 +198,32 @@ async fn test_consume_upload_rejects_wrong_owner() {
 }
 
 #[tokio::test]
+async fn test_consume_upload_copy_failure_preserves_claim() {
+    let db = Arc::new(MockDb::new());
+    let store = MockBlobStore::new();
+    // No staging file seeded, so the blobstore copy fails because the
+    // source key is missing.
+
+    let service = make_service(db.clone(), store.clone());
+
+    let req = Request::new(ConsumeUploadRequest {
+        filename: "test.jpg".to_string(),
+        user_id: 1,
+    });
+
+    let res = service.consume_upload(req).await;
+    assert!(res.is_err());
+    assert_eq!(res.unwrap_err().code(), tonic::Code::Internal);
+
+    // The DB claim must survive a failed copy so a retry can still find and
+    // finish the promotion. Deleting the claim before the copy succeeds
+    // would orphan the staged upload with nothing left to reference it.
+    let uploads = db.uploads.lock().await;
+    assert_eq!(uploads.len(), 1);
+    assert_eq!(uploads[0], ("test.jpg".to_string(), 1));
+}
+
+#[tokio::test]
 async fn test_verify_upload_rejects_invalid_filename() {
     let db = Arc::new(MockDb::new());
     let service = make_service(db, MockBlobStore::new());

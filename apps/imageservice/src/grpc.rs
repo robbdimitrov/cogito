@@ -62,15 +62,19 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
         let req = request.into_inner();
         validate_filename(&req.filename)?;
 
-        let claimed = self
+        // Confirm ownership without destroying the claim yet: promoting the
+        // blob is not atomic, so the DB row must stay intact until the copy
+        // is known to have succeeded. Deleting it first would orphan the
+        // staged bytes forever if the copy failed afterward.
+        let owned = self
             .db
-            .consume_upload(&req.filename, req.user_id)
+            .verify_upload(&req.filename, req.user_id)
             .await
             .map_err(|e| {
-                tracing::warn!(request_id = %request_id, method = "/cogito.ImageService/ConsumeUpload", error = %e, "claiming upload failed");
+                tracing::warn!(request_id = %request_id, method = "/cogito.ImageService/ConsumeUpload", error = %e, "checking upload ownership failed");
                 Status::internal("Internal server error.")
             })?;
-        if !claimed {
+        if !owned {
             return Err(Status::not_found("Upload not found or not owned by user"));
         }
 
@@ -82,6 +86,17 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
             .await
             .map_err(|e| {
                 tracing::warn!(request_id = %request_id, method = "/cogito.ImageService/ConsumeUpload", error = %e, "promoting staged upload failed");
+                Status::internal("Internal server error.")
+            })?;
+
+        // The blob is promoted; finalize the claim. If a concurrent caller
+        // already finalized it, the copy above was a harmless duplicate of
+        // an idempotent operation, so no rows affected is not an error.
+        self.db
+            .consume_upload(&req.filename, req.user_id)
+            .await
+            .map_err(|e| {
+                tracing::warn!(request_id = %request_id, method = "/cogito.ImageService/ConsumeUpload", error = %e, "finalizing upload claim failed");
                 Status::internal("Internal server error.")
             })?;
 
