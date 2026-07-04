@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"io"
@@ -154,16 +155,25 @@ func (r *router) proxyImageUpload(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Reject an oversized upload before ever proxying it. A client that
-	// honestly reports Content-Length (true of every browser and standard
-	// HTTP client) gets a clean, immediate JSON 413 here instead of racing
-	// bodyLimitMiddleware's MaxBytesReader against the reverse proxy's
-	// request-body write, which can drop the connection with no response at
-	// all rather than surfacing to proxy.ErrorHandler below.
-	if req.ContentLength > maxRequestBodyBytes {
+	// Read and bound the body ourselves before ever proxying it, rather than
+	// trusting a client-supplied Content-Length: a chunked-encoded request
+	// (or any client that omits Content-Length) reports ContentLength == -1,
+	// which would sail past a header-only check. Uploads are capped at 2 MB,
+	// small enough to buffer here, so this gives every client shape a clean,
+	// immediate JSON 413 instead of racing bodyLimitMiddleware's
+	// MaxBytesReader against the reverse proxy's request-body write, which
+	// can drop the connection with no response at all.
+	body, err := io.ReadAll(io.LimitReader(req.Body, maxRequestBodyBytes+1))
+	if err != nil {
+		jsonError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+	if len(body) > maxRequestBodyBytes {
 		jsonError(w, http.StatusRequestEntityTooLarge, "Payload too large")
 		return
 	}
+	req.Body = io.NopCloser(bytes.NewReader(body))
+	req.ContentLength = int64(len(body))
 
 	r.proxyImageRequest("/uploads", func(proxyReq *http.Request) {
 		proxyReq.Header.Set("x-user-id", userID)

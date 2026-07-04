@@ -140,7 +140,7 @@ func TestImageUploadProxy_ForwardsFrontendRouteWithUserHeader(t *testing.T) {
 	}
 }
 
-func TestImageUploadProxy_RejectsOversizedContentLengthBeforeProxying(t *testing.T) {
+func TestImageUploadProxy_RejectsOversizedUploadBeforeProxying(t *testing.T) {
 	// Regression test: an oversized upload must get a clean JSON 413 without
 	// ever reaching the reverse proxy, since a body-write error mid-proxy can
 	// drop the connection with no response at all instead of a clean error.
@@ -155,8 +155,8 @@ func TestImageUploadProxy_RejectsOversizedContentLengthBeforeProxying(t *testing
 	imageAddr := strings.TrimPrefix(imageServer.URL, "http://")
 	router := &router{imageAddr: imageAddr}
 
-	req := httptest.NewRequest("POST", "/uploads", bytes.NewBufferString("oversized-body"))
-	req.ContentLength = maxRequestBodyBytes + 1
+	oversized := bytes.Repeat([]byte("x"), maxRequestBodyBytes+1)
+	req := httptest.NewRequest("POST", "/uploads", bytes.NewReader(oversized))
 	req = setUserID(req, "42")
 	w := httptest.NewRecorder()
 
@@ -174,6 +174,38 @@ func TestImageUploadProxy_RejectsOversizedContentLengthBeforeProxying(t *testing
 	}
 	if body["message"] == "" {
 		t.Error("expected a non-empty JSON error message")
+	}
+}
+
+func TestImageUploadProxy_RejectsOversizedUploadWithUnknownContentLength(t *testing.T) {
+	// Regression test: a chunked-encoded (or otherwise Content-Length-less)
+	// request reports req.ContentLength == -1, which a header-only size check
+	// would never catch. The body must still be bounded by actually reading
+	// it, not by trusting a client-supplied length.
+	proxyReached := false
+	imageServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		proxyReached = true
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer imageServer.Close()
+
+	t.Setenv("INTERNAL_GRPC_TOKEN", "test-internal-token")
+	imageAddr := strings.TrimPrefix(imageServer.URL, "http://")
+	router := &router{imageAddr: imageAddr}
+
+	oversized := bytes.Repeat([]byte("x"), maxRequestBodyBytes+1)
+	req := httptest.NewRequest("POST", "/uploads", bytes.NewReader(oversized))
+	req.ContentLength = -1 // simulates chunked transfer-encoding
+	req = setUserID(req, "42")
+	w := httptest.NewRecorder()
+
+	router.proxyImageUpload(w, req)
+
+	if w.Code != http.StatusRequestEntityTooLarge {
+		t.Fatalf("expected status 413, got %d", w.Code)
+	}
+	if proxyReached {
+		t.Error("expected the oversized upload to be rejected before reaching the image service")
 	}
 }
 
