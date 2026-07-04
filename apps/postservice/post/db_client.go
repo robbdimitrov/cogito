@@ -324,14 +324,16 @@ func (c *DBClient) getPosts(ctx context.Context, userID int32, cursor Cursor, ha
 }
 
 func (c *DBClient) getLikedPosts(ctx context.Context, userID int32, cursor Cursor, hasCursor bool, limit int32, currentUserID int32) (iter.Seq2[likedPostRow, error], error) {
+	// posts.id must stay qualified — see getPost for why a bare `id` here
+	// would silently bind to the reposts/replies subqueries' own alias.
 	query := `SELECT likes.created AS cursor_ts,
 		id, posts.user_id, content,
 		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
 		EXISTS (SELECT 1 FROM likes WHERE post_id = id AND likes.user_id = $1) AS liked,
-		(SELECT count(*) FROM posts AS rp WHERE rp.repost_of_id = id) AS reposts,
-		EXISTS (SELECT 1 FROM posts AS rp WHERE rp.repost_of_id = id AND rp.user_id = $1) AS reposted,
+		(SELECT count(*) FROM posts AS rp WHERE rp.repost_of_id = posts.id) AS reposts,
+		EXISTS (SELECT 1 FROM posts AS rp WHERE rp.repost_of_id = posts.id AND rp.user_id = $1) AS reposted,
 		posts.created, posts.repost_of_id, posts.media_key,
-		(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = id) AS replies,
+		(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = posts.id) AS replies,
 		COALESCE(in_reply_to_id, 0) AS in_reply_to_id,
 		COALESCE(quote_of_id, 0) AS quote_of_id
 		FROM posts
@@ -389,13 +391,16 @@ func (c *DBClient) getHashtagPosts(ctx context.Context, tag string, cursor Curso
 }
 
 func (c *DBClient) getPost(ctx context.Context, id int32, currentUserID int32) (*pb.Post, error) {
+	// posts.id must stay qualified in the reposts/reposted/replies subqueries:
+	// their own FROM posts AS rp/r shadows a bare `id`, binding it to the
+	// inner alias instead of the outer row and silently zeroing every count.
 	query := `SELECT id, user_id, content,
 		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
 		EXISTS (SELECT 1 FROM likes WHERE post_id = id AND likes.user_id = $1) AS liked,
-		(SELECT count(*) FROM posts AS rp WHERE rp.repost_of_id = id) AS reposts,
-		EXISTS (SELECT 1 FROM posts AS rp WHERE rp.repost_of_id = id AND rp.user_id = $1) AS reposted,
+		(SELECT count(*) FROM posts AS rp WHERE rp.repost_of_id = posts.id) AS reposts,
+		EXISTS (SELECT 1 FROM posts AS rp WHERE rp.repost_of_id = posts.id AND rp.user_id = $1) AS reposted,
 		created, repost_of_id, media_key,
-		(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = id) AS replies,
+		(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = posts.id) AS replies,
 		COALESCE(in_reply_to_id, 0) AS in_reply_to_id,
 		COALESCE(quote_of_id, 0) AS quote_of_id
 		FROM posts WHERE id = $2`
@@ -409,13 +414,15 @@ func (c *DBClient) getPost(ctx context.Context, id int32, currentUserID int32) (
 }
 
 func (c *DBClient) getPostsByIds(ctx context.Context, ids []int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
+	// posts.id must stay qualified — see getPost for why a bare `id` here
+	// would silently bind to the reposts/replies subqueries' own alias.
 	query := `SELECT id, user_id, content,
 		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
 		EXISTS (SELECT 1 FROM likes WHERE post_id = id AND likes.user_id = $1) AS liked,
-		(SELECT count(*) FROM posts AS rp WHERE rp.repost_of_id = id) AS reposts,
-		EXISTS (SELECT 1 FROM posts AS rp WHERE rp.repost_of_id = id AND rp.user_id = $1) AS reposted,
+		(SELECT count(*) FROM posts AS rp WHERE rp.repost_of_id = posts.id) AS reposts,
+		EXISTS (SELECT 1 FROM posts AS rp WHERE rp.repost_of_id = posts.id AND rp.user_id = $1) AS reposted,
 		created, repost_of_id, media_key,
-		(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = id) AS replies,
+		(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = posts.id) AS replies,
 		COALESCE(in_reply_to_id, 0) AS in_reply_to_id,
 		COALESCE(quote_of_id, 0) AS quote_of_id
 		FROM posts WHERE id = ANY($2)`
@@ -696,13 +703,15 @@ func (c *DBClient) removeRepost(ctx context.Context, postID int32, userID int32)
 }
 
 func (c *DBClient) getReplies(ctx context.Context, postID int32, cursor Cursor, hasCursor bool, limit int32, currentUserID int32) (iter.Seq2[postCursorRow, error], error) {
+	// posts.id must stay qualified — see getPost for why a bare `id` here
+	// would silently bind to the reposts/replies subqueries' own alias.
 	query := `SELECT id, user_id, content,
 		(SELECT count(*) FROM likes WHERE post_id = id) AS likes,
 		EXISTS (SELECT 1 FROM likes WHERE post_id = id AND likes.user_id = $1) AS liked,
-		(SELECT count(*) FROM posts AS rp WHERE rp.repost_of_id = id) AS reposts,
-		EXISTS (SELECT 1 FROM posts AS rp WHERE rp.repost_of_id = id AND rp.user_id = $1) AS reposted,
+		(SELECT count(*) FROM posts AS rp WHERE rp.repost_of_id = posts.id) AS reposts,
+		EXISTS (SELECT 1 FROM posts AS rp WHERE rp.repost_of_id = posts.id AND rp.user_id = $1) AS reposted,
 		created, repost_of_id, media_key,
-		(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = id) AS replies,
+		(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = posts.id) AS replies,
 		COALESCE(in_reply_to_id, 0) AS in_reply_to_id,
 		COALESCE(quote_of_id, 0) AS quote_of_id
 		FROM posts
