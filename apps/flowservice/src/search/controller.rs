@@ -158,6 +158,7 @@ impl SearchService for SearchController {
 
         let (items, next_cursor) = paginate(hits, limit, offset, |h| Post {
             id: h.id,
+            user_id: h.author_id,
             content: h.content,
             created: h.created,
             ..Default::default()
