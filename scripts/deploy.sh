@@ -97,36 +97,16 @@ ensure_secret_key() {
     -p "{\"stringData\":{\"${key}\":\"$(random_secret)\"}}"
 }
 
-database_url_with_sslmode() {
-  local url="$1"
-  if [[ "${url}" == *"sslmode=require"* ]]; then
-    printf '%s\n' "${url}"
-  elif [[ "${url}" =~ ^(.*[\?\&]sslmode=)[^\&]*(.*)$ ]]; then
-    printf '%srequire%s\n' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}"
-  elif [[ "${url}" == *"?"* ]]; then
-    printf '%s&sslmode=require\n' "${url}"
-  else
-    printf '%s?sslmode=require\n' "${url}"
-  fi
-}
-
 ensure_database_url() {
-  local app_password url required_url
+  local app_password url
   app_password="$(secret_value cogito-app-password)"
   [[ -n "${app_password}" ]] || die "cogito-app-password is required before database-url can be generated"
 
   url="$(secret_value database-url)"
   if [[ -z "${url}" ]]; then
     log "adding missing generated secret key: database-url"
-    required_url="postgresql://cogito_app:${app_password}@database:5432/cogito?sslmode=require"
-  else
-    required_url="$(database_url_with_sslmode "${url}")"
-  fi
-
-  if [[ "${url}" != "${required_url}" ]]; then
-    log "updating database-url to require PostgreSQL TLS"
     kubectl -n "${NS}" patch secret cogito-db-secret --type merge \
-      -p "{\"stringData\":{\"database-url\":\"${required_url}\"}}"
+      -p "{\"stringData\":{\"database-url\":\"postgresql://cogito_app:${app_password}@database:5432/cogito?sslmode=disable\"}}"
   fi
 }
 
@@ -159,7 +139,7 @@ ensure_secret() {
   kubectl -n "${NS}" create secret generic cogito-db-secret \
     --from-literal=database-password="${postgres_password}" \
     --from-literal=cogito-app-password="${app_password}" \
-    --from-literal=database-url="postgresql://cogito_app:${app_password}@database:5432/cogito?sslmode=require" \
+    --from-literal=database-url="postgresql://cogito_app:${app_password}@database:5432/cogito?sslmode=disable" \
     --from-literal=internal-grpc-token="$(random_secret)" \
     --from-literal=session-hmac-secret="$(random_secret)" \
     --from-literal=search-master-key="$(random_secret)" \
@@ -167,29 +147,6 @@ ensure_secret() {
     --from-literal=s3-secret-key="$(random_secret)" \
     --from-literal=s3-provisioning-access-key="$(random_secret)" \
     --from-literal=s3-provisioning-secret-key="$(random_secret)"
-}
-
-ensure_database_tls_secret() {
-  local secret_name="database-tls"
-  local tmpdir
-  if kubectl -n "${NS}" get secret "${secret_name}" >/dev/null 2>&1; then
-    return
-  fi
-  command -v openssl >/dev/null || die "missing required tool for database TLS secret: openssl"
-
-  log "creating self-signed TLS secret for database"
-  tmpdir="$(mktemp -d)"
-  trap 'rm -rf "${tmpdir}"' RETURN
-  openssl req -x509 -newkey rsa:2048 -sha256 -days 365 -nodes \
-    -keyout "${tmpdir}/tls.key" \
-    -out "${tmpdir}/tls.crt" \
-    -subj "/CN=database" \
-    -addext "subjectAltName=DNS:database,DNS:database.${NS}.svc.cluster.local" >/dev/null 2>&1
-  kubectl -n "${NS}" create secret tls "${secret_name}" \
-    --cert="${tmpdir}/tls.crt" \
-    --key="${tmpdir}/tls.key" >/dev/null
-  trap - RETURN
-  rm -rf "${tmpdir}"
 }
 
 port_pids() {
@@ -243,7 +200,6 @@ apply_manifests() {
   log "creating namespace and applying manifests"
   ensure_namespace
   ensure_secret
-  ensure_database_tls_secret
   kubectl apply -f "${K8S_DIR}" -n "${NS}"
   kubectl -n "${NS}" set image deployment/apigateway migration="${REGISTRY}/database:${GIT_SHA}" apigateway="${REGISTRY}/apigateway:${GIT_SHA}" >/dev/null
   kubectl -n "${NS}" set image deployment/authservice authservice="${REGISTRY}/authservice:${GIT_SHA}" >/dev/null
