@@ -7,6 +7,7 @@
   import FormattedContent from "$lib/domains/posts/components/FormattedContent.svelte";
   import ConfirmModal from "$lib/shared/components/ui/ConfirmModal.svelte";
   import RepostMenu from "$lib/domains/posts/components/RepostMenu.svelte";
+  import LoginGateButton from "$lib/domains/posts/components/LoginGateButton.svelte";
   import QuoteEmbed from "$lib/domains/posts/components/QuoteEmbed.svelte";
   import { imageUrl } from "$lib/shared/imageUrl";
   import type { Post, User } from "$lib/shared/types";
@@ -221,16 +222,13 @@
                 onQuote={() => onQuote?.(displayPost)}
               />
             {:else}
-              <a
-                href={resolve("/login")}
-                class="btn btn-ghost btn-sm gap-2 rounded-full px-4 text-slate-500 dark:text-slate-400"
-                aria-label="Log in to repost"
-              >
-                <Repeat class="h-4 w-4" />
-                <span class="text-xs sm:text-sm font-semibold tracking-wide"
-                  >{reposts}</span
-                >
-              </a>
+              <LoginGateButton
+                icon={Repeat}
+                ariaLabel="Log in to repost"
+                buttonClass="btn btn-ghost btn-sm gap-2 rounded-full px-4 text-slate-500 dark:text-slate-400"
+                count={reposts}
+                countClass="text-xs sm:text-sm font-semibold tracking-wide"
+              />
             {/if}
 
             {#if currentUserId}
@@ -281,16 +279,13 @@
                 </button>
               </form>
             {:else}
-              <a
-                href={resolve("/login")}
-                class="btn btn-ghost btn-sm gap-2 rounded-full px-4 text-slate-500 dark:text-slate-400"
-                aria-label="Log in to like"
-              >
-                <Heart class="h-4 w-4" />
-                <span class="text-xs sm:text-sm font-semibold tracking-wide"
-                  >{likes}</span
-                >
-              </a>
+              <LoginGateButton
+                icon={Heart}
+                ariaLabel="Log in to like"
+                buttonClass="btn btn-ghost btn-sm gap-2 rounded-full px-4 text-slate-500 dark:text-slate-400"
+                count={likes}
+                countClass="text-xs sm:text-sm font-semibold tracking-wide"
+              />
             {/if}
           </div>
         </div>

@@ -13,6 +13,7 @@
   import FormattedContent from "$lib/domains/posts/components/FormattedContent.svelte";
   import ReplyComposer from "$lib/domains/posts/components/ReplyComposer.svelte";
   import PostItem from "$lib/domains/posts/components/PostItem.svelte";
+  import LoginGateButton from "$lib/domains/posts/components/LoginGateButton.svelte";
   import QuoteComposeModal from "$lib/domains/posts/components/QuoteComposeModal.svelte";
   import { imageUrl } from "$lib/shared/imageUrl";
   import { enhance } from "$app/forms";
@@ -231,22 +232,20 @@
                   </button>
                 </form>
               {:else}
-                <a
-                  href={resolve("/login")}
-                  class="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 text-slate-500 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4 dark:text-slate-400"
-                  aria-label="Log in to repost"
-                >
-                  <Repeat class="h-4 w-4 sm:h-5 sm:w-5" />
-                  {post.reposts}
-                </a>
-                <a
-                  href={resolve("/login")}
-                  class="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 text-slate-500 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4 dark:text-slate-400"
-                  aria-label="Log in to like"
-                >
-                  <Heart class="h-4 w-4 sm:h-5 sm:w-5" />
-                  {post.likes}
-                </a>
+                <LoginGateButton
+                  icon={Repeat}
+                  iconClass="h-4 w-4 sm:h-5 sm:w-5"
+                  ariaLabel="Log in to repost"
+                  buttonClass="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 text-slate-500 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4 dark:text-slate-400"
+                  count={post.reposts}
+                />
+                <LoginGateButton
+                  icon={Heart}
+                  iconClass="h-4 w-4 sm:h-5 sm:w-5"
+                  ariaLabel="Log in to like"
+                  buttonClass="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 text-slate-500 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4 dark:text-slate-400"
+                  count={post.likes}
+                />
               {/if}
             </div>
           </div>
