@@ -24,7 +24,7 @@ pub(crate) struct UserHit {
 pub(crate) struct PostHit {
     pub id: i32,
     pub content: String,
-    pub created_at: String,
+    pub created: String,
 }
 
 #[derive(Deserialize)]
@@ -145,7 +145,7 @@ async fn ensure_indexes(master: &Client) -> Result<(), Box<dyn std::error::Error
             uid: "posts",
             searchable: &["content", "username"],
             filterable: &["hashtags"],
-            sortable: &["created_at"],
+            sortable: &["created"],
         },
         IndexDef {
             uid: "hashtags",
