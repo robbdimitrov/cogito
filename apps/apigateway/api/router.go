@@ -162,9 +162,16 @@ func (r *router) proxyImageUpload(w http.ResponseWriter, req *http.Request) {
 	// small enough to buffer here, so this gives every client shape a clean,
 	// immediate JSON 413 instead of racing bodyLimitMiddleware's
 	// MaxBytesReader against the reverse proxy's request-body write, which
-	// can drop the connection with no response at all.
+	// can drop the connection with no response at all. req.Body may already
+	// be that same MaxBytesReader (bodyLimitMiddleware wraps every request
+	// upstream of this handler), so a too-large body can surface here as a
+	// read error rather than merely a long slice — map that case to 413 too.
 	body, err := io.ReadAll(io.LimitReader(req.Body, maxRequestBodyBytes+1))
 	if err != nil {
+		if _, ok := errors.AsType[*http.MaxBytesError](err); ok {
+			jsonError(w, http.StatusRequestEntityTooLarge, "Payload too large")
+			return
+		}
 		jsonError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
