@@ -168,17 +168,26 @@ func (r *router) proxyImageUpload(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Read and bound the body ourselves before ever proxying it, rather than
-	// trusting a client-supplied Content-Length: a chunked-encoded request
-	// (or any client that omits Content-Length) reports ContentLength == -1,
-	// which would sail past a header-only check. Uploads are capped at 2 MB,
-	// small enough to buffer here, so this gives every client shape a clean,
-	// immediate JSON 413 instead of racing bodyLimitMiddleware's
-	// MaxBytesReader against the reverse proxy's request-body write, which
-	// can drop the connection with no response at all. req.Body may already
-	// be that same MaxBytesReader (bodyLimitMiddleware wraps every request
-	// upstream of this handler), so a too-large body can surface here as a
-	// read error rather than merely a long slice — map that case to 413 too.
+	// A client that honestly reports an oversized Content-Length gets a
+	// clean, immediate, zero-I/O 413 here — the common case for browsers and
+	// standard HTTP clients.
+	if req.ContentLength > maxRequestBodyBytes {
+		jsonError(w, http.StatusRequestEntityTooLarge, "Payload too large")
+		return
+	}
+
+	// Fall back to reading and bounding the body ourselves before ever
+	// proxying it, rather than trusting Content-Length outright: a
+	// chunked-encoded request (or any client that omits Content-Length)
+	// reports ContentLength == -1, which sails past the check above.
+	// Uploads are capped at 2 MB, small enough to buffer here, so this gives
+	// every client shape a clean, immediate JSON 413 instead of racing
+	// bodyLimitMiddleware's MaxBytesReader against the reverse proxy's
+	// request-body write, which can drop the connection with no response at
+	// all. req.Body may already be that same MaxBytesReader
+	// (bodyLimitMiddleware wraps every request upstream of this handler), so
+	// a too-large body can surface here as a read error rather than merely a
+	// long slice — map that case to 413 too.
 	body, err := io.ReadAll(io.LimitReader(req.Body, maxRequestBodyBytes+1))
 	if err != nil {
 		if _, ok := errors.AsType[*http.MaxBytesError](err); ok {

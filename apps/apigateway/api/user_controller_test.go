@@ -177,6 +177,50 @@ func TestImageUploadProxy_RejectsOversizedUploadBeforeProxying(t *testing.T) {
 	}
 }
 
+// panicOnReadBody fails the test if its Read method is ever called, to prove
+// a code path rejects a request without consuming the body.
+type panicOnReadBody struct {
+	t *testing.T
+}
+
+func (p panicOnReadBody) Read([]byte) (int, error) {
+	p.t.Fatal("expected the body to never be read")
+	return 0, nil
+}
+
+func (p panicOnReadBody) Close() error { return nil }
+
+func TestImageUploadProxy_RejectsOversizedContentLengthWithoutReadingBody(t *testing.T) {
+	// Regression test: an honestly oversized Content-Length must be rejected
+	// by a header-only check before any body I/O, not by reading up to
+	// maxRequestBodyBytes+1 bytes first.
+	proxyReached := false
+	imageServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		proxyReached = true
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer imageServer.Close()
+
+	t.Setenv("INTERNAL_GRPC_TOKEN", "test-internal-token")
+	imageAddr := strings.TrimPrefix(imageServer.URL, "http://")
+	router := &router{imageAddr: imageAddr}
+
+	req := httptest.NewRequest("POST", "/uploads", http.NoBody)
+	req.Body = panicOnReadBody{t: t}
+	req.ContentLength = maxRequestBodyBytes + 1
+	req = setUserID(req, "42")
+	w := httptest.NewRecorder()
+
+	router.proxyImageUpload(w, req)
+
+	if w.Code != http.StatusRequestEntityTooLarge {
+		t.Fatalf("expected status 413, got %d", w.Code)
+	}
+	if proxyReached {
+		t.Error("expected the oversized upload to be rejected before reaching the image service")
+	}
+}
+
 func TestImageUploadProxy_RejectsOversizedUploadWithUnknownContentLength(t *testing.T) {
 	// Regression test: a chunked-encoded (or otherwise Content-Length-less)
 	// request reports req.ContentLength == -1, which a header-only size check

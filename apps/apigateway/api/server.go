@@ -9,10 +9,13 @@ import (
 )
 
 // maxRequestBodyBytes is the gateway-wide hard body-size ceiling, enforced by
-// bodyLimitMiddleware for every request and checked early against
-// Content-Length for proxied uploads (see proxyImageUpload) to avoid Go's
-// reverse-proxy body-write-error edge case, which can drop the connection
-// without a response instead of returning a clean error.
+// bodyLimitMiddleware for every request. Proxied uploads (see
+// proxyImageUpload) additionally get a fast, zero-I/O rejection when
+// Content-Length honestly reports an oversized body, falling back to reading
+// and bounding the body directly when Content-Length is absent or -1 (e.g.
+// chunked transfer-encoding) — this avoids Go's reverse-proxy
+// body-write-error edge case, which can drop the connection without a
+// response instead of returning a clean error.
 const maxRequestBodyBytes = 2 * 1024 * 1024
 
 // CreateServer builds the gateway HTTP handler and middleware chain.
