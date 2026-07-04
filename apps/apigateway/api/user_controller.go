@@ -130,8 +130,10 @@ func (s *userController) getUserByUsername(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	currentUserID, _ := strconv.ParseInt(getUserID(r), 10, 32)
-	if res.Id == int32(currentUserID) {
+	// Compare as strings, like getUser does: an anonymous caller's empty
+	// getUserID(r) must never match a real user id, so this can't rely on
+	// parsing "" to a sentinel int and hoping no user ever has that id.
+	if getUserID(r) != "" && getUserID(r) == strconv.Itoa(int(res.Id)) {
 		jsonResponse(w, 200, mapCurrentUser(res))
 	} else {
 		jsonResponse(w, 200, mapUser(res))

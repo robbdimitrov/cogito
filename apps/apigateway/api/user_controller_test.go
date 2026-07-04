@@ -350,6 +350,34 @@ func TestGetUserByUsername_NoSessionSucceedsAndHidesEmail(t *testing.T) {
 	}
 }
 
+func TestGetUserByUsername_AnonymousNeverMatchesUserIdZero(t *testing.T) {
+	// Regression test: currentUserID used to come from strconv.ParseInt on a
+	// possibly-empty getUserID(r) with the error discarded, so an anonymous
+	// caller's "" collapsed to a currentUserID of 0. If the looked-up user's
+	// id were ever 0 (should not happen with a `serial` PK, but must not be
+	// relied on), that would match and leak the owner's email.
+	mockUser := &mockUserServiceClientWithZeroID{}
+	uc := &userController{client: mockUser}
+
+	req := httptest.NewRequest("GET", "/users?username=alice", nil)
+	// No setUserID call: simulates an anonymous visitor.
+
+	w := httptest.NewRecorder()
+	uc.getUserByUsername(w, req)
+
+	if strings.Contains(w.Body.String(), "owner@example.com") {
+		t.Errorf("anonymous caller must never see email even if the user's id is 0, got: %s", w.Body.String())
+	}
+}
+
+type mockUserServiceClientWithZeroID struct {
+	pb.UserServiceClient
+}
+
+func (m *mockUserServiceClientWithZeroID) GetUserByUsername(ctx context.Context, in *pb.GetUserByUsernameRequest, opts ...grpc.CallOption) (*pb.User, error) {
+	return &pb.User{Id: 0, Username: in.Username, Email: "owner@example.com"}, nil
+}
+
 func TestUpdateUser_ImageAndSessionOrchestration(t *testing.T) {
 	mockUser := &mockUserServiceClient{
 		oldProfileKey: "old-profile.jpg",
