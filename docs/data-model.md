@@ -175,6 +175,7 @@ deletes cascade.
 | notifications | `notifications_user_id_created_idx`                             | Notification pagination          |
 | notifications | `notifications_type_entity_idx`                                 | Event-based notification cleanup |
 | feed          | `feed_user_id_created_idx`                                      | Home feed pagination             |
+| feed          | `feed_created_idx`                                              | 30-day retention cleanup         |
 
 ## Meilisearch Indexes
 
