@@ -145,6 +145,32 @@ func TestAuthGuard_PublicPostReadToleratesInvalidSession(t *testing.T) {
 	}
 }
 
+func TestAuthGuard_PublicPostReadSurfacesTransientAuthFailure(t *testing.T) {
+	// Regression test: a valid session must not be silently downgraded to
+	// anonymous when authservice itself is unavailable — only a missing or
+	// confirmed-invalid cookie should fall back to anonymous.
+	ac := &authController{client: &mockAuthServiceClient{errGetSession: status.Error(codes.Unavailable, "authservice down")}}
+
+	called := false
+	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		called = true
+		w.WriteHeader(http.StatusNoContent)
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/posts/123", nil)
+	req.AddCookie(&http.Cookie{Name: "session", Value: "valid-session"})
+	w := httptest.NewRecorder()
+
+	authGuard(ac)(next).ServeHTTP(w, req)
+
+	if called {
+		t.Fatal("expected a transient auth failure to not silently proceed as anonymous")
+	}
+	if w.Code != http.StatusServiceUnavailable {
+		t.Fatalf("expected status 503, got %d", w.Code)
+	}
+}
+
 func TestAuthGuard_DoesNotBypassGatedPostAndUserRoutes(t *testing.T) {
 	// Includes the two collision-regression cases: GET /posts/feed and
 	// GET /users/search have the same single-segment shape as the public

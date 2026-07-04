@@ -150,25 +150,28 @@ func (ac *authController) validateSession(w http.ResponseWriter, r *http.Request
 }
 
 // validateSessionOptional attaches the caller's user id when a valid session
-// cookie is present, but never blocks the request — for viewer-optional reads
-// (public post/profile pages) that must serve anonymous and stale-session
-// callers alike rather than requiring a session. A confirmed-invalid cookie
-// is still logged and cleared, same as the required-session path, so this
-// degrades observability and cookie hygiene the same way; only a missing
-// cookie (the common case) skips straight to anonymous silently.
-func (ac *authController) validateSessionOptional(w http.ResponseWriter, r *http.Request) *http.Request {
+// cookie is present, but never blocks the request for a missing or expired
+// cookie — for viewer-optional reads (public post/profile pages) that must
+// serve anonymous and stale-session callers alike rather than requiring a
+// session. A confirmed-invalid cookie is still logged and cleared, same as
+// the required-session path. Any other failure (e.g. authservice unavailable)
+// is returned as an error instead of being silently treated as anonymous,
+// since that would misrepresent a possibly-valid session as logged out.
+func (ac *authController) validateSessionOptional(w http.ResponseWriter, r *http.Request) (*http.Request, error) {
 	newReq, err := ac.resolveSession(r)
 	if err != nil {
-		if !errors.Is(err, errNoSessionCookie) {
-			slog.Warn("optional session validation failed", "request_id", getRequestID(r), "error_kind", status.Code(err).String())
-			if status.Code(err) == codes.Unauthenticated {
-				clearCookie(w)
-			}
+		if errors.Is(err, errNoSessionCookie) {
+			return r, nil
 		}
-		return r
+		slog.Warn("optional session validation failed", "request_id", getRequestID(r), "error_kind", status.Code(err).String())
+		if status.Code(err) == codes.Unauthenticated {
+			clearCookie(w)
+			return r, nil
+		}
+		return nil, err
 	}
 
-	return newReq
+	return newReq, nil
 }
 
 // resolveSession extracts and validates the session cookie against

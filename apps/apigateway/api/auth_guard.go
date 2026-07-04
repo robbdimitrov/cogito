@@ -31,7 +31,12 @@ func authGuard(ac *authController) func(http.Handler) http.Handler {
 				return
 			}
 			if isPublicPostRead(r) || isPublicUserRead(r) || isPublicUserByUsernameRead(r) {
-				next.ServeHTTP(w, ac.validateSessionOptional(w, r))
+				newReq, err := ac.validateSessionOptional(w, r)
+				if err != nil {
+					grpcError(w, err)
+					return
+				}
+				next.ServeHTTP(w, newReq)
 				return
 			}
 			newReq, err := ac.validateSession(w, r)
