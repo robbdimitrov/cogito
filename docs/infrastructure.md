@@ -21,7 +21,7 @@
 | database (postgres:18.4-alpine)          | 500m    | 512Mi   | 512Mi     | 5 Gi     |
 | cache (dragonflydb)                      | 100m    | 64Mi    | 256Mi     | 1 Gi     |
 | storage (chrislusf/seaweedfs)            | 100m    | 64Mi    | 256Mi     | 5 Gi     |
-| search (getmeili/meilisearch:v1.15)      | 100m    | 256Mi   | 512Mi     | 1 Gi     |
+| search (getmeili/meilisearch:v1.15)      | 100m    | 256Mi   | 1 Gi      | 1 Gi     |
 | broker (redpandadata/redpanda)           | 100m    | 256Mi   | 512Mi     | 2 Gi     |
 
 Redpanda Connect runs as a Deployment and mounts broker pipeline configuration
