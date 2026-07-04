@@ -33,12 +33,15 @@ pub trait UserDb: Send + Sync + 'static {
         password_hash: &str,
     ) -> Result<i32, SqlxError>;
     async fn get_user_with_id(&self, user_id: i32) -> Result<Option<(i32, String)>, SqlxError>;
-    async fn get_user(&self, user_id: i32, current_user_id: i32)
-    -> Result<Option<User>, SqlxError>;
+    async fn get_user(
+        &self,
+        user_id: i32,
+        current_user_id: Option<i32>,
+    ) -> Result<Option<User>, SqlxError>;
     async fn get_user_by_username(
         &self,
         username: &str,
-        current_user_id: i32,
+        current_user_id: Option<i32>,
     ) -> Result<Option<User>, SqlxError>;
     async fn get_users_by_ids(&self, ids: &[i32]) -> Result<Vec<User>, SqlxError>;
     async fn update_user(

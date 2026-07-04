@@ -24,8 +24,12 @@ pub fn get_user_id<T>(req: &Request<T>) -> Result<i32, Status> {
     }
 }
 
-pub fn optional_user_id<T>(req: &Request<T>) -> i32 {
-    get_user_id(req).unwrap_or(0)
+// Returns None for an anonymous caller rather than a 0 sentinel: 0 is a
+// valid-looking i32 that an equality check like `follower_id = $1` could
+// accidentally match if the users id sequence were ever reset or seeded to
+// start at 0. Callers must bind this as a nullable query parameter.
+pub fn optional_user_id<T>(req: &Request<T>) -> Option<i32> {
+    get_user_id(req).ok()
 }
 
 pub fn is_unique_violation(e: &sqlx::Error) -> bool {

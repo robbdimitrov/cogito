@@ -75,7 +75,7 @@ impl UserDb for DbClient {
     async fn get_user(
         &self,
         user_id: i32,
-        current_user_id: i32,
+        current_user_id: Option<i32>,
     ) -> Result<Option<User>, SqlxError> {
         let row = sqlx::query(
             r#"SELECT id, name, username, email, bio, profile_photo_key, cover_photo_key,
@@ -119,7 +119,7 @@ impl UserDb for DbClient {
     async fn get_user_by_username(
         &self,
         username: &str,
-        current_user_id: i32,
+        current_user_id: Option<i32>,
     ) -> Result<Option<User>, SqlxError> {
         let row = sqlx::query(
             r#"SELECT id, name, username, email, bio, profile_photo_key, cover_photo_key,

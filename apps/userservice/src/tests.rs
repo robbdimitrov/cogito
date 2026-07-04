@@ -61,7 +61,7 @@ impl UserDb for Arc<MockDb> {
     async fn get_user(
         &self,
         user_id: i32,
-        _current_user_id: i32,
+        _current_user_id: Option<i32>,
     ) -> Result<Option<User>, SqlxError> {
         let users = self.users.lock().await;
         Ok(users.iter().find(|u| u.id == user_id).cloned())
@@ -70,7 +70,7 @@ impl UserDb for Arc<MockDb> {
     async fn get_user_by_username(
         &self,
         username: &str,
-        _current_user_id: i32,
+        _current_user_id: Option<i32>,
     ) -> Result<Option<User>, SqlxError> {
         let users = self.users.lock().await;
         Ok(users.iter().find(|u| u.username == username).cloned())
@@ -335,7 +335,7 @@ async fn test_update_user() {
     let res = controller.update_user(req).await;
     assert!(res.is_ok());
 
-    let user = db.get_user(1, 1).await.unwrap().unwrap();
+    let user = db.get_user(1, Some(1)).await.unwrap().unwrap();
     assert_eq!(user.name, "Updated Name");
     assert_eq!(user.username, "updateduser");
     assert_eq!(user.bio, "New Bio");
@@ -434,7 +434,7 @@ async fn test_update_user_rejects_mixed_password_and_profile_changes() {
     let error = controller.update_user(req).await.unwrap_err();
     assert_eq!(error.code(), tonic::Code::InvalidArgument);
 
-    let user = db.get_user(1, 1).await.unwrap().unwrap();
+    let user = db.get_user(1, Some(1)).await.unwrap().unwrap();
     assert_eq!(user.name, "Test");
 }
 
@@ -464,7 +464,7 @@ async fn test_update_user_partial_preserves_existing_fields() {
 
     controller.update_user(req).await.unwrap();
 
-    let user = db.get_user(1, 1).await.unwrap().unwrap();
+    let user = db.get_user(1, Some(1)).await.unwrap().unwrap();
     assert_eq!(
         user.name, "Test",
         "name must be preserved on bio-only update"
