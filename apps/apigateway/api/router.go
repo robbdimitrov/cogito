@@ -91,6 +91,19 @@ func newRouter(authAddr, postAddr, userAddr, imageAddr, searchAddr, eventsAddr s
 	}
 }
 
+// postsFeedSegment and usersSearchSegment are literal single-segment routes
+// that share a URL shape with a public {id} route registered under the same
+// prefix (GET /posts/feed vs. GET /posts/{postId}; GET /users/search vs.
+// GET /users/{userId}) and must stay excluded from anonymous reads. They are
+// defined once here, alongside route registration, and consumed by
+// isPublicPostRead/isPublicUserRead in auth_guard.go so the two can't drift
+// out of sync by renaming. Adding another literal single-segment route under
+// either prefix still requires adding a matching exclusion in auth_guard.go.
+const (
+	postsFeedSegment   = "feed"
+	usersSearchSegment = "search"
+)
+
 func (r *router) configureRoutes(mux *http.ServeMux) {
 	// Health check
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, req *http.Request) {
@@ -105,7 +118,7 @@ func (r *router) configureRoutes(mux *http.ServeMux) {
 	// Users
 	mux.HandleFunc("POST /users", r.user.createUser)
 	mux.HandleFunc("GET /users", r.user.getUserByUsername)
-	mux.HandleFunc("GET /users/search", r.user.searchUsers)
+	mux.HandleFunc("GET /users/"+usersSearchSegment, r.user.searchUsers)
 	mux.HandleFunc("GET /users/{userId}", r.user.getUser)
 	mux.HandleFunc("PUT /users/{userId}", r.user.updateUser)
 	mux.HandleFunc("GET /users/{userId}/following", r.user.getFollowing)
@@ -122,7 +135,7 @@ func (r *router) configureRoutes(mux *http.ServeMux) {
 	// Posts
 	mux.HandleFunc("POST /posts", r.post.createPost)
 	mux.HandleFunc("GET /posts", r.post.getFeed)
-	mux.HandleFunc("GET /posts/feed", r.post.getFeed)
+	mux.HandleFunc("GET /posts/"+postsFeedSegment, r.post.getFeed)
 	mux.HandleFunc("GET /users/{userId}/posts", r.post.getPosts)
 	mux.HandleFunc("GET /users/{userId}/likes", r.post.getLikedPosts)
 	mux.HandleFunc("GET /hashtags/{tag}/posts", r.post.getHashtagPosts)

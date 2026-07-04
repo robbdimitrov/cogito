@@ -79,19 +79,20 @@ func isPublicResourceRead(r *http.Request, prefix, reservedID, allowedSubpath st
 	return ok && id != "" && id != reservedID && sub == allowedSubpath
 }
 
-// isPublicPostRead matches GET /posts/{postId} only. "feed" is excluded
-// because GET /posts/feed is the personalized, session-required getFeed
-// route and has the same single-segment shape as /posts/{postId}.
+// isPublicPostRead matches GET /posts/{postId} only. postsFeedSegment is
+// excluded because GET /posts/feed is the personalized, session-required
+// getFeed route and has the same single-segment shape as /posts/{postId}.
 func isPublicPostRead(r *http.Request) bool {
-	return isPublicResourceRead(r, "/posts/", "feed", "")
+	return isPublicResourceRead(r, "/posts/", postsFeedSegment, "")
 }
 
 // isPublicUserRead matches GET /users/{userId} and GET /users/{userId}/posts
-// only. "search" is excluded because GET /users/search is the session-required
-// searchUsers route and collides with the /users/{userId} shape; "likes",
-// "following", "followers" stay gated since only "posts" is public.
+// only. usersSearchSegment is excluded because GET /users/search is the
+// session-required searchUsers route and collides with the /users/{userId}
+// shape; "likes", "following", "followers" stay gated since only "posts" is
+// public.
 func isPublicUserRead(r *http.Request) bool {
-	return isPublicResourceRead(r, "/users/", "search", "posts")
+	return isPublicResourceRead(r, "/users/", usersSearchSegment, "posts")
 }
 
 // isPublicUserByUsernameRead matches GET /users (getUserByUsername, looked up
