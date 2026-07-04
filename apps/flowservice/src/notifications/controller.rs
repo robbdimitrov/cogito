@@ -6,6 +6,7 @@ use crate::cogito::{
     UserRequest,
 };
 use crate::notifications::db::{InvalidCursor, NotificationDb};
+use crate::utils::get_user_id;
 
 #[derive(Clone)]
 pub struct NotificationController<D: NotificationDb + Clone> {
@@ -25,6 +26,7 @@ impl<D: NotificationDb + Clone> NotificationService for NotificationController<D
         request: Request<GetNotificationsRequest>,
     ) -> Result<Response<Notifications>, Status> {
         let request_id = crate::logging::request_id(&request).to_owned();
+        let user_id = get_user_id(&request)?;
         let req = request.into_inner();
 
         let limit = match req.limit {
@@ -35,7 +37,7 @@ impl<D: NotificationDb + Clone> NotificationService for NotificationController<D
 
         let (items, next_cursor) = self
             .db
-            .list(req.user_id, &req.cursor, limit)
+            .list(user_id, &req.cursor, limit)
             .await
             .map_err(|e| {
                 if e.is::<InvalidCursor>() {
@@ -71,11 +73,12 @@ impl<D: NotificationDb + Clone> NotificationService for NotificationController<D
         request: Request<NotificationRequest>,
     ) -> Result<Response<Empty>, Status> {
         let request_id = crate::logging::request_id(&request).to_owned();
+        let user_id = get_user_id(&request)?;
         let req = request.into_inner();
 
         let found = self
             .db
-            .mark_read(req.notification_id, req.user_id)
+            .mark_read(req.notification_id, user_id)
             .await
             .map_err(|e| {
                 tracing::warn!(request_id = %request_id, method = "/cogito.NotificationService/MarkNotificationRead", error = %e, "mark notification read failed");
@@ -94,9 +97,9 @@ impl<D: NotificationDb + Clone> NotificationService for NotificationController<D
         request: Request<UserRequest>,
     ) -> Result<Response<UnreadCountResponse>, Status> {
         let request_id = crate::logging::request_id(&request).to_owned();
-        let req = request.into_inner();
+        let user_id = get_user_id(&request)?;
 
-        let count = self.db.unread_count(req.user_id).await.map_err(|e| {
+        let count = self.db.unread_count(user_id).await.map_err(|e| {
             tracing::warn!(request_id = %request_id, method = "/cogito.NotificationService/GetUnreadCount", error = %e, "get unread count failed");
             Status::internal("Internal server error.")
         })?;
@@ -110,12 +113,14 @@ mod tests {
     use super::*;
     use crate::notifications::db::{InvalidCursor, Notification, NotificationDb};
     use chrono::Utc;
+    use std::sync::{Arc, Mutex};
 
     #[derive(Clone)]
     struct MockNotificationDb {
         list_result: MockListResult,
         mark_read_result: MockMarkReadResult,
         unread_count_result: MockUnreadCountResult,
+        seen_user_id: Arc<Mutex<Option<i32>>>,
     }
 
     #[derive(Clone)]
@@ -151,7 +156,8 @@ mod tests {
             Ok(())
         }
 
-        async fn mark_read(&self, _id: i64, _user_id: i32) -> Result<bool, sqlx::Error> {
+        async fn mark_read(&self, _id: i64, user_id: i32) -> Result<bool, sqlx::Error> {
+            *self.seen_user_id.lock().unwrap() = Some(user_id);
             match &self.mark_read_result {
                 MockMarkReadResult::Found => Ok(true),
                 MockMarkReadResult::NotFound => Ok(false),
@@ -161,10 +167,11 @@ mod tests {
 
         async fn list(
             &self,
-            _user_id: i32,
+            user_id: i32,
             _cursor: &str,
             _limit: i32,
         ) -> Result<(Vec<Notification>, String), Box<dyn std::error::Error + Send + Sync>> {
+            *self.seen_user_id.lock().unwrap() = Some(user_id);
             match &self.list_result {
                 MockListResult::Ok(items, cursor) => Ok((items.clone(), cursor.clone())),
                 MockListResult::InvalidCursor => Err(Box::new(InvalidCursor)),
@@ -172,7 +179,8 @@ mod tests {
             }
         }
 
-        async fn unread_count(&self, _user_id: i32) -> Result<i32, sqlx::Error> {
+        async fn unread_count(&self, user_id: i32) -> Result<i32, sqlx::Error> {
+            *self.seen_user_id.lock().unwrap() = Some(user_id);
             match &self.unread_count_result {
                 MockUnreadCountResult::Ok(n) => Ok(*n),
                 MockUnreadCountResult::DbError => Err(sqlx::Error::RowNotFound),
@@ -220,7 +228,17 @@ mod tests {
             list_result: list,
             mark_read_result: mark_read,
             unread_count_result: unread,
+            seen_user_id: Arc::new(Mutex::new(None)),
         }
+    }
+
+    /// Wraps `body` in a `Request` carrying the `user-id` metadata header the
+    /// gateway attaches after validating the session.
+    fn request_with_user<T>(body: T, user_id: i32) -> Request<T> {
+        let mut req = Request::new(body);
+        req.metadata_mut()
+            .insert("user-id", user_id.to_string().parse().unwrap());
+        req
     }
 
     #[tokio::test]
@@ -231,6 +249,30 @@ mod tests {
             MockMarkReadResult::Found,
             MockUnreadCountResult::Ok(0),
         );
+        let controller = NotificationController::new(db.clone());
+        let req = request_with_user(
+            GetNotificationsRequest {
+                user_id: 999, // must be ignored in favor of the metadata-derived ID
+                cursor: String::new(),
+                limit: 10,
+            },
+            10,
+        );
+        let res = controller.get_notifications(req).await;
+        assert!(res.is_ok());
+        let body = res.unwrap().into_inner();
+        assert_eq!(body.notifications.len(), 1);
+        assert_eq!(body.next_cursor, "next-cursor");
+        assert_eq!(*db.seen_user_id.lock().unwrap(), Some(10));
+    }
+
+    #[tokio::test]
+    async fn test_get_notifications_missing_user_id_metadata() {
+        let db = mock_db(
+            MockListResult::Ok(vec![], String::new()),
+            MockMarkReadResult::Found,
+            MockUnreadCountResult::Ok(0),
+        );
         let controller = NotificationController::new(db);
         let req = Request::new(GetNotificationsRequest {
             user_id: 10,
@@ -238,10 +280,8 @@ mod tests {
             limit: 10,
         });
         let res = controller.get_notifications(req).await;
-        assert!(res.is_ok());
-        let body = res.unwrap().into_inner();
-        assert_eq!(body.notifications.len(), 1);
-        assert_eq!(body.next_cursor, "next-cursor");
+        assert!(res.is_err());
+        assert_eq!(res.unwrap_err().code(), tonic::Code::Unauthenticated);
     }
 
     #[tokio::test]
@@ -252,11 +292,14 @@ mod tests {
             MockUnreadCountResult::Ok(0),
         );
         let controller = NotificationController::new(db);
-        let req = Request::new(GetNotificationsRequest {
-            user_id: 10,
-            cursor: "bad-cursor".to_string(),
-            limit: 10,
-        });
+        let req = request_with_user(
+            GetNotificationsRequest {
+                user_id: 10,
+                cursor: "bad-cursor".to_string(),
+                limit: 10,
+            },
+            10,
+        );
         let res = controller.get_notifications(req).await;
         assert!(res.is_err());
         assert_eq!(res.unwrap_err().code(), tonic::Code::InvalidArgument);
@@ -270,11 +313,14 @@ mod tests {
             MockUnreadCountResult::Ok(0),
         );
         let controller = NotificationController::new(db);
-        let req = Request::new(GetNotificationsRequest {
-            user_id: 10,
-            cursor: String::new(),
-            limit: 10,
-        });
+        let req = request_with_user(
+            GetNotificationsRequest {
+                user_id: 10,
+                cursor: String::new(),
+                limit: 10,
+            },
+            10,
+        );
         let res = controller.get_notifications(req).await;
         assert!(res.is_err());
         assert_eq!(res.unwrap_err().code(), tonic::Code::Internal);
@@ -287,13 +333,34 @@ mod tests {
             MockMarkReadResult::Found,
             MockUnreadCountResult::Ok(0),
         );
+        let controller = NotificationController::new(db.clone());
+        let req = request_with_user(
+            NotificationRequest {
+                notification_id: 1,
+                user_id: 999, // must be ignored in favor of the metadata-derived ID
+            },
+            10,
+        );
+        let res = controller.mark_notification_read(req).await;
+        assert!(res.is_ok());
+        assert_eq!(*db.seen_user_id.lock().unwrap(), Some(10));
+    }
+
+    #[tokio::test]
+    async fn test_mark_notification_read_missing_user_id_metadata() {
+        let db = mock_db(
+            MockListResult::Ok(vec![], String::new()),
+            MockMarkReadResult::Found,
+            MockUnreadCountResult::Ok(0),
+        );
         let controller = NotificationController::new(db);
         let req = Request::new(NotificationRequest {
             notification_id: 1,
             user_id: 10,
         });
         let res = controller.mark_notification_read(req).await;
-        assert!(res.is_ok());
+        assert!(res.is_err());
+        assert_eq!(res.unwrap_err().code(), tonic::Code::Unauthenticated);
     }
 
     #[tokio::test]
@@ -304,10 +371,13 @@ mod tests {
             MockUnreadCountResult::Ok(0),
         );
         let controller = NotificationController::new(db);
-        let req = Request::new(NotificationRequest {
-            notification_id: 99,
-            user_id: 10,
-        });
+        let req = request_with_user(
+            NotificationRequest {
+                notification_id: 99,
+                user_id: 10,
+            },
+            10,
+        );
         let res = controller.mark_notification_read(req).await;
         assert!(res.is_err());
         assert_eq!(res.unwrap_err().code(), tonic::Code::NotFound);
@@ -321,10 +391,13 @@ mod tests {
             MockUnreadCountResult::Ok(0),
         );
         let controller = NotificationController::new(db);
-        let req = Request::new(NotificationRequest {
-            notification_id: 1,
-            user_id: 10,
-        });
+        let req = request_with_user(
+            NotificationRequest {
+                notification_id: 1,
+                user_id: 10,
+            },
+            10,
+        );
         let res = controller.mark_notification_read(req).await;
         assert!(res.is_err());
         assert_eq!(res.unwrap_err().code(), tonic::Code::Internal);
@@ -337,11 +410,26 @@ mod tests {
             MockMarkReadResult::Found,
             MockUnreadCountResult::Ok(7),
         );
-        let controller = NotificationController::new(db);
-        let req = Request::new(UserRequest { user_id: 10 });
+        let controller = NotificationController::new(db.clone());
+        let req = request_with_user(UserRequest { user_id: 999 }, 10);
         let res = controller.get_unread_count(req).await;
         assert!(res.is_ok());
         assert_eq!(res.unwrap().into_inner().count, 7);
+        assert_eq!(*db.seen_user_id.lock().unwrap(), Some(10));
+    }
+
+    #[tokio::test]
+    async fn test_get_unread_count_missing_user_id_metadata() {
+        let db = mock_db(
+            MockListResult::Ok(vec![], String::new()),
+            MockMarkReadResult::Found,
+            MockUnreadCountResult::Ok(0),
+        );
+        let controller = NotificationController::new(db);
+        let req = Request::new(UserRequest { user_id: 10 });
+        let res = controller.get_unread_count(req).await;
+        assert!(res.is_err());
+        assert_eq!(res.unwrap_err().code(), tonic::Code::Unauthenticated);
     }
 
     #[tokio::test]
@@ -352,7 +440,7 @@ mod tests {
             MockUnreadCountResult::DbError,
         );
         let controller = NotificationController::new(db);
-        let req = Request::new(UserRequest { user_id: 10 });
+        let req = request_with_user(UserRequest { user_id: 10 }, 10);
         let res = controller.get_unread_count(req).await;
         assert!(res.is_err());
         assert_eq!(res.unwrap_err().code(), tonic::Code::Internal);

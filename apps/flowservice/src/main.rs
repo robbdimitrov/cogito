@@ -7,6 +7,7 @@ mod internal_auth;
 mod logging;
 mod notifications;
 mod search;
+mod utils;
 
 use std::env;
 use std::sync::Arc;
