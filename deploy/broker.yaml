@@ -17,6 +17,11 @@ data:
       - sql_raw:
           driver: postgres
           dsn: "${DATABASE_DSN}"
+          # Recycle pooled connections periodically so a connection that goes
+          # stale after the database restarts (its underlying TCP session
+          # dies but the driver never observes an error on it) self-heals
+          # within a bounded window, instead of polling empty indefinitely.
+          conn_max_life_time: 2m
           query: |
             DELETE FROM outbox
             WHERE id IN (
