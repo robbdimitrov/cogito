@@ -12,7 +12,7 @@ const backendTimeoutMs = (): number => {
 
 function composeAbortSignals(
   timeoutMs: number,
-  callerSignal?: AbortSignal,
+  callerSignal?: AbortSignal | null,
 ): AbortSignal {
   const timeout = AbortSignal.timeout(timeoutMs);
   if (!callerSignal) return timeout;
