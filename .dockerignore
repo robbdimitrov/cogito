@@ -6,6 +6,7 @@
 **/.next
 **/dist
 **/coverage
+**/src/cogito.rs
 
 .DS_Store
 *.log
