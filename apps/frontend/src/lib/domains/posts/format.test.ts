@@ -1,84 +1,88 @@
 import { describe, it, expect } from "vitest";
 import { formatContent, type ContentPart } from "./format";
 
-const links = (parts: ContentPart[]) => parts.filter((p) => p.type === "link");
 const texts = (parts: ContentPart[]) =>
   parts.filter((p) => p.type === "text").map((p) => p.text);
+const hashtags = (parts: ContentPart[]) =>
+  parts.filter((p) => p.type === "hashtag");
+const mentions = (parts: ContentPart[]) =>
+  parts.filter((p) => p.type === "mention");
+const urls = (parts: ContentPart[]) => parts.filter((p) => p.type === "url");
 
 describe("formatContent", () => {
   describe("plain text", () => {
     it("returns plain text unchanged", () => {
       expect(formatContent("Just some plain text")).toEqual([
-        { type: "text", text: "Just some plain text" },
+        { type: "text", id: "text-0", text: "Just some plain text" },
       ]);
     });
 
     it("returns empty text part for empty string", () => {
-      expect(formatContent("")).toEqual([{ type: "text", text: "" }]);
+      expect(formatContent("")).toEqual([
+        { type: "text", id: "text-0", text: "" },
+      ]);
     });
   });
 
   describe("hashtags", () => {
     it("links a hashtag mid-sentence", () => {
       const parts = formatContent("Hello #world today");
-      expect(links(parts)).toHaveLength(1);
-      expect(links(parts)[0]).toMatchObject({
-        text: "#world",
+      expect(hashtags(parts)).toHaveLength(1);
+      expect(hashtags(parts)[0]).toMatchObject({
+        tag: "world",
         href: "/hashtags/world",
-        external: false,
       });
     });
 
     it("lowercases the hashtag value in the href", () => {
       const parts = formatContent("Trending #React today");
-      const [link] = links(parts);
-      expect(link).toMatchObject({
+      const [tag] = hashtags(parts);
+      expect(tag).toMatchObject({
         href: "/hashtags/react",
-        text: "#React",
+        tag: "React",
       });
     });
 
     it("links a hashtag at the very start of the string", () => {
       const parts = formatContent("#hello world");
-      expect(links(parts)).toHaveLength(1);
-      expect(links(parts)[0]).toMatchObject({ text: "#hello" });
+      expect(hashtags(parts)).toHaveLength(1);
+      expect(hashtags(parts)[0]).toMatchObject({ tag: "hello" });
       expect(texts(parts)).toEqual([" world"]);
     });
 
     it("does not link # inside a word", () => {
       const parts = formatContent("C# is a language");
-      expect(links(parts)).toHaveLength(0);
+      expect(hashtags(parts)).toHaveLength(0);
     });
   });
 
   describe("mentions", () => {
     it("links a mention mid-sentence", () => {
       const parts = formatContent("Hello @user today");
-      expect(links(parts)).toHaveLength(1);
-      expect(links(parts)[0]).toMatchObject({
-        text: "@user",
+      expect(mentions(parts)).toHaveLength(1);
+      expect(mentions(parts)[0]).toMatchObject({
+        handle: "user",
         href: "/@user",
-        external: false,
       });
     });
 
-    it("preserves mention casing in both text and href", () => {
+    it("preserves mention casing in both handle and href", () => {
       const parts = formatContent("cc @Admin");
-      expect(links(parts)[0]).toMatchObject({
-        text: "@Admin",
+      expect(mentions(parts)[0]).toMatchObject({
+        handle: "Admin",
         href: "/@Admin",
       });
     });
 
     it("links a mention at the very start of the string", () => {
       const parts = formatContent("@user replied");
-      expect(links(parts)).toHaveLength(1);
+      expect(mentions(parts)).toHaveLength(1);
       expect(texts(parts)).toEqual([" replied"]);
     });
 
     it("does not link @ inside a word (e.g. email addresses)", () => {
       const parts = formatContent("contact user@example for info");
-      expect(links(parts)).toHaveLength(0);
+      expect(mentions(parts)).toHaveLength(0);
     });
   });
 
@@ -87,10 +91,9 @@ describe("formatContent", () => {
       const parts = formatContent("https://example.com/foo?bar=1");
       expect(parts).toEqual([
         {
-          type: "link",
-          text: "https://example.com/foo?bar=1",
-          href: "https://example.com/foo?bar=1",
-          external: true,
+          type: "url",
+          id: "url-0",
+          url: "https://example.com/foo?bar=1",
         },
       ]);
     });
@@ -99,7 +102,7 @@ describe("formatContent", () => {
       const parts = formatContent(
         "Go to https://google.com. Also https://test.com,",
       );
-      expect(links(parts).map((l) => l.text)).toEqual([
+      expect(urls(parts).map((l) => l.url)).toEqual([
         "https://google.com",
         "https://test.com",
       ]);
@@ -111,20 +114,32 @@ describe("formatContent", () => {
       const parts = formatContent(
         "Hey @alice check #news at https://example.com!",
       );
-      const ls = links(parts);
-      expect(ls).toHaveLength(3);
-      expect(ls[0]).toMatchObject({ text: "@alice", href: "/@alice" });
-      expect(ls[1]).toMatchObject({ text: "#news", href: "/hashtags/news" });
-      expect(ls[2]).toMatchObject({
-        text: "https://example.com",
-        external: true,
+      expect(mentions(parts)).toHaveLength(1);
+      expect(hashtags(parts)).toHaveLength(1);
+      expect(urls(parts)).toHaveLength(1);
+      expect(mentions(parts)[0]).toMatchObject({
+        handle: "alice",
+        href: "/@alice",
+      });
+      expect(hashtags(parts)[0]).toMatchObject({
+        tag: "news",
+        href: "/hashtags/news",
+      });
+      expect(urls(parts)[0]).toMatchObject({
+        url: "https://example.com",
       });
       expect(texts(parts).join("")).toContain("Hey ");
     });
 
     it("handles repeated identical tokens independently", () => {
       const parts = formatContent("#test #test #test");
-      expect(links(parts)).toHaveLength(3);
+      expect(hashtags(parts)).toHaveLength(3);
+    });
+
+    it("gives every token a unique, stable id", () => {
+      const parts = formatContent("#test #test @user https://example.com");
+      const ids = parts.map((p) => p.id);
+      expect(new Set(ids).size).toBe(ids.length);
     });
   });
 });

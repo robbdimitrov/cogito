@@ -19,6 +19,8 @@
     onQuote,
     emptyMessage = "No posts yet. Share what's on your mind!",
   }: Props = $props();
+
+  let usersById = $derived(new Map(users.map((u) => [u.id, u])));
 </script>
 
 {#if !posts || posts.length === 0}
@@ -35,7 +37,7 @@
     {#each posts as post (post.id + (post.repostOfId ? `-repost-${post.userId}` : ""))}
       <PostItem
         {post}
-        user={users.find((u) => u.id === post.userId) ?? users[0]}
+        user={usersById.get(post.userId) ?? users[0]}
         {currentUserId}
         {onQuote}
       />

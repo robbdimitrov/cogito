@@ -1,13 +1,25 @@
 export type ContentPart =
   | {
       type: "text";
+      id: string;
       text: string;
     }
   | {
-      type: "link";
-      text: string;
+      type: "url";
+      id: string;
+      url: string;
+    }
+  | {
+      type: "hashtag";
+      id: string;
+      tag: string;
       href: string;
-      external: boolean;
+    }
+  | {
+      type: "mention";
+      id: string;
+      handle: string;
+      href: string;
     };
 
 const TOKEN_PATTERN =
@@ -24,16 +36,11 @@ export function formatContent(content: string): ContentPart[] {
 
     if (url !== undefined) {
       const punctuation = url.match(TRAILING_URL_PUNCTUATION)?.[0] ?? "";
-      const linkText = punctuation ? url.slice(0, -punctuation.length) : url;
+      const linkUrl = punctuation ? url.slice(0, -punctuation.length) : url;
 
-      appendText(parts, content.slice(lastIndex, matchIndex));
-      parts.push({
-        type: "link",
-        text: linkText,
-        href: linkText,
-        external: true,
-      });
-      lastIndex = matchIndex + linkText.length;
+      appendText(parts, content.slice(lastIndex, matchIndex), lastIndex);
+      parts.push({ type: "url", id: `url-${matchIndex}`, url: linkUrl });
+      lastIndex = matchIndex + linkUrl.length;
       continue;
     }
 
@@ -46,26 +53,34 @@ export function formatContent(content: string): ContentPart[] {
     }
 
     const tokenIndex = matchIndex + prefix.length;
-    appendText(parts, content.slice(lastIndex, tokenIndex));
+    appendText(parts, content.slice(lastIndex, tokenIndex), lastIndex);
 
-    parts.push({
-      type: "link",
-      text: `${symbol}${value}`,
-      href:
-        symbol === "#"
-          ? `/hashtags/${encodeURIComponent(value.toLowerCase())}`
-          : `/@${encodeURIComponent(value)}`,
-      external: false,
-    });
+    if (symbol === "#") {
+      parts.push({
+        type: "hashtag",
+        id: `hashtag-${tokenIndex}`,
+        tag: value,
+        href: `/hashtags/${encodeURIComponent(value.toLowerCase())}`,
+      });
+    } else {
+      parts.push({
+        type: "mention",
+        id: `mention-${tokenIndex}`,
+        handle: value,
+        href: `/@${encodeURIComponent(value)}`,
+      });
+    }
     lastIndex = matchIndex + fullMatch.length;
   }
 
-  appendText(parts, content.slice(lastIndex));
-  return parts.length > 0 ? parts : [{ type: "text", text: content }];
+  appendText(parts, content.slice(lastIndex), lastIndex);
+  return parts.length > 0
+    ? parts
+    : [{ type: "text", id: "text-0", text: content }];
 }
 
-function appendText(parts: ContentPart[], text: string): void {
+function appendText(parts: ContentPart[], text: string, index: number): void {
   if (text) {
-    parts.push({ type: "text", text });
+    parts.push({ type: "text", id: `text-${index}`, text });
   }
 }

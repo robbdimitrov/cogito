@@ -17,7 +17,7 @@
     () => ({ items: data.items, nextCursor: data.nextCursor }),
     async (cursor) => {
       const res = await fetch(
-        `/@${user.username}/${tab}?cursor=${encodeURIComponent(cursor)}`,
+        `/@${user.username}/${tab}?cursor=${encodeURIComponent(cursor)}&userId=${user.id}`,
       );
       return res.ok ? res.json() : { items: [], nextCursor: null };
     },

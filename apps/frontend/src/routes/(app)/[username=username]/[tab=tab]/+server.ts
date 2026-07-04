@@ -6,6 +6,7 @@ import {
   getUser,
 } from "$lib/domains/users/api.server";
 import { apiClient } from "$lib/server/api/client";
+import { parseIdParam } from "$lib/server/api/http";
 
 export const GET = async (event) => {
   if (!event.cookies.get("session")) {
@@ -14,18 +15,27 @@ export const GET = async (event) => {
   const { params, url } = event;
   const cursor = url.searchParams.get("cursor") ?? "";
   const tab = params.tab;
-  const cleanUsername = decodeURIComponent(params.username).replace(/^@/, "");
 
   try {
-    const user = await getUser(apiClient(event), cleanUsername);
+    // The client already resolved the profile user on initial page load and
+    // passes its ID along, so pagination requests skip a redundant username
+    // lookup. Fall back to resolving by username if the ID is missing.
+    const userID =
+      parseIdParam(url.searchParams.get("userId")) ??
+      (
+        await getUser(
+          apiClient(event),
+          decodeURIComponent(params.username).replace(/^@/, ""),
+        )
+      ).id;
     if (tab === "likes") {
-      const feed = await getLikedPosts(apiClient(event), user.id, cursor);
+      const feed = await getLikedPosts(apiClient(event), userID, cursor);
       return json(feed ?? { items: [], nextCursor: null });
     } else if (tab === "followers") {
-      const userPage = await getFollowers(apiClient(event), user.id, cursor);
+      const userPage = await getFollowers(apiClient(event), userID, cursor);
       return json(userPage ?? { items: [], nextCursor: null });
     } else if (tab === "following") {
-      const userPage = await getFollowing(apiClient(event), user.id, cursor);
+      const userPage = await getFollowing(apiClient(event), userID, cursor);
       return json(userPage ?? { items: [], nextCursor: null });
     }
     return json({ items: [], nextCursor: null });

@@ -12,7 +12,7 @@
     () => data.posts,
     async (cursor) => {
       const res = await fetch(
-        `/@${user.username}?cursor=${encodeURIComponent(cursor)}`,
+        `/@${user.username}?cursor=${encodeURIComponent(cursor)}&userId=${user.id}`,
       );
       return res.ok ? res.json() : { items: [], nextCursor: null };
     },

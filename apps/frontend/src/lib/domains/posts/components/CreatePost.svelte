@@ -27,18 +27,29 @@
   const toast = getToastContext();
   let textareaRef: HTMLTextAreaElement;
   let fileInputRef: HTMLInputElement;
+  let searchAbortController: AbortController | null = null;
+  let hashtagAbortController: AbortController | null = null;
+
+  function isAbortError(e: unknown): boolean {
+    return e instanceof DOMException && e.name === "AbortError";
+  }
 
   $effect(() => {
     const delayDebounceFn = setTimeout(async () => {
       if (searchQuery.length > 0) {
+        searchAbortController?.abort();
+        const controller = new AbortController();
+        searchAbortController = controller;
         try {
           const response = await fetch(
             `/api/users/search?query=${encodeURIComponent(searchQuery)}&limit=5`,
+            { signal: controller.signal },
           );
           const res = await response.json();
           suggestions = res.items || [];
           showTypeahead = true;
-        } catch {
+        } catch (e) {
+          if (isAbortError(e)) return;
           suggestions = [];
         }
       } else {
@@ -47,20 +58,28 @@
       }
     }, 200);
 
-    return () => clearTimeout(delayDebounceFn);
+    return () => {
+      clearTimeout(delayDebounceFn);
+      searchAbortController?.abort();
+    };
   });
 
   $effect(() => {
     const delayDebounceFn = setTimeout(async () => {
       if (hashtagQuery.length > 0) {
+        hashtagAbortController?.abort();
+        const controller = new AbortController();
+        hashtagAbortController = controller;
         try {
           const response = await fetch(
             `/api/hashtags/search?query=${encodeURIComponent(hashtagQuery)}&limit=5`,
+            { signal: controller.signal },
           );
           const res = await response.json();
           hashtagSuggestions = res.items || [];
           showHashtagTypeahead = true;
-        } catch {
+        } catch (e) {
+          if (isAbortError(e)) return;
           hashtagSuggestions = [];
         }
       } else {
@@ -68,7 +87,10 @@
         showHashtagTypeahead = false;
       }
     }, 200);
-    return () => clearTimeout(delayDebounceFn);
+    return () => {
+      clearTimeout(delayDebounceFn);
+      hashtagAbortController?.abort();
+    };
   });
 
   function handleChange(e: Event) {
