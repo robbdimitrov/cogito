@@ -182,11 +182,15 @@ observed.
    `staging/{filename}` in S3; `uploads` row created.
 2. `POST /posts` with `mediaKey` — gateway calls `VerifyUpload` (ownership
    check) then `ConsumeUpload` (moves to `{filename}`).
-3. `ConsumeUpload` validates the key and atomically claims upload metadata by
-   filename and user ID before promotion.
+3. `ConsumeUpload` validates the key and ownership, promotes the blob to its
+   final location, then atomically claims (deletes) the upload metadata row —
+   only after promotion succeeds, so a failed copy leaves the claim intact for
+   retry instead of orphaning the staged file.
 4. If post creation succeeds but image consumption fails, the gateway attempts
    to delete the post and reports the image failure.
-5. `DELETE /posts/{postId}` — gateway calls `DeleteImage` if post had a
-   `mediaKey` and surfaces cleanup failures.
+5. `DELETE /posts/{postId}` — gateway calls `DeleteImage` first if post had a
+   `mediaKey`; the post is only deleted once the image delete succeeds, so an
+   image-delete failure leaves the post intact (safe to retry) instead of
+   orphaning the image.
 6. Profile and cover images are consumed before their keys are stored on the
    user record; old-image deletion failures are reported.

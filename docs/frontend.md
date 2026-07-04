@@ -150,7 +150,9 @@ unchanged after DTO mapping.
 - Initial paginated data returned by `load` functions follows each page's
   existing prop names, with `nextCursor: string | null`.
 - Subsequent pages: client calls the corresponding same-origin `+server.ts` GET
-  route with `?cursor=`.
+  route with `?cursor=`. Profile routes (`/{username}` and its tabs) also pass
+  `&userId=`, since the initial `load` already resolved the profile user;
+  `+server.ts` falls back to resolving by username only if `userId` is absent.
 - `createPagination<T>()` state: `items`, `cursor`, `loading`. `more()` appends
   and advances cursor.
 - Used in: feed, user posts, liked posts, followers, following, hashtag feed.
