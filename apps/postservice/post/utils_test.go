@@ -45,26 +45,26 @@ func TestGetUserID(t *testing.T) {
 }
 
 func TestOptionalUserID(t *testing.T) {
-	if id := optionalUserID(context.Background()); id != 0 {
-		t.Errorf("expected 0 for missing metadata, got %d", id)
+	if id := optionalUserID(context.Background()); id != nil {
+		t.Errorf("expected nil for missing metadata, got %v", id)
 	}
 
 	md := metadata.Pairs("other", "value")
 	ctx := metadata.NewIncomingContext(context.Background(), md)
-	if id := optionalUserID(ctx); id != 0 {
-		t.Errorf("expected 0 for missing user-id, got %d", id)
+	if id := optionalUserID(ctx); id != nil {
+		t.Errorf("expected nil for missing user-id, got %v", id)
 	}
 
 	md = metadata.Pairs("user-id", "invalid")
 	ctx = metadata.NewIncomingContext(context.Background(), md)
-	if id := optionalUserID(ctx); id != 0 {
-		t.Errorf("expected 0 for invalid user-id, got %d", id)
+	if id := optionalUserID(ctx); id != nil {
+		t.Errorf("expected nil for invalid user-id, got %v", id)
 	}
 
 	md = metadata.Pairs("user-id", "123")
 	ctx = metadata.NewIncomingContext(context.Background(), md)
-	if id := optionalUserID(ctx); id != 123 {
-		t.Errorf("expected 123, got %d", id)
+	if id := optionalUserID(ctx); id == nil || *id != 123 {
+		t.Errorf("expected 123, got %v", id)
 	}
 }
 

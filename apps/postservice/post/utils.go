@@ -61,12 +61,17 @@ func getUserID(ctx context.Context) (int32, error) {
 	return int32(userID), nil
 }
 
-func optionalUserID(ctx context.Context) int32 {
+// optionalUserID returns the caller's id, or nil for an anonymous viewer.
+// Callers must bind this as a nullable query parameter rather than
+// substituting a sentinel value: 0 is a valid-looking int32 that an
+// equality check like `likes.user_id = $1` could accidentally match if the
+// users id sequence were ever reset or seeded to start at 0.
+func optionalUserID(ctx context.Context) *int32 {
 	id, err := getUserID(ctx)
 	if err != nil {
-		return 0
+		return nil
 	}
-	return id
+	return &id
 }
 
 func validateInternalAuth(ctx context.Context) error {
