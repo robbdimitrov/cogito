@@ -121,7 +121,7 @@ Set by SvelteKit nonce-based CSP (frontend only):
 
 | Check             | Detail                                                                                                          |
 | ----------------- | --------------------------------------------------------------------------------------------------------------- |
-| Body limit        | 1 MB — enforced at Axum router (`DefaultBodyLimit::max(1024 * 1024)`) and per-field during multipart read       |
+| Body limit        | Image field capped at 1 MB (enforced per-field during multipart read); the Axum router's own `DefaultBodyLimit` is a deliberately looser 2 MB backstop against abusive multipart bodies, not a second copy of the image limit |
 | Format validation | Magic-byte check on first 12 bytes: JPEG (`\xff\xd8\xff`), PNG (8-byte sig), GIF (`GIF8`), WebP (`RIFF`…`WEBP`) |
 | Filename          | Server-generated UUIDv4 + validated extension; client filename is ignored                                       |
 | Path traversal    | Rejected if filename contains `..`, `/`, or `\` (checked on GET and gRPC lifecycle methods)                     |

@@ -18,6 +18,20 @@ use crate::db_client::ImageDb;
 
 const IMAGE_CACHE_CONTROL: &str = "private, max-age=86400";
 
+/// Overall request-body ceiling, deliberately well above the per-field 1 MB
+/// image limit below: it exists to bound abusive/garbage multipart bodies
+/// (many oversized non-"image" fields), not to duplicate the image limit. If
+/// it sat close to 1 MB, a legitimate ~1 MB image plus ordinary multipart
+/// boundary/header overhead could trip this router-level limit before the
+/// field-level check below ever runs, replacing the specific 413 "File
+/// exceeds 1MB limit" response with a generic, unhelpful body-read error.
+const MAX_REQUEST_BODY_BYTES: usize = 2 * 1024 * 1024;
+const MAX_IMAGE_FIELD_BYTES: usize = 1024 * 1024;
+
+fn json_error(status: StatusCode, message: &str) -> (StatusCode, Json<serde_json::Value>) {
+    (status, Json(serde_json::json!({ "message": message })))
+}
+
 struct AppState<D: ImageDb, B: BlobStore> {
     db: D,
     blobstore: Arc<B>,
@@ -33,7 +47,7 @@ pub fn create_router<D: ImageDb, B: BlobStore + 'static>(db: D, blobstore: Arc<B
         )
         .route("/uploads/:filename", get(get_handler::<D, B>))
         .layer(middleware::from_fn(cache_image_responses))
-        .layer(axum::extract::DefaultBodyLimit::max(1024 * 1024 + 8192))
+        .layer(axum::extract::DefaultBodyLimit::max(MAX_REQUEST_BODY_BYTES))
         .with_state(state)
 }
 
@@ -47,7 +61,7 @@ async fn require_internal_token(request: Request, next: Next) -> Response {
     if crate::internal_auth::verify(provided) {
         next.run(request).await
     } else {
-        (StatusCode::UNAUTHORIZED, "Unauthorized").into_response()
+        json_error(StatusCode::UNAUTHORIZED, "Unauthorized").into_response()
     }
 }
 
@@ -73,9 +87,9 @@ async fn cache_image_responses(request: Request, next: Next) -> Response {
 async fn get_handler<D: ImageDb, B: BlobStore>(
     Path(filename): Path<String>,
     State(state): State<Arc<AppState<D, B>>>,
-) -> Result<impl IntoResponse, (StatusCode, String)> {
+) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
     if filename.contains("..") || filename.contains('/') || filename.contains('\\') {
-        return Err((StatusCode::BAD_REQUEST, "Invalid filename".to_string()));
+        return Err(json_error(StatusCode::BAD_REQUEST, "Invalid filename"));
     }
 
     match state.blobstore.get(&filename).await {
@@ -88,12 +102,12 @@ async fn get_handler<D: ImageDb, B: BlobStore>(
             data,
         )
             .into_response()),
-        Ok(None) => Err((StatusCode::NOT_FOUND, "Not found".to_string())),
+        Ok(None) => Err(json_error(StatusCode::NOT_FOUND, "Not found")),
         Err(e) => {
             tracing::warn!(error = %e, "blobstore get failed");
-            Err((
+            Err(json_error(
                 StatusCode::INTERNAL_SERVER_ERROR,
-                "Internal server error.".to_string(),
+                "Internal server error.",
             ))
         }
     }
@@ -103,25 +117,24 @@ async fn upload_handler<D: ImageDb, B: BlobStore>(
     headers: HeaderMap,
     State(state): State<Arc<AppState<D, B>>>,
     mut multipart: Multipart,
-) -> Result<impl IntoResponse, (StatusCode, String)> {
+) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
     let request_id = crate::logging::http_request_id(&headers).to_string();
-    let user_id_header = headers.get("x-user-id").ok_or((
-        StatusCode::UNAUTHORIZED,
-        "Missing x-user-id header".to_string(),
-    ))?;
+    let user_id_header = headers
+        .get("x-user-id")
+        .ok_or_else(|| json_error(StatusCode::UNAUTHORIZED, "Missing x-user-id header"))?;
 
     let user_id: i32 = user_id_header
         .to_str()
         .unwrap_or("")
         .parse()
-        .map_err(|_| (StatusCode::BAD_REQUEST, "Invalid user_id".to_string()))?;
+        .map_err(|_| json_error(StatusCode::BAD_REQUEST, "Invalid user_id"))?;
 
     while let Some(mut field) = multipart
         .next_field()
         .await
         .map_err(|e| {
             tracing::warn!(request_id = %request_id, method = "POST /uploads", error = %e, "reading multipart field failed");
-            (StatusCode::BAD_REQUEST, "Invalid upload.".to_string())
+            json_error(StatusCode::BAD_REQUEST, "Invalid upload.")
         })?
     {
         if field.name() != Some("image") {
@@ -131,21 +144,20 @@ async fn upload_handler<D: ImageDb, B: BlobStore>(
         let mut data: Vec<u8> = Vec::new();
         let mut total_bytes = 0;
         let mut signature = Vec::with_capacity(12);
-        let limit = 1024 * 1024;
 
         while let Some(chunk) = field
             .chunk()
             .await
             .map_err(|e| {
                 tracing::warn!(request_id = %request_id, method = "POST /uploads", error = %e, "reading upload chunk failed");
-                (StatusCode::BAD_REQUEST, "Invalid upload.".to_string())
+                json_error(StatusCode::BAD_REQUEST, "Invalid upload.")
             })?
         {
             total_bytes += chunk.len();
-            if total_bytes > limit {
-                return Err((
+            if total_bytes > MAX_IMAGE_FIELD_BYTES {
+                return Err(json_error(
                     StatusCode::PAYLOAD_TOO_LARGE,
-                    "File exceeds 1MB limit".to_string(),
+                    "File exceeds 1MB limit",
                 ));
             }
             if signature.len() < 12 {
@@ -158,10 +170,7 @@ async fn upload_handler<D: ImageDb, B: BlobStore>(
         let extension = match image_extension(&signature) {
             Some(ext) => ext,
             None => {
-                return Err((
-                    StatusCode::BAD_REQUEST,
-                    "Only images are allowed".to_string(),
-                ));
+                return Err(json_error(StatusCode::BAD_REQUEST, "Only images are allowed"));
             }
         };
 
@@ -183,25 +192,22 @@ async fn upload_handler<D: ImageDb, B: BlobStore>(
             .await
             .map_err(|e| {
                 tracing::warn!(request_id = %request_id, method = "POST /uploads", error = %e, "staging upload failed");
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    "Internal server error.".to_string(),
-                )
+                json_error(StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.")
             })?;
 
         if let Err(e) = state.db.insert_upload(&filename, user_id).await {
             tracing::warn!(request_id = %request_id, method = "POST /uploads", error = %e, "recording upload failed");
             let _ = state.blobstore.delete(&staging_key).await;
-            return Err((
+            return Err(json_error(
                 StatusCode::INTERNAL_SERVER_ERROR,
-                "Internal server error.".to_string(),
+                "Internal server error.",
             ));
         }
 
         return Ok(Json(serde_json::json!({ "filename": filename })));
     }
 
-    Err((StatusCode::BAD_REQUEST, "No file provided".to_string()))
+    Err(json_error(StatusCode::BAD_REQUEST, "No file provided"))
 }
 
 fn image_extension(bytes: &[u8]) -> Option<&'static str> {
@@ -448,6 +454,11 @@ mod tests {
 
     #[tokio::test]
     async fn upload_enforces_size_limit() {
+        // A file just over the 1MB field limit but comfortably under the
+        // router's 2MB body ceiling must deterministically hit the specific
+        // per-field check (413 JSON), not fall through to the generic
+        // multipart-read-error path (400) — regression test for the router
+        // limit sitting too close to the field limit.
         let store = MockBlobStore::new();
         let oversized: Vec<u8> = {
             let mut v = vec![0xff, 0xd8, 0xff];
@@ -473,10 +484,52 @@ mod tests {
             .await
             .unwrap();
 
-        assert!(
-            response.status() == StatusCode::PAYLOAD_TOO_LARGE
-                || response.status() == StatusCode::BAD_REQUEST
-        );
+        assert_eq!(response.status(), StatusCode::PAYLOAD_TOO_LARGE);
+        let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+            .await
+            .unwrap();
+        let json: serde_json::Value = serde_json::from_slice(&body).unwrap();
+        assert_eq!(json["message"], "File exceeds 1MB limit");
+    }
+
+    #[tokio::test]
+    async fn upload_rejects_body_beyond_router_limit_as_json() {
+        // A body well beyond the router's own 2MB ceiling can't reach the
+        // field-level check at all; it must still fail as valid JSON (not a
+        // raw framework/plaintext body), honoring the API-wide JSON contract.
+        let store = MockBlobStore::new();
+        let huge: Vec<u8> = {
+            let mut v = vec![0xff, 0xd8, 0xff];
+            v.extend(std::iter::repeat_n(0u8, 3 * 1024 * 1024));
+            v
+        };
+        let (boundary, body) = multipart_body(&huge);
+
+        let response = create_router(MockDb, Arc::new(store))
+            .oneshot(
+                Request::builder()
+                    .method(Method::POST)
+                    .uri("/uploads")
+                    .header("internal-token", crate::internal_auth::init_for_test())
+                    .header("x-user-id", "1")
+                    .header(
+                        "content-type",
+                        format!("multipart/form-data; boundary={boundary}"),
+                    )
+                    .body(Body::from(body))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        assert!(!response.status().is_success());
+        let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+            .await
+            .unwrap();
+        let json: serde_json::Value = serde_json::from_slice(&body).unwrap_or_else(|e| {
+            panic!("expected valid JSON error body, got parse error {e}: {body:?}")
+        });
+        assert!(json["message"].is_string());
     }
 
     #[tokio::test]
