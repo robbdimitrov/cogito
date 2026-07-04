@@ -67,7 +67,7 @@ export async function updatePassword(
 }
 
 export async function getUser(api: ApiClient, username: string): Promise<User> {
-  const res = await api(`/users/${encodeURIComponent(username)}`);
+  const res = await api(`/users?username=${encodeURIComponent(username)}`);
   const unwrapped = await unwrap<User>(res);
   return unwrapped!;
 }
