@@ -451,7 +451,7 @@ mod tests {
         let store = MockBlobStore::new();
         let oversized: Vec<u8> = {
             let mut v = vec![0xff, 0xd8, 0xff];
-            v.extend(std::iter::repeat(0u8).take(1024 * 1024 + 1));
+            v.extend(std::iter::repeat_n(0u8, 1024 * 1024 + 1));
             v
         };
         let (boundary, body) = multipart_body(&oversized);

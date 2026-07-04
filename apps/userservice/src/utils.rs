@@ -7,6 +7,8 @@ pub fn is_valid_email(email: &str) -> bool {
     re.is_match(email)
 }
 
+// tonic::Status is mandated by the gRPC handler signatures that call this;
+// boxing it isn't practical here.
 #[allow(clippy::result_large_err)]
 pub fn get_user_id<T>(req: &Request<T>) -> Result<i32, Status> {
     match req.metadata().get("user-id") {

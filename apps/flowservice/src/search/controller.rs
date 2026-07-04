@@ -84,6 +84,9 @@ impl SearchController {
     }
 }
 
+// tonic::Status is mandated by this function's gRPC-handler callers; boxing
+// it isn't practical here.
+#[allow(clippy::result_large_err)]
 fn validate_request(req: &SearchRequest) -> Result<(String, u32, u32), Status> {
     let query = req.query.trim().to_string();
     if query.is_empty() || query.chars().count() > MAX_QUERY_CHARS {

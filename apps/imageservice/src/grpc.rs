@@ -17,6 +17,9 @@ impl<D: ImageDb> ImageGrpcService<D> {
     }
 }
 
+// tonic::Status is mandated by this function's gRPC-handler callers; boxing
+// it isn't practical here.
+#[allow(clippy::result_large_err)]
 fn validate_filename(filename: &str) -> Result<(), Status> {
     if filename.is_empty()
         || filename.len() > 255

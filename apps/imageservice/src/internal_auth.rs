@@ -13,12 +13,16 @@ pub fn init() {
     });
 }
 
+// tonic::Status is mandated by the gRPC interceptor signature; boxing it
+// isn't practical here.
 #[allow(clippy::result_large_err)]
 pub fn interceptor(req: Request<()>) -> Result<Request<()>, Status> {
     let expected = internal_grpc_token();
     authenticate(req, expected)
 }
 
+// tonic::Status is mandated by the gRPC interceptor signature; boxing it
+// isn't practical here.
 #[allow(clippy::result_large_err)]
 fn authenticate(req: Request<()>, expected: &str) -> Result<Request<()>, Status> {
     let provided = req

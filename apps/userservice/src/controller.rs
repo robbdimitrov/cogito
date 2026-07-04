@@ -381,7 +381,7 @@ impl<D: UserDb> UserService for Controller<D> {
         let request_id = crate::logging::request_id(&request).to_string();
         let user_id = get_user_id(&request)?;
         let req = request.into_inner();
-        let limit = req.limit.max(1).min(100);
+        let limit = req.limit.clamp(1, 100);
 
         match self
             .db_client
@@ -413,7 +413,7 @@ impl<D: UserDb> UserService for Controller<D> {
         let request_id = crate::logging::request_id(&request).to_string();
         let user_id = get_user_id(&request)?;
         let req = request.into_inner();
-        let limit = req.limit.max(1).min(100);
+        let limit = req.limit.clamp(1, 100);
 
         match self
             .db_client
@@ -484,7 +484,7 @@ impl<D: UserDb> UserService for Controller<D> {
         let request_id = crate::logging::request_id(&request).to_string();
         let user_id = get_user_id(&request)?;
         let req = request.into_inner();
-        let limit = req.limit.max(1).min(100);
+        let limit = req.limit.clamp(1, 100);
 
         match self
             .db_client
