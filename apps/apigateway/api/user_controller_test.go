@@ -140,6 +140,43 @@ func TestImageUploadProxy_ForwardsFrontendRouteWithUserHeader(t *testing.T) {
 	}
 }
 
+func TestImageUploadProxy_RejectsOversizedContentLengthBeforeProxying(t *testing.T) {
+	// Regression test: an oversized upload must get a clean JSON 413 without
+	// ever reaching the reverse proxy, since a body-write error mid-proxy can
+	// drop the connection with no response at all instead of a clean error.
+	proxyReached := false
+	imageServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		proxyReached = true
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer imageServer.Close()
+
+	t.Setenv("INTERNAL_GRPC_TOKEN", "test-internal-token")
+	imageAddr := strings.TrimPrefix(imageServer.URL, "http://")
+	router := &router{imageAddr: imageAddr}
+
+	req := httptest.NewRequest("POST", "/uploads", bytes.NewBufferString("oversized-body"))
+	req.ContentLength = maxRequestBodyBytes + 1
+	req = setUserID(req, "42")
+	w := httptest.NewRecorder()
+
+	router.proxyImageUpload(w, req)
+
+	if w.Code != http.StatusRequestEntityTooLarge {
+		t.Fatalf("expected status 413, got %d", w.Code)
+	}
+	if proxyReached {
+		t.Error("expected the oversized upload to be rejected before reaching the image service")
+	}
+	var body map[string]string
+	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
+		t.Fatalf("expected valid JSON error body, got parse error %v: %s", err, w.Body.String())
+	}
+	if body["message"] == "" {
+		t.Error("expected a non-empty JSON error message")
+	}
+}
+
 func TestImageFileProxy_ForwardsCacheAndValidatorHeaders(t *testing.T) {
 	var gotPath string
 	var gotMethod string

@@ -154,6 +154,17 @@ func (r *router) proxyImageUpload(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// Reject an oversized upload before ever proxying it. A client that
+	// honestly reports Content-Length (true of every browser and standard
+	// HTTP client) gets a clean, immediate JSON 413 here instead of racing
+	// bodyLimitMiddleware's MaxBytesReader against the reverse proxy's
+	// request-body write, which can drop the connection with no response at
+	// all rather than surfacing to proxy.ErrorHandler below.
+	if req.ContentLength > maxRequestBodyBytes {
+		jsonError(w, http.StatusRequestEntityTooLarge, "Payload too large")
+		return
+	}
+
 	r.proxyImageRequest("/uploads", func(proxyReq *http.Request) {
 		proxyReq.Header.Set("x-user-id", userID)
 	})(w, req)
@@ -198,8 +209,7 @@ func (r *router) proxyImageRequest(path string, configure func(*http.Request)) h
 		}
 		proxy.ErrorHandler = func(w http.ResponseWriter, req *http.Request, err error) {
 			slog.Warn("image proxy failed", "request_id", getRequestID(req), "error", err)
-			var maxBytesErr *http.MaxBytesError
-			if errors.As(err, &maxBytesErr) {
+			if _, ok := errors.AsType[*http.MaxBytesError](err); ok {
 				jsonError(w, http.StatusRequestEntityTooLarge, "Payload too large")
 				return
 			}

@@ -8,6 +8,13 @@ import (
 	"time"
 )
 
+// maxRequestBodyBytes is the gateway-wide hard body-size ceiling, enforced by
+// bodyLimitMiddleware for every request and checked early against
+// Content-Length for proxied uploads (see proxyImageUpload) to avoid Go's
+// reverse-proxy body-write-error edge case, which can drop the connection
+// without a response instead of returning a clean error.
+const maxRequestBodyBytes = 2 * 1024 * 1024
+
 // CreateServer builds the gateway HTTP handler and middleware chain.
 func CreateServer(ctx context.Context, authAddr, postAddr, userAddr, imageAddr, searchAddr, eventsAddr string) http.Handler {
 	setupLogger()
@@ -27,7 +34,7 @@ func CreateServer(ctx context.Context, authAddr, postAddr, userAddr, imageAddr, 
 	handler = newConcurrencyLimiter().middleware(handler)
 	handler = rateLimitMiddleware(rlStore)(handler)
 	handler = authGuard(router.auth)(handler)
-	handler = bodyLimitMiddleware(2 * 1024 * 1024)(handler)
+	handler = bodyLimitMiddleware(maxRequestBodyBytes)(handler)
 	handler = secureHeadersMiddleware()(handler)
 	handler = loggerMiddleware()(handler)
 	handler = requestIDMiddleware()(handler)
