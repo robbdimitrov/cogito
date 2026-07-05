@@ -45,8 +45,9 @@
 | /settings/sessions    | Active sessions                                                         | deleteSession                                      |
 
 Route params: `username` (any string), `tab` (matches `likes`, `followers`,
-`following` — the `[tab=tab]` route itself always requires a session, even
-though its parent profile route doesn't).
+`following` — the `[tab=tab]` route always requires a session, enforced by a
+`(private)` layout guard nested under the profile route, even though the
+profile route itself doesn't require one).
 
 ## Layout Hierarchy
 
@@ -57,7 +58,8 @@ though its parent profile route doesn't).
   (app)/+layout.svelte    no redirect; loads currentUser: User | null
     /[username]/+layout.svelte  loads profile user (404 if not found)
       /[username]/+page.svelte  posts tab — anonymous-readable
-      /[username]/[tab]/+page.svelte  likes / followers / following — guards for a session itself
+      /[username]/(private)/+layout.server.ts  guard: redirect /login if unauthenticated
+        /[username]/(private)/[tab]/+page.svelte  likes / followers / following
     /posts/[id]/+page.svelte  anonymous-readable; replies/composer require a session
     (private)/+layout.server.ts  guard: redirect /login if unauthenticated
       /(main)/+page.svelte  feed
@@ -70,10 +72,11 @@ though its parent profile route doesn't).
 
 ## Auth Guards
 
-| Guard                | File                              | Condition                            | Redirect      |
-| -------------------- | ---------------------------------- | ------------------------------------ | ------------- |
-| Prevent authed users | (auth)/+layout.server.ts           | `resolveCurrentUser` → authenticated | 303 to /      |
-| Require auth         | (app)/(private)/+layout.server.ts  | `currentUser` absent (from parent)    | 303 to /login |
+| Guard                | File                                          | Condition                            | Redirect      |
+| -------------------- | ---------------------------------------------- | ------------------------------------ | ------------- |
+| Prevent authed users | (auth)/+layout.server.ts                       | `resolveCurrentUser` → authenticated | 303 to /      |
+| Require auth         | (app)/(private)/+layout.server.ts              | `currentUser` absent (from parent)    | 303 to /login |
+| Require auth (profile tabs) | [username]/(private)/+layout.server.ts | `currentUser` absent (from parent)    | 303 to /login |
 
 `(app)/+layout.server.ts` itself no longer redirects — it resolves
 `currentUser: User | null` for every route under `(app)`, including the
