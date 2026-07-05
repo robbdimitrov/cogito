@@ -73,6 +73,16 @@ All inter-service communication uses ClusterIP via Kubernetes DNS
 namespace, allow DNS to kube-system, and allow explicit in-namespace service
 ports.
 
+Long-lived application clients bound stale dependency state explicitly:
+PostgreSQL pools set a 30 minute maximum connection lifetime and a 5 minute idle
+timeout; apigateway gRPC clients send HTTP/2 keepalives every 30 seconds with a
+10 second timeout and bounded reconnect backoff; the apigateway image HTTP proxy
+uses a dedicated transport with bounded per-host connections, idle connection
+expiry, and response-header timeouts. Flowservice logs per-consumer progress
+every 60 seconds (`consumer`, `partition`, `offset`, and
+`seconds_since_commit`) so stalled notification or feed pipelines are visible
+without adding another consumer group or changing the protobuf contract.
+
 ## Secrets
 
 All secrets live in a single Kubernetes Secret named `cogito-db-secret`:

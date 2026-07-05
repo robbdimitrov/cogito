@@ -1,8 +1,12 @@
 use sqlx::PgPool as DatabasePool;
 use sqlx::types::chrono::{DateTime, Utc};
 use std::env;
+use std::time::Duration;
 
 const DEFAULT_SESSION_TTL_DAYS: i32 = 7;
+const DB_MAX_CONNECTIONS: u32 = 5;
+const DB_MAX_CONNECTION_LIFETIME: Duration = Duration::from_secs(30 * 60);
+const DB_IDLE_TIMEOUT: Duration = Duration::from_secs(5 * 60);
 
 fn session_ttl_days() -> i32 {
     parse_session_ttl_days(env::var("SESSION_TTL_DAYS").ok().as_deref())
@@ -24,7 +28,9 @@ pub struct DbClient {
 impl DbClient {
     pub async fn new(db_url: &str) -> Result<Self, sqlx::Error> {
         let pool = sqlx::postgres::PgPoolOptions::new()
-            .max_connections(5)
+            .max_connections(DB_MAX_CONNECTIONS)
+            .max_lifetime(DB_MAX_CONNECTION_LIFETIME)
+            .idle_timeout(DB_IDLE_TIMEOUT)
             .connect(db_url)
             .await?;
         Ok(Self { pool })

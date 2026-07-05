@@ -1,7 +1,9 @@
 use rdkafka::Message;
 use rdkafka::consumer::Consumer as _;
 use sqlx::PgPool as DatabasePool;
+use std::sync::Arc;
 
+use crate::consumer_health::ConsumerProgress;
 use crate::notifications::db::NotificationDb;
 
 #[derive(serde::Deserialize)]
@@ -65,6 +67,7 @@ struct EntityChangeEvent {
 pub async fn run(
     consumer: rdkafka::consumer::StreamConsumer,
     db: DatabasePool,
+    progress: Arc<ConsumerProgress>,
     mut shutdown_rx: tokio::sync::watch::Receiver<bool>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     consumer.subscribe(&["activity", "entity-changes"])?;
@@ -93,6 +96,7 @@ pub async fn run(
                     consumer
                         .commit_message(&msg, rdkafka::consumer::CommitMode::Async)
                         .ok();
+                    progress.mark_committed(msg.partition(), msg.offset());
                 }
             }
         }

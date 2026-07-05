@@ -4,6 +4,11 @@ use crate::pagination;
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use sqlx::{Error as SqlxError, PgPool as DatabasePool, Row};
+use std::time::Duration;
+
+const DB_MAX_CONNECTIONS: u32 = 5;
+const DB_MAX_CONNECTION_LIFETIME: Duration = Duration::from_secs(30 * 60);
+const DB_IDLE_TIMEOUT: Duration = Duration::from_secs(5 * 60);
 
 #[derive(Debug, Clone)]
 pub struct DbClient {
@@ -13,7 +18,9 @@ pub struct DbClient {
 impl DbClient {
     pub async fn new(db_url: &str) -> Result<Self, SqlxError> {
         let pool = sqlx::postgres::PgPoolOptions::new()
-            .max_connections(5)
+            .max_connections(DB_MAX_CONNECTIONS)
+            .max_lifetime(DB_MAX_CONNECTION_LIFETIME)
+            .idle_timeout(DB_IDLE_TIMEOUT)
             .connect(db_url)
             .await?;
         Ok(Self { pool })

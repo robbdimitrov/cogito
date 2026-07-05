@@ -47,12 +47,22 @@ type DBClient struct {
 	db *pgxpool.Pool
 }
 
+const (
+	dbMaxConns              int32 = 5
+	dbMaxConnLifetime             = 30 * time.Minute
+	dbMaxConnIdleTime             = 5 * time.Minute
+	dbPoolHealthCheckPeriod       = time.Minute
+)
+
 func NewDBClient(dbURL string) (*DBClient, error) {
 	config, err := pgxpool.ParseConfig(dbURL)
 	if err != nil {
 		return nil, err
 	}
-	config.MaxConns = 5
+	config.MaxConns = dbMaxConns
+	config.MaxConnLifetime = dbMaxConnLifetime
+	config.MaxConnIdleTime = dbMaxConnIdleTime
+	config.HealthCheckPeriod = dbPoolHealthCheckPeriod
 	// PostgreSQL 18 tightened type-inference for unspecified parameter OIDs in
 	// extended query protocol. Simple protocol avoids this by sending complete SQL
 	// text; pgx handles value escaping so there is no injection risk.

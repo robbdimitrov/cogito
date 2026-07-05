@@ -26,6 +26,16 @@ type router struct {
 	imageHTTPBreaker *circuitBreaker
 }
 
+const (
+	imageHTTPMaxIdleConns          = 64
+	imageHTTPMaxIdleConnsPerHost   = 16
+	imageHTTPMaxConnsPerHost       = 64
+	imageHTTPIdleConnTimeout       = 90 * time.Second
+	imageHTTPTLSHandshakeTimeout   = 5 * time.Second
+	imageHTTPResponseHeaderTimeout = 10 * time.Second
+	imageHTTPExpectContinueTimeout = time.Second
+)
+
 func imageGRPCAddress(imageHTTPAddr string) string {
 	if addr := os.Getenv("IMAGE_GRPC_SERVICE_ADDR"); addr != "" {
 		return addr
@@ -82,12 +92,25 @@ func newRouter(authAddr, postAddr, userAddr, imageAddr, searchAddr, eventsAddr s
 		imageHTTPBreaker: imageHTTPBreaker,
 		imageHTTP: &http.Client{
 			Transport: &retryHTTPTransport{
-				base:    http.DefaultTransport,
+				base:    newImageHTTPTransport(),
 				breaker: imageHTTPBreaker,
 				retries: envInt("HTTP_RETRY_MAX_ATTEMPTS", 3),
 				backoff: time.Duration(envInt("HTTP_RETRY_BACKOFF_MS", 100)) * time.Millisecond,
 			},
 		},
+	}
+}
+
+func newImageHTTPTransport() *http.Transport {
+	return &http.Transport{
+		Proxy:                 http.ProxyFromEnvironment,
+		MaxIdleConns:          imageHTTPMaxIdleConns,
+		MaxIdleConnsPerHost:   imageHTTPMaxIdleConnsPerHost,
+		MaxConnsPerHost:       imageHTTPMaxConnsPerHost,
+		IdleConnTimeout:       imageHTTPIdleConnTimeout,
+		TLSHandshakeTimeout:   imageHTTPTLSHandshakeTimeout,
+		ResponseHeaderTimeout: imageHTTPResponseHeaderTimeout,
+		ExpectContinueTimeout: imageHTTPExpectContinueTimeout,
 	}
 }
 

@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 func TestRetryableGRPCMethodOnlyRetriesReadsAndVerification(t *testing.T) {
@@ -49,5 +50,25 @@ func TestStatusRecorderUnwrapsResponseWriter(t *testing.T) {
 	rec.WriteHeader(http.StatusCreated)
 	if rec.status != http.StatusCreated {
 		t.Fatalf("expected status %d, got %d", http.StatusCreated, rec.status)
+	}
+}
+
+func TestImageHTTPTransportHasBoundedConnectionPolicy(t *testing.T) {
+	transport := newImageHTTPTransport()
+
+	if transport.MaxIdleConns != imageHTTPMaxIdleConns {
+		t.Fatalf("expected max idle conns %d, got %d", imageHTTPMaxIdleConns, transport.MaxIdleConns)
+	}
+	if transport.MaxIdleConnsPerHost != imageHTTPMaxIdleConnsPerHost {
+		t.Fatalf("expected max idle conns per host %d, got %d", imageHTTPMaxIdleConnsPerHost, transport.MaxIdleConnsPerHost)
+	}
+	if transport.MaxConnsPerHost != imageHTTPMaxConnsPerHost {
+		t.Fatalf("expected max conns per host %d, got %d", imageHTTPMaxConnsPerHost, transport.MaxConnsPerHost)
+	}
+	if transport.IdleConnTimeout <= 0 || transport.IdleConnTimeout > 2*time.Minute {
+		t.Fatalf("expected bounded idle timeout, got %s", transport.IdleConnTimeout)
+	}
+	if transport.ResponseHeaderTimeout <= 0 {
+		t.Fatalf("expected response header timeout, got %s", transport.ResponseHeaderTimeout)
 	}
 }

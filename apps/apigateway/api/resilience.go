@@ -9,7 +9,9 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/backoff"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/status"
 )
 
@@ -79,6 +81,14 @@ type retryConfig struct {
 	baseBackoff time.Duration
 }
 
+const (
+	grpcKeepaliveTime      = 30 * time.Second
+	grpcKeepaliveTimeout   = 10 * time.Second
+	grpcMinConnectTimeout  = 5 * time.Second
+	grpcBaseConnectBackoff = 100 * time.Millisecond
+	grpcMaxConnectBackoff  = 5 * time.Second
+)
+
 func defaultRetryConfig() retryConfig {
 	return retryConfig{
 		maxAttempts: envInt("GRPC_RETRY_MAX_ATTEMPTS", 3),
@@ -94,6 +104,20 @@ func newGatewayClientWithBreaker(addr string, downstream string, breaker *circui
 	return grpc.NewClient(
 		addr,
 		insecureCredentials(),
+		grpc.WithConnectParams(grpc.ConnectParams{
+			Backoff: backoff.Config{
+				BaseDelay:  grpcBaseConnectBackoff,
+				Multiplier: 1.6,
+				Jitter:     0.2,
+				MaxDelay:   grpcMaxConnectBackoff,
+			},
+			MinConnectTimeout: grpcMinConnectTimeout,
+		}),
+		grpc.WithKeepaliveParams(keepalive.ClientParameters{
+			Time:                grpcKeepaliveTime,
+			Timeout:             grpcKeepaliveTimeout,
+			PermitWithoutStream: true,
+		}),
 		grpc.WithUnaryInterceptor(resilienceUnaryClientInterceptor(downstream, breaker, defaultRetryConfig())),
 	)
 }

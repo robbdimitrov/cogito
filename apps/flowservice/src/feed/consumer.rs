@@ -4,12 +4,14 @@ use rdkafka::{
     consumer::{CommitMode, Consumer, StreamConsumer},
 };
 use sqlx::PgPool as DatabasePool;
+use std::sync::Arc;
 use tokio::time::{Duration, sleep};
 
 const BACKFILL_POST_LIMIT: i32 = 50;
 const MAX_FEED_EVENT_ATTEMPTS: usize = 3;
 const FEED_EVENT_RETRY_DELAY: Duration = Duration::from_millis(250);
 
+use crate::consumer_health::ConsumerProgress;
 use crate::feed::db::{Entry, FanOutSnapshot, FeedDb};
 
 struct FeedMessage<'a> {
@@ -50,6 +52,7 @@ pub async fn run(
     consumer: StreamConsumer,
     db: DatabasePool,
     fan_out_threshold: i32,
+    progress: Arc<ConsumerProgress>,
     mut shutdown_rx: tokio::sync::watch::Receiver<bool>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     consumer.subscribe(&["activity", "entity-changes"])?;
@@ -88,6 +91,7 @@ pub async fn run(
                 .await
                 {
                     consumer.commit_message(&msg, CommitMode::Async).ok();
+                    progress.mark_committed(msg.partition(), msg.offset());
                 }
             }
         }
