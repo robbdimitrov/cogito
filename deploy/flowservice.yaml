@@ -12,7 +12,12 @@ spec:
     tier: backend
     component: flowservice
   ports:
-  - port: 5050
+  - name: grpc
+    port: 5050
+    targetPort: 5050
+  - name: metrics
+    port: 8080
+    targetPort: 8080
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -47,6 +52,8 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5050
+        - containerPort: 8080
+          name: metrics
         resources:
           limits:
             memory: 256Mi
@@ -74,6 +81,8 @@ spec:
           value: http://userservice:5050
         - name: PORT
           value: "5050"
+        - name: METRICS_ADDR
+          value: "0.0.0.0:8080"
         - name: INTERNAL_GRPC_TOKEN
           valueFrom:
             secretKeyRef:

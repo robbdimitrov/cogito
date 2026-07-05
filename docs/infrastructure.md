@@ -82,6 +82,10 @@ expiry, and response-header timeouts. Flowservice logs per-consumer progress
 every 60 seconds (`consumer`, `partition`, `offset`, and
 `seconds_since_commit`) so stalled notification or feed pipelines are visible
 without adding another consumer group or changing the protobuf contract.
+Flowservice also exposes `GET /metrics` on port 8080 with canonical
+`app_pipeline_*` Prometheus text metrics using labels
+`app="cogito"`, `service="flowservice"`, and pipeline names `notifications` and
+`feed`.
 
 ## Secrets
 
@@ -156,6 +160,7 @@ imageservice only during startup to create or verify the image bucket.
 | MEILI_HOST          | http://search:7700      |
 | MEILI_MASTER_KEY    | from secret             |
 | PORT                | 5050                    |
+| METRICS_ADDR        | 0.0.0.0:8080            |
 | INTERNAL_GRPC_TOKEN | from secret             |
 
 ### broker/connect

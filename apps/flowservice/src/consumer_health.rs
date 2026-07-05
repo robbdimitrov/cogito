@@ -30,7 +30,7 @@ impl ConsumerProgress {
             .store(unix_secs_now(), Ordering::Relaxed);
     }
 
-    fn snapshot(&self) -> ConsumerProgressSnapshot {
+    pub fn snapshot(&self) -> ConsumerProgressSnapshot {
         ConsumerProgressSnapshot {
             name: self.name,
             last_partition: self.last_partition.load(Ordering::Relaxed),
@@ -41,11 +41,34 @@ impl ConsumerProgress {
 }
 
 #[derive(Debug)]
-struct ConsumerProgressSnapshot {
-    name: &'static str,
-    last_partition: i64,
-    last_offset: i64,
-    last_commit_unix_secs: u64,
+pub struct ConsumerProgressSnapshot {
+    pub name: &'static str,
+    pub last_partition: i64,
+    pub last_offset: i64,
+    pub last_commit_unix_secs: u64,
+}
+
+pub fn metrics(progresses: &[Arc<ConsumerProgress>]) -> String {
+    let mut output = String::new();
+    for progress in progresses {
+        let snapshot = progress.snapshot();
+        let labels = format!(
+            "app=\"cogito\",service=\"flowservice\",pipeline=\"{}\"",
+            snapshot.name
+        );
+        output.push_str(&format!("app_pipeline_running{{{labels}}} 1\n"));
+        output.push_str(&format!("app_pipeline_unhealthy{{{labels}}} 0\n"));
+        output.push_str(&format!("app_pipeline_error_streak{{{labels}}} 0\n"));
+        if let Some(age) = seconds_since(snapshot.last_commit_unix_secs) {
+            output.push_str(&format!(
+                "app_pipeline_last_progress_age_seconds{{{labels}}} {age}\n"
+            ));
+            output.push_str(&format!(
+                "app_pipeline_last_success_age_seconds{{{labels}}} {age}\n"
+            ));
+        }
+    }
+    output
 }
 
 pub async fn report_progress(

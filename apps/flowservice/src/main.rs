@@ -22,6 +22,8 @@ use rdkafka::ClientConfig;
 use rdkafka::consumer::StreamConsumer as BrokerConsumer;
 use rdkafka::error::KafkaError as BrokerError;
 use sqlx::PgPool as DatabasePool;
+use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::net::TcpListener;
 
 const DEFAULT_FAN_OUT_THRESHOLD: i32 = 10_000;
 const CLEANUP_INTERVAL_SECS: u64 = 3600;
@@ -40,6 +42,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     internal_auth::init();
 
     let port = env::var("PORT").unwrap_or_else(|_| "5050".to_string());
+    let metrics_addr = env::var("METRICS_ADDR").unwrap_or_else(|_| "0.0.0.0:8080".to_string());
     let db_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let broker_addresses =
         env::var("REDPANDA_BROKERS").unwrap_or_else(|_| "localhost:9092".to_string());
@@ -101,6 +104,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (shutdown_tx, shutdown_rx) = tokio::sync::watch::channel(false);
     let notif_progress = Arc::new(ConsumerProgress::new("notifications"));
     let feed_progress = Arc::new(ConsumerProgress::new("feed"));
+    let progress_metrics = vec![Arc::clone(&notif_progress), Arc::clone(&feed_progress)];
 
     let notif_handle = {
         let db = pool.clone();
@@ -130,6 +134,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let rx = shutdown_rx.clone();
         tokio::spawn(async move {
             consumer_health::report_progress(vec![notif_progress, feed_progress], rx).await;
+        })
+    };
+    let metrics_handle = {
+        let rx = shutdown_rx.clone();
+        tokio::spawn(async move {
+            run_metrics_server(metrics_addr, progress_metrics, rx).await;
         })
     };
     let cleanup_handle = {
@@ -175,10 +185,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     // Drain background tasks before closing the pool so in-flight DB writes can finish.
-    let (nr, fr, pr, cr, mr) = tokio::join!(
+    let (nr, fr, pr, hr, cr, mr) = tokio::join!(
         notif_handle,
         feed_handle,
         consumer_progress_handle,
+        metrics_handle,
         cleanup_handle,
         search_reconnect_handle
     );
@@ -191,6 +202,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     if let Err(e) = pr {
         tracing::error!(error = ?e, "consumer progress task failed");
     }
+    if let Err(e) = hr {
+        tracing::error!(error = ?e, "metrics task failed");
+    }
     if let Err(e) = cr {
         tracing::error!(error = ?e, "cleanup task failed");
     }
@@ -199,6 +213,57 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
     pool.close().await;
     Ok(())
+}
+
+async fn run_metrics_server(
+    addr: String,
+    progresses: Vec<Arc<ConsumerProgress>>,
+    mut shutdown_rx: tokio::sync::watch::Receiver<bool>,
+) {
+    let listener = match TcpListener::bind(&addr).await {
+        Ok(listener) => listener,
+        Err(e) => {
+            tracing::error!(error = %e, addr = %addr, "metrics server bind failed");
+            return;
+        }
+    };
+    tracing::info!(addr = %addr, "metrics server started");
+    loop {
+        tokio::select! {
+            accepted = listener.accept() => {
+                let Ok((mut socket, _)) = accepted else {
+                    continue;
+                };
+                let progresses = progresses.clone();
+                tokio::spawn(async move {
+                    let mut buf = [0_u8; 512];
+                    let n = socket.read(&mut buf).await.unwrap_or(0);
+                    let request = String::from_utf8_lossy(&buf[..n]);
+                    let path = request
+                        .lines()
+                        .next()
+                        .and_then(|line| line.split_whitespace().nth(1))
+                        .unwrap_or("/");
+                    let (status, body, content_type) = if path == "/metrics" {
+                        ("200 OK", consumer_health::metrics(&progresses), "text/plain; version=0.0.4")
+                    } else {
+                        ("404 Not Found", "not found\n".to_string(), "text/plain")
+                    };
+                    let response = format!(
+                        "HTTP/1.1 {status}\r\nContent-Type: {content_type}\r\nContent-Length: {}\r\n\r\n{body}",
+                        body.len()
+                    );
+                    let _ = socket.write_all(response.as_bytes()).await;
+                });
+            }
+            _ = shutdown_rx.changed() => {
+                if *shutdown_rx.borrow() {
+                    tracing::info!("metrics server shutting down");
+                    return;
+                }
+            }
+        }
+    }
 }
 
 async fn run_search_reconnect(
