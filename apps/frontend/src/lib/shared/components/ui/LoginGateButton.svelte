@@ -7,8 +7,9 @@
     iconClass?: string;
     ariaLabel: string;
     buttonClass: string;
-    count: number;
+    count?: number;
     countClass?: string;
+    label?: string;
   }
 
   let {
@@ -18,12 +19,15 @@
     buttonClass,
     count,
     countClass,
+    label,
   }: Props = $props();
 </script>
 
 <a href={resolve("/login")} class={buttonClass} aria-label={ariaLabel}>
   <Icon class={iconClass} />
-  {#if countClass}
+  {#if label}
+    {label}
+  {:else if countClass}
     <span class={countClass}>{count}</span>
   {:else}
     {count}

@@ -4,6 +4,7 @@
   import Avatar from "$lib/shared/components/ui/Avatar.svelte";
   import { Pen, Check, UserPlus, Calendar } from "@lucide/svelte";
   import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
+  import LoginGateButton from "$lib/shared/components/ui/LoginGateButton.svelte";
   import { resolve } from "$app/paths";
   import type { User } from "$lib/shared/types";
 
@@ -96,13 +97,12 @@
           </button>
         </form>
       {:else}
-        <a
-          href={resolve("/login")}
-          class="btn btn-primary btn-sm gap-1 rounded-full px-3 sm:px-4"
-        >
-          <UserPlus class="h-4 w-4" />
-          Follow
-        </a>
+        <LoginGateButton
+          icon={UserPlus}
+          ariaLabel="Log in to follow"
+          buttonClass="btn btn-primary btn-sm gap-1 rounded-full px-3 sm:px-4"
+          label="Follow"
+        />
       {/if}
     </div>
     <div class="mt-3 sm:mt-4">

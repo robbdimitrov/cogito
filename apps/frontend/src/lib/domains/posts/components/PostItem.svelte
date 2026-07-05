@@ -7,7 +7,7 @@
   import FormattedContent from "$lib/domains/posts/components/FormattedContent.svelte";
   import ConfirmModal from "$lib/shared/components/ui/ConfirmModal.svelte";
   import RepostMenu from "$lib/domains/posts/components/RepostMenu.svelte";
-  import LoginGateButton from "$lib/domains/posts/components/LoginGateButton.svelte";
+  import LoginGateButton from "$lib/shared/components/ui/LoginGateButton.svelte";
   import QuoteEmbed from "$lib/domains/posts/components/QuoteEmbed.svelte";
   import { imageUrl } from "$lib/shared/imageUrl";
   import type { Post, User } from "$lib/shared/types";

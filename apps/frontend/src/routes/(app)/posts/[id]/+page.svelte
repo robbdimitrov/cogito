@@ -13,7 +13,7 @@
   import FormattedContent from "$lib/domains/posts/components/FormattedContent.svelte";
   import ReplyComposer from "$lib/domains/posts/components/ReplyComposer.svelte";
   import PostItem from "$lib/domains/posts/components/PostItem.svelte";
-  import LoginGateButton from "$lib/domains/posts/components/LoginGateButton.svelte";
+  import LoginGateButton from "$lib/shared/components/ui/LoginGateButton.svelte";
   import QuoteComposeModal from "$lib/domains/posts/components/QuoteComposeModal.svelte";
   import { imageUrl } from "$lib/shared/imageUrl";
   import { enhance } from "$app/forms";
