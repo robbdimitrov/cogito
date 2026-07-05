@@ -170,27 +170,56 @@ async fn ensure_indexes(master: &Client) -> Result<(), Box<dyn std::error::Error
             let task_info = master.create_index(def.uid, Some("id")).await?;
             master.wait_for_task(task_info, None, None).await?;
             tracing::info!(index = def.uid, "created search index");
+        }
 
-            // Only configure attributes on new indexes. Re-applying on every startup
-            // triggers a full Meilisearch re-index and can block search availability.
-            // Apply attribute changes via a migration task on existing indexes instead.
-            let idx = master.index(def.uid);
-            if !def.searchable.is_empty() {
-                let task = idx.set_searchable_attributes(def.searchable).await?;
-                master.wait_for_task(task, None, None).await?;
-            }
-            if !def.filterable.is_empty() {
-                let task = idx.set_filterable_attributes(def.filterable).await?;
-                master.wait_for_task(task, None, None).await?;
-            }
-            if !def.sortable.is_empty() {
-                let task = idx.set_sortable_attributes(def.sortable).await?;
-                master.wait_for_task(task, None, None).await?;
-            }
+        // Only apply an attribute setting when it actually differs from what's
+        // live, on new and existing indexes alike: re-applying the same value
+        // on every startup would otherwise trigger a full Meilisearch
+        // re-index and can block search availability.
+        let idx = master.index(def.uid);
+
+        let current = idx.get_searchable_attributes().await?;
+        if !attributes_match(&current, def.searchable) {
+            let task = idx.set_searchable_attributes(def.searchable).await?;
+            idx.wait_for_task(task, None, None).await?;
+            tracing::info!(
+                index = def.uid,
+                attribute = "searchable",
+                "updated search index attribute"
+            );
+        }
+
+        let current = idx.get_filterable_attributes().await?;
+        if !attributes_match(&current, def.filterable) {
+            let task = idx.set_filterable_attributes(def.filterable).await?;
+            idx.wait_for_task(task, None, None).await?;
+            tracing::info!(
+                index = def.uid,
+                attribute = "filterable",
+                "updated search index attribute"
+            );
+        }
+
+        let current = idx.get_sortable_attributes().await?;
+        if !attributes_match(&current, def.sortable) {
+            let task = idx.set_sortable_attributes(def.sortable).await?;
+            idx.wait_for_task(task, None, None).await?;
+            tracing::info!(
+                index = def.uid,
+                attribute = "sortable",
+                "updated search index attribute"
+            );
         }
     }
 
     Ok(())
+}
+
+fn attributes_match(current: &[String], desired: &[&str]) -> bool {
+    current
+        .iter()
+        .map(String::as_str)
+        .eq(desired.iter().copied())
 }
 
 // --- Cursor encoding / decoding ---
