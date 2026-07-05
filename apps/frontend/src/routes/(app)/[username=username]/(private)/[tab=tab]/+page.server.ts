@@ -1,4 +1,4 @@
-import { fail, error, redirect } from "@sveltejs/kit";
+import { fail, error } from "@sveltejs/kit";
 import { getLikedPosts } from "$lib/domains/posts/api.server";
 import {
   toggleLike,
@@ -16,8 +16,7 @@ import { failFromError } from "$lib/server/api/http";
 
 export const load = async (event) => {
   const { params, parent } = event;
-  const { currentUser, profileUser } = await parent();
-  if (!currentUser) redirect(303, "/login");
+  const { profileUser } = await parent();
 
   const tab = params.tab;
 
