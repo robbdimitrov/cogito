@@ -228,3 +228,17 @@ trigger a full reindex by running the `broker-backfill` Job.
 8. Restart stateful services (`cache`, `storage`, `search`, `broker`) and wait.
 9. Scale Deployments back to their manifest replica counts and wait.
 10. Start port-forward supervisor: `frontend:8080` → `localhost:8080`.
+
+## Dependency Restart Drill
+
+Run `scripts/failure-drill.sh` after changing dependency clients, probes, or
+consumer loops. The script restarts PostgreSQL, cache, broker, search, and
+storage workloads, then waits for API, backend, and flow deployments to remain
+rolled out. Override the namespace and wait budget with `NAMESPACE=...` and
+`TIMEOUT=...`.
+
+Long-lived database, HTTP, and gRPC clients must keep explicit connection
+lifetimes, idle limits, keepalive, and reconnect backoff. Flow consumers log
+partition and offset progress periodically so a restarted broker or stalled
+pipeline has an operator-visible signal instead of relying only on process
+liveness.
