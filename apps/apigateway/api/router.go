@@ -114,14 +114,8 @@ func newImageHTTPTransport() *http.Transport {
 	}
 }
 
-// postsFeedSegment and usersSearchSegment are literal single-segment routes
-// that share a URL shape with a public {id} route registered under the same
-// prefix (GET /posts/feed vs. GET /posts/{postId}; GET /users/search vs.
-// GET /users/{userId}) and must stay excluded from anonymous reads. They are
-// defined once here, alongside route registration, and consumed by
-// isPublicPostRead/isPublicUserRead in auth_guard.go so the two can't drift
-// out of sync by renaming. Adding another literal single-segment route under
-// either prefix still requires adding a matching exclusion in auth_guard.go.
+// These literal segments share a shape with public {id} routes but must stay
+// gated; auth_guard.go consumes the constants so route names cannot drift.
 const (
 	postsFeedSegment   = "feed"
 	usersSearchSegment = "search"
@@ -191,26 +185,14 @@ func (r *router) proxyImageUpload(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// A client that honestly reports an oversized Content-Length gets a
-	// clean, immediate, zero-I/O 413 here — the common case for browsers and
-	// standard HTTP clients.
+	// Honest oversized Content-Length values get an immediate, zero-I/O 413.
 	if req.ContentLength > maxRequestBodyBytes {
 		jsonError(w, http.StatusRequestEntityTooLarge, "Payload too large")
 		return
 	}
 
-	// Fall back to reading and bounding the body ourselves before ever
-	// proxying it, rather than trusting Content-Length outright: a
-	// chunked-encoded request (or any client that omits Content-Length)
-	// reports ContentLength == -1, which sails past the check above.
-	// Uploads are capped at 2 MB, small enough to buffer here, so this gives
-	// every client shape a clean, immediate JSON 413 instead of racing
-	// bodyLimitMiddleware's MaxBytesReader against the reverse proxy's
-	// request-body write, which can drop the connection with no response at
-	// all. req.Body may already be that same MaxBytesReader
-	// (bodyLimitMiddleware wraps every request upstream of this handler), so
-	// a too-large body can surface here as a read error rather than merely a
-	// long slice — map that case to 413 too.
+	// Bound unknown-length/chunked bodies before proxying; MaxBytesReader may
+	// surface an oversized body as a read error, which still maps to 413.
 	body, err := io.ReadAll(io.LimitReader(req.Body, maxRequestBodyBytes+1))
 	if err != nil {
 		if _, ok := errors.AsType[*http.MaxBytesError](err); ok {

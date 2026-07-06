@@ -4,12 +4,8 @@ import { apiClient } from "$lib/server/api/client";
 import type { LayoutServerLoad } from "./$types";
 
 export const load: LayoutServerLoad = async (event) => {
-  // Anonymous visitors can reach this layout now (posts/[id], profiles), so
-  // the unread-count fetch must not fire without a session cookie — it's a
-  // guaranteed-401 call otherwise. Gate on the cookie itself (like sibling
-  // +server.ts files do) rather than on the fully-resolved session, so this
-  // still starts alongside resolveCurrentUser's two sequential backend calls
-  // instead of waiting on them.
+  // Gate unread-count on the cookie to avoid anonymous 401s while keeping the
+  // fetch parallel with resolveCurrentUser's backend calls.
   const hasSession = Boolean(event.cookies.get("session"));
   const unreadCountPromise =
     hasSession && event.url.pathname !== "/notifications"

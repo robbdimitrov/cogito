@@ -212,8 +212,7 @@ impl UserDb for DbClient {
     ) -> Result<(), SqlxError> {
         let mut tx = self.pool.begin().await?;
 
-        // Use COALESCE(NULLIF($n, ''), col) so that an empty string (field absent
-        // from the request) keeps the existing column value rather than clearing it.
+        // Empty proto3 string fields mean "preserve the existing column value".
         sqlx::query(
             "UPDATE users SET \
              name = COALESCE(NULLIF($1, ''), name), \
@@ -234,11 +233,8 @@ impl UserDb for DbClient {
         .execute(&mut *tx)
         .await?;
 
-        // Only publish to the search outbox when a searchable field (name or username)
-        // is actually changing. Because the UPDATE above may preserve existing values via
-        // COALESCE, we re-read both columns within the same transaction to get the
-        // effective post-update values — the outbox must carry complete, correct data so
-        // the search-index pipeline does not overwrite a preserved field with an empty string.
+        // Re-read effective searchable fields after COALESCE so the outbox
+        // carries complete values and never overwrites preserved fields.
         if !fields.name.is_empty() || !fields.username.is_empty() {
             let (effective_username, effective_name, follower_count, fan_out_disabled): (
                 String,

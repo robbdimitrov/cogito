@@ -149,14 +149,8 @@ func (ac *authController) validateSession(w http.ResponseWriter, r *http.Request
 	return newReq, nil
 }
 
-// validateSessionOptional attaches the caller's user id when a valid session
-// cookie is present, but never blocks the request for a missing or expired
-// cookie — for viewer-optional reads (public post/profile pages) that must
-// serve anonymous and stale-session callers alike rather than requiring a
-// session. A confirmed-invalid cookie is still logged and cleared, same as
-// the required-session path. Any other failure (e.g. authservice unavailable)
-// is returned as an error instead of being silently treated as anonymous,
-// since that would misrepresent a possibly-valid session as logged out.
+// validateSessionOptional attaches a valid session's user id for viewer-optional
+// reads. Missing/expired cookies stay anonymous; other auth failures still fail.
 func (ac *authController) validateSessionOptional(w http.ResponseWriter, r *http.Request) (*http.Request, error) {
 	newReq, err := ac.resolveSession(r)
 	if err != nil {

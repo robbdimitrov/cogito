@@ -95,12 +95,8 @@ func isPublicUserRead(r *http.Request) bool {
 	return isPublicResourceRead(r, "/users/", usersSearchSegment, "posts")
 }
 
-// isPublicUserByUsernameRead matches GET /users (getUserByUsername, looked up
-// via the ?username= query string) — the username-based counterpart to
-// isPublicUserRead's numeric-id path. Deliberately routed through
-// validateSessionOptional like the other viewer-optional reads rather than
-// the unconditional `allowed` allowlist, so a logged-in caller's session is
-// still resolved instead of always looking anonymous.
+// isPublicUserByUsernameRead matches GET /users?username= and uses optional
+// session validation so logged-in callers do not look anonymous.
 func isPublicUserByUsernameRead(r *http.Request) bool {
 	return r.Method == http.MethodGet && r.URL.Path == "/users"
 }

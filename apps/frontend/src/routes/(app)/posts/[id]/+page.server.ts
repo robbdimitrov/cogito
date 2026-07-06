@@ -10,10 +10,8 @@ import { failFromError } from "$lib/server/api/http";
 
 export const load = async (event) => {
   const { params } = event;
-  // getPost doesn't need currentUser, so it must not wait on the parent
-  // layout's session resolution — only the replies fetch is conditional on
-  // being logged in, and that gating happens after parent() resolves, in
-  // parallel with getPost rather than blocking it.
+  // Fetch the public post immediately; only replies wait for parent() to prove
+  // a logged-in viewer.
   const postPromise = getPost(apiClient(event), params.id).catch(() => null);
   const repliesPromise = event
     .parent()

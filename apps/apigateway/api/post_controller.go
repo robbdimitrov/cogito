@@ -410,11 +410,8 @@ func (pc *postController) deletePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Delete the image before the post: deleting the post is the point of no
-	// return, so an image-delete failure must abort here rather than leave an
-	// orphaned image with no post left to reference it. This is safe to
-	// retry: image storage deletes are idempotent, so a retry after a prior
-	// image delete succeeded but the post delete failed will no-op here.
+	// Delete image storage first; post deletion is the point of no return, and
+	// storage deletes are idempotent if a later retry repeats this step.
 	if postRes.MediaKey != "" && pc.imgClient != nil {
 		_, err := pc.imgClient.DeleteImage(ctx, &pb.DeleteImageRequest{Filename: postRes.MediaKey})
 		if err != nil {

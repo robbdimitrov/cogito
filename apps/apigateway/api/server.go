@@ -8,14 +8,8 @@ import (
 	"time"
 )
 
-// maxRequestBodyBytes is the gateway-wide hard body-size ceiling, enforced by
-// bodyLimitMiddleware for every request. Proxied uploads (see
-// proxyImageUpload) additionally get a fast, zero-I/O rejection when
-// Content-Length honestly reports an oversized body, falling back to reading
-// and bounding the body directly when Content-Length is absent or -1 (e.g.
-// chunked transfer-encoding) — this avoids Go's reverse-proxy
-// body-write-error edge case, which can drop the connection without a
-// response instead of returning a clean error.
+// maxRequestBodyBytes is the gateway-wide hard body-size ceiling. Uploads also
+// pre-buffer unknown-length bodies to return JSON 413 before reverse proxying.
 const maxRequestBodyBytes = 2 * 1024 * 1024
 
 // CreateServer builds the gateway HTTP handler and middleware chain.
@@ -29,11 +23,8 @@ func CreateServer(ctx context.Context, authAddr, postAddr, userAddr, imageAddr, 
 
 	rlStore := NewCacheStore(ctx)
 
-	// authGuard runs before rateLimitMiddleware so the user ID is in context
-	// when the rate limit key is computed. Per-user keying is critical: without
-	// it, every request falls back to the IP key and all users share one bucket
-	// (all browser traffic arrives via the SvelteKit proxy pod, so RemoteAddr is
-	// always the same host).
+	// authGuard must run before rateLimitMiddleware so browser traffic keys by
+	// user ID instead of the shared SvelteKit proxy address.
 	handler = newConcurrencyLimiter().middleware(handler)
 	handler = rateLimitMiddleware(rlStore)(handler)
 	handler = authGuard(router.auth)(handler)

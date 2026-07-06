@@ -88,6 +88,10 @@ copied into that stage.
 - Comments explain constraints, invariants, security decisions, or non-obvious
   intent. Do not narrate straightforward code or preserve implementation
   history.
+- Keep comments concise but valuable: compress verbose explanations into one or
+  two lines when they preserve the same essential constraint or intent. Respect
+  documentation comments and language-specific requirements such as Go comments
+  on exported identifiers.
 - Do not suppress compiler, linter, type-checker, or test warnings to make
   checks pass. Fix the underlying issue. Use a narrowly scoped suppression only
   when required by an external API, generated code, or a documented false
