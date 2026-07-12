@@ -37,7 +37,7 @@
 | /{username}/followers | Followers list                                                          | toggleFollow                                       |
 | /{username}/following | Following list                                                          | toggleFollow                                       |
 | /hashtags/{tag}       | Tag post feed                                                           | toggleLike, toggleRepost, deletePost               |
-| /search               | Search results (q, type params)                                         | —                                                  |
+| /search               | Grouped search results for users, posts, and hashtags                   | —                                                  |
 | /notifications        | Notifications (initial unread rows marked read server-side after fetch) | —                                                  |
 | /settings             | Redirect to /settings/profile                                           | —                                                  |
 | /settings/profile     | Current user profile                                                    | default — update name/username/email/bio/photos    |
@@ -142,12 +142,13 @@ unchanged after DTO mapping.
 | `/posts/{id}`           | GET    | page load       | GET /posts/{id} + GET /posts/{id}/replies                         |
 | `/hashtags/{tag}`       | GET    | page load       | GET /hashtags/{tag}/posts                                         |
 | `/hashtags/{tag}`       | GET    | +server.ts      | GET /hashtags/{tag}/posts?cursor=                                 |
-| `/search`               | GET    | page load       | GET /search?q=&type=                                              |
+| `/search`               | GET    | page load       | GET /search?q=&type=users,posts,hashtags in parallel              |
+| `/search`               | GET    | +server.ts      | GET /search?q=&type=&cursor=                                      |
 | `/notifications`        | GET    | app layout load | GET /notifications/unread-count                                   |
 | `/notifications`        | GET    | page load       | GET /notifications + PUT /notifications/{id}/read for unread rows |
 | `/notifications`        | GET    | +server.ts      | GET /notifications?cursor=                                        |
-| `/api/users/search`     | GET    | +server.ts      | GET /users/search?q=                                              |
-| `/api/hashtags/search`  | GET    | +server.ts      | GET /hashtags/search?q=                                           |
+| `/api/users/search`     | GET    | +server.ts      | GET /users/search?q=; used by composer typeahead                  |
+| `/api/hashtags/search`  | GET    | +server.ts      | GET /hashtags/search?q=; used by composer typeahead               |
 | `/uploads/{key}`        | GET    | +server.ts      | GET /uploads/{key} (proxied)                                      |
 | `/health`               | GET    | +server.ts      | returns "ok"                                                      |
 

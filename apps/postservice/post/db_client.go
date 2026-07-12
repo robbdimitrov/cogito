@@ -40,6 +40,32 @@ func repliesCount(postIDExpr string) string {
 	return fmt.Sprintf("(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = %s) AS replies", postIDExpr)
 }
 
+func feedPullQuery(querySelect string) string {
+	return querySelect + `
+		FROM posts p
+		JOIN users u ON u.id = p.user_id
+		LEFT JOIN posts o ON o.id = p.repost_of_id
+		WHERE (
+			p.user_id = $2
+			OR p.user_id IN (
+				SELECT fol.user_id FROM followers fol
+				JOIN users fu ON fu.id = fol.user_id
+				WHERE fol.follower_id = $2
+				AND fu.fan_out_disabled = true
+			)
+		)
+		AND (p.user_id = $2 OR u.fan_out_disabled = true)
+		AND NOT EXISTS (
+			SELECT 1 FROM feed f
+			WHERE f.user_id = $2 AND f.post_id = p.id
+		)
+		AND p.in_reply_to_id IS NULL
+		AND (o.id IS NULL OR o.in_reply_to_id IS NULL)
+		AND ($3::timestamptz IS NULL OR (p.created, p.id) < ($3::timestamptz, $4::int))
+		ORDER BY p.created DESC, p.id DESC
+		LIMIT $5`
+}
+
 var errInvalidReference = errors.New("invalid reference")
 var errNotFound = errors.New("not found")
 
@@ -232,22 +258,7 @@ func (c *DBClient) getFeed(ctx context.Context, cursor Cursor, hasCursor bool, l
 		AND ($3::timestamptz IS NULL OR (f.created, f.post_id) < ($3::timestamptz, $4::int))
 		ORDER BY f.created DESC, f.post_id DESC
 		LIMIT $5`
-	pullQuery := querySelect + `
-		FROM posts p
-		JOIN users u ON u.id = p.user_id
-		LEFT JOIN posts o ON o.id = p.repost_of_id
-		WHERE p.user_id IN (
-			SELECT fol.user_id FROM followers fol
-			JOIN users fu ON fu.id = fol.user_id
-			WHERE fol.follower_id = $2
-			AND fu.fan_out_disabled = true
-		)
-		AND u.fan_out_disabled = true
-		AND p.in_reply_to_id IS NULL
-		AND (o.id IS NULL OR o.in_reply_to_id IS NULL)
-		AND ($3::timestamptz IS NULL OR (p.created, p.id) < ($3::timestamptz, $4::int))
-		ORDER BY p.created DESC, p.id DESC
-		LIMIT $5`
+	pullQuery := feedPullQuery(querySelect)
 
 	var cursorTS *time.Time
 	var cursorID int32

@@ -71,6 +71,9 @@ timestamp, formatted content, optional embedded image, action bar (like with
 count, repost with dropdown, reply with count, delete for own posts). Renders
 `QuoteEmbed` when `quotePost` is present; renders repost attribution header when
 `repostOf` is present. Owner sees a delete button that triggers `ConfirmModal`.
+Authenticated users can double-click an embedded image to like it; the existing
+like form handles mutation and rollback, while a large heart overlay uses
+`--animate-like-burst`.
 
 ### `UserCard`
 
@@ -89,7 +92,14 @@ access.
 
 Post composer with expandable textarea (`FormattedContent` preview), image
 upload button (triggers `POST /uploads`), and submit. Supports `inReplyToId`
-prop for reply creation.
+prop for reply creation. Mentions and hashtags use the shared typeahead
+controller and a portalled dropdown positioned at the active caret line.
+
+### `Typeahead`
+
+Portalled suggestion dropdown for composer mention and hashtag completion.
+User suggestions show avatar, name, and username; hashtag suggestions show the
+tag and post count.
 
 ### `FormattedContent`
 
@@ -120,7 +130,8 @@ input wrapper. `FormInput` / `FormTextarea` — apply `.form-input` /
 input with leading Lucide icon (email, lock). `Loading` — centered spinner.
 `ToastProvider` — toast queue context and renderer. `PostList` / `UserList` —
 list containers. `QuoteEmbed` / `ReplyComposer` — inline post context
-components. `ControlBar` — profile action strip.
+components. `ReplyComposer` uses the same mention/hashtag typeahead as
+`CreatePost`. `ControlBar` — profile action strip.
 
 ## Icons
 

@@ -55,6 +55,29 @@ Single-replica stateful services (`database`, `cache`, `storage`, `search`, and
 database startup probe: failureThreshold=30, periodSeconds=2.
 terminationGracePeriodSeconds=60.
 
+## Deployment Flow
+
+`scripts/deploy.sh` applies manifests in stages: static policy resources,
+infra dependencies, database, application services, then the broker backfill.
+Custom images are tagged with a stable 12-character SHA-256 checksum of each
+component's build inputs, so an apigateway-only change does not create new tags
+for frontend, database, or the other services. Override
+`APIGATEWAY_IMAGE_TAG`, `AUTHSERVICE_IMAGE_TAG`, `DATABASE_IMAGE_TAG`,
+`FLOWSERVICE_IMAGE_TAG`, `FRONTEND_IMAGE_TAG`, `IMAGESERVICE_IMAGE_TAG`,
+`POSTSERVICE_IMAGE_TAG`, or `USERSERVICE_IMAGE_TAG` only when a fixed tag is
+deliberate.
+
+Application manifests are rendered with the resolved tags before `kubectl
+apply`, so unchanged workloads are not reset to the untagged images in source
+manifests. Workloads that consume `cogito-db-secret` receive a
+`checksum/cogito-db-secret` pod-template annotation; `connect` also receives a
+`checksum/broker-pipelines` annotation. Secret or pipeline changes therefore
+roll out the affected workload without restarting unrelated services.
+
+The `broker-backfill` Job is created only when it has not completed before.
+Use `FORCE_BACKFILL=1 scripts/deploy.sh` to deliberately delete and rerun it,
+for example after resetting the search index.
+
 ## Init Containers
 
 | Deployment | Init image                     | Action                                            |
@@ -216,7 +239,7 @@ trigger a full reindex by running the `broker-backfill` Job.
   migrations, never by editing existing ones.
 - Mixed-version compatibility required when a schema change affects multiple
   independently deployed services.
-- Current: 12 migration pairs (000001 through 000012).
+- Current: 13 migration pairs (000001 through 000013).
 
 ## Deployment Script
 
@@ -226,12 +249,15 @@ trigger a full reindex by running the `broker-backfill` Job.
 2. Use the current Kubernetes context and create namespace `cogito` (skip if
    exists; override with `NS`).
 3. Generate or repair `cogito-db-secret`.
-4. Build all images via `make IMAGE_PREFIX="$REGISTRY"`.
-5. Apply all manifests from `deploy/` and set Cogito images from `REGISTRY`.
-6. Scale Deployments down while dependencies restart.
-7. Restart the database StatefulSet and wait up to 180 s.
-8. Restart stateful services (`cache`, `storage`, `search`, `broker`) and wait.
-9. Scale Deployments back to their manifest replica counts and wait.
+4. Compute per-component image tags and build/push each image via `make
+   <service> IMAGE_PREFIX="$REGISTRY" GIT_SHA="$tag"`.
+5. Apply static manifests, infra StatefulSets, and broker resources except the
+   backfill Job; wait for infra rollouts.
+6. Apply the database StatefulSet and wait for it.
+7. Render application manifests with resolved image tags, apply them, stamp
+   secret checksum annotations, and wait for application rollouts.
+8. Stamp connect secret/configmap checksum annotations and wait for connect.
+9. Run `broker-backfill` once, or rerun with `FORCE_BACKFILL=1`.
 10. Start port-forward supervisor: `frontend:8080` → `localhost:8080`.
 
 ## Dependency Restart Drill

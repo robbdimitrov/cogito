@@ -55,9 +55,11 @@
   let isDeleting = $state(false);
   let isLiking = $state(false);
   let isReposting = $state(false);
+  let imageLikeBurst = $state(false);
 
   let deleteForm: HTMLFormElement | null = $state(null);
   let repostForm: HTMLFormElement | null = $state(null);
+  let likeForm: HTMLFormElement | null = $state(null);
 
   function formatPostDate(dateString: string | undefined) {
     if (!dateString) return "";
@@ -77,6 +79,20 @@
 
   function triggerRepost() {
     if (repostForm) repostForm.requestSubmit();
+  }
+
+  function handleImageDoubleClick() {
+    if (!currentUserId) return;
+    imageLikeBurst = false;
+    requestAnimationFrame(() => {
+      imageLikeBurst = true;
+      setTimeout(() => {
+        imageLikeBurst = false;
+      }, 700);
+    });
+    if (!liked) {
+      likeForm?.requestSubmit();
+    }
   }
 </script>
 
@@ -147,14 +163,27 @@
             class="mt-3 sm:mt-3.5 whitespace-pre-wrap wrap-break-word text-[15px] sm:text-[1.05rem] leading-relaxed text-slate-800 dark:text-slate-200"
           />
           {#if displayPost.mediaKey}
-            <div class="mt-3">
+            <div
+              class="relative mt-3 inline-block"
+              role="presentation"
+              ondblclick={handleImageDoubleClick}
+            >
               <img
                 src={imageUrl(displayPost.mediaKey)}
                 alt="Post attachment"
                 loading="lazy"
                 decoding="async"
-                class="max-h-96 w-auto rounded-xl object-contain border border-slate-200 dark:border-slate-800"
+                class="max-h-96 w-auto rounded-xl border border-slate-200 object-contain dark:border-slate-800"
               />
+              {#if imageLikeBurst}
+                <div
+                  class="pointer-events-none absolute inset-0 flex items-center justify-center"
+                >
+                  <Heart
+                    class="h-20 w-20 animate-like-burst fill-white text-white drop-shadow-lg"
+                  />
+                </div>
+              {/if}
             </div>
           {/if}
           {#if displayPost.quotePost}
@@ -233,6 +262,7 @@
 
             {#if currentUserId}
               <form
+                bind:this={likeForm}
                 method="POST"
                 action="?/toggleLike"
                 use:enhance={() => {

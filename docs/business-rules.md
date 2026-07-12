@@ -71,8 +71,10 @@ before insert).
 Home feed is a hybrid follow graph query. Regular authors are pushed into the
 `feed` table for each follower plus the author; authors with
 `fan_out_disabled = true` are pulled in real time from the posts table for
-followers. Replies do not fan out. Reposts do fan out and provide a discovery
-path beyond original follows.
+followers. The viewer's own posts are also pulled live until their async feed
+row exists, so newly created posts are visible immediately without duplicating
+once fan-out catches up. Replies do not fan out. Reposts do fan out and provide
+a discovery path beyond original follows.
 
 ## Post Counters
 
@@ -166,12 +168,14 @@ observed.
    posts directly for followers. During mixed-version rollout only, legacy post
    events that lack this snapshot are routed from a database snapshot instead of
    being dropped.
-3. Following a regular author backfills the follower's feed with the author's
+3. Own-post read-after-write is live-read from `posts` and deduped against
+   `feed`, because fan-out is asynchronous.
+4. Following a regular author backfills the follower's feed with the author's
    latest 50 non-reply posts.
-4. Unfollowing prunes that followee's materialized feed rows for the follower.
-5. Post and user deletes rely on database CASCADE to remove feed rows; consumers
+5. Unfollowing prunes that followee's materialized feed rows for the follower.
+6. Post and user deletes rely on database CASCADE to remove feed rows; consumers
    do not separately delete them.
-6. Feed consumer processing is at-least-once: malformed or unsupported messages
+7. Feed consumer processing is at-least-once: malformed or unsupported messages
    are logged and acknowledged as deliberate skips, while retryable handler
    failures are left uncommitted after bounded in-process retries so Kafka can
    redeliver them.

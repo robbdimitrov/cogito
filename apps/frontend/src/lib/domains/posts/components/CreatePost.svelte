@@ -2,23 +2,19 @@
   import { Pen, Send, ImageIcon, X } from "@lucide/svelte";
   import Avatar from "$lib/shared/components/ui/Avatar.svelte";
   import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
+  import Typeahead from "$lib/shared/components/ui/Typeahead.svelte";
   import type { User } from "$lib/domains/users/model";
 
   import { resizeImageForUpload } from "$lib/shared/image";
   import { getToastContext } from "$lib/shared/toast.svelte";
   import { enhance } from "$app/forms";
+  import { getCaretLineTop } from "$lib/shared/caretLineTop";
+  import { createFloatingPosition } from "$lib/shared/floatingPosition.svelte";
+  import { portal } from "$lib/shared/portal";
+  import { createTypeaheadController } from "$lib/shared/typeaheadController.svelte";
 
   let { user } = $props<{ user: User }>();
   let content = $state("");
-  let cursorPosition = $state<number | null>(null);
-  let suggestions = $state<User[]>([]);
-  let searchQuery = $state("");
-  let showTypeahead = $state(false);
-  let hashtagSuggestions = $state<
-    { id: number; name: string; postCount: number }[]
-  >([]);
-  let hashtagQuery = $state("");
-  let showHashtagTypeahead = $state(false);
   let imageBlob = $state<Blob | null>(null);
   let imagePreview = $state<string | null>(null);
   let uploadingImage = $state(false);
@@ -27,140 +23,39 @@
   const toast = getToastContext();
   let textareaRef: HTMLTextAreaElement;
   let fileInputRef: HTMLInputElement;
-  let searchAbortController: AbortController | null = null;
-  let hashtagAbortController: AbortController | null = null;
-
-  function isAbortError(e: unknown): boolean {
-    return e instanceof DOMException && e.name === "AbortError";
-  }
-
-  $effect(() => {
-    const delayDebounceFn = setTimeout(async () => {
-      if (searchQuery.length > 0) {
-        searchAbortController?.abort();
-        const controller = new AbortController();
-        searchAbortController = controller;
-        try {
-          const response = await fetch(
-            `/api/users/search?query=${encodeURIComponent(searchQuery)}&limit=5`,
-            { signal: controller.signal },
-          );
-          const res = await response.json();
-          suggestions = res.items || [];
-          showTypeahead = true;
-        } catch (e) {
-          if (isAbortError(e)) return;
-          suggestions = [];
-        }
-      } else {
-        suggestions = [];
-        showTypeahead = false;
-      }
-    }, 200);
-
-    return () => {
-      clearTimeout(delayDebounceFn);
-      searchAbortController?.abort();
-    };
-  });
-
-  $effect(() => {
-    const delayDebounceFn = setTimeout(async () => {
-      if (hashtagQuery.length > 0) {
-        hashtagAbortController?.abort();
-        const controller = new AbortController();
-        hashtagAbortController = controller;
-        try {
-          const response = await fetch(
-            `/api/hashtags/search?query=${encodeURIComponent(hashtagQuery)}&limit=5`,
-            { signal: controller.signal },
-          );
-          const res = await response.json();
-          hashtagSuggestions = res.items || [];
-          showHashtagTypeahead = true;
-        } catch (e) {
-          if (isAbortError(e)) return;
-          hashtagSuggestions = [];
-        }
-      } else {
-        hashtagSuggestions = [];
-        showHashtagTypeahead = false;
-      }
-    }, 200);
-    return () => {
-      clearTimeout(delayDebounceFn);
-      hashtagAbortController?.abort();
-    };
-  });
+  let typeahead = createTypeaheadController();
+  let dropdownPos = createFloatingPosition();
+  let lastCaretLineTop = 0;
+  let lastPaddingLeft = 0;
 
   function handleChange(e: Event) {
     const target = e.target as HTMLTextAreaElement;
     content = target.value;
-    cursorPosition = target.selectionStart;
-
-    const textBeforeCursor = content.substring(0, cursorPosition);
-    const match = textBeforeCursor.match(/(?:^|\s)@([a-zA-Z0-9_]*)$/);
-    if (match) {
-      searchQuery = match[1] || "";
-      showTypeahead = true;
-      // Clear hashtag typeahead when mention is active
-      hashtagQuery = "";
-      showHashtagTypeahead = false;
-    } else {
-      searchQuery = "";
-      showTypeahead = false;
-    }
-
-    const hashtagMatch = textBeforeCursor.match(/(?:^|\s)#([A-Za-z0-9_]*)$/);
-    if (hashtagMatch) {
-      hashtagQuery = hashtagMatch[1] || "";
-      showHashtagTypeahead = true;
-      // Clear mention typeahead when hashtag is active
-      searchQuery = "";
-      showTypeahead = false;
-    } else {
-      hashtagQuery = "";
-      showHashtagTypeahead = false;
+    const caret = target.selectionStart ?? content.length;
+    typeahead.handleInput(content, caret);
+    if (typeahead.token) {
+      lastCaretLineTop = getCaretLineTop(target, caret);
+      lastPaddingLeft = parseFloat(getComputedStyle(target).paddingLeft) || 0;
+      dropdownPos.placeAtLine(target, lastCaretLineTop, lastPaddingLeft);
     }
   }
 
-  function handleSelectSuggestion(username: string) {
-    if (cursorPosition === null) return;
-    const textBeforeCursor = content.substring(0, cursorPosition);
-    const textAfterCursor = content.substring(cursorPosition);
-    const match = textBeforeCursor.match(/(?:^|\s)@([a-zA-Z0-9_]*)$/);
-
-    if (match) {
-      const matchStart = textBeforeCursor.lastIndexOf("@" + match[1]);
-      content =
-        content.substring(0, matchStart) +
-        "@" +
-        username +
-        " " +
-        textAfterCursor;
-    }
-
-    showTypeahead = false;
-    searchQuery = "";
-    textareaRef?.focus();
+  function handleTypeaheadSelect(value: string) {
+    const next = typeahead.select(content, value, textareaRef);
+    if (next !== null) content = next;
   }
 
-  function handleSelectHashtag(name: string) {
-    if (cursorPosition === null) return;
-    const textBeforeCursor = content.substring(0, cursorPosition);
-    const textAfterCursor = content.substring(cursorPosition);
-    const match = textBeforeCursor.match(/(?:^|\s)#([A-Za-z0-9_]*)$/);
-
-    if (match) {
-      const matchStart = textBeforeCursor.lastIndexOf("#" + match[1]);
-      content =
-        content.substring(0, matchStart) + "#" + name + " " + textAfterCursor;
-    }
-
-    showHashtagTypeahead = false;
-    hashtagQuery = "";
-    textareaRef?.focus();
-  }
+  $effect(() => {
+    if (typeahead.items.length === 0 || !textareaRef) return;
+    const reposition = () =>
+      dropdownPos.placeAtLine(textareaRef, lastCaretLineTop, lastPaddingLeft);
+    window.addEventListener("scroll", reposition, true);
+    window.addEventListener("resize", reposition);
+    return () => {
+      window.removeEventListener("scroll", reposition, true);
+      window.removeEventListener("resize", reposition);
+    };
+  });
 
   async function handleImageUpload(e: Event) {
     const target = e.target as HTMLInputElement;
@@ -205,10 +100,7 @@
             imageBlob = null;
             if (imagePreview) URL.revokeObjectURL(imagePreview);
             imagePreview = null;
-            showTypeahead = false;
-            showHashtagTypeahead = false;
-            hashtagQuery = "";
-            hashtagSuggestions = [];
+            typeahead.reset();
             await update();
           } else if (result.type === "failure") {
             toast.error(
@@ -242,62 +134,16 @@
             onkeyup={handleChange}
             rows={3}
             maxlength={255}></textarea>
-          {#if showTypeahead && suggestions.length > 0}
+          {#if typeahead.items.length > 0}
             <div
-              class="absolute left-0 top-[105%] z-10 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white/95 shadow-2xl backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/95"
+              use:portal
+              style="position: fixed; top: {dropdownPos.top}px; left: {dropdownPos.left}px;"
             >
-              {#each suggestions as u (u.id)}
-                <button
-                  type="button"
-                  class="flex w-full items-center gap-3 border-b border-slate-100 px-4 py-3 text-left transition-colors last:border-0 hover:bg-slate-100 dark:border-slate-800/50 dark:hover:bg-slate-800/80"
-                  onclick={() => handleSelectSuggestion(u.username)}
-                >
-                  <Avatar
-                    name={u.name}
-                    size="sm"
-                    photoKey={u.profilePhotoKey}
-                  />
-                  <div class="overflow-hidden">
-                    <div
-                      class="truncate text-sm font-semibold text-slate-900 dark:text-white"
-                    >
-                      {u.name}
-                    </div>
-                    <div
-                      class="truncate text-xs text-slate-500 dark:text-slate-400"
-                    >
-                      @{u.username}
-                    </div>
-                  </div>
-                </button>
-              {/each}
-            </div>
-          {/if}
-          {#if showHashtagTypeahead && hashtagSuggestions.length > 0}
-            <div
-              class="absolute left-0 top-[105%] z-10 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white/95 shadow-2xl backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/95"
-            >
-              {#each hashtagSuggestions as h (h.id)}
-                <button
-                  type="button"
-                  class="flex w-full items-center gap-3 border-b border-slate-100 px-4 py-3 text-left transition-colors last:border-0 hover:bg-slate-100 dark:border-slate-800/50 dark:hover:bg-slate-800/80"
-                  onclick={() => handleSelectHashtag(h.name)}
-                >
-                  <div class="overflow-hidden">
-                    <div
-                      class="truncate text-sm font-semibold text-slate-900 dark:text-white"
-                    >
-                      #{h.name}
-                    </div>
-                    <div
-                      class="truncate text-xs text-slate-500 dark:text-slate-400"
-                    >
-                      {h.postCount}
-                      {h.postCount === 1 ? "post" : "posts"}
-                    </div>
-                  </div>
-                </button>
-              {/each}
+              <Typeahead
+                items={typeahead.items}
+                display={typeahead.displayItem}
+                onselect={handleTypeaheadSelect}
+              />
             </div>
           {/if}
         </div>

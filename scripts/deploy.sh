@@ -8,41 +8,45 @@ NS="${NS:-cogito}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 K8S_DIR="$ROOT/deploy"
 REGISTRY="${REGISTRY:-localhost:5000/cogito}"
-GIT_SHA="${GIT_SHA:-$(git -C "${ROOT}" rev-parse --short HEAD)}"
 APP_HOST="${APP_HOST:-cogito.localhost}"
 LOCAL_PORT="${LOCAL_PORT:-8080}"
 REMOTE_PORT="${REMOTE_PORT:-8080}"
 PORT_FORWARD_LOG="${PORT_FORWARD_LOG:-/tmp/cogito-port-forward-${LOCAL_PORT}.log}"
 PORT_FORWARD_PID_FILE="${PORT_FORWARD_PID_FILE:-/tmp/cogito-port-forward-${LOCAL_PORT}.pid}"
+FORCE_BACKFILL="${FORCE_BACKFILL:-0}"
 CREATED_NAMESPACE=false
+
+APIGATEWAY_IMAGE_TAG="${APIGATEWAY_IMAGE_TAG:-}"
+AUTHSERVICE_IMAGE_TAG="${AUTHSERVICE_IMAGE_TAG:-}"
+DATABASE_IMAGE_TAG="${DATABASE_IMAGE_TAG:-}"
+FLOWSERVICE_IMAGE_TAG="${FLOWSERVICE_IMAGE_TAG:-}"
+FRONTEND_IMAGE_TAG="${FRONTEND_IMAGE_TAG:-}"
+IMAGESERVICE_IMAGE_TAG="${IMAGESERVICE_IMAGE_TAG:-}"
+POSTSERVICE_IMAGE_TAG="${POSTSERVICE_IMAGE_TAG:-}"
+USERSERVICE_IMAGE_TAG="${USERSERVICE_IMAGE_TAG:-}"
+
+STATIC_MANIFESTS=(pdb.yaml networkpolicy.yaml)
+INFRA_MANIFESTS=(storage.yaml cache.yaml search.yaml)
+DATABASE_MANIFESTS=(database.yaml)
+BROKER_MANIFEST="broker.yaml"
 
 ROLL_OUT_DATABASE=(statefulset/database)
 ROLL_OUT_STATEFUL=(
-  statefulset/cache
   statefulset/storage
+  statefulset/cache
   statefulset/search
   statefulset/broker
 )
 ROLL_OUT_DEPLOYMENTS=(
   deployment/apigateway
   deployment/authservice
-  deployment/connect
   deployment/flowservice
   deployment/frontend
   deployment/imageservice
   deployment/postservice
   deployment/userservice
 )
-DEPLOYMENT_REPLICAS=(
-  apigateway=1
-  authservice=1
-  connect=1
-  flowservice=2
-  frontend=1
-  imageservice=1
-  postservice=1
-  userservice=1
-)
+ROLL_OUT_CONNECT=(deployment/connect)
 
 log() {
   echo "==> $*"
@@ -55,7 +59,7 @@ die() {
 
 require_tools() {
   local tool
-  for tool in kubectl docker make openssl; do
+  for tool in kubectl docker make openssl awk; do
     command -v "$tool" >/dev/null || die "missing required tool: $tool"
   done
 }
@@ -132,8 +136,7 @@ ensure_secret() {
   fi
 
   log "creating generated database and service secrets"
-  local postgres_password
-  local app_password
+  local postgres_password app_password
   postgres_password="$(random_secret)"
   app_password="$(random_secret)"
   kubectl -n "${NS}" create secret generic cogito-db-secret \
@@ -189,32 +192,205 @@ handle_existing_port_forward() {
   exit 1
 }
 
+context_checksum() {
+  (
+    cd "${ROOT}"
+    for dir in "$@"; do
+      find "${dir}" -type f \
+        ! -path '*/.git/*' \
+        ! -path '*/bin/*' \
+        ! -path '*/tmp/*' \
+        ! -path '*/target/*' \
+        ! -path '*/coverage/*' \
+        ! -path '*/node_modules/*' \
+        ! -path '*/.svelte-kit/*' \
+        ! -path '*/build/*' \
+        ! -path '*/dist/*'
+    done | LC_ALL=C sort -u | while IFS= read -r file; do
+      case "${file}" in
+        apps/frontend/.env | apps/frontend/.env.*)
+          [[ "${file}" == "apps/frontend/.env.example" ]] || continue
+          ;;
+      esac
+      printf '%s\0' "${file}"
+      openssl dgst -sha256 -binary "${file}"
+    done
+  ) | openssl dgst -sha256 -r | awk '{print substr($1, 1, 12)}'
+}
+
+init_image_tags() {
+  APIGATEWAY_IMAGE_TAG="${APIGATEWAY_IMAGE_TAG:-$(context_checksum apps/apigateway pkg/pb)}"
+  AUTHSERVICE_IMAGE_TAG="${AUTHSERVICE_IMAGE_TAG:-$(context_checksum apps/authservice pkg/pb)}"
+  DATABASE_IMAGE_TAG="${DATABASE_IMAGE_TAG:-$(context_checksum apps/database)}"
+  FLOWSERVICE_IMAGE_TAG="${FLOWSERVICE_IMAGE_TAG:-$(context_checksum apps/flowservice pkg/pb)}"
+  FRONTEND_IMAGE_TAG="${FRONTEND_IMAGE_TAG:-$(context_checksum apps/frontend)}"
+  IMAGESERVICE_IMAGE_TAG="${IMAGESERVICE_IMAGE_TAG:-$(context_checksum apps/imageservice pkg/pb)}"
+  POSTSERVICE_IMAGE_TAG="${POSTSERVICE_IMAGE_TAG:-$(context_checksum apps/postservice pkg/pb)}"
+  USERSERVICE_IMAGE_TAG="${USERSERVICE_IMAGE_TAG:-$(context_checksum apps/userservice pkg/pb)}"
+}
+
+build_one_image() {
+  local target="$1"
+  local tag="$2"
+  make -C "${ROOT}" "${target}" IMAGE_PREFIX="${REGISTRY}" GIT_SHA="${tag}"
+}
+
 build_images() {
   log "building images"
+  log "image tags: apigateway=${APIGATEWAY_IMAGE_TAG} authservice=${AUTHSERVICE_IMAGE_TAG} database=${DATABASE_IMAGE_TAG} flowservice=${FLOWSERVICE_IMAGE_TAG} frontend=${FRONTEND_IMAGE_TAG} imageservice=${IMAGESERVICE_IMAGE_TAG} postservice=${POSTSERVICE_IMAGE_TAG} userservice=${USERSERVICE_IMAGE_TAG}"
   export DOCKER_BUILDKIT=1
-  export GIT_SHA
-  make -C "${ROOT}" IMAGE_PREFIX="${REGISTRY}" GIT_SHA="${GIT_SHA}"
+  build_one_image apigateway "${APIGATEWAY_IMAGE_TAG}"
+  build_one_image authservice "${AUTHSERVICE_IMAGE_TAG}"
+  build_one_image database "${DATABASE_IMAGE_TAG}"
+  build_one_image flowservice "${FLOWSERVICE_IMAGE_TAG}"
+  build_one_image frontend "${FRONTEND_IMAGE_TAG}"
+  build_one_image imageservice "${IMAGESERVICE_IMAGE_TAG}"
+  build_one_image postservice "${POSTSERVICE_IMAGE_TAG}"
+  build_one_image userservice "${USERSERVICE_IMAGE_TAG}"
 }
 
-apply_manifests() {
-  log "creating namespace and applying manifests"
-  ensure_namespace
-  ensure_secret
-  kubectl apply -f "${K8S_DIR}" -n "${NS}"
-  kubectl -n "${NS}" set image deployment/apigateway migration="${REGISTRY}/database:${GIT_SHA}" apigateway="${REGISTRY}/apigateway:${GIT_SHA}" >/dev/null
-  kubectl -n "${NS}" set image deployment/authservice authservice="${REGISTRY}/authservice:${GIT_SHA}" >/dev/null
-  kubectl -n "${NS}" set image deployment/flowservice flowservice="${REGISTRY}/flowservice:${GIT_SHA}" >/dev/null
-  kubectl -n "${NS}" set image deployment/frontend frontend="${REGISTRY}/frontend:${GIT_SHA}" >/dev/null
-  kubectl -n "${NS}" set image deployment/imageservice imageservice="${REGISTRY}/imageservice:${GIT_SHA}" >/dev/null
-  kubectl -n "${NS}" set image deployment/postservice postservice="${REGISTRY}/postservice:${GIT_SHA}" >/dev/null
-  kubectl -n "${NS}" set image deployment/userservice userservice="${REGISTRY}/userservice:${GIT_SHA}" >/dev/null
-}
-
-rollout_restart() {
-  local resource
-  for resource in "$@"; do
-    kubectl -n "${NS}" rollout restart "${resource}"
+apply_manifest_files() {
+  local files=()
+  local manifest
+  for manifest in "$@"; do
+    files+=("-f" "${K8S_DIR}/${manifest}")
   done
+  kubectl apply "${files[@]}" -n "${NS}" >/dev/null
+}
+
+select_manifest_documents() {
+  local manifest="$1"
+  local mode="$2"
+  local kind="$3"
+  local name="$4"
+  awk -v mode="${mode}" -v want_kind="${kind}" -v want_name="${name}" '
+    function reset() {
+      doc = ""
+      doc_kind = ""
+      doc_name = ""
+      in_metadata = 0
+    }
+    function should_emit() {
+      matched = (doc_kind == want_kind && doc_name == want_name)
+      return mode == "only" ? matched : !matched
+    }
+    function emit() {
+      if (doc != "" && should_emit()) {
+        printf "%s---\n", doc
+      }
+    }
+    /^---[[:space:]]*$/ {
+      emit()
+      reset()
+      next
+    }
+    {
+      doc = doc $0 "\n"
+    }
+    /^kind:[[:space:]]*/ {
+      doc_kind = $2
+    }
+    /^metadata:[[:space:]]*$/ {
+      in_metadata = 1
+      next
+    }
+    /^[^[:space:]]/ && $0 !~ /^metadata:/ {
+      in_metadata = 0
+    }
+    in_metadata && /^[[:space:]]+name:[[:space:]]*/ {
+      doc_name = $2
+    }
+    END {
+      emit()
+    }
+  ' "${K8S_DIR}/${manifest}"
+}
+
+append_rendered_deployment_manifest() {
+  local rendered="$1"
+  local manifest="$2"
+  local name="$3"
+  local deployment
+  deployment="$(mktemp)"
+  shift 3
+
+  select_manifest_documents "${manifest}" except Deployment "${name}" >> "${rendered}"
+  select_manifest_documents "${manifest}" only Deployment "${name}" > "${deployment}"
+  if ! kubectl set image --local -o yaml -f "${deployment}" "$@" >> "${rendered}"; then
+    rm -f "${deployment}"
+    return 1
+  fi
+  rm -f "${deployment}"
+}
+
+apply_rendered_app_manifests() {
+  local rendered
+  rendered="$(mktemp)"
+  trap 'rm -f "${rendered}"' RETURN
+
+  append_rendered_deployment_manifest "${rendered}" apigateway.yaml apigateway \
+    migration="${REGISTRY}/database:${DATABASE_IMAGE_TAG}" \
+    apigateway="${REGISTRY}/apigateway:${APIGATEWAY_IMAGE_TAG}"
+  append_rendered_deployment_manifest "${rendered}" authservice.yaml authservice \
+    authservice="${REGISTRY}/authservice:${AUTHSERVICE_IMAGE_TAG}"
+  append_rendered_deployment_manifest "${rendered}" flowservice.yaml flowservice \
+    flowservice="${REGISTRY}/flowservice:${FLOWSERVICE_IMAGE_TAG}"
+  append_rendered_deployment_manifest "${rendered}" frontend.yaml frontend \
+    frontend="${REGISTRY}/frontend:${FRONTEND_IMAGE_TAG}"
+  append_rendered_deployment_manifest "${rendered}" imageservice.yaml imageservice \
+    imageservice="${REGISTRY}/imageservice:${IMAGESERVICE_IMAGE_TAG}"
+  append_rendered_deployment_manifest "${rendered}" postservice.yaml postservice \
+    postservice="${REGISTRY}/postservice:${POSTSERVICE_IMAGE_TAG}"
+  append_rendered_deployment_manifest "${rendered}" userservice.yaml userservice \
+    userservice="${REGISTRY}/userservice:${USERSERVICE_IMAGE_TAG}"
+
+  kubectl apply -f "${rendered}" -n "${NS}" >/dev/null
+  trap - RETURN
+  rm -f "${rendered}"
+}
+
+apply_broker_infra_manifest() {
+  local rendered
+  rendered="$(mktemp)"
+  trap 'rm -f "${rendered}"' RETURN
+  select_manifest_documents "${BROKER_MANIFEST}" except Job broker-backfill > "${rendered}"
+  kubectl apply -f "${rendered}" -n "${NS}" >/dev/null
+  trap - RETURN
+  rm -f "${rendered}"
+}
+
+data_resource_checksum() {
+  local kind="$1"
+  local name="$2"
+  kubectl -n "${NS}" get "${kind}" "${name}" -o go-template='{{ range $k, $v := .data }}{{ printf "%s=%s\n" $k $v }}{{ end }}' \
+    | LC_ALL=C sort \
+    | openssl dgst -sha256 -r | awk '{print $1}'
+}
+
+annotate_data_resource_checksums() {
+  local kind="$1"
+  local resource="$2"
+  shift 2
+  local name pairs=()
+  for name in "$@"; do
+    pairs+=("\"checksum/${name}\":\"$(data_resource_checksum "${kind}" "${name}")\"")
+  done
+  local joined
+  joined="$(IFS=,; echo "${pairs[*]}")"
+  kubectl -n "${NS}" patch "${resource}" --type merge \
+    -p "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{${joined}}}}}}" >/dev/null
+}
+
+annotate_secret_checksums() {
+  local resource="$1"
+  shift
+  annotate_data_resource_checksums secret "${resource}" "$@"
+}
+
+annotate_configmap_checksums() {
+  local resource="$1"
+  shift
+  annotate_data_resource_checksums configmap "${resource}" "$@"
 }
 
 wait_for_rollouts() {
@@ -240,33 +416,71 @@ wait_for_rollouts() {
   exit 1
 }
 
-restart_stack() {
-  local deployment replica
-  log "pausing deployments while dependencies restart"
-  for deployment in "${DEPLOYMENT_REPLICAS[@]}"; do
-    kubectl -n "${NS}" scale "deployment/${deployment%%=*}" --replicas=0
-  done
+run_broker_backfill() {
+  local complete
+  complete="$(kubectl -n "${NS}" get job broker-backfill -o jsonpath='{range .status.conditions[?(@.type=="Complete")]}{.status}{end}' 2>/dev/null || true)"
+  if [[ "${FORCE_BACKFILL}" != "1" && "${complete}" == "True" ]]; then
+    log "broker backfill already complete"
+    return 0
+  fi
 
-  log "restarting database"
-  rollout_restart "${ROLL_OUT_DATABASE[@]}"
-  wait_for_rollouts "${ROLL_OUT_DATABASE[@]}"
+  log "running broker backfill"
+  local manifest
+  manifest="$(mktemp)"
+  trap 'rm -f "${manifest}"' RETURN
+  select_manifest_documents "${BROKER_MANIFEST}" only Job broker-backfill > "${manifest}"
+  kubectl -n "${NS}" delete job broker-backfill --ignore-not-found --wait=true >/dev/null
+  kubectl apply -f "${manifest}" -n "${NS}" >/dev/null
+  trap - RETURN
+  rm -f "${manifest}"
+  if kubectl -n "${NS}" wait --for=condition=complete job/broker-backfill --timeout=180s; then
+    return 0
+  fi
+  echo "error: broker backfill failed or timed out" >&2
+  kubectl -n "${NS}" logs job/broker-backfill --tail=80 || true
+  exit 1
+}
 
-  log "restarting stateful services"
-  rollout_restart "${ROLL_OUT_STATEFUL[@]}"
+apply_manifests() {
+  log "creating namespace and provisioning secrets"
+  ensure_namespace
+  ensure_secret
+  apply_manifest_files "${STATIC_MANIFESTS[@]}"
+
+  log "applying infra dependencies"
+  apply_manifest_files "${INFRA_MANIFESTS[@]}"
+  apply_broker_infra_manifest
+  annotate_secret_checksums statefulset/storage cogito-db-secret
+  annotate_secret_checksums statefulset/search cogito-db-secret
   wait_for_rollouts "${ROLL_OUT_STATEFUL[@]}"
 
-  log "starting deployments"
-  for deployment in "${DEPLOYMENT_REPLICAS[@]}"; do
-    replica="${deployment#*=}"
-    kubectl -n "${NS}" scale "deployment/${deployment%%=*}" --replicas="${replica}"
-  done
+  log "applying database"
+  apply_manifest_files "${DATABASE_MANIFESTS[@]}"
+  annotate_secret_checksums statefulset/database cogito-db-secret
+  wait_for_rollouts "${ROLL_OUT_DATABASE[@]}"
+
+  log "applying application services"
+  apply_rendered_app_manifests
+  kubectl -n "${NS}" set env deployment/frontend ORIGIN="http://${APP_HOST}:${LOCAL_PORT}" >/dev/null
+  annotate_secret_checksums deployment/apigateway cogito-db-secret
+  annotate_secret_checksums deployment/authservice cogito-db-secret
+  annotate_secret_checksums deployment/flowservice cogito-db-secret
+  annotate_secret_checksums deployment/imageservice cogito-db-secret
+  annotate_secret_checksums deployment/postservice cogito-db-secret
+  annotate_secret_checksums deployment/userservice cogito-db-secret
   wait_for_rollouts "${ROLL_OUT_DEPLOYMENTS[@]}"
+
+  log "checking connect inputs"
+  annotate_secret_checksums deployment/connect cogito-db-secret
+  annotate_configmap_checksums deployment/connect broker-pipelines
+  wait_for_rollouts "${ROLL_OUT_CONNECT[@]}"
+
+  run_broker_backfill
 }
 
 start_port_forward_background() {
   local supervisor_pid
 
-  # Terminate any existing frontend port-forward to this port to avoid stale connections
   local pids pid
   pids="$(port_pids)"
   if [[ -n "${pids}" ]]; then
@@ -339,6 +553,7 @@ EOF
 
 require_tools
 require_docker
+init_image_tags
 
 if [[ -n "$(port_pids)" ]]; then
   echo "note: local port ${LOCAL_PORT} is already in use; deploy will reuse a frontend port-forward or report the conflict." >&2
@@ -346,6 +561,5 @@ fi
 
 build_images
 apply_manifests
-restart_stack
 start_port_forward_background
 print_summary

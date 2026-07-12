@@ -5,34 +5,47 @@ import type { Post } from "$lib/domains/posts/model";
 import type { User } from "$lib/domains/users/model";
 import type { Hashtag } from "$lib/domains/posts/api.server";
 
+const SEARCH_PREVIEW_LIMIT = 5;
+const EMPTY_SECTION = { items: [], nextCursor: null };
+type SearchType = "posts" | "users" | "hashtags";
+type SearchSection<T> = { items: T[]; nextCursor: string | null };
+
+async function searchSection<T>(
+  api: ReturnType<typeof apiClient>,
+  q: string,
+  type: SearchType,
+): Promise<SearchSection<T>> {
+  try {
+    const params = new URLSearchParams({
+      q,
+      type,
+      limit: String(SEARCH_PREVIEW_LIMIT),
+    });
+    const res = await api(`/search?${params}`);
+    return (await unwrap<SearchSection<T>>(res)) ?? EMPTY_SECTION;
+  } catch {
+    return EMPTY_SECTION;
+  }
+}
+
 export const load: PageServerLoad = async (event) => {
   const q = event.url.searchParams.get("q") ?? "";
-  const tab = event.url.searchParams.get("tab") ?? "posts";
   const api = apiClient(event);
 
-  let posts: Post[] = [];
-  let users: User[] = [];
-  let hashtags: Hashtag[] = [];
-
-  if (q) {
-    try {
-      const typeMap: Record<string, string> = {
-        posts: "posts",
-        users: "users",
-        hashtags: "hashtags",
-      };
-      const type = typeMap[tab] ?? "posts";
-      const res = await api(
-        `/search?q=${encodeURIComponent(q)}&type=${type}&limit=20`,
-      );
-      const data = await unwrap<{ items: unknown[] }>(res);
-      if (tab === "posts") posts = (data?.items ?? []) as Post[];
-      else if (tab === "users") users = (data?.items ?? []) as User[];
-      else if (tab === "hashtags") hashtags = (data?.items ?? []) as Hashtag[];
-    } catch {
-      // fall through with empty results
-    }
+  if (!q) {
+    return {
+      q,
+      posts: EMPTY_SECTION as SearchSection<Post>,
+      users: EMPTY_SECTION as SearchSection<User>,
+      hashtags: EMPTY_SECTION as SearchSection<Hashtag>,
+    };
   }
 
-  return { q, tab, posts, users, hashtags };
+  const [posts, users, hashtags] = await Promise.all([
+    searchSection<Post>(api, q, "posts"),
+    searchSection<User>(api, q.replace(/^@/, ""), "users"),
+    searchSection<Hashtag>(api, q.replace(/^#/, ""), "hashtags"),
+  ]);
+
+  return { q, posts, users, hashtags };
 };
