@@ -17,7 +17,7 @@ export async function loadNotificationPage(
   const markedRead =
     options.markRead === false
       ? new Set<number>()
-      : await markUnreadAsRead(api, notifications);
+      : markUnreadAsRead(api, notifications);
 
   return {
     items: notifications.map((notification) =>
@@ -55,20 +55,15 @@ async function attachActors(
   }));
 }
 
-async function markUnreadAsRead(
+// Fire-and-forget: mark-read failures are best-effort and must not block the
+// page response on N round-trips to flowservice.
+function markUnreadAsRead(
   api: ApiClient,
   notifications: Notification[],
-): Promise<Set<number>> {
+): Set<number> {
   const unread = notifications.filter((notification) => !notification.read);
-  const results = await Promise.allSettled(
+  void Promise.allSettled(
     unread.map((notification) => markNotificationRead(api, notification.id)),
   );
-  const marked = new Set<number>();
-  for (const [index, result] of results.entries()) {
-    const notification = unread[index];
-    if (notification && result.status === "fulfilled") {
-      marked.add(notification.id);
-    }
-  }
-  return marked;
+  return new Set(unread.map((notification) => notification.id));
 }
