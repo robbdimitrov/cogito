@@ -316,10 +316,14 @@ append_rendered_deployment_manifest() {
 
   select_manifest_documents "${manifest}" except Deployment "${name}" >> "${rendered}"
   select_manifest_documents "${manifest}" only Deployment "${name}" > "${deployment}"
+  # kubectl's -o yaml output has no trailing `---`; without one here, the next
+  # append merges into this document via YAML's last-key-wins duplicate-key
+  # rule instead of starting a new one.
   if ! kubectl set image --local -o yaml -f "${deployment}" "$@" >> "${rendered}"; then
     rm -f "${deployment}"
     return 1
   fi
+  echo "---" >> "${rendered}"
   rm -f "${deployment}"
 }
 
