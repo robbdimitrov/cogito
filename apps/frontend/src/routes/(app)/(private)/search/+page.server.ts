@@ -1,13 +1,13 @@
 import type { PageServerLoad } from "./$types";
 import { apiClient } from "$lib/server/api/client";
 import { unwrap } from "$lib/server/api/http";
-import type { Post } from "$lib/domains/posts/model";
 import type { User } from "$lib/domains/users/model";
 import type { Hashtag } from "$lib/domains/posts/api.server";
+import { wrapBlended, type BlendedItem } from "./types";
 
-const SEARCH_PREVIEW_LIMIT = 5;
+const SEARCH_PREVIEW_LIMIT = 15;
 const EMPTY_SECTION = { items: [], nextCursor: null };
-type SearchType = "posts" | "users" | "hashtags";
+type SearchType = "all" | "users" | "hashtags";
 type SearchSection<T> = { items: T[]; nextCursor: string | null };
 
 async function searchSection<T>(
@@ -33,32 +33,34 @@ export const load: PageServerLoad = async (event) => {
   const api = apiClient(event);
 
   if (!q) {
-    return {
-      q,
-      posts: EMPTY_SECTION as SearchSection<Post>,
-      users: EMPTY_SECTION as SearchSection<User>,
-      hashtags: EMPTY_SECTION as SearchSection<Hashtag>,
-    };
+    return { q, type: "all" as const, results: EMPTY_SECTION as SearchSection<BlendedItem> };
   }
 
   // An explicit @/# prefix means the user picked a specific entity type, so
-  // show only the matching section instead of three mostly-empty ones.
-  const prefix = q.startsWith("@") ? "@" : q.startsWith("#") ? "#" : null;
-  const wantPosts = prefix === null;
-  const wantUsers = prefix !== "#";
-  const wantHashtags = prefix !== "@";
+  // show only the matching section instead of a blended list.
+  if (q.startsWith("@")) {
+    const section = await searchSection<User>(api, q.replace(/^@/, ""), "users");
+    return {
+      q,
+      type: "users" as const,
+      results: {
+        items: wrapBlended("users", section.items),
+        nextCursor: section.nextCursor,
+      },
+    };
+  }
+  if (q.startsWith("#")) {
+    const section = await searchSection<Hashtag>(api, q.replace(/^#/, ""), "hashtags");
+    return {
+      q,
+      type: "hashtags" as const,
+      results: {
+        items: wrapBlended("hashtags", section.items),
+        nextCursor: section.nextCursor,
+      },
+    };
+  }
 
-  const [posts, users, hashtags] = await Promise.all([
-    wantPosts
-      ? searchSection<Post>(api, q, "posts")
-      : (EMPTY_SECTION as SearchSection<Post>),
-    wantUsers
-      ? searchSection<User>(api, q.replace(/^@/, ""), "users")
-      : (EMPTY_SECTION as SearchSection<User>),
-    wantHashtags
-      ? searchSection<Hashtag>(api, q.replace(/^#/, ""), "hashtags")
-      : (EMPTY_SECTION as SearchSection<Hashtag>),
-  ]);
-
-  return { q, posts, users, hashtags };
+  const results = await searchSection<BlendedItem>(api, q, "all");
+  return { q, type: "all" as const, results };
 };

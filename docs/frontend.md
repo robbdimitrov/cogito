@@ -37,7 +37,7 @@
 | /{username}/followers | Followers list                                                          | toggleFollow                                       |
 | /{username}/following | Following list                                                          | toggleFollow                                       |
 | /hashtags/{tag}       | Tag post feed                                                           | toggleLike, toggleRepost, deletePost               |
-| /search               | Grouped search results for users, posts, and hashtags                   | —                                                  |
+| /search               | Blended, relevance-ranked search results (users/posts/hashtags) with a live typeahead dropdown | — |
 | /notifications        | Notifications (initial unread rows marked read server-side after fetch) | —                                                  |
 | /settings             | Redirect to /settings/profile                                           | —                                                  |
 | /settings/profile     | Current user profile                                                    | default — update name/username/email/bio/photos    |
@@ -142,8 +142,8 @@ unchanged after DTO mapping.
 | `/posts/{id}`           | GET    | page load       | GET /posts/{id} + GET /posts/{id}/replies                         |
 | `/hashtags/{tag}`       | GET    | page load       | GET /hashtags/{tag}/posts                                         |
 | `/hashtags/{tag}`       | GET    | +server.ts      | GET /hashtags/{tag}/posts?cursor=                                 |
-| `/search`               | GET    | page load       | GET /search?q=&type=users,posts,hashtags in parallel              |
-| `/search`               | GET    | +server.ts      | GET /search?q=&type=&cursor=                                      |
+| `/search`               | GET    | page load       | GET /search?q=&type=all (or type=users/hashtags for @/# prefixes) |
+| `/search`               | GET    | +server.ts      | GET /search?q=&type=&cursor= — also backs the live typeahead dropdown |
 | `/notifications`        | GET    | app layout load | GET /notifications/unread-count                                   |
 | `/notifications`        | GET    | page load       | GET /notifications + PUT /notifications/{id}/read for unread rows |
 | `/notifications`        | GET    | +server.ts      | GET /notifications?cursor=                                        |

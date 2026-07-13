@@ -81,6 +81,10 @@ failures map to 500 unless a controller handles them explicitly.
   `{"created":"<RFC3339Nano>","id":<int32>}`
 - **SearchService cursor** — base64url-encoded JSON: `{"offset":<int32>}`
   (capped at 1000)
+- **Blended search cursor** (`type=all` only) — base64url-encoded JSON
+  `{"u":"<users cursor>","p":"<posts cursor>","h":"<hashtags cursor>"}`
+  wrapping three opaque SearchService cursors; `nextCursor` is empty only
+  when all three are exhausted.
 - **NotificationService cursor** — base64url `<RFC3339Nano>,<id>` (created
   timestamp and notification ID)
 
@@ -161,9 +165,17 @@ still requires a session.
 
 #### Search
 
-| Method | Path             | Purpose                                                 |
-| ------ | ---------------- | ------------------------------------------------------- |
-| GET    | /search?q=&type= | Full-text search; `type` ∈ `posts`, `users`, `hashtags` |
+| Method | Path             | Purpose                                                        |
+| ------ | ---------------- | ---------------------------------------------------------------- |
+| GET    | /search?q=&type= | Full-text search; `type` ∈ `all`, `posts`, `users`, `hashtags` |
+
+`type=all` returns one relevance-ranked list blending all three entity
+types (~20% users / 60% posts / 20% hashtags), interleaved rather than
+grouped, for a Twitter-style search results page and live typeahead. Each
+item is `{"type": "users"|"posts"|"hashtags", "item": {...}}`, where `item`
+has the same shape as the corresponding single-type result. If one entity
+type's lookup fails, the response still returns the other two; only a
+failure of all three returns an error.
 
 #### Images
 

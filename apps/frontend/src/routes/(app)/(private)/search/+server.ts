@@ -3,7 +3,7 @@ import type { RequestHandler } from "./$types";
 import { apiClient } from "$lib/server/api/client";
 import { unwrap } from "$lib/server/api/http";
 
-const VALID_TYPES = new Set(["posts", "users", "hashtags"]);
+const VALID_TYPES = new Set(["all", "posts", "users", "hashtags"]);
 
 export const GET: RequestHandler = async (event) => {
   const q = event.url.searchParams.get("q") ?? "";

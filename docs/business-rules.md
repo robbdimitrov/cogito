@@ -124,8 +124,17 @@ Gateway also calls `ImageService.DeleteImage` when deleting a post with a
 | Storage                      | Lowercase; deduplicated per post                                         |
 | Uniqueness                   | DB UNIQUE constraint on `hashtags.name`                                  |
 | Insert on conflict           | `ON CONFLICT (name) DO NOTHING`                                          |
-| Tag search                   | Trigram (GIN index) + ILIKE; ordered by similarity DESC, post_count DESC |
+| Tag search                   | Meilisearch via `GET /search` (see Search Query Rules below)             |
 | `GetHashtagPosts` validation | Tag must match `^[A-Za-z0-9_]{1,50}$`                                    |
+
+## Search Query Rules
+
+| Rule                      | Value                                                              |
+| -------------------------- | ------------------------------------------------------------------ |
+| Query length                | 1–255 characters (trimmed); empty or over-length is rejected      |
+| `type=all` blend ratio      | ~20% users / 60% posts / 20% hashtags, interleaved by ratio         |
+| `type=all` failure handling | Partial results if only some entity types fail; error only if all three fail |
+| `type=all` cursor           | Wraps the three per-type opaque cursors; a type left out of a page keeps its prior cursor so a later page retries it |
 
 ## Event Relay and Search Indexing
 
