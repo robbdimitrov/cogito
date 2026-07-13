@@ -104,6 +104,15 @@ describe("resizeImageForUpload", () => {
       const result = await resizeImageForUpload(file);
       expect(result.name).toBe("photo.backup.jpeg");
     });
+
+    it("attempts compression at full size before ever checking the 320px floor", async () => {
+      mockImage(200, 200);
+      const file = new File([LARGE], "small-dimensions.png", {
+        type: "image/png",
+      });
+      const result = await resizeImageForUpload(file);
+      expect(result.size).toBeLessThanOrEqual(900 * 1024);
+    });
   });
 
   describe("error handling", () => {
@@ -120,6 +129,21 @@ describe("resizeImageForUpload", () => {
       const file = new File([LARGE], "large.jpg", { type: "image/jpeg" });
       await expect(resizeImageForUpload(file)).rejects.toThrow(
         "Failed to load image",
+      );
+    });
+
+    it("throws once shrinking would fall below the 320px floor and still not fit", async () => {
+      HTMLCanvasElement.prototype.toBlob = vi.fn(function (
+        this: HTMLCanvasElement,
+        callback: BlobCallback,
+      ) {
+        const blob = new Blob([""], { type: "image/jpeg" });
+        Object.defineProperty(blob, "size", { value: 2000 * 1024 });
+        setTimeout(() => callback(blob), 0);
+      });
+      const file = new File([LARGE], "large.jpg", { type: "image/jpeg" });
+      await expect(resizeImageForUpload(file)).rejects.toThrow(
+        "Image cannot be compressed under 900KB without falling below 320px",
       );
     });
   });

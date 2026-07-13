@@ -38,18 +38,11 @@ export async function resizeImageForUpload(file: File): Promise<File> {
       }
 
       let scale = 1.0;
+      const MIN_DIMENSION = 320;
 
       const attemptCompression = () => {
         const currentWidth = Math.round(width * scale);
         const currentHeight = Math.round(height * scale);
-
-        if (currentWidth < 320 || currentHeight < 320) {
-          return reject(
-            new Error(
-              "Image cannot be compressed under 900KB without falling below 320px",
-            ),
-          );
-        }
 
         canvas.width = currentWidth;
         canvas.height = currentHeight;
@@ -86,6 +79,15 @@ export async function resizeImageForUpload(file: File): Promise<File> {
               quality -= STEP;
               if (quality >= MIN_QUALITY) {
                 checkQuality();
+              } else if (
+                currentWidth <= MIN_DIMENSION ||
+                currentHeight <= MIN_DIMENSION
+              ) {
+                return reject(
+                  new Error(
+                    "Image cannot be compressed under 900KB without falling below 320px",
+                  ),
+                );
               } else {
                 scale *= 0.85;
                 attemptCompression();
