@@ -8,8 +8,6 @@ use tokio::sync::Semaphore;
 use tonic::{Request, Response, Status};
 
 type HmacSha256 = Hmac<Sha256>;
-const MIN_PASSWORD_LEN: usize = 8;
-const MAX_PASSWORD_LEN: usize = 1024;
 
 // A precomputed Argon2 hash used to equalize verification time when an email is
 // not found, so response timing does not reveal whether an account exists.
@@ -84,11 +82,6 @@ impl<D: AuthDb + Clone> AuthService for Controller<D> {
         let email = req.email.trim().to_lowercase();
         if email.is_empty() || req.password.is_empty() {
             return Err(Status::invalid_argument("Missing credentials."));
-        }
-        if req.password.len() < MIN_PASSWORD_LEN || req.password.len() > MAX_PASSWORD_LEN {
-            return Err(Status::invalid_argument(
-                "Password must be between 8 and 1024 characters.",
-            ));
         }
 
         let user_opt = self.db_client.get_user(&email).await.map_err(|e| {
@@ -412,30 +405,6 @@ mod tests {
         let res = controller.create_session(req).await;
         assert!(res.is_err());
         assert_eq!(res.unwrap_err().code(), tonic::Code::Unauthenticated);
-    }
-
-    #[tokio::test]
-    async fn test_create_session_short_password_rejected_before_verification() {
-        let controller = Controller::new(MockAuthDb, "test-secret".to_string(), make_semaphore(8));
-        let req = Request::new(Credentials {
-            email: "test@example.com".to_string(),
-            password: "short".to_string(),
-        });
-        let res = controller.create_session(req).await;
-        assert!(res.is_err());
-        assert_eq!(res.unwrap_err().code(), tonic::Code::InvalidArgument);
-    }
-
-    #[tokio::test]
-    async fn test_create_session_long_password_rejected_before_lookup() {
-        let controller = Controller::new(MockAuthDb, "test-secret".to_string(), make_semaphore(8));
-        let req = Request::new(Credentials {
-            email: "db_error@example.com".to_string(),
-            password: "a".repeat(MAX_PASSWORD_LEN + 1),
-        });
-        let res = controller.create_session(req).await;
-        assert!(res.is_err());
-        assert_eq!(res.unwrap_err().code(), tonic::Code::InvalidArgument);
     }
 
     #[tokio::test]
