@@ -41,10 +41,23 @@ export const load: PageServerLoad = async (event) => {
     };
   }
 
+  // An explicit @/# prefix means the user picked a specific entity type, so
+  // show only the matching section instead of three mostly-empty ones.
+  const prefix = q.startsWith("@") ? "@" : q.startsWith("#") ? "#" : null;
+  const wantPosts = prefix === null;
+  const wantUsers = prefix !== "#";
+  const wantHashtags = prefix !== "@";
+
   const [posts, users, hashtags] = await Promise.all([
-    searchSection<Post>(api, q, "posts"),
-    searchSection<User>(api, q.replace(/^@/, ""), "users"),
-    searchSection<Hashtag>(api, q.replace(/^#/, ""), "hashtags"),
+    wantPosts
+      ? searchSection<Post>(api, q, "posts")
+      : (EMPTY_SECTION as SearchSection<Post>),
+    wantUsers
+      ? searchSection<User>(api, q.replace(/^@/, ""), "users")
+      : (EMPTY_SECTION as SearchSection<User>),
+    wantHashtags
+      ? searchSection<Hashtag>(api, q.replace(/^#/, ""), "hashtags")
+      : (EMPTY_SECTION as SearchSection<Hashtag>),
   ]);
 
   return { q, posts, users, hashtags };
