@@ -2,7 +2,7 @@ CREATE TABLE notifications (
   id          bigserial PRIMARY KEY,
   external_id bigint NOT NULL UNIQUE,
   user_id     integer NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  actor_id    integer REFERENCES users(id) ON DELETE SET NULL,
+  actor_id    integer NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   type        varchar(50) NOT NULL,
   entity_id   varchar(255) NOT NULL,
   read        boolean NOT NULL DEFAULT false,

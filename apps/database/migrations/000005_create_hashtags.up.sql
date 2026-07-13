@@ -1,12 +1,8 @@
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
-
 CREATE TABLE hashtags (
   id serial PRIMARY KEY,
   name varchar(50) NOT NULL,
   CONSTRAINT hashtags_name_unique UNIQUE (name)
 );
-
-CREATE INDEX hashtags_name_trgm_idx ON hashtags USING GIN (name gin_trgm_ops);
 
 CREATE TABLE post_hashtags (
   post_id integer NOT NULL REFERENCES posts (id) ON DELETE CASCADE,

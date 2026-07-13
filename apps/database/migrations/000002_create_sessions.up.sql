@@ -1,6 +1,7 @@
 CREATE TABLE sessions (
   id varchar(255) PRIMARY KEY,
   user_id integer NOT NULL REFERENCES users ON DELETE CASCADE,
+  handle varchar(255) NOT NULL UNIQUE,
   created timestamptz NOT NULL DEFAULT now()
 );
 

@@ -198,7 +198,7 @@ imageservice only during startup to create or verify the image bucket.
 | S3_BUCKET        | cogito-images           |
 
 PostgreSQL must run with `wal_level=logical` so Redpanda Connect `pg_cdc` can
-relay `outbox` inserts. Migration `000010` creates the required `outbox_relay`
+relay `outbox` inserts. Migration `000008` creates the required `outbox_relay`
 publication (`CREATE PUBLICATION outbox_relay FOR TABLE outbox`); the `connect`
 deployment will crash-loop until this publication exists.
 
@@ -239,7 +239,7 @@ trigger a full reindex by running the `broker-backfill` Job.
   migrations, never by editing existing ones.
 - Mixed-version compatibility required when a schema change affects multiple
   independently deployed services.
-- Current: 13 migration pairs (000001 through 000013).
+- Current: 8 migration pairs (000001 through 000008).
 
 ## Deployment Script
 

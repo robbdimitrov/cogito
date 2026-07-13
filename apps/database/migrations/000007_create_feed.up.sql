@@ -6,3 +6,4 @@ CREATE TABLE feed (
 );
 
 CREATE INDEX feed_user_id_created_idx ON feed(user_id, created DESC, post_id DESC);
+CREATE INDEX feed_created_idx ON feed(created);
