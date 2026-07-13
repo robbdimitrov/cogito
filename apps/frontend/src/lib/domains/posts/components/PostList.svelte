@@ -25,9 +25,7 @@
 
 {#if !posts || posts.length === 0}
   <GlassCard>
-    <div
-      class="card-body items-center text-center text-slate-600 dark:text-slate-300 py-12"
-    >
+    <div class="card-body muted-text items-center py-12 text-center">
       <MessageSquare class="h-12 w-12 mb-2 opacity-50" />
       <p>{emptyMessage}</p>
     </div>

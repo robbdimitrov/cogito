@@ -30,7 +30,7 @@
         class="group flex min-w-0 items-center gap-3"
       >
         <div
-          class="shrink-0 rounded-full bg-white/45 p-1 ring-1 ring-white/60 transition-transform duration-200 group-hover:scale-105 dark:bg-white/5 dark:ring-white/10"
+          class="shrink-0 rounded-full bg-base-100/55 p-1 ring-1 ring-base-300/80 transition-transform duration-200 group-hover:scale-105 dark:bg-white/5 dark:ring-white/10"
         >
           <Avatar name={user.name} size="md" photoKey={user.profilePhotoKey} />
         </div>
@@ -40,7 +40,7 @@
           >
             {user.name}
           </p>
-          <p class="text-sm text-slate-500 dark:text-slate-400">
+          <p class="muted-text text-sm">
             @{user.username}
           </p>
         </div>
@@ -72,7 +72,7 @@
           <button
             class={`btn btn-sm shrink-0 gap-1 rounded-full px-4 shadow-sm transition-all duration-200 hover:scale-105 active:scale-95 ${
               followed
-                ? "btn-outline border-white/50 bg-white/25 dark:border-white/10 dark:bg-white/5"
+                ? "btn-outline border-base-300/80 bg-base-100/30 dark:border-white/10 dark:bg-white/5"
                 : "btn-primary shadow-primary/20"
             }`}
             disabled={isActionLoading}
@@ -91,7 +91,7 @@
       {/if}
       {#if isCurrentUser}
         <span
-          class="rounded-full border border-white/50 bg-white/35 px-3 py-1.5 text-xs font-semibold text-slate-500 dark:border-white/10 dark:bg-white/5 dark:text-slate-400"
+          class="muted-text rounded-full border border-base-300/80 bg-base-100/40 px-3 py-1.5 text-xs font-semibold dark:border-white/10 dark:bg-white/5"
         >
           You
         </span>
@@ -99,7 +99,7 @@
     </div>
     {#if user.bio}
       <p
-        class="line-clamp-2 mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-300 sm:pl-14"
+        class="line-clamp-2 mt-3 text-sm leading-relaxed text-base-content/75 sm:pl-14"
       >
         {user.bio}
       </p>

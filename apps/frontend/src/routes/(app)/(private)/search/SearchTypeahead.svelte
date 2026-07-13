@@ -104,7 +104,7 @@
 </script>
 
 <div class="relative flex-1">
-  <label class="input input-bordered flex items-center gap-2 rounded-2xl">
+  <label class="form-input flex items-center gap-2 rounded-2xl">
     <Search class="h-4 w-4 opacity-60" />
     <input
       type="search"
@@ -123,11 +123,13 @@
 
   {#if open}
     <div
-      class="absolute top-full z-50 mt-2 w-full overflow-hidden rounded-2xl border border-slate-200 bg-white/95 shadow-2xl backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/95"
+      class="dropdown-surface absolute top-full z-50 mt-2 w-full overflow-hidden"
     >
       <ul id="search-typeahead-listbox" class="max-h-96 overflow-y-auto py-1">
         {#each items as item, i (item.type + "-" + i)}
-          <li class={i === activeIndex ? "bg-slate-100 dark:bg-slate-800/80" : ""}>
+          <li
+            class={i === activeIndex ? "bg-base-200 dark:bg-slate-800/80" : ""}
+          >
             <SearchResultRow result={item} compact {currentUserId} />
           </li>
         {/each}

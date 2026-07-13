@@ -49,7 +49,7 @@
   <div class="card-body relative -mt-11 px-4 pb-4 sm:-mt-14 sm:px-6 sm:pb-6">
     <div class="flex items-end justify-between">
       <div
-        class="relative rounded-full border border-base-200/50 bg-base-100 p-1 dark:bg-slate-800"
+        class="relative rounded-full border border-base-300/80 bg-base-100 p-1 dark:border-white/10 dark:bg-slate-800"
       >
         <Avatar name={user.name} size="lg" photoKey={user.profilePhotoKey} />
       </div>
@@ -107,17 +107,15 @@
     </div>
     <div class="mt-3 sm:mt-4">
       <h1 class="text-xl font-bold">{user.name}</h1>
-      <p class="text-sm text-slate-500 dark:text-slate-400">@{user.username}</p>
+      <p class="muted-text text-sm">@{user.username}</p>
       {#if user.bio}
         <p
-          class="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-200"
+          class="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-base-content/80"
         >
           {user.bio}
         </p>
       {/if}
-      <div
-        class="mt-3 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400"
-      >
+      <div class="muted-text mt-3 flex items-center gap-2 text-xs">
         <Calendar class="h-4 w-4" />
         <span>Joined {formatDate(user.created)}</span>
       </div>

@@ -52,23 +52,23 @@
     {#if user || sessionUnavailable}
       <a
         href={resolve("/")}
-        class="btn btn-ghost gap-2 text-base normal-case transition-transform duration-200 hover:scale-105 hover:bg-white/40 dark:hover:bg-white/10 sm:text-lg"
+        class="btn btn-ghost gap-2 text-base normal-case transition-transform duration-200 hover:scale-105 hover:bg-white/40 dark:hover:bg-white/10 md:text-lg"
         aria-current={page.url.pathname === "/" ? "page" : undefined}
       >
-        <Home class="size-5 sm:size-6" aria-hidden="true" />
-        <span class="hidden sm:inline">Home</span>
+        <Home class="size-5 md:size-6" aria-hidden="true" />
+        <span class="hidden md:inline">Home</span>
       </a>
       <a
         href={resolve("/search")}
-        class="btn btn-ghost gap-2 text-base normal-case transition-transform duration-200 hover:scale-105 hover:bg-white/40 dark:hover:bg-white/10 sm:text-lg"
+        class="btn btn-ghost gap-2 text-base normal-case transition-transform duration-200 hover:scale-105 hover:bg-white/40 dark:hover:bg-white/10 md:text-lg"
         aria-current={page.url.pathname === "/search" ? "page" : undefined}
       >
-        <Search class="size-5 sm:size-6" aria-hidden="true" />
-        <span class="hidden sm:inline">Search</span>
+        <Search class="size-5 md:size-6" aria-hidden="true" />
+        <span class="hidden md:inline">Search</span>
       </a>
       <a
         href={resolve("/notifications")}
-        class="btn btn-ghost gap-2 text-base normal-case transition-transform duration-200 hover:scale-105 hover:bg-white/40 dark:hover:bg-white/10 sm:text-lg"
+        class="btn btn-ghost gap-2 text-base normal-case transition-transform duration-200 hover:scale-105 hover:bg-white/40 dark:hover:bg-white/10 md:text-lg"
         aria-current={page.url.pathname === "/notifications"
           ? "page"
           : undefined}
@@ -82,9 +82,9 @@
               {unreadCount > 99 ? "99+" : unreadCount}
             </span>
           {/if}
-          <Bell class="size-5 sm:size-6" aria-hidden="true" />
+          <Bell class="size-5 md:size-6" aria-hidden="true" />
         </span>
-        <span class="hidden sm:inline">Notifications</span>
+        <span class="hidden md:inline">Notifications</span>
       </a>
     {/if}
   </div>
@@ -123,7 +123,7 @@
         </button>
         {#if menuOpen}
           <ul
-            class="menu menu-sm dropdown-content z-1001 mt-3 w-56 rounded-2xl border border-white/70 bg-white/90 p-2 shadow-2xl shadow-slate-900/20 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/95 dark:shadow-black/50"
+            class="menu menu-sm dropdown-content dropdown-surface z-1001 mt-3 w-56 p-2"
           >
             <li class="menu-title px-3 py-1 text-xs opacity-60">
               Signed in as @{user.username || "user"}

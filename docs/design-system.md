@@ -38,18 +38,32 @@ Defined in `app.css`:
 | `.glass-surface`          | `border-white/60 bg-base-100/80 shadow-xl backdrop-blur-2xl` (dark: `border-white/10 bg-slate-900/70 shadow-black/30`) |
 | `.glass-card`             | `.glass-surface` + `card rounded-2xl`                                                                                  |
 | `.glass-card-interactive` | `.glass-card` + `transition hover:bg-base-100/95` (dark: `hover:bg-slate-800/80`)                                      |
+| `.page-shell`             | Root page shell for wide or multi-column app screens: `container mx-auto max-w-5xl px-3 py-3 sm:px-4 sm:py-6`          |
+| `.feed-shell`             | Root page shell for single-column timelines, detail pages, search, hashtags, and notifications: `max-w-2xl`            |
+| `.profile-shell`          | Root page shell for profile pages: `max-w-3xl`                                                                         |
+| `.feed-column`            | Inner feed column used inside wide grid screens: centered `max-w-2xl`, left-aligned at `lg`                            |
+| `.soft-surface`           | Tokenized inline/list surface with `rounded-2xl`, base borders, translucent base background, and dark hover states     |
+| `.dropdown-surface`       | Tokenized dropdown/popover surface with base border, translucent base background, shadow, and blur                     |
+| `.muted-text`             | Muted text color: `text-base-content/60`                                                                               |
+| `.subtle-border`          | Tokenized subtle border color: `border-base-300/80` (dark: `border-white/10`)                                          |
+| `.action-pill`            | Standard social/action pill: ghost small button, rounded full, consistent gap/padding and press/hover motion           |
 | `.form-input`             | `input min-h-12 rounded-xl bg-base-100/30 focus:border-primary/60 focus:ring-4`                                        |
 | `.form-textarea`          | `textarea min-h-28 rounded-xl bg-base-100/30 focus:border-primary/60 focus:ring-4`                                     |
 
 ## Layout
 
-| Property       | Value                                                              |
-| -------------- | ------------------------------------------------------------------ |
-| Page container | `mx-auto max-w-5xl`                                                |
-| Feed column    | `max-w-2xl`                                                        |
-| Sidebar        | `18rem` — hidden below lg breakpoint                               |
-| Content grid   | `grid-cols-1 sm:gap-6 lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-8` |
-| Breakpoints    | sm=640px, lg=1024px                                                |
+| Screen category | Utility          | Width       | Used for                                                    |
+| --------------- | ---------------- | ----------- | ----------------------------------------------------------- |
+| Wide shell      | `.page-shell`    | `max-w-5xl` | Feed with sidebar and settings/account screens              |
+| Feed shell      | `.feed-shell`    | `max-w-2xl` | Timelines, post detail, search, hashtags, and notifications |
+| Profile shell   | `.profile-shell` | `max-w-3xl` | Profile header plus profile tabs                            |
+
+| Property     | Value                                                              |
+| ------------ | ------------------------------------------------------------------ |
+| Feed column  | `.feed-column` (`max-w-2xl`)                                       |
+| Sidebar      | `18rem` — hidden below lg breakpoint                               |
+| Content grid | `grid-cols-1 sm:gap-6 lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-8` |
+| Breakpoints  | sm=640px, md=768px, lg=1024px                                      |
 
 ## Component Inventory
 

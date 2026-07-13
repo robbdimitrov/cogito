@@ -10,9 +10,7 @@
   let author = $derived(post.user);
 </script>
 
-<div
-  class="border border-slate-200 dark:border-slate-700/60 bg-slate-50/60 dark:bg-slate-800/40 rounded-xl p-3 mt-2"
->
+<div class="soft-surface mt-2 rounded-xl p-3">
   <div class="flex items-center gap-2 mb-1.5">
     {#if author}
       <a
@@ -30,13 +28,13 @@
       <div class="flex items-center gap-1.5 min-w-0">
         <a
           href={resolve(`/@${author.username}`)}
-          class="font-bold text-sm text-slate-900 dark:text-slate-100 hover:underline truncate"
+          class="truncate text-sm font-bold text-base-content hover:underline"
         >
           {author.name}
         </a>
         <a
           href={resolve(`/@${author.username}`)}
-          class="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors truncate"
+          class="muted-text truncate text-xs transition-colors hover:text-base-content/80"
         >
           @{author.username}
         </a>
@@ -45,7 +43,7 @@
   </div>
   <FormattedContent
     content={post.content}
-    class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed line-clamp-4 wrap-break-word"
+    class="line-clamp-4 wrap-break-word text-sm leading-relaxed text-base-content/75"
   />
   {#if post.mediaKey}
     <div class="mt-2">
@@ -54,7 +52,7 @@
         alt="Quoted post attachment"
         loading="lazy"
         decoding="async"
-        class="max-h-40 w-auto rounded-lg object-contain border border-slate-200 dark:border-slate-700"
+        class="max-h-40 w-auto rounded-lg border border-base-300 object-contain dark:border-white/10"
       />
     </div>
   {/if}

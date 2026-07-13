@@ -31,7 +31,7 @@
   <title>Cogito</title>
 </svelte:head>
 
-<main class="container mx-auto max-w-5xl px-3 py-3 sm:px-4 sm:py-6">
+<main class="page-shell">
   <div
     class="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-8"
   >
@@ -40,9 +40,7 @@
         <UserCard {user} />
       {/if}
     </aside>
-    <section
-      class="mx-auto flex w-full max-w-2xl flex-col gap-3 sm:gap-4 lg:mx-0"
-    >
+    <section class="feed-column">
       {#if user}
         <div class="lg:hidden">
           <UserCard {user} variant="compact" />
@@ -51,9 +49,7 @@
       {/if}
       {#if data.isEmpty}
         <GlassCard>
-          <div
-            class="card-body items-center py-12 text-center text-slate-600 dark:text-slate-300"
-          >
+          <div class="card-body muted-text items-center py-12 text-center">
             <Search class="mb-2 h-12 w-12 opacity-50" aria-hidden="true" />
             <p>No posts in your feed yet.</p>
             <a
@@ -77,7 +73,7 @@
         <div class="py-4 text-center">
           <button
             type="button"
-            class="btn btn-outline btn-sm"
+            class="btn btn-outline btn-sm rounded-full"
             disabled={pagination.loading}
             onclick={() => pagination.more()}
           >

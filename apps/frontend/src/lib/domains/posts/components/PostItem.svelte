@@ -99,7 +99,7 @@
 <li>
   {#if repostedBy}
     <div
-      class="mx-auto -mb-px flex w-[calc(100%-1rem)] items-center gap-2 rounded-t-2xl border border-b-slate-200/70 border-white/60 bg-base-100/75 px-4 sm:px-5 py-2 text-xs sm:text-sm text-slate-600 shadow-lg shadow-slate-900/5 backdrop-blur-2xl dark:border-white/10 dark:border-b-slate-700/70 dark:bg-slate-900/70 dark:text-slate-300"
+      class="subtle-border mx-auto -mb-px flex w-[calc(100%-1rem)] items-center gap-2 rounded-t-2xl border border-b-base-300/80 bg-base-100/75 px-4 py-2 text-xs text-base-content/70 shadow-lg shadow-slate-900/5 backdrop-blur-2xl sm:px-5 sm:text-sm dark:border-b-white/10 dark:bg-slate-900/70"
     >
       <Repeat class="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
       <a
@@ -135,13 +135,13 @@
               {#if author}
                 <a
                   href={resolve(`/@${author.username}`)}
-                  class="font-bold hover:underline truncate max-w-full text-base sm:text-lg text-slate-900 dark:text-slate-100 tracking-tight leading-none mb-0.5 sm:mb-1"
+                  class="mb-0.5 max-w-full truncate text-base font-bold leading-none tracking-tight text-base-content hover:underline sm:mb-1 sm:text-lg"
                 >
                   {author.name}
                 </a>
                 <a
                   href={resolve(`/@${author.username}`)}
-                  class="text-[0.9rem] sm:text-sm text-slate-500 dark:text-slate-400 truncate max-w-full hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+                  class="muted-text max-w-full truncate text-[0.9rem] transition-colors hover:text-base-content/80 sm:text-sm"
                 >
                   @{author.username}
                 </a>
@@ -150,7 +150,7 @@
             {#if isOwnPost}
               <button
                 type="button"
-                class="btn btn-ghost btn-sm btn-square text-slate-400 dark:text-slate-500 hover:text-error hover:bg-error/10 hover:scale-110 active:scale-90 transition-transform duration-150 shrink-0"
+                class="btn btn-ghost btn-sm btn-square shrink-0 text-base-content/40 transition-transform duration-150 hover:scale-110 hover:bg-error/10 hover:text-error active:scale-90"
                 onclick={() => (showDeleteModal = true)}
                 aria-label="Delete post"
               >
@@ -160,7 +160,7 @@
           </div>
           <FormattedContent
             content={displayPost.content}
-            class="mt-3 sm:mt-3.5 whitespace-pre-wrap wrap-break-word text-[15px] sm:text-[1.05rem] leading-relaxed text-slate-800 dark:text-slate-200"
+            class="mt-3 whitespace-pre-wrap wrap-break-word text-[15px] leading-relaxed text-base-content/85 sm:mt-3.5 sm:text-[1.05rem]"
           />
           {#if displayPost.mediaKey}
             <div
@@ -173,7 +173,7 @@
                 alt="Post attachment"
                 loading="lazy"
                 decoding="async"
-                class="max-h-96 w-auto rounded-xl border border-slate-200 object-contain dark:border-slate-800"
+                class="max-h-96 w-auto rounded-xl border border-base-300 object-contain dark:border-white/10"
               />
               {#if imageLikeBurst}
                 <div
@@ -192,17 +192,17 @@
           <div class="mt-3">
             <a
               href={resolve(`/posts/${displayPost.id}`)}
-              class="text-[0.8rem] sm:text-sm font-medium text-slate-400 dark:text-slate-500 hover:text-primary transition-colors"
+              class="text-[0.8rem] font-medium text-base-content/45 transition-colors hover:text-primary sm:text-sm"
             >
               {formatPostDate(displayPost.created)}
             </a>
           </div>
           <div
-            class="mt-3 sm:mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/60 flex items-center gap-2 sm:gap-3"
+            class="subtle-border mt-3 flex items-center gap-2 border-t pt-3 sm:mt-4 sm:gap-3"
           >
             <a
               href={resolve(`/posts/${displayPost.id}`)}
-              class="btn btn-ghost btn-sm gap-1.5 rounded-full px-3 text-slate-500 dark:text-slate-400 hover:text-primary hover:bg-primary/5 transition-all duration-150"
+              class="action-pill gap-1.5 px-3 text-base-content/60 hover:bg-primary/5 hover:text-primary"
               aria-label="Replies"
             >
               <MessageSquare class="h-4 w-4" />
@@ -254,7 +254,7 @@
               <LoginGateButton
                 icon={Repeat}
                 ariaLabel="Log in to repost"
-                buttonClass="btn btn-ghost btn-sm gap-2 rounded-full px-4 text-slate-500 dark:text-slate-400"
+                buttonClass="action-pill text-base-content/60"
                 count={reposts}
                 countClass="text-xs sm:text-sm font-semibold tracking-wide"
               />
@@ -291,9 +291,9 @@
                 />
                 <button
                   type="submit"
-                  class="btn btn-ghost btn-sm gap-2 rounded-full px-4 hover:scale-105 active:scale-95 transition-all duration-150 {liked
+                  class="action-pill {liked
                     ? 'text-error bg-error/10'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-error hover:bg-error/5'}"
+                    : 'text-base-content/60 hover:text-error hover:bg-error/5'}"
                   disabled={isLiking}
                   aria-label={liked ? "Unlike post" : "Like post"}
                 >
@@ -312,7 +312,7 @@
               <LoginGateButton
                 icon={Heart}
                 ariaLabel="Log in to like"
-                buttonClass="btn btn-ghost btn-sm gap-2 rounded-full px-4 text-slate-500 dark:text-slate-400"
+                buttonClass="action-pill text-base-content/60"
                 count={likes}
                 countClass="text-xs sm:text-sm font-semibold tracking-wide"
               />

@@ -15,7 +15,7 @@
   <div
     class="flex {compact
       ? 'gap-4'
-      : 'mt-4 justify-around border-t border-slate-200 pt-4 dark:border-slate-700'}"
+      : 'subtle-border mt-4 justify-around border-t pt-4'}"
   >
     <div class={compact ? "" : "text-center"}>
       <p
@@ -25,7 +25,7 @@
       >
         {user.posts ?? 0}
       </p>
-      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Cogito</p>
+      <p class="muted-text mt-1 text-xs">Cogito</p>
     </div>
     <div class={compact ? "" : "text-center"}>
       <p
@@ -35,7 +35,7 @@
       >
         {user.following ?? 0}
       </p>
-      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Following</p>
+      <p class="muted-text mt-1 text-xs">Following</p>
     </div>
     <div class={compact ? "" : "text-center"}>
       <p
@@ -45,7 +45,7 @@
       >
         {user.followers ?? 0}
       </p>
-      <p class="mt-1 text-xs text-slate-500 dark:text-slate-400">Followers</p>
+      <p class="muted-text mt-1 text-xs">Followers</p>
     </div>
   </div>
 {/snippet}
@@ -57,13 +57,11 @@
         <Avatar name={user.name} size="md" photoKey={user.profilePhotoKey} />
       </a>
       <a href={resolve(`/@${user.username}`)} class="min-w-0 flex-1">
-        <p
-          class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
-        >
+        <p class="muted-text text-xs font-semibold uppercase tracking-wide">
           Your profile
         </p>
         <p class="truncate font-bold leading-tight">{user.name}</p>
-        <p class="truncate text-sm text-slate-500 dark:text-slate-400">
+        <p class="muted-text truncate text-sm">
           @{user.username}
         </p>
       </a>
@@ -74,7 +72,7 @@
         View
       </a>
     </div>
-    <div class="border-t border-slate-200 px-3 py-2 dark:border-slate-700">
+    <div class="subtle-border border-t px-3 py-2">
       {@render stats(true)}
     </div>
   </GlassCard>
@@ -93,7 +91,7 @@
       <a href={resolve(`/@${user.username}`)}>
         <div class="flex items-center gap-3">
           <div
-            class="rounded-full border border-base-200/50 bg-base-100 p-1 dark:bg-slate-800"
+            class="rounded-full border border-base-300/80 bg-base-100 p-1 dark:border-white/10 dark:bg-slate-800"
           >
             <Avatar
               name={user.name}
@@ -103,7 +101,7 @@
           </div>
           <div class="min-w-0 pt-6">
             <p class="truncate font-bold">{user.name}</p>
-            <p class="text-sm text-slate-500 dark:text-slate-400">
+            <p class="muted-text text-sm">
               @{user.username}
             </p>
           </div>

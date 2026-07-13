@@ -25,9 +25,9 @@
 
 <details bind:this={detailsRef} class="dropdown">
   <summary
-    class="btn btn-ghost btn-sm gap-2 rounded-full px-4 hover:scale-105 active:scale-95 transition-all duration-150 list-none {reposted
+    class="action-pill list-none {reposted
       ? 'text-success bg-success/10'
-      : 'text-slate-500 dark:text-slate-400 hover:text-success hover:bg-success/5'}"
+      : 'text-base-content/60 hover:text-success hover:bg-success/5'}"
     aria-label={reposted ? "Remove repost" : "Repost options"}
     aria-disabled={isReposting}
     onclick={(e) => {
@@ -42,9 +42,7 @@
     <span class="text-xs sm:text-sm font-semibold tracking-wide">{reposts}</span
     >
   </summary>
-  <ul
-    class="dropdown-content menu bg-base-100 rounded-box border border-slate-200 dark:border-slate-700 shadow-lg z-10 w-40 p-1"
-  >
+  <ul class="dropdown-content menu dropdown-surface z-10 w-40 p-1">
     <li>
       <button type="button" onclick={handleRepost} disabled={isReposting}>
         <Repeat class="h-4 w-4" />

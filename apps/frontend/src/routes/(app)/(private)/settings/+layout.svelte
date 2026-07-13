@@ -22,12 +22,12 @@
   ] as const;
 </script>
 
-<div class="mx-auto w-full max-w-5xl px-3 py-3 sm:px-4 sm:py-6">
+<div class="page-shell w-full">
   <header class="px-1 pb-4 sm:pb-6">
     <h1 class="text-2xl font-bold tracking-tight text-base-content sm:text-3xl">
       Settings
     </h1>
-    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400 sm:text-base">
+    <p class="muted-text mt-1 text-sm sm:text-base">
       Manage your account, appearance, and security.
     </p>
   </header>

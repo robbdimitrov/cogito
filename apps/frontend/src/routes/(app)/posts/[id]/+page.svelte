@@ -68,11 +68,11 @@
 </svelte:head>
 
 {#if !post || !post.user}
-  <div class="container mx-auto max-w-2xl px-3 py-3 sm:px-4 sm:py-6">
+  <div class="feed-shell">
     <GlassCard>
       <div class="card-body items-center py-12 text-center">
         <AlertTriangle class="mb-4 h-16 w-16 opacity-30" />
-        <p class="text-slate-600 dark:text-slate-300">Post not found.</p>
+        <p class="muted-text">Post not found.</p>
         <a href={resolve("/")} class="btn btn-primary btn-sm mt-4"
           >Back to Feed</a
         >
@@ -80,7 +80,7 @@
     </GlassCard>
   </div>
 {:else}
-  <div class="container mx-auto max-w-2xl px-3 py-3 sm:px-4 sm:py-6">
+  <div class="feed-shell">
     <div class="mb-3 sm:mb-4">
       <a
         href={resolve("/")}
@@ -110,17 +110,15 @@
                 >
                   {post.user.name}
                 </a>
-                <span class="text-sm text-slate-500 dark:text-slate-400"
-                  >@{post.user.username}</span
-                >
-                <span class="text-sm text-slate-500 dark:text-slate-400"
+                <span class="muted-text text-sm">@{post.user.username}</span>
+                <span class="muted-text text-sm"
                   >· {formatRelativeTime(post.created)}</span
                 >
               </div>
               {#if user && post.userId === user.id}
                 <button
                   type="button"
-                  class="btn btn-ghost btn-xs h-auto p-1 text-slate-500 transition-transform duration-150 hover:scale-110 hover:text-error active:scale-90 dark:text-slate-400"
+                  class="btn btn-ghost btn-xs h-auto p-1 text-base-content/60 transition-transform duration-150 hover:scale-110 hover:text-error active:scale-90"
                   onclick={() => (showDeleteModal = true)}
                   aria-label="Delete post"
                 >
@@ -137,13 +135,13 @@
                 <img
                   src={imageUrl(post.mediaKey)}
                   alt="Post attachment"
-                  class="max-h-125 w-auto rounded-xl border border-slate-200 object-contain dark:border-slate-800"
+                  class="max-h-96 w-auto rounded-xl border border-base-300 object-contain dark:border-white/10"
                 />
               </div>
             {/if}
 
             <div
-              class="mt-4 flex items-center gap-2 border-t border-slate-200 pt-3 sm:mt-6 sm:gap-6 sm:pt-4 dark:border-slate-700"
+              class="subtle-border mt-4 flex items-center gap-2 border-t pt-3 sm:mt-6 sm:gap-6 sm:pt-4"
             >
               {#if user}
                 <form
@@ -181,7 +179,7 @@
                     type="submit"
                     class="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 transition-all duration-150 hover:scale-105 active:scale-95 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4 {post.reposted
                       ? 'bg-success/10 text-success'
-                      : 'text-slate-500 hover:bg-success/10 hover:text-success dark:text-slate-400'}"
+                      : 'text-base-content/60 hover:bg-success/10 hover:text-success'}"
                     disabled={isReposting}
                   >
                     <Repeat class="h-4 w-4 sm:h-5 sm:w-5" />
@@ -221,7 +219,7 @@
                     type="submit"
                     class="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 transition-all duration-150 hover:scale-105 active:scale-95 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4 {post.liked
                       ? 'bg-error/10 text-error'
-                      : 'text-slate-500 hover:bg-error/10 hover:text-error dark:text-slate-400'}"
+                      : 'text-base-content/60 hover:bg-error/10 hover:text-error'}"
                     disabled={isLiking}
                   >
                     <Heart
@@ -236,14 +234,14 @@
                   icon={Repeat}
                   iconClass="h-4 w-4 sm:h-5 sm:w-5"
                   ariaLabel="Log in to repost"
-                  buttonClass="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 text-slate-500 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4 dark:text-slate-400"
+                  buttonClass="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 text-base-content/60 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4"
                   count={post.reposts}
                 />
                 <LoginGateButton
                   icon={Heart}
                   iconClass="h-4 w-4 sm:h-5 sm:w-5"
                   ariaLabel="Log in to like"
-                  buttonClass="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 text-slate-500 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4 dark:text-slate-400"
+                  buttonClass="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 text-base-content/60 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4"
                   count={post.likes}
                 />
               {/if}
@@ -284,7 +282,7 @@
     {#if user}
       {#if replies.length > 0}
         <div
-          class="mt-2 space-y-0 divide-y divide-slate-100 dark:divide-slate-800/60"
+          class="mt-2 space-y-0 divide-y divide-base-300/70 dark:divide-white/10"
         >
           {#each replies as reply (reply.id)}
             <PostItem

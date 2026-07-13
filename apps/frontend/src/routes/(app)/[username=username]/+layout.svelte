@@ -16,7 +16,7 @@
   />
 </svelte:head>
 
-<main class="container mx-auto max-w-3xl px-3 py-3 sm:px-4 sm:py-6">
+<main class="profile-shell">
   <UserHeader {user} {currentUser} />
   <ControlBar {user} />
   <div class="mt-3 sm:mt-4">

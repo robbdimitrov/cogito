@@ -20,17 +20,14 @@
   {@const user = entry.item}
   <a
     href={resolve(`/@${user.username}`)}
-    class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white/60 p-4 transition-colors hover:bg-white/80 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:bg-slate-900/80"
+    class="soft-surface flex items-center gap-3 p-4"
   >
     <Avatar name={user.name} size="md" photoKey={user.profilePhotoKey} />
     <span class="min-w-0">
-      <span
-        class="block truncate font-semibold text-slate-900 dark:text-white"
-      >
+      <span class="block truncate font-semibold text-base-content">
         {user.name}
       </span>
-      <span class="block truncate text-sm text-slate-500">@{user.username}</span
-      >
+      <span class="muted-text block truncate text-sm">@{user.username}</span>
     </span>
   </a>
 {/snippet}
@@ -39,7 +36,7 @@
   {@const hashtag = entry.item}
   <a
     href={resolve(`/hashtags/${hashtag.name}`)}
-    class="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white/60 p-4 transition-colors hover:bg-white/80 dark:border-slate-800 dark:bg-slate-900/60 dark:hover:bg-slate-900/80"
+    class="soft-surface flex items-center justify-between gap-3 p-4"
   >
     <span class="flex min-w-0 items-center gap-3">
       <span
@@ -49,7 +46,7 @@
       </span>
       <span class="truncate font-semibold text-primary">#{hashtag.name}</span>
     </span>
-    <span class="shrink-0 text-sm text-slate-500">
+    <span class="muted-text shrink-0 text-sm">
       {hashtag.postCount}
       {hashtag.postCount === 1 ? "post" : "posts"}
     </span>
@@ -71,7 +68,7 @@
 {:else if compact}
   <a
     href={resolve(`/posts/${result.item.id}`)}
-    class="block truncate rounded-xl px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800/80"
+    class="block truncate rounded-xl px-3 py-2 text-sm text-base-content/75 hover:bg-base-200 dark:hover:bg-slate-800/80"
   >
     {result.item.content}
   </a>

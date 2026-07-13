@@ -40,7 +40,7 @@
     <textarea
       bind:this={textareaRef}
       name="content"
-      class="textarea textarea-bordered w-full resize-none text-sm leading-relaxed"
+      class="form-textarea min-h-0 resize-none text-sm"
       placeholder="Reply to @{replyToPost.user?.username ?? 'this post'}…"
       bind:value={content}
       maxlength={255}
@@ -48,7 +48,7 @@
   </div>
   <button
     type="submit"
-    class="btn btn-primary btn-sm btn-square shrink-0 mt-1"
+    class="btn btn-primary btn-sm btn-square mt-1 shrink-0 rounded-xl"
     disabled={isSubmitting || !content.trim()}
     aria-label="Send reply"
   >

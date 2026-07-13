@@ -82,12 +82,12 @@
         </div>
         <div class="relative flex-1 min-w-0">
           <Pen
-            class="pointer-events-none absolute left-3 top-3.5 h-5 w-5 text-slate-500 dark:text-slate-400"
+            class="muted-text pointer-events-none absolute left-3 top-3.5 h-5 w-5"
           />
           <textarea
             bind:this={textareaRef}
             name="content"
-            class="textarea border-slate-200/70 focus:border-primary/60 focus:ring-primary/10 dark:border-slate-700/70 dark:bg-slate-950/35 dark:focus:bg-slate-950/60 w-full resize-none rounded-2xl bg-white/55 pl-10 text-base leading-relaxed shadow-inner shadow-slate-900/5 transition-all duration-300 focus:bg-white/80 focus:ring-4 sm:text-lg"
+            class="form-textarea min-h-0 resize-none rounded-2xl pl-10 shadow-inner shadow-slate-900/5 sm:text-lg"
             placeholder="What's on your mind?"
             bind:value={content}
             rows={3}
@@ -100,7 +100,7 @@
             <img
               src={imagePreview}
               alt="Attached"
-              class="max-h-60 rounded-xl border border-slate-200 object-cover dark:border-slate-800"
+              class="max-h-60 rounded-xl border border-base-300 object-cover dark:border-white/10"
             />
             <button
               type="button"
@@ -119,7 +119,7 @@
         <div class="flex items-center gap-4">
           <button
             type="button"
-            class="btn btn-circle btn-ghost btn-sm text-slate-500 transition-colors hover:text-primary"
+            class="btn btn-circle btn-ghost btn-sm muted-text transition-colors hover:text-primary"
             onclick={() => fileInputRef?.click()}
             disabled={uploadingImage}
             title="Attach image"
@@ -141,8 +141,7 @@
           <span
             class="text-sm {content.length > 240
               ? 'text-warning'
-              : 'text-slate-500 dark:text-slate-400'}"
-            >{content.length}/255</span
+              : 'muted-text'}">{content.length}/255</span
           >
         </div>
         <button

@@ -64,28 +64,27 @@
   <title>{q ? `${q} - Search` : "Search"} - Cogito</title>
 </svelte:head>
 
-<main class="container mx-auto max-w-2xl px-3 py-3 sm:px-4 sm:py-6">
+<main class="feed-shell">
   <form onsubmit={handleSubmit} class="mb-6">
     <div class="flex gap-2">
-      <SearchTypeahead bind:query={searchInput} currentUserId={data.currentUser?.id} />
+      <SearchTypeahead
+        bind:query={searchInput}
+        currentUserId={data.currentUser?.id}
+      />
       <button type="submit" class="btn btn-primary rounded-2xl">Search</button>
     </div>
   </form>
 
   {#if !q}
     <GlassCard>
-      <div
-        class="card-body items-center py-12 text-center text-slate-600 dark:text-slate-300"
-      >
+      <div class="card-body muted-text items-center py-12 text-center">
         <Search class="mb-2 h-12 w-12 opacity-50" />
         <p>Enter a search query to find posts, people, and hashtags.</p>
       </div>
     </GlassCard>
   {:else if resultsPagination.items.length === 0}
     <GlassCard>
-      <div
-        class="card-body items-center py-12 text-center text-slate-600 dark:text-slate-300"
-      >
+      <div class="card-body muted-text items-center py-12 text-center">
         <Search class="mb-2 h-12 w-12 opacity-50" />
         <p>No results found for "{q}".</p>
       </div>

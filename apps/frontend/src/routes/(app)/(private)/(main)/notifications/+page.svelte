@@ -72,15 +72,13 @@
   <title>Notifications - Cogito</title>
 </svelte:head>
 
-<main class="container mx-auto max-w-2xl px-3 py-3 sm:px-4 sm:py-6">
+<main class="feed-shell">
   <section class="flex flex-col gap-3 sm:gap-4">
     <h1 class="px-1 text-2xl font-bold text-base-content">Notifications</h1>
 
     {#if pagination.items.length === 0}
       <GlassCard>
-        <div
-          class="card-body items-center py-12 text-center text-slate-600 dark:text-slate-300"
-        >
+        <div class="card-body muted-text items-center py-12 text-center">
           <Bell class="mb-2 h-12 w-12 opacity-50" aria-hidden="true" />
           <p>No notifications yet</p>
         </div>
@@ -94,7 +92,7 @@
               class="card-body flex-row items-start gap-3 p-4 sm:p-5"
             >
               <div
-                class="shrink-0 rounded-full bg-white/45 p-1 ring-1 ring-white/60 dark:bg-white/5 dark:ring-white/10"
+                class="shrink-0 rounded-full bg-base-100/55 p-1 ring-1 ring-base-300/80 dark:bg-white/5 dark:ring-white/10"
               >
                 <Avatar
                   name={actorName(notification)}
@@ -103,13 +101,13 @@
                 />
               </div>
               <div class="min-w-0 flex-1">
-                <p class="text-sm leading-6 text-slate-700 dark:text-slate-200">
+                <p class="text-sm leading-6 text-base-content/80">
                   <span class="font-semibold text-base-content">
                     {actorName(notification)}
                   </span>
                   {notificationLabel(notification.type)}
                 </p>
-                <p class="text-xs text-slate-500 dark:text-slate-400">
+                <p class="muted-text text-xs">
                   {formatRelativeTime(notification.created)}
                 </p>
               </div>
@@ -129,7 +127,7 @@
       <div class="py-4 text-center">
         <button
           type="button"
-          class="btn btn-outline btn-sm"
+          class="btn btn-outline btn-sm rounded-full"
           disabled={pagination.loading}
           onclick={() => pagination.more()}
         >

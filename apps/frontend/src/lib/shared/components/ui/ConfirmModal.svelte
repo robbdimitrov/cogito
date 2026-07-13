@@ -36,7 +36,7 @@
       aria-labelledby="confirm-modal-title"
     >
       <h2 id="confirm-modal-title" class="text-lg font-bold">{title}</h2>
-      <p class="py-4 text-slate-600 dark:text-slate-300">{message}</p>
+      <p class="muted-text py-4">{message}</p>
       <div class="modal-action">
         <button
           type="button"

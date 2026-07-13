@@ -24,8 +24,8 @@
 </script>
 
 <dialog class="modal modal-open">
-  <div class="modal-box max-w-lg">
-    <h3 class="font-bold text-lg mb-3">Repost</h3>
+  <div class="modal-box glass-card max-w-lg p-6">
+    <h3 class="mb-3 text-lg font-bold">Repost</h3>
     <form
       method="POST"
       action="?/quote"
@@ -43,16 +43,16 @@
       <input type="hidden" name="quotePostId" value={quotedPost.id} />
       <textarea
         name="content"
-        class="textarea textarea-bordered w-full resize-none text-base leading-relaxed"
+        class="form-textarea min-h-0 resize-none"
         placeholder="Add a comment…"
         bind:value={content}
         maxlength={255}
         rows={3}
         bind:this={textarea}></textarea>
       <div
-        class="text-right text-sm mt-1 {content.length > 240
+        class="mt-1 text-right text-sm {content.length > 240
           ? 'text-warning'
-          : 'text-slate-500 dark:text-slate-400'}"
+          : 'muted-text'}"
       >
         {content.length}/255
       </div>
@@ -60,7 +60,7 @@
       <div class="modal-action mt-4">
         <button
           type="button"
-          class="btn btn-ghost"
+          class="btn btn-ghost rounded-xl"
           onclick={handleClose}
           disabled={isSubmitting}
         >
@@ -68,7 +68,7 @@
         </button>
         <button
           type="submit"
-          class="btn btn-primary"
+          class="btn btn-primary rounded-xl"
           disabled={isSubmitting || !content.trim()}
         >
           {#if isSubmitting}

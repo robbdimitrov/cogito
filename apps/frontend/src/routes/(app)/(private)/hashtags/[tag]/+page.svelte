@@ -29,13 +29,11 @@
   <title>#{tag} - Cogito</title>
 </svelte:head>
 
-<main class="container mx-auto max-w-2xl px-3 py-3 sm:px-4 sm:py-6">
+<main class="feed-shell">
   <div
-    class="mb-6 flex items-center justify-between border-b border-slate-200 pb-4 dark:border-slate-800"
+    class="subtle-border mb-6 flex items-center justify-between border-b pb-4"
   >
-    <h1
-      class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl dark:text-white"
-    >
+    <h1 class="text-2xl font-bold tracking-tight text-base-content sm:text-3xl">
       <span class="text-primary">#</span>{tag}
     </h1>
   </div>
@@ -52,7 +50,7 @@
     <div class="py-4 text-center">
       <button
         type="button"
-        class="btn btn-outline btn-sm"
+        class="btn btn-outline btn-sm rounded-full"
         disabled={pagination.loading}
         onclick={() => pagination.more()}
       >

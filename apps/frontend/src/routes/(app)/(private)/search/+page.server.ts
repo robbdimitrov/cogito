@@ -33,13 +33,21 @@ export const load: PageServerLoad = async (event) => {
   const api = apiClient(event);
 
   if (!q) {
-    return { q, type: "all" as const, results: EMPTY_SECTION as SearchSection<BlendedItem> };
+    return {
+      q,
+      type: "all" as const,
+      results: EMPTY_SECTION as SearchSection<BlendedItem>,
+    };
   }
 
   // An explicit @/# prefix means the user picked a specific entity type, so
   // show only the matching section instead of a blended list.
   if (q.startsWith("@")) {
-    const section = await searchSection<User>(api, q.replace(/^@/, ""), "users");
+    const section = await searchSection<User>(
+      api,
+      q.replace(/^@/, ""),
+      "users",
+    );
     return {
       q,
       type: "users" as const,
@@ -50,7 +58,11 @@ export const load: PageServerLoad = async (event) => {
     };
   }
   if (q.startsWith("#")) {
-    const section = await searchSection<Hashtag>(api, q.replace(/^#/, ""), "hashtags");
+    const section = await searchSection<Hashtag>(
+      api,
+      q.replace(/^#/, ""),
+      "hashtags",
+    );
     return {
       q,
       type: "hashtags" as const,

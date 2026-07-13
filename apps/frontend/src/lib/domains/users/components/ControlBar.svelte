@@ -48,7 +48,7 @@
       class={`tab group h-10 min-w-0 items-center justify-center gap-1 rounded-xl px-1 text-xs font-medium transition-all duration-300 sm:gap-1.5 sm:px-4 sm:text-sm ${
         tab.isActive
           ? "tab-active bg-primary! text-primary-content! shadow-sm"
-          : "hover:bg-black/5 hover:text-slate-950! dark:hover:bg-white/5 dark:hover:text-white! text-slate-600! dark:text-slate-300!"
+          : "text-base-content/70! hover:bg-base-200/70 hover:text-base-content! dark:hover:bg-white/5 dark:hover:text-white!"
       }`}
     >
       {tab.name}
