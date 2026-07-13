@@ -16,23 +16,21 @@ import (
 )
 
 type postController struct {
-	client       pb.PostServiceClient
-	userClient   pb.UserServiceClient
-	imgClient    pb.ImageServiceClient
-	searchClient pb.SearchServiceClient
+	client     pb.PostServiceClient
+	userClient pb.UserServiceClient
+	imgClient  pb.ImageServiceClient
 }
 
-func newPostController(addr string, userClient pb.UserServiceClient, imgClient pb.ImageServiceClient, searchClient pb.SearchServiceClient) *postController {
+func newPostController(addr string, userClient pb.UserServiceClient, imgClient pb.ImageServiceClient) *postController {
 	conn, err := newGatewayClient(addr, "post")
 	if err != nil {
 		slog.Error("unable to create post client", "error", err)
 		os.Exit(1)
 	}
 	return &postController{
-		client:       pb.NewPostServiceClient(conn),
-		userClient:   userClient,
-		imgClient:    imgClient,
-		searchClient: searchClient,
+		client:     pb.NewPostServiceClient(conn),
+		userClient: userClient,
+		imgClient:  imgClient,
 	}
 }
 
@@ -584,62 +582,4 @@ func (pc *postController) getReplies(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonResponse(w, 200, map[string]any{"items": pc.buildPosts(ctx, res.Posts), "nextCursor": res.NextCursor})
-}
-
-func (pc *postController) searchHashtags(w http.ResponseWriter, r *http.Request) {
-	q := strings.TrimSpace(r.URL.Query().Get("q"))
-	if q == "" {
-		jsonError(w, http.StatusBadRequest, "Missing query parameter")
-		return
-	}
-	if utf8.RuneCountInString(q) > 255 {
-		jsonError(w, http.StatusBadRequest, "Query exceeds maximum length")
-		return
-	}
-	cursor, limit, err := getCursorAndLimitRange(r, 8, 20)
-	if err != nil {
-		grpcError(w, err)
-		return
-	}
-
-	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
-	ctx = appendInternalAuth(appendRequestIDHeader(ctx, r))
-	defer cancel()
-
-	if pc.searchClient != nil {
-		res, err := pc.searchClient.SearchHashtags(ctx, &pb.SearchRequest{
-			Query:  q,
-			Cursor: cursor,
-			Limit:  int32(limit),
-		})
-		if err != nil {
-			slog.Warn("searching hashtags failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
-			grpcError(w, err)
-			return
-		}
-		tags := make([]hashtag, 0, len(res.Hashtags))
-		for _, h := range res.Hashtags {
-			tags = append(tags, mapHashtag(h))
-		}
-		jsonResponse(w, http.StatusOK, map[string]any{"items": tags, "nextCursor": res.NextCursor})
-		return
-	}
-
-	res, err := pc.client.SearchHashtags(ctx, &pb.SearchHashtagsRequest{
-		Query: q,
-		Limit: int32(limit),
-	})
-	if err != nil {
-		slog.Warn("searching hashtags failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
-		grpcError(w, err)
-		return
-	}
-
-	tags := make([]hashtag, 0, len(res.Hashtags))
-	for _, h := range res.Hashtags {
-		tags = append(tags, mapHashtag(h))
-	}
-	slog.Info("hashtag search in fallback mode, cursor-based pagination unavailable", "request_id", getRequestID(r))
-	w.Header().Set("X-Pagination-Degraded", "true")
-	jsonResponse(w, http.StatusOK, map[string]any{"items": tags, "nextCursor": ""})
 }

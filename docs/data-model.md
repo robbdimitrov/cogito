@@ -159,7 +159,6 @@ deletes cascade.
 
 | Table         | Index                                                           | Purpose                          |
 | ------------- | --------------------------------------------------------------- | -------------------------------- |
-| users         | `lower(username) text_pattern_ops`                              | LIKE prefix search on username   |
 | users         | `users_fan_out_disabled_idx` partial on `(id)`                  | High-follower feed pull path     |
 | sessions      | `sessions_user_id_idx`                                          | Session lookup by user           |
 | posts         | `posts_user_id_created_idx (user_id, created DESC)`             | User timeline pagination         |
@@ -169,7 +168,6 @@ deletes cascade.
 | posts         | `posts_hashtags_idx` GIN on `hashtags`                          | Hashtag array search             |
 | likes         | `likes_user_id_idx`                                             | User's liked posts               |
 | followers     | `followers_follower_id_idx`                                     | User's following list            |
-| hashtags      | `hashtags_name_trgm_idx` GIN trgm on `name`                     | Trigram typeahead                |
 | post_hashtags | `post_hashtags_hashtag_id_idx`                                  | Tag's posts                      |
 | outbox        | `outbox_created_idx`                                            | CDC retention cleanup            |
 | notifications | `notifications_user_id_created_idx`                             | Notification pagination          |

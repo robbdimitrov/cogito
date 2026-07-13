@@ -249,25 +249,6 @@ func (c *controller) GetHashtagPosts(ctx context.Context, req *pb.GetHashtagPost
 	return &pb.Posts{Posts: posts, NextCursor: nextCursor}, nil
 }
 
-func (c *controller) SearchHashtags(ctx context.Context, req *pb.SearchHashtagsRequest) (*pb.Hashtags, error) {
-	if req.Query == "" {
-		return nil, newError(codes.InvalidArgument)
-	}
-	limit := req.Limit
-	if limit < 1 {
-		limit = 8
-	}
-	if limit > 20 {
-		limit = 20
-	}
-	tags, err := c.dbClient.searchHashtags(ctx, req.Query, limit)
-	if err != nil {
-		slog.Warn("searching hashtags failed", "request_id", requestID(ctx), "error", err)
-		return nil, newError(codes.Internal)
-	}
-	return &pb.Hashtags{Hashtags: tags}, nil
-}
-
 func (c *controller) GetPostsByIds(ctx context.Context, req *pb.Ids) (*pb.Posts, error) {
 	// Viewer-optional: this is only called internally by the gateway to
 	// resolve embedded quote posts for GetPost/GetPosts, both of which are

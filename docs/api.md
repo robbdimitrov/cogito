@@ -37,18 +37,17 @@ are matched by path shape (`isPublicPostRead`/`isPublicUserRead` in
 `auth_guard.go`), not full anonymity like account creation/login — the
 handler still reads a session if one is present and degrades gracefully
 without one (`liked`/`reposted`/`followed` come back `false`, email is
-hidden). `GET /posts/feed` and `GET /users/search` have the same
-single-path-segment shape but are explicitly excluded and stay
-session-required.
+hidden). `GET /posts/feed` has the same single-path-segment shape but is
+explicitly excluded and stays session-required.
 
 ## Rate Limit Policies
 
-| Policy    | Burst | Rate (req/s) | Endpoints                                            |
-| --------- | ----- | ------------ | ---------------------------------------------------- |
-| strict    | 5     | 200          | POST /sessions, POST /users, POST /uploads           |
-| typeahead | 20    | 5 000        | GET /users/search, GET /hashtags/search, GET /search |
-| read      | 120   | 2 000        | All other GET / HEAD                                 |
-| mutation  | 30    | 1 000        | All other POST / PUT / DELETE / PATCH                |
+| Policy    | Burst | Rate (req/s) | Endpoints                                  |
+| --------- | ----- | ------------ | ------------------------------------------- |
+| strict    | 5     | 200          | POST /sessions, POST /users, POST /uploads |
+| typeahead | 20    | 5 000        | GET /search                                |
+| read      | 120   | 2 000        | All other GET / HEAD                       |
+| mutation  | 30    | 1 000        | All other POST / PUT / DELETE / PATCH      |
 
 Rate limit key: `{policy}:user:{id}` (authenticated) →
 `{policy}:session:{cookie}` → `{policy}:ip:{ip}`
@@ -75,8 +74,7 @@ failures map to 500 unless a controller handles them explicitly.
 - All list endpoints accept `cursor` (opaque string) and `limit` (integer) query
   params.
 - Malformed `limit` values and values outside the endpoint range return 400.
-- Default limit: 20. Min: 1. Max: 100 (except `GET /hashtags/search`: default 8,
-  max 20).
+- Default limit: 20. Min: 1. Max: 100.
 - Response shape: `{ "items": [...], "nextCursor": "..." }` (`nextCursor` is
   empty string when no next page).
 - **PostService cursor** — base64url-encoded JSON:
@@ -128,7 +126,6 @@ are anonymous-readable — see above. Everything below still requires a session.
 
 | Method | Path                      | Purpose                                                      |
 | ------ | ------------------------- | ------------------------------------------------------------ |
-| GET    | /users/search?q=          | Search users by username/name (cursor + limit)               |
 | PUT    | /users/{userId}           | Update profile or credentials (self only; 403 otherwise)     |
 | GET    | /users/{userId}/following | Paginated following list                                     |
 | GET    | /users/{userId}/followers | Paginated followers list                                     |
@@ -161,7 +158,6 @@ still requires a session.
 | GET    | /posts/{postId}/replies | Paginated replies (oldest-first)                                                                                                         |
 | GET    | /users/{userId}/likes   | Paginated posts liked by user                                                                                                            |
 | GET    | /hashtags/{tag}/posts   | Paginated posts with hashtag                                                                                                             |
-| GET    | /hashtags/search?q=     | Hashtag prefix/trigram search                                                                                                            |
 
 #### Search
 
@@ -270,7 +266,6 @@ Standard timeout: 10 seconds. Search endpoints: 5 seconds.
 | GetFollowers      | user_id, cursor, limit                                                                   | Users                              |
 | FollowUser        | user_id                                                                                  | Empty                              |
 | UnfollowUser      | user_id                                                                                  | Empty                              |
-| SearchUsers       | query, limit                                                                             | Users                              |
 
 ### AuthService
 
@@ -298,7 +293,6 @@ Standard timeout: 10 seconds. Search endpoints: 5 seconds.
 | RepostPost      | post_id                                            | Empty      |
 | RemoveRepost    | post_id                                            | Empty      |
 | GetReplies      | post_id, cursor, limit                             | Posts      |
-| SearchHashtags  | query, limit                                       | Hashtags   |
 
 ### ImageService (gRPC)
 

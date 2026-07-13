@@ -757,30 +757,3 @@ func (c *DBClient) getReplies(ctx context.Context, postID int32, cursor Cursor, 
 
 	return mapPostCursorRows(rows), nil
 }
-
-func (c *DBClient) searchHashtags(ctx context.Context, query string, limit int32) ([]*pb.Hashtag, error) {
-	sql := `SELECT h.id, h.name, COUNT(ph.post_id)::int AS post_count
-		FROM hashtags h
-		LEFT JOIN post_hashtags ph ON ph.hashtag_id = h.id
-		WHERE h.name % $1 OR h.name ILIKE $2
-		GROUP BY h.id
-		ORDER BY similarity(h.name, $1) DESC, post_count DESC
-		LIMIT $3`
-
-	q := strings.ToLower(query)
-	rows, err := c.db.Query(ctx, sql, q, q+"%", limit)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var tags []*pb.Hashtag
-	for rows.Next() {
-		var h pb.Hashtag
-		if err := rows.Scan(&h.Id, &h.Name, &h.PostCount); err != nil {
-			return nil, err
-		}
-		tags = append(tags, &h)
-	}
-	return tags, rows.Err()
-}

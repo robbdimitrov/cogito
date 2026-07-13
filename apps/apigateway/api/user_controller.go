@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 	"unicode/utf8"
 
@@ -16,23 +15,21 @@ import (
 )
 
 type userController struct {
-	client       pb.UserServiceClient
-	authClient   pb.AuthServiceClient
-	imgClient    pb.ImageServiceClient
-	searchClient pb.SearchServiceClient
+	client     pb.UserServiceClient
+	authClient pb.AuthServiceClient
+	imgClient  pb.ImageServiceClient
 }
 
-func newUserController(userClient pb.UserServiceClient, authAddr string, imgClient pb.ImageServiceClient, searchClient pb.SearchServiceClient) *userController {
+func newUserController(userClient pb.UserServiceClient, authAddr string, imgClient pb.ImageServiceClient) *userController {
 	authConn, err := newGatewayClient(authAddr, "auth")
 	if err != nil {
 		slog.Error("unable to create auth client", "error", err)
 		os.Exit(1)
 	}
 	return &userController{
-		client:       userClient,
-		authClient:   pb.NewAuthServiceClient(authConn),
-		imgClient:    imgClient,
-		searchClient: searchClient,
+		client:     userClient,
+		authClient: pb.NewAuthServiceClient(authConn),
+		imgClient:  imgClient,
 	}
 }
 
@@ -395,71 +392,6 @@ func (s *userController) getFollowing(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jsonResponse(w, 200, map[string]any{"items": users, "nextCursor": res.NextCursor})
-}
-
-func (s *userController) searchUsers(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
-	ctx, errCtx := appendUserIDHeader(ctx, r)
-	if errCtx != nil {
-		jsonError(w, http.StatusUnauthorized, "Unauthorized")
-		cancel()
-		return
-	}
-	defer cancel()
-
-	query := strings.TrimSpace(r.URL.Query().Get("q"))
-	if query == "" {
-		jsonError(w, http.StatusBadRequest, "Missing query parameter")
-		return
-	}
-	if utf8.RuneCountInString(query) > 255 {
-		jsonError(w, http.StatusBadRequest, "Query exceeds maximum length")
-		return
-	}
-	cursor, limit, err := getCursorAndLimit(r)
-	if err != nil {
-		grpcError(w, err)
-		return
-	}
-
-	if s.searchClient != nil {
-		searchCtx := appendInternalAuth(appendRequestIDHeader(ctx, r))
-		res, err := s.searchClient.SearchUsers(searchCtx, &pb.SearchRequest{
-			Query:  query,
-			Limit:  int32(limit),
-			Cursor: cursor,
-		})
-		if err != nil {
-			slog.Warn("searching users failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
-			grpcError(w, err)
-			return
-		}
-		users := make([]user, len(res.Users))
-		for i, v := range res.Users {
-			users[i] = mapUser(v)
-		}
-		jsonResponse(w, http.StatusOK, map[string]any{"items": users, "nextCursor": res.NextCursor})
-		return
-	}
-
-	res, err := s.client.SearchUsers(ctx, &pb.SearchUsersRequest{
-		Query: query,
-		Limit: int32(limit),
-	})
-	if err != nil {
-		slog.Warn("searching users failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
-		grpcError(w, err)
-		return
-	}
-
-	users := make([]user, len(res.Users))
-	for i, v := range res.Users {
-		users[i] = mapUser(v)
-	}
-
-	slog.Info("user search in fallback mode, cursor-based pagination unavailable", "request_id", getRequestID(r))
-	w.Header().Set("X-Pagination-Degraded", "true")
-	jsonResponse(w, http.StatusOK, map[string]any{"items": users, "nextCursor": ""})
 }
 
 func (s *userController) getFollowers(w http.ResponseWriter, r *http.Request) {

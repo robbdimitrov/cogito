@@ -3,7 +3,6 @@ import type { ApiClient } from "$lib/server/api/client";
 import { unwrap } from "$lib/server/api/http";
 
 const DEFAULT_PAGE_SIZE = 20;
-const DEFAULT_SEARCH_LIMIT = 5;
 
 interface Identifier {
   id: number;
@@ -79,20 +78,6 @@ export async function getUserById(
   const res = await api(`/users/${id}`);
   const unwrapped = await unwrap<User>(res);
   return unwrapped!;
-}
-
-export async function searchUsers(
-  api: ApiClient,
-  query: string,
-  limit = DEFAULT_SEARCH_LIMIT,
-): Promise<{ items: User[] }> {
-  const params = new URLSearchParams({
-    q: query,
-    limit: String(limit),
-  });
-  const res = await api(`/users/search?${params}`);
-  const unwrapped = await unwrap<{ items: User[] }>(res);
-  return unwrapped ?? { items: [] };
 }
 
 export async function getFollowing(

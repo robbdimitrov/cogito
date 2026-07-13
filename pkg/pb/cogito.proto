@@ -66,11 +66,6 @@ message GetUserByUsernameRequest {
   string username = 1;
 }
 
-message SearchUsersRequest {
-  string query = 1;
-  int32 limit = 2;
-}
-
 service UserService {
   rpc CreateUser(CreateUserRequest) returns (Identifier);
   rpc GetUser(UserRequest) returns (User);
@@ -81,7 +76,6 @@ service UserService {
   rpc GetFollowers(GetUsersRequest) returns (Users);
   rpc FollowUser(UserRequest) returns (Empty);
   rpc UnfollowUser(UserRequest) returns (Empty);
-  rpc SearchUsers(SearchUsersRequest) returns (Users);
 }
 
 // Sessions
@@ -186,11 +180,6 @@ message Hashtags {
   string next_cursor = 2;
 }
 
-message SearchHashtagsRequest {
-  string query = 1;
-  int32 limit = 2;
-}
-
 service PostService {
   rpc CreatePost(CreatePostRequest) returns (Identifier);
   rpc GetFeed(GetFeedRequest) returns (Posts);
@@ -205,7 +194,6 @@ service PostService {
   rpc RepostPost(PostRequest) returns (Empty);
   rpc RemoveRepost(PostRequest) returns (Empty);
   rpc GetReplies(GetRepliesRequest) returns (Posts);
-  rpc SearchHashtags(SearchHashtagsRequest) returns (Hashtags);
 }
 
 // Images

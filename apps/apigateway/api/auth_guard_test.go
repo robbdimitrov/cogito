@@ -172,9 +172,9 @@ func TestAuthGuard_PublicPostReadSurfacesTransientAuthFailure(t *testing.T) {
 }
 
 func TestAuthGuard_DoesNotBypassGatedPostAndUserRoutes(t *testing.T) {
-	// Includes the two collision-regression cases: GET /posts/feed and
-	// GET /users/search have the same single-segment shape as the public
-	// /posts/{postId} and /users/{userId} routes, but must stay gated.
+	// Includes the collision-regression case: GET /posts/feed has the same
+	// single-segment shape as the public /posts/{postId} route, but must
+	// stay gated.
 	paths := []string{
 		"/posts/123/likes",
 		"/posts/123/replies",
@@ -182,7 +182,6 @@ func TestAuthGuard_DoesNotBypassGatedPostAndUserRoutes(t *testing.T) {
 		"/users/123/likes",
 		"/users/123/following",
 		"/users/123/followers",
-		"/users/search",
 	}
 	for _, path := range paths {
 		t.Run(path, func(t *testing.T) {

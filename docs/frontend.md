@@ -147,8 +147,6 @@ unchanged after DTO mapping.
 | `/notifications`        | GET    | app layout load | GET /notifications/unread-count                                   |
 | `/notifications`        | GET    | page load       | GET /notifications + PUT /notifications/{id}/read for unread rows |
 | `/notifications`        | GET    | +server.ts      | GET /notifications?cursor=                                        |
-| `/api/users/search`     | GET    | +server.ts      | GET /users/search?q=; used by composer typeahead                  |
-| `/api/hashtags/search`  | GET    | +server.ts      | GET /hashtags/search?q=; used by composer typeahead               |
 | `/uploads/{key}`        | GET    | +server.ts      | GET /uploads/{key} (proxied)                                      |
 | `/health`               | GET    | +server.ts      | returns "ok"                                                      |
 

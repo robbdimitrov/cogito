@@ -168,7 +168,6 @@ func isRetryableGRPCMethod(method string) bool {
 		"/cogito.UserService/GetUserByUsername",
 		"/cogito.UserService/GetFollowing",
 		"/cogito.UserService/GetFollowers",
-		"/cogito.UserService/SearchUsers",
 		"/cogito.ImageService/VerifyUpload",
 		"/cogito.SearchService/SearchUsers",
 		"/cogito.SearchService/SearchPosts",

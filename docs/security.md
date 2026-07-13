@@ -77,12 +77,12 @@ session-required with no anonymous path.
 
 ## Rate Limiting
 
-| Policy    | Burst | Rate (req/s) | Applies to                                           |
-| --------- | ----- | ------------ | ---------------------------------------------------- |
-| strict    | 5     | 200          | POST /sessions, POST /users, POST /uploads           |
-| typeahead | 20    | 5 000        | GET /users/search, GET /hashtags/search, GET /search |
-| read      | 120   | 2 000        | All other GET/HEAD                                   |
-| mutation  | 30    | 1 000        | All other POST/PUT/DELETE/PATCH                      |
+| Policy    | Burst | Rate (req/s) | Applies to                                 |
+| --------- | ----- | ------------ | ------------------------------------------- |
+| strict    | 5     | 200          | POST /sessions, POST /users, POST /uploads |
+| typeahead | 20    | 5 000        | GET /search                                |
+| read      | 120   | 2 000        | All other GET/HEAD                         |
+| mutation  | 30    | 1 000        | All other POST/PUT/DELETE/PATCH            |
 
 - Algorithm: Token bucket (Lua script in Dragonfly). TTL per key:
   `ceil(BURST / RATE * 2)` seconds.

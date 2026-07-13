@@ -89,8 +89,8 @@ All counters computed at read time via subqueries on the original post (using
 | liked    | `EXISTS (SELECT 1 FROM likes WHERE post_id = post.id AND user_id = current_user)`      |
 | reposted | `EXISTS (SELECT 1 FROM posts WHERE repost_of_id = post.id AND user_id = current_user)` |
 
-Lightweight projections (`GetUsersByIds`, `SearchUsers`) return 0 for all counts
-and `false` for boolean states.
+Lightweight projections (`GetUsersByIds`) return 0 for all counts and `false`
+for boolean states.
 
 ## Like and Repost Idempotency
 

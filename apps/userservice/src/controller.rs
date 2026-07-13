@@ -1,7 +1,7 @@
 use crate::cogito::user_service_server::UserService;
 use crate::cogito::{
     CreateUserRequest, Empty, GetUserByUsernameRequest, GetUsersRequest, Identifier, Ids,
-    SearchUsersRequest, UpdateUserRequest, User, UserRequest, Users,
+    UpdateUserRequest, User, UserRequest, Users,
 };
 use crate::crypto::{generate_hash, validate_password};
 use crate::pagination;
@@ -66,12 +66,6 @@ pub trait UserDb: Send + Sync + 'static {
     ) -> Result<Vec<(User, DateTime<Utc>)>, SqlxError>;
     async fn follow_user(&self, user_id: i32, follower_id: i32) -> Result<(), SqlxError>;
     async fn unfollow_user(&self, user_id: i32, follower_id: i32) -> Result<(), SqlxError>;
-    async fn search_users(
-        &self,
-        query: &str,
-        limit: i32,
-        current_user_id: i32,
-    ) -> Result<Vec<User>, SqlxError>;
 }
 
 pub struct Controller<D: UserDb> {
@@ -475,31 +469,6 @@ impl<D: UserDb> UserService for Controller<D> {
             Ok(_) => Ok(Response::new(Empty {})),
             Err(e) => {
                 tracing::warn!(request_id = %request_id, method = "/cogito.UserService/UnfollowUser", error = %e, "unfollowing user failed");
-                Err(Status::internal("Internal server error."))
-            }
-        }
-    }
-
-    async fn search_users(
-        &self,
-        request: Request<SearchUsersRequest>,
-    ) -> Result<Response<Users>, Status> {
-        let request_id = crate::logging::request_id(&request).to_string();
-        let user_id = get_user_id(&request)?;
-        let req = request.into_inner();
-        let limit = req.limit.clamp(1, 100);
-
-        match self
-            .db_client
-            .search_users(&req.query, limit, user_id)
-            .await
-        {
-            Ok(users) => Ok(Response::new(Users {
-                users,
-                next_cursor: String::new(),
-            })),
-            Err(e) => {
-                tracing::warn!(request_id = %request_id, method = "/cogito.UserService/SearchUsers", error = %e, "searching users failed");
                 Err(Status::internal("Internal server error."))
             }
         }

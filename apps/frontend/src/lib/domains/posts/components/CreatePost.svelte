@@ -2,16 +2,11 @@
   import { Pen, Send, ImageIcon, X } from "@lucide/svelte";
   import Avatar from "$lib/shared/components/ui/Avatar.svelte";
   import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
-  import Typeahead from "$lib/shared/components/ui/Typeahead.svelte";
   import type { User } from "$lib/domains/users/model";
 
   import { resizeImageForUpload } from "$lib/shared/image";
   import { getToastContext } from "$lib/shared/toast.svelte";
   import { enhance } from "$app/forms";
-  import { getCaretLineTop } from "$lib/shared/caretLineTop";
-  import { createFloatingPosition } from "$lib/shared/floatingPosition.svelte";
-  import { portal } from "$lib/shared/portal";
-  import { createTypeaheadController } from "$lib/shared/typeaheadController.svelte";
 
   let { user } = $props<{ user: User }>();
   let content = $state("");
@@ -23,39 +18,6 @@
   const toast = getToastContext();
   let textareaRef: HTMLTextAreaElement;
   let fileInputRef: HTMLInputElement;
-  let typeahead = createTypeaheadController();
-  let dropdownPos = createFloatingPosition();
-  let lastCaretLineTop = 0;
-  let lastPaddingLeft = 0;
-
-  function handleChange(e: Event) {
-    const target = e.target as HTMLTextAreaElement;
-    content = target.value;
-    const caret = target.selectionStart ?? content.length;
-    typeahead.handleInput(content, caret);
-    if (typeahead.token) {
-      lastCaretLineTop = getCaretLineTop(target, caret);
-      lastPaddingLeft = parseFloat(getComputedStyle(target).paddingLeft) || 0;
-      dropdownPos.placeAtLine(target, lastCaretLineTop, lastPaddingLeft);
-    }
-  }
-
-  function handleTypeaheadSelect(value: string) {
-    const next = typeahead.select(content, value, textareaRef);
-    if (next !== null) content = next;
-  }
-
-  $effect(() => {
-    if (typeahead.items.length === 0 || !textareaRef) return;
-    const reposition = () =>
-      dropdownPos.placeAtLine(textareaRef, lastCaretLineTop, lastPaddingLeft);
-    window.addEventListener("scroll", reposition, true);
-    window.addEventListener("resize", reposition);
-    return () => {
-      window.removeEventListener("scroll", reposition, true);
-      window.removeEventListener("resize", reposition);
-    };
-  });
 
   async function handleImageUpload(e: Event) {
     const target = e.target as HTMLInputElement;
@@ -100,7 +62,6 @@
             imageBlob = null;
             if (imagePreview) URL.revokeObjectURL(imagePreview);
             imagePreview = null;
-            typeahead.reset();
             await update();
           } else if (result.type === "failure") {
             toast.error(
@@ -128,24 +89,9 @@
             name="content"
             class="textarea border-slate-200/70 focus:border-primary/60 focus:ring-primary/10 dark:border-slate-700/70 dark:bg-slate-950/35 dark:focus:bg-slate-950/60 w-full resize-none rounded-2xl bg-white/55 pl-10 text-base leading-relaxed shadow-inner shadow-slate-900/5 transition-all duration-300 focus:bg-white/80 focus:ring-4 sm:text-lg"
             placeholder="What's on your mind?"
-            value={content}
-            oninput={handleChange}
-            onclick={handleChange}
-            onkeyup={handleChange}
+            bind:value={content}
             rows={3}
             maxlength={255}></textarea>
-          {#if typeahead.items.length > 0}
-            <div
-              use:portal
-              style="position: fixed; top: {dropdownPos.top}px; left: {dropdownPos.left}px;"
-            >
-              <Typeahead
-                items={typeahead.items}
-                display={typeahead.displayItem}
-                onselect={handleTypeaheadSelect}
-              />
-            </div>
-          {/if}
         </div>
       </div>
       {#if imagePreview}

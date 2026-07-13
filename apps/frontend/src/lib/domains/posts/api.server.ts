@@ -19,10 +19,6 @@ export interface Hashtag {
   postCount: number;
 }
 
-interface HashtagPage {
-  items: Hashtag[];
-}
-
 export interface CreatePostInput {
   content: string;
   mediaKey?: string;
@@ -136,17 +132,6 @@ export function removeRepost(
   postID: string | number,
 ): Promise<void> {
   return postMutation(api, postID, "reposts", "DELETE");
-}
-
-export async function searchHashtags(
-  api: ApiClient,
-  query: string,
-  limit = 5,
-): Promise<HashtagPage> {
-  const params = new URLSearchParams({ q: query, limit: String(limit) });
-  const res = await api(`/hashtags/search?${params}`);
-  const unwrapped = await unwrap<HashtagPage>(res);
-  return unwrapped ?? { items: [] };
 }
 
 async function getCursorPage(

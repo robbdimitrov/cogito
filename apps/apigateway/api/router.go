@@ -81,11 +81,11 @@ func newRouter(authAddr, postAddr, userAddr, imageAddr, searchAddr, eventsAddr s
 	}
 
 	imageHTTPBreaker := newCircuitBreaker("image-http")
-	post := newPostController(postAddr, sharedUserClient, sharedImgClient, searchClient)
+	post := newPostController(postAddr, sharedUserClient, sharedImgClient)
 	return &router{
 		auth:             newAuthController(authAddr),
 		post:             post,
-		user:             newUserController(sharedUserClient, authAddr, sharedImgClient, searchClient),
+		user:             newUserController(sharedUserClient, authAddr, sharedImgClient),
 		search:           newSearchController(searchClient, post),
 		notification:     newNotificationController(eventsAddr),
 		imageAddr:        imageAddr,
@@ -114,12 +114,10 @@ func newImageHTTPTransport() *http.Transport {
 	}
 }
 
-// These literal segments share a shape with public {id} routes but must stay
-// gated; auth_guard.go consumes the constants so route names cannot drift.
-const (
-	postsFeedSegment   = "feed"
-	usersSearchSegment = "search"
-)
+// This literal segment shares a shape with the public {id} route but must
+// stay gated; auth_guard.go consumes the constant so the route name cannot
+// drift.
+const postsFeedSegment = "feed"
 
 func (r *router) configureRoutes(mux *http.ServeMux) {
 	// Health check
@@ -135,7 +133,6 @@ func (r *router) configureRoutes(mux *http.ServeMux) {
 	// Users
 	mux.HandleFunc("POST /users", r.user.createUser)
 	mux.HandleFunc("GET /users", r.user.getUserByUsername)
-	mux.HandleFunc("GET /users/"+usersSearchSegment, r.user.searchUsers)
 	mux.HandleFunc("GET /users/{userId}", r.user.getUser)
 	mux.HandleFunc("PUT /users/{userId}", r.user.updateUser)
 	mux.HandleFunc("GET /users/{userId}/following", r.user.getFollowing)
@@ -156,7 +153,6 @@ func (r *router) configureRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /users/{userId}/posts", r.post.getPosts)
 	mux.HandleFunc("GET /users/{userId}/likes", r.post.getLikedPosts)
 	mux.HandleFunc("GET /hashtags/{tag}/posts", r.post.getHashtagPosts)
-	mux.HandleFunc("GET /hashtags/search", r.post.searchHashtags)
 	mux.HandleFunc("GET /posts/{postId}", r.post.getPost)
 	mux.HandleFunc("DELETE /posts/{postId}", r.post.deletePost)
 	mux.HandleFunc("POST /posts/{postId}/likes", r.post.likePost)

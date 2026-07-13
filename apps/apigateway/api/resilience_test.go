@@ -13,7 +13,6 @@ func TestRetryableGRPCMethodOnlyRetriesReadsAndVerification(t *testing.T) {
 		"/cogito.PostService/GetFeed",
 		"/cogito.PostService/GetPost",
 		"/cogito.UserService/GetUser",
-		"/cogito.UserService/SearchUsers",
 		"/cogito.ImageService/VerifyUpload",
 	}
 	for _, method := range retryable {

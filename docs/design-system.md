@@ -92,14 +92,7 @@ access.
 
 Post composer with expandable textarea (`FormattedContent` preview), image
 upload button (triggers `POST /uploads`), and submit. Supports `inReplyToId`
-prop for reply creation. Mentions and hashtags use the shared typeahead
-controller and a portalled dropdown positioned at the active caret line.
-
-### `Typeahead`
-
-Portalled suggestion dropdown for composer mention and hashtag completion.
-User suggestions show avatar, name, and username; hashtag suggestions show the
-tag and post count.
+prop for reply creation.
 
 ### `FormattedContent`
 
@@ -130,8 +123,7 @@ input wrapper. `FormInput` / `FormTextarea` — apply `.form-input` /
 input with leading Lucide icon (email, lock). `Loading` — centered spinner.
 `ToastProvider` — toast queue context and renderer. `PostList` / `UserList` —
 list containers. `QuoteEmbed` / `ReplyComposer` — inline post context
-components. `ReplyComposer` uses the same mention/hashtag typeahead as
-`CreatePost`. `ControlBar` — profile action strip.
+components. `ControlBar` — profile action strip.
 
 ## Icons
 

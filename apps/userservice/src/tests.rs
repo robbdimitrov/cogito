@@ -147,20 +147,6 @@ impl UserDb for Arc<MockDb> {
     async fn unfollow_user(&self, _user_id: i32, _follower_id: i32) -> Result<(), SqlxError> {
         Ok(())
     }
-
-    async fn search_users(
-        &self,
-        query: &str,
-        _limit: i32,
-        _current_user_id: i32,
-    ) -> Result<Vec<User>, SqlxError> {
-        let users = self.users.lock().await;
-        Ok(users
-            .iter()
-            .filter(|u| u.username.contains(query))
-            .cloned()
-            .collect())
-    }
 }
 
 fn create_request<T>(msg: T, user_id: i32) -> Request<T> {
@@ -307,7 +293,7 @@ async fn test_get_users_by_ids_empty_returns_empty() {
     assert!(res.unwrap().into_inner().users.is_empty());
 }
 
-use crate::cogito::{GetUserByUsernameRequest, SearchUsersRequest, UpdateUserRequest};
+use crate::cogito::{GetUserByUsernameRequest, UpdateUserRequest};
 
 #[tokio::test]
 async fn test_update_user() {
@@ -551,33 +537,4 @@ async fn test_get_user_by_username_without_viewer_succeeds() {
     let user = res.unwrap().into_inner();
     assert_eq!(user.username, "testuser");
     assert!(!user.followed);
-}
-
-#[tokio::test]
-async fn test_search_users() {
-    let db = Arc::new(MockDb::new());
-    let controller = Controller::new(db.clone());
-
-    let _ = db
-        .create_user("Test1", "user1", "test1@example.com", "hash")
-        .await;
-    let _ = db
-        .create_user("Test2", "user2", "test2@example.com", "hash")
-        .await;
-    let _ = db
-        .create_user("Other", "other", "other@example.com", "hash")
-        .await;
-
-    let req = create_request(
-        SearchUsersRequest {
-            query: "user".into(),
-            limit: 10,
-        },
-        1,
-    );
-
-    let res = controller.search_users(req).await;
-    assert!(res.is_ok());
-    let users = res.unwrap().into_inner().users;
-    assert_eq!(users.len(), 2);
 }
