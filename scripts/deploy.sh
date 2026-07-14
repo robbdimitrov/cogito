@@ -14,7 +14,6 @@ REMOTE_PORT="${REMOTE_PORT:-8080}"
 PORT_FORWARD_LOG="${PORT_FORWARD_LOG:-/tmp/cogito-port-forward-${LOCAL_PORT}.log}"
 PORT_FORWARD_PID_FILE="${PORT_FORWARD_PID_FILE:-/tmp/cogito-port-forward-${LOCAL_PORT}.pid}"
 FORCE_BACKFILL="${FORCE_BACKFILL:-0}"
-CREATED_NAMESPACE=false
 
 APIGATEWAY_IMAGE_TAG="${APIGATEWAY_IMAGE_TAG:-}"
 AUTHSERVICE_IMAGE_TAG="${AUTHSERVICE_IMAGE_TAG:-}"
@@ -68,6 +67,38 @@ require_docker() {
   docker info >/dev/null 2>&1 || die "Docker daemon is not running. Start Docker and try again."
 }
 
+require_colima_aio_capacity() {
+  local context aio_nr aio_max available
+  context="$(kubectl config current-context 2>/dev/null || true)"
+  [[ "${context}" == "colima" ]] || return 0
+  command -v colima >/dev/null || return 0
+
+  aio_nr="$(colima ssh -- cat /proc/sys/fs/aio-nr 2>/dev/null || true)"
+  aio_max="$(colima ssh -- cat /proc/sys/fs/aio-max-nr 2>/dev/null || true)"
+  [[ "${aio_nr}" =~ ^[0-9]+$ && "${aio_max}" =~ ^[0-9]+$ ]] || return 0
+  available=$((aio_max - aio_nr))
+
+  if (( aio_max >= 1048576 && available >= 4096 )); then
+    return 0
+  fi
+
+  cat >&2 <<EOF
+error: Colima Linux AIO capacity is too low for Redpanda.
+
+Current Colima values:
+  fs.aio-nr      ${aio_nr}
+  fs.aio-max-nr  ${aio_max}
+  available      ${available}
+
+Raise the node limit, then rerun deploy:
+  colima ssh -- sudo sysctl -w fs.aio-max-nr=1048576
+
+To persist it in the Colima VM:
+  colima ssh -- sudo sh -c 'echo fs.aio-max-nr=1048576 >/etc/sysctl.d/99-redpanda-aio.conf && sysctl --system'
+EOF
+  exit 1
+}
+
 random_secret() {
   if command -v openssl >/dev/null; then
     openssl rand -hex 32
@@ -115,9 +146,7 @@ ensure_database_url() {
 }
 
 ensure_namespace() {
-  if kubectl create namespace "${NS}" 2>/dev/null; then
-    CREATED_NAMESPACE=true
-  fi
+  kubectl create namespace "${NS}" 2>/dev/null || true
 }
 
 ensure_secret() {
@@ -415,7 +444,17 @@ wait_for_rollouts() {
   kubectl -n "${NS}" get pods
   for resource in "${failed[@]}"; do
     echo "==> recent logs for ${resource}"
-    kubectl -n "${NS}" logs "${resource}" --tail=40 || true
+    case "${resource}" in
+      deployment/connect)
+        # connect runs three containers; a bare `logs` call is ambiguous and errors.
+        for container in relay sync-search cleanup-s3; do
+          kubectl -n "${NS}" logs "${resource}" -c "${container}" --tail=40 || true
+        done
+        ;;
+      *)
+        kubectl -n "${NS}" logs "${resource}" --tail=40 || true
+        ;;
+    esac
   done
   exit 1
 }
@@ -549,14 +588,16 @@ print_summary() {
                  stop: kill \$(cat ${PORT_FORWARD_PID_FILE})
 
   Pods           kubectl -n ${NS} get pods
-  Logs           kubectl -n ${NS} logs deployment/<service> --tail=100
-  Tear down      kubectl delete -f ${K8S_DIR} -n ${NS}
+  App logs       kubectl -n ${NS} logs deployment/<service> --tail=100
+  Database logs  kubectl -n ${NS} logs statefulset/database --tail=100
+  Tear down      kubectl delete namespace ${NS}
 
 EOF
 }
 
 require_tools
 require_docker
+require_colima_aio_capacity
 init_image_tags
 
 if [[ -n "$(port_pids)" ]]; then
