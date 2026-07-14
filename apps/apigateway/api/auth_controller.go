@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -315,6 +316,12 @@ func (ac *authController) getSessions(w http.ResponseWriter, r *http.Request) {
 			Created: s.Created,
 		}
 	}
+
+	// Pin the caller's own session first regardless of creation order, so it
+	// doesn't get buried by a more-recently-created session elsewhere.
+	sort.SliceStable(sessions, func(i, j int) bool {
+		return sessions[i].ID == currentSessionID && sessions[j].ID != currentSessionID
+	})
 
 	jsonResponse(w, 200, map[string]any{
 		"sessions":         sessions,
