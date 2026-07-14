@@ -30,6 +30,7 @@ func CreateServer(ctx context.Context, authAddr, postAddr, userAddr, imageAddr, 
 	handler = authGuard(router.auth)(handler)
 	handler = bodyLimitMiddleware(maxRequestBodyBytes)(handler)
 	handler = secureHeadersMiddleware()(handler)
+	handler = recoveryMiddleware()(handler)
 	handler = loggerMiddleware()(handler)
 	handler = requestIDMiddleware()(handler)
 
@@ -79,6 +80,23 @@ func loggerMiddleware() func(http.Handler) http.Handler {
 				"status", rec.status,
 				"duration_ms", time.Since(start).Milliseconds(),
 			)
+		})
+	}
+}
+
+// recoveryMiddleware sits inside loggerMiddleware so the recovered response's
+// status still reaches the access log, and outside routes/backends so it
+// catches panics from any handler or inner middleware.
+func recoveryMiddleware() func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			defer func() {
+				if rec := recover(); rec != nil {
+					slog.Error("panic recovered", "request_id", getRequestID(r), "route", r.Pattern, "panic", rec)
+					jsonError(w, http.StatusInternalServerError, "Internal server error")
+				}
+			}()
+			next.ServeHTTP(w, r)
 		})
 	}
 }

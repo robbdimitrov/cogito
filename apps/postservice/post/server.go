@@ -6,16 +6,34 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
 	pb "cogito/postservice/genproto"
 )
 
 func CreateServer(dbClient *DBClient) *grpc.Server {
-	server := grpc.NewServer(grpc.UnaryInterceptor(internalAuthInterceptor))
+	server := grpc.NewServer(grpc.ChainUnaryInterceptor(recoveryInterceptor, internalAuthInterceptor))
 	controller := newController(dbClient)
 	pb.RegisterPostServiceServer(server, controller)
 	return server
+}
+
+// recoveryInterceptor runs outermost so a panic anywhere in the handler chain
+// is mapped to a gRPC Internal status instead of crashing the process.
+func recoveryInterceptor(
+	ctx context.Context,
+	req interface{},
+	info *grpc.UnaryServerInfo,
+	handler grpc.UnaryHandler,
+) (resp interface{}, err error) {
+	defer func() {
+		if rec := recover(); rec != nil {
+			slog.Error("grpc panic recovered", "request_id", requestID(ctx), "method", info.FullMethod, "panic", rec)
+			err = status.Error(codes.Internal, "Internal server error")
+		}
+	}()
+	return handler(ctx, req)
 }
 
 func internalAuthInterceptor(
