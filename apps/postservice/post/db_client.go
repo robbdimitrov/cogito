@@ -218,13 +218,18 @@ func (c *DBClient) createPost(ctx context.Context, content string, tags []string
 	}
 
 	for _, tag := range tags {
+		var hashtagID int32
 		var count int32
-		err = tx.QueryRow(ctx, "SELECT COUNT(*)::int FROM post_hashtags WHERE hashtag_id = (SELECT id FROM hashtags WHERE name = $1)", tag).Scan(&count)
+		err = tx.QueryRow(ctx, `SELECT h.id, COUNT(ph.post_id)::int
+			FROM hashtags h
+			LEFT JOIN post_hashtags ph ON ph.hashtag_id = h.id
+			WHERE h.name = $1
+			GROUP BY h.id`, tag).Scan(&hashtagID, &count)
 		if err != nil {
 			return 0, err
 		}
 		err = outbox(tx, ctx, "entity-changes", map[string]any{
-			"table": "hashtags", "op": "upsert", "name": tag, "post_count": count,
+			"table": "hashtags", "op": "upsert", "id": hashtagID, "name": tag, "post_count": count,
 		})
 		if err != nil {
 			return 0, err
@@ -541,7 +546,7 @@ func (c *DBClient) deletePost(ctx context.Context, postID int32, userID int32) e
 	}
 
 	if len(tagIDs) > 0 {
-		rows, err = tx.Query(ctx, `SELECT h.name, COUNT(ph.post_id)::int
+		rows, err = tx.Query(ctx, `SELECT h.id, h.name, COUNT(ph.post_id)::int
 			FROM hashtags h
 			LEFT JOIN post_hashtags ph ON ph.hashtag_id = h.id
 			WHERE h.id = ANY($1)
@@ -550,13 +555,14 @@ func (c *DBClient) deletePost(ctx context.Context, postID int32, userID int32) e
 			return err
 		}
 		type hashtagCount struct {
+			id    int32
 			name  string
 			count int32
 		}
 		var counts []hashtagCount
 		for rows.Next() {
 			var item hashtagCount
-			if err := rows.Scan(&item.name, &item.count); err != nil {
+			if err := rows.Scan(&item.id, &item.name, &item.count); err != nil {
 				rows.Close()
 				return err
 			}
@@ -569,7 +575,7 @@ func (c *DBClient) deletePost(ctx context.Context, postID int32, userID int32) e
 		rows.Close()
 		for _, item := range counts {
 			err = outbox(tx, ctx, "entity-changes", map[string]any{
-				"table": "hashtags", "op": "upsert", "name": item.name, "post_count": item.count,
+				"table": "hashtags", "op": "upsert", "id": item.id, "name": item.name, "post_count": item.count,
 			})
 			if err != nil {
 				return err

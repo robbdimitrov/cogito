@@ -54,7 +54,7 @@ data:
         - check: this.table == "users" && this.op == "upsert"
           output:
             http_client:
-              url: ${MEILI_HOST}/indexes/users/documents
+              url: ${MEILI_HOST}/indexes/users/documents?primaryKey=id
               verb: POST
               headers:
                 Authorization: Bearer ${MEILI_MASTER_KEY}
@@ -62,7 +62,7 @@ data:
         - check: this.table == "posts" && this.op == "upsert" && !this.exists("in_reply_to_id") && !this.exists("repost_of_id")
           output:
             http_client:
-              url: ${MEILI_HOST}/indexes/posts/documents
+              url: ${MEILI_HOST}/indexes/posts/documents?primaryKey=id
               verb: POST
               headers:
                 Authorization: Bearer ${MEILI_MASTER_KEY}
@@ -77,7 +77,7 @@ data:
         - check: this.table == "hashtags" && this.op == "upsert" && this.post_count > 0
           output:
             http_client:
-              url: ${MEILI_HOST}/indexes/hashtags/documents
+              url: ${MEILI_HOST}/indexes/hashtags/documents?primaryKey=id
               verb: POST
               headers:
                 Authorization: Bearer ${MEILI_MASTER_KEY}
@@ -122,7 +122,7 @@ data:
           GROUP BY p.id, u.fan_out_disabled
           UNION ALL
           SELECT 'entity-changes' AS topic,
-                 jsonb_build_object('table','hashtags','op','upsert','name',h.name,'post_count',COUNT(ph.post_id)) AS payload
+                 jsonb_build_object('table','hashtags','op','upsert','id',h.id,'name',h.name,'post_count',COUNT(ph.post_id)) AS payload
           FROM hashtags h
           LEFT JOIN post_hashtags ph ON ph.hashtag_id = h.id
           GROUP BY h.id, h.name

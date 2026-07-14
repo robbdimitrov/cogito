@@ -153,6 +153,12 @@ Gateway also calls `ImageService.DeleteImage` when deleting a post with a
    search.
 6. Backfill is a one-shot Redpanda Connect job that emits current users, posts,
    and hashtags to `entity-changes`.
+7. Every upsert payload must include `id` (each index's Meilisearch primary
+   key, provisioned explicitly at flowservice startup) and every producer must
+   pass `?primaryKey=id` on the Connect upsert call. Meilisearch otherwise
+   infers the key from the document; a payload with more than one `id`-like
+   field (e.g. posts' `id` and `author_id`) is ambiguous and the document is
+   rejected outright.
 
 ## Notifications
 
