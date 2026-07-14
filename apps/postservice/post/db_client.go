@@ -498,13 +498,34 @@ func (c *DBClient) deletePost(ctx context.Context, postID int32, userID int32) e
 	}
 	rows.Close()
 
+	// Capture reply IDs before the FK SET NULL orphans them, so their reply
+	// notifications can still be cleaned up via this delete event.
+	var replyPostIDs []int32
+	rows, err = tx.Query(ctx, "SELECT id FROM posts WHERE in_reply_to_id = $1", postID)
+	if err != nil {
+		return err
+	}
+	for rows.Next() {
+		var replyID int32
+		if err := rows.Scan(&replyID); err != nil {
+			rows.Close()
+			return err
+		}
+		replyPostIDs = append(replyPostIDs, replyID)
+	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		return err
+	}
+	rows.Close()
+
 	_, err = tx.Exec(ctx, "DELETE FROM posts WHERE id = $1 AND user_id = $2", postID, userID)
 	if err != nil {
 		return err
 	}
 
 	err = outbox(tx, ctx, "entity-changes", map[string]any{
-		"table": "posts", "op": "delete", "id": postID, "author_id": userID, "media_key": mediaKey,
+		"table": "posts", "op": "delete", "id": postID, "author_id": userID, "media_key": mediaKey, "reply_post_ids": replyPostIDs,
 	})
 	if err != nil {
 		return err

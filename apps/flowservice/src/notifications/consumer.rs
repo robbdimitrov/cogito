@@ -62,6 +62,7 @@ struct EntityChangeEvent {
     table: String,
     op: String,
     id: Option<i64>,
+    reply_post_ids: Option<Vec<i64>>,
 }
 
 pub async fn run(
@@ -147,8 +148,15 @@ async fn dispatch_entity_change(
                 return Ok(());
             }
         };
-        db.delete_by_entity(&post_id.to_string(), &["like", "repost", "reply"])
+        db.delete_by_entity(&post_id.to_string(), &["like", "repost"])
             .await?;
+        // Reply notifications are keyed by the reply's own entity ID, not the
+        // parent's — the parent's FK SET NULL orphans replies rather than
+        // deleting them, so those IDs must be captured by the producer.
+        for reply_id in event.reply_post_ids.unwrap_or_default() {
+            db.delete_by_entity(&reply_id.to_string(), &["reply"])
+                .await?;
+        }
     } else {
         tracing::warn!(
             op = %event.op,
@@ -273,4 +281,26 @@ async fn dispatch_activity(
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn entity_change_event_deserializes_without_reply_post_ids() {
+        let event: EntityChangeEvent =
+            serde_json::from_str(r#"{"table":"posts","op":"delete","id":42}"#).unwrap();
+        assert_eq!(event.id, Some(42));
+        assert!(event.reply_post_ids.is_none());
+    }
+
+    #[test]
+    fn entity_change_event_deserializes_with_reply_post_ids() {
+        let event: EntityChangeEvent = serde_json::from_str(
+            r#"{"table":"posts","op":"delete","id":42,"reply_post_ids":[7,8]}"#,
+        )
+        .unwrap();
+        assert_eq!(event.reply_post_ids, Some(vec![7, 8]));
+    }
 }

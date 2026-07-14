@@ -163,10 +163,12 @@ Gateway also calls `ImageService.DeleteImage` when deleting a post with a
 | post delete                      | Delete like, repost, and reply notifications tied to the deleted post |
 
 Notification inserts use the outbox row ID as `external_id`, so replayed
-messages are discarded by a unique constraint. If a parent post deletion
-cascades reply rows before a corresponding unreply event is emitted, stale reply
-notifications are cleaned up only when an entity delete event for that reply is
-observed.
+messages are discarded by a unique constraint. Reply notifications are keyed by
+the reply post's own ID, not its parent's. Since `posts.in_reply_to_id` is
+`SET NULL` rather than cascading, deleting a parent post orphans its replies
+instead of removing them, so the parent's `entity-changes` delete event carries
+the affected replies' IDs (`reply_post_ids`) captured before the FK clears the
+link, letting their reply notifications be cleaned up in the same event.
 
 ## Feed Fan-Out
 
