@@ -93,9 +93,8 @@ for example after resetting the search index.
 
 ## Networking
 
-| Resource       | Kind    | Host             | Backend       |
-| -------------- | ------- | ---------------- | ------------- |
-| cogito-ingress | Ingress | cogito.localhost | frontend:8080 |
+No Ingress controller runs in this local cluster; `scripts/deploy.sh` exposes
+`frontend` via `kubectl port-forward` instead.
 
 All inter-service communication uses ClusterIP via Kubernetes DNS
 (`service-name:port`). imageservice exposes two ClusterIP ports: 5050 (gRPC) and
