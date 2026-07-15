@@ -2,15 +2,15 @@
 
 ## User Validation
 
-| Field             | Rule                                                            |
-| ----------------- | --------------------------------------------------------------- |
-| name              | Required; non-empty after trim                                  |
-| username          | Required; `[a-zA-Z0-9_]+` only; max 255 chars; stored lowercase |
-| email             | Required; matches `^[^@]+@[^@]+\.[^@]+$`; stored lowercase      |
-| password          | Min 8, max 1024 characters                                      |
-| bio               | Optional; no application-enforced length limit                  |
-| profile_photo_key | Optional                                                        |
-| cover_photo_key   | Optional                                                        |
+| Field             | Rule                                                             |
+| ----------------- | ----------------------------------------------------------------- |
+| name              | Required; non-empty after trim; max 100 characters               |
+| username          | Required; `[a-zA-Z0-9_]+` only; 3-30 chars; stored lowercase     |
+| email             | Required; matches `^[^@]+@[^@]+\.[^@]+$`; stored lowercase       |
+| password          | Min 8, max 128 characters                                        |
+| bio               | Optional; max 255 characters                                     |
+| profile_photo_key | Optional                                                          |
+| cover_photo_key   | Optional                                                          |
 
 `username` and `email` are globally unique (DB constraint). Duplicate returns
 `already_exists`.

@@ -540,3 +540,33 @@ func TestUpdateUser_ImageAndSessionOrchestration(t *testing.T) {
 		t.Errorf("Expected GetSessions to be called")
 	}
 }
+
+func TestCreateUser_RejectsUsernameOverLengthLimit(t *testing.T) {
+	uc := &userController{client: &mockUserServiceClient{}}
+
+	body := `{"name":"test","username":"` + strings.Repeat("a", maxUsernameLength+1) + `","email":"test@example.com","password":"password123"}`
+	req := httptest.NewRequest("POST", "/users", bytes.NewBufferString(body))
+
+	w := httptest.NewRecorder()
+	uc.createUser(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected status 400, got %d", w.Code)
+	}
+}
+
+func TestUpdateUser_RejectsNameOverLengthLimit(t *testing.T) {
+	uc := &userController{client: &mockUserServiceClient{}}
+
+	body := `{"name":"` + strings.Repeat("a", maxNameLength+1) + `","username":"test","email":"test@example.com"}`
+	req := httptest.NewRequest("PUT", "/users/1", bytes.NewBufferString(body))
+	req.SetPathValue("userId", "1")
+	req = setUserID(req, "1")
+
+	w := httptest.NewRecorder()
+	uc.updateUser(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected status 400, got %d", w.Code)
+	}
+}

@@ -50,6 +50,7 @@
           name="oldPassword"
           placeholder="Current password"
           minlength={8}
+          maxlength={128}
           bind:value={oldPassword}
           required
           autocomplete="current-password"
@@ -62,6 +63,7 @@
           name="password"
           placeholder="New password"
           minlength={8}
+          maxlength={128}
           bind:value={password}
           required
           autocomplete="new-password"

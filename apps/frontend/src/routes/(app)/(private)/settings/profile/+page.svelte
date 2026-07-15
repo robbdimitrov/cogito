@@ -229,6 +229,7 @@
           value={user.name}
           required
           autocomplete="name"
+          maxlength={100}
         />
       </Field>
       <Field id="settings-username" label="Username">
@@ -240,6 +241,9 @@
           value={user.username}
           required
           autocomplete="username"
+          pattern="[a-zA-Z0-9_]+"
+          minlength={3}
+          maxlength={30}
         />
       </Field>
       <Field id="settings-email" label="Email">
@@ -251,6 +255,7 @@
           value={user.email}
           required
           autocomplete="email"
+          maxlength={255}
         />
       </Field>
       <Field id="settings-bio" label="Bio">
@@ -260,6 +265,7 @@
           placeholder="Tell us about yourself"
           value={user.bio}
           rows={4}
+          maxlength={255}
         />
       </Field>
 

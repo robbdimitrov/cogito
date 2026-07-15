@@ -14,6 +14,13 @@ import (
 	pb "cogito/apigateway/genproto"
 )
 
+const (
+	maxNameLength     = 100
+	maxUsernameLength = 30
+	maxEmailLength    = 255
+	maxBioLength      = 255
+)
+
 type userController struct {
 	client     pb.UserServiceClient
 	authClient pb.AuthServiceClient
@@ -60,8 +67,10 @@ func (s *userController) createUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if utf8.RuneCountInString(body.Name) > 255 || utf8.RuneCountInString(body.Username) > 255 || utf8.RuneCountInString(body.Email) > 255 {
-		jsonError(w, http.StatusBadRequest, "Profile fields cannot exceed 255 characters")
+	if utf8.RuneCountInString(body.Name) > maxNameLength ||
+		utf8.RuneCountInString(body.Username) > maxUsernameLength ||
+		utf8.RuneCountInString(body.Email) > maxEmailLength {
+		jsonError(w, http.StatusBadRequest, "Profile fields exceed the allowed length")
 		return
 	}
 
@@ -187,8 +196,8 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 	if body.Bio != nil {
 		bioLen = utf8.RuneCountInString(*body.Bio)
 	}
-	if nameLen > 255 || usernameLen > 255 || emailLen > 255 || bioLen > 255 {
-		jsonError(w, http.StatusBadRequest, "Profile fields cannot exceed 255 characters")
+	if nameLen > maxNameLength || usernameLen > maxUsernameLength || emailLen > maxEmailLength || bioLen > maxBioLength {
+		jsonError(w, http.StatusBadRequest, "Profile fields exceed the allowed length")
 		return
 	}
 

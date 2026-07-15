@@ -37,7 +37,7 @@ feed (materialized home-feed rows)
 | ----------------- | ------------ | ----------------------- |
 | id                | serial       | PRIMARY KEY             |
 | name              | varchar(255) | NOT NULL                |
-| username          | varchar(255) | NOT NULL, UNIQUE        |
+| username          | varchar(30)  | NOT NULL, UNIQUE        |
 | email             | varchar(255) | NOT NULL, UNIQUE        |
 | password          | varchar(255) | NOT NULL                |
 | bio               | varchar(255) | DEFAULT ''              |

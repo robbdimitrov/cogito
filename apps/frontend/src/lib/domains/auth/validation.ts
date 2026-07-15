@@ -1,6 +1,9 @@
 const USERNAME_PATTERN = /^[a-zA-Z0-9_]+$/;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MIN_USERNAME_LENGTH = 3;
+const MAX_USERNAME_LENGTH = 30;
 const MIN_PASSWORD_LENGTH = 8;
+const MAX_PASSWORD_LENGTH = 128;
 
 export interface RegisterFields {
   name: string;
@@ -17,14 +20,21 @@ export function validateRegister(
   if (!name || !username || !email || !password) {
     return "All fields are required";
   }
-  if (!USERNAME_PATTERN.test(username)) {
-    return "Username can only contain letters, numbers, and underscores";
+  if (
+    username.length < MIN_USERNAME_LENGTH ||
+    username.length > MAX_USERNAME_LENGTH ||
+    !USERNAME_PATTERN.test(username)
+  ) {
+    return "Username must be 3-30 characters and contain only letters, numbers, and underscores";
   }
   if (!EMAIL_PATTERN.test(email)) {
     return "Enter a valid email address";
   }
-  if (password.length < MIN_PASSWORD_LENGTH) {
-    return "Password must be at least 8 characters";
+  if (
+    password.length < MIN_PASSWORD_LENGTH ||
+    password.length > MAX_PASSWORD_LENGTH
+  ) {
+    return "Password must be between 8 and 128 characters";
   }
   return null;
 }

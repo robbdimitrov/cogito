@@ -216,6 +216,60 @@ async fn test_create_user_rejects_invalid_username() {
 }
 
 #[tokio::test]
+async fn test_create_user_rejects_username_too_short() {
+    let db = Arc::new(MockDb::new());
+    let controller = Controller::new(db);
+    let req = create_request(
+        CreateUserRequest {
+            name: "Test".into(),
+            username: "ab".into(),
+            email: "test@example.com".into(),
+            password: "password".into(),
+        },
+        1,
+    );
+
+    let error = controller.create_user(req).await.unwrap_err();
+    assert_eq!(error.code(), tonic::Code::InvalidArgument);
+}
+
+#[tokio::test]
+async fn test_create_user_rejects_username_too_long() {
+    let db = Arc::new(MockDb::new());
+    let controller = Controller::new(db);
+    let req = create_request(
+        CreateUserRequest {
+            name: "Test".into(),
+            username: "a".repeat(31),
+            email: "test@example.com".into(),
+            password: "password".into(),
+        },
+        1,
+    );
+
+    let error = controller.create_user(req).await.unwrap_err();
+    assert_eq!(error.code(), tonic::Code::InvalidArgument);
+}
+
+#[tokio::test]
+async fn test_create_user_rejects_password_too_long() {
+    let db = Arc::new(MockDb::new());
+    let controller = Controller::new(db);
+    let req = create_request(
+        CreateUserRequest {
+            name: "Test".into(),
+            username: "testuser".into(),
+            email: "test@example.com".into(),
+            password: "a".repeat(129),
+        },
+        1,
+    );
+
+    let error = controller.create_user(req).await.unwrap_err();
+    assert_eq!(error.code(), tonic::Code::InvalidArgument);
+}
+
+#[tokio::test]
 async fn test_get_user() {
     let db = Arc::new(MockDb::new());
     let controller = Controller::new(db.clone());
@@ -478,6 +532,31 @@ async fn test_update_user_rejects_invalid_username() {
             name: Some("Updated Name".into()),
             username: Some("invalid/user".into()),
             email: Some("updated@example.com".into()),
+            bio: None,
+            password: String::new(),
+            old_password: String::new(),
+            profile_photo_key: None,
+            cover_photo_key: None,
+        },
+        1,
+    );
+
+    let error = controller.update_user(req).await.unwrap_err();
+    assert_eq!(error.code(), tonic::Code::InvalidArgument);
+}
+
+#[tokio::test]
+async fn test_update_user_rejects_name_too_long() {
+    let db = Arc::new(MockDb::new());
+    let controller = Controller::new(db.clone());
+    let _ = db
+        .create_user("Test", "testuser", "test@example.com", "hash")
+        .await;
+    let req = create_request(
+        UpdateUserRequest {
+            name: Some("a".repeat(101)),
+            username: None,
+            email: None,
             bio: None,
             password: String::new(),
             old_password: String::new(),

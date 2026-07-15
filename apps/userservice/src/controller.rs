@@ -13,6 +13,12 @@ use tokio::sync::Semaphore;
 use tonic::{Request, Response, Status};
 
 const DEFAULT_ARGON_MAX_CONCURRENCY: usize = 4;
+const MIN_USERNAME_LENGTH: usize = 3;
+const MAX_USERNAME_LENGTH: usize = 30;
+const MAX_NAME_LENGTH: usize = 100;
+const MAX_BIO_LENGTH: usize = 255;
+const MIN_PASSWORD_LENGTH: usize = 8;
+const MAX_PASSWORD_LENGTH: usize = 128;
 
 pub struct UpdateUserFields<'a> {
     pub name: &'a str,
@@ -90,8 +96,9 @@ impl<D: UserDb> Controller<D> {
 }
 
 fn is_valid_username(username: &str) -> bool {
-    !username.is_empty()
-        && username.len() <= 255
+    let len = username.len();
+    len >= MIN_USERNAME_LENGTH
+        && len <= MAX_USERNAME_LENGTH
         && username
             .bytes()
             .all(|character| character.is_ascii_alphanumeric() || character == b'_')
@@ -116,11 +123,11 @@ impl<D: UserDb> UserService for Controller<D> {
             ));
         } else if !is_valid_username(&username) {
             return Err(Status::invalid_argument(
-                "Username may contain only letters, numbers, and underscores.",
+                "Username must be 3-30 characters and contain only letters, numbers, and underscores.",
             ));
-        } else if password.len() < 8 || password.len() > 1024 {
+        } else if password.len() < MIN_PASSWORD_LENGTH || password.len() > MAX_PASSWORD_LENGTH {
             return Err(Status::invalid_argument(
-                "Password must be at least 8 characters long.",
+                "Password must be between 8 and 128 characters long.",
             ));
         } else if !is_valid_email(&email) {
             return Err(Status::invalid_argument("Invalid email address."));
@@ -223,9 +230,9 @@ impl<D: UserDb> UserService for Controller<D> {
             }
 
             let password = req.password.as_str();
-            if password.len() < 8 || password.len() > 1024 {
+            if password.len() < MIN_PASSWORD_LENGTH || password.len() > MAX_PASSWORD_LENGTH {
                 return Err(Status::invalid_argument(
-                    "New password must be at least 8 characters long.",
+                    "New password must be between 8 and 128 characters long.",
                 ));
             }
 
@@ -276,19 +283,19 @@ impl<D: UserDb> UserService for Controller<D> {
 
         if req.name.as_deref().map(|s| !s.is_empty()).unwrap_or(false) && name.is_empty() {
             return Err(Status::invalid_argument("Name cannot be empty."));
-        } else if !name.is_empty() && name.len() > 255 {
+        } else if !name.is_empty() && name.len() > MAX_NAME_LENGTH {
             return Err(Status::invalid_argument(
-                "Name cannot exceed 255 characters.",
+                "Name cannot exceed 100 characters.",
             ));
         } else if req.bio.as_deref().map(|s| !s.is_empty()).unwrap_or(false) && bio.is_empty() {
             return Err(Status::invalid_argument("Bio cannot be empty."));
-        } else if !bio.is_empty() && bio.len() > 255 {
+        } else if !bio.is_empty() && bio.len() > MAX_BIO_LENGTH {
             return Err(Status::invalid_argument(
                 "Bio cannot exceed 255 characters.",
             ));
         } else if !username.is_empty() && !is_valid_username(&username) {
             return Err(Status::invalid_argument(
-                "Username may contain only letters, numbers, and underscores.",
+                "Username must be 3-30 characters and contain only letters, numbers, and underscores.",
             ));
         } else if !email.is_empty() && !is_valid_email(&email) {
             return Err(Status::invalid_argument("Invalid email address."));

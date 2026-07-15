@@ -20,7 +20,7 @@
 | --------------- | ---------------------------------------------------------------------------- |
 | Algorithm       | Argon2id (default parameters)                                                |
 | Min length      | 8 characters                                                                 |
-| Max length      | 1024 characters                                                              |
+| Max length      | 128 characters                                                               |
 | Lazy upgrade    | Rehashed at next login when stored params fall below current Argon2 defaults |
 | Concurrency cap | `ARGON_MAX_CONCURRENCY` env var (default: 4 concurrent hash operations)      |
 

@@ -42,13 +42,39 @@ describe("validateRegister", () => {
     it("rejects a username with a slash", () => {
       expect(
         validateRegister(VALID.name, "bad/user", VALID.email, VALID.password),
-      ).toBe("Username can only contain letters, numbers, and underscores");
+      ).toBe(
+        "Username must be 3-30 characters and contain only letters, numbers, and underscores",
+      );
     });
 
     it("rejects a username with a space", () => {
       expect(
         validateRegister(VALID.name, "bad user", VALID.email, VALID.password),
-      ).toBe("Username can only contain letters, numbers, and underscores");
+      ).toBe(
+        "Username must be 3-30 characters and contain only letters, numbers, and underscores",
+      );
+    });
+
+    it("rejects a username shorter than 3 characters", () => {
+      expect(
+        validateRegister(VALID.name, "ab", VALID.email, VALID.password),
+      ).toBe(
+        "Username must be 3-30 characters and contain only letters, numbers, and underscores",
+      );
+    });
+
+    it("rejects a username longer than 30 characters", () => {
+      expect(
+        validateRegister(VALID.name, "a".repeat(31), VALID.email, VALID.password),
+      ).toBe(
+        "Username must be 3-30 characters and contain only letters, numbers, and underscores",
+      );
+    });
+
+    it("accepts a username of exactly 30 characters", () => {
+      expect(
+        validateRegister(VALID.name, "a".repeat(30), VALID.email, VALID.password),
+      ).toBeNull();
     });
   });
 
@@ -56,12 +82,24 @@ describe("validateRegister", () => {
     it("rejects passwords shorter than 8 characters", () => {
       expect(
         validateRegister(VALID.name, VALID.username, VALID.email, "short"),
-      ).toBe("Password must be at least 8 characters");
+      ).toBe("Password must be between 8 and 128 characters");
     });
 
     it("accepts a password of exactly 8 characters", () => {
       expect(
         validateRegister(VALID.name, VALID.username, VALID.email, "exactly8"),
+      ).toBeNull();
+    });
+
+    it("rejects passwords longer than 128 characters", () => {
+      expect(
+        validateRegister(VALID.name, VALID.username, VALID.email, "a".repeat(129)),
+      ).toBe("Password must be between 8 and 128 characters");
+    });
+
+    it("accepts a password of exactly 128 characters", () => {
+      expect(
+        validateRegister(VALID.name, VALID.username, VALID.email, "a".repeat(128)),
       ).toBeNull();
     });
   });
