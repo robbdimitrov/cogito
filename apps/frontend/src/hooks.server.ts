@@ -8,16 +8,15 @@ export const handle: Handle = async ({ event, resolve }) => {
       html.replace('data-theme="system"', `data-theme="${theme}"`),
   });
   response.headers.set("X-Content-Type-Options", "nosniff");
-  response.headers.set("X-Frame-Options", "SAMEORIGIN");
+  response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  response.headers.set(
-    "Strict-Transport-Security",
-    "max-age=31536000; includeSubDomains",
-  );
+  response.headers.set("Cross-Origin-Opener-Policy", "same-origin");
   response.headers.set(
     "Permissions-Policy",
-    "camera=(), microphone=(), geolocation=()",
+    "camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=()",
   );
+  // No Strict-Transport-Security: this deployment has no TLS termination,
+  // and sending it over plain HTTP would be a false guarantee to clients.
   return response;
 };
 

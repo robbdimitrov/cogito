@@ -203,12 +203,15 @@ clears the cookie on the SvelteKit origin regardless of backend response.
 
 ## Security Headers (hooks.server.ts)
 
-Applied to all responses:
+Applied to all responses. No `Strict-Transport-Security`: this deployment has
+no TLS termination (local k3s only).
 
-| Header                 | Value                           |
-| ---------------------- | ------------------------------- |
-| X-Content-Type-Options | nosniff                         |
-| X-Frame-Options        | SAMEORIGIN                      |
-| Referrer-Policy        | strict-origin-when-cross-origin |
+| Header                     | Value                                                                      |
+| --------------------------- | ---------------------------------------------------------------------------- |
+| X-Content-Type-Options      | nosniff                                                                    |
+| X-Frame-Options             | DENY                                                                       |
+| Referrer-Policy             | strict-origin-when-cross-origin                                           |
+| Cross-Origin-Opener-Policy  | same-origin                                                                |
+| Permissions-Policy          | camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=() |
 
 CSP: nonce-based, set by SvelteKit. See security.md for directives.

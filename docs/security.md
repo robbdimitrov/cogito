@@ -93,29 +93,54 @@ session-required with no anonymous path.
 
 ## Response Headers
 
-| Header                 | Value                           | Set by                              |
-| ---------------------- | ------------------------------- | ----------------------------------- |
-| X-Content-Type-Options | nosniff                         | Gateway, Frontend                   |
-| X-Frame-Options        | SAMEORIGIN                      | Gateway, Frontend                   |
-| Referrer-Policy        | strict-origin-when-cross-origin | Gateway, Frontend                   |
-| Cache-Control          | private, max-age=86400          | ImageService (image responses only) |
+No `Strict-Transport-Security` on either service: this deployment has no TLS
+termination (local k3s only), and sending it over plain HTTP would be a false
+guarantee to clients.
+
+| Header                     | Value                                                                      | Set by                              |
+| -------------------------- | -------------------------------------------------------------------------- | ------------------------------------ |
+| X-Content-Type-Options     | nosniff                                                                    | Gateway, Frontend                   |
+| X-Frame-Options            | DENY                                                                       | Gateway, Frontend                   |
+| X-XSS-Protection           | 0 (legacy auditor disabled; CSP takes over)                                | Gateway                             |
+| Referrer-Policy            | no-referrer                                                                | Gateway                             |
+| Referrer-Policy            | strict-origin-when-cross-origin                                            | Frontend                            |
+| Cross-Origin-Opener-Policy | same-origin                                                                | Frontend                            |
+| Permissions-Policy         | camera=(), microphone=(), geolocation=(), payment=(), usb=(), bluetooth=() | Frontend                            |
+| Cache-Control              | private, max-age=86400                                                     | ImageService (image responses only) |
 
 ## Content Security Policy
 
-Set by SvelteKit nonce-based CSP (frontend only):
+### Frontend
 
-| Directive       | Value                |
-| --------------- | -------------------- |
-| default-src     | 'self'               |
-| script-src      | 'self' + nonce       |
-| style-src       | 'self' unsafe-inline |
-| img-src         | 'self' data: blob:   |
-| font-src        | 'self'               |
-| connect-src     | 'self'               |
-| object-src      | 'none'               |
-| frame-ancestors | 'self'               |
-| base-uri        | 'self'               |
-| form-action     | 'self'               |
+Set by SvelteKit nonce-based CSP:
+
+| Directive       | Value                                                                                                                               |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| default-src     | 'self'                                                                                                                              |
+| script-src      | 'self' + nonce                                                                                                                      |
+| style-src       | 'self'                                                                                                                              |
+| style-src-attr  | 'unsafe-hashes' + two fixed inline style attribute hashes (SvelteKit's `#svelte-announcer`, `UserHeader`'s cover-photo placeholder) |
+| img-src         | 'self' data: blob:                                                                                                                  |
+| font-src        | 'self'                                                                                                                              |
+| connect-src     | 'self'                                                                                                                              |
+| object-src      | 'none'                                                                                                                              |
+| frame-src       | 'none'                                                                                                                              |
+| frame-ancestors | 'none'                                                                                                                              |
+| base-uri        | 'self'                                                                                                                              |
+| form-action     | 'self'                                                                                                                              |
+
+### Gateway
+
+Set unconditionally alongside the response headers above. The gateway only
+ever emits JSON, so this stays fully locked down rather than carrying a
+browser-app baseline this origin doesn't need.
+
+| Directive       | Value  |
+| --------------- | ------ |
+| default-src     | 'none' |
+| frame-ancestors | 'none' |
+| base-uri        | 'none' |
+| form-action     | 'none' |
 
 ## Upload Security
 
