@@ -130,14 +130,15 @@ followers/following lists and search results.
 
 ### Auth, Primitives, Containers
 
-`AuthHero` — hero panel on login/register (eyebrow text, title, feature bullets).
 `ConfirmModal` — accessible `role="dialog"` confirmation. `Field` — label +
 input wrapper. `FormInput` / `FormTextarea` — apply `.form-input` /
-`.form-textarea` utilities. `GlassCard` — `.glass-card` wrapper. `IconInput` —
-input with leading Lucide icon (email, lock). `Loading` — centered spinner.
-`ToastProvider` — toast queue context and renderer. `PostList` / `UserList` —
-list containers. `QuoteEmbed` / `ReplyComposer` — inline post context
-components. `ControlBar` — profile action strip.
+`.form-textarea` utilities. `GlassCard` — `.glass-card` wrapper. `Loading` —
+centered spinner. `ToastProvider` — toast queue context and renderer.
+`PostList` / `UserList` — list containers. `QuoteEmbed` / `ReplyComposer` —
+inline post context components. `ControlBar` — profile action strip.
+
+Login/register use `GlassCard` with `Field`/`FormInput` directly in a single
+centered card — no separate hero panel or icon-prefixed input variant.
 
 ## Icons
 

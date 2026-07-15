@@ -1,10 +1,10 @@
 <script lang="ts">
   import { enhance } from "$app/forms";
   import { resolve } from "$app/paths";
-  import AuthHero from "$lib/domains/auth/components/AuthHero.svelte";
   import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
-  import IconInput from "$lib/shared/components/ui/IconInput.svelte";
-  import { AlertCircle, Lock, Mail, User, UserPlus } from "@lucide/svelte";
+  import Field from "$lib/shared/components/ui/Field.svelte";
+  import FormInput from "$lib/shared/components/ui/FormInput.svelte";
+  import { AlertCircle } from "@lucide/svelte";
   import { untrack } from "svelte";
   import type { ActionData } from "./$types";
 
@@ -13,147 +13,131 @@
   let username = $state(untrack(() => form?.fields?.username ?? ""));
   let email = $state(untrack(() => form?.fields?.email ?? ""));
   let password = $state("");
+  let showPassword = $state(false);
   let pending = $state(false);
-  const usernameValid = $derived(!username || /^[a-zA-Z0-9_]+$/.test(username));
-  const passwordValid = $derived(!password || password.length >= 8);
 </script>
 
 <svelte:head>
   <title>Register · Cogito</title>
 </svelte:head>
 
-<div class="flex min-h-[calc(100vh-4rem)]">
-  <AuthHero
-    eyebrow="Start here"
-    title="Cogito"
-    description="Create a space for quick ideas and real conversations."
-    points={[
-      "Claim your profile and username",
-      "Post cogito as they happen",
-      "Find people worth following",
-    ]}
-  />
+<div
+  class="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12"
+>
+  <div class="w-full max-w-md">
+    <GlassCard>
+      <div class="card-body">
+        <span
+          class="text-xs font-semibold uppercase tracking-wider text-base-content/50"
+          >Join Cogito</span
+        >
+        <h1 class="card-title mt-1 mb-1 text-2xl">Create your account</h1>
+        <p class="mb-6 text-base-content/60">
+          Set up your profile and start posting.
+        </p>
 
-  <div class="flex flex-1 items-center justify-center px-4 py-12">
-    <div class="w-full max-w-md">
-      <GlassCard>
-        <div class="card-body">
-          <h1 class="card-title mb-1 text-2xl">Create your account</h1>
-          <p class="mb-6 text-base-content/60">
-            Set up your profile and start posting.
-          </p>
+        {#if form?.error}
+          <div class="alert alert-error mb-4">
+            <AlertCircle class="size-5" aria-hidden="true" />
+            <span>{form.error}</span>
+          </div>
+        {/if}
 
-          {#if form?.error}
-            <div class="alert alert-error mb-4">
-              <AlertCircle class="size-5" aria-hidden="true" />
-              <span>{form.error}</span>
-            </div>
-          {/if}
-
-          <form
-            method="POST"
-            class="space-y-4"
-            use:enhance={() => {
-              pending = true;
-              return async ({ update }) => {
-                pending = false;
-                await update();
-              };
-            }}
-          >
-            <div class="form-control">
-              <label class="label" for="register-name">
-                <span class="label-text font-medium">Name</span>
-              </label>
-              <IconInput
-                icon={User}
-                id="register-name"
-                name="name"
-                placeholder="Your name"
-                bind:value={name}
-                autocomplete="name"
-                required
-              />
-            </div>
-            <div class="form-control">
-              <label class="label" for="register-username">
-                <span class="label-text font-medium">Username</span>
-              </label>
-              <IconInput
-                icon={User}
-                id="register-username"
-                name="username"
-                placeholder="@username"
-                bind:value={username}
-                autocomplete="username"
-                pattern="[a-zA-Z0-9_]+"
-                required
-              />
-              {#if !usernameValid}
-                <span class="label-text-alt mt-1 text-error">
-                  Letters, numbers, underscores only
-                </span>
-              {/if}
-            </div>
-            <div class="form-control">
-              <label class="label" for="register-email">
-                <span class="label-text font-medium">Email</span>
-              </label>
-              <IconInput
-                icon={Mail}
-                id="register-email"
-                type="email"
-                name="email"
-                placeholder="you@example.com"
-                bind:value={email}
-                autocomplete="email"
-                required
-              />
-            </div>
-            <div class="form-control">
-              <label class="label" for="register-password">
-                <span class="label-text font-medium">Password</span>
-              </label>
-              <IconInput
-                icon={Lock}
+        <form
+          method="POST"
+          class="space-y-4"
+          use:enhance={() => {
+            pending = true;
+            return async ({ update }) => {
+              pending = false;
+              await update();
+            };
+          }}
+        >
+          <Field id="register-name" label="Name">
+            <FormInput
+              id="register-name"
+              name="name"
+              placeholder="Your name"
+              bind:value={name}
+              autocomplete="name"
+              maxlength={100}
+              required
+            />
+          </Field>
+          <Field id="register-username" label="Username">
+            <FormInput
+              id="register-username"
+              name="username"
+              placeholder="username"
+              bind:value={username}
+              autocomplete="username"
+              pattern="[a-zA-Z0-9_]+"
+              minlength={3}
+              maxlength={30}
+              required
+            />
+          </Field>
+          <Field id="register-email" label="Email">
+            <FormInput
+              id="register-email"
+              type="email"
+              name="email"
+              placeholder="you@example.com"
+              bind:value={email}
+              autocomplete="email"
+              pattern="[^\s@]+@[^\s@]+\.[^\s@]+"
+              maxlength={255}
+              required
+            />
+          </Field>
+          <Field id="register-password" label="Password">
+            <div class="relative">
+              <FormInput
                 id="register-password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="password"
                 placeholder="Enter your password"
+                class="pr-16"
                 bind:value={password}
                 autocomplete="new-password"
                 minlength={8}
+                maxlength={128}
                 required
               />
-              {#if !passwordValid}
-                <span class="label-text-alt mt-1 text-error"
-                  >At least 8 characters</span
-                >
-              {/if}
+              <button
+                type="button"
+                class="btn btn-ghost btn-sm absolute top-1/2 right-1 -translate-y-1/2"
+                onclick={() => (showPassword = !showPassword)}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
             </div>
-            <button
-              type="submit"
-              class="btn btn-primary w-full gap-1 rounded-xl"
-              disabled={pending || !usernameValid || !passwordValid}
-            >
-              {#if pending}
-                <span class="loading loading-spinner"></span>
-              {:else}
-                <UserPlus class="size-4" aria-hidden="true" />
-                Create account
-              {/if}
-            </button>
-          </form>
+          </Field>
+          <button
+            type="submit"
+            class="btn btn-primary w-full gap-1 rounded-xl"
+            disabled={pending}
+          >
+            {#if pending}
+              <span
+                class="loading loading-spinner"
+                aria-label="Creating account"
+              ></span>
+            {:else}
+              Create account
+            {/if}
+          </button>
+        </form>
 
-          <div class="divider my-4">or</div>
-          <p class="text-center text-sm text-base-content/60">
-            Already have an account?
-            <a href={resolve("/login")} class="link link-primary font-medium"
-              >Log In</a
-            >
-          </p>
-        </div>
-      </GlassCard>
-    </div>
+        <div class="divider my-4">or</div>
+        <p class="text-center text-sm text-base-content/60">
+          Already have an account?
+          <a href={resolve("/login")} class="link link-primary font-medium"
+            >Log In</a
+          >
+        </p>
+      </div>
+    </GlassCard>
   </div>
 </div>
