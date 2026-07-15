@@ -96,9 +96,7 @@ impl<D: UserDb> Controller<D> {
 }
 
 fn is_valid_username(username: &str) -> bool {
-    let len = username.len();
-    len >= MIN_USERNAME_LENGTH
-        && len <= MAX_USERNAME_LENGTH
+    (MIN_USERNAME_LENGTH..=MAX_USERNAME_LENGTH).contains(&username.len())
         && username
             .bytes()
             .all(|character| character.is_ascii_alphanumeric() || character == b'_')
