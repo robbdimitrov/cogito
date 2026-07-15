@@ -49,9 +49,13 @@
                 item.href,
               )
                 ? 'bg-primary/20 text-primary'
-                : 'bg-base-300 text-base-content/70'}"
+                : 'bg-base-300'}"
             >
-              <item.icon class="h-4 w-4" />
+              <item.icon
+                class="h-4 w-4 {page.url.pathname.startsWith(item.href)
+                  ? ''
+                  : 'opacity-70'}"
+              />
             </div>
             <span>{item.title}</span>
           </a>
@@ -77,7 +81,7 @@
               class="btn btn-ghost min-h-10 rounded-lg border-0 px-2 text-xs font-medium {theme.mode ===
               option.value
                 ? 'bg-base-100 text-base-content shadow-sm hover:bg-base-100 dark:bg-slate-800'
-                : 'text-base-content/60 hover:bg-base-100/60 hover:text-base-content'}"
+                : 'opacity-60 hover:bg-base-100/60 hover:text-base-content hover:opacity-100'}"
               onclick={() => theme.set(option.value)}
             >
               <option.icon class="h-3.5 w-3.5" />

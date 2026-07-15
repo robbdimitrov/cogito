@@ -82,7 +82,7 @@
         </div>
         <div class="relative flex-1 min-w-0">
           <Pen
-            class="muted-text pointer-events-none absolute left-3 top-3.5 h-5 w-5"
+            class="pointer-events-none absolute left-3 top-3.5 h-5 w-5 opacity-60"
           />
           <textarea
             bind:this={textareaRef}
@@ -119,7 +119,7 @@
         <div class="flex items-center gap-4">
           <button
             type="button"
-            class="btn btn-circle btn-ghost btn-sm muted-text transition-colors hover:text-primary"
+            class="btn btn-circle btn-ghost btn-sm opacity-60 transition-colors hover:text-primary hover:opacity-100"
             onclick={() => fileInputRef?.click()}
             disabled={uploadingImage}
             title="Attach image"

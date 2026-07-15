@@ -118,7 +118,7 @@
               {#if user && post.userId === user.id}
                 <button
                   type="button"
-                  class="btn btn-ghost btn-xs h-auto p-1 text-base-content/60 transition-transform duration-150 hover:scale-110 hover:text-error active:scale-90"
+                  class="btn btn-ghost btn-xs h-auto p-1 opacity-60 transition-transform duration-150 hover:scale-110 hover:text-error hover:opacity-100 active:scale-90"
                   onclick={() => (showDeleteModal = true)}
                   aria-label="Delete post"
                 >
@@ -179,7 +179,7 @@
                     type="submit"
                     class="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 transition-all duration-150 hover:scale-105 active:scale-95 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4 {post.reposted
                       ? 'bg-success/10 text-success'
-                      : 'text-base-content/60 hover:bg-success/10 hover:text-success'}"
+                      : 'opacity-60 hover:bg-success/10 hover:text-success hover:opacity-100'}"
                     disabled={isReposting}
                   >
                     <Repeat class="h-4 w-4 sm:h-5 sm:w-5" />
@@ -219,7 +219,7 @@
                     type="submit"
                     class="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 transition-all duration-150 hover:scale-105 active:scale-95 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4 {post.liked
                       ? 'bg-error/10 text-error'
-                      : 'text-base-content/60 hover:bg-error/10 hover:text-error'}"
+                      : 'opacity-60 hover:bg-error/10 hover:text-error hover:opacity-100'}"
                     disabled={isLiking}
                   >
                     <Heart
@@ -234,14 +234,14 @@
                   icon={Repeat}
                   iconClass="h-4 w-4 sm:h-5 sm:w-5"
                   ariaLabel="Log in to repost"
-                  buttonClass="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 text-base-content/60 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4"
+                  buttonClass="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 opacity-60 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4"
                   count={post.reposts}
                 />
                 <LoginGateButton
                   icon={Heart}
                   iconClass="h-4 w-4 sm:h-5 sm:w-5"
                   ariaLabel="Log in to like"
-                  buttonClass="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 text-base-content/60 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4"
+                  buttonClass="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 opacity-60 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4"
                   count={post.likes}
                 />
               {/if}

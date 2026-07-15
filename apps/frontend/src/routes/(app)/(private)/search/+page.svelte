@@ -78,14 +78,14 @@
   {#if !q}
     <GlassCard>
       <div class="card-body muted-text items-center py-12 text-center">
-        <Search class="mb-2 h-12 w-12 opacity-50" />
+        <Search class="mb-2 h-12 w-12 text-base-content opacity-50" />
         <p>Enter a search query to find posts, people, and hashtags.</p>
       </div>
     </GlassCard>
   {:else if resultsPagination.items.length === 0}
     <GlassCard>
       <div class="card-body muted-text items-center py-12 text-center">
-        <Search class="mb-2 h-12 w-12 opacity-50" />
+        <Search class="mb-2 h-12 w-12 text-base-content opacity-50" />
         <p>No results found for "{q}".</p>
       </div>
     </GlassCard>

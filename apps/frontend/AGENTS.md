@@ -5,8 +5,13 @@ These rules extend the repository-level `AGENTS.md` for `apps/frontend/`.
 ## Icons
 
 - All icons come from `@lucide/svelte`. Do not inline SVG.
-- Don't apply opacity directly to an icon (e.g. `text-base-content/60` on the
-  icon itself, or wrapping it in an opacity utility). Lucide icons are stroked
-  outlines, so opacity makes overlapping/crossing lines show through each
-  other and looks broken. Fade an icon by wrapping it in a container that
-  carries the opacity, or by using a muted solid color token instead.
+- Never let an icon's paint color carry an alpha channel — no `text-*/NN`
+  (including `muted-text`, which is `text-base-content/60`) on the icon
+  itself or on an ancestor it inherits `currentColor` from. Lucide icons are
+  stroked outlines, so a translucent stroke color double-blends at every
+  point two strokes cross, making the crossing look darker/uneven.
+- To dim an icon, use the `opacity-NN` utility instead, either directly on
+  the icon or on a wrapping element that also contains its label. CSS
+  `opacity` composites the whole element as one opaque group before fading
+  it, so crossing strokes stay uniform. Add `hover:opacity-100` alongside any
+  `hover:text-*` that should look fully bright on interaction.

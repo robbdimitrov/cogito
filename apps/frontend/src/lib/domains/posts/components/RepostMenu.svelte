@@ -27,7 +27,7 @@
   <summary
     class="action-pill list-none {reposted
       ? 'text-success bg-success/10'
-      : 'text-base-content/60 hover:text-success hover:bg-success/5'}"
+      : 'opacity-60 hover:text-success hover:bg-success/5 hover:opacity-100'}"
     aria-label={reposted ? "Remove repost" : "Repost options"}
     aria-disabled={isReposting}
     onclick={(e) => {

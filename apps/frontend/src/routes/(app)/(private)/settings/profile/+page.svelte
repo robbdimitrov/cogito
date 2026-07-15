@@ -141,7 +141,7 @@
               <div
                 class="flex h-16 w-16 items-center justify-center rounded-full bg-base-200 border border-base-content/10"
               >
-                <Camera class="h-6 w-6 text-base-content/50" />
+                <Camera class="h-6 w-6 opacity-50" />
               </div>
             {/if}
             <div class="flex gap-2">
@@ -188,7 +188,7 @@
               <div
                 class="flex h-16 w-32 items-center justify-center rounded-lg bg-base-200 border border-base-content/10"
               >
-                <ImageIcon class="h-6 w-6 text-base-content/50" />
+                <ImageIcon class="h-6 w-6 opacity-50" />
               </div>
             {/if}
             <div class="flex gap-2">

@@ -99,16 +99,18 @@
 <li>
   {#if repostedBy}
     <div
-      class="subtle-border mx-auto -mb-px flex w-[calc(100%-1rem)] items-center gap-2 rounded-t-2xl border border-b-base-300/80 bg-base-100/75 px-4 py-2 text-xs text-base-content/70 shadow-lg shadow-slate-900/5 backdrop-blur-2xl sm:px-5 sm:text-sm dark:border-b-white/10 dark:bg-slate-900/70"
+      class="subtle-border mx-auto -mb-px w-[calc(100%-1rem)] rounded-t-2xl border border-b-base-300/80 bg-base-100/75 px-4 py-2 text-xs shadow-lg shadow-slate-900/5 backdrop-blur-2xl sm:px-5 sm:text-sm dark:border-b-white/10 dark:bg-slate-900/70"
     >
-      <Repeat class="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
-      <a
-        href={resolve(`/@${repostedBy.username}`)}
-        class="font-semibold hover:underline truncate min-w-0"
-      >
-        @{repostedBy.username}
-      </a>
-      <span class="shrink-0">reposted</span>
+      <div class="flex items-center gap-2 opacity-70">
+        <Repeat class="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+        <a
+          href={resolve(`/@${repostedBy.username}`)}
+          class="font-semibold hover:underline truncate min-w-0"
+        >
+          @{repostedBy.username}
+        </a>
+        <span class="shrink-0">reposted</span>
+      </div>
     </div>
   {/if}
   <GlassCard
@@ -150,7 +152,7 @@
             {#if isOwnPost}
               <button
                 type="button"
-                class="btn btn-ghost btn-sm btn-square shrink-0 text-base-content/40 transition-transform duration-150 hover:scale-110 hover:bg-error/10 hover:text-error active:scale-90"
+                class="btn btn-ghost btn-sm btn-square shrink-0 opacity-40 transition-transform duration-150 hover:scale-110 hover:bg-error/10 hover:text-error hover:opacity-100 active:scale-90"
                 onclick={() => (showDeleteModal = true)}
                 aria-label="Delete post"
               >
@@ -202,7 +204,7 @@
           >
             <a
               href={resolve(`/posts/${displayPost.id}`)}
-              class="action-pill gap-1.5 px-3 text-base-content/60 hover:bg-primary/5 hover:text-primary"
+              class="action-pill gap-1.5 px-3 opacity-60 hover:bg-primary/5 hover:text-primary hover:opacity-100"
               aria-label="Replies"
             >
               <MessageSquare class="h-4 w-4" />
@@ -254,7 +256,7 @@
               <LoginGateButton
                 icon={Repeat}
                 ariaLabel="Log in to repost"
-                buttonClass="action-pill text-base-content/60"
+                buttonClass="action-pill opacity-60"
                 count={reposts}
                 countClass="text-xs sm:text-sm font-semibold tracking-wide"
               />
@@ -293,7 +295,7 @@
                   type="submit"
                   class="action-pill {liked
                     ? 'text-error bg-error/10'
-                    : 'text-base-content/60 hover:text-error hover:bg-error/5'}"
+                    : 'opacity-60 hover:text-error hover:bg-error/5 hover:opacity-100'}"
                   disabled={isLiking}
                   aria-label={liked ? "Unlike post" : "Like post"}
                 >
@@ -312,7 +314,7 @@
               <LoginGateButton
                 icon={Heart}
                 ariaLabel="Log in to like"
-                buttonClass="action-pill text-base-content/60"
+                buttonClass="action-pill opacity-60"
                 count={likes}
                 countClass="text-xs sm:text-sm font-semibold tracking-wide"
               />

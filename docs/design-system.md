@@ -143,3 +143,10 @@ centered card — no separate hero panel or icon-prefixed input variant.
 ## Icons
 
 All icons from `@lucide/svelte`. Inline SVG is not used.
+
+Icons never carry an alpha-channel color (no `text-*/NN`, including
+`.muted-text`) directly or via an inherited `currentColor`, since a
+translucent stroke double-blends where a lucide icon's lines cross and looks
+broken. Dim an icon with the `opacity-NN` utility instead — on the icon
+itself or on a wrapping element that also holds its label — since `opacity`
+composites the element as one opaque group before fading it.

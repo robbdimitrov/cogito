@@ -18,7 +18,7 @@
 {#if !users || users.length === 0}
   <GlassCard>
     <div class="card-body muted-text items-center py-12 text-center">
-      <Users class="mb-2 h-12 w-12 opacity-50" />
+      <Users class="mb-2 h-12 w-12 text-base-content opacity-50" />
       <p>{emptyMessage}</p>
     </div>
   </GlassCard>

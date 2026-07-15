@@ -79,7 +79,7 @@
     {#if pagination.items.length === 0}
       <GlassCard>
         <div class="card-body muted-text items-center py-12 text-center">
-          <Bell class="mb-2 h-12 w-12 opacity-50" aria-hidden="true" />
+          <Bell class="mb-2 h-12 w-12 text-base-content opacity-50" aria-hidden="true" />
           <p>No notifications yet</p>
         </div>
       </GlassCard>

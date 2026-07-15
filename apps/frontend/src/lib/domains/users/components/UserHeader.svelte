@@ -115,7 +115,7 @@
           {user.bio}
         </p>
       {/if}
-      <div class="muted-text mt-3 flex items-center gap-2 text-xs">
+      <div class="mt-3 flex items-center gap-2 text-xs opacity-60">
         <Calendar class="h-4 w-4" />
         <span>Joined {formatDate(user.created)}</span>
       </div>

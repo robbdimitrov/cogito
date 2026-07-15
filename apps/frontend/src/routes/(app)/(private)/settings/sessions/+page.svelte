@@ -31,7 +31,7 @@
 {:else if !sessions || sessions.length === 0}
   <GlassCard>
     <div class="card-body items-center text-center text-base-content/70 py-12">
-      <XCircle class="h-12 w-12 mb-2 opacity-60" aria-hidden="true" />
+      <XCircle class="h-12 w-12 mb-2 text-base-content opacity-60" aria-hidden="true" />
       <p class="text-base">No active sessions found.</p>
     </div>
   </GlassCard>
@@ -67,7 +67,7 @@
                 <td>
                   <div class="flex min-h-12 items-center gap-3">
                     <Monitor
-                      class="h-5 w-5 shrink-0 text-base-content/60"
+                      class="h-5 w-5 shrink-0 opacity-60"
                       aria-hidden="true"
                     />
                     <span class="text-base font-medium">Browser</span>
