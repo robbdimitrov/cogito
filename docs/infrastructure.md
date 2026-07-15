@@ -154,6 +154,7 @@ imageservice only during startup to create or verify the image bucket.
 | FLOW_SERVICE_ADDR    | flowservice:5050       |
 | CACHE_URL            | redis://cache:6379     |
 | RATE_LIMIT_FAIL_OPEN | true                   |
+| TRUST_PROXY          | true                   |
 | SESSION_HMAC_SECRET  | from secret            |
 | INTERNAL_GRPC_TOKEN  | from secret            |
 
@@ -217,6 +218,7 @@ All services: `DATABASE_URL` (from secret), `INTERNAL_GRPC_TOKEN` (from secret).
 | BACKEND_URL        | http://apigateway:8080   |
 | BODY_SIZE_LIMIT    | 2097152                  |
 | BACKEND_TIMEOUT_MS | 10000 (default if unset) |
+| ADDRESS_HEADER     | x-forwarded-for          |
 
 ## Storage
 

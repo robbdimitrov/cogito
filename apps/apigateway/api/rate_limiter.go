@@ -218,10 +218,16 @@ func rateLimitKey(r *http.Request, policy RateLimitPolicy) string {
 	return policy.Name + ":ip:" + clientIP(r)
 }
 
-// clientIP resolves the rate-limit identity from the connection's remote
-// address. X-Forwarded-For is intentionally ignored: it is attacker-controlled
-// and there is no trusted proxy in front of the gateway.
+// clientIP trusts X-Forwarded-For only when TRUST_PROXY is set, which is
+// safe only because NetworkPolicy restricts this port to the frontend BFF.
 func clientIP(r *http.Request) string {
+	if envBool("TRUST_PROXY", false) {
+		if forwarded := r.Header.Get("X-Forwarded-For"); forwarded != "" {
+			if ip := net.ParseIP(strings.TrimSpace(strings.Split(forwarded, ",")[0])); ip != nil {
+				return ip.String()
+			}
+		}
+	}
 	host, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
 		return r.RemoteAddr

@@ -79,10 +79,10 @@ session-required with no anonymous path.
 
 | Policy    | Burst | Rate (req/s) | Applies to                                 |
 | --------- | ----- | ------------ | ------------------------------------------- |
-| strict    | 5     | 200          | POST /sessions, POST /users, POST /uploads |
-| typeahead | 20    | 5 000        | GET /search                                |
-| read      | 120   | 2 000        | All other GET/HEAD                         |
-| mutation  | 30    | 1 000        | All other POST/PUT/DELETE/PATCH            |
+| strict    | 5     | 0.2          | POST /sessions, POST /users, POST /uploads |
+| typeahead | 20    | 5            | GET /search                                |
+| read      | 120   | 2            | All other GET/HEAD                         |
+| mutation  | 30    | 1            | All other POST/PUT/DELETE/PATCH            |
 
 - Algorithm: Token bucket (Lua script in Dragonfly). TTL per key:
   `ceil(BURST / RATE * 2)` seconds.
@@ -90,6 +90,18 @@ session-required with no anonymous path.
   Dragonfly is unavailable.
 - Rate limits are configurable per policy via env vars (e.g.,
   `RATE_LIMIT_STRICT_BURST`).
+- Key derivation falls back to client IP only for unauthenticated requests
+  with no session. `TRUST_PROXY=true` (set in the manifest) lets the gateway
+  read that IP from `X-Forwarded-For`; safe only because NetworkPolicy
+  restricts the gateway's port to the frontend BFF, which overwrites the
+  header with the real client address before proxying (see
+  `apps/frontend/src/lib/server/api/client.ts`). That overwrite in turn relies
+  on frontend's own `ADDRESS_HEADER` config, which is only trustworthy behind
+  a reverse proxy that sets it — no such proxy exists in this local cluster
+  (frontend is reached only via `kubectl port-forward`), so the header is
+  always absent and this whole chain is currently a no-op. Exposing frontend
+  any other way requires a trusted reverse proxy in front of it, or client
+  requests could spoof their own rate-limit identity end to end.
 
 ## Response Headers
 

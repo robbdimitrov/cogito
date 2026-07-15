@@ -48,6 +48,8 @@ spec:
           value: http://apigateway:8080
         - name: BODY_SIZE_LIMIT
           value: "2097152"
+        - name: ADDRESS_HEADER
+          value: x-forwarded-for
         ports:
         - containerPort: 8080
         resources:

@@ -11,6 +11,7 @@ func TestClientIP(t *testing.T) {
 		name       string
 		remoteAddr string
 		forwarded  string
+		trustProxy bool
 		want       string
 	}{
 		{
@@ -19,7 +20,7 @@ func TestClientIP(t *testing.T) {
 			want:       "203.0.113.5",
 		},
 		{
-			name:       "spoofed X-Forwarded-For is ignored",
+			name:       "spoofed X-Forwarded-For is ignored without TRUST_PROXY",
 			remoteAddr: "203.0.113.5:443",
 			forwarded:  "1.2.3.4",
 			want:       "203.0.113.5",
@@ -29,10 +30,34 @@ func TestClientIP(t *testing.T) {
 			remoteAddr: "203.0.113.5",
 			want:       "203.0.113.5",
 		},
+		{
+			name:       "X-Forwarded-For trusted when TRUST_PROXY is set",
+			remoteAddr: "10.0.0.1:1234",
+			forwarded:  "203.0.113.5",
+			trustProxy: true,
+			want:       "203.0.113.5",
+		},
+		{
+			name:       "first entry of a multi-hop X-Forwarded-For is used",
+			remoteAddr: "10.0.0.1:1234",
+			forwarded:  "203.0.113.5, 10.0.0.1",
+			trustProxy: true,
+			want:       "203.0.113.5",
+		},
+		{
+			name:       "malformed X-Forwarded-For falls back to remote addr",
+			remoteAddr: "10.0.0.1:1234",
+			forwarded:  "not-an-ip",
+			trustProxy: true,
+			want:       "10.0.0.1",
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			if tt.trustProxy {
+				t.Setenv("TRUST_PROXY", "true")
+			}
 			req := httptest.NewRequest(http.MethodGet, "/", nil)
 			req.RemoteAddr = tt.remoteAddr
 			if tt.forwarded != "" {
