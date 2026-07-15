@@ -37,6 +37,7 @@ spec:
         tier: backend
         component: postservice
     spec:
+      serviceAccountName: postservice
       automountServiceAccountToken: false
       terminationGracePeriodSeconds: 60
       containers:

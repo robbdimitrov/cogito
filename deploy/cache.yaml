@@ -19,6 +19,7 @@ spec:
         app: cogito
         component: cache
     spec:
+      serviceAccountName: cache
       automountServiceAccountToken: false
       containers:
       - name: cache

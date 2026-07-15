@@ -38,6 +38,7 @@ spec:
         tier: backend
         component: search
     spec:
+      serviceAccountName: search
       automountServiceAccountToken: false
       containers:
       - name: search

@@ -37,6 +37,7 @@ spec:
         tier: backend
         component: userservice
     spec:
+      serviceAccountName: userservice
       automountServiceAccountToken: false
       terminationGracePeriodSeconds: 60
       containers:

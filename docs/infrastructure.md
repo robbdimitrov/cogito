@@ -37,6 +37,13 @@ Single-replica stateful services (`database`, `cache`, `storage`, `search`, and
 `broker`) set `maxUnavailable: 0`. Application and connect Deployments set
 `minAvailable: 1` with selectors matching their pod template labels.
 
+### ServiceAccounts
+
+Each workload uses its own `ServiceAccount` (`deploy/serviceaccounts.yaml`,
+applied first) instead of the namespace's shared `default`, limiting blast
+radius for any future RBAC grant. `connect` is shared by the `connect`
+Deployment and `broker-backfill` Job.
+
 ## Health Probes
 
 | Service      | Type            | Path / Port              | Readiness delay/period | Liveness delay/period             |

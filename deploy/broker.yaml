@@ -176,6 +176,7 @@ spec:
         app: cogito
         tier: broker
     spec:
+      serviceAccountName: broker
       automountServiceAccountToken: false
       terminationGracePeriodSeconds: 60
       securityContext:
@@ -275,6 +276,7 @@ spec:
         tier: broker
         component: broker-backfill
     spec:
+      serviceAccountName: connect
       automountServiceAccountToken: false
       restartPolicy: Never
       securityContext:
@@ -348,6 +350,7 @@ spec:
         tier: broker
         component: connect
     spec:
+      serviceAccountName: connect
       automountServiceAccountToken: false
       terminationGracePeriodSeconds: 60
       securityContext:

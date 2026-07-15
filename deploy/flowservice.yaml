@@ -44,6 +44,7 @@ spec:
         tier: backend
         component: flowservice
     spec:
+      serviceAccountName: flowservice
       automountServiceAccountToken: false
       terminationGracePeriodSeconds: 60
       containers:

@@ -28,6 +28,7 @@ spec:
         app: cogito
         tier: frontend
     spec:
+      serviceAccountName: frontend
       automountServiceAccountToken: false
       containers:
       - name: frontend

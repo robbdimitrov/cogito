@@ -19,6 +19,7 @@ spec:
         app: cogito
         component: storage
     spec:
+      serviceAccountName: storage
       automountServiceAccountToken: false
       containers:
       - name: storage

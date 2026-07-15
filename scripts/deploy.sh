@@ -24,7 +24,7 @@ IMAGESERVICE_IMAGE_TAG="${IMAGESERVICE_IMAGE_TAG:-}"
 POSTSERVICE_IMAGE_TAG="${POSTSERVICE_IMAGE_TAG:-}"
 USERSERVICE_IMAGE_TAG="${USERSERVICE_IMAGE_TAG:-}"
 
-STATIC_MANIFESTS=(pdb.yaml networkpolicy.yaml)
+STATIC_MANIFESTS=(serviceaccounts.yaml pdb.yaml networkpolicy.yaml)
 INFRA_MANIFESTS=(storage.yaml cache.yaml search.yaml)
 DATABASE_MANIFESTS=(database.yaml)
 BROKER_MANIFEST="broker.yaml"

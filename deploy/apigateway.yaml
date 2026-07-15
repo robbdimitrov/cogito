@@ -37,6 +37,7 @@ spec:
         tier: backend
         component: apigateway
     spec:
+      serviceAccountName: apigateway
       automountServiceAccountToken: false
       terminationGracePeriodSeconds: 60
       initContainers:
