@@ -85,13 +85,17 @@ copied into that stage.
 - Use precise names and standard initialisms. Prefer clarity over compressed
   code and named constants over repeated policy-significant literals.
 - Keep related fixes together; do not expand a task into unrelated cleanup.
-- Comments explain constraints, invariants, security decisions, or non-obvious
-  intent. Do not narrate straightforward code or preserve implementation
-  history.
-- Keep comments concise but valuable: compress verbose explanations into one or
-  two lines when they preserve the same essential constraint or intent. Respect
-  documentation comments and language-specific requirements such as Go comments
-  on exported identifiers.
+- Code should be self-documenting through naming and structure. Comments
+  explain constraints, invariants, security decisions, or non-obvious intent
+  only — never narrate straightforward code or preserve implementation
+  history. Keep every comment to one or two lines; compress anything longer
+  down to the essential constraint or intent. Respect documentation comments
+  and language-specific requirements such as Go comments on exported
+  identifiers.
+- Keep writing concise everywhere — `docs/` specs, commit messages, and PR
+  descriptions — with code comments held to the tightest standard of all
+  (one or two lines, per above). `README` files are the one exception: they
+  may read as normal, regular-sized documentation.
 - Do not suppress compiler, linter, type-checker, or test warnings to make
   checks pass. Fix the underlying issue. Use a narrowly scoped suppression only
   when required by an external API, generated code, or a documented false
