@@ -189,10 +189,12 @@ unchanged after DTO mapping.
 
 ## Session Cookie Relay
 
-The login action calls `POST /sessions` via `event.fetch`. SvelteKit propagates
-the `Set-Cookie` response header from the backend through to the browser on the
-SvelteKit origin. After redirect, `event.cookies.get("session")` is non-null and
-`apiClient` includes it on all subsequent server-side backend calls as
+The login action calls `POST /sessions` via `apiClient`. SvelteKit only
+auto-propagates `Set-Cookie` for same-origin targets, and `BACKEND_URL` is a
+cross-origin internal address, so `apiClient` parses each response's
+`Set-Cookie` headers (via `set-cookie-parser`) and writes them onto
+`event.cookies` itself. After redirect, `event.cookies.get("session")` is
+non-null and `apiClient` includes it on subsequent calls as
 `Cookie: session={value}`.
 
 On logout:
