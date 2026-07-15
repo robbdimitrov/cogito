@@ -571,6 +571,36 @@ async fn test_update_user_rejects_name_too_long() {
 }
 
 #[tokio::test]
+async fn test_update_user_name_length_counts_characters_not_bytes() {
+    // "é" is 2 bytes, so this is 100 chars but 200 bytes — limit must count chars.
+    let db = Arc::new(MockDb::new());
+    let controller = Controller::new(db.clone());
+    let _ = db
+        .create_user("Test", "testuser", "test@example.com", "hash")
+        .await;
+    let req = create_request(
+        UpdateUserRequest {
+            name: Some("é".repeat(100)),
+            username: None,
+            email: None,
+            bio: None,
+            password: String::new(),
+            old_password: String::new(),
+            profile_photo_key: None,
+            cover_photo_key: None,
+        },
+        1,
+    );
+
+    let res = controller.update_user(req).await;
+    assert!(
+        res.is_ok(),
+        "100-character name must be accepted regardless of byte length, got: {:?}",
+        res.err()
+    );
+}
+
+#[tokio::test]
 async fn test_get_user_by_username() {
     let db = Arc::new(MockDb::new());
     let controller = Controller::new(db.clone());
