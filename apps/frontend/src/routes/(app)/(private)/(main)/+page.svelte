@@ -50,7 +50,10 @@
       {#if data.isEmpty}
         <GlassCard>
           <div class="card-body muted-text items-center py-12 text-center">
-            <Search class="mb-2 h-12 w-12 text-base-content opacity-50" aria-hidden="true" />
+            <Search
+              class="mb-2 h-12 w-12 text-base-content opacity-50"
+              aria-hidden="true"
+            />
             <p>No posts in your feed yet.</p>
             <a
               href={resolve("/search")}

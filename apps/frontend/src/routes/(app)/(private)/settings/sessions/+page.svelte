@@ -31,7 +31,10 @@
 {:else if !sessions || sessions.length === 0}
   <GlassCard>
     <div class="card-body items-center text-center text-base-content/70 py-12">
-      <XCircle class="h-12 w-12 mb-2 text-base-content opacity-60" aria-hidden="true" />
+      <XCircle
+        class="h-12 w-12 mb-2 text-base-content opacity-60"
+        aria-hidden="true"
+      />
       <p class="text-base">No active sessions found.</p>
     </div>
   </GlassCard>
