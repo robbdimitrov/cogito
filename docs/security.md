@@ -48,6 +48,7 @@
 | Delete post                            | PostService              | `DELETE FROM posts WHERE id = $1 AND user_id = $2` (0 rows → not found)                                                    |
 | Image upload ownership                 | ImageService HTTP + gRPC | `x-user-id`/`user_id` injected by gateway from validated session; consume atomically claims metadata by filename and owner |
 | Notification read / unread-count       | FlowService              | Acting user derived from `user-id` gRPC metadata, not the request body                                                     |
+| Recent-search list / delete / clear    | FlowService              | Acting user derived from `user-id`; delete scopes by public row ID and owner                                               |
 | Self-follow prevention                 | UserService              | Rejects if `req.user_id == current_user_id`                                                                                |
 | Password change → session invalidation | Gateway                  | Fetches all user sessions; deletes all except current (matched by public handle returned from `GetSession`)                |
 

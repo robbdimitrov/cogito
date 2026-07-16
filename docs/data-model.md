@@ -15,6 +15,7 @@
 | Outbox       | `outbox`        | Append-only CDC queue for Redpanda topics    |
 | Notification | `notifications` | User-facing activity notifications           |
 | FeedEntry    | `feed`          | Materialized home-feed membership            |
+| RecentSearch | `recent_searches` | Last 10 saved searches per user            |
 
 ## Entity Relationships
 
@@ -24,6 +25,7 @@ users ──< followers (follower → followed)
 users ──< posts ──< likes
                  ──< post_hashtags >── hashtags
 users ──< uploads
+users ──< recent_searches
 outbox (append-only CDC source for Redpanda relay)
 notifications (activity records)
 feed (materialized home-feed rows)
@@ -155,6 +157,21 @@ days after CDC relay.
 Primary key: `(user_id, post_id)`. Feed rows are retained for 30 days; post/user
 deletes cascade.
 
+### recent_searches
+
+| Column      | Type         | Constraints                                   |
+| ----------- | ------------ | --------------------------------------------- |
+| id          | bigserial    | PRIMARY KEY                                   |
+| public_id   | uuid         | NOT NULL, DEFAULT `gen_random_uuid()`, UNIQUE |
+| user_id     | integer      | FK → users.id ON DELETE CASCADE               |
+| entity_type | varchar(10)  | CHECK IN (`users`, `hashtags`, `queries`)     |
+| reference   | varchar(255) | Username, hashtag name, or submitted query    |
+| created     | timestamptz  | NOT NULL, DEFAULT now()                       |
+
+Unique: `(user_id, entity_type, reference)`. Recording a repeat bumps
+`created`; each write trims the user's rows back to 10 newest entries in the
+same transaction.
+
 ## Indexes
 
 | Table         | Index                                                           | Purpose                          |
@@ -174,6 +191,8 @@ deletes cascade.
 | notifications | `notifications_type_entity_idx`                                 | Event-based notification cleanup |
 | feed          | `feed_user_id_created_idx`                                      | Home feed pagination             |
 | feed          | `feed_created_idx`                                              | 30-day retention cleanup         |
+| recent_searches | `recent_searches_user_created_idx`                           | Recent-search newest-first list  |
+| recent_searches | `recent_searches_user_type_reference_idx`                    | Recent-search de-dupe            |
 
 ## Meilisearch Indexes
 
@@ -206,3 +225,5 @@ deletes cascade.
 - `posts.hashtags` (varchar array) mirrors the post_hashtags relational data but
   is not actively written by the application; the `hashtags` and `post_hashtags`
   tables are the authoritative source.
+- Recent searches are owned by the authenticated user. Recording is an
+  idempotent upsert and transactionally bounds the list to 10 rows per user.

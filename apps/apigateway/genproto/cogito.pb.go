@@ -1733,6 +1733,222 @@ func (x *SearchRequest) GetLimit() int32 {
 	return 0
 }
 
+type RecentSearch struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Type          string                 `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	Reference     string                 `protobuf:"bytes,3,opt,name=reference,proto3" json:"reference,omitempty"`
+	User          *User                  `protobuf:"bytes,4,opt,name=user,proto3" json:"user,omitempty"`
+	Hashtag       *Hashtag               `protobuf:"bytes,5,opt,name=hashtag,proto3" json:"hashtag,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RecentSearch) Reset() {
+	*x = RecentSearch{}
+	mi := &file_pkg_pb_cogito_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RecentSearch) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RecentSearch) ProtoMessage() {}
+
+func (x *RecentSearch) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_pb_cogito_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RecentSearch.ProtoReflect.Descriptor instead.
+func (*RecentSearch) Descriptor() ([]byte, []int) {
+	return file_pkg_pb_cogito_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *RecentSearch) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *RecentSearch) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+func (x *RecentSearch) GetReference() string {
+	if x != nil {
+		return x.Reference
+	}
+	return ""
+}
+
+func (x *RecentSearch) GetUser() *User {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+func (x *RecentSearch) GetHashtag() *Hashtag {
+	if x != nil {
+		return x.Hashtag
+	}
+	return nil
+}
+
+type RecentSearches struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*RecentSearch        `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RecentSearches) Reset() {
+	*x = RecentSearches{}
+	mi := &file_pkg_pb_cogito_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RecentSearches) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RecentSearches) ProtoMessage() {}
+
+func (x *RecentSearches) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_pb_cogito_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RecentSearches.ProtoReflect.Descriptor instead.
+func (*RecentSearches) Descriptor() ([]byte, []int) {
+	return file_pkg_pb_cogito_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *RecentSearches) GetItems() []*RecentSearch {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+type RecordRecentSearchRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Type          string                 `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
+	Reference     string                 `protobuf:"bytes,2,opt,name=reference,proto3" json:"reference,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RecordRecentSearchRequest) Reset() {
+	*x = RecordRecentSearchRequest{}
+	mi := &file_pkg_pb_cogito_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RecordRecentSearchRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RecordRecentSearchRequest) ProtoMessage() {}
+
+func (x *RecordRecentSearchRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_pb_cogito_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RecordRecentSearchRequest.ProtoReflect.Descriptor instead.
+func (*RecordRecentSearchRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_pb_cogito_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *RecordRecentSearchRequest) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+func (x *RecordRecentSearchRequest) GetReference() string {
+	if x != nil {
+		return x.Reference
+	}
+	return ""
+}
+
+type DeleteRecentSearchRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteRecentSearchRequest) Reset() {
+	*x = DeleteRecentSearchRequest{}
+	mi := &file_pkg_pb_cogito_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteRecentSearchRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteRecentSearchRequest) ProtoMessage() {}
+
+func (x *DeleteRecentSearchRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_pkg_pb_cogito_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteRecentSearchRequest.ProtoReflect.Descriptor instead.
+func (*DeleteRecentSearchRequest) Descriptor() ([]byte, []int) {
+	return file_pkg_pb_cogito_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *DeleteRecentSearchRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
 type GetNotificationsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserId        int32                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
@@ -1744,7 +1960,7 @@ type GetNotificationsRequest struct {
 
 func (x *GetNotificationsRequest) Reset() {
 	*x = GetNotificationsRequest{}
-	mi := &file_pkg_pb_cogito_proto_msgTypes[28]
+	mi := &file_pkg_pb_cogito_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1756,7 +1972,7 @@ func (x *GetNotificationsRequest) String() string {
 func (*GetNotificationsRequest) ProtoMessage() {}
 
 func (x *GetNotificationsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_cogito_proto_msgTypes[28]
+	mi := &file_pkg_pb_cogito_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1769,7 +1985,7 @@ func (x *GetNotificationsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetNotificationsRequest.ProtoReflect.Descriptor instead.
 func (*GetNotificationsRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_cogito_proto_rawDescGZIP(), []int{28}
+	return file_pkg_pb_cogito_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *GetNotificationsRequest) GetUserId() int32 {
@@ -1809,7 +2025,7 @@ type Notification struct {
 
 func (x *Notification) Reset() {
 	*x = Notification{}
-	mi := &file_pkg_pb_cogito_proto_msgTypes[29]
+	mi := &file_pkg_pb_cogito_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1821,7 +2037,7 @@ func (x *Notification) String() string {
 func (*Notification) ProtoMessage() {}
 
 func (x *Notification) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_cogito_proto_msgTypes[29]
+	mi := &file_pkg_pb_cogito_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1834,7 +2050,7 @@ func (x *Notification) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Notification.ProtoReflect.Descriptor instead.
 func (*Notification) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_cogito_proto_rawDescGZIP(), []int{29}
+	return file_pkg_pb_cogito_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *Notification) GetId() int64 {
@@ -1903,7 +2119,7 @@ type Notifications struct {
 
 func (x *Notifications) Reset() {
 	*x = Notifications{}
-	mi := &file_pkg_pb_cogito_proto_msgTypes[30]
+	mi := &file_pkg_pb_cogito_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1915,7 +2131,7 @@ func (x *Notifications) String() string {
 func (*Notifications) ProtoMessage() {}
 
 func (x *Notifications) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_cogito_proto_msgTypes[30]
+	mi := &file_pkg_pb_cogito_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1928,7 +2144,7 @@ func (x *Notifications) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Notifications.ProtoReflect.Descriptor instead.
 func (*Notifications) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_cogito_proto_rawDescGZIP(), []int{30}
+	return file_pkg_pb_cogito_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *Notifications) GetNotifications() []*Notification {
@@ -1955,7 +2171,7 @@ type NotificationRequest struct {
 
 func (x *NotificationRequest) Reset() {
 	*x = NotificationRequest{}
-	mi := &file_pkg_pb_cogito_proto_msgTypes[31]
+	mi := &file_pkg_pb_cogito_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1967,7 +2183,7 @@ func (x *NotificationRequest) String() string {
 func (*NotificationRequest) ProtoMessage() {}
 
 func (x *NotificationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_cogito_proto_msgTypes[31]
+	mi := &file_pkg_pb_cogito_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1980,7 +2196,7 @@ func (x *NotificationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use NotificationRequest.ProtoReflect.Descriptor instead.
 func (*NotificationRequest) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_cogito_proto_rawDescGZIP(), []int{31}
+	return file_pkg_pb_cogito_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *NotificationRequest) GetNotificationId() int64 {
@@ -2006,7 +2222,7 @@ type UnreadCountResponse struct {
 
 func (x *UnreadCountResponse) Reset() {
 	*x = UnreadCountResponse{}
-	mi := &file_pkg_pb_cogito_proto_msgTypes[32]
+	mi := &file_pkg_pb_cogito_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2018,7 +2234,7 @@ func (x *UnreadCountResponse) String() string {
 func (*UnreadCountResponse) ProtoMessage() {}
 
 func (x *UnreadCountResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_pkg_pb_cogito_proto_msgTypes[32]
+	mi := &file_pkg_pb_cogito_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2031,7 +2247,7 @@ func (x *UnreadCountResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UnreadCountResponse.ProtoReflect.Descriptor instead.
 func (*UnreadCountResponse) Descriptor() ([]byte, []int) {
-	return file_pkg_pb_cogito_proto_rawDescGZIP(), []int{32}
+	return file_pkg_pb_cogito_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *UnreadCountResponse) GetCount() int32 {
@@ -2182,7 +2398,20 @@ const file_pkg_pb_cogito_proto_rawDesc = "" +
 	"\rSearchRequest\x12\x14\n" +
 	"\x05query\x18\x01 \x01(\tR\x05query\x12\x16\n" +
 	"\x06cursor\x18\x02 \x01(\tR\x06cursor\x12\x14\n" +
-	"\x05limit\x18\x03 \x01(\x05R\x05limit\"`\n" +
+	"\x05limit\x18\x03 \x01(\x05R\x05limit\"\x9d\x01\n" +
+	"\fRecentSearch\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04type\x18\x02 \x01(\tR\x04type\x12\x1c\n" +
+	"\treference\x18\x03 \x01(\tR\treference\x12 \n" +
+	"\x04user\x18\x04 \x01(\v2\f.cogito.UserR\x04user\x12)\n" +
+	"\ahashtag\x18\x05 \x01(\v2\x0f.cogito.HashtagR\ahashtag\"<\n" +
+	"\x0eRecentSearches\x12*\n" +
+	"\x05items\x18\x01 \x03(\v2\x14.cogito.RecentSearchR\x05items\"M\n" +
+	"\x19RecordRecentSearchRequest\x12\x12\n" +
+	"\x04type\x18\x01 \x01(\tR\x04type\x12\x1c\n" +
+	"\treference\x18\x02 \x01(\tR\treference\"+\n" +
+	"\x19DeleteRecentSearchRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"`\n" +
 	"\x17GetNotificationsRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\x05R\x06userId\x12\x16\n" +
 	"\x06cursor\x18\x02 \x01(\tR\x06cursor\x12\x14\n" +
@@ -2247,11 +2476,15 @@ const file_pkg_pb_cogito_proto_rawDesc = "" +
 	"\fImageService\x12:\n" +
 	"\fVerifyUpload\x12\x1b.cogito.VerifyUploadRequest\x1a\r.cogito.Empty\x12<\n" +
 	"\rConsumeUpload\x12\x1c.cogito.ConsumeUploadRequest\x1a\r.cogito.Empty\x128\n" +
-	"\vDeleteImage\x12\x1a.cogito.DeleteImageRequest\x1a\r.cogito.Empty2\xb4\x01\n" +
+	"\vDeleteImage\x12\x1a.cogito.DeleteImageRequest\x1a\r.cogito.Empty2\xb6\x03\n" +
 	"\rSearchService\x123\n" +
 	"\vSearchUsers\x12\x15.cogito.SearchRequest\x1a\r.cogito.Users\x123\n" +
 	"\vSearchPosts\x12\x15.cogito.SearchRequest\x1a\r.cogito.Posts\x129\n" +
-	"\x0eSearchHashtags\x12\x15.cogito.SearchRequest\x1a\x10.cogito.Hashtags2\xe9\x01\n" +
+	"\x0eSearchHashtags\x12\x15.cogito.SearchRequest\x1a\x10.cogito.Hashtags\x12;\n" +
+	"\x12ListRecentSearches\x12\r.cogito.Empty\x1a\x16.cogito.RecentSearches\x12F\n" +
+	"\x12RecordRecentSearch\x12!.cogito.RecordRecentSearchRequest\x1a\r.cogito.Empty\x12F\n" +
+	"\x12DeleteRecentSearch\x12!.cogito.DeleteRecentSearchRequest\x1a\r.cogito.Empty\x123\n" +
+	"\x13ClearRecentSearches\x12\r.cogito.Empty\x1a\r.cogito.Empty2\xe9\x01\n" +
 	"\x13NotificationService\x12J\n" +
 	"\x10GetNotifications\x12\x1f.cogito.GetNotificationsRequest\x1a\x15.cogito.Notifications\x12B\n" +
 	"\x14MarkNotificationRead\x12\x1b.cogito.NotificationRequest\x1a\r.cogito.Empty\x12B\n" +
@@ -2270,41 +2503,45 @@ func file_pkg_pb_cogito_proto_rawDescGZIP() []byte {
 	return file_pkg_pb_cogito_proto_rawDescData
 }
 
-var file_pkg_pb_cogito_proto_msgTypes = make([]protoimpl.MessageInfo, 33)
+var file_pkg_pb_cogito_proto_msgTypes = make([]protoimpl.MessageInfo, 37)
 var file_pkg_pb_cogito_proto_goTypes = []any{
-	(*CreateUserRequest)(nil),        // 0: cogito.CreateUserRequest
-	(*Identifier)(nil),               // 1: cogito.Identifier
-	(*Ids)(nil),                      // 2: cogito.Ids
-	(*UserRequest)(nil),              // 3: cogito.UserRequest
-	(*User)(nil),                     // 4: cogito.User
-	(*UpdateUserRequest)(nil),        // 5: cogito.UpdateUserRequest
-	(*GetUsersRequest)(nil),          // 6: cogito.GetUsersRequest
-	(*Users)(nil),                    // 7: cogito.Users
-	(*GetUserByUsernameRequest)(nil), // 8: cogito.GetUserByUsernameRequest
-	(*Empty)(nil),                    // 9: cogito.Empty
-	(*Credentials)(nil),              // 10: cogito.Credentials
-	(*SessionRequest)(nil),           // 11: cogito.SessionRequest
-	(*Session)(nil),                  // 12: cogito.Session
-	(*Sessions)(nil),                 // 13: cogito.Sessions
-	(*CreatePostRequest)(nil),        // 14: cogito.CreatePostRequest
-	(*PostRequest)(nil),              // 15: cogito.PostRequest
-	(*Post)(nil),                     // 16: cogito.Post
-	(*GetFeedRequest)(nil),           // 17: cogito.GetFeedRequest
-	(*Posts)(nil),                    // 18: cogito.Posts
-	(*GetPostsRequest)(nil),          // 19: cogito.GetPostsRequest
-	(*GetHashtagPostsRequest)(nil),   // 20: cogito.GetHashtagPostsRequest
-	(*GetRepliesRequest)(nil),        // 21: cogito.GetRepliesRequest
-	(*Hashtag)(nil),                  // 22: cogito.Hashtag
-	(*Hashtags)(nil),                 // 23: cogito.Hashtags
-	(*VerifyUploadRequest)(nil),      // 24: cogito.VerifyUploadRequest
-	(*ConsumeUploadRequest)(nil),     // 25: cogito.ConsumeUploadRequest
-	(*DeleteImageRequest)(nil),       // 26: cogito.DeleteImageRequest
-	(*SearchRequest)(nil),            // 27: cogito.SearchRequest
-	(*GetNotificationsRequest)(nil),  // 28: cogito.GetNotificationsRequest
-	(*Notification)(nil),             // 29: cogito.Notification
-	(*Notifications)(nil),            // 30: cogito.Notifications
-	(*NotificationRequest)(nil),      // 31: cogito.NotificationRequest
-	(*UnreadCountResponse)(nil),      // 32: cogito.UnreadCountResponse
+	(*CreateUserRequest)(nil),         // 0: cogito.CreateUserRequest
+	(*Identifier)(nil),                // 1: cogito.Identifier
+	(*Ids)(nil),                       // 2: cogito.Ids
+	(*UserRequest)(nil),               // 3: cogito.UserRequest
+	(*User)(nil),                      // 4: cogito.User
+	(*UpdateUserRequest)(nil),         // 5: cogito.UpdateUserRequest
+	(*GetUsersRequest)(nil),           // 6: cogito.GetUsersRequest
+	(*Users)(nil),                     // 7: cogito.Users
+	(*GetUserByUsernameRequest)(nil),  // 8: cogito.GetUserByUsernameRequest
+	(*Empty)(nil),                     // 9: cogito.Empty
+	(*Credentials)(nil),               // 10: cogito.Credentials
+	(*SessionRequest)(nil),            // 11: cogito.SessionRequest
+	(*Session)(nil),                   // 12: cogito.Session
+	(*Sessions)(nil),                  // 13: cogito.Sessions
+	(*CreatePostRequest)(nil),         // 14: cogito.CreatePostRequest
+	(*PostRequest)(nil),               // 15: cogito.PostRequest
+	(*Post)(nil),                      // 16: cogito.Post
+	(*GetFeedRequest)(nil),            // 17: cogito.GetFeedRequest
+	(*Posts)(nil),                     // 18: cogito.Posts
+	(*GetPostsRequest)(nil),           // 19: cogito.GetPostsRequest
+	(*GetHashtagPostsRequest)(nil),    // 20: cogito.GetHashtagPostsRequest
+	(*GetRepliesRequest)(nil),         // 21: cogito.GetRepliesRequest
+	(*Hashtag)(nil),                   // 22: cogito.Hashtag
+	(*Hashtags)(nil),                  // 23: cogito.Hashtags
+	(*VerifyUploadRequest)(nil),       // 24: cogito.VerifyUploadRequest
+	(*ConsumeUploadRequest)(nil),      // 25: cogito.ConsumeUploadRequest
+	(*DeleteImageRequest)(nil),        // 26: cogito.DeleteImageRequest
+	(*SearchRequest)(nil),             // 27: cogito.SearchRequest
+	(*RecentSearch)(nil),              // 28: cogito.RecentSearch
+	(*RecentSearches)(nil),            // 29: cogito.RecentSearches
+	(*RecordRecentSearchRequest)(nil), // 30: cogito.RecordRecentSearchRequest
+	(*DeleteRecentSearchRequest)(nil), // 31: cogito.DeleteRecentSearchRequest
+	(*GetNotificationsRequest)(nil),   // 32: cogito.GetNotificationsRequest
+	(*Notification)(nil),              // 33: cogito.Notification
+	(*Notifications)(nil),             // 34: cogito.Notifications
+	(*NotificationRequest)(nil),       // 35: cogito.NotificationRequest
+	(*UnreadCountResponse)(nil),       // 36: cogito.UnreadCountResponse
 }
 var file_pkg_pb_cogito_proto_depIdxs = []int32{
 	4,  // 0: cogito.Users.users:type_name -> cogito.User
@@ -2313,82 +2550,93 @@ var file_pkg_pb_cogito_proto_depIdxs = []int32{
 	16, // 3: cogito.Post.repost_of:type_name -> cogito.Post
 	16, // 4: cogito.Posts.posts:type_name -> cogito.Post
 	22, // 5: cogito.Hashtags.hashtags:type_name -> cogito.Hashtag
-	29, // 6: cogito.Notifications.notifications:type_name -> cogito.Notification
-	0,  // 7: cogito.UserService.CreateUser:input_type -> cogito.CreateUserRequest
-	3,  // 8: cogito.UserService.GetUser:input_type -> cogito.UserRequest
-	8,  // 9: cogito.UserService.GetUserByUsername:input_type -> cogito.GetUserByUsernameRequest
-	2,  // 10: cogito.UserService.GetUsersByIds:input_type -> cogito.Ids
-	5,  // 11: cogito.UserService.UpdateUser:input_type -> cogito.UpdateUserRequest
-	6,  // 12: cogito.UserService.GetFollowing:input_type -> cogito.GetUsersRequest
-	6,  // 13: cogito.UserService.GetFollowers:input_type -> cogito.GetUsersRequest
-	3,  // 14: cogito.UserService.FollowUser:input_type -> cogito.UserRequest
-	3,  // 15: cogito.UserService.UnfollowUser:input_type -> cogito.UserRequest
-	10, // 16: cogito.AuthService.CreateSession:input_type -> cogito.Credentials
-	11, // 17: cogito.AuthService.GetSession:input_type -> cogito.SessionRequest
-	11, // 18: cogito.AuthService.DeleteSession:input_type -> cogito.SessionRequest
-	3,  // 19: cogito.AuthService.GetSessions:input_type -> cogito.UserRequest
-	14, // 20: cogito.PostService.CreatePost:input_type -> cogito.CreatePostRequest
-	17, // 21: cogito.PostService.GetFeed:input_type -> cogito.GetFeedRequest
-	19, // 22: cogito.PostService.GetPosts:input_type -> cogito.GetPostsRequest
-	19, // 23: cogito.PostService.GetLikedPosts:input_type -> cogito.GetPostsRequest
-	20, // 24: cogito.PostService.GetHashtagPosts:input_type -> cogito.GetHashtagPostsRequest
-	15, // 25: cogito.PostService.GetPost:input_type -> cogito.PostRequest
-	2,  // 26: cogito.PostService.GetPostsByIds:input_type -> cogito.Ids
-	15, // 27: cogito.PostService.DeletePost:input_type -> cogito.PostRequest
-	15, // 28: cogito.PostService.LikePost:input_type -> cogito.PostRequest
-	15, // 29: cogito.PostService.UnlikePost:input_type -> cogito.PostRequest
-	15, // 30: cogito.PostService.RepostPost:input_type -> cogito.PostRequest
-	15, // 31: cogito.PostService.RemoveRepost:input_type -> cogito.PostRequest
-	21, // 32: cogito.PostService.GetReplies:input_type -> cogito.GetRepliesRequest
-	24, // 33: cogito.ImageService.VerifyUpload:input_type -> cogito.VerifyUploadRequest
-	25, // 34: cogito.ImageService.ConsumeUpload:input_type -> cogito.ConsumeUploadRequest
-	26, // 35: cogito.ImageService.DeleteImage:input_type -> cogito.DeleteImageRequest
-	27, // 36: cogito.SearchService.SearchUsers:input_type -> cogito.SearchRequest
-	27, // 37: cogito.SearchService.SearchPosts:input_type -> cogito.SearchRequest
-	27, // 38: cogito.SearchService.SearchHashtags:input_type -> cogito.SearchRequest
-	28, // 39: cogito.NotificationService.GetNotifications:input_type -> cogito.GetNotificationsRequest
-	31, // 40: cogito.NotificationService.MarkNotificationRead:input_type -> cogito.NotificationRequest
-	3,  // 41: cogito.NotificationService.GetUnreadCount:input_type -> cogito.UserRequest
-	1,  // 42: cogito.UserService.CreateUser:output_type -> cogito.Identifier
-	4,  // 43: cogito.UserService.GetUser:output_type -> cogito.User
-	4,  // 44: cogito.UserService.GetUserByUsername:output_type -> cogito.User
-	7,  // 45: cogito.UserService.GetUsersByIds:output_type -> cogito.Users
-	9,  // 46: cogito.UserService.UpdateUser:output_type -> cogito.Empty
-	7,  // 47: cogito.UserService.GetFollowing:output_type -> cogito.Users
-	7,  // 48: cogito.UserService.GetFollowers:output_type -> cogito.Users
-	9,  // 49: cogito.UserService.FollowUser:output_type -> cogito.Empty
-	9,  // 50: cogito.UserService.UnfollowUser:output_type -> cogito.Empty
-	12, // 51: cogito.AuthService.CreateSession:output_type -> cogito.Session
-	12, // 52: cogito.AuthService.GetSession:output_type -> cogito.Session
-	9,  // 53: cogito.AuthService.DeleteSession:output_type -> cogito.Empty
-	13, // 54: cogito.AuthService.GetSessions:output_type -> cogito.Sessions
-	1,  // 55: cogito.PostService.CreatePost:output_type -> cogito.Identifier
-	18, // 56: cogito.PostService.GetFeed:output_type -> cogito.Posts
-	18, // 57: cogito.PostService.GetPosts:output_type -> cogito.Posts
-	18, // 58: cogito.PostService.GetLikedPosts:output_type -> cogito.Posts
-	18, // 59: cogito.PostService.GetHashtagPosts:output_type -> cogito.Posts
-	16, // 60: cogito.PostService.GetPost:output_type -> cogito.Post
-	18, // 61: cogito.PostService.GetPostsByIds:output_type -> cogito.Posts
-	9,  // 62: cogito.PostService.DeletePost:output_type -> cogito.Empty
-	9,  // 63: cogito.PostService.LikePost:output_type -> cogito.Empty
-	9,  // 64: cogito.PostService.UnlikePost:output_type -> cogito.Empty
-	9,  // 65: cogito.PostService.RepostPost:output_type -> cogito.Empty
-	9,  // 66: cogito.PostService.RemoveRepost:output_type -> cogito.Empty
-	18, // 67: cogito.PostService.GetReplies:output_type -> cogito.Posts
-	9,  // 68: cogito.ImageService.VerifyUpload:output_type -> cogito.Empty
-	9,  // 69: cogito.ImageService.ConsumeUpload:output_type -> cogito.Empty
-	9,  // 70: cogito.ImageService.DeleteImage:output_type -> cogito.Empty
-	7,  // 71: cogito.SearchService.SearchUsers:output_type -> cogito.Users
-	18, // 72: cogito.SearchService.SearchPosts:output_type -> cogito.Posts
-	23, // 73: cogito.SearchService.SearchHashtags:output_type -> cogito.Hashtags
-	30, // 74: cogito.NotificationService.GetNotifications:output_type -> cogito.Notifications
-	9,  // 75: cogito.NotificationService.MarkNotificationRead:output_type -> cogito.Empty
-	32, // 76: cogito.NotificationService.GetUnreadCount:output_type -> cogito.UnreadCountResponse
-	42, // [42:77] is the sub-list for method output_type
-	7,  // [7:42] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	4,  // 6: cogito.RecentSearch.user:type_name -> cogito.User
+	22, // 7: cogito.RecentSearch.hashtag:type_name -> cogito.Hashtag
+	28, // 8: cogito.RecentSearches.items:type_name -> cogito.RecentSearch
+	33, // 9: cogito.Notifications.notifications:type_name -> cogito.Notification
+	0,  // 10: cogito.UserService.CreateUser:input_type -> cogito.CreateUserRequest
+	3,  // 11: cogito.UserService.GetUser:input_type -> cogito.UserRequest
+	8,  // 12: cogito.UserService.GetUserByUsername:input_type -> cogito.GetUserByUsernameRequest
+	2,  // 13: cogito.UserService.GetUsersByIds:input_type -> cogito.Ids
+	5,  // 14: cogito.UserService.UpdateUser:input_type -> cogito.UpdateUserRequest
+	6,  // 15: cogito.UserService.GetFollowing:input_type -> cogito.GetUsersRequest
+	6,  // 16: cogito.UserService.GetFollowers:input_type -> cogito.GetUsersRequest
+	3,  // 17: cogito.UserService.FollowUser:input_type -> cogito.UserRequest
+	3,  // 18: cogito.UserService.UnfollowUser:input_type -> cogito.UserRequest
+	10, // 19: cogito.AuthService.CreateSession:input_type -> cogito.Credentials
+	11, // 20: cogito.AuthService.GetSession:input_type -> cogito.SessionRequest
+	11, // 21: cogito.AuthService.DeleteSession:input_type -> cogito.SessionRequest
+	3,  // 22: cogito.AuthService.GetSessions:input_type -> cogito.UserRequest
+	14, // 23: cogito.PostService.CreatePost:input_type -> cogito.CreatePostRequest
+	17, // 24: cogito.PostService.GetFeed:input_type -> cogito.GetFeedRequest
+	19, // 25: cogito.PostService.GetPosts:input_type -> cogito.GetPostsRequest
+	19, // 26: cogito.PostService.GetLikedPosts:input_type -> cogito.GetPostsRequest
+	20, // 27: cogito.PostService.GetHashtagPosts:input_type -> cogito.GetHashtagPostsRequest
+	15, // 28: cogito.PostService.GetPost:input_type -> cogito.PostRequest
+	2,  // 29: cogito.PostService.GetPostsByIds:input_type -> cogito.Ids
+	15, // 30: cogito.PostService.DeletePost:input_type -> cogito.PostRequest
+	15, // 31: cogito.PostService.LikePost:input_type -> cogito.PostRequest
+	15, // 32: cogito.PostService.UnlikePost:input_type -> cogito.PostRequest
+	15, // 33: cogito.PostService.RepostPost:input_type -> cogito.PostRequest
+	15, // 34: cogito.PostService.RemoveRepost:input_type -> cogito.PostRequest
+	21, // 35: cogito.PostService.GetReplies:input_type -> cogito.GetRepliesRequest
+	24, // 36: cogito.ImageService.VerifyUpload:input_type -> cogito.VerifyUploadRequest
+	25, // 37: cogito.ImageService.ConsumeUpload:input_type -> cogito.ConsumeUploadRequest
+	26, // 38: cogito.ImageService.DeleteImage:input_type -> cogito.DeleteImageRequest
+	27, // 39: cogito.SearchService.SearchUsers:input_type -> cogito.SearchRequest
+	27, // 40: cogito.SearchService.SearchPosts:input_type -> cogito.SearchRequest
+	27, // 41: cogito.SearchService.SearchHashtags:input_type -> cogito.SearchRequest
+	9,  // 42: cogito.SearchService.ListRecentSearches:input_type -> cogito.Empty
+	30, // 43: cogito.SearchService.RecordRecentSearch:input_type -> cogito.RecordRecentSearchRequest
+	31, // 44: cogito.SearchService.DeleteRecentSearch:input_type -> cogito.DeleteRecentSearchRequest
+	9,  // 45: cogito.SearchService.ClearRecentSearches:input_type -> cogito.Empty
+	32, // 46: cogito.NotificationService.GetNotifications:input_type -> cogito.GetNotificationsRequest
+	35, // 47: cogito.NotificationService.MarkNotificationRead:input_type -> cogito.NotificationRequest
+	3,  // 48: cogito.NotificationService.GetUnreadCount:input_type -> cogito.UserRequest
+	1,  // 49: cogito.UserService.CreateUser:output_type -> cogito.Identifier
+	4,  // 50: cogito.UserService.GetUser:output_type -> cogito.User
+	4,  // 51: cogito.UserService.GetUserByUsername:output_type -> cogito.User
+	7,  // 52: cogito.UserService.GetUsersByIds:output_type -> cogito.Users
+	9,  // 53: cogito.UserService.UpdateUser:output_type -> cogito.Empty
+	7,  // 54: cogito.UserService.GetFollowing:output_type -> cogito.Users
+	7,  // 55: cogito.UserService.GetFollowers:output_type -> cogito.Users
+	9,  // 56: cogito.UserService.FollowUser:output_type -> cogito.Empty
+	9,  // 57: cogito.UserService.UnfollowUser:output_type -> cogito.Empty
+	12, // 58: cogito.AuthService.CreateSession:output_type -> cogito.Session
+	12, // 59: cogito.AuthService.GetSession:output_type -> cogito.Session
+	9,  // 60: cogito.AuthService.DeleteSession:output_type -> cogito.Empty
+	13, // 61: cogito.AuthService.GetSessions:output_type -> cogito.Sessions
+	1,  // 62: cogito.PostService.CreatePost:output_type -> cogito.Identifier
+	18, // 63: cogito.PostService.GetFeed:output_type -> cogito.Posts
+	18, // 64: cogito.PostService.GetPosts:output_type -> cogito.Posts
+	18, // 65: cogito.PostService.GetLikedPosts:output_type -> cogito.Posts
+	18, // 66: cogito.PostService.GetHashtagPosts:output_type -> cogito.Posts
+	16, // 67: cogito.PostService.GetPost:output_type -> cogito.Post
+	18, // 68: cogito.PostService.GetPostsByIds:output_type -> cogito.Posts
+	9,  // 69: cogito.PostService.DeletePost:output_type -> cogito.Empty
+	9,  // 70: cogito.PostService.LikePost:output_type -> cogito.Empty
+	9,  // 71: cogito.PostService.UnlikePost:output_type -> cogito.Empty
+	9,  // 72: cogito.PostService.RepostPost:output_type -> cogito.Empty
+	9,  // 73: cogito.PostService.RemoveRepost:output_type -> cogito.Empty
+	18, // 74: cogito.PostService.GetReplies:output_type -> cogito.Posts
+	9,  // 75: cogito.ImageService.VerifyUpload:output_type -> cogito.Empty
+	9,  // 76: cogito.ImageService.ConsumeUpload:output_type -> cogito.Empty
+	9,  // 77: cogito.ImageService.DeleteImage:output_type -> cogito.Empty
+	7,  // 78: cogito.SearchService.SearchUsers:output_type -> cogito.Users
+	18, // 79: cogito.SearchService.SearchPosts:output_type -> cogito.Posts
+	23, // 80: cogito.SearchService.SearchHashtags:output_type -> cogito.Hashtags
+	29, // 81: cogito.SearchService.ListRecentSearches:output_type -> cogito.RecentSearches
+	9,  // 82: cogito.SearchService.RecordRecentSearch:output_type -> cogito.Empty
+	9,  // 83: cogito.SearchService.DeleteRecentSearch:output_type -> cogito.Empty
+	9,  // 84: cogito.SearchService.ClearRecentSearches:output_type -> cogito.Empty
+	34, // 85: cogito.NotificationService.GetNotifications:output_type -> cogito.Notifications
+	9,  // 86: cogito.NotificationService.MarkNotificationRead:output_type -> cogito.Empty
+	36, // 87: cogito.NotificationService.GetUnreadCount:output_type -> cogito.UnreadCountResponse
+	49, // [49:88] is the sub-list for method output_type
+	10, // [10:49] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_pkg_pb_cogito_proto_init() }
@@ -2405,7 +2653,7 @@ func file_pkg_pb_cogito_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_pkg_pb_cogito_proto_rawDesc), len(file_pkg_pb_cogito_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   33,
+			NumMessages:   37,
 			NumExtensions: 0,
 			NumServices:   6,
 		},

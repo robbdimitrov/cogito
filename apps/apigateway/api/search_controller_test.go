@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"net/http"
@@ -25,6 +26,16 @@ type fakeSearchServiceClient struct {
 	hashtagsErr error
 
 	gotUsersReq, gotPostsReq, gotHashtagsReq *pb.SearchRequest
+
+	recentRes    *pb.RecentSearches
+	recentErr    error
+	recordErr    error
+	deleteErr    error
+	clearErr     error
+	gotRecordReq *pb.RecordRecentSearchRequest
+	gotDeleteReq *pb.DeleteRecentSearchRequest
+	listCalled   bool
+	clearCalled  bool
 }
 
 func (f *fakeSearchServiceClient) SearchUsers(ctx context.Context, in *pb.SearchRequest, opts ...grpc.CallOption) (*pb.Users, error) {
@@ -40,6 +51,26 @@ func (f *fakeSearchServiceClient) SearchPosts(ctx context.Context, in *pb.Search
 func (f *fakeSearchServiceClient) SearchHashtags(ctx context.Context, in *pb.SearchRequest, opts ...grpc.CallOption) (*pb.Hashtags, error) {
 	f.gotHashtagsReq = in
 	return f.hashtagsRes, f.hashtagsErr
+}
+
+func (f *fakeSearchServiceClient) ListRecentSearches(ctx context.Context, in *pb.Empty, opts ...grpc.CallOption) (*pb.RecentSearches, error) {
+	f.listCalled = true
+	return f.recentRes, f.recentErr
+}
+
+func (f *fakeSearchServiceClient) RecordRecentSearch(ctx context.Context, in *pb.RecordRecentSearchRequest, opts ...grpc.CallOption) (*pb.Empty, error) {
+	f.gotRecordReq = in
+	return &pb.Empty{}, f.recordErr
+}
+
+func (f *fakeSearchServiceClient) DeleteRecentSearch(ctx context.Context, in *pb.DeleteRecentSearchRequest, opts ...grpc.CallOption) (*pb.Empty, error) {
+	f.gotDeleteReq = in
+	return &pb.Empty{}, f.deleteErr
+}
+
+func (f *fakeSearchServiceClient) ClearRecentSearches(ctx context.Context, in *pb.Empty, opts ...grpc.CallOption) (*pb.Empty, error) {
+	f.clearCalled = true
+	return &pb.Empty{}, f.clearErr
 }
 
 func newTestSearchController(fake *fakeSearchServiceClient) *searchController {
@@ -174,5 +205,122 @@ func TestSearch_InvalidTypeStill400(t *testing.T) {
 
 	if w.Code != http.StatusBadRequest {
 		t.Fatalf("expected 400 for an invalid type parameter, got %d: %s", w.Code, w.Body.String())
+	}
+}
+
+func TestListRecentSearchesMapsItems(t *testing.T) {
+	fake := &fakeSearchServiceClient{recentRes: &pb.RecentSearches{Items: []*pb.RecentSearch{
+		{Id: "01904d2e-7f4d-7c33-ae21-2f94737eaa10", Type: "users", User: &pb.User{Id: 1, Username: "alice", Name: "Alice"}},
+		{Id: "01904d2e-7f4d-7c33-ae21-2f94737eaa11", Type: "hashtags", Hashtag: &pb.Hashtag{Id: 2, Name: "go", PostCount: 3}},
+		{Id: "01904d2e-7f4d-7c33-ae21-2f94737eaa12", Type: "queries", Reference: "live flow"},
+	}}}
+	sc := newTestSearchController(fake)
+
+	req := httptest.NewRequest(http.MethodGet, "/search/recent", nil)
+	req = setUserID(req, "1")
+	w := httptest.NewRecorder()
+	sc.listRecentSearches(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+	var body []struct {
+		ID   string          `json:"id"`
+		Type string          `json:"type"`
+		Item json.RawMessage `json:"item"`
+	}
+	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
+		t.Fatalf("failed to decode body: %v", err)
+	}
+	if len(body) != 3 || body[2].Type != "queries" || string(body[2].Item) != `"live flow"` {
+		t.Fatalf("unexpected recent search body: %+v", body)
+	}
+}
+
+func TestRecordRecentSearchTrimsInput(t *testing.T) {
+	fake := &fakeSearchServiceClient{}
+	sc := newTestSearchController(fake)
+
+	req := httptest.NewRequest(http.MethodPost, "/search/recent", bytes.NewBufferString(`{"type":" queries ","reference":" live flow "}`))
+	req = setUserID(req, "1")
+	w := httptest.NewRecorder()
+	sc.recordRecentSearch(w, req)
+
+	if w.Code != http.StatusNoContent {
+		t.Fatalf("expected 204, got %d: %s", w.Code, w.Body.String())
+	}
+	if fake.gotRecordReq == nil || fake.gotRecordReq.Type != "queries" || fake.gotRecordReq.Reference != "live flow" {
+		t.Fatalf("record request = %+v", fake.gotRecordReq)
+	}
+}
+
+func TestRecordRecentSearchRejectsMalformedJSON(t *testing.T) {
+	fake := &fakeSearchServiceClient{}
+	sc := newTestSearchController(fake)
+
+	req := httptest.NewRequest(http.MethodPost, "/search/recent", bytes.NewBufferString(`{`))
+	req = setUserID(req, "1")
+	w := httptest.NewRecorder()
+	sc.recordRecentSearch(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400, got %d: %s", w.Code, w.Body.String())
+	}
+	if fake.gotRecordReq != nil {
+		t.Fatal("malformed json reached gRPC client")
+	}
+}
+
+func TestDeleteRecentSearchValidatesID(t *testing.T) {
+	fake := &fakeSearchServiceClient{}
+	sc := newTestSearchController(fake)
+
+	req := httptest.NewRequest(http.MethodDelete, "/search/recent/not-a-uuid", nil)
+	req.SetPathValue("id", "not-a-uuid")
+	req = setUserID(req, "1")
+	w := httptest.NewRecorder()
+	sc.deleteRecentSearch(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400, got %d: %s", w.Code, w.Body.String())
+	}
+	if fake.gotDeleteReq != nil {
+		t.Fatal("invalid id reached gRPC client")
+	}
+}
+
+func TestDeleteRecentSearchMapsNotFound(t *testing.T) {
+	const id = "01904d2e-7f4d-7c33-ae21-2f94737eaa10"
+	fake := &fakeSearchServiceClient{deleteErr: status.Error(codes.NotFound, "Recent search not found.")}
+	sc := newTestSearchController(fake)
+
+	req := httptest.NewRequest(http.MethodDelete, "/search/recent/"+id, nil)
+	req.SetPathValue("id", id)
+	req = setUserID(req, "1")
+	w := httptest.NewRecorder()
+	sc.deleteRecentSearch(w, req)
+
+	if w.Code != http.StatusNotFound {
+		t.Fatalf("expected 404, got %d: %s", w.Code, w.Body.String())
+	}
+	if fake.gotDeleteReq == nil || fake.gotDeleteReq.Id != id {
+		t.Fatalf("delete request = %+v", fake.gotDeleteReq)
+	}
+}
+
+func TestClearRecentSearchesSucceeds(t *testing.T) {
+	fake := &fakeSearchServiceClient{}
+	sc := newTestSearchController(fake)
+
+	req := httptest.NewRequest(http.MethodDelete, "/search/recent", nil)
+	req = setUserID(req, "1")
+	w := httptest.NewRecorder()
+	sc.clearRecentSearches(w, req)
+
+	if w.Code != http.StatusNoContent {
+		t.Fatalf("expected 204, got %d: %s", w.Code, w.Body.String())
+	}
+	if !fake.clearCalled {
+		t.Fatal("expected ClearRecentSearches to be called")
 	}
 }

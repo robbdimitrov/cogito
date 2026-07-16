@@ -165,17 +165,28 @@ still requires a session.
 
 #### Search
 
-| Method | Path             | Purpose                                                        |
-| ------ | ---------------- | ---------------------------------------------------------------- |
-| GET    | /search?q=&type= | Full-text search; `type` ∈ `all`, `posts`, `users`, `hashtags` |
+| Method | Path                | Purpose                                                        |
+| ------ | ------------------- | -------------------------------------------------------------- |
+| GET    | /search?q=&type=    | Full-text search; `type` ∈ `all`, `posts`, `users`, `hashtags` |
+| GET    | /search/recent      | Last 10 saved searches for the authenticated user              |
+| POST   | /search/recent      | Save or bump a recent search `{type, reference}`               |
+| DELETE | /search/recent/{id} | Remove one authenticated user's recent search                  |
+| DELETE | /search/recent      | Clear authenticated user's recent searches                     |
 
 `type=all` returns one relevance-ranked list blending all three entity
 types (~20% users / 60% posts / 20% hashtags), interleaved rather than
-grouped, for a Twitter-style search results page and live typeahead. Each
+grouped, for the search results page. Live typeahead fetches users and
+hashtags only, interleaves them, and caps the combined dropdown at 10. Each
 item is `{"type": "users"|"posts"|"hashtags", "item": {...}}`, where `item`
 has the same shape as the corresponding single-type result. If one entity
 type's lookup fails, the response still returns the other two; only a
 failure of all three returns an error.
+
+Recent searches use `{"id","type","item"}`. `type` is `users`, `hashtags`, or
+`queries`; entity items use the corresponding search result shape, and
+`queries` stores the submitted search text. Recording a recent search de-dupes
+by `(user, type, reference)`, bumps repeats to the top, and trims the list back
+to 10 in the same transaction.
 
 #### Images
 
@@ -316,11 +327,15 @@ Standard timeout: 10 seconds. Search endpoints: 5 seconds.
 
 ### SearchService
 
-| Method         | Key request fields   | Response |
-| -------------- | -------------------- | -------- |
-| SearchUsers    | query, cursor, limit | Users    |
-| SearchPosts    | query, cursor, limit | Posts    |
-| SearchHashtags | query, cursor, limit | Hashtags |
+| Method              | Key request fields   | Response       |
+| ------------------- | -------------------- | -------------- |
+| SearchUsers         | query, cursor, limit | Users          |
+| SearchPosts         | query, cursor, limit | Posts          |
+| SearchHashtags      | query, cursor, limit | Hashtags       |
+| ListRecentSearches  | user-id metadata     | RecentSearches |
+| RecordRecentSearch  | type, reference      | Empty          |
+| DeleteRecentSearch  | id                   | Empty          |
+| ClearRecentSearches | user-id metadata     | Empty          |
 
 ### NotificationService
 

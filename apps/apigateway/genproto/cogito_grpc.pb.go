@@ -1377,9 +1377,13 @@ var ImageService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	SearchService_SearchUsers_FullMethodName    = "/cogito.SearchService/SearchUsers"
-	SearchService_SearchPosts_FullMethodName    = "/cogito.SearchService/SearchPosts"
-	SearchService_SearchHashtags_FullMethodName = "/cogito.SearchService/SearchHashtags"
+	SearchService_SearchUsers_FullMethodName         = "/cogito.SearchService/SearchUsers"
+	SearchService_SearchPosts_FullMethodName         = "/cogito.SearchService/SearchPosts"
+	SearchService_SearchHashtags_FullMethodName      = "/cogito.SearchService/SearchHashtags"
+	SearchService_ListRecentSearches_FullMethodName  = "/cogito.SearchService/ListRecentSearches"
+	SearchService_RecordRecentSearch_FullMethodName  = "/cogito.SearchService/RecordRecentSearch"
+	SearchService_DeleteRecentSearch_FullMethodName  = "/cogito.SearchService/DeleteRecentSearch"
+	SearchService_ClearRecentSearches_FullMethodName = "/cogito.SearchService/ClearRecentSearches"
 )
 
 // SearchServiceClient is the client API for SearchService service.
@@ -1389,6 +1393,10 @@ type SearchServiceClient interface {
 	SearchUsers(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*Users, error)
 	SearchPosts(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*Posts, error)
 	SearchHashtags(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*Hashtags, error)
+	ListRecentSearches(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*RecentSearches, error)
+	RecordRecentSearch(ctx context.Context, in *RecordRecentSearchRequest, opts ...grpc.CallOption) (*Empty, error)
+	DeleteRecentSearch(ctx context.Context, in *DeleteRecentSearchRequest, opts ...grpc.CallOption) (*Empty, error)
+	ClearRecentSearches(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type searchServiceClient struct {
@@ -1429,6 +1437,46 @@ func (c *searchServiceClient) SearchHashtags(ctx context.Context, in *SearchRequ
 	return out, nil
 }
 
+func (c *searchServiceClient) ListRecentSearches(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*RecentSearches, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RecentSearches)
+	err := c.cc.Invoke(ctx, SearchService_ListRecentSearches_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *searchServiceClient) RecordRecentSearch(ctx context.Context, in *RecordRecentSearchRequest, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, SearchService_RecordRecentSearch_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *searchServiceClient) DeleteRecentSearch(ctx context.Context, in *DeleteRecentSearchRequest, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, SearchService_DeleteRecentSearch_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *searchServiceClient) ClearRecentSearches(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, SearchService_ClearRecentSearches_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SearchServiceServer is the server API for SearchService service.
 // All implementations must embed UnimplementedSearchServiceServer
 // for forward compatibility.
@@ -1436,6 +1484,10 @@ type SearchServiceServer interface {
 	SearchUsers(context.Context, *SearchRequest) (*Users, error)
 	SearchPosts(context.Context, *SearchRequest) (*Posts, error)
 	SearchHashtags(context.Context, *SearchRequest) (*Hashtags, error)
+	ListRecentSearches(context.Context, *Empty) (*RecentSearches, error)
+	RecordRecentSearch(context.Context, *RecordRecentSearchRequest) (*Empty, error)
+	DeleteRecentSearch(context.Context, *DeleteRecentSearchRequest) (*Empty, error)
+	ClearRecentSearches(context.Context, *Empty) (*Empty, error)
 	mustEmbedUnimplementedSearchServiceServer()
 }
 
@@ -1454,6 +1506,18 @@ func (UnimplementedSearchServiceServer) SearchPosts(context.Context, *SearchRequ
 }
 func (UnimplementedSearchServiceServer) SearchHashtags(context.Context, *SearchRequest) (*Hashtags, error) {
 	return nil, status.Error(codes.Unimplemented, "method SearchHashtags not implemented")
+}
+func (UnimplementedSearchServiceServer) ListRecentSearches(context.Context, *Empty) (*RecentSearches, error) {
+	return nil, status.Error(codes.Unimplemented, "method ListRecentSearches not implemented")
+}
+func (UnimplementedSearchServiceServer) RecordRecentSearch(context.Context, *RecordRecentSearchRequest) (*Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method RecordRecentSearch not implemented")
+}
+func (UnimplementedSearchServiceServer) DeleteRecentSearch(context.Context, *DeleteRecentSearchRequest) (*Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteRecentSearch not implemented")
+}
+func (UnimplementedSearchServiceServer) ClearRecentSearches(context.Context, *Empty) (*Empty, error) {
+	return nil, status.Error(codes.Unimplemented, "method ClearRecentSearches not implemented")
 }
 func (UnimplementedSearchServiceServer) mustEmbedUnimplementedSearchServiceServer() {}
 func (UnimplementedSearchServiceServer) testEmbeddedByValue()                       {}
@@ -1530,6 +1594,78 @@ func _SearchService_SearchHashtags_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SearchService_ListRecentSearches_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SearchServiceServer).ListRecentSearches(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SearchService_ListRecentSearches_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SearchServiceServer).ListRecentSearches(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SearchService_RecordRecentSearch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RecordRecentSearchRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SearchServiceServer).RecordRecentSearch(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SearchService_RecordRecentSearch_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SearchServiceServer).RecordRecentSearch(ctx, req.(*RecordRecentSearchRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SearchService_DeleteRecentSearch_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteRecentSearchRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SearchServiceServer).DeleteRecentSearch(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SearchService_DeleteRecentSearch_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SearchServiceServer).DeleteRecentSearch(ctx, req.(*DeleteRecentSearchRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SearchService_ClearRecentSearches_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SearchServiceServer).ClearRecentSearches(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SearchService_ClearRecentSearches_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SearchServiceServer).ClearRecentSearches(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SearchService_ServiceDesc is the grpc.ServiceDesc for SearchService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1548,6 +1684,22 @@ var SearchService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SearchHashtags",
 			Handler:    _SearchService_SearchHashtags_Handler,
+		},
+		{
+			MethodName: "ListRecentSearches",
+			Handler:    _SearchService_ListRecentSearches_Handler,
+		},
+		{
+			MethodName: "RecordRecentSearch",
+			Handler:    _SearchService_RecordRecentSearch_Handler,
+		},
+		{
+			MethodName: "DeleteRecentSearch",
+			Handler:    _SearchService_DeleteRecentSearch_Handler,
+		},
+		{
+			MethodName: "ClearRecentSearches",
+			Handler:    _SearchService_ClearRecentSearches_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

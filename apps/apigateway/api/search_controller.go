@@ -10,11 +10,20 @@ import (
 	"unicode/utf8"
 
 	pb "cogito/apigateway/genproto"
+	"google.golang.org/grpc/codes"
 )
+
+const recentSearchTimeout = 5 * time.Second
 
 type searchController struct {
 	client pb.SearchServiceClient
 	post   *postController
+}
+
+type recentSearchItem struct {
+	ID   string `json:"id"`
+	Type string `json:"type"`
+	Item any    `json:"item"`
 }
 
 func newSearchController(client pb.SearchServiceClient, post *postController) *searchController {
@@ -101,6 +110,165 @@ func (sc *searchController) search(w http.ResponseWriter, r *http.Request) {
 	default:
 		jsonError(w, http.StatusBadRequest, "Invalid type parameter")
 	}
+}
+
+func (sc *searchController) listRecentSearches(w http.ResponseWriter, r *http.Request) {
+	if sc.client == nil {
+		jsonError(w, http.StatusServiceUnavailable, "Search service unavailable")
+		return
+	}
+	ctx, cancel, ok := sc.authenticatedSearchContext(w, r)
+	if !ok {
+		return
+	}
+	defer cancel()
+
+	res, err := sc.client.ListRecentSearches(ctx, &pb.Empty{})
+	if err != nil {
+		slog.Warn("listing recent searches failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
+		grpcError(w, err)
+		return
+	}
+	items := make([]recentSearchItem, 0, len(res.Items))
+	for _, item := range res.Items {
+		mapped, ok := mapRecentSearch(item)
+		if ok {
+			items = append(items, mapped)
+		}
+	}
+	jsonResponse(w, http.StatusOK, items)
+}
+
+func (sc *searchController) recordRecentSearch(w http.ResponseWriter, r *http.Request) {
+	if sc.client == nil {
+		jsonError(w, http.StatusServiceUnavailable, "Search service unavailable")
+		return
+	}
+	var body struct {
+		Type      string `json:"type"`
+		Reference string `json:"reference"`
+	}
+	if err := decodeJSONBody(r, &body); err != nil {
+		if grpcCode(err) == codes.ResourceExhausted.String() {
+			jsonError(w, http.StatusRequestEntityTooLarge, "Payload too large")
+			return
+		}
+		jsonError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+	ctx, cancel, ok := sc.authenticatedSearchContext(w, r)
+	if !ok {
+		return
+	}
+	defer cancel()
+
+	_, err := sc.client.RecordRecentSearch(ctx, &pb.RecordRecentSearchRequest{
+		Type:      strings.TrimSpace(body.Type),
+		Reference: strings.TrimSpace(body.Reference),
+	})
+	if err != nil {
+		slog.Warn("recording recent search failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
+		grpcError(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (sc *searchController) deleteRecentSearch(w http.ResponseWriter, r *http.Request) {
+	if sc.client == nil {
+		jsonError(w, http.StatusServiceUnavailable, "Search service unavailable")
+		return
+	}
+	publicID := r.PathValue("id")
+	if !isUUID(publicID) {
+		jsonError(w, http.StatusBadRequest, "Recent search ID is invalid.")
+		return
+	}
+	ctx, cancel, ok := sc.authenticatedSearchContext(w, r)
+	if !ok {
+		return
+	}
+	defer cancel()
+
+	_, err := sc.client.DeleteRecentSearch(ctx, &pb.DeleteRecentSearchRequest{Id: publicID})
+	if err != nil {
+		slog.Warn("deleting recent search failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
+		grpcError(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (sc *searchController) clearRecentSearches(w http.ResponseWriter, r *http.Request) {
+	if sc.client == nil {
+		jsonError(w, http.StatusServiceUnavailable, "Search service unavailable")
+		return
+	}
+	ctx, cancel, ok := sc.authenticatedSearchContext(w, r)
+	if !ok {
+		return
+	}
+	defer cancel()
+
+	_, err := sc.client.ClearRecentSearches(ctx, &pb.Empty{})
+	if err != nil {
+		slog.Warn("clearing recent searches failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
+		grpcError(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (sc *searchController) authenticatedSearchContext(w http.ResponseWriter, r *http.Request) (context.Context, context.CancelFunc, bool) {
+	ctx, cancel := context.WithTimeout(r.Context(), recentSearchTimeout)
+	ctx, err := appendUserIDHeader(ctx, r)
+	if err != nil {
+		jsonError(w, http.StatusUnauthorized, "Unauthorized")
+		cancel()
+		return nil, nil, false
+	}
+	return ctx, cancel, true
+}
+
+func mapRecentSearch(item *pb.RecentSearch) (recentSearchItem, bool) {
+	switch item.GetType() {
+	case "users":
+		user := item.GetUser()
+		if user == nil {
+			return recentSearchItem{}, false
+		}
+		return recentSearchItem{ID: item.GetId(), Type: "users", Item: mapUser(user)}, true
+	case "hashtags":
+		hashtag := item.GetHashtag()
+		if hashtag == nil {
+			return recentSearchItem{}, false
+		}
+		return recentSearchItem{ID: item.GetId(), Type: "hashtags", Item: mapHashtag(hashtag)}, true
+	case "queries":
+		return recentSearchItem{ID: item.GetId(), Type: "queries", Item: item.GetReference()}, true
+	default:
+		return recentSearchItem{}, false
+	}
+}
+
+func isUUID(value string) bool {
+	if len(value) != 36 {
+		return false
+	}
+	for i := 0; i < len(value); i++ {
+		ch := value[i]
+		switch i {
+		case 8, 13, 18, 23:
+			if ch != '-' {
+				return false
+			}
+		default:
+			if !((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F')) {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 // searchAll fans the blended "all" search type out to the three underlying

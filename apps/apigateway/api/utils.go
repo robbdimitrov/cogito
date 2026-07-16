@@ -30,6 +30,8 @@ func getStatusCode(s *status.Status) int {
 		return http.StatusTooManyRequests
 	case codes.Unavailable:
 		return http.StatusServiceUnavailable
+	case codes.Unimplemented:
+		return http.StatusServiceUnavailable
 	case codes.DeadlineExceeded:
 		return http.StatusGatewayTimeout
 	default:

@@ -5,28 +5,36 @@ use tonic::{Request, Response, Status};
 
 use crate::cogito::search_service_server::SearchService;
 use crate::cogito::user_service_client::UserServiceClient;
-use crate::cogito::{Hashtag, Hashtags, Ids, Post, Posts, SearchRequest, User, Users};
+use crate::cogito::{
+    DeleteRecentSearchRequest, Empty, Hashtag, Hashtags, Ids, Post, Posts, RecentSearches,
+    RecordRecentSearchRequest, SearchRequest, User, Users,
+};
+use crate::utils::get_user_id;
 
 use super::client::{SearchClient, UserHit, decode_cursor, encode_cursor};
+use super::db::{RecentSearchDb, normalize_recent_reference, validate_recent_search};
 
 const MAX_QUERY_CHARS: usize = 255;
 const DEFAULT_LIMIT: u32 = 20;
 const MAX_LIMIT: u32 = 50;
 
 #[derive(Clone)]
-pub struct SearchController {
+pub struct SearchController<D> {
     search: Arc<RwLock<Option<SearchClient>>>,
     user_client: Option<UserServiceClient<Channel>>,
+    db: D,
 }
 
-impl SearchController {
+impl<D: RecentSearchDb> SearchController<D> {
     pub fn new(
         search: Arc<RwLock<Option<SearchClient>>>,
         user_client: Option<UserServiceClient<Channel>>,
+        db: D,
     ) -> Self {
         Self {
             search,
             user_client,
+            db,
         }
     }
 
@@ -104,7 +112,7 @@ fn validate_request(req: &SearchRequest) -> Result<(String, u32, u32), Status> {
 }
 
 #[tonic::async_trait]
-impl SearchService for SearchController {
+impl<D: RecentSearchDb> SearchService for SearchController<D> {
     async fn search_users(
         &self,
         request: Request<SearchRequest>,
@@ -199,6 +207,86 @@ impl SearchService for SearchController {
             next_cursor,
         }))
     }
+
+    async fn list_recent_searches(
+        &self,
+        request: Request<Empty>,
+    ) -> Result<Response<RecentSearches>, Status> {
+        let request_id = crate::logging::request_id(&request).to_owned();
+        let user_id = get_user_id(&request)?;
+        let items = self.db.list_recent_searches(user_id).await.map_err(|e| {
+            tracing::warn!(request_id = %request_id, method = "/cogito.SearchService/ListRecentSearches", error = %e, "list recent searches failed");
+            Status::internal("Internal server error.")
+        })?;
+        Ok(Response::new(RecentSearches { items }))
+    }
+
+    async fn record_recent_search(
+        &self,
+        request: Request<RecordRecentSearchRequest>,
+    ) -> Result<Response<Empty>, Status> {
+        let request_id = crate::logging::request_id(&request).to_owned();
+        let user_id = get_user_id(&request)?;
+        let req = request.into_inner();
+        let entity_type = req.r#type.trim();
+        let reference = normalize_recent_reference(entity_type, req.reference.trim());
+        validate_recent_search(entity_type, &reference)?;
+
+        self.db
+            .record_recent_search(user_id, entity_type, &reference)
+            .await
+            .map_err(|e| {
+                tracing::warn!(request_id = %request_id, method = "/cogito.SearchService/RecordRecentSearch", error = %e, "record recent search failed");
+                Status::internal("Internal server error.")
+            })?;
+        Ok(Response::new(Empty {}))
+    }
+
+    async fn delete_recent_search(
+        &self,
+        request: Request<DeleteRecentSearchRequest>,
+    ) -> Result<Response<Empty>, Status> {
+        let request_id = crate::logging::request_id(&request).to_owned();
+        let user_id = get_user_id(&request)?;
+        let req = request.into_inner();
+        let public_id = req.id.trim();
+        if !is_uuid(public_id) {
+            return Err(Status::invalid_argument("Recent search ID is invalid."));
+        }
+        let deleted = self
+            .db
+            .delete_recent_search(user_id, public_id)
+            .await
+            .map_err(|e| {
+                tracing::warn!(request_id = %request_id, method = "/cogito.SearchService/DeleteRecentSearch", error = %e, "delete recent search failed");
+                Status::internal("Internal server error.")
+            })?;
+        if !deleted {
+            return Err(Status::not_found("Recent search not found."));
+        }
+        Ok(Response::new(Empty {}))
+    }
+
+    async fn clear_recent_searches(
+        &self,
+        request: Request<Empty>,
+    ) -> Result<Response<Empty>, Status> {
+        let request_id = crate::logging::request_id(&request).to_owned();
+        let user_id = get_user_id(&request)?;
+        self.db.clear_recent_searches(user_id).await.map_err(|e| {
+            tracing::warn!(request_id = %request_id, method = "/cogito.SearchService/ClearRecentSearches", error = %e, "clear recent searches failed");
+            Status::internal("Internal server error.")
+        })?;
+        Ok(Response::new(Empty {}))
+    }
+}
+
+fn is_uuid(value: &str) -> bool {
+    value.len() == 36
+        && value.bytes().enumerate().all(|(i, ch)| match i {
+            8 | 13 | 18 | 23 => ch == b'-',
+            _ => ch.is_ascii_hexdigit(),
+        })
 }
 
 /// Trim `hits` to `limit`, map each to `T`, and compute the next-page cursor.
@@ -225,6 +313,46 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use async_trait::async_trait;
+    use std::sync::{Arc, Mutex};
+
+    #[derive(Clone, Default)]
+    struct FakeRecentSearchDb {
+        recorded: Arc<Mutex<Option<(i32, String, String)>>>,
+    }
+
+    #[async_trait]
+    impl RecentSearchDb for FakeRecentSearchDb {
+        async fn list_recent_searches(
+            &self,
+            _user_id: i32,
+        ) -> Result<Vec<crate::cogito::RecentSearch>, sqlx::Error> {
+            Ok(Vec::new())
+        }
+
+        async fn record_recent_search(
+            &self,
+            user_id: i32,
+            entity_type: &str,
+            reference: &str,
+        ) -> Result<(), sqlx::Error> {
+            *self.recorded.lock().unwrap() =
+                Some((user_id, entity_type.to_string(), reference.to_string()));
+            Ok(())
+        }
+
+        async fn delete_recent_search(
+            &self,
+            _user_id: i32,
+            _public_id: &str,
+        ) -> Result<bool, sqlx::Error> {
+            Ok(true)
+        }
+
+        async fn clear_recent_searches(&self, _user_id: i32) -> Result<(), sqlx::Error> {
+            Ok(())
+        }
+    }
 
     fn make_request(query: &str, limit: i32, cursor: &str) -> SearchRequest {
         SearchRequest {
@@ -279,10 +407,39 @@ mod tests {
     }
 
     #[test]
+    fn uuid_validation_accepts_canonical_uuid() {
+        assert!(is_uuid("01904d2e-7f4d-7c33-ae21-2f94737eaa10"));
+    }
+
+    #[test]
+    fn uuid_validation_rejects_non_uuid() {
+        assert!(!is_uuid("not-a-uuid"));
+    }
+
+    #[test]
     fn paginate_no_next_when_fewer_than_limit() {
         let hits = vec![1u32, 2]; // limit=3, only 2 returned
         let (items, next_cursor) = paginate(hits, 3, 0, |n| n);
         assert_eq!(items, [1, 2]);
         assert!(next_cursor.is_empty());
+    }
+
+    #[tokio::test]
+    async fn record_recent_search_normalizes_entity_references_before_storage() {
+        let db = FakeRecentSearchDb::default();
+        let controller = SearchController::new(Arc::new(RwLock::new(None)), None, db.clone());
+        let mut req = Request::new(RecordRecentSearchRequest {
+            r#type: "hashtags".to_string(),
+            reference: "RustLang".to_string(),
+        });
+        req.metadata_mut().insert("user-id", "42".parse().unwrap());
+
+        controller.record_recent_search(req).await.unwrap();
+
+        let recorded = db.recorded.lock().unwrap().clone();
+        assert_eq!(
+            recorded,
+            Some((42, "hashtags".to_string(), "rustlang".to_string()))
+        );
     }
 }

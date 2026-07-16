@@ -159,7 +159,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         })
     };
 
-    let search_ctrl = search::controller::SearchController::new(search, user_client);
+    let search_ctrl = search::controller::SearchController::new(search, user_client, pool.clone());
     let notif_ctrl = notifications::controller::NotificationController::new(pool.clone());
 
     let shutdown_signal = async move {

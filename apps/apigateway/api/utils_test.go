@@ -21,6 +21,7 @@ func TestGetStatusCode(t *testing.T) {
 		{codes.AlreadyExists, http.StatusConflict},
 		{codes.ResourceExhausted, http.StatusTooManyRequests},
 		{codes.Unavailable, http.StatusServiceUnavailable},
+		{codes.Unimplemented, http.StatusServiceUnavailable},
 		{codes.DeadlineExceeded, http.StatusGatewayTimeout},
 		{codes.Internal, http.StatusInternalServerError},
 	}

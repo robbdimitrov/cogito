@@ -37,7 +37,7 @@
 | /{username}/followers | Followers list                                                          | toggleFollow                                       |
 | /{username}/following | Following list                                                          | toggleFollow                                       |
 | /hashtags/{tag}       | Tag post feed                                                           | toggleLike, toggleRepost, deletePost               |
-| /search               | Blended, relevance-ranked search results (users/posts/hashtags) with a live typeahead dropdown | — |
+| /search               | Search results with users/hashtags typeahead and last 10 recent searches | remove/clear recent searches |
 | /notifications        | Notifications (initial unread rows marked read server-side after fetch) | —                                                  |
 | /settings             | Redirect to /settings/profile                                           | —                                                  |
 | /settings/profile     | Current user profile                                                    | default — update name/username/email/bio/photos    |
@@ -142,8 +142,10 @@ unchanged after DTO mapping.
 | `/posts/{id}`           | GET    | page load       | GET /posts/{id} + GET /posts/{id}/replies                         |
 | `/hashtags/{tag}`       | GET    | page load       | GET /hashtags/{tag}/posts                                         |
 | `/hashtags/{tag}`       | GET    | +server.ts      | GET /hashtags/{tag}/posts?cursor=                                 |
-| `/search`               | GET    | page load       | GET /search?q=&type=all (or type=users/hashtags for @/# prefixes) |
-| `/search`               | GET    | +server.ts      | GET /search?q=&type=&cursor= — also backs the live typeahead dropdown |
+| `/search`               | GET    | page load       | GET /search?q=&type=all (or type=users/hashtags for @/# prefixes) + GET /search/recent |
+| `/search`               | GET    | +server.ts      | GET /search?q=&type=&cursor= — backs pagination and users/hashtags typeahead |
+| `/search/recent`        | POST/DELETE | +server.ts | POST /search/recent, DELETE /search/recent                         |
+| `/search/recent/{id}`   | DELETE | +server.ts      | DELETE /search/recent/{id}                                         |
 | `/notifications`        | GET    | app layout load | GET /notifications/unread-count                                   |
 | `/notifications`        | GET    | page load       | GET /notifications + PUT /notifications/{id}/read for unread rows |
 | `/notifications`        | GET    | +server.ts      | GET /notifications?cursor=                                        |
@@ -177,6 +179,9 @@ unchanged after DTO mapping.
   `/posts/feed` returns no items and no cursor.
 - `/notifications` initial page marks unread rows as read after retrieval.
   Pagination through same-origin `+server.ts` is read-only.
+- `/search` shows recent searches when the empty input is focused. Typing
+  switches to a users/hashtags-only typeahead capped at 10 combined rows; Enter
+  submits the typed query unless the user arrow-highlights a suggestion first.
 
 ## Image Upload Flow
 

@@ -2,6 +2,7 @@
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
   import QuoteComposeModal from "$lib/domains/posts/components/QuoteComposeModal.svelte";
+  import { recordRecentSearch } from "$lib/shared/recentSearch";
   import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
   import { createPagination } from "$lib/shared/createPagination.svelte";
   import { Search } from "@lucide/svelte";
@@ -52,6 +53,7 @@
     e.preventDefault();
     const trimmed = searchInput.trim();
     if (!trimmed) return;
+    recordRecentSearch("queries", trimmed);
     goto(resolve(`/search?${new URLSearchParams({ q: trimmed })}`));
   }
 
@@ -70,6 +72,7 @@
       <SearchTypeahead
         bind:query={searchInput}
         currentUserId={data.currentUser?.id}
+        recent={data.recent}
       />
       <button type="submit" class="btn btn-primary rounded-2xl">Search</button>
     </div>

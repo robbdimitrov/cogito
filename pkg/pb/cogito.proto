@@ -226,10 +226,35 @@ message SearchRequest {
   int32 limit = 3;
 }
 
+message RecentSearch {
+  string id = 1;
+  string type = 2;
+  string reference = 3;
+  User user = 4;
+  Hashtag hashtag = 5;
+}
+
+message RecentSearches {
+  repeated RecentSearch items = 1;
+}
+
+message RecordRecentSearchRequest {
+  string type = 1;
+  string reference = 2;
+}
+
+message DeleteRecentSearchRequest {
+  string id = 1;
+}
+
 service SearchService {
   rpc SearchUsers(SearchRequest) returns (Users);
   rpc SearchPosts(SearchRequest) returns (Posts);
   rpc SearchHashtags(SearchRequest) returns (Hashtags);
+  rpc ListRecentSearches(Empty) returns (RecentSearches);
+  rpc RecordRecentSearch(RecordRecentSearchRequest) returns (Empty);
+  rpc DeleteRecentSearch(DeleteRecentSearchRequest) returns (Empty);
+  rpc ClearRecentSearches(Empty) returns (Empty);
 }
 
 message GetNotificationsRequest {

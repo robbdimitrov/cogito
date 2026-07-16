@@ -1,9 +1,10 @@
+import { fail, type Actions } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 import { apiClient } from "$lib/server/api/client";
-import { unwrap } from "$lib/server/api/http";
+import { failFromError, unwrap } from "$lib/server/api/http";
 import type { User } from "$lib/domains/users/model";
 import type { Hashtag } from "$lib/domains/posts/api.server";
-import { wrapBlended, type BlendedItem } from "./types";
+import { wrapBlended, type BlendedItem, type RecentSearchItem } from "./types";
 
 const SEARCH_PREVIEW_LIMIT = 15;
 const EMPTY_SECTION = { items: [], nextCursor: null };
@@ -28,15 +29,28 @@ async function searchSection<T>(
   }
 }
 
+async function listRecentSearches(
+  api: ReturnType<typeof apiClient>,
+): Promise<RecentSearchItem[]> {
+  try {
+    const res = await api("/search/recent");
+    return (await unwrap<RecentSearchItem[]>(res)) ?? [];
+  } catch {
+    return [];
+  }
+}
+
 export const load: PageServerLoad = async (event) => {
   const q = event.url.searchParams.get("q") ?? "";
   const api = apiClient(event);
+  const recent = await listRecentSearches(api);
 
   if (!q) {
     return {
       q,
       type: "all" as const,
       results: EMPTY_SECTION as SearchSection<BlendedItem>,
+      recent,
     };
   }
 
@@ -55,6 +69,7 @@ export const load: PageServerLoad = async (event) => {
         items: wrapBlended("users", section.items),
         nextCursor: section.nextCursor,
       },
+      recent,
     };
   }
   if (q.startsWith("#")) {
@@ -70,9 +85,40 @@ export const load: PageServerLoad = async (event) => {
         items: wrapBlended("hashtags", section.items),
         nextCursor: section.nextCursor,
       },
+      recent,
     };
   }
 
   const results = await searchSection<BlendedItem>(api, q, "all");
-  return { q, type: "all" as const, results };
+  return { q, type: "all" as const, results, recent };
+};
+
+export const actions: Actions = {
+  removeRecent: async (event) => {
+    const formData = await event.request.formData();
+    const id = formData.get("id");
+    if (typeof id !== "string" || !id) {
+      return fail(400, { error: "Recent search ID is required." });
+    }
+    try {
+      await unwrap<null>(
+        await apiClient(event)(`/search/recent/${encodeURIComponent(id)}`, {
+          method: "DELETE",
+        }),
+      );
+      return { success: true };
+    } catch (e) {
+      return failFromError(e, "Could not remove recent search.");
+    }
+  },
+  clearRecent: async (event) => {
+    try {
+      await unwrap<null>(
+        await apiClient(event)("/search/recent", { method: "DELETE" }),
+      );
+      return { success: true };
+    } catch (e) {
+      return failFromError(e, "Could not clear recent searches.");
+    }
+  },
 };

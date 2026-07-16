@@ -11,9 +11,16 @@
     compact?: boolean;
     currentUserId?: number | null;
     onQuote?: (post: Post) => void;
+    onSelect?: () => void;
   }
 
-  let { result, compact = false, currentUserId, onQuote }: Props = $props();
+  let {
+    result,
+    compact = false,
+    currentUserId,
+    onQuote,
+    onSelect,
+  }: Props = $props();
 </script>
 
 {#snippet userRow(entry: Extract<BlendedItem, { type: "users" }>)}
@@ -21,6 +28,7 @@
   <a
     href={resolve(`/@${user.username}`)}
     class="soft-surface flex items-center gap-3 p-4"
+    onclick={onSelect}
   >
     <Avatar name={user.name} size="md" photoKey={user.profilePhotoKey} />
     <span class="min-w-0">
@@ -37,6 +45,7 @@
   <a
     href={resolve(`/hashtags/${hashtag.name}`)}
     class="soft-surface flex items-center justify-between gap-3 p-4"
+    onclick={onSelect}
   >
     <span class="flex min-w-0 items-center gap-3">
       <span
@@ -69,6 +78,7 @@
   <a
     href={resolve(`/posts/${result.item.id}`)}
     class="block truncate rounded-xl px-3 py-2 text-sm text-base-content/75 hover:bg-base-200 dark:hover:bg-slate-800/80"
+    onclick={onSelect}
   >
     {result.item.content}
   </a>
