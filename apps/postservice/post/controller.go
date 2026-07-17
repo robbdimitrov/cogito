@@ -32,16 +32,17 @@ func (c *controller) CreatePost(ctx context.Context, req *pb.CreatePostRequest) 
 		return nil, newError(codes.InvalidArgument)
 	}
 
-	if strings.TrimSpace(req.Content) == "" {
+	content := strings.TrimSpace(req.Content)
+	if content == "" {
 		return nil, newError(codes.InvalidArgument)
 	}
-	if utf8.RuneCountInString(req.Content) > 255 {
+	if utf8.RuneCountInString(content) > 255 {
 		return nil, newError(codes.InvalidArgument)
 	}
 
-	tags := ExtractHashtags(req.Content)
+	tags := ExtractHashtags(content)
 
-	res, err := c.dbClient.createPost(ctx, req.Content, tags, userID, req.MediaKey, req.InReplyToId, req.QuoteOfId)
+	res, err := c.dbClient.createPost(ctx, content, tags, userID, req.MediaKey, req.InReplyToId, req.QuoteOfId)
 	if err != nil {
 		if errors.Is(err, errInvalidReference) {
 			return nil, newError(codes.InvalidArgument)
