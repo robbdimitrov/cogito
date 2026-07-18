@@ -122,11 +122,11 @@
 }
 
 @utility form-input {
-  @apply input min-h-12 w-full rounded-xl bg-base-100/30 text-base transition-all duration-300 focus:border-primary/60 focus:ring-4 focus:ring-primary/10;
+  @apply input min-h-12 w-full rounded-xl bg-base-100/30 text-base transition-colors duration-200 focus:border-primary/70 focus:outline-hidden focus-within:border-primary/70 focus-within:outline-hidden;
 }
 
 @utility form-textarea {
-  @apply textarea min-h-28 w-full rounded-xl bg-base-100/30 text-base leading-6 transition-all duration-300 focus:border-primary/60 focus:ring-4 focus:ring-primary/10;
+  @apply textarea min-h-28 w-full rounded-xl bg-base-100/30 text-base leading-6 transition-colors duration-200 focus:border-primary/70 focus:outline-hidden focus-within:border-primary/70 focus-within:outline-hidden;
 }
 
 html {
