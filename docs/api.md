@@ -95,7 +95,7 @@ failures map to 500 unless a controller handles them explicitly.
 | Method     | Path                | Purpose                                                 |
 | ---------- | ------------------- | ------------------------------------------------------- |
 | GET        | /                   | Liveness — returns "OK"                                 |
-| GET / HEAD | /uploads/{filename} | Serve image — proxied to imageservice                   |
+| GET / HEAD | /uploads/{filename} | Serve image — proxied to imageservice; optional `?size=thumb` for a cached 128x128 cover-cropped JPEG thumbnail |
 | POST       | /users              | Create account (name, username, email, password)        |
 | POST       | /sessions           | Login — sets `session` cookie; returns `{ id: userId }` |
 | DELETE     | /sessions           | Logout — clears `session` cookie                        |
@@ -353,7 +353,12 @@ Standard timeout: 10 seconds. Search endpoints: 5 seconds.
 - `POST /uploads` — forwards multipart body to `imageservice:8081/uploads`;
   injects `x-user-id` (from session) and `internal-token` headers.
 - `GET /uploads/{filename}` and `HEAD /uploads/{filename}` — public image reads
-  forwarded to `imageservice:8081/uploads/{filename}`.
+  forwarded to `imageservice:8081/uploads/{filename}`, including any `?size=`
+  query string.
+- `size` accepts only the literal value `thumb`; imageservice rejects any
+  other value with 400. On first request for a given original, imageservice
+  derives, caches, and serves a 128x128 cover-cropped JPEG thumbnail keyed off
+  the validated filename (`thumb/{filename}`); later requests are cache hits.
 - The gateway strips client-supplied `internal-token`, `x-user-id`, and
   `user-id` before proxying image HTTP requests, then injects its own
   `internal-token`. Authenticated upload proxying also injects gateway-derived

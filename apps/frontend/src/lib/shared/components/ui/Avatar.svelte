@@ -19,6 +19,14 @@
     lg: "size-14 text-xl",
     xl: "size-20 text-2xl",
   };
+  // Pixel equivalents of the Tailwind size-* classes above, for the img
+  // width/height attributes (1 unit = 4px).
+  const pixelSizes: Record<Size, number> = {
+    sm: 32,
+    md: 40,
+    lg: 56,
+    xl: 80,
+  };
   const initial = $derived((name || "?").charAt(0).toUpperCase());
 </script>
 
@@ -32,8 +40,10 @@
   >
     {#if photoKey}
       <img
-        src={imageUrl(photoKey)}
+        src={imageUrl(photoKey, "thumb")}
         alt={name}
+        width={pixelSizes[size]}
+        height={pixelSizes[size]}
         loading="lazy"
         decoding="async"
         class="h-full w-full object-cover"

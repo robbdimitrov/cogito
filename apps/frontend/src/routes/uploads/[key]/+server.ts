@@ -19,14 +19,23 @@ const forwardedHeaders = [
   "cache-control",
 ];
 
-export const GET: RequestHandler = async ({ fetch, params }) => {
+export const GET: RequestHandler = async ({ fetch, params, url }) => {
   if (!keyPattern.test(params.key) || params.key.includes("..")) {
     error(404, "Not found");
   }
 
-  const upstream = await fetch(`${backendBase()}/uploads/${params.key}`, {
-    signal: AbortSignal.timeout(backendTimeoutMs()),
-  });
+  const size = url.searchParams.get("size");
+  if (size !== null && size !== "thumb") {
+    error(400, "Invalid size");
+  }
+  const query = size ? `?size=${size}` : "";
+
+  const upstream = await fetch(
+    `${backendBase()}/uploads/${params.key}${query}`,
+    {
+      signal: AbortSignal.timeout(backendTimeoutMs()),
+    },
+  );
 
   if (!upstream.ok) {
     error(upstream.status === 404 ? 404 : 502, "Image unavailable");

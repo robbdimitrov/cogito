@@ -53,7 +53,10 @@
 | Password change → session invalidation | Gateway                  | Fetches all user sessions; deletes all except current (matched by public handle returned from `GetSession`)                |
 
 Image files are publicly readable at `GET /uploads/{filename}` — no ownership
-check on serve.
+check on serve. The optional `?size=` param only accepts the literal `thumb`;
+imageservice rejects any other value with 400, bounding the derived-thumbnail
+cache and resize cost to one variant per original instead of an
+arbitrary-resize surface.
 
 `GET /posts/{postId}`, `GET /users/{userId}`, `GET /users/{userId}/posts`, and
 `GET /users?username=` are viewer-optional: `authGuard` (apigateway) validates

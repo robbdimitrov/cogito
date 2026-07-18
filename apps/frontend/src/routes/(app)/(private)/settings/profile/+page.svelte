@@ -37,7 +37,7 @@
       return () => URL.revokeObjectURL(url);
     }
     profilePreview = data.currentUser?.profilePhotoKey
-      ? imageUrl(data.currentUser.profilePhotoKey)
+      ? imageUrl(data.currentUser.profilePhotoKey, "thumb")
       : "";
   });
 
@@ -144,6 +144,8 @@
                 <img
                   src={profilePreview}
                   alt="Avatar"
+                  width="64"
+                  height="64"
                   class="h-full w-full object-cover"
                 />
               </div>
@@ -191,6 +193,8 @@
                 <img
                   src={coverPreview}
                   alt="Cover"
+                  width="128"
+                  height="64"
                   class="h-full w-full object-cover"
                 />
               </div>

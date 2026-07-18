@@ -1,6 +1,6 @@
 use axum::{
     Router,
-    extract::{Multipart, Path, Request, State},
+    extract::{Multipart, Path, Query, Request, State, rejection::QueryRejection},
     http::{
         HeaderMap, Method, StatusCode,
         header::{CACHE_CONTROL, CONTENT_TYPE, HeaderValue},
@@ -10,6 +10,7 @@ use axum::{
     routing::{get, post},
 };
 use bytes::Bytes;
+use serde::Deserialize;
 use std::sync::Arc;
 use uuid::Uuid;
 
@@ -17,6 +18,11 @@ use crate::blobstore::BlobStore;
 use crate::db_client::ImageDb;
 
 const IMAGE_CACHE_CONTROL: &str = "private, max-age=86400";
+
+/// Fixed square dimension for the derived avatar/cover thumbnail; cover-fit
+/// cropped so it renders cleanly for both circular and square avatar UI.
+const THUMBNAIL_DIM: u32 = 128;
+const THUMBNAIL_CONTENT_TYPE: &str = "image/jpeg";
 
 /// Overall request-body ceiling, deliberately well above the per-field 1 MB
 /// image limit below: it exists to bound abusive/garbage multipart bodies
@@ -84,24 +90,54 @@ async fn cache_image_responses(request: Request, next: Next) -> Response {
     response
 }
 
+#[derive(Deserialize)]
+struct GetImageParams {
+    size: Option<String>,
+}
+
+fn image_response(data: Bytes, content_type: &str) -> Response {
+    (
+        [(
+            CONTENT_TYPE,
+            HeaderValue::from_str(content_type)
+                .unwrap_or(HeaderValue::from_static("application/octet-stream")),
+        )],
+        data,
+    )
+        .into_response()
+}
+
 async fn get_handler<D: ImageDb, B: BlobStore>(
     Path(filename): Path<String>,
+    params: Result<Query<GetImageParams>, QueryRejection>,
     State(state): State<Arc<AppState<D, B>>>,
-) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
+) -> Result<Response, (StatusCode, Json<serde_json::Value>)> {
     if filename.contains("..") || filename.contains('/') || filename.contains('\\') {
         return Err(json_error(StatusCode::BAD_REQUEST, "Invalid filename"));
     }
+    // Query extraction failures (malformed query string) must stay JSON-shaped
+    // like every other error on this endpoint, not axum's plain-text default.
+    let Query(params) = params.map_err(|_| json_error(StatusCode::BAD_REQUEST, "Invalid query"))?;
 
-    match state.blobstore.get(&filename).await {
-        Ok(Some((data, content_type))) => Ok((
-            [(
-                CONTENT_TYPE,
-                HeaderValue::from_str(&content_type)
-                    .unwrap_or(HeaderValue::from_static("application/octet-stream")),
-            )],
-            data,
-        )
-            .into_response()),
+    // Allow-list of exactly one derived variant: bounds cache-key growth and
+    // resize CPU cost to one thumbnail per original, not an arbitrary-resize
+    // DoS surface.
+    match params.size.as_deref() {
+        None => get_original(&state, &filename).await,
+        Some("thumb") => get_thumbnail(&state, &filename).await,
+        Some(_) => Err(json_error(
+            StatusCode::BAD_REQUEST,
+            "Invalid size parameter",
+        )),
+    }
+}
+
+async fn get_original<D: ImageDb, B: BlobStore>(
+    state: &AppState<D, B>,
+    filename: &str,
+) -> Result<Response, (StatusCode, Json<serde_json::Value>)> {
+    match state.blobstore.get(filename).await {
+        Ok(Some((data, content_type))) => Ok(image_response(data, &content_type)),
         Ok(None) => Err(json_error(StatusCode::NOT_FOUND, "Not found")),
         Err(e) => {
             tracing::warn!(error = %e, "blobstore get failed");
@@ -111,6 +147,114 @@ async fn get_handler<D: ImageDb, B: BlobStore>(
             ))
         }
     }
+}
+
+async fn get_thumbnail<D: ImageDb, B: BlobStore>(
+    state: &AppState<D, B>,
+    filename: &str,
+) -> Result<Response, (StatusCode, Json<serde_json::Value>)> {
+    // Always derived from the already-validated filename, never from raw
+    // client input, so the thumbnail key can't escape the original's namespace.
+    let thumb_key = format!("thumb/{filename}");
+
+    match state.blobstore.get(&thumb_key).await {
+        Ok(Some((data, content_type))) => return Ok(image_response(data, &content_type)),
+        Ok(None) => {}
+        Err(e) => {
+            tracing::warn!(error = %e, "blobstore get failed for thumbnail");
+            return Err(json_error(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Internal server error.",
+            ));
+        }
+    }
+
+    let original = match state.blobstore.get(filename).await {
+        Ok(Some((data, _content_type))) => data,
+        Ok(None) => return Err(json_error(StatusCode::NOT_FOUND, "Not found")),
+        Err(e) => {
+            tracing::warn!(error = %e, "blobstore get failed");
+            return Err(json_error(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Internal server error.",
+            ));
+        }
+    };
+
+    let thumbnail = generate_thumbnail(&original).map_err(|e| {
+        tracing::warn!(error = %e, "thumbnail generation failed");
+        json_error(StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.")
+    })?;
+    let thumbnail = Bytes::from(thumbnail);
+
+    // A concurrent first request generating the same thumbnail races
+    // harmlessly here: both writes are idempotent overwrites of the same key.
+    if let Err(e) = state
+        .blobstore
+        .put(&thumb_key, THUMBNAIL_CONTENT_TYPE, thumbnail.clone())
+        .await
+    {
+        tracing::warn!(error = %e, "thumbnail cache write failed");
+        return Err(json_error(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Internal server error.",
+        ));
+    }
+
+    Ok(image_response(thumbnail, THUMBNAIL_CONTENT_TYPE))
+}
+
+// Uploads are already capped at MAX_IMAGE_FIELD_BYTES compressed bytes, but a
+// pathological low-entropy image (e.g. a large solid-color PNG) can still
+// expand hundreds of times on decode. `image`'s own default limits only cap
+// allocation at 512MiB, well above what this service's container memory
+// limit allows, so decoding one such image could get the pod OOM-killed
+// before that check ever rejects it. These tighter limits reject oversized
+// images from their header before a pixel buffer is allocated.
+const MAX_DECODE_DIMENSION: u32 = 4096;
+const MAX_DECODE_ALLOC_BYTES: u64 = 128 * 1024 * 1024;
+
+/// Decodes `data`, cover-crops it to a fixed `THUMBNAIL_DIM` square, and
+/// re-encodes as JPEG (flattening any transparency onto white, matching the
+/// client-side upload compression in `image.ts`).
+fn generate_thumbnail(data: &[u8]) -> Result<Vec<u8>, String> {
+    let mut reader = image::ImageReader::new(std::io::Cursor::new(data))
+        .with_guessed_format()
+        .map_err(|e| format!("format detection failed: {e}"))?;
+    let mut limits = image::Limits::default();
+    limits.max_image_width = Some(MAX_DECODE_DIMENSION);
+    limits.max_image_height = Some(MAX_DECODE_DIMENSION);
+    limits.max_alloc = Some(MAX_DECODE_ALLOC_BYTES);
+    reader.limits(limits);
+    let img = reader.decode().map_err(|e| format!("decode failed: {e}"))?;
+    let resized = img.resize_to_fill(
+        THUMBNAIL_DIM,
+        THUMBNAIL_DIM,
+        image::imageops::FilterType::Lanczos3,
+    );
+
+    let rgba = resized.to_rgba8();
+    let mut canvas = image::RgbImage::new(THUMBNAIL_DIM, THUMBNAIL_DIM);
+    for (x, y, pixel) in rgba.enumerate_pixels() {
+        let [r, g, b, a] = pixel.0;
+        let alpha = a as f32 / 255.0;
+        let over_white =
+            |channel: u8| -> u8 { (channel as f32 * alpha + 255.0 * (1.0 - alpha)).round() as u8 };
+        canvas.put_pixel(
+            x,
+            y,
+            image::Rgb([over_white(r), over_white(g), over_white(b)]),
+        );
+    }
+
+    let mut buf = Vec::new();
+    image::DynamicImage::ImageRgb8(canvas)
+        .write_to(
+            &mut std::io::Cursor::new(&mut buf),
+            image::ImageFormat::Jpeg,
+        )
+        .map_err(|e| format!("encode failed: {e}"))?;
+    Ok(buf)
 }
 
 async fn upload_handler<D: ImageDb, B: BlobStore>(
@@ -234,9 +378,10 @@ mod tests {
     use async_trait::async_trait;
     use axum::{
         body::Body,
-        http::{Method, Request, StatusCode, header::CACHE_CONTROL},
+        http::{Method, Request, StatusCode, header::CACHE_CONTROL, header::CONTENT_TYPE},
     };
     use bytes::Bytes;
+    use image::GenericImageView;
     use std::collections::HashMap;
     use std::sync::{Arc, Mutex};
     use tower::ServiceExt;
@@ -625,5 +770,184 @@ mod tests {
             .unwrap();
 
         assert_eq!(response.status(), StatusCode::INTERNAL_SERVER_ERROR);
+    }
+
+    fn real_jpeg() -> Vec<u8> {
+        let img = image::RgbImage::from_fn(300, 200, |x, y| {
+            image::Rgb([(x % 256) as u8, (y % 256) as u8, 128])
+        });
+        let mut buf = Vec::new();
+        image::DynamicImage::ImageRgb8(img)
+            .write_to(
+                &mut std::io::Cursor::new(&mut buf),
+                image::ImageFormat::Jpeg,
+            )
+            .unwrap();
+        buf
+    }
+
+    #[tokio::test]
+    async fn thumbnail_generation_rejects_oversized_dimensions() {
+        // Wider than MAX_DECODE_DIMENSION but only 10px tall, so this fixture
+        // stays cheap to encode even though its width exceeds the limit.
+        let img = image::RgbImage::from_fn(super::MAX_DECODE_DIMENSION + 100, 10, |x, y| {
+            image::Rgb([(x % 256) as u8, (y % 256) as u8, 0])
+        });
+        let mut buf = Vec::new();
+        image::DynamicImage::ImageRgb8(img)
+            .write_to(
+                &mut std::io::Cursor::new(&mut buf),
+                image::ImageFormat::Jpeg,
+            )
+            .unwrap();
+
+        let store = MockBlobStore::new();
+        store.seed("huge.jpg", "image/jpeg", buf);
+
+        let response = create_router(MockDb, Arc::new(store))
+            .oneshot(
+                Request::builder()
+                    .uri("/uploads/huge.jpg?size=thumb")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::INTERNAL_SERVER_ERROR);
+    }
+
+    #[tokio::test]
+    async fn thumbnail_generated_and_cached_on_first_request() {
+        let store = MockBlobStore::new();
+        store.seed("avatar.jpg", "image/jpeg", real_jpeg());
+        let store_arc = Arc::new(store.clone());
+
+        let response = create_router(MockDb, store_arc.clone())
+            .oneshot(
+                Request::builder()
+                    .uri("/uploads/avatar.jpg?size=thumb")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::OK);
+        assert_eq!(response.headers().get(CONTENT_TYPE).unwrap(), "image/jpeg");
+        let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+            .await
+            .unwrap();
+        let decoded = image::load_from_memory(&body).unwrap();
+        assert_eq!(decoded.dimensions(), (128, 128));
+
+        let cached = store.get("thumb/avatar.jpg").await.unwrap();
+        assert!(cached.is_some());
+    }
+
+    #[tokio::test]
+    async fn thumbnail_cache_hit_serves_without_regenerating() {
+        // Seed only the thumb key; the original is intentionally absent so a
+        // fall-through regeneration attempt would 404 instead of matching.
+        let store = MockBlobStore::new();
+        store.seed("thumb/avatar.jpg", "image/jpeg", vec![1, 2, 3, 4]);
+
+        let response = create_router(MockDb, Arc::new(store))
+            .oneshot(
+                Request::builder()
+                    .uri("/uploads/avatar.jpg?size=thumb")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::OK);
+        let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+            .await
+            .unwrap();
+        assert_eq!(body.as_ref(), &[1, 2, 3, 4]);
+    }
+
+    #[tokio::test]
+    async fn thumbnail_responses_are_cached() {
+        let store = MockBlobStore::new();
+        store.seed("avatar.jpg", "image/jpeg", real_jpeg());
+
+        let response = create_router(MockDb, Arc::new(store))
+            .oneshot(
+                Request::builder()
+                    .uri("/uploads/avatar.jpg?size=thumb")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::OK);
+        assert_eq!(
+            response.headers().get(CACHE_CONTROL).unwrap(),
+            IMAGE_CACHE_CONTROL
+        );
+    }
+
+    #[tokio::test]
+    async fn invalid_size_value_is_rejected() {
+        let store = MockBlobStore::new();
+        store.seed("avatar.jpg", "image/jpeg", real_jpeg());
+
+        let response = create_router(MockDb, Arc::new(store))
+            .oneshot(
+                Request::builder()
+                    .uri("/uploads/avatar.jpg?size=huge")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+    }
+
+    #[tokio::test]
+    async fn get_rejects_path_traversal_with_thumb_size() {
+        let store = MockBlobStore::new();
+        let response = create_router(MockDb, Arc::new(store))
+            .oneshot(
+                Request::builder()
+                    .uri("/uploads/..%2Fetc%2Fpasswd?size=thumb")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        assert!(
+            response.status() == StatusCode::BAD_REQUEST
+                || response.status() == StatusCode::NOT_FOUND
+        );
+    }
+
+    #[tokio::test]
+    async fn malformed_query_string_returns_json_400() {
+        let store = MockBlobStore::new();
+        let response = create_router(MockDb, Arc::new(store))
+            .oneshot(
+                Request::builder()
+                    .uri("/uploads/avatar.jpg?size=%FF")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+
+        assert_eq!(response.status(), StatusCode::BAD_REQUEST);
+        let body = axum::body::to_bytes(response.into_body(), usize::MAX)
+            .await
+            .unwrap();
+        let json: serde_json::Value = serde_json::from_slice(&body).unwrap_or_else(|e| {
+            panic!("expected valid JSON error body, got parse error {e}: {body:?}")
+        });
+        assert!(json["message"].is_string());
     }
 }

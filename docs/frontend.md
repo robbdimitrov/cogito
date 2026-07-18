@@ -158,11 +158,18 @@ unchanged after DTO mapping.
 
 - Validates `key` against `^[A-Za-z0-9._-]{1,255}$`; rejects keys containing
   `..` — 404 on failure.
+- Accepts an optional `?size=thumb` query param and forwards it as-is; any
+  other `size` value is rejected with 400.
 - Streams response body from backend without buffering in the Node process.
 - Does not attach a session cookie; backend image reads are public through the
   gateway.
 - Forwards: `content-type`, `content-length`, `etag`, `last-modified`,
   `cache-control`.
+
+`imageUrl(key, size?)` in `src/lib/shared/imageUrl.ts` builds this URL;
+callers pass `"thumb"` for avatar renders (the derived thumbnail is a
+128x128 cover-crop, which distorts badly at non-square aspect ratios) and
+omit it for cover photos and full-resolution post media.
 
 ## Pagination
 

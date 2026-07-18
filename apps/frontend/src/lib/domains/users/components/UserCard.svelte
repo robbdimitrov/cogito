@@ -83,6 +83,8 @@
         <img
           src={imageUrl(user.coverPhotoKey)}
           alt="Cover"
+          width="288"
+          height="64"
           class="absolute inset-0 h-full w-full object-cover"
         />
       {/if}
