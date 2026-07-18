@@ -36,8 +36,8 @@
       profilePreview = url;
       return () => URL.revokeObjectURL(url);
     }
-    profilePreview = data.currentUser?.profilePhotoKey
-      ? imageUrl(data.currentUser.profilePhotoKey, "thumb")
+    profilePreview = user.profilePhotoKey
+      ? imageUrl(user.profilePhotoKey, "thumb")
       : "";
   });
 
@@ -48,9 +48,7 @@
       coverPreview = url;
       return () => URL.revokeObjectURL(url);
     }
-    coverPreview = data.currentUser?.coverPhotoKey
-      ? imageUrl(data.currentUser.coverPhotoKey)
-      : "";
+    coverPreview = user.coverPhotoKey ? imageUrl(user.coverPhotoKey) : "";
   });
 
   let avatarInput: HTMLInputElement;
@@ -105,6 +103,7 @@
       class="space-y-4 sm:space-y-5"
       use:enhance={({ formData }) => {
         isSubmitting = true;
+        const previousOverride = userOverride;
 
         if (avatarFile) formData.set("avatar", avatarFile);
         if (coverFile) formData.set("cover", coverFile);
@@ -114,6 +113,7 @@
 
         // Optimistic UI for text fields
         userOverride = {
+          ...userOverride,
           name: formData.get("name") as string,
           username: formData.get("username") as string,
           email: formData.get("email") as string,
@@ -123,14 +123,23 @@
         return async ({ result, update }) => {
           isSubmitting = false;
           if (result.type === "failure") {
-            userOverride = {};
-          } else {
-            toast.success("Profile updated successfully");
-            avatarFile = null;
-            coverFile = null;
-            userOverride = {};
-            await update({ invalidateAll: false });
+            userOverride = previousOverride;
+            return;
           }
+
+          toast.success("Profile updated successfully");
+          avatarFile = null;
+          coverFile = null;
+          if (result.type === "success") {
+            userOverride = {
+              ...userOverride,
+              profilePhotoKey: result.data?.profilePhotoKey as
+                | string
+                | undefined,
+              coverPhotoKey: result.data?.coverPhotoKey as string | undefined,
+            };
+          }
+          await update({ invalidateAll: false });
         };
       }}
     >

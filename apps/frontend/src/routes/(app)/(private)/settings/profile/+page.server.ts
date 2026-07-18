@@ -49,7 +49,7 @@ export const actions = {
         coverPhotoKey: coverPhotoKey || undefined,
       });
 
-      return { success: true };
+      return { success: true, profilePhotoKey, coverPhotoKey };
     } catch (e) {
       return failFromError(e, "Failed to update profile");
     }
