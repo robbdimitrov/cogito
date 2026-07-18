@@ -43,25 +43,24 @@ async function listRecentSearches(
 export const load: PageServerLoad = async (event) => {
   const q = event.url.searchParams.get("q") ?? "";
   const api = apiClient(event);
-  const recent = await listRecentSearches(api);
+  const recentPromise = listRecentSearches(api);
 
   if (!q) {
     return {
       q,
       type: "all" as const,
       results: EMPTY_SECTION as SearchSection<BlendedItem>,
-      recent,
+      recent: await recentPromise,
     };
   }
 
   // An explicit @/# prefix means the user picked a specific entity type, so
   // show only the matching section instead of a blended list.
   if (q.startsWith("@")) {
-    const section = await searchSection<User>(
-      api,
-      q.replace(/^@/, ""),
-      "users",
-    );
+    const [section, recent] = await Promise.all([
+      searchSection<User>(api, q.replace(/^@/, ""), "users"),
+      recentPromise,
+    ]);
     return {
       q,
       type: "users" as const,
@@ -73,11 +72,10 @@ export const load: PageServerLoad = async (event) => {
     };
   }
   if (q.startsWith("#")) {
-    const section = await searchSection<Hashtag>(
-      api,
-      q.replace(/^#/, ""),
-      "hashtags",
-    );
+    const [section, recent] = await Promise.all([
+      searchSection<Hashtag>(api, q.replace(/^#/, ""), "hashtags"),
+      recentPromise,
+    ]);
     return {
       q,
       type: "hashtags" as const,
@@ -89,7 +87,10 @@ export const load: PageServerLoad = async (event) => {
     };
   }
 
-  const results = await searchSection<BlendedItem>(api, q, "all");
+  const [results, recent] = await Promise.all([
+    searchSection<BlendedItem>(api, q, "all"),
+    recentPromise,
+  ]);
   return { q, type: "all" as const, results, recent };
 };
 
