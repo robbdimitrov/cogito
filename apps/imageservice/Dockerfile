@@ -1,29 +1,33 @@
-FROM rust:1.95-alpine AS builder
-
+# syntax=docker/dockerfile:1
+FROM rust:1.95-bookworm AS chef
 WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends protobuf-compiler \
+    && rm -rf /var/lib/apt/lists/*
+RUN cargo install cargo-chef --locked --version 0.1.77
 
-RUN apk add --no-cache protobuf-dev
-
+FROM chef AS planner
 COPY pkg/pb ./pkg/pb
-
-# Cache dependency compilation in its own layer: only Cargo.toml/Cargo.lock
-# and build.rs (which needs pkg/pb to codegen cogito.rs) go in first, so this
-# expensive layer is invalidated only when dependencies change, not on every
-# source edit.
-COPY apps/imageservice/Cargo.toml apps/imageservice/Cargo.lock apps/imageservice/build.rs ./apps/imageservice/
+COPY apps/imageservice ./apps/imageservice
 WORKDIR /app/apps/imageservice
-RUN mkdir src && echo "fn main() {}" > src/main.rs
-RUN cargo build --release
+RUN cargo chef prepare --recipe-path recipe.json
 
-# Overwrite the stub with real sources and rebuild. BuildKit can preserve
-# source mtimes from the build context, which may predate the fingerprint
-# recorded during the stub build above, so cargo would otherwise think
-# nothing changed and reuse the stub binary. Force fresh mtimes on app
-# sources only (not build.rs) to guarantee a real rebuild without forcing
-# build.rs to rerun and cascade into recompiling every dependency.
+FROM chef AS builder
+COPY pkg/pb ./pkg/pb
+WORKDIR /app/apps/imageservice
+COPY --from=planner /app/apps/imageservice/recipe.json recipe.json
+# Builds only the dependency graph, cacheable independently of app source.
+RUN --mount=type=cache,id=cargo-registry,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/app/apps/imageservice/target \
+    cargo chef cook --release --recipe-path recipe.json
+
 COPY apps/imageservice ./
-RUN find src -name '*.rs' -exec touch {} + && cargo build --release
+# Cache mounts aren't visible to later stages, so copy the binary out first.
+RUN --mount=type=cache,id=cargo-registry,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/app/apps/imageservice/target \
+    cargo build --release && cp target/release/imageservice /app/imageservice
 
-FROM scratch
-COPY --from=builder /app/apps/imageservice/target/release/imageservice /service
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /app/imageservice /service
 CMD ["/service"]

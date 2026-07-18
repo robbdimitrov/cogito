@@ -1,22 +1,33 @@
-FROM rust:1.95-alpine AS builder
-
+# syntax=docker/dockerfile:1
+FROM rust:1.95-bookworm AS chef
 WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends protobuf-compiler \
+    && rm -rf /var/lib/apt/lists/*
+RUN cargo install cargo-chef --locked --version 0.1.77
 
-RUN apk add --no-cache protobuf-dev
-
+FROM chef AS planner
 COPY pkg/pb ./pkg/pb
-
-# Cache dependencies separately; build.rs needs pkg/pb to generate cogito.rs.
-COPY apps/userservice/Cargo.toml apps/userservice/Cargo.lock apps/userservice/build.rs ./apps/userservice/
+COPY apps/userservice ./apps/userservice
 WORKDIR /app/apps/userservice
-RUN mkdir src && echo "fn main() {}" > src/main.rs
-RUN cargo build --release
+RUN cargo chef prepare --recipe-path recipe.json
 
-# Touch real sources after replacing the stub so Cargo rebuilds app code
-# without rerunning build.rs and invalidating dependency codegen.
+FROM chef AS builder
+COPY pkg/pb ./pkg/pb
+WORKDIR /app/apps/userservice
+COPY --from=planner /app/apps/userservice/recipe.json recipe.json
+# Builds only the dependency graph, cacheable independently of app source.
+RUN --mount=type=cache,id=cargo-registry,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/app/apps/userservice/target \
+    cargo chef cook --release --recipe-path recipe.json
+
 COPY apps/userservice ./
-RUN find src -name '*.rs' -exec touch {} + && cargo build --release
+# Cache mounts aren't visible to later stages, so copy the binary out first.
+RUN --mount=type=cache,id=cargo-registry,target=/usr/local/cargo/registry \
+    --mount=type=cache,target=/app/apps/userservice/target \
+    cargo build --release && cp target/release/userservice /app/userservice
 
-FROM scratch
-COPY --from=builder /app/apps/userservice/target/release/userservice /service
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=builder /app/userservice /service
 CMD ["/service"]
