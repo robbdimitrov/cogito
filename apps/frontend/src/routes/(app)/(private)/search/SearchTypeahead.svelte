@@ -205,7 +205,7 @@
 
 <div class="relative flex-1" onfocusout={handleFocusOut}>
   <label class="form-input flex items-center gap-2 rounded-2xl">
-    <Search class="h-4 w-4 opacity-60" />
+    <Search class="size-4 opacity-60" />
     <input
       bind:this={inputRef}
       type="text"
@@ -222,11 +222,11 @@
     {#if query}
       <button
         type="button"
-        class="grid h-5 w-5 shrink-0 place-items-center rounded-full opacity-60 hover:opacity-100"
+        class="grid size-5 shrink-0 place-items-center rounded-full opacity-60 outline-none hover:bg-base-200 hover:opacity-100 focus-visible:bg-base-200 focus-visible:opacity-100"
         aria-label="Clear search"
         onclick={clearQuery}
       >
-        <X class="h-4 w-4" />
+        <X class="size-4" />
       </button>
     {/if}
   </label>
@@ -251,48 +251,47 @@
       </div>
       <ul id="search-typeahead-listbox" class="max-h-96 overflow-y-auto py-1">
         {#each recentItems as item (item.id)}
-          <li class="flex items-center gap-1 px-1">
+          <li class="px-1">
             {#if item.type === "queries"}
-              <a
-                href={resolve(
-                  `/search?${new URLSearchParams({ q: item.item })}`,
-                )}
-                class="min-w-0 flex-1"
-                onmousedown={() => recordRecentItem(item)}
-              >
-                <span class="soft-surface flex items-center gap-3 p-4">
+              <div class="soft-surface flex items-center gap-3 p-4">
+                <a
+                  href={resolve(
+                    `/search?${new URLSearchParams({ q: item.item })}`,
+                  )}
+                  class="flex min-w-0 flex-1 items-center gap-3"
+                  onmousedown={() => recordRecentItem(item)}
+                >
                   <span
-                    class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-base-200"
+                    class="grid size-10 shrink-0 place-items-center rounded-xl bg-base-200"
                   >
-                    <History class="h-5 w-5 opacity-60" />
+                    <History class="size-5 opacity-60" />
                   </span>
                   <span class="truncate font-semibold text-base-content">
                     {item.item}
                   </span>
-                </span>
-              </a>
-            {:else}
-              <div class="min-w-0 flex-1">
-                <SearchResultRow
-                  result={item}
-                  compact
-                  {currentUserId}
-                  onSelect={() => recordRecentItem(item)}
-                />
+                </a>
+                <button
+                  type="button"
+                  class="grid size-8 shrink-0 place-items-center rounded-full text-base-content opacity-60 outline-none hover:bg-base-300 hover:opacity-100 focus-visible:bg-base-300 focus-visible:opacity-100"
+                  aria-label="Remove from recent searches"
+                  onclick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    removeRecent(item.id);
+                  }}
+                >
+                  <X class="size-4" />
+                </button>
               </div>
+            {:else}
+              <SearchResultRow
+                result={item}
+                compact
+                {currentUserId}
+                onSelect={() => recordRecentItem(item)}
+                onRemove={() => removeRecent(item.id)}
+              />
             {/if}
-            <button
-              type="button"
-              class="grid h-8 w-8 shrink-0 place-items-center rounded-full text-base-content opacity-60 hover:bg-base-200 hover:opacity-100"
-              aria-label="Remove from recent searches"
-              onclick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                removeRecent(item.id);
-              }}
-            >
-              <X class="h-4 w-4" />
-            </button>
           </li>
         {/each}
       </ul>
