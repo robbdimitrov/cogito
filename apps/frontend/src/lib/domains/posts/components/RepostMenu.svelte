@@ -10,39 +10,89 @@
   }
 
   let { reposted, reposts, isReposting, onRepost, onQuote }: Props = $props();
-  let detailsRef: HTMLDetailsElement | null = $state(null);
+
+  let triggerRef: HTMLButtonElement | null = $state(null);
+  let menuRef: HTMLUListElement | null = $state(null);
+  let open = $state(false);
+  let menuStyle = $state("");
+
+  function toggleMenu() {
+    if (isReposting) return;
+    if (!open && triggerRef) {
+      const rect = triggerRef.getBoundingClientRect();
+      menuStyle = `left:${rect.left}px; top:${rect.bottom + 8}px;`;
+    }
+    open = !open;
+  }
+
+  function closeMenu() {
+    open = false;
+  }
 
   function handleRepost() {
-    if (detailsRef) detailsRef.open = false;
+    closeMenu();
     onRepost();
   }
 
   function handleQuote() {
-    if (detailsRef) detailsRef.open = false;
+    closeMenu();
     onQuote();
   }
+
+  function portal(node: HTMLElement) {
+    document.body.appendChild(node);
+    return {
+      destroy() {
+        node.remove();
+      },
+    };
+  }
+
+  $effect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      const target = e.target as Node;
+      if (menuRef?.contains(target) || triggerRef?.contains(target)) return;
+      closeMenu();
+    }
+    function handleKeydown(e: KeyboardEvent) {
+      if (e.key === "Escape") closeMenu();
+    }
+    document.addEventListener("click", handleClick);
+    document.addEventListener("keydown", handleKeydown);
+    return () => {
+      document.removeEventListener("click", handleClick);
+      document.removeEventListener("keydown", handleKeydown);
+    };
+  });
 </script>
 
-<details bind:this={detailsRef} class="dropdown">
-  <summary
-    class="action-pill list-none {reposted
-      ? 'text-success bg-success/10'
-      : 'opacity-60 hover:text-success hover:bg-success/5 hover:opacity-100'}"
-    aria-label={reposted ? "Remove repost" : "Repost options"}
-    aria-disabled={isReposting}
-    onclick={(e) => {
-      if (isReposting) e.preventDefault();
-    }}
+<button
+  bind:this={triggerRef}
+  type="button"
+  onclick={toggleMenu}
+  class="action-pill {reposted
+    ? 'text-success bg-success/10'
+    : 'opacity-60 hover:text-success hover:bg-success/5 hover:opacity-100'}"
+  aria-label={reposted ? "Remove repost" : "Repost options"}
+  aria-expanded={open}
+  disabled={isReposting}
+>
+  <Repeat
+    class="h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] {reposted
+      ? 'rotate-180 scale-110'
+      : 'rotate-0 scale-100'}"
+  />
+  <span class="text-xs sm:text-sm font-semibold tracking-wide">{reposts}</span>
+</button>
+
+{#if open}
+  <ul
+    bind:this={menuRef}
+    use:portal
+    style={menuStyle}
+    class="dropdown-surface menu fixed z-50 w-40 p-1"
   >
-    <Repeat
-      class="h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] {reposted
-        ? 'rotate-180 scale-110'
-        : 'rotate-0 scale-100'}"
-    />
-    <span class="text-xs sm:text-sm font-semibold tracking-wide">{reposts}</span
-    >
-  </summary>
-  <ul class="dropdown-content menu dropdown-surface z-10 w-40 p-1">
     <li>
       <button type="button" onclick={handleRepost} disabled={isReposting}>
         <Repeat class="h-4 w-4" />
@@ -72,4 +122,4 @@
       </button>
     </li>
   </ul>
-</details>
+{/if}

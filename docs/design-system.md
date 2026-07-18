@@ -162,8 +162,13 @@ render as navigation links to `/search?q=#{tag}`.
 
 ### `RepostMenu`
 
-Dropdown (DaisyUI dropdown) with two actions: "Repost" (toggle) and "Quote"
-(opens `QuoteComposeModal`).
+Dropdown with two actions: "Repost" (toggle) and "Quote" (opens
+`QuoteComposeModal`) — not a DaisyUI `.dropdown`/`<details>`. The menu is
+portaled to `document.body` on open and positioned from the trigger's
+bounding rect, so it's never clipped by an ancestor's `overflow-hidden` (e.g.
+`PostItem`'s card) or trapped by a filtered ancestor's containing block (e.g.
+`backdrop-blur`). Closes on outside click or `Escape` via a document-level
+listener attached only while open.
 
 ### `QuoteComposeModal`
 
