@@ -20,11 +20,6 @@
   <div class="w-full max-w-md">
     <div class="glass-card overflow-hidden">
       <div class="card-body">
-        <div class="mb-4 text-center">
-          <span class="font-serif text-2xl font-semibold text-primary"
-            >Cogito</span
-          >
-        </div>
         <span
           class="text-xs font-semibold uppercase tracking-wider text-base-content/50"
           >{eyebrow}</span
