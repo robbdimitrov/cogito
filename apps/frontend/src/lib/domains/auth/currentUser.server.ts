@@ -11,7 +11,12 @@ export type CurrentUserResult =
 
 export async function resolveCurrentUser(
   api: ApiClient,
+  hasSession: boolean,
 ): Promise<CurrentUserResult> {
+  if (!hasSession) {
+    return { status: "unauthenticated", user: null };
+  }
+
   try {
     const sessions = await getSessions(api);
     const userID =

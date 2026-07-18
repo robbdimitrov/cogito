@@ -4,7 +4,10 @@ import { redirect } from "@sveltejs/kit";
 import type { LayoutServerLoad } from "./$types";
 
 export const load: LayoutServerLoad = async (event) => {
-  const result = await resolveCurrentUser(apiClient(event));
+  const result = await resolveCurrentUser(
+    apiClient(event),
+    Boolean(event.cookies.get("session")),
+  );
   if (result.status === "authenticated") {
     redirect(303, "/");
   }

@@ -84,14 +84,15 @@ anonymous-readable `/posts/{id}` and `/{username}` routes, and skips the
 unread-count fetch entirely when there's no session. The `(private)` group
 is where the hard require-auth boundary now lives, one level down.
 
-`resolveCurrentUser(apiClient(event))`:
+`resolveCurrentUser(apiClient(event), hasSession)`:
 
-1. Calls `GET /sessions` → returns `currentSessionId` and `userId`.
-2. Calls `GET /users/{userId}` → returns full user object.
-3. On any failure: returns `{ status: "unauthenticated" }` or
-   `{ status: "unavailable" }` — no session cookie is the common
-   `"unauthenticated"` case and no longer forces a redirect by itself; only
-   the `(private)` layout guard redirects.
+1. Without a session cookie, returns `{ status: "unauthenticated" }`
+   immediately with no backend call.
+2. Otherwise calls `GET /sessions` → returns `currentSessionId` and `userId`.
+3. Calls `GET /users/{userId}` → returns full user object.
+4. On any failure: returns `{ status: "unauthenticated" }` or
+   `{ status: "unavailable" }` — this no longer forces a redirect by itself;
+   only the `(private)` layout guard redirects.
 
 ## Data Fetching Strategy
 

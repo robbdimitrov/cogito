@@ -7,7 +7,10 @@ import { failFromError } from "$lib/server/api/http";
 export const actions = {
   default: async (event) => {
     const { request } = event;
-    const userResult = await resolveCurrentUser(apiClient(event));
+    const userResult = await resolveCurrentUser(
+      apiClient(event),
+      Boolean(event.cookies.get("session")),
+    );
     if (userResult.status !== "authenticated") {
       return fail(401, { error: "Unauthorized" });
     }
