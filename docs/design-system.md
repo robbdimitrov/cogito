@@ -128,10 +128,12 @@ like form handles mutation and rollback, while a large heart overlay uses
 
 ### `UserCard`
 
-Compact identity strip at the top of the home feed: avatar, display name,
-username, a "View" link to the profile, and an inline follower/following/post
-count row below a divider. No cover-image treatment — deliberately not a
-second copy of the full `UserHeader` profile card.
+Compact identity strip at the top of the home feed: a single clickable row
+(the whole `.glass-card-interactive` is an `<a>` to the profile) with avatar,
+display name, username, and a compact post/follower count on the trailing
+edge — no separate "View" button or divider, since the row itself is already
+the link. No cover-image treatment — deliberately not a second copy of the
+full `UserHeader` profile card.
 
 ### `UserHeader`
 

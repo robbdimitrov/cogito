@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { HTMLAttributes } from "svelte/elements";
+  import type { HTMLAnchorAttributes, HTMLAttributes } from "svelte/elements";
   import type { Snippet } from "svelte";
 
   let {
@@ -8,11 +8,12 @@
     as = "div",
     class: className = "",
     ...attributes
-  }: HTMLAttributes<HTMLElement> & {
-    children: Snippet;
-    interactive?: boolean;
-    as?: string;
-  } = $props();
+  }: HTMLAttributes<HTMLElement> &
+    Partial<HTMLAnchorAttributes> & {
+      children: Snippet;
+      interactive?: boolean;
+      as?: string;
+    } = $props();
 </script>
 
 <svelte:element

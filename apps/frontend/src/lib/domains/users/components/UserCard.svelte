@@ -7,39 +7,24 @@
   let { user } = $props<{ user: User }>();
 </script>
 
-<GlassCard class="overflow-hidden">
+<GlassCard
+  as="a"
+  href={resolve(`/@${user.username}`)}
+  interactive
+  class="block overflow-hidden"
+>
   <div class="flex items-center gap-3 p-3">
-    <a href={resolve(`/@${user.username}`)} class="shrink-0">
-      <Avatar name={user.name} size="md" photoKey={user.profilePhotoKey} />
-    </a>
-    <a href={resolve(`/@${user.username}`)} class="min-w-0 flex-1">
-      <p class="muted-text text-xs font-semibold uppercase tracking-wide">
-        Your profile
-      </p>
-      <p class="truncate font-bold leading-tight">{user.name}</p>
-      <p class="muted-text truncate text-sm">
-        @{user.username}
-      </p>
-    </a>
-    <a
-      href={resolve(`/@${user.username}`)}
-      class="btn btn-primary btn-xs rounded-full px-3"
-    >
-      View
-    </a>
-  </div>
-  <div class="subtle-border flex gap-4 border-t px-3 py-2">
-    <div>
-      <p class="text-sm font-bold leading-none">{user.posts ?? 0}</p>
-      <p class="muted-text mt-1 text-xs">Cogito</p>
-    </div>
-    <div>
-      <p class="text-sm font-bold leading-none">{user.following ?? 0}</p>
-      <p class="muted-text mt-1 text-xs">Following</p>
-    </div>
-    <div>
-      <p class="text-sm font-bold leading-none">{user.followers ?? 0}</p>
-      <p class="muted-text mt-1 text-xs">Followers</p>
-    </div>
+    <Avatar name={user.name} size="md" photoKey={user.profilePhotoKey} />
+    <span class="min-w-0 flex-1">
+      <span class="block truncate font-bold leading-tight">{user.name}</span>
+      <span class="muted-text block truncate text-sm">@{user.username}</span>
+    </span>
+    <span class="muted-text hidden shrink-0 text-xs sm:block">
+      <span class="font-bold text-base-content">{user.posts ?? 0}</span> Cogito
+      <span class="mx-1">·</span>
+      <span class="font-bold text-base-content">{user.following ?? 0}</span> Following
+      <span class="mx-1">·</span>
+      <span class="font-bold text-base-content">{user.followers ?? 0}</span> Followers
+    </span>
   </div>
 </GlassCard>
