@@ -62,10 +62,10 @@
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
 @utility glass-surface {
-  @apply border border-white/60 bg-base-100/80 shadow-xl shadow-black/10 backdrop-blur-2xl;
+  @apply border border-white/60 bg-base-100/80 shadow-xl shadow-base-300/25 backdrop-blur-2xl;
 
   @variant dark {
-    @apply border-white/15 bg-base-200/85 shadow-black/40;
+    @apply border-white/15 bg-base-200/85 shadow-base-100/35;
   }
 }
 
@@ -102,10 +102,10 @@
 }
 
 @utility dropdown-surface {
-  @apply rounded-2xl border border-base-300/80 bg-base-100/95 shadow-2xl shadow-black/15 backdrop-blur-xl;
+  @apply rounded-2xl border border-base-300/80 bg-base-100/95 shadow-2xl shadow-base-300/30 backdrop-blur-xl;
 
   @variant dark {
-    @apply border-white/15 bg-base-300/95 shadow-black/50;
+    @apply border-white/15 bg-base-300/95 shadow-base-100/40;
   }
 }
 

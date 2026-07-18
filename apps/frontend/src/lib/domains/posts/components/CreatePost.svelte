@@ -100,7 +100,7 @@
           <textarea
             bind:this={textareaRef}
             name="content"
-            class="form-textarea min-h-0 resize-none rounded-2xl pl-10 shadow-inner shadow-black/5 sm:text-lg"
+            class="form-textarea min-h-0 resize-none rounded-2xl pl-10 shadow-inner shadow-base-300/10 sm:text-lg dark:shadow-base-100/15"
             placeholder="What's on your mind?"
             bind:value={content}
             rows={5}

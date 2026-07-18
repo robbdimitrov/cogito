@@ -58,7 +58,7 @@ Defined in `app.css`:
 
 | Class                     | Definition                                                                                                             |
 | ------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `.glass-surface`          | `border-white/60 bg-base-100/80 shadow-xl backdrop-blur-2xl` (dark: `border-white/15 bg-base-200/85 shadow-black/40`)  |
+| `.glass-surface`          | `border-white/60 bg-base-100/80 shadow-xl shadow-base-300/25 backdrop-blur-2xl` (dark: `border-white/15 bg-base-200/85 shadow-base-100/35`) — shadows are tinted from the theme's own base palette, never plain black |
 | `.glass-card`             | `.glass-surface` + `card rounded-2xl`                                                                                  |
 | `.glass-card-interactive` | `.glass-card` + `transition hover:bg-base-100/95` (dark: `hover:bg-base-300/85`)                                      |
 | `.page-shell`             | Root page shell for wide or multi-column app screens: `container mx-auto max-w-5xl px-3 py-3 sm:px-4 sm:py-6`          |
