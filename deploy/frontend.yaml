@@ -18,6 +18,7 @@ metadata:
     tier: frontend
 spec:
   replicas: 1
+  revisionHistoryLimit: 3
   selector:
     matchLabels:
       app: cogito
@@ -75,4 +76,5 @@ spec:
           periodSeconds: 10
       volumes:
       - name: tmp
-        emptyDir: {}
+        emptyDir:
+          sizeLimit: 256Mi

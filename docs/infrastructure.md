@@ -25,7 +25,8 @@
 | broker (redpandadata/redpanda)           | 100m    | 256Mi   | 512Mi     | 2 Gi     |
 
 Redpanda Connect runs as a Deployment and mounts broker pipeline configuration
-from a ConfigMap. All PVCs: ReadWriteOnce. All StatefulSets: 1 replica.
+from a ConfigMap. All PVCs: ReadWriteOnce. All StatefulSets: 1 replica. All
+`emptyDir` volumes set `sizeLimit`.
 PostgreSQL serves in-cluster connections without TLS (`sslmode=disable` in the
 shared `database-url` Secret value) — connections stay within the cluster's
 internal network, consistent with the other local deployments in this

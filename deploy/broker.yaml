@@ -246,9 +246,11 @@ spec:
           periodSeconds: 15
       volumes:
       - name: tmp
-        emptyDir: {}
+        emptyDir:
+          sizeLimit: 256Mi
       - name: broker-config
-        emptyDir: {}
+        emptyDir:
+          sizeLimit: 16Mi
   volumeClaimTemplates:
   - metadata:
       name: broker-data
@@ -325,7 +327,8 @@ spec:
           - key: backfill.yaml
             path: backfill.yaml
       - name: tmp
-        emptyDir: {}
+        emptyDir:
+          sizeLimit: 64Mi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -443,4 +446,5 @@ spec:
         configMap:
           name: broker-pipelines
       - name: tmp
-        emptyDir: {}
+        emptyDir:
+          sizeLimit: 64Mi
