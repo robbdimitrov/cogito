@@ -110,10 +110,16 @@
     {#if sessionUnavailable}
       <span class="text-xs muted-text">Service unavailable</span>
     {:else if !user}
-      <a
-        href={resolve("/login")}
-        class="btn btn-primary btn-sm rounded-full px-6">Log In</a
-      >
+      <div class="flex items-center gap-2">
+        <a
+          href={resolve("/login")}
+          class="btn btn-ghost btn-sm rounded-full px-6">Log In</a
+        >
+        <a
+          href={resolve("/register")}
+          class="btn btn-primary btn-sm rounded-full px-6">Register</a
+        >
+      </div>
     {/if}
   </div>
 </nav>

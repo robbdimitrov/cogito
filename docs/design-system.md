@@ -107,7 +107,8 @@ Compose's solid fill, so an active icon and the compose button never look
 interchangeable. Icon-only throughout (no text labels, no
 breakpoint-dependent sizing) so the bar behaves identically at every width;
 `aria-label`/`title` carry the names. Settings and Logout live in the
-Settings sidebar, not the navbar.
+Settings sidebar, not the navbar. Signed out, the icon cluster is replaced
+by "Log In" (ghost) and "Register" (solid `bg-primary`) pill buttons.
 
 ### `Avatar`
 
