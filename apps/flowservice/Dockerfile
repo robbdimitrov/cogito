@@ -2,7 +2,7 @@ FROM rust:1.95-alpine AS builder
 
 WORKDIR /app
 
-RUN apk add --no-cache protobuf-dev build-base bash openssl-dev pkgconfig
+RUN apk add --no-cache protobuf-dev build-base librdkafka-dev pkgconfig
 
 COPY pkg/pb ./pkg/pb
 
@@ -20,6 +20,6 @@ RUN find src -name '*.rs' -exec touch {} + && \
 
 # rdkafka (librdkafka) requires dynamic linking; scratch is not viable here.
 FROM alpine:3.21
-RUN apk add --no-cache libgcc openssl
+RUN apk add --no-cache libgcc librdkafka
 COPY --from=builder /app/apps/flowservice/target/release/flowservice /service
 CMD ["/service"]
