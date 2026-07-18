@@ -158,7 +158,7 @@ per-page).
 ### `FormattedContent`
 
 Inline renderer that linkifies `#hashtag` tokens within post text. Hashtags
-render as navigation links to `/hashtags/{tag}`.
+render as navigation links to `/search?q=#{tag}`.
 
 ### `RepostMenu`
 

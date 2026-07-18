@@ -60,7 +60,7 @@ export function formatContent(content: string): ContentPart[] {
         type: "hashtag",
         id: `hashtag-${tokenIndex}`,
         tag: value,
-        href: `/hashtags/${encodeURIComponent(value.toLowerCase())}`,
+        href: `/search?${new URLSearchParams({ q: `#${value.toLowerCase()}` })}`,
       });
     } else {
       parts.push({

@@ -36,8 +36,7 @@
 | /{username}/likes     | User's liked posts                                                      | same post/follow actions                           |
 | /{username}/followers | Followers list                                                          | toggleFollow                                       |
 | /{username}/following | Following list                                                          | toggleFollow                                       |
-| /hashtags/{tag}       | Tag post feed                                                           | toggleLike, toggleRepost, deletePost               |
-| /search               | Search results with users/hashtags typeahead and last 10 recent searches | remove/clear recent searches |
+| /search               | Search results (`#tag` shows that tag's post feed) with users/hashtags typeahead and last 10 recent searches | toggleLike, toggleRepost, deletePost, remove/clear recent searches |
 | /notifications        | Notifications (initial unread rows marked read server-side after fetch) | —                                                  |
 | /settings             | Redirect to /settings/profile                                           | —                                                  |
 | /settings/profile     | Current user profile                                                    | default — update name/username/email/bio/photos    |
@@ -64,7 +63,6 @@ profile route itself doesn't require one).
     (private)/+layout.server.ts  guard: redirect /login if unauthenticated
       /(main)/+page.svelte  feed
       /(main)/notifications/+page.svelte
-      hashtags/[tag]/+page.svelte
       search/+page.svelte
       settings/+layout.svelte  settings sidebar nav
         /settings/profile, /settings/password, /settings/sessions
@@ -141,10 +139,8 @@ unchanged after DTO mapping.
 | `/{username}/following` | GET    | page load       | GET /users/{id}/following                                         |
 | `/{username}/following` | GET    | +server.ts      | GET /users/{id}/following?cursor=                                 |
 | `/posts/{id}`           | GET    | page load       | GET /posts/{id} + GET /posts/{id}/replies                         |
-| `/hashtags/{tag}`       | GET    | page load       | GET /hashtags/{tag}/posts                                         |
-| `/hashtags/{tag}`       | GET    | +server.ts      | GET /hashtags/{tag}/posts?cursor=                                 |
-| `/search`               | GET    | page load       | GET /search?q=&type=all (or type=users/hashtags for @/# prefixes) + GET /search/recent |
-| `/search`               | GET    | +server.ts      | GET /search?q=&type=&cursor= — backs pagination and users/hashtags typeahead |
+| `/search`               | GET    | page load       | GET /search?q=&type=all (or type=users for @ prefix) + GET /search/recent, or GET /hashtags/{tag}/posts for a # prefix |
+| `/search`               | GET    | +server.ts      | GET /search?q=&type=&cursor= — backs pagination and users/hashtags typeahead; type=hashtag-posts calls GET /hashtags/{tag}/posts?cursor= directly |
 | `/search/recent`        | POST/DELETE | +server.ts | POST /search/recent, DELETE /search/recent                         |
 | `/search/recent/{id}`   | DELETE | +server.ts      | DELETE /search/recent/{id}                                         |
 | `/notifications`        | GET    | app layout load | GET /notifications/unread-count                                   |
@@ -182,7 +178,8 @@ omit it for cover photos and full-resolution post media.
   `+server.ts` falls back to resolving by username only if `userId` is absent.
 - `createPagination<T>()` state: `items`, `cursor`, `loading`. `more()` appends
   and advances cursor.
-- Used in: feed, user posts, liked posts, followers, following, hashtag feed.
+- Used in: feed, user posts, liked posts, followers, following, hashtag post
+  feed (`/search?q=#tag`).
 - The feed renders a first-page empty state linking to `/search` when
   `/posts/feed` returns no items and no cursor.
 - `/notifications` initial page marks unread rows as read after retrieval.
@@ -190,6 +187,10 @@ omit it for cover photos and full-resolution post media.
 - `/search` shows recent searches when the empty input is focused. Typing
   switches to a users/hashtags-only typeahead capped at 10 combined rows; Enter
   submits the typed query unless the user arrow-highlights a suggestion first.
+  A `#tag` query (typed, submitted from a suggestion, or from clicking a
+  hashtag in post content) shows that tag's exact post feed instead of the
+  blended/typeahead results — a distinct `type=hashtag-posts` mode backed by
+  `getHashtagPosts`, not the full-text hashtag-name search.
 
 ## Image Upload Flow
 

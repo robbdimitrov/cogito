@@ -45,7 +45,7 @@ describe("SearchResultRow", () => {
 
   it("renders a hashtag row with a hashtag link and post count", () => {
     const el = mountComponent(SearchResultRow, { result: hashtagResult });
-    const link = el.querySelector('a[href="/hashtags/svelte"]');
+    const link = el.querySelector('a[href="/search?q=%23svelte"]');
     expect(link).not.toBeNull();
     expect(link?.textContent).toContain("12");
   });

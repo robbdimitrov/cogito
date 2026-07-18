@@ -43,7 +43,7 @@
 {#snippet hashtagRow(entry: Extract<BlendedItem, { type: "hashtags" }>)}
   {@const hashtag = entry.item}
   <a
-    href={resolve(`/hashtags/${hashtag.name}`)}
+    href={resolve(`/search?${new URLSearchParams({ q: `#${hashtag.name}` })}`)}
     class="soft-surface flex items-center justify-between gap-3 p-4"
     onclick={onSelect}
   >

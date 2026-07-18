@@ -135,7 +135,9 @@
     if (item.type === "users") {
       goto(resolve(`/@${item.item.username}`));
     } else {
-      goto(resolve(`/hashtags/${item.item.name}`));
+      goto(
+        resolve(`/search?${new URLSearchParams({ q: `#${item.item.name}` })}`),
+      );
     }
     open = false;
   }

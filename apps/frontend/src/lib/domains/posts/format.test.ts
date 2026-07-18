@@ -30,7 +30,7 @@ describe("formatContent", () => {
       expect(hashtags(parts)).toHaveLength(1);
       expect(hashtags(parts)[0]).toMatchObject({
         tag: "world",
-        href: "/hashtags/world",
+        href: "/search?q=%23world",
       });
     });
 
@@ -38,7 +38,7 @@ describe("formatContent", () => {
       const parts = formatContent("Trending #React today");
       const [tag] = hashtags(parts);
       expect(tag).toMatchObject({
-        href: "/hashtags/react",
+        href: "/search?q=%23react",
         tag: "React",
       });
     });
@@ -123,7 +123,7 @@ describe("formatContent", () => {
       });
       expect(hashtags(parts)[0]).toMatchObject({
         tag: "news",
-        href: "/hashtags/news",
+        href: "/search?q=%23news",
       });
       expect(urls(parts)[0]).toMatchObject({
         url: "https://example.com",

@@ -3,12 +3,17 @@ import type { PageServerLoad } from "./$types";
 import { apiClient } from "$lib/server/api/client";
 import { failFromError, unwrap } from "$lib/server/api/http";
 import type { User } from "$lib/domains/users/model";
-import type { Hashtag } from "$lib/domains/posts/api.server";
+import { getHashtagPosts, type PostPage } from "$lib/domains/posts/api.server";
+import {
+  toggleLike,
+  toggleRepost,
+  deletePost,
+} from "$lib/domains/posts/actions.server";
 import { wrapBlended, type BlendedItem, type RecentSearchItem } from "./types";
 
 const SEARCH_PREVIEW_LIMIT = 15;
 const EMPTY_SECTION = { items: [], nextCursor: null };
-type SearchType = "all" | "users" | "hashtags";
+type SearchType = "all" | "users";
 type SearchSection<T> = { items: T[]; nextCursor: string | null };
 
 async function searchSection<T>(
@@ -73,19 +78,15 @@ export const load: PageServerLoad = async (event) => {
     };
   }
   if (q.startsWith("#")) {
-    const [section, recent] = await Promise.all([
-      searchSection<Hashtag>(api, q.replace(/^#/, ""), "hashtags"),
+    const tag = q.replace(/^#/, "");
+    const [posts, recent] = await Promise.all([
+      getHashtagPosts(api, tag).catch<PostPage>(() => ({
+        items: [],
+        nextCursor: null,
+      })),
       recentPromise,
     ]);
-    return {
-      q,
-      type: "hashtags" as const,
-      results: {
-        items: wrapBlended("hashtags", section.items),
-        nextCursor: section.nextCursor,
-      },
-      recent,
-    };
+    return { q, type: "hashtag-posts" as const, tag, results: posts, recent };
   }
 
   const [results, recent] = await Promise.all([
@@ -96,6 +97,9 @@ export const load: PageServerLoad = async (event) => {
 };
 
 export const actions: Actions = {
+  toggleLike,
+  toggleRepost,
+  deletePost,
   removeRecent: async (event) => {
     const formData = await event.request.formData();
     const id = formData.get("id");
