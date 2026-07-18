@@ -163,6 +163,7 @@ func (r *router) configureRoutes(mux *http.ServeMux) {
 
 	// Search
 	mux.HandleFunc("GET /search", r.search.search)
+	mux.HandleFunc("GET /search/popular", r.search.getPopularPosts)
 	mux.HandleFunc("GET /search/recent", r.search.listRecentSearches)
 	mux.HandleFunc("POST /search/recent", r.search.recordRecentSearch)
 	mux.HandleFunc("DELETE /search/recent/{id}", r.search.deleteRecentSearch)

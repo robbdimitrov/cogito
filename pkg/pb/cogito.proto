@@ -169,6 +169,11 @@ message GetRepliesRequest {
   int32 limit = 3;
 }
 
+message GetPopularPostsRequest {
+  string cursor = 1;
+  int32 limit = 2;
+}
+
 message Hashtag {
   int32 id = 1;
   string name = 2;
@@ -194,6 +199,7 @@ service PostService {
   rpc RepostPost(PostRequest) returns (Empty);
   rpc RemoveRepost(PostRequest) returns (Empty);
   rpc GetReplies(GetRepliesRequest) returns (Posts);
+  rpc GetPopularPosts(GetPopularPostsRequest) returns (Posts);
 }
 
 // Images

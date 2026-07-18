@@ -24,6 +24,22 @@ func TestRepliesCount(t *testing.T) {
 	}
 }
 
+func TestPopularPostsQueryRanksByEngagementWithinWindow(t *testing.T) {
+	got := popularPostsQuery()
+	for _, want := range []string{
+		"p.repost_of_id IS NULL",
+		"p.in_reply_to_id IS NULL",
+		"p.created >= $2",
+		"ORDER BY (likes + replies) DESC, created DESC, id DESC",
+		"OFFSET $3",
+		"LIMIT $4",
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("popularPostsQuery missing %q in:\n%s", want, got)
+		}
+	}
+}
+
 func TestFeedPullQueryIncludesOwnPostsAndDedupesMaterializedRows(t *testing.T) {
 	got := feedPullQuery("SELECT p.id")
 	for _, want := range []string{

@@ -179,7 +179,7 @@ same transaction.
 | users         | `users_fan_out_disabled_idx` partial on `(id)`                  | High-follower feed pull path     |
 | sessions      | `sessions_user_id_idx`                                          | Session lookup by user           |
 | posts         | `posts_user_id_created_idx (user_id, created DESC)`             | User timeline pagination         |
-| posts         | `posts_created_idx (created DESC) WHERE in_reply_to_id IS NULL` | Feed ordering (partial)          |
+| posts         | `posts_created_idx (created DESC) WHERE in_reply_to_id IS NULL` | Feed ordering; also bounds the recent-window scan for popular posts (partial) |
 | posts         | `posts_in_reply_to_id_idx WHERE in_reply_to_id IS NOT NULL`     | Reply lookup (partial)           |
 | posts         | `posts_repost_of_id_idx WHERE repost_of_id IS NOT NULL`         | Repost lookup (partial)          |
 | posts         | `posts_hashtags_idx` GIN on `hashtags`                          | Hashtag array search             |

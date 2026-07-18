@@ -52,6 +52,10 @@ type mockBatchPostClient struct {
 	quotes              map[int32]*pb.Post
 	requestedQuoteIDs   []int32
 	getPostsByIDsCalled bool
+
+	popularRes    *pb.Posts
+	popularErr    error
+	gotPopularReq *pb.GetPopularPostsRequest
 }
 
 func (m *mockBatchPostClient) GetPostsByIds(ctx context.Context, in *pb.Ids, opts ...grpc.CallOption) (*pb.Posts, error) {
@@ -64,6 +68,11 @@ func (m *mockBatchPostClient) GetPostsByIds(ctx context.Context, in *pb.Ids, opt
 		}
 	}
 	return &pb.Posts{Posts: out}, nil
+}
+
+func (m *mockBatchPostClient) GetPopularPosts(ctx context.Context, in *pb.GetPopularPostsRequest, opts ...grpc.CallOption) (*pb.Posts, error) {
+	m.gotPopularReq = in
+	return m.popularRes, m.popularErr
 }
 
 type mockBatchUserClient struct {

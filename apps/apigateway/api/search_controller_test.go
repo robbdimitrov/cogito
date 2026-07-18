@@ -208,6 +208,77 @@ func TestSearch_InvalidTypeStill400(t *testing.T) {
 	}
 }
 
+func newTestSearchControllerWithPopularPosts(res *pb.Posts, err error) (*searchController, *mockBatchPostClient) {
+	postClient := &mockBatchPostClient{popularRes: res, popularErr: err}
+	userClient := &mockBatchUserClient{users: map[int32]*pb.User{
+		1: {Id: 1, Username: "alice"},
+	}}
+	pc := &postController{client: postClient, userClient: userClient}
+	return newSearchController(&fakeSearchServiceClient{}, pc), postClient
+}
+
+func TestGetPopularPosts_HappyPath(t *testing.T) {
+	res := &pb.Posts{Posts: []*pb.Post{{Id: 1, UserId: 1}, {Id: 2, UserId: 1}}, NextCursor: "next"}
+	sc, postClient := newTestSearchControllerWithPopularPosts(res, nil)
+
+	req := httptest.NewRequest(http.MethodGet, "/search/popular?limit=2", nil)
+	req = setUserID(req, "1")
+	w := httptest.NewRecorder()
+	sc.getPopularPosts(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d: %s", w.Code, w.Body.String())
+	}
+	if postClient.gotPopularReq == nil || postClient.gotPopularReq.Limit != 2 {
+		t.Errorf("expected GetPopularPosts called with limit=2, got %+v", postClient.gotPopularReq)
+	}
+
+	var body struct {
+		Items []struct {
+			ID int32 `json:"id"`
+		} `json:"items"`
+		NextCursor string `json:"nextCursor"`
+	}
+	if err := json.Unmarshal(w.Body.Bytes(), &body); err != nil {
+		t.Fatalf("failed to decode response body: %v: %s", err, w.Body.String())
+	}
+	if len(body.Items) != 2 {
+		t.Fatalf("expected 2 items, got %d", len(body.Items))
+	}
+	if body.NextCursor != "next" {
+		t.Errorf("expected nextCursor %q, got %q", "next", body.NextCursor)
+	}
+}
+
+func TestGetPopularPosts_UpstreamFailureMapped(t *testing.T) {
+	sc, _ := newTestSearchControllerWithPopularPosts(nil, status.Error(codes.Unavailable, "postservice down"))
+
+	req := httptest.NewRequest(http.MethodGet, "/search/popular", nil)
+	req = setUserID(req, "1")
+	w := httptest.NewRecorder()
+	sc.getPopularPosts(w, req)
+
+	if w.Code != http.StatusServiceUnavailable {
+		t.Fatalf("expected 503, got %d: %s", w.Code, w.Body.String())
+	}
+}
+
+func TestGetPopularPosts_InvalidLimitRejected(t *testing.T) {
+	sc, postClient := newTestSearchControllerWithPopularPosts(&pb.Posts{}, nil)
+
+	req := httptest.NewRequest(http.MethodGet, "/search/popular?limit=0", nil)
+	req = setUserID(req, "1")
+	w := httptest.NewRecorder()
+	sc.getPopularPosts(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400, got %d: %s", w.Code, w.Body.String())
+	}
+	if postClient.gotPopularReq != nil {
+		t.Fatal("invalid limit reached gRPC client")
+	}
+}
+
 func TestListRecentSearchesMapsItems(t *testing.T) {
 	fake := &fakeSearchServiceClient{recentRes: &pb.RecentSearches{Items: []*pb.RecentSearch{
 		{Id: "01904d2e-7f4d-7c33-ae21-2f94737eaa10", Type: "users", User: &pb.User{Id: 1, Username: "alice", Name: "Alice"}},

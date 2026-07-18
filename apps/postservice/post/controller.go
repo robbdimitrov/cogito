@@ -346,6 +346,49 @@ func (c *controller) GetReplies(ctx context.Context, req *pb.GetRepliesRequest) 
 	return &pb.Posts{Posts: posts, NextCursor: nextCursor}, nil
 }
 
+func (c *controller) GetPopularPosts(ctx context.Context, req *pb.GetPopularPostsRequest) (*pb.Posts, error) {
+	userID, err := getUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	offset, err := DecodeOffsetCursor(req.Cursor)
+	if err != nil {
+		return nil, newError(codes.InvalidArgument)
+	}
+
+	limit := req.Limit
+	if limit < 1 {
+		limit = 20
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
+	resIter, err := c.dbClient.getPopularPosts(ctx, offset, limit, userID)
+	if err != nil {
+		slog.Warn("getting popular posts failed", "request_id", requestID(ctx), "error", err)
+		return nil, newError(codes.Internal)
+	}
+
+	var posts []*pb.Post
+	for post, err := range resIter {
+		if err != nil {
+			slog.Warn("mapping post failed", "request_id", requestID(ctx), "error", err)
+			return nil, newError(codes.Internal)
+		}
+		posts = append(posts, post)
+	}
+
+	var nextCursor string
+	if len(posts) > int(limit) {
+		posts = posts[:limit]
+		nextCursor = EncodeOffsetCursor(offset + limit)
+	}
+
+	return &pb.Posts{Posts: posts, NextCursor: nextCursor}, nil
+}
+
 func (c *controller) DeletePost(ctx context.Context, req *pb.PostRequest) (*pb.Empty, error) {
 	userID, err := getUserID(ctx)
 	if err != nil {

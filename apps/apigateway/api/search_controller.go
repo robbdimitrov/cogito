@@ -112,6 +112,35 @@ func (sc *searchController) search(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// getPopularPosts serves the search screen's empty-query state: posts ranked
+// by recent engagement, via PostService rather than SearchService since it's
+// a Postgres aggregation, not a Meilisearch lookup.
+func (sc *searchController) getPopularPosts(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	ctx, err := appendUserIDHeader(ctx, r)
+	if err != nil {
+		jsonError(w, http.StatusUnauthorized, "Unauthorized")
+		cancel()
+		return
+	}
+	defer cancel()
+
+	cursor, limit, err := getCursorAndLimit(r)
+	if err != nil {
+		grpcError(w, err)
+		return
+	}
+
+	res, err := sc.post.client.GetPopularPosts(ctx, &pb.GetPopularPostsRequest{Cursor: cursor, Limit: int32(limit)})
+	if err != nil {
+		slog.Warn("getting popular posts failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
+		grpcError(w, err)
+		return
+	}
+
+	jsonResponse(w, http.StatusOK, map[string]any{"items": sc.post.buildPosts(ctx, res.Posts), "nextCursor": res.NextCursor})
+}
+
 func (sc *searchController) listRecentSearches(w http.ResponseWriter, r *http.Request) {
 	if sc.client == nil {
 		jsonError(w, http.StatusServiceUnavailable, "Search service unavailable")

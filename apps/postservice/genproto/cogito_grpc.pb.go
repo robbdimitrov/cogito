@@ -654,6 +654,7 @@ const (
 	PostService_RepostPost_FullMethodName      = "/cogito.PostService/RepostPost"
 	PostService_RemoveRepost_FullMethodName    = "/cogito.PostService/RemoveRepost"
 	PostService_GetReplies_FullMethodName      = "/cogito.PostService/GetReplies"
+	PostService_GetPopularPosts_FullMethodName = "/cogito.PostService/GetPopularPosts"
 )
 
 // PostServiceClient is the client API for PostService service.
@@ -673,6 +674,7 @@ type PostServiceClient interface {
 	RepostPost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error)
 	RemoveRepost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Empty, error)
 	GetReplies(ctx context.Context, in *GetRepliesRequest, opts ...grpc.CallOption) (*Posts, error)
+	GetPopularPosts(ctx context.Context, in *GetPopularPostsRequest, opts ...grpc.CallOption) (*Posts, error)
 }
 
 type postServiceClient struct {
@@ -813,6 +815,16 @@ func (c *postServiceClient) GetReplies(ctx context.Context, in *GetRepliesReques
 	return out, nil
 }
 
+func (c *postServiceClient) GetPopularPosts(ctx context.Context, in *GetPopularPostsRequest, opts ...grpc.CallOption) (*Posts, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Posts)
+	err := c.cc.Invoke(ctx, PostService_GetPopularPosts_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PostServiceServer is the server API for PostService service.
 // All implementations must embed UnimplementedPostServiceServer
 // for forward compatibility.
@@ -830,6 +842,7 @@ type PostServiceServer interface {
 	RepostPost(context.Context, *PostRequest) (*Empty, error)
 	RemoveRepost(context.Context, *PostRequest) (*Empty, error)
 	GetReplies(context.Context, *GetRepliesRequest) (*Posts, error)
+	GetPopularPosts(context.Context, *GetPopularPostsRequest) (*Posts, error)
 	mustEmbedUnimplementedPostServiceServer()
 }
 
@@ -878,6 +891,9 @@ func (UnimplementedPostServiceServer) RemoveRepost(context.Context, *PostRequest
 }
 func (UnimplementedPostServiceServer) GetReplies(context.Context, *GetRepliesRequest) (*Posts, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetReplies not implemented")
+}
+func (UnimplementedPostServiceServer) GetPopularPosts(context.Context, *GetPopularPostsRequest) (*Posts, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetPopularPosts not implemented")
 }
 func (UnimplementedPostServiceServer) mustEmbedUnimplementedPostServiceServer() {}
 func (UnimplementedPostServiceServer) testEmbeddedByValue()                     {}
@@ -1134,6 +1150,24 @@ func _PostService_GetReplies_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PostService_GetPopularPosts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPopularPostsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).GetPopularPosts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PostService_GetPopularPosts_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).GetPopularPosts(ctx, req.(*GetPopularPostsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PostService_ServiceDesc is the grpc.ServiceDesc for PostService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1192,6 +1226,10 @@ var PostService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetReplies",
 			Handler:    _PostService_GetReplies_Handler,
+		},
+		{
+			MethodName: "GetPopularPosts",
+			Handler:    _PostService_GetPopularPosts_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -40,6 +40,34 @@ func repliesCount(postIDExpr string) string {
 	return fmt.Sprintf("(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = %s) AS replies", postIDExpr)
 }
 
+// popularPostsWindow bounds the ranking to recent posts so trending reflects
+// current activity rather than all-time accumulated likes/replies.
+const popularPostsWindow = 7 * 24 * time.Hour
+
+// popularPostsQuery ranks original, top-level posts created within the recent
+// window by (likes + replies), wrapping postCountsAndViewerFlags/repliesCount
+// in a subquery so the outer ORDER BY can reference their computed aliases
+// directly instead of repeating the subqueries.
+func popularPostsQuery() string {
+	return `SELECT id, user_id, content, likes, liked, reposts, reposted,
+		created, repost_of_id, media_key, replies, in_reply_to_id, quote_of_id
+		FROM (
+			SELECT p.id, p.user_id, p.content,
+				` + postCountsAndViewerFlags("p.id") + `,
+				p.created, p.repost_of_id, p.media_key,
+				` + repliesCount("p.id") + `,
+				COALESCE(p.in_reply_to_id, 0) AS in_reply_to_id,
+				COALESCE(p.quote_of_id, 0) AS quote_of_id
+			FROM posts p
+			WHERE p.repost_of_id IS NULL
+			AND p.in_reply_to_id IS NULL
+			AND p.created >= $2
+		) t
+		ORDER BY (likes + replies) DESC, created DESC, id DESC
+		OFFSET $3
+		LIMIT $4`
+}
+
 func feedPullQuery(querySelect string) string {
 	return querySelect + `
 		FROM posts p
@@ -783,4 +811,14 @@ func (c *DBClient) getReplies(ctx context.Context, postID int32, cursor Cursor, 
 	}
 
 	return mapPostCursorRows(rows), nil
+}
+
+func (c *DBClient) getPopularPosts(ctx context.Context, offset int32, limit int32, currentUserID int32) (iter.Seq2[*pb.Post, error], error) {
+	windowStart := time.Now().Add(-popularPostsWindow)
+	rows, err := c.db.Query(ctx, popularPostsQuery(), currentUserID, windowStart, offset, limit+1)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapPosts(rows), nil
 }

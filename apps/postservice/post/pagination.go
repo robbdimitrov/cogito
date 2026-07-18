@@ -34,3 +34,46 @@ func EncodeCursor(created time.Time, id int32) string {
 	b, _ := json.Marshal(Cursor{Created: created.UTC(), ID: id})
 	return base64.RawURLEncoding.EncodeToString(b)
 }
+
+// maxPopularOffset bounds OFFSET-based pagination over the popular-posts
+// ranking, matching flowservice SearchService's cursor cap for the same
+// reason: the ranking key is a computed score, not a stable keyset column.
+const maxPopularOffset = 1000
+
+type offsetCursor struct {
+	Offset int32 `json:"offset"`
+}
+
+// DecodeOffsetCursor base64-decodes and JSON-unmarshals an offset cursor.
+// Returns 0 for an empty string; a malformed or negative offset is clamped to
+// 0 rather than rejected, since it only affects which page is served.
+func DecodeOffsetCursor(s string) (int32, error) {
+	if s == "" {
+		return 0, nil
+	}
+	b, err := base64.RawURLEncoding.DecodeString(s)
+	if err != nil {
+		return 0, err
+	}
+	var c offsetCursor
+	if err := json.Unmarshal(b, &c); err != nil {
+		return 0, err
+	}
+	if c.Offset < 0 {
+		return 0, nil
+	}
+	if c.Offset > maxPopularOffset {
+		return maxPopularOffset, nil
+	}
+	return c.Offset, nil
+}
+
+// EncodeOffsetCursor serializes a page offset into an opaque cursor string.
+// Returns "" at or beyond maxPopularOffset to signal end-of-results.
+func EncodeOffsetCursor(offset int32) string {
+	if offset >= maxPopularOffset {
+		return ""
+	}
+	b, _ := json.Marshal(offsetCursor{Offset: offset})
+	return base64.RawURLEncoding.EncodeToString(b)
+}

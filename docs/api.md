@@ -81,6 +81,10 @@ failures map to 500 unless a controller handles them explicitly.
   `{"created":"<RFC3339Nano>","id":<int32>}`
 - **SearchService cursor** — base64url-encoded JSON: `{"offset":<int32>}`
   (capped at 1000)
+- **Popular posts cursor** (`GET /search/popular`, PostService `GetPopularPosts`)
+  — base64url-encoded JSON `{"offset":<int32>}` (capped at 1000), the same
+  offset convention as SearchService, since the ranking key is a computed
+  engagement score rather than a stable keyset column
 - **Blended search cursor** (`type=all` only) — base64url-encoded JSON
   `{"u":"<users cursor>","p":"<posts cursor>","h":"<hashtags cursor>"}`
   wrapping three opaque SearchService cursors; `nextCursor` is empty only
@@ -168,10 +172,17 @@ still requires a session.
 | Method | Path                | Purpose                                                        |
 | ------ | ------------------- | -------------------------------------------------------------- |
 | GET    | /search?q=&type=    | Full-text search; `type` ∈ `all`, `posts`, `users`, `hashtags` |
+| GET    | /search/popular     | Posts ranked by recent engagement, cursor-paginated; for the empty-query search screen |
 | GET    | /search/recent      | Last 10 saved searches for the authenticated user              |
 | POST   | /search/recent      | Save or bump a recent search `{type, reference}`               |
 | DELETE | /search/recent/{id} | Remove one authenticated user's recent search                  |
 | DELETE | /search/recent      | Clear authenticated user's recent searches                     |
+
+`GET /search/popular` calls PostService's `GetPopularPosts`, not
+SearchService — it's a Postgres ranking (likes + replies) over posts created
+in the last 7 days, not a Meilisearch lookup. Only original, top-level posts
+are ranked (no replies or reposts). Response shape matches other post lists:
+`{"items": [Post...], "nextCursor": "..."}`.
 
 `type=all` returns one relevance-ranked list blending all three entity
 types (~20% users / 60% posts / 20% hashtags), interleaved rather than
@@ -319,6 +330,7 @@ Standard timeout: 10 seconds. Search endpoints: 5 seconds.
 | RepostPost      | post_id                                            | Empty      |
 | RemoveRepost    | post_id                                            | Empty      |
 | GetReplies      | post_id, cursor, limit                             | Posts      |
+| GetPopularPosts | cursor, limit                                      | Posts      |
 
 ### ImageService (gRPC)
 
