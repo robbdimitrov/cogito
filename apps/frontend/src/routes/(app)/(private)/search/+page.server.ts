@@ -41,6 +41,7 @@ async function listRecentSearches(
 }
 
 export const load: PageServerLoad = async (event) => {
+  await event.parent();
   const q = event.url.searchParams.get("q") ?? "";
   const api = apiClient(event);
   const recentPromise = listRecentSearches(api);

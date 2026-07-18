@@ -4,6 +4,7 @@ import { apiClient } from "$lib/server/api/client";
 import { failFromError } from "$lib/server/api/http";
 
 export async function load(event) {
+  await event.parent();
   try {
     const data = await getSessions(apiClient(event));
     return {

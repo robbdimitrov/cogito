@@ -8,6 +8,7 @@ import { apiClient } from "$lib/server/api/client";
 import type { Post } from "$lib/shared/types";
 
 export const load = async (event) => {
+  await event.parent();
   const { params } = event;
   let posts = { items: [] as Post[], nextCursor: null as string | null };
   try {

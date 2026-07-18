@@ -10,6 +10,7 @@ import { apiClient } from "$lib/server/api/client";
 import { failFromError } from "$lib/server/api/http";
 
 export const load = async (event) => {
+  await event.parent();
   const feed = await getFeed(apiClient(event), "");
   const items = feed?.items ?? [];
   return {
