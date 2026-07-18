@@ -541,6 +541,45 @@ func TestUpdateUser_ImageAndSessionOrchestration(t *testing.T) {
 	}
 }
 
+func TestUpdateUser_ResendingUnchangedPhotoKeySkipsVerifyAndConsume(t *testing.T) {
+	// The frontend resends the current photo keys on every save; a key equal
+	// to the already-committed one must not touch the image service.
+	mockUser := &mockUserServiceClient{
+		oldProfileKey: "existing-profile.jpg",
+		oldCoverKey:   "existing-cover.jpg",
+	}
+	mockImage := &mockImageServiceClientForUser{}
+
+	uc := &userController{
+		client:    mockUser,
+		imgClient: mockImage,
+	}
+
+	body := `{"name":"test","profilePhotoKey":"existing-profile.jpg","coverPhotoKey":"existing-cover.jpg"}`
+	req := httptest.NewRequest("PUT", "/users/1", bytes.NewBufferString(body))
+	req.SetPathValue("userId", "1")
+	req = setUserID(req, "1")
+
+	w := httptest.NewRecorder()
+	uc.updateUser(w, req)
+
+	if w.Code != http.StatusNoContent {
+		t.Fatalf("Expected status 204, got %d: %s", w.Code, w.Body.String())
+	}
+	if !mockUser.updateUserCalled {
+		t.Errorf("Expected UpdateUser to be called")
+	}
+	if mockImage.verifyCalled != 0 {
+		t.Errorf("Expected VerifyUpload not to be called for an unchanged key, got %d calls", mockImage.verifyCalled)
+	}
+	if mockImage.consumeCalled != 0 {
+		t.Errorf("Expected ConsumeUpload not to be called for an unchanged key, got %d calls", mockImage.consumeCalled)
+	}
+	if mockImage.deleteCalled != 0 {
+		t.Errorf("Expected DeleteImage not to be called when photo keys are unchanged, got %d calls", mockImage.deleteCalled)
+	}
+}
+
 func TestCreateUser_RejectsUsernameOverLengthLimit(t *testing.T) {
 	uc := &userController{client: &mockUserServiceClient{}}
 

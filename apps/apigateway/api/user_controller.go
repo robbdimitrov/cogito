@@ -212,9 +212,14 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// A key equal to the already-committed one is a resend, not a new upload;
+	// its staging claim row is gone, so re-verifying it would always fail.
+	profileKeyChanged := body.ProfilePhotoKey != nil && *body.ProfilePhotoKey != "" && *body.ProfilePhotoKey != oldUserRes.ProfilePhotoKey
+	coverKeyChanged := body.CoverPhotoKey != nil && *body.CoverPhotoKey != "" && *body.CoverPhotoKey != oldUserRes.CoverPhotoKey
+
 	imgClient := s.imgClient
-	if (body.ProfilePhotoKey != nil || body.CoverPhotoKey != nil) && imgClient != nil {
-		if body.ProfilePhotoKey != nil && *body.ProfilePhotoKey != "" {
+	if (profileKeyChanged || coverKeyChanged) && imgClient != nil {
+		if profileKeyChanged {
 			verCtx, verCancel := context.WithTimeout(baseCtx, 5*time.Second)
 			_, err = imgClient.VerifyUpload(verCtx, &pb.VerifyUploadRequest{Filename: *body.ProfilePhotoKey, UserId: int32(userIDInt)})
 			verCancel()
@@ -223,7 +228,7 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		if body.CoverPhotoKey != nil && *body.CoverPhotoKey != "" {
+		if coverKeyChanged {
 			verCtx, verCancel := context.WithTimeout(baseCtx, 5*time.Second)
 			_, err = imgClient.VerifyUpload(verCtx, &pb.VerifyUploadRequest{Filename: *body.CoverPhotoKey, UserId: int32(userIDInt)})
 			verCancel()
@@ -236,7 +241,7 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 
 	consumedImages := make([]string, 0, 2)
 	if imgClient != nil {
-		if body.ProfilePhotoKey != nil && *body.ProfilePhotoKey != "" {
+		if profileKeyChanged {
 			consumeCtx, consumeCancel := context.WithTimeout(baseCtx, 5*time.Second)
 			_, err = imgClient.ConsumeUpload(consumeCtx, &pb.ConsumeUploadRequest{Filename: *body.ProfilePhotoKey, UserId: int32(userIDInt)})
 			consumeCancel()
@@ -247,7 +252,7 @@ func (s *userController) updateUser(w http.ResponseWriter, r *http.Request) {
 			}
 			consumedImages = append(consumedImages, *body.ProfilePhotoKey)
 		}
-		if body.CoverPhotoKey != nil && *body.CoverPhotoKey != "" {
+		if coverKeyChanged {
 			consumeCtx, consumeCancel := context.WithTimeout(baseCtx, 5*time.Second)
 			_, err = imgClient.ConsumeUpload(consumeCtx, &pb.ConsumeUploadRequest{Filename: *body.CoverPhotoKey, UserId: int32(userIDInt)})
 			consumeCancel()

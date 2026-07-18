@@ -45,8 +45,8 @@ export const actions = {
         username,
         email,
         bio,
-        profilePhotoKey: profilePhotoKey || undefined,
-        coverPhotoKey: coverPhotoKey || undefined,
+        profilePhotoKey,
+        coverPhotoKey,
       });
 
       return { success: true, profilePhotoKey, coverPhotoKey };
