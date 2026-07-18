@@ -126,14 +126,13 @@ Authenticated users can double-click an embedded image to like it; the existing
 like form handles mutation and rollback, while a large heart overlay uses
 `--animate-like-burst`.
 
-### `UserCard`
+### `ComposePrompt`
 
-Compact identity strip at the top of the home feed: a single clickable row
-(the whole `.glass-card-interactive` is an `<a>` to the profile) with avatar,
-display name, username, and a compact post/follower count on the trailing
-edge — no separate "View" button or divider, since the row itself is already
-the link. No cover-image treatment — deliberately not a second copy of the
-full `UserHeader` profile card.
+Slim clickable row at the top of the home feed and (only for the signed-in
+user's own profile) the profile posts tab: avatar + "What's on your mind?"
+placeholder text, no real form. Opens the same `ComposeModal` as the navbar's
+"+" button via `compose.svelte.ts`'s shared context — a second entry point to
+one composer, not a duplicate.
 
 ### `UserHeader`
 
@@ -149,8 +148,8 @@ page's utility row, not on the profile.
 
 The composer form: avatar, a roomy multi-line textarea, image upload button
 (triggers `POST /uploads`), character count, and submit. Always rendered
-expanded — there is no inline collapsed variant, and no standalone
-composer on the home feed; `ComposeModal` is its only mount point, so the
+expanded — there is no inline collapsed variant; `ComposeModal` is its only
+mount point (opened from the navbar's "+" or a `ComposePrompt`), so the
 composing experience is identical everywhere it's opened from. Requires an
 `onClose` prop, rendered as an inset close (X) button in the card's own
 top-right corner and called after a successful post. Its form posts to an

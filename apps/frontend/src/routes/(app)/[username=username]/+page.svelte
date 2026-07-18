@@ -1,6 +1,7 @@
 <script lang="ts">
   import PostList from "$lib/domains/posts/components/PostList.svelte";
   import QuoteComposeModal from "$lib/domains/posts/components/QuoteComposeModal.svelte";
+  import ComposePrompt from "$lib/domains/posts/components/ComposePrompt.svelte";
   import { createPagination } from "$lib/shared/createPagination.svelte";
   import type { Post } from "$lib/domains/posts/model";
 
@@ -24,6 +25,12 @@
     quotingPost = post;
   }
 </script>
+
+{#if currentUser && currentUser.username === user.username}
+  <div class="mb-3 sm:mb-4">
+    <ComposePrompt user={currentUser} />
+  </div>
+{/if}
 
 <PostList
   posts={pagination.items}

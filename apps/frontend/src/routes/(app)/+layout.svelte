@@ -3,10 +3,13 @@
   import AmbientBackground from "$lib/shared/components/layout/AmbientBackground.svelte";
   import ToastProvider from "$lib/shared/components/ui/ToastProvider.svelte";
   import ComposeModal from "$lib/domains/posts/components/ComposeModal.svelte";
+  import { setComposeContext } from "$lib/domains/posts/compose.svelte";
 
   let { data, children } = $props();
 
   let composeOpen = $state(false);
+
+  setComposeContext({ open: () => (composeOpen = true) });
 </script>
 
 <ToastProvider>
