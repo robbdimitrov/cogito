@@ -1,11 +1,7 @@
 <script lang="ts">
   import { enhance } from "$app/forms";
-  import {
-    Camera,
-    Image as ImageIcon,
-    Trash2,
-    AlertCircle,
-  } from "@lucide/svelte";
+  import { Trash2, AlertCircle } from "@lucide/svelte";
+  import Avatar from "$lib/shared/components/ui/Avatar.svelte";
   import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
   import Field from "$lib/shared/components/ui/Field.svelte";
   import FormInput from "$lib/shared/components/ui/FormInput.svelte";
@@ -13,6 +9,7 @@
   import { resizeImageForUpload } from "$lib/shared/image";
   import { imageUrl } from "$lib/shared/imageUrl";
   import { getToastContext } from "$lib/shared/toast.svelte";
+  import { untrack } from "svelte";
 
   let { data, form } = $props();
 
@@ -22,6 +19,7 @@
 
   let avatarFile: File | null = $state(null);
   let coverFile: File | null = $state(null);
+  let bio = $state(untrack(() => data.currentUser?.bio ?? ""));
 
   let userOverride = $state<Partial<typeof data.currentUser>>({});
   let user = $derived({ ...data.currentUser!, ...userOverride });
@@ -146,24 +144,20 @@
       <div class="flex flex-col gap-4 sm:flex-row sm:gap-6">
         <Field id="settings-avatar" label="Profile Photo">
           <div class="flex items-center gap-3">
-            {#if profilePreview}
+            {#if avatarFile}
               <div
-                class="relative h-16 w-16 overflow-hidden rounded-full border border-base-content/10"
+                class="relative h-14 w-14 overflow-hidden rounded-full border border-base-content/10"
               >
                 <img
                   src={profilePreview}
                   alt="Avatar"
-                  width="64"
-                  height="64"
+                  width="56"
+                  height="56"
                   class="h-full w-full object-cover"
                 />
               </div>
             {:else}
-              <div
-                class="flex h-16 w-16 items-center justify-center rounded-full bg-base-200 border border-base-content/10"
-              >
-                <Camera class="h-6 w-6 opacity-50" />
-              </div>
+              <Avatar name={user.name} size="lg" photoKey={user.profilePhotoKey} />
             {/if}
             <div class="flex gap-2">
               <button
@@ -209,10 +203,8 @@
               </div>
             {:else}
               <div
-                class="flex h-16 w-32 items-center justify-center rounded-lg bg-base-200 border border-base-content/10"
-              >
-                <ImageIcon class="h-6 w-6 opacity-50" />
-              </div>
+                class="h-16 w-32 rounded-lg border border-base-content/10 bg-linear-to-tr from-primary via-primary/80 to-secondary"
+              ></div>
             {/if}
             <div class="flex gap-2">
               <button
@@ -286,10 +278,15 @@
           id="settings-bio"
           name="bio"
           placeholder="Tell us about yourself"
-          value={user.bio}
+          bind:value={bio}
           rows={4}
           maxlength={255}
         />
+        <span
+          class="mt-1 block text-right text-xs {bio.length > 240
+            ? 'text-warning'
+            : 'muted-text'}">{bio.length}/255</span
+        >
       </Field>
 
       <button
