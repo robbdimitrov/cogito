@@ -14,6 +14,7 @@ REMOTE_PORT="${REMOTE_PORT:-8080}"
 PORT_FORWARD_LOG="${PORT_FORWARD_LOG:-/tmp/cogito-port-forward-${LOCAL_PORT}.log}"
 PORT_FORWARD_PID_FILE="${PORT_FORWARD_PID_FILE:-/tmp/cogito-port-forward-${LOCAL_PORT}.pid}"
 FORCE_BACKFILL="${FORCE_BACKFILL:-0}"
+FORCE_BUILD="${FORCE_BUILD:-0}"
 
 APIGATEWAY_IMAGE_TAG="${APIGATEWAY_IMAGE_TAG:-}"
 AUTHSERVICE_IMAGE_TAG="${AUTHSERVICE_IMAGE_TAG:-}"
@@ -261,9 +262,25 @@ init_image_tags() {
   USERSERVICE_IMAGE_TAG="${USERSERVICE_IMAGE_TAG:-$(context_checksum apps/userservice pkg/pb)}"
 }
 
+# Queried from a container on the daemon's own network; `docker manifest`
+# inspect can't reach a registry only published inside colima's VM.
+image_exists() {
+  local image="$1"
+  local host_and_repo="${image%:*}" tag="${image##*:}"
+  local host="${host_and_repo%%/*}" repo="${host_and_repo#*/}"
+  docker run --rm --network host alpine:3.21 wget -q --spider \
+    --header='Accept: application/vnd.oci.image.index.v1+json, application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json' \
+    "http://${host}/v2/${repo}/manifests/${tag}" >/dev/null 2>&1
+}
+
 build_one_image() {
   local target="$1"
   local tag="$2"
+  local image="${REGISTRY}/${target}:${tag}"
+  if [[ "${FORCE_BUILD}" != "1" ]] && image_exists "${image}"; then
+    log "skipping ${target}; image already exists: ${image}"
+    return 0
+  fi
   make -C "${ROOT}" "${target}" IMAGE_PREFIX="${REGISTRY}" GIT_SHA="${tag}"
 }
 
