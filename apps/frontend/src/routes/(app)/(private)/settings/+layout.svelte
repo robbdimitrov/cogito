@@ -69,7 +69,7 @@
           Appearance
         </h2>
         <div
-          class="mt-3 grid grid-cols-3 rounded-xl bg-base-200/70 p-1 dark:bg-slate-950/60"
+          class="mt-3 grid grid-cols-3 rounded-xl border border-transparent bg-base-200/70 p-1 dark:border-white/15 dark:bg-base-200/70"
           role="radiogroup"
           aria-label="Theme"
         >
@@ -80,7 +80,7 @@
               aria-checked={theme.mode === option.value}
               class="btn btn-ghost min-h-10 rounded-lg border-0 px-2 text-xs font-medium {theme.mode ===
               option.value
-                ? 'bg-base-100 text-base-content shadow-sm hover:bg-base-100 dark:bg-slate-800'
+                ? 'bg-base-100 text-base-content shadow-sm hover:bg-base-100'
                 : 'opacity-60 hover:bg-base-100/60 hover:text-base-content hover:opacity-100'}"
               onclick={() => theme.set(option.value)}
             >

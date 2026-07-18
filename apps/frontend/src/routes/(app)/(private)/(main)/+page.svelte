@@ -31,64 +31,53 @@
   <title>Cogito</title>
 </svelte:head>
 
-<main class="page-shell">
-  <div
-    class="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-8"
-  >
-    <aside class="hidden lg:block">
-      {#if user}
-        <UserCard {user} />
-      {/if}
-    </aside>
-    <section class="feed-column">
-      {#if user}
-        <div class="lg:hidden">
-          <UserCard {user} variant="compact" />
-        </div>
-        <CreatePost {user} />
-      {/if}
-      {#if data.isEmpty}
-        <GlassCard>
-          <div class="card-body muted-text items-center py-12 text-center">
-            <Search
-              class="mb-2 h-12 w-12 text-base-content opacity-50"
-              aria-hidden="true"
-            />
-            <p>No posts in your feed yet.</p>
-            <a
-              href={resolve("/search")}
-              class="btn btn-primary btn-sm mt-2 rounded-full"
-            >
-              Find people to follow
-            </a>
-          </div>
-        </GlassCard>
-      {:else}
-        <PostList
-          posts={pagination.items}
-          users={user ? [user] : []}
-          currentUserId={user?.id}
-          onQuote={handleQuote}
-          emptyMessage="No posts yet. Be the first to share!"
-        />
-      {/if}
-      {#if !pagination.done}
-        <div class="py-4 text-center">
-          <button
-            type="button"
-            class="btn btn-outline btn-sm rounded-full"
-            disabled={pagination.loading}
-            onclick={() => pagination.more()}
+<main class="feed-shell">
+  <div class="flex flex-col gap-3 sm:gap-4">
+    {#if user}
+      <UserCard {user} />
+      <CreatePost {user} />
+    {/if}
+    {#if data.isEmpty}
+      <GlassCard>
+        <div class="card-body muted-text items-center py-12 text-center">
+          <Search
+            class="mb-2 h-12 w-12 text-base-content opacity-50"
+            aria-hidden="true"
+          />
+          <p>No posts in your feed yet.</p>
+          <a
+            href={resolve("/search")}
+            class="btn btn-primary btn-sm mt-2 rounded-full"
           >
-            {#if pagination.loading}
-              <span class="loading loading-spinner loading-xs"></span>
-            {:else}
-              Load more
-            {/if}
-          </button>
+            Find people to follow
+          </a>
         </div>
-      {/if}
-    </section>
+      </GlassCard>
+    {:else}
+      <PostList
+        posts={pagination.items}
+        users={user ? [user] : []}
+        currentUserId={user?.id}
+        onQuote={handleQuote}
+        emptyMessage="No posts yet. Be the first to share!"
+      />
+    {/if}
+    {#if !pagination.done}
+      <div class="py-4 text-center">
+        <button
+          type="button"
+          class="btn btn-outline btn-sm rounded-full"
+          disabled={pagination.loading}
+          onclick={() => pagination.more()}
+        >
+          {#if pagination.loading}
+            <span class="loading loading-spinner loading-xs"></span>
+          {:else}
+            Load more
+          {/if}
+        </button>
+      </div>
+    {/if}
   </div>
 
   {#if quotingPost}

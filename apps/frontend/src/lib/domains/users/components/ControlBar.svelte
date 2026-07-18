@@ -56,7 +56,7 @@
         class={`ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-bold transition-all duration-300 sm:ml-1.5 sm:px-2.5 ${
           tab.isActive
             ? "bg-primary-content/25 text-primary-content"
-            : "text-primary group-hover:bg-primary/20 dark:group-hover:bg-primary/30 bg-primary/10 dark:bg-primary/20 dark:text-violet-300"
+            : "text-primary group-hover:bg-primary/20 dark:group-hover:bg-primary/30 bg-primary/10 dark:bg-primary/20"
         }`}
       >
         {tab.count}

@@ -283,9 +283,7 @@
     >
       <ul id="search-typeahead-listbox" class="max-h-96 overflow-y-auto py-1">
         {#each items as item, i (item.type + "-" + i)}
-          <li
-            class={i === activeIndex ? "bg-base-200 dark:bg-slate-800/80" : ""}
-          >
+          <li class={i === activeIndex ? "bg-base-200" : ""}>
             <SearchResultRow
               result={item}
               compact

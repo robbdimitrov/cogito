@@ -99,7 +99,7 @@
 <li>
   {#if repostedBy}
     <div
-      class="subtle-border mx-auto -mb-px w-[calc(100%-1rem)] rounded-t-2xl border border-b-base-300/80 bg-base-100/75 px-4 py-2 text-xs shadow-lg shadow-slate-900/5 backdrop-blur-2xl sm:px-5 sm:text-sm dark:border-b-white/10 dark:bg-slate-900/70"
+      class="subtle-border mx-auto -mb-px w-[calc(100%-1rem)] rounded-t-2xl border border-b-base-300/80 bg-base-100/75 px-4 py-2 text-xs shadow-lg shadow-black/5 backdrop-blur-2xl sm:px-5 sm:text-sm dark:border-b-white/15 dark:bg-base-200/85"
     >
       <div class="flex items-center gap-2 opacity-70">
         <Repeat class="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
@@ -175,7 +175,7 @@
                 alt="Post attachment"
                 loading="lazy"
                 decoding="async"
-                class="max-h-96 w-auto rounded-xl border border-base-300 object-contain dark:border-white/10"
+                class="subtle-border max-h-96 w-auto rounded-xl border object-contain"
               />
               {#if imageLikeBurst}
                 <div

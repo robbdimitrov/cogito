@@ -51,7 +51,7 @@
   <div class="card-body relative -mt-11 px-4 pb-4 sm:-mt-14 sm:px-6 sm:pb-6">
     <div class="flex items-end justify-between">
       <div
-        class="relative rounded-full border border-base-300/80 bg-base-100 p-1 dark:border-white/10 dark:bg-slate-800"
+        class="relative rounded-full border border-base-300/80 bg-base-100 p-1 dark:border-base-300/30 dark:bg-base-200"
       >
         <Avatar name={user.name} size="lg" photoKey={user.profilePhotoKey} />
       </div>

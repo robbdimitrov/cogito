@@ -7,6 +7,7 @@
     Home,
     LogOut,
     Bell,
+    ChevronDown,
     Search,
     Settings,
     User as UserIcon,
@@ -26,6 +27,10 @@
   let menuOpen = $state(false);
   let menu = $state<HTMLDivElement>();
 
+  let homeActive = $derived(page.url.pathname === "/");
+  let searchActive = $derived(page.url.pathname === "/search");
+  let notificationsActive = $derived(page.url.pathname === "/notifications");
+
   onMount(() => {
     const closeOnOutsideClick = (event: MouseEvent) => {
       if (menuOpen && menu && !menu.contains(event.target as Node)) {
@@ -38,67 +43,88 @@
 </script>
 
 <nav
-  class="navbar sticky top-0 z-50 min-h-16 border-b border-white/40 bg-white/35 px-3 shadow-none backdrop-blur-2xl backdrop-saturate-150 transition-colors duration-300 supports-backdrop-filter:bg-white/25 dark:border-white/10 dark:bg-slate-950/35 dark:supports-backdrop-filter:bg-slate-950/25 sm:px-4"
+  class="navbar sticky top-0 z-50 min-h-16 border-b border-base-300/40 bg-base-100/35 px-3 shadow-none backdrop-blur-2xl backdrop-saturate-150 transition-colors duration-300 supports-backdrop-filter:bg-base-100/25 dark:border-base-300/10 sm:px-4"
 >
   <div class="navbar-start">
     {#if user || sessionUnavailable}
-      <a
-        href={resolve("/")}
-        class="btn btn-ghost gap-2 text-base normal-case transition-transform duration-200 hover:scale-105 hover:bg-white/40 dark:hover:bg-white/10 md:text-lg"
-        aria-current={page.url.pathname === "/" ? "page" : undefined}
+      <div
+        class="flex items-center gap-1 rounded-full bg-base-100/40 p-1 dark:bg-base-100/10"
       >
-        <Home class="size-5 md:size-6" aria-hidden="true" />
-        <span class="hidden md:inline">Home</span>
-      </a>
-      <a
-        href={resolve("/search")}
-        class="btn btn-ghost gap-2 text-base normal-case transition-transform duration-200 hover:scale-105 hover:bg-white/40 dark:hover:bg-white/10 md:text-lg"
-        aria-current={page.url.pathname === "/search" ? "page" : undefined}
-      >
-        <Search class="size-5 md:size-6" aria-hidden="true" />
-        <span class="hidden md:inline">Search</span>
-      </a>
-      <a
-        href={resolve("/notifications")}
-        class="btn btn-ghost gap-2 text-base normal-case transition-transform duration-200 hover:scale-105 hover:bg-white/40 dark:hover:bg-white/10 md:text-lg"
-        aria-current={page.url.pathname === "/notifications"
-          ? "page"
-          : undefined}
-      >
-        <span class="indicator">
-          {#if unreadCount > 0}
-            <span
-              class="badge badge-primary indicator-item badge-xs min-w-5 px-1 text-[0.65rem]"
-              aria-label={`${unreadCount} unread notifications`}
-            >
-              {unreadCount > 99 ? "99+" : unreadCount}
-            </span>
-          {/if}
-          <Bell class="size-5 md:size-6" aria-hidden="true" />
-        </span>
-        <span class="hidden md:inline">Notifications</span>
-      </a>
+        <a
+          href={resolve("/")}
+          class="btn btn-circle {homeActive
+            ? 'bg-primary! text-primary-content!'
+            : 'btn-ghost hover:bg-base-100/60 dark:hover:bg-white/10'}"
+          aria-label="Home"
+          title="Home"
+          aria-current={homeActive ? "page" : undefined}
+        >
+          <Home class="size-6" aria-hidden="true" />
+        </a>
+        <a
+          href={resolve("/search")}
+          class="btn btn-circle {searchActive
+            ? 'bg-primary! text-primary-content!'
+            : 'btn-ghost hover:bg-base-100/60 dark:hover:bg-white/10'}"
+          aria-label="Search"
+          title="Search"
+          aria-current={searchActive ? "page" : undefined}
+        >
+          <Search class="size-6" aria-hidden="true" />
+        </a>
+      </div>
     {/if}
   </div>
 
   <div class="navbar-center">
     <span
-      class="bg-linear-to-r from-primary via-fuchsia-500 to-secondary bg-clip-text text-xl font-black tracking-tight text-transparent drop-shadow-sm sm:text-2xl"
+      class="bg-linear-to-r from-primary to-primary/70 bg-clip-text font-serif text-xl font-bold tracking-tight text-transparent sm:text-2xl"
       >Cogito</span
     >
   </div>
 
-  <div class="navbar-end gap-1">
+  <div class="navbar-end gap-2">
+    {#if user || sessionUnavailable}
+      <div
+        class="flex items-center rounded-full bg-base-100/40 p-1 dark:bg-base-100/10"
+      >
+        <a
+          href={resolve("/notifications")}
+          class="btn btn-circle {notificationsActive
+            ? 'bg-primary! text-primary-content!'
+            : 'btn-ghost hover:bg-base-100/60 dark:hover:bg-white/10'}"
+          aria-label={unreadCount > 0
+            ? `Notifications, ${unreadCount} unread`
+            : "Notifications"}
+          title="Notifications"
+          aria-current={notificationsActive ? "page" : undefined}
+        >
+          <span class="indicator">
+            {#if unreadCount > 0}
+              <span
+                class="badge badge-primary indicator-item badge-xs min-w-5 px-1 text-[0.65rem]"
+                aria-hidden="true"
+              >
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            {/if}
+            <Bell class="size-6" aria-hidden="true" />
+          </span>
+        </a>
+      </div>
+    {/if}
     {#if user}
       <div class="dropdown dropdown-end" bind:this={menu}>
         <button
           type="button"
           onclick={() => (menuOpen = !menuOpen)}
-          class="btn btn-ghost btn-circle avatar hover:bg-white/40 dark:hover:bg-white/10"
+          class="btn btn-ghost gap-1 px-2 hover:bg-base-100/40 dark:hover:bg-base-100/10"
           aria-label="User menu"
+          title={user.name || `@${user.username}`}
           aria-expanded={menuOpen}
         >
-          <Avatar name={user.name} photoKey={user.profilePhotoKey} />
+          <Avatar name={user.name} photoKey={user.profilePhotoKey} size="sm" />
+          <ChevronDown class="size-4 opacity-60" aria-hidden="true" />
         </button>
         {#if menuOpen}
           <ul
@@ -138,7 +164,7 @@
         {/if}
       </div>
     {:else if sessionUnavailable}
-      <span class="text-xs text-base-content/60">Service unavailable</span>
+      <span class="text-xs muted-text">Service unavailable</span>
     {:else}
       <a
         href={resolve("/login")}

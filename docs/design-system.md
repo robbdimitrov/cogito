@@ -9,25 +9,47 @@ preference persists via a `theme` cookie (1-year max-age, SameSite=Lax) and
 to set the initial `data-theme` on SSR and prevent FOUC. Logout deletes the
 `theme` cookie, resetting the preference to `system`.
 
-### Light Theme (custom)
+Both themes are bespoke "Ink & Ember" palettes (warm paper/ink + ember
+accent), each a full `@plugin "daisyui/theme"` block — neither inherits an
+unmodified DaisyUI preset.
 
-| Token                  | Value     |
-| ---------------------- | --------- |
-| `--color-base-100`     | `#f8fafc` |
-| `--color-base-200`     | `#f1f5f9` |
-| `--color-base-300`     | `#e2e8f0` |
-| `--color-base-content` | `#0f172a` |
+### Light Theme
+
+| Token                        | Value     |
+| ----------------------------- | --------- |
+| `--color-base-100`            | `#f7f5f1` |
+| `--color-base-200`            | `#efebe3` |
+| `--color-base-300`            | `#ddd6c9` |
+| `--color-base-content`        | `#1b1d24` |
+| `--color-primary`             | `#a6501b` |
+| `--color-primary-content`     | `#fbf3ea` |
+| `--color-secondary`           | `#3e5c58` |
+| `--color-secondary-content`   | `#f2f6f5` |
 
 ### Dark Theme
 
-DaisyUI v5 built-in `dark` preset, active via `--prefersdark` (follows
-`prefers-color-scheme: dark`). No custom token overrides.
+| Token                        | Value     |
+| ----------------------------- | --------- |
+| `--color-base-100`            | `#14161c` |
+| `--color-base-200`            | `#1b1e26` |
+| `--color-base-300`            | `#262a34` |
+| `--color-base-content`        | `#ece8e1` |
+| `--color-primary`             | `#e08a3c` |
+| `--color-primary-content`     | `#1b1d24` |
+| `--color-secondary`           | `#5b8a83` |
+| `--color-secondary-content`   | `#0f1512` |
+
+`primary` is deliberately deeper in the light theme (AA contrast against
+white button text) and brighter in dark (reads against ink). `secondary`
+(pine/teal) is used sparingly — cover gradients and the odd accent, never a
+second loud gradient.
 
 ### Custom Tokens (`@theme`)
 
 | Token                  | Value                                                                   | Use                               |
 | ---------------------- | ----------------------------------------------------------------------- | --------------------------------- |
 | `--font-sans`          | `system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, ...` | Base body font                    |
+| `--font-serif`         | `ui-serif, Georgia, Cambria, "Times New Roman", serif`                  | Wordmark and page-level headings only, via Tailwind's built-in `font-serif` utility — not a custom `@utility` |
 | `--animate-pulse-slow` | `pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite`                        | Slow pulse on decorative elements |
 
 ## Custom CSS Utilities
@@ -36,13 +58,12 @@ Defined in `app.css`:
 
 | Class                     | Definition                                                                                                             |
 | ------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `.glass-surface`          | `border-white/60 bg-base-100/80 shadow-xl backdrop-blur-2xl` (dark: `border-white/10 bg-slate-900/70 shadow-black/30`) |
+| `.glass-surface`          | `border-white/60 bg-base-100/80 shadow-xl backdrop-blur-2xl` (dark: `border-white/15 bg-base-200/85 shadow-black/40`)  |
 | `.glass-card`             | `.glass-surface` + `card rounded-2xl`                                                                                  |
-| `.glass-card-interactive` | `.glass-card` + `transition hover:bg-base-100/95` (dark: `hover:bg-slate-800/80`)                                      |
+| `.glass-card-interactive` | `.glass-card` + `transition hover:bg-base-100/95` (dark: `hover:bg-base-300/85`)                                      |
 | `.page-shell`             | Root page shell for wide or multi-column app screens: `container mx-auto max-w-5xl px-3 py-3 sm:px-4 sm:py-6`          |
 | `.feed-shell`             | Root page shell for single-column timelines, detail pages, search, hashtags, and notifications: `max-w-2xl`            |
 | `.profile-shell`          | Root page shell for profile pages: `max-w-3xl`                                                                         |
-| `.feed-column`            | Inner feed column used inside wide grid screens: centered `max-w-2xl`, left-aligned at `lg`                            |
 | `.soft-surface`           | Tokenized inline/list surface with `rounded-2xl`, base borders, translucent base background, and dark hover states     |
 | `.dropdown-surface`       | Tokenized dropdown/popover surface with base border, translucent base background, shadow, and blur                     |
 | `.muted-text`             | Muted text color: `text-base-content/60`                                                                               |
@@ -53,27 +74,30 @@ Defined in `app.css`:
 
 ## Layout
 
-| Screen category | Utility          | Width       | Used for                                                    |
-| --------------- | ---------------- | ----------- | ----------------------------------------------------------- |
-| Wide shell      | `.page-shell`    | `max-w-5xl` | Feed with sidebar and settings/account screens              |
-| Feed shell      | `.feed-shell`    | `max-w-2xl` | Timelines, post detail, search, hashtags, and notifications |
-| Profile shell   | `.profile-shell` | `max-w-3xl` | Profile header plus profile tabs                            |
+| Screen category | Utility          | Width       | Used for                                                             |
+| --------------- | ---------------- | ----------- | --------------------------------------------------------------------- |
+| Wide shell      | `.page-shell`    | `max-w-5xl` | Settings/account screens                                             |
+| Feed shell      | `.feed-shell`    | `max-w-2xl` | Home feed, timelines, post detail, search, hashtags, and notifications |
+| Profile shell   | `.profile-shell` | `max-w-3xl` | Profile header plus profile tabs                                     |
 
-| Property     | Value                                                              |
-| ------------ | ------------------------------------------------------------------ |
-| Feed column  | `.feed-column` (`max-w-2xl`)                                       |
-| Sidebar      | `18rem` — hidden below lg breakpoint                               |
-| Content grid | `grid-cols-1 sm:gap-6 lg:grid-cols-[18rem_minmax(0,1fr)] lg:gap-8` |
-| Breakpoints  | sm=640px, md=768px, lg=1024px                                      |
+Breakpoints: sm=640px, md=768px, lg=1024px. The home feed is single-column
+at every width — no sidebar grid.
 
 ## Component Inventory
 
 ### `Navbar`
 
-Fixed top navigation bar. Contains logo, primary links (home, search,
-notifications), and user avatar menu (profile, settings, logout). The theme
-control (light / dark / system) lives in Settings, gated to authenticated
-users; unauthenticated visitors always see the system theme.
+Fixed top navigation bar. Wordmark: `font-serif` + restrained
+`from-primary to-primary/70` gradient. Icon-only throughout (no text labels,
+no breakpoint-dependent sizing) so the bar never crowds the centered
+wordmark and behaves identically at every width; `aria-label`/`title` carry
+the names. Links split by role, not all on one side: `navbar-start` holds
+wayfinding (home, search) in a shared pill; `navbar-end` holds
+personal/account items (notifications, user menu) in their own pill next to
+the avatar, balancing the bar 2-and-2. Both pills reuse `ControlBar`'s
+active-tab fill (`bg-primary`) to mark the current route. User menu (avatar
++ chevron) opens profile/settings/logout; theme control lives in Settings,
+gated to authenticated users.
 
 ### `Avatar`
 
@@ -93,8 +117,10 @@ like form handles mutation and rollback, while a large heart overlay uses
 
 ### `UserCard`
 
-Compact profile card (avatar, display name, username, bio excerpt,
-follower/following/post counts). Used in sidebar trending and suggestions.
+Compact identity strip at the top of the home feed: avatar, display name,
+username, a "View" link to the profile, and an inline follower/following/post
+count row below a divider. No cover-image treatment — deliberately not a
+second copy of the full `UserHeader` profile card.
 
 ### `UserHeader`
 
@@ -106,9 +132,14 @@ access.
 
 ### `CreatePost`
 
-Post composer with expandable textarea (`FormattedContent` preview), image
-upload button (triggers `POST /uploads`), and submit. Supports `inReplyToId`
-prop for reply creation.
+Progressive-disclosure composer: collapses to a single-line `font-serif`
+prompt pill, expanding on focus/click to the full textarea
+(`FormattedContent` preview), image upload button (triggers
+`POST /uploads`), and submit. Collapses back after a successful post or on
+blur while empty; the `focusout` handler defers its `document.activeElement`
+check (rather than trusting `relatedTarget`, which is unset when the expand
+button itself gets unmounted mid-click) so it doesn't collapse mid-click on
+its own controls. Supports `inReplyToId` prop for reply creation.
 
 ### `FormattedContent`
 
@@ -139,8 +170,13 @@ centered spinner. `ToastProvider` — toast queue context and renderer.
 `PostList` / `UserList` — list containers. `QuoteEmbed` / `ReplyComposer` —
 inline post context components. `ControlBar` — profile action strip.
 
-Login/register use `GlassCard` with `Field`/`FormInput` directly in a single
-centered card — no separate hero panel or icon-prefixed input variant.
+Login/register share `AuthShell` (`eyebrow`/`heading`/`description` props +
+a `children` snippet for the page's own `<form>`), a two-panel layout on
+`lg+`: a `font-serif` brand panel (dot-grid texture, ember glow, forced to
+the dark theme via a scoped `data-theme="dark"` regardless of the page's
+active theme) beside the form card, collapsing to a single centered column
+below `lg`. `AuthShell` owns only the chrome — form fields, validation, and
+submission stay in each page.
 
 ## Icons
 
