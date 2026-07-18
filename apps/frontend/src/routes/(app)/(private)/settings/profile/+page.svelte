@@ -26,22 +26,32 @@
   let userOverride = $state<Partial<typeof data.currentUser>>({});
   let user = $derived({ ...data.currentUser!, ...userOverride });
 
-  // Track visual state of images before upload
-  let profilePreview = $derived(
-    avatarFile
-      ? URL.createObjectURL(avatarFile)
-      : data.currentUser?.profilePhotoKey
-        ? imageUrl(data.currentUser.profilePhotoKey)
-        : "",
-  );
+  // Track visual state of images before upload. Object URLs are created here
+  // (not in $derived) so the cleanup return revokes the previous URL on every
+  // change and on unmount, avoiding a blob URL leak.
+  let profilePreview = $state("");
+  $effect(() => {
+    if (avatarFile) {
+      const url = URL.createObjectURL(avatarFile);
+      profilePreview = url;
+      return () => URL.revokeObjectURL(url);
+    }
+    profilePreview = data.currentUser?.profilePhotoKey
+      ? imageUrl(data.currentUser.profilePhotoKey)
+      : "";
+  });
 
-  let coverPreview = $derived(
-    coverFile
-      ? URL.createObjectURL(coverFile)
-      : data.currentUser?.coverPhotoKey
-        ? imageUrl(data.currentUser.coverPhotoKey)
-        : "",
-  );
+  let coverPreview = $state("");
+  $effect(() => {
+    if (coverFile) {
+      const url = URL.createObjectURL(coverFile);
+      coverPreview = url;
+      return () => URL.revokeObjectURL(url);
+    }
+    coverPreview = data.currentUser?.coverPhotoKey
+      ? imageUrl(data.currentUser.coverPhotoKey)
+      : "";
+  });
 
   let avatarInput: HTMLInputElement;
   let coverInput: HTMLInputElement;
