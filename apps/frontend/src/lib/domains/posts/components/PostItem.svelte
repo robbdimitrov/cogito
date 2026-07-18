@@ -223,26 +223,24 @@
                   if (isReposting) return () => {};
                   isReposting = true;
                   const wasReposted = reposted;
+                  const previousDelta = optimisticRepostsDelta;
                   optimisticRepostOverride = !wasReposted;
                   optimisticRepostsDelta += wasReposted ? -1 : 1;
 
                   return async ({ result, update }) => {
                     isReposting = false;
-                    optimisticRepostOverride = null;
-                    optimisticRepostsDelta = 0;
 
-                    if (result.type !== "failure") {
-                      await update({ invalidateAll: false });
+                    if (result.type === "failure") {
+                      optimisticRepostOverride = wasReposted;
+                      optimisticRepostsDelta = previousDelta;
+                      return;
                     }
+                    await update({ invalidateAll: false });
                   };
                 }}
               >
                 <input type="hidden" name="postId" value={displayPost.id} />
-                <input
-                  type="hidden"
-                  name="reposted"
-                  value={String(displayPost.reposted ?? false)}
-                />
+                <input type="hidden" name="reposted" value={String(reposted)} />
               </form>
 
               <RepostMenu
@@ -271,26 +269,24 @@
                   if (isLiking) return () => {};
                   isLiking = true;
                   const wasLiked = liked;
+                  const previousDelta = optimisticLikesDelta;
                   optimisticLikeOverride = !wasLiked;
                   optimisticLikesDelta += wasLiked ? -1 : 1;
 
                   return async ({ result, update }) => {
                     isLiking = false;
-                    optimisticLikeOverride = null;
-                    optimisticLikesDelta = 0;
 
-                    if (result.type !== "failure") {
-                      await update({ invalidateAll: false });
+                    if (result.type === "failure") {
+                      optimisticLikeOverride = wasLiked;
+                      optimisticLikesDelta = previousDelta;
+                      return;
                     }
+                    await update({ invalidateAll: false });
                   };
                 }}
               >
                 <input type="hidden" name="postId" value={displayPost.id} />
-                <input
-                  type="hidden"
-                  name="liked"
-                  value={String(displayPost.liked ?? false)}
-                />
+                <input type="hidden" name="liked" value={String(liked)} />
                 <button
                   type="submit"
                   class="action-pill {liked
