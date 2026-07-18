@@ -72,6 +72,9 @@ func loggerMiddleware() func(http.Handler) http.Handler {
 			if rec.status == 0 {
 				rec.status = http.StatusOK
 			}
+			if r.URL.Path == "/" { // k3s probe path; skip to avoid drowning out real traffic
+				return
+			}
 			slog.Info("http request",
 				"request_id", getRequestID(r),
 				"method", r.Method,
