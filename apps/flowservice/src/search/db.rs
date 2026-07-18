@@ -148,6 +148,10 @@ impl RecentSearchDb for DatabasePool {
     }
 }
 
+// tonic::Status is the codebase-wide gRPC error type, used unboxed in every
+// tonic-generated trait signature; boxing it only here would just force an
+// unbox at the one call site for no stack-size benefit.
+#[allow(clippy::result_large_err)]
 pub(crate) fn validate_recent_search(
     entity_type: &str,
     reference: &str,
