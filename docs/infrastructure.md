@@ -92,14 +92,19 @@ Use `FORCE_BACKFILL=1 scripts/deploy.sh` to deliberately delete and rerun it,
 for example after resetting the search index.
 
 The four Rust services (`authservice`, `userservice`, `imageservice`,
-`flowservice`) build on `rust:1.95-bookworm` with `cargo-chef` and run on
-`debian:bookworm-slim`, not Alpine/musl/`scratch` like the Go services.
+`flowservice`) build on `rust:1.95-trixie` with `cargo-chef` and run on
+`debian:trixie-slim`, not Alpine/musl/`scratch` like the Go services.
 Alpine's musl toolchain compiles noticeably slower for this dependency set
 (sqlx, tonic, and `flowservice`'s cmake-built `rdkafka` in particular), and
 `scratch` requires fully static binaries, which glibc doesn't produce by
 default. `cargo-chef` plus `--mount=type=cache` on the registry and `target`
 directories keep dependency rebuilds fast and shared across all four
 Dockerfiles regardless of Docker layer cache invalidation.
+
+All base images are pinned to a specific version rather than a floating
+variant tag: `golang:1.26.5-alpine` (apigateway, postservice), `node:24-alpine`
+(frontend, current Node LTS), `rust:1.95-trixie`/`debian:trixie-slim` (the
+four Rust services, current Debian stable), `postgres:18.4-alpine` (database).
 
 ## Init Containers
 
