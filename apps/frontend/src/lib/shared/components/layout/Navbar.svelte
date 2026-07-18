@@ -2,16 +2,13 @@
   import { resolve } from "$app/paths";
   import { page } from "$app/state";
   import type { User } from "$lib/domains/users/model";
-  import { getThemeContext } from "$lib/shared/theme.svelte";
   import Avatar from "$lib/shared/components/ui/Avatar.svelte";
   import {
     Home,
     LogOut,
-    Moon,
     Bell,
     Search,
     Settings,
-    Sun,
     User as UserIcon,
   } from "@lucide/svelte";
   import { onMount } from "svelte";
@@ -26,13 +23,8 @@
     unreadCount?: number;
   } = $props();
 
-  const theme = getThemeContext();
   let menuOpen = $state(false);
   let menu = $state<HTMLDivElement>();
-
-  function toggleTheme(): void {
-    theme.set(theme.resolved === "light" ? "dark" : "light");
-  }
 
   onMount(() => {
     const closeOnOutsideClick = (event: MouseEvent) => {
@@ -97,19 +89,6 @@
   </div>
 
   <div class="navbar-end gap-1">
-    <button
-      type="button"
-      onclick={toggleTheme}
-      class="btn btn-ghost btn-circle hover:bg-white/40 dark:hover:bg-white/10"
-      aria-label="Toggle theme"
-    >
-      {#if theme.resolved === "light"}
-        <Sun class="size-5" aria-hidden="true" />
-      {:else}
-        <Moon class="size-5" aria-hidden="true" />
-      {/if}
-    </button>
-
     {#if user}
       <div class="dropdown dropdown-end" bind:this={menu}>
         <button

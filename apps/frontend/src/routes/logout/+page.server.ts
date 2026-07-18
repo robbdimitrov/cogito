@@ -20,6 +20,7 @@ export const actions = {
         secure: true,
         sameSite: "strict",
       });
+      event.cookies.delete("theme", { path: "/" });
     }
 
     redirect(303, "/login");

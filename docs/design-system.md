@@ -6,7 +6,8 @@ Themes are defined CSS-first in `src/app.css` using `@plugin "daisyui/theme"`.
 The `data-theme` attribute on `<html>` selects the active theme. Theme
 preference persists via a `theme` cookie (1-year max-age, SameSite=Lax) and
 `localStorage`; the cookie is read server-side in the root `+layout.server.ts`
-to set the initial `data-theme` on SSR and prevent FOUC.
+to set the initial `data-theme` on SSR and prevent FOUC. Logout deletes the
+`theme` cookie, resetting the preference to `system`.
 
 ### Light Theme (custom)
 
@@ -70,8 +71,9 @@ Defined in `app.css`:
 ### `Navbar`
 
 Fixed top navigation bar. Contains logo, primary links (home, search,
-notifications), user avatar menu (profile, settings, logout), and theme toggle
-(light / dark / system).
+notifications), and user avatar menu (profile, settings, logout). The theme
+control (light / dark / system) lives in Settings, gated to authenticated
+users; unauthenticated visitors always see the system theme.
 
 ### `Avatar`
 
