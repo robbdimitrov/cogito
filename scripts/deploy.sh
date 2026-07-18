@@ -611,7 +611,7 @@ print_summary() {
   Frontend       http://${APP_HOST}:${LOCAL_PORT}
   Gateway        in-cluster: http://apigateway:8080
   Namespace      ${NS}
-  Registry       ${REGISTRY}
+  Image prefix   ${REGISTRY}
   Context        $(kubectl config current-context 2>/dev/null || echo "unknown")
 
   Port-forward   supervisor pid: $(cat "${PORT_FORWARD_PID_FILE}" 2>/dev/null || echo "unknown")
