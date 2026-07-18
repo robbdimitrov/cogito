@@ -7,7 +7,7 @@ set -euo pipefail
 NS="${NS:-cogito}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 K8S_DIR="$ROOT/deploy"
-REGISTRY="${REGISTRY:-localhost:5000/cogito}"
+REGISTRY="${REGISTRY:-cogito}"
 APP_HOST="${APP_HOST:-cogito.localhost}"
 LOCAL_PORT="${LOCAL_PORT:-8080}"
 REMOTE_PORT="${REMOTE_PORT:-8080}"
@@ -262,15 +262,10 @@ init_image_tags() {
   USERSERVICE_IMAGE_TAG="${USERSERVICE_IMAGE_TAG:-$(context_checksum apps/userservice pkg/pb)}"
 }
 
-# Queried from a container on the daemon's own network; `docker manifest`
-# inspect can't reach a registry only published inside colima's VM.
+# k3s here shares the local Docker daemon (cri-dockerd) with `docker build`,
+# so a built image is already schedulable with no registry involved.
 image_exists() {
-  local image="$1"
-  local host_and_repo="${image%:*}" tag="${image##*:}"
-  local host="${host_and_repo%%/*}" repo="${host_and_repo#*/}"
-  docker run --rm --network host alpine:3.21 wget -q --spider \
-    --header='Accept: application/vnd.oci.image.index.v1+json, application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.docker.distribution.manifest.v2+json' \
-    "http://${host}/v2/${repo}/manifests/${tag}" >/dev/null 2>&1
+  docker image inspect "$1" >/dev/null 2>&1
 }
 
 build_one_image() {

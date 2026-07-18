@@ -42,7 +42,7 @@ spec:
       terminationGracePeriodSeconds: 60
       containers:
       - name: userservice
-        image: localhost:5000/cogito/userservice
+        image: cogito/userservice
         imagePullPolicy: IfNotPresent
         securityContext:
           allowPrivilegeEscalation: false

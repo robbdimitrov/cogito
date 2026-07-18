@@ -67,6 +67,11 @@ terminationGracePeriodSeconds=60.
 
 `scripts/deploy.sh` applies manifests in stages: static policy resources,
 infra dependencies, database, application services, then the broker backfill.
+Images are built straight into the k3s node's Docker daemon and never
+pushed anywhere — this only works because colima's single-node k3s uses
+that same daemon as its container runtime (cri-dockerd); every workload
+sets `imagePullPolicy: IfNotPresent` so kubelet uses the local image
+instead of trying to pull one.
 Custom images are tagged with a stable 12-character SHA-256 checksum of each
 component's build inputs, so an apigateway-only change does not create new tags
 for frontend, database, or the other services. Override
@@ -90,7 +95,7 @@ for example after resetting the search index.
 
 | Deployment | Init image                     | Action                                            |
 | ---------- | ------------------------------ | ------------------------------------------------- |
-| apigateway | localhost:5000/cogito/database | Runs all pending migrations before gateway starts |
+| apigateway | cogito/database | Runs all pending migrations before gateway starts |
 
 ## Networking
 

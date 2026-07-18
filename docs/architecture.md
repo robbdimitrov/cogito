@@ -121,4 +121,4 @@ index in sync.
 | `make test`      | All unit tests (Go, Rust, frontend)             |
 
 Go services: `CGO_ENABLED=0` (scratch runtime). Image tag pattern:
-`localhost:5000/cogito/{service}` (configurable via `IMAGE_PREFIX`).
+`cogito/{service}` (configurable via `IMAGE_PREFIX`).

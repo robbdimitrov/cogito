@@ -49,7 +49,7 @@ spec:
       terminationGracePeriodSeconds: 60
       containers:
       - name: flowservice
-        image: localhost:5000/cogito/flowservice
+        image: cogito/flowservice
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5050

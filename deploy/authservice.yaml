@@ -42,7 +42,7 @@ spec:
       terminationGracePeriodSeconds: 60
       containers:
       - name: authservice
-        image: localhost:5000/cogito/authservice
+        image: cogito/authservice
         imagePullPolicy: IfNotPresent
         securityContext:
           allowPrivilegeEscalation: false

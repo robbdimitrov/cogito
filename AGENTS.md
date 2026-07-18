@@ -21,8 +21,9 @@ The protobuf contract is `pkg/pb/cogito.proto`. gRPC services listen on port
 5050 by default, the image HTTP server listens on 8081, and the gateway and
 production frontend listen on 8080.
 
-Container images are tagged `localhost:5000/cogito/<service>`. Backend services
-use `DATABASE_URL` for PostgreSQL connectivity.
+Container images are tagged `cogito/<service>` and built directly into the
+local k3s node's Docker daemon — no registry involved. Backend services use
+`DATABASE_URL` for PostgreSQL connectivity.
 
 Before changing a service with a nested `AGENTS.md`, read it. Nested files
 contain only local invariants; this file remains the source of shared rules.

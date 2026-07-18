@@ -33,7 +33,7 @@ spec:
       automountServiceAccountToken: false
       containers:
       - name: frontend
-        image: localhost:5000/cogito/frontend
+        image: cogito/frontend
         imagePullPolicy: IfNotPresent
         securityContext:
           allowPrivilegeEscalation: false

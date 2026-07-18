@@ -42,7 +42,7 @@ spec:
       terminationGracePeriodSeconds: 60
       containers:
       - name: postservice
-        image: localhost:5000/cogito/postservice
+        image: cogito/postservice
         imagePullPolicy: IfNotPresent
         securityContext:
           allowPrivilegeEscalation: false

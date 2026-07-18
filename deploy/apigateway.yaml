@@ -42,7 +42,7 @@ spec:
       terminationGracePeriodSeconds: 60
       initContainers:
       - name: migration
-        image: localhost:5000/cogito/database
+        image: cogito/database
         imagePullPolicy: IfNotPresent
         env:
         - name: DATABASE_URL
@@ -57,7 +57,7 @@ spec:
               key: database-password
       containers:
       - name: apigateway
-        image: localhost:5000/cogito/apigateway
+        image: cogito/apigateway
         imagePullPolicy: IfNotPresent
         securityContext:
           allowPrivilegeEscalation: false
