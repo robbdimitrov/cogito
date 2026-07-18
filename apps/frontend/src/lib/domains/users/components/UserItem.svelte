@@ -56,10 +56,11 @@
 
             return async ({ result, update }) => {
               isActionLoading = false;
-              optimisticFollowOverride = null;
-              if (result.type !== "failure") {
-                await update({ invalidateAll: false });
+              if (result.type === "failure") {
+                optimisticFollowOverride = wasFollowed;
+                return;
               }
+              await update({ invalidateAll: false });
             };
           }}
         >
