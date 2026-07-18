@@ -21,7 +21,7 @@ export function createPagination<T>(
     if (loading || done || !cursor) return;
     loading = true;
     const next = await fetchPage(cursor);
-    extra = [...extra, ...next.items];
+    extra.push(...next.items);
     cursor = next.nextCursor;
     loading = false;
   }
