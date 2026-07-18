@@ -70,10 +70,14 @@ type mockBatchUserClient struct {
 	pb.UserServiceClient
 	users        map[int32]*pb.User
 	requestedIDs []int32
+	err          error
 }
 
 func (m *mockBatchUserClient) GetUsersByIds(ctx context.Context, in *pb.Ids, opts ...grpc.CallOption) (*pb.Users, error) {
 	m.requestedIDs = in.Ids
+	if m.err != nil {
+		return nil, m.err
+	}
 	var out []*pb.User
 	for _, id := range in.Ids {
 		if u, ok := m.users[id]; ok {

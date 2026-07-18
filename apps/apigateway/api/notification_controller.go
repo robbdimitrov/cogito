@@ -12,10 +12,11 @@ import (
 )
 
 type notificationController struct {
-	client pb.NotificationServiceClient
+	client     pb.NotificationServiceClient
+	userClient pb.UserServiceClient
 }
 
-func newNotificationController(addr string) *notificationController {
+func newNotificationController(addr string, userClient pb.UserServiceClient) *notificationController {
 	if addr == "" {
 		return &notificationController{}
 	}
@@ -24,7 +25,7 @@ func newNotificationController(addr string) *notificationController {
 		slog.Error("unable to create events client", "error", err)
 		os.Exit(1)
 	}
-	return &notificationController{client: pb.NewNotificationServiceClient(conn)}
+	return &notificationController{client: pb.NewNotificationServiceClient(conn), userClient: userClient}
 }
 
 type notification struct {
@@ -36,6 +37,7 @@ type notification struct {
 	EntityID   string `json:"entityId"`
 	Read       bool   `json:"read"`
 	Created    string `json:"created"`
+	Actor      *user  `json:"actor,omitempty"`
 }
 
 func (nc *notificationController) getNotifications(w http.ResponseWriter, r *http.Request) {
@@ -73,11 +75,50 @@ func (nc *notificationController) getNotifications(w http.ResponseWriter, r *htt
 		return
 	}
 
+	actors := nc.resolveActors(ctx, res.Notifications)
 	items := make([]notification, 0, len(res.Notifications))
 	for _, item := range res.Notifications {
-		items = append(items, mapNotification(item))
+		n := mapNotification(item)
+		if a, ok := actors[item.ActorId]; ok {
+			actor := a
+			n.Actor = &actor
+		}
+		items = append(items, n)
 	}
 	jsonResponse(w, http.StatusOK, map[string]any{"items": items, "nextCursor": res.NextCursor})
+}
+
+// resolveActors batch-fetches the actors referenced by a page of
+// notifications in a single call, returning a map keyed by user ID.
+func (nc *notificationController) resolveActors(ctx context.Context, items []*pb.Notification) map[int32]user {
+	if nc.userClient == nil {
+		return nil
+	}
+
+	idSet := make(map[int32]struct{})
+	for _, item := range items {
+		idSet[item.ActorId] = struct{}{}
+	}
+	if len(idSet) == 0 {
+		return nil
+	}
+
+	ids := make([]int32, 0, len(idSet))
+	for id := range idSet {
+		ids = append(ids, id)
+	}
+
+	res, err := nc.userClient.GetUsersByIds(ctx, &pb.Ids{Ids: ids})
+	if err != nil {
+		slog.Warn("resolving notification actors failed", "request_id", requestIDFromContext(ctx), "error_kind", grpcCode(err))
+		return nil
+	}
+
+	actors := make(map[int32]user, len(res.Users))
+	for _, u := range res.Users {
+		actors[u.Id] = mapUser(u)
+	}
+	return actors
 }
 
 func (nc *notificationController) markNotificationRead(w http.ResponseWriter, r *http.Request) {

@@ -256,12 +256,15 @@ Zero-value integer fields and null nested objects are omitted.
   "type": "like",
   "entityId": "string",
   "read": false,
-  "created": "2024-01-01T00:00:00Z"
+  "created": "2024-01-01T00:00:00Z",
+  "actor": {}
 }
 ```
 
 `type` ∈ `like`, `repost`, `reply`, `follow`. `entityId` is the post ID (string)
-for post events, empty for follows.
+for post events, empty for follows. `actor` is the batch-resolved User for
+`actorId`, omitted when the gateway can't resolve it (upstream error or a
+since-deleted user).
 
 **Session** —
 `{ "id": "string", "userId": 1, "created": "2024-01-01T00:00:00Z" }`

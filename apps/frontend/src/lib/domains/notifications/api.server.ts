@@ -5,7 +5,7 @@ import type { Notification } from "./model";
 const DEFAULT_PAGE_SIZE = 20;
 
 export interface NotificationPage {
-  notifications: Notification[];
+  items: Notification[];
   nextCursor: string | null;
 }
 
@@ -23,7 +23,7 @@ export async function getNotifications(
 
   const res = await api(`/notifications?${query}`);
   const unwrapped = await unwrap<NotificationPage>(res);
-  return unwrapped ?? { notifications: [], nextCursor: null };
+  return unwrapped ?? { items: [], nextCursor: null };
 }
 
 export async function markNotificationRead(

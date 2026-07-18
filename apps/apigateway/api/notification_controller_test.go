@@ -70,7 +70,8 @@ func TestNotificationControllerGetNotifications(t *testing.T) {
 			NextCursor:    "next",
 		},
 	}
-	controller := &notificationController{client: client}
+	userClient := &mockBatchUserClient{users: map[int32]*pb.User{8: {Id: 8, Username: "actor"}}}
+	controller := &notificationController{client: client, userClient: userClient}
 	req := httptest.NewRequest(http.MethodGet, "/notifications?cursor=abc&limit=5", nil)
 	req = setUserID(req, "7")
 	req = setRequestID(req, "req-1")
@@ -85,6 +86,9 @@ func TestNotificationControllerGetNotifications(t *testing.T) {
 		t.Fatalf("unexpected request: %+v", client.getReq)
 	}
 	assertNotificationMetadata(t, client.outgoingMD)
+	if len(userClient.requestedIDs) != 1 || userClient.requestedIDs[0] != 8 {
+		t.Fatalf("expected actor ids [8], got %v", userClient.requestedIDs)
+	}
 
 	var body struct {
 		Items      []notification `json:"items"`
@@ -95,6 +99,69 @@ func TestNotificationControllerGetNotifications(t *testing.T) {
 	}
 	if body.NextCursor != "next" || len(body.Items) != 1 || body.Items[0].ExternalID != 42 {
 		t.Fatalf("unexpected body: %+v", body)
+	}
+	if body.Items[0].Actor == nil || body.Items[0].Actor.ID != 8 || body.Items[0].Actor.Username != "actor" {
+		t.Fatalf("expected embedded actor 8, got %+v", body.Items[0].Actor)
+	}
+}
+
+func TestNotificationControllerGetNotifications_UnresolvableActor(t *testing.T) {
+	t.Setenv("INTERNAL_GRPC_TOKEN", "test-token")
+	client := &mockNotificationServiceClient{
+		notifications: &pb.Notifications{
+			Notifications: []*pb.Notification{{Id: 1, ExternalId: 42, UserId: 7, ActorId: 8, Type: "like", EntityId: "99", Created: "2026-01-01T00:00:00Z"}},
+		},
+	}
+	userClient := &mockBatchUserClient{users: map[int32]*pb.User{}}
+	controller := &notificationController{client: client, userClient: userClient}
+	req := httptest.NewRequest(http.MethodGet, "/notifications", nil)
+	req = setUserID(req, "7")
+	req = setRequestID(req, "req-1")
+	rec := httptest.NewRecorder()
+
+	controller.getNotifications(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d body %s", rec.Code, rec.Body.String())
+	}
+	var body struct {
+		Items []notification `json:"items"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
+		t.Fatalf("invalid json: %v", err)
+	}
+	if len(body.Items) != 1 || body.Items[0].Actor != nil {
+		t.Fatalf("expected nil actor for unresolvable actor id, got %+v", body.Items)
+	}
+}
+
+func TestNotificationControllerGetNotifications_ActorResolutionFails(t *testing.T) {
+	t.Setenv("INTERNAL_GRPC_TOKEN", "test-token")
+	client := &mockNotificationServiceClient{
+		notifications: &pb.Notifications{
+			Notifications: []*pb.Notification{{Id: 1, ExternalId: 42, UserId: 7, ActorId: 8, Type: "like", EntityId: "99", Created: "2026-01-01T00:00:00Z"}},
+		},
+	}
+	userClient := &mockBatchUserClient{err: context.DeadlineExceeded}
+	controller := &notificationController{client: client, userClient: userClient}
+	req := httptest.NewRequest(http.MethodGet, "/notifications", nil)
+	req = setUserID(req, "7")
+	req = setRequestID(req, "req-1")
+	rec := httptest.NewRecorder()
+
+	controller.getNotifications(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected 200 despite actor resolution failure, got %d body %s", rec.Code, rec.Body.String())
+	}
+	var body struct {
+		Items []notification `json:"items"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
+		t.Fatalf("invalid json: %v", err)
+	}
+	if len(body.Items) != 1 || body.Items[0].ExternalID != 42 || body.Items[0].Actor != nil {
+		t.Fatalf("expected notification returned with nil actor, got %+v", body.Items)
 	}
 }
 

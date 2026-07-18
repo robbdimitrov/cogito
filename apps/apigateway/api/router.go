@@ -87,7 +87,7 @@ func newRouter(authAddr, postAddr, userAddr, imageAddr, searchAddr, eventsAddr s
 		post:             post,
 		user:             newUserController(sharedUserClient, authAddr, sharedImgClient),
 		search:           newSearchController(searchClient, post),
-		notification:     newNotificationController(eventsAddr),
+		notification:     newNotificationController(eventsAddr, sharedUserClient),
 		imageAddr:        imageAddr,
 		imageHTTPBreaker: imageHTTPBreaker,
 		imageHTTP: &http.Client{
