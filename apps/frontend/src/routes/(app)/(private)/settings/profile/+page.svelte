@@ -90,7 +90,7 @@
 
     {#if form?.error}
       <div class="alert alert-error" role="alert">
-        <AlertCircle class="h-5 w-5 shrink-0" aria-hidden="true" />
+        <AlertCircle class="size-5 shrink-0" aria-hidden="true" />
         <span>{form.error}</span>
       </div>
     {/if}
@@ -146,18 +146,22 @@
           <div class="flex items-center gap-3">
             {#if avatarFile}
               <div
-                class="relative h-14 w-14 overflow-hidden rounded-full border border-base-content/10"
+                class="relative size-14 overflow-hidden rounded-full border border-base-content/10"
               >
                 <img
                   src={profilePreview}
                   alt="Avatar"
                   width="56"
                   height="56"
-                  class="h-full w-full object-cover"
+                  class="size-full object-cover"
                 />
               </div>
             {:else}
-              <Avatar name={user.name} size="lg" photoKey={user.profilePhotoKey} />
+              <Avatar
+                name={user.name}
+                size="lg"
+                photoKey={user.profilePhotoKey}
+              />
             {/if}
             <div class="flex gap-2">
               <button
@@ -173,7 +177,7 @@
                   class="btn btn-ghost btn-sm text-error"
                   onclick={() => removeImage("avatar")}
                 >
-                  <Trash2 class="h-4 w-4" />
+                  <Trash2 class="size-4" />
                 </button>
               {/if}
             </div>
@@ -198,7 +202,7 @@
                   alt="Cover"
                   width="128"
                   height="64"
-                  class="h-full w-full object-cover"
+                  class="size-full object-cover"
                 />
               </div>
             {:else}
@@ -220,7 +224,7 @@
                   class="btn btn-ghost btn-sm text-error"
                   onclick={() => removeImage("cover")}
                 >
-                  <Trash2 class="h-4 w-4" />
+                  <Trash2 class="size-4" />
                 </button>
               {/if}
             </div>

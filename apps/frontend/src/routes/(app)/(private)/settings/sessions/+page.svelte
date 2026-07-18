@@ -23,7 +23,7 @@
   <GlassCard>
     <div class="card-body p-4 sm:p-6">
       <div class="alert alert-error" role="alert">
-        <AlertCircle class="h-5 w-5 shrink-0" aria-hidden="true" />
+        <AlertCircle class="size-5 shrink-0" aria-hidden="true" />
         <span>{form?.error || data.error}</span>
       </div>
     </div>
@@ -32,7 +32,7 @@
   <GlassCard>
     <div class="card-body items-center text-center text-base-content/70 py-12">
       <XCircle
-        class="h-12 w-12 mb-2 text-base-content opacity-60"
+        class="size-12 mb-2 text-base-content opacity-60"
         aria-hidden="true"
       />
       <p class="text-base">No active sessions found.</p>
@@ -70,7 +70,7 @@
                 <td>
                   <div class="flex min-h-12 items-center gap-3">
                     <Monitor
-                      class="h-5 w-5 shrink-0 opacity-60"
+                      class="size-5 shrink-0 opacity-60"
                       aria-hidden="true"
                     />
                     <span class="text-base font-medium">Browser</span>
@@ -117,7 +117,7 @@
                           <span class="loading loading-spinner loading-xs"
                           ></span>
                         {:else}
-                          <X class="h-4 w-4" aria-hidden="true" />
+                          <X class="size-4" aria-hidden="true" />
                         {/if}
                         Terminate
                       </button>

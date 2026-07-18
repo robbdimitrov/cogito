@@ -60,7 +60,7 @@
       onclick={onClose}
       aria-label="Close"
     >
-      <X class="h-4 w-4" aria-hidden="true" />
+      <X class="size-4" aria-hidden="true" />
     </button>
     <form
       method="POST"
@@ -91,11 +91,15 @@
     >
       <div class="flex gap-3 pr-10 sm:gap-4">
         <div class="hidden shrink-0 sm:block">
-          <Avatar name={user?.name} size="md" photoKey={user?.profilePhotoKey} />
+          <Avatar
+            name={user?.name}
+            size="md"
+            photoKey={user?.profilePhotoKey}
+          />
         </div>
         <div class="relative min-w-0 flex-1">
           <Pen
-            class="pointer-events-none absolute left-3 top-3.5 h-5 w-5 opacity-60"
+            class="pointer-events-none absolute left-3 top-3.5 size-5 opacity-60"
           />
           <textarea
             bind:this={textareaRef}
@@ -123,7 +127,7 @@
               }}
               class="absolute right-2 top-2 rounded-full bg-black/50 p-1 text-white transition-colors hover:bg-black/70"
             >
-              <X class="h-4 w-4" />
+              <X class="size-4" />
             </button>
           </div>
         </div>
@@ -140,7 +144,7 @@
             {#if uploadingImage}
               <span class="loading loading-spinner loading-xs"></span>
             {:else}
-              <ImageIcon class="h-5 w-5" />
+              <ImageIcon class="size-5" />
             {/if}
           </button>
           <input
@@ -165,7 +169,7 @@
             : 'shadow-none'}"
           disabled={isPending || (!content.trim() && !imageBlob)}
         >
-          <Send class="h-4 w-4" />
+          <Send class="size-4" />
           Post
         </button>
       </div>

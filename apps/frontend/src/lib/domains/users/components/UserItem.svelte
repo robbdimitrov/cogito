@@ -81,10 +81,10 @@
             {#if isActionLoading}
               <span class="loading loading-spinner loading-xs"></span>
             {:else if followed}
-              <Check class="h-4 w-4" />
+              <Check class="size-4" />
               Following
             {:else}
-              <UserPlus class="h-4 w-4" />
+              <UserPlus class="size-4" />
               Follow
             {/if}
           </button>

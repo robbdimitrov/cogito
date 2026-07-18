@@ -14,7 +14,7 @@
 
   let {
     icon: Icon,
-    iconClass = "h-4 w-4",
+    iconClass = "size-4",
     ariaLabel,
     buttonClass,
     count,

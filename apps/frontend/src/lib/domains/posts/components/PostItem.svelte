@@ -156,7 +156,7 @@
                 onclick={() => (showDeleteModal = true)}
                 aria-label="Delete post"
               >
-                <Trash2 class="h-4 w-4" />
+                <Trash2 class="size-4" />
               </button>
             {/if}
           </div>
@@ -182,7 +182,7 @@
                   class="pointer-events-none absolute inset-0 flex items-center justify-center"
                 >
                   <Heart
-                    class="h-20 w-20 animate-like-burst fill-white text-white drop-shadow-lg"
+                    class="size-20 animate-like-burst fill-white text-white drop-shadow-lg"
                   />
                 </div>
               {/if}
@@ -207,7 +207,7 @@
               class="action-pill gap-1.5 px-3 opacity-60 hover:bg-primary/5 hover:text-primary hover:opacity-100"
               aria-label="Replies"
             >
-              <MessageSquare class="h-4 w-4" />
+              <MessageSquare class="size-4" />
               <span class="text-xs sm:text-sm font-semibold"
                 >{displayPost.replies ?? 0}</span
               >
@@ -296,7 +296,7 @@
                   aria-label={liked ? "Unlike post" : "Like post"}
                 >
                   <Heart
-                    class="h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] {liked
+                    class="size-4 transition-transform duration-500 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] {liked
                       ? 'scale-125'
                       : 'scale-100'}"
                     fill={liked ? "currentColor" : "none"}

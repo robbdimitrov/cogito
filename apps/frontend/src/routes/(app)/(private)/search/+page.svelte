@@ -143,14 +143,14 @@
   {:else if !q}
     <GlassCard>
       <div class="card-body muted-text items-center py-12 text-center">
-        <Search class="mb-2 h-12 w-12 text-base-content opacity-50" />
+        <Search class="mb-2 size-12 text-base-content opacity-50" />
         <p>Enter a search query to find posts and people.</p>
       </div>
     </GlassCard>
   {:else if groupedResults.users.length === 0 && groupedResults.posts.length === 0}
     <GlassCard>
       <div class="card-body muted-text items-center py-12 text-center">
-        <Search class="mb-2 h-12 w-12 text-base-content opacity-50" />
+        <Search class="mb-2 size-12 text-base-content opacity-50" />
         <p>No results found for "{q}".</p>
       </div>
     </GlassCard>

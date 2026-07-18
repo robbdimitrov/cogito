@@ -22,7 +22,7 @@
 
     {#if form?.error}
       <div class="alert alert-error" role="alert">
-        <AlertCircle class="h-5 w-5 shrink-0" aria-hidden="true" />
+        <AlertCircle class="size-5 shrink-0" aria-hidden="true" />
         <span>{form.error}</span>
       </div>
     {/if}

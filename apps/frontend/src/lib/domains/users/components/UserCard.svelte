@@ -22,7 +22,8 @@
     <span class="muted-text hidden shrink-0 text-xs sm:block">
       <span class="font-bold text-base-content">{user.posts ?? 0}</span> Cogito
       <span class="mx-1">·</span>
-      <span class="font-bold text-base-content">{user.following ?? 0}</span> Following
+      <span class="font-bold text-base-content">{user.following ?? 0}</span>
+      Following
       <span class="mx-1">·</span>
       <span class="font-bold text-base-content">{user.followers ?? 0}</span> Followers
     </span>

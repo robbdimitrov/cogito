@@ -14,10 +14,10 @@
     aria-hidden="true"
   >
     <div
-      class="animate-pulse-slow absolute -top-32 -right-32 h-160 w-160 rounded-full bg-primary/20 opacity-70 mix-blend-multiply blur-[100px] dark:bg-primary/10 dark:mix-blend-lighten"
+      class="animate-pulse-slow absolute -top-32 -right-32 size-160 rounded-full bg-primary/20 opacity-70 mix-blend-multiply blur-[100px] dark:bg-primary/10 dark:mix-blend-lighten"
     ></div>
     <div
-      class="animate-pulse-slow absolute -bottom-40 -left-32 h-180 w-180 rounded-full bg-secondary/20 opacity-70 mix-blend-multiply blur-[120px] [animation-delay:1s] dark:bg-secondary/10 dark:mix-blend-lighten"
+      class="animate-pulse-slow absolute -bottom-40 -left-32 size-180 rounded-full bg-secondary/20 opacity-70 mix-blend-multiply blur-[120px] [animation-delay:1s] dark:bg-secondary/10 dark:mix-blend-lighten"
     ></div>
   </div>
 

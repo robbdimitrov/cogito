@@ -46,7 +46,7 @@
         height={pixelSizes[size]}
         loading="lazy"
         decoding="async"
-        class="h-full w-full object-cover"
+        class="size-full object-cover"
       />
     {:else}
       <span>{initial}</span>

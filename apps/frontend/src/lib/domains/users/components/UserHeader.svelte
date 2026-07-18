@@ -39,7 +39,7 @@
         alt="Cover"
         width="768"
         height="128"
-        class="absolute inset-0 h-full w-full object-cover"
+        class="absolute inset-0 size-full object-cover"
       />
     {:else}
       <div
@@ -61,7 +61,7 @@
             href={resolve("/settings/profile")}
             class="btn btn-outline btn-sm gap-1 rounded-full px-3 sm:px-4"
           >
-            <Pen class="h-4 w-4" />
+            <Pen class="size-4" />
             <span class="hidden xs:inline">Edit Profile</span>
             <span class="xs:hidden">Edit</span>
           </a>
@@ -71,7 +71,7 @@
             aria-label="Settings"
             title="Settings"
           >
-            <Settings class="h-4 w-4" />
+            <Settings class="size-4" />
           </a>
         </div>
       {:else if currentUser}
@@ -101,10 +101,10 @@
             class={`btn btn-sm gap-1 rounded-full px-3 sm:px-4 ${followed ? "btn-outline" : "btn-primary"}`}
           >
             {#if followed}
-              <Check class="h-4 w-4" />
+              <Check class="size-4" />
               Following
             {:else}
-              <UserPlus class="h-4 w-4" />
+              <UserPlus class="size-4" />
               Follow
             {/if}
           </button>
@@ -129,7 +129,7 @@
         </p>
       {/if}
       <div class="mt-3 flex items-center gap-2 text-xs opacity-60">
-        <Calendar class="h-4 w-4" />
+        <Calendar class="size-4" />
         <span>Joined {formatDate(user.created)}</span>
       </div>
     </div>

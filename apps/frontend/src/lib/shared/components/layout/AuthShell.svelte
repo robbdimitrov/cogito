@@ -24,7 +24,7 @@
           class="text-xs font-semibold uppercase tracking-wider text-base-content/50"
           >{eyebrow}</span
         >
-        <h1 class="card-title mt-1 mb-1 text-2xl">{heading}</h1>
+        <h1 class="card-title my-1 text-2xl">{heading}</h1>
         <p class="mb-6 text-base-content/60">{description}</p>
         {@render children()}
       </div>

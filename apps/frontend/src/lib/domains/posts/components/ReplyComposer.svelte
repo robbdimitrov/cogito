@@ -55,7 +55,7 @@
     {#if isSubmitting}
       <span class="loading loading-spinner loading-xs"></span>
     {:else}
-      <Send class="h-4 w-4" />
+      <Send class="size-4" />
     {/if}
   </button>
 </form>

@@ -79,7 +79,7 @@
   disabled={isReposting}
 >
   <Repeat
-    class="h-4 w-4 transition-transform duration-500 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] {reposted
+    class="size-4 transition-transform duration-500 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] {reposted
       ? 'rotate-180 scale-110'
       : 'rotate-0 scale-100'}"
   />
@@ -95,7 +95,7 @@
   >
     <li>
       <button type="button" onclick={handleRepost} disabled={isReposting}>
-        <Repeat class="h-4 w-4" />
+        <Repeat class="size-4" />
         {reposted ? "Undo Repost" : "Repost"}
       </button>
     </li>
@@ -103,7 +103,7 @@
       <button type="button" onclick={handleQuote} disabled={isReposting}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          class="h-4 w-4"
+          class="size-4"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"

@@ -71,7 +71,7 @@
   <div class="feed-shell">
     <GlassCard>
       <div class="card-body items-center py-12 text-center">
-        <AlertTriangle class="mb-4 h-16 w-16 opacity-30" />
+        <AlertTriangle class="mb-4 size-16 opacity-30" />
         <p class="muted-text">Post not found.</p>
         <a href={resolve("/")} class="btn btn-primary btn-sm mt-4"
           >Back to Feed</a
@@ -86,7 +86,7 @@
         href={resolve("/")}
         class="btn btn-ghost btn-sm gap-1 rounded-full px-3"
       >
-        <ArrowLeft class="h-4 w-4" />
+        <ArrowLeft class="size-4" />
         Back
       </a>
     </div>
@@ -122,7 +122,7 @@
                   onclick={() => (showDeleteModal = true)}
                   aria-label="Delete post"
                 >
-                  <Trash2 class="h-4 w-4" />
+                  <Trash2 class="size-4" />
                 </button>
               {/if}
             </div>
@@ -182,7 +182,7 @@
                       : 'opacity-60 hover:bg-success/10 hover:text-success hover:opacity-100'}"
                     disabled={isReposting}
                   >
-                    <Repeat class="h-4 w-4 sm:h-5 sm:w-5" />
+                    <Repeat class="size-4 sm:h-5 sm:w-5" />
                     {post.reposts}
                   </button>
                 </form>
@@ -223,7 +223,7 @@
                     disabled={isLiking}
                   >
                     <Heart
-                      class="h-4 w-4 sm:h-5 sm:w-5"
+                      class="size-4 sm:h-5 sm:w-5"
                       fill={post.liked ? "currentColor" : "none"}
                     />
                     {post.likes}
@@ -232,14 +232,14 @@
               {:else}
                 <LoginGateButton
                   icon={Repeat}
-                  iconClass="h-4 w-4 sm:h-5 sm:w-5"
+                  iconClass="size-4 sm:h-5 sm:w-5"
                   ariaLabel="Log in to repost"
                   buttonClass="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 opacity-60 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4"
                   count={post.reposts}
                 />
                 <LoginGateButton
                   icon={Heart}
-                  iconClass="h-4 w-4 sm:h-5 sm:w-5"
+                  iconClass="size-4 sm:h-5 sm:w-5"
                   ariaLabel="Log in to like"
                   buttonClass="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 opacity-60 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4"
                   count={post.likes}

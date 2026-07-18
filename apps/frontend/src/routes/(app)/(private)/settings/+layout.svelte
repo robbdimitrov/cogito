@@ -1,7 +1,15 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
   import type { Pathname } from "$app/types";
-  import { User, Lock, Monitor, Laptop, Sun, Moon, LogOut } from "@lucide/svelte";
+  import {
+    User,
+    Lock,
+    Monitor,
+    Laptop,
+    Sun,
+    Moon,
+    LogOut,
+  } from "@lucide/svelte";
   import { page } from "$app/state";
   import { getThemeContext } from "$lib/shared/theme.svelte";
 
@@ -45,14 +53,14 @@
               : ''}"
           >
             <div
-              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg {page.url.pathname.startsWith(
+              class="flex size-8 shrink-0 items-center justify-center rounded-lg {page.url.pathname.startsWith(
                 item.href,
               )
                 ? 'bg-primary/20 text-primary'
                 : 'bg-base-300'}"
             >
               <item.icon
-                class="h-4 w-4 {page.url.pathname.startsWith(item.href)
+                class="size-4 {page.url.pathname.startsWith(item.href)
                   ? ''
                   : 'opacity-70'}"
               />
@@ -97,9 +105,9 @@
             class="group flex w-full items-center gap-3 rounded-xl p-3 text-error outline-none transition-colors duration-200 hover:bg-error/10 focus-visible:bg-error/10"
           >
             <div
-              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-error/10 text-error"
+              class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-error/10 text-error"
             >
-              <LogOut class="h-4 w-4" />
+              <LogOut class="size-4" />
             </div>
             <span>Log out</span>
           </button>
