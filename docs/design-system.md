@@ -190,14 +190,29 @@ post; the home feed has no inline composer of its own.
 Compact user row: avatar + name + username + follow/unfollow button. Used in
 followers/following lists and search results.
 
+### `SearchTypeahead`
+
+Input plus its suggestion/recent-search dropdown read as one combobox: when
+the dropdown is open, the input's bottom corners and the dropdown's top
+corners flatten (`rounded-b-none` / `rounded-t-none`) and sit flush (no
+gap), instead of floating as a separate `.dropdown-surface` card. On the
+search page, submitting is Enter-only — there is no separate Search button.
+With an empty query, the page shows a "Popular" section (`PostList` of
+`GET /search/popular`, paginated like the feed) instead of the results list,
+falling back to the empty-query message if there are no popular posts.
+
 ### Auth, Primitives, Containers
 
 `ConfirmModal` — accessible `role="dialog"` confirmation. `Field` — label +
 input wrapper. `FormInput` / `FormTextarea` — apply `.form-input` /
 `.form-textarea` utilities. `GlassCard` — `.glass-card` wrapper. `Loading` —
 centered spinner. `ToastProvider` — toast queue context and renderer.
-`PostList` / `UserList` — list containers. `QuoteEmbed` / `ReplyComposer` —
-inline post context components. `ControlBar` — profile action strip.
+`EmptyState` — shared `GlassCard` + centered icon/message empty-state shell
+(`icon`, `message`, optional `children` snippet for a CTA); used by the home
+feed, search, notifications, `PostList`, and `UserList`. `PostList` /
+`UserList` — list containers, falling back to `EmptyState` when empty.
+`QuoteEmbed` / `ReplyComposer` — inline post context components. `ControlBar`
+— profile action strip.
 `TabStrip` — shared `glass-surface tabs tabs-boxed` pill strip (`tabs:
 {name, href, isActive, count?}[]`); grid column count derives from
 `tabs.length`. Used by `ControlBar` (4 tabs, with counts) and the Settings

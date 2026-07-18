@@ -42,6 +42,9 @@
   let showRecent = $derived(
     inputFocused && !query.trim() && recentItems.length > 0,
   );
+  // Suggestions and recent-search panels never render together, so this is
+  // safe as a single flag driving the input/dropdown seam styling.
+  let dropdownVisible = $derived(open || showRecent);
 
   async function fetchSuggestions(q: string) {
     abortController?.abort();
@@ -204,7 +207,12 @@
 </script>
 
 <div class="relative flex-1" onfocusout={handleFocusOut}>
-  <label class="form-input flex items-center gap-2 rounded-2xl">
+  <label
+    class={[
+      "form-input flex items-center gap-2 rounded-2xl",
+      dropdownVisible && "rounded-b-none",
+    ]}
+  >
     <Search class="size-4 opacity-60" />
     <input
       bind:this={inputRef}
@@ -215,7 +223,7 @@
       onfocus={handleFocus}
       onkeydown={handleKeydown}
       role="combobox"
-      aria-expanded={open || showRecent}
+      aria-expanded={dropdownVisible}
       aria-controls="search-typeahead-listbox"
       aria-autocomplete="list"
     />
@@ -233,7 +241,7 @@
 
   {#if showRecent}
     <div
-      class="dropdown-surface absolute top-full z-50 mt-2 w-full overflow-hidden"
+      class="dropdown-surface absolute top-full z-50 w-full overflow-hidden rounded-t-none"
     >
       <div class="flex items-center justify-between px-3 py-2">
         <h2
@@ -300,7 +308,7 @@
 
   {#if open}
     <div
-      class="dropdown-surface absolute top-full z-50 mt-2 w-full overflow-hidden"
+      class="dropdown-surface absolute top-full z-50 w-full overflow-hidden rounded-t-none"
     >
       <ul id="search-typeahead-listbox" class="max-h-96 overflow-y-auto py-1">
         {#each items as item, i (item.type + "-" + i)}

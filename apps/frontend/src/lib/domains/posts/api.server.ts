@@ -66,6 +66,14 @@ export async function getHashtagPosts(
   );
 }
 
+export async function getPopularPosts(
+  api: ApiClient,
+  cursor = "",
+  limit = DEFAULT_PAGE_SIZE,
+): Promise<PostPage> {
+  return getCursorPage(api, "/search/popular", cursor, limit);
+}
+
 export async function getPost(
   api: ApiClient,
   postID: string | number,

@@ -3,7 +3,11 @@ import type { PageServerLoad } from "./$types";
 import { apiClient } from "$lib/server/api/client";
 import { failFromError, unwrap } from "$lib/server/api/http";
 import type { User } from "$lib/domains/users/model";
-import { getHashtagPosts, type PostPage } from "$lib/domains/posts/api.server";
+import {
+  getHashtagPosts,
+  getPopularPosts,
+  type PostPage,
+} from "$lib/domains/posts/api.server";
 import {
   toggleLike,
   toggleRepost,
@@ -13,6 +17,7 @@ import { wrapBlended, type BlendedItem, type RecentSearchItem } from "./types";
 
 const SEARCH_PREVIEW_LIMIT = 15;
 const EMPTY_SECTION = { items: [], nextCursor: null };
+const EMPTY_POSTS: PostPage = { items: [], nextCursor: null };
 type SearchType = "all" | "users";
 type SearchSection<T> = { items: T[]; nextCursor: string | null };
 
@@ -52,11 +57,16 @@ export const load: PageServerLoad = async (event) => {
   const recentPromise = listRecentSearches(api);
 
   if (!q) {
+    const [popular, recent] = await Promise.all([
+      getPopularPosts(api).catch<PostPage>(() => EMPTY_POSTS),
+      recentPromise,
+    ]);
     return {
       q,
       type: "all" as const,
       results: EMPTY_SECTION as SearchSection<BlendedItem>,
-      recent: await recentPromise,
+      popular,
+      recent,
     };
   }
 
@@ -74,6 +84,7 @@ export const load: PageServerLoad = async (event) => {
         items: wrapBlended("users", section.items),
         nextCursor: section.nextCursor,
       },
+      popular: EMPTY_POSTS,
       recent,
     };
   }
@@ -86,14 +97,27 @@ export const load: PageServerLoad = async (event) => {
       })),
       recentPromise,
     ]);
-    return { q, type: "hashtag-posts" as const, tag, results: posts, recent };
+    return {
+      q,
+      type: "hashtag-posts" as const,
+      tag,
+      results: posts,
+      popular: EMPTY_POSTS,
+      recent,
+    };
   }
 
   const [results, recent] = await Promise.all([
     searchSection<BlendedItem>(api, q, "all"),
     recentPromise,
   ]);
-  return { q, type: "all" as const, results, recent };
+  return {
+    q,
+    type: "all" as const,
+    results,
+    popular: EMPTY_POSTS,
+    recent,
+  };
 };
 
 export const actions: Actions = {

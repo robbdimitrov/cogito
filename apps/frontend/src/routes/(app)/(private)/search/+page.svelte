@@ -4,7 +4,7 @@
   import PostList from "$lib/domains/posts/components/PostList.svelte";
   import QuoteComposeModal from "$lib/domains/posts/components/QuoteComposeModal.svelte";
   import { recordRecentSearch } from "$lib/shared/recentSearch";
-  import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
+  import EmptyState from "$lib/shared/components/ui/EmptyState.svelte";
   import { createPagination } from "$lib/shared/createPagination.svelte";
   import { Search } from "@lucide/svelte";
   import SearchResultRow from "./SearchResultRow.svelte";
@@ -55,6 +55,16 @@
     };
   }
 
+  const popularPostsPagination = createPagination<Post>(
+    () => (data.q ? EMPTY_POSTS : data.popular),
+    async (cursor) => {
+      const res = await fetch(
+        `/search/popular?cursor=${encodeURIComponent(cursor)}`,
+      );
+      return res.ok ? res.json() : EMPTY_POSTS;
+    },
+  );
+
   const EMPTY_SECTION = { items: [] as BlendedItem[], nextCursor: null };
 
   const resultsPagination = createPagination<BlendedItem>(
@@ -103,16 +113,11 @@
 
 <main class="feed-shell">
   <form onsubmit={handleSubmit} class="mb-6">
-    <div class="flex gap-2">
-      <SearchTypeahead
-        bind:query={searchInput}
-        currentUserId={data.currentUser?.id}
-        recent={data.recent}
-      />
-      <button type="submit" class="btn btn-primary min-h-12 rounded-2xl"
-        >Search</button
-      >
-    </div>
+    <SearchTypeahead
+      bind:query={searchInput}
+      currentUserId={data.currentUser?.id}
+      recent={data.recent}
+    />
   </form>
 
   {#if data.type === "hashtag-posts"}
@@ -141,19 +146,40 @@
       </div>
     {/if}
   {:else if !q}
-    <GlassCard>
-      <div class="card-body muted-text items-center py-12 text-center">
-        <Search class="mb-2 size-12 text-base-content opacity-50" />
-        <p>Enter a search query to find posts and people.</p>
-      </div>
-    </GlassCard>
+    {#if popularPostsPagination.items.length === 0}
+      <EmptyState
+        icon={Search}
+        message="Enter a search query to find posts and people."
+      />
+    {:else}
+      <section>
+        <h2
+          class="mb-2 text-xs font-semibold uppercase tracking-wide text-base-content/50"
+        >
+          Popular
+        </h2>
+        <PostList
+          posts={popularPostsPagination.items}
+          users={[]}
+          currentUserId={currentUser?.id}
+          onQuote={handleQuote}
+        />
+        {#if !popularPostsPagination.done}
+          <div class="mt-4 flex justify-center">
+            <button
+              type="button"
+              class="btn btn-outline btn-sm rounded-full"
+              disabled={popularPostsPagination.loading}
+              onclick={() => popularPostsPagination.more()}
+            >
+              {popularPostsPagination.loading ? "Loading..." : "Load more"}
+            </button>
+          </div>
+        {/if}
+      </section>
+    {/if}
   {:else if groupedResults.users.length === 0 && groupedResults.posts.length === 0}
-    <GlassCard>
-      <div class="card-body muted-text items-center py-12 text-center">
-        <Search class="mb-2 size-12 text-base-content opacity-50" />
-        <p>No results found for "{q}".</p>
-      </div>
-    </GlassCard>
+    <EmptyState icon={Search} message={`No results found for "${q}".`} />
   {:else}
     {#if groupedResults.users.length > 0}
       <section class="mb-6">
