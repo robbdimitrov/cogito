@@ -1,27 +1,26 @@
 <script lang="ts">
-  import { resolve } from "$app/paths";
-  import type { Pathname } from "$app/types";
-  import {
-    User,
-    Lock,
-    Monitor,
-    Laptop,
-    Sun,
-    Moon,
-    LogOut,
-  } from "@lucide/svelte";
+  import { Laptop, Sun, Moon, LogOut } from "@lucide/svelte";
   import { page } from "$app/state";
   import { getThemeContext } from "$lib/shared/theme.svelte";
+  import TabStrip from "$lib/shared/components/ui/TabStrip.svelte";
 
   let { children } = $props();
 
   const theme = getThemeContext();
 
   const settingsLinks = [
-    { title: "Profile", href: "/settings/profile", icon: User },
-    { title: "Password", href: "/settings/password", icon: Lock },
-    { title: "Sessions", href: "/settings/sessions", icon: Monitor },
+    { title: "Profile", href: "/settings/profile" },
+    { title: "Password", href: "/settings/password" },
+    { title: "Sessions", href: "/settings/sessions" },
   ];
+
+  let tabs = $derived(
+    settingsLinks.map((item) => ({
+      name: item.title,
+      href: item.href,
+      isActive: page.url.pathname.startsWith(item.href),
+    })),
+  );
 
   const themeOptions = [
     { label: "System", value: "system", icon: Laptop },
@@ -40,83 +39,46 @@
     </p>
   </header>
 
-  <div class="flex flex-col gap-6 md:flex-row md:items-start md:gap-8">
-    <aside class="shrink-0 md:w-64">
-      <nav class="flex flex-col gap-1">
-        {#each settingsLinks as item (item.href)}
-          <a
-            href={resolve(item.href as Pathname)}
-            class="group flex items-center gap-3 rounded-xl p-3 outline-none transition-colors duration-200 hover:bg-base-200 focus-visible:bg-base-200 {page.url.pathname.startsWith(
-              item.href,
-            )
-              ? 'bg-base-200 font-medium'
-              : ''}"
-          >
-            <div
-              class="flex size-8 shrink-0 items-center justify-center rounded-lg {page.url.pathname.startsWith(
-                item.href,
-              )
-                ? 'bg-primary/20 text-primary'
-                : 'bg-base-300'}"
-            >
-              <item.icon
-                class="size-4 {page.url.pathname.startsWith(item.href)
-                  ? ''
-                  : 'opacity-70'}"
-              />
-            </div>
-            <span>{item.title}</span>
-          </a>
-        {/each}
-      </nav>
-
-      <div class="mt-8 px-3">
-        <h2
-          class="text-xs font-semibold uppercase tracking-wider text-base-content/50"
+  <div class="flex flex-wrap items-center justify-between gap-4">
+    <div
+      class="grid grid-cols-3 rounded-xl border border-transparent bg-base-200/70 p-1 dark:border-white/15 dark:bg-base-200/70"
+      role="radiogroup"
+      aria-label="Theme"
+    >
+      {#each themeOptions as option (option.value)}
+        <button
+          type="button"
+          role="radio"
+          aria-checked={theme.mode === option.value}
+          class="btn btn-ghost min-h-10 rounded-lg border-0 px-2 text-xs font-medium {theme.mode ===
+          option.value
+            ? 'bg-base-100 text-base-content shadow-sm hover:bg-base-100'
+            : 'opacity-60 hover:bg-base-100/60 hover:text-base-content hover:opacity-100'}"
+          onclick={() => theme.set(option.value)}
         >
-          Appearance
-        </h2>
+          <option.icon class="h-3.5 w-3.5" />
+        </button>
+      {/each}
+    </div>
+
+    <form method="POST" action="/logout">
+      <button
+        type="submit"
+        class="group flex items-center gap-3 rounded-xl p-3 text-error outline-none transition-colors duration-200 hover:bg-error/10 focus-visible:bg-error/10"
+      >
         <div
-          class="mt-3 grid grid-cols-3 rounded-xl border border-transparent bg-base-200/70 p-1 dark:border-white/15 dark:bg-base-200/70"
-          role="radiogroup"
-          aria-label="Theme"
+          class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-error/10 text-error"
         >
-          {#each themeOptions as option (option.value)}
-            <button
-              type="button"
-              role="radio"
-              aria-checked={theme.mode === option.value}
-              class="btn btn-ghost min-h-10 rounded-lg border-0 px-2 text-xs font-medium {theme.mode ===
-              option.value
-                ? 'bg-base-100 text-base-content shadow-sm hover:bg-base-100'
-                : 'opacity-60 hover:bg-base-100/60 hover:text-base-content hover:opacity-100'}"
-              onclick={() => theme.set(option.value)}
-            >
-              <option.icon class="h-3.5 w-3.5" />
-            </button>
-          {/each}
+          <LogOut class="size-4" />
         </div>
-      </div>
-
-      <div class="mt-8 border-t border-base-300/60 pt-2 dark:border-white/10">
-        <form method="POST" action="/logout">
-          <button
-            type="submit"
-            class="group flex w-full items-center gap-3 rounded-xl p-3 text-error outline-none transition-colors duration-200 hover:bg-error/10 focus-visible:bg-error/10"
-          >
-            <div
-              class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-error/10 text-error"
-            >
-              <LogOut class="size-4" />
-            </div>
-            <span>Log out</span>
-          </button>
-        </form>
-      </div>
-    </aside>
-
-    <main class="min-w-0 flex-1">
-      {@render children()}
-    </main>
+        <span>Log out</span>
+      </button>
+    </form>
   </div>
+
+  <TabStrip {tabs} />
+
+  <main class="mt-6">
+    {@render children()}
+  </main>
 </div>

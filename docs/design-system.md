@@ -102,12 +102,12 @@ rather than the `Avatar` component, to avoid a second filled circle. Solid
 `bg-primary` fill is reserved for Compose alone, so it reads as the bar's
 one call-to-action; the active route (Search, Notifications, or profile)
 instead gets the tinted `bg-primary/20 text-primary` treatment already used
-for the active item in the Settings sidebar nav — visually distinct from
+for the active tab in the Settings tab strip — visually distinct from
 Compose's solid fill, so an active icon and the compose button never look
 interchangeable. Icon-only throughout (no text labels, no
 breakpoint-dependent sizing) so the bar behaves identically at every width;
-`aria-label`/`title` carry the names. Settings and Logout live in the
-Settings sidebar, not the navbar. Signed out, the icon cluster is replaced
+`aria-label`/`title` carry the names. Settings and Logout live on the
+Settings page, not the navbar. Signed out, the icon cluster is replaced
 by "Log In" (ghost) and "Register" (solid `bg-primary`) pill buttons.
 
 ### `Avatar`
@@ -142,8 +142,8 @@ Full-width profile header: cover image, or
 when none is set. Below: avatar, display name, `@username`, bio, stat links
 (posts, likes, following, followers), and `ControlBar` for follow access. On
 your own profile, "Edit Profile" (→ `/settings/profile`) sits beside a
-circular Settings icon button (→ `/settings`); Logout lives at the bottom of
-the Settings sidebar, not on the profile.
+circular Settings icon button (→ `/settings`); Logout lives in the Settings
+page's utility row, not on the profile.
 
 ### `CreatePost`
 
@@ -199,6 +199,11 @@ input wrapper. `FormInput` / `FormTextarea` — apply `.form-input` /
 centered spinner. `ToastProvider` — toast queue context and renderer.
 `PostList` / `UserList` — list containers. `QuoteEmbed` / `ReplyComposer` —
 inline post context components. `ControlBar` — profile action strip.
+`TabStrip` — shared `glass-surface tabs tabs-boxed` pill strip (`tabs:
+{name, href, isActive, count?}[]`); grid column count derives from
+`tabs.length`. Used by `ControlBar` (4 tabs, with counts) and the Settings
+layout's Profile/Password/Sessions nav (3 tabs, no counts), identically at
+every breakpoint — no responsive column-switching.
 
 Login/register share `AuthShell` (`eyebrow`/`heading`/`description` props +
 a `children` snippet for the page's own `<form>`): a single centered card at
