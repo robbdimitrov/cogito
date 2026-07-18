@@ -1,2 +1,6 @@
 .DS_Store
 vendor
+AGENTS.md
+CLAUDE.md
+*_test.go
+**/*_test.go

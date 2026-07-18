@@ -5,5 +5,10 @@ node_modules
 build
 .svelte-kit
 
+AGENTS.md
+CLAUDE.md
+*.test.ts
+**/*.test.ts
+
 .DS_Store
 *.log

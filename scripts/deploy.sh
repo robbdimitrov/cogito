@@ -240,6 +240,9 @@ context_checksum() {
         apps/frontend/.env | apps/frontend/.env.*)
           [[ "${file}" == "apps/frontend/.env.example" ]] || continue
           ;;
+        apps/*/AGENTS.md | apps/*/CLAUDE.md) continue ;;
+        apps/apigateway/*_test.go | apps/postservice/*_test.go) continue ;;
+        apps/frontend/*.test.ts) continue ;;
       esac
       printf '%s\0' "${file}"
       openssl dgst -sha256 -binary "${file}"
@@ -268,14 +271,30 @@ build_images() {
   log "building images"
   log "image tags: apigateway=${APIGATEWAY_IMAGE_TAG} authservice=${AUTHSERVICE_IMAGE_TAG} database=${DATABASE_IMAGE_TAG} flowservice=${FLOWSERVICE_IMAGE_TAG} frontend=${FRONTEND_IMAGE_TAG} imageservice=${IMAGESERVICE_IMAGE_TAG} postservice=${POSTSERVICE_IMAGE_TAG} userservice=${USERSERVICE_IMAGE_TAG}"
   export DOCKER_BUILDKIT=1
-  build_one_image apigateway "${APIGATEWAY_IMAGE_TAG}"
-  build_one_image authservice "${AUTHSERVICE_IMAGE_TAG}"
-  build_one_image database "${DATABASE_IMAGE_TAG}"
-  build_one_image flowservice "${FLOWSERVICE_IMAGE_TAG}"
-  build_one_image frontend "${FRONTEND_IMAGE_TAG}"
-  build_one_image imageservice "${IMAGESERVICE_IMAGE_TAG}"
-  build_one_image postservice "${POSTSERVICE_IMAGE_TAG}"
-  build_one_image userservice "${USERSERVICE_IMAGE_TAG}"
+  local pids=() failed=0
+
+  build_one_image authservice "${AUTHSERVICE_IMAGE_TAG}" &
+  pids+=("$!")
+  build_one_image database "${DATABASE_IMAGE_TAG}" &
+  pids+=("$!")
+  build_one_image flowservice "${FLOWSERVICE_IMAGE_TAG}" &
+  pids+=("$!")
+  build_one_image frontend "${FRONTEND_IMAGE_TAG}" &
+  pids+=("$!")
+  build_one_image imageservice "${IMAGESERVICE_IMAGE_TAG}" &
+  pids+=("$!")
+  build_one_image userservice "${USERSERVICE_IMAGE_TAG}" &
+  pids+=("$!")
+  # apigateway and postservice both regenerate pkg/pb via the shared `proto`
+  # make target, so keep them sequential to avoid racing on its output.
+  (build_one_image apigateway "${APIGATEWAY_IMAGE_TAG}" &&
+    build_one_image postservice "${POSTSERVICE_IMAGE_TAG}") &
+  pids+=("$!")
+
+  for pid in "${pids[@]}"; do
+    wait "${pid}" || failed=1
+  done
+  ((failed == 0)) || die "image build failed"
 }
 
 apply_manifest_files() {
