@@ -2,69 +2,55 @@
   import { resolve } from "$app/paths";
   import { page } from "$app/state";
   import type { User } from "$lib/domains/users/model";
-  import Avatar from "$lib/shared/components/ui/Avatar.svelte";
-  import {
-    Home,
-    LogOut,
-    Bell,
-    ChevronDown,
-    Search,
-    Settings,
-    User as UserIcon,
-  } from "@lucide/svelte";
-  import { onMount } from "svelte";
+  import { Brain, Bell, Plus, Search, User as UserIcon } from "@lucide/svelte";
 
   let {
     user = null,
     sessionUnavailable = false,
     unreadCount = 0,
+    onCompose,
   }: {
     user?: User | null;
     sessionUnavailable?: boolean;
     unreadCount?: number;
+    onCompose?: () => void;
   } = $props();
-
-  let menuOpen = $state(false);
-  let menu = $state<HTMLDivElement>();
 
   let homeActive = $derived(page.url.pathname === "/");
   let searchActive = $derived(page.url.pathname === "/search");
   let notificationsActive = $derived(page.url.pathname === "/notifications");
-
-  onMount(() => {
-    const closeOnOutsideClick = (event: MouseEvent) => {
-      if (menuOpen && menu && !menu.contains(event.target as Node)) {
-        menuOpen = false;
-      }
-    };
-    document.addEventListener("mousedown", closeOnOutsideClick);
-    return () => document.removeEventListener("mousedown", closeOnOutsideClick);
-  });
+  let profileActive = $derived(
+    user != null &&
+      (page.url.pathname === `/@${user.username}` ||
+        page.url.pathname.startsWith(`/@${user.username}/`)),
+  );
 </script>
 
 <nav
   class="navbar sticky top-0 z-50 min-h-16 border-b border-base-300/40 bg-base-100/35 px-3 shadow-none backdrop-blur-2xl backdrop-saturate-150 transition-colors duration-300 supports-backdrop-filter:bg-base-100/25 dark:border-base-300/10 sm:px-4"
 >
   <div class="navbar-start">
-    {#if user || sessionUnavailable}
-      <div
-        class="flex items-center gap-1 rounded-full bg-base-100/40 p-1 dark:bg-base-100/10"
+    <a
+      href={resolve("/")}
+      class="flex items-center gap-2 transition-opacity hover:opacity-80"
+      aria-label="Cogito home"
+      aria-current={homeActive ? "page" : undefined}
+    >
+      <Brain class="size-6 text-primary" aria-hidden="true" />
+      <span
+        class="bg-linear-to-r from-primary to-primary/70 bg-clip-text font-serif text-xl font-bold tracking-tight text-transparent sm:text-2xl"
+        >Cogito</span
       >
-        <a
-          href={resolve("/")}
-          class="btn btn-circle {homeActive
-            ? 'bg-primary! text-primary-content!'
-            : 'btn-ghost hover:bg-base-100/60 dark:hover:bg-white/10'}"
-          aria-label="Home"
-          title="Home"
-          aria-current={homeActive ? "page" : undefined}
-        >
-          <Home class="size-6" aria-hidden="true" />
-        </a>
+    </a>
+  </div>
+
+  <div class="navbar-end gap-2">
+    {#if user || sessionUnavailable}
+      <div class="flex items-center gap-1 sm:gap-2">
         <a
           href={resolve("/search")}
           class="btn btn-circle {searchActive
-            ? 'bg-primary! text-primary-content!'
+            ? 'bg-primary/20! text-primary!'
             : 'btn-ghost hover:bg-base-100/60 dark:hover:bg-white/10'}"
           aria-label="Search"
           title="Search"
@@ -72,26 +58,21 @@
         >
           <Search class="size-6" aria-hidden="true" />
         </a>
-      </div>
-    {/if}
-  </div>
-
-  <div class="navbar-center">
-    <span
-      class="bg-linear-to-r from-primary to-primary/70 bg-clip-text font-serif text-xl font-bold tracking-tight text-transparent sm:text-2xl"
-      >Cogito</span
-    >
-  </div>
-
-  <div class="navbar-end gap-2">
-    {#if user || sessionUnavailable}
-      <div
-        class="flex items-center rounded-full bg-base-100/40 p-1 dark:bg-base-100/10"
-      >
+        {#if user}
+          <button
+            type="button"
+            onclick={() => onCompose?.()}
+            class="btn btn-circle bg-primary text-primary-content hover:bg-primary/90"
+            aria-label="Compose post"
+            title="Compose post"
+          >
+            <Plus class="size-6" aria-hidden="true" />
+          </button>
+        {/if}
         <a
           href={resolve("/notifications")}
           class="btn btn-circle {notificationsActive
-            ? 'bg-primary! text-primary-content!'
+            ? 'bg-primary/20! text-primary!'
             : 'btn-ghost hover:bg-base-100/60 dark:hover:bg-white/10'}"
           aria-label={unreadCount > 0
             ? `Notifications, ${unreadCount} unread`
@@ -111,61 +92,24 @@
             <Bell class="size-6" aria-hidden="true" />
           </span>
         </a>
-      </div>
-    {/if}
-    {#if user}
-      <div class="dropdown dropdown-end" bind:this={menu}>
-        <button
-          type="button"
-          onclick={() => (menuOpen = !menuOpen)}
-          class="btn btn-ghost gap-1 px-2 hover:bg-base-100/40 dark:hover:bg-base-100/10"
-          aria-label="User menu"
-          title={user.name || `@${user.username}`}
-          aria-expanded={menuOpen}
-        >
-          <Avatar name={user.name} photoKey={user.profilePhotoKey} size="sm" />
-          <ChevronDown class="size-4 opacity-60" aria-hidden="true" />
-        </button>
-        {#if menuOpen}
-          <ul
-            class="menu menu-sm dropdown-content dropdown-surface z-1001 mt-3 w-56 p-2"
+        {#if user}
+          <a
+            href={resolve(`/@${user.username}`)}
+            class="btn btn-circle {profileActive
+              ? 'bg-primary/20! text-primary!'
+              : 'btn-ghost hover:bg-base-100/60 dark:hover:bg-white/10'}"
+            aria-label="Your profile"
+            title={user.name || `@${user.username}`}
+            aria-current={profileActive ? "page" : undefined}
           >
-            <li class="menu-title px-3 py-1 text-xs opacity-60">
-              Signed in as @{user.username || "user"}
-            </li>
-            <li><hr class="my-1 border-base-200" /></li>
-            <li>
-              <a
-                href={resolve(`/@${user.username}`)}
-                onclick={() => (menuOpen = false)}
-                class="gap-2 py-2"
-              >
-                <UserIcon class="size-4" aria-hidden="true" />Profile
-              </a>
-            </li>
-            <li>
-              <a
-                href={resolve("/settings")}
-                onclick={() => (menuOpen = false)}
-                class="gap-2 py-2"
-              >
-                <Settings class="size-4" aria-hidden="true" />Settings
-              </a>
-            </li>
-            <li><hr class="my-1 border-base-200" /></li>
-            <li>
-              <form method="POST" action="/logout">
-                <button type="submit" class="w-full gap-2 py-2 text-error">
-                  <LogOut class="size-4" aria-hidden="true" />Logout
-                </button>
-              </form>
-            </li>
-          </ul>
+            <UserIcon class="size-6" aria-hidden="true" />
+          </a>
         {/if}
       </div>
-    {:else if sessionUnavailable}
+    {/if}
+    {#if sessionUnavailable}
       <span class="text-xs muted-text">Service unavailable</span>
-    {:else}
+    {:else if !user}
       <a
         href={resolve("/login")}
         class="btn btn-primary btn-sm rounded-full px-6">Log In</a

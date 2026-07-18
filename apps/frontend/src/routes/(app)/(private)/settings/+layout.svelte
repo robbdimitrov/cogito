@@ -1,7 +1,7 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
   import type { Pathname } from "$app/types";
-  import { User, Lock, Monitor, Laptop, Sun, Moon } from "@lucide/svelte";
+  import { User, Lock, Monitor, Laptop, Sun, Moon, LogOut } from "@lucide/svelte";
   import { page } from "$app/state";
   import { getThemeContext } from "$lib/shared/theme.svelte";
 
@@ -88,6 +88,22 @@
             </button>
           {/each}
         </div>
+      </div>
+
+      <div class="mt-8 border-t border-base-300/60 pt-2 dark:border-white/10">
+        <form method="POST" action="/logout">
+          <button
+            type="submit"
+            class="group flex w-full items-center gap-3 rounded-xl p-3 text-error outline-none transition-colors duration-200 hover:bg-error/10 focus-visible:bg-error/10"
+          >
+            <div
+              class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-error/10 text-error"
+            >
+              <LogOut class="h-4 w-4" />
+            </div>
+            <span>Log out</span>
+          </button>
+        </form>
       </div>
     </aside>
 

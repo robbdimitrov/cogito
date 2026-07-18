@@ -2,7 +2,7 @@
   import { enhance } from "$app/forms";
   import { imageUrl } from "$lib/shared/imageUrl";
   import Avatar from "$lib/shared/components/ui/Avatar.svelte";
-  import { Pen, Check, UserPlus, Calendar } from "@lucide/svelte";
+  import { Pen, Check, UserPlus, Calendar, Settings } from "@lucide/svelte";
   import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
   import LoginGateButton from "$lib/shared/components/ui/LoginGateButton.svelte";
   import { resolve } from "$app/paths";
@@ -56,14 +56,24 @@
         <Avatar name={user.name} size="lg" photoKey={user.profilePhotoKey} />
       </div>
       {#if isOwnProfile}
-        <a
-          href={resolve("/settings/profile")}
-          class="btn btn-outline btn-sm gap-1 rounded-full px-3 sm:px-4"
-        >
-          <Pen class="h-4 w-4" />
-          <span class="hidden xs:inline">Edit Profile</span>
-          <span class="xs:hidden">Edit</span>
-        </a>
+        <div class="flex items-center gap-2">
+          <a
+            href={resolve("/settings/profile")}
+            class="btn btn-outline btn-sm gap-1 rounded-full px-3 sm:px-4"
+          >
+            <Pen class="h-4 w-4" />
+            <span class="hidden xs:inline">Edit Profile</span>
+            <span class="xs:hidden">Edit</span>
+          </a>
+          <a
+            href={resolve("/settings")}
+            class="btn btn-outline btn-circle btn-sm"
+            aria-label="Settings"
+            title="Settings"
+          >
+            <Settings class="h-4 w-4" />
+          </a>
+        </div>
       {:else if currentUser}
         <form
           method="POST"

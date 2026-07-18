@@ -1,7 +1,6 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
   import UserCard from "$lib/domains/users/components/UserCard.svelte";
-  import CreatePost from "$lib/domains/posts/components/CreatePost.svelte";
   import PostList from "$lib/domains/posts/components/PostList.svelte";
   import QuoteComposeModal from "$lib/domains/posts/components/QuoteComposeModal.svelte";
   import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
@@ -35,7 +34,6 @@
   <div class="flex flex-col gap-3 sm:gap-4">
     {#if user}
       <UserCard {user} />
-      <CreatePost {user} />
     {/if}
     {#if data.isEmpty}
       <GlassCard>

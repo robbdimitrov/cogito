@@ -87,17 +87,27 @@ at every width — no sidebar grid.
 
 ### `Navbar`
 
-Fixed top navigation bar. Wordmark: `font-serif` + restrained
-`from-primary to-primary/70` gradient. Icon-only throughout (no text labels,
-no breakpoint-dependent sizing) so the bar never crowds the centered
-wordmark and behaves identically at every width; `aria-label`/`title` carry
-the names. Links split by role, not all on one side: `navbar-start` holds
-wayfinding (home, search) in a shared pill; `navbar-end` holds
-personal/account items (notifications, user menu) in their own pill next to
-the avatar, balancing the bar 2-and-2. Both pills reuse `ControlBar`'s
-active-tab fill (`bg-primary`) to mark the current route. User menu (avatar
-+ chevron) opens profile/settings/logout; theme control lives in Settings,
-gated to authenticated users.
+Fixed top navigation bar, built as a single unified control cluster rather
+than split pieces. `navbar-start` holds the logo lockup — a plain `Brain`
+glyph (`text-primary`, no circle/background) beside the `font-serif`
+"Cogito" wordmark (`from-primary to-primary/70` gradient) — which doubles as
+the Home link. `navbar-end` holds every other action — Search, Compose
+(opens `ComposeModal`), Notifications (unread badge), and a generic profile
+icon that links directly to the signed-in user's own profile — as plain
+icon buttons spaced directly in the bar, deliberately not wrapped in a pill
+container: a shared pill chrome around the whole cluster read as one more
+repeated rounded shape competing with the circular buttons themselves.
+There is no account dropdown. The profile icon is a plain `User` glyph
+rather than the `Avatar` component, to avoid a second filled circle. Solid
+`bg-primary` fill is reserved for Compose alone, so it reads as the bar's
+one call-to-action; the active route (Search, Notifications, or profile)
+instead gets the tinted `bg-primary/20 text-primary` treatment already used
+for the active item in the Settings sidebar nav — visually distinct from
+Compose's solid fill, so an active icon and the compose button never look
+interchangeable. Icon-only throughout (no text labels, no
+breakpoint-dependent sizing) so the bar behaves identically at every width;
+`aria-label`/`title` carry the names. Settings and Logout live in the
+Settings sidebar, not the navbar.
 
 ### `Avatar`
 
@@ -127,19 +137,23 @@ second copy of the full `UserHeader` profile card.
 Full-width profile header: cover image, or
 `bg-linear-to-tr from-primary via-primary/80 to-secondary` gradient placeholder
 when none is set. Below: avatar, display name, `@username`, bio, stat links
-(posts, likes, following, followers), and `ControlBar` for follow or settings
-access.
+(posts, likes, following, followers), and `ControlBar` for follow access. On
+your own profile, "Edit Profile" (→ `/settings/profile`) sits beside a
+circular Settings icon button (→ `/settings`); Logout lives at the bottom of
+the Settings sidebar, not on the profile.
 
 ### `CreatePost`
 
-Progressive-disclosure composer: collapses to a single-line `font-serif`
-prompt pill, expanding on focus/click to the full textarea
-(`FormattedContent` preview), image upload button (triggers
-`POST /uploads`), and submit. Collapses back after a successful post or on
-blur while empty; the `focusout` handler defers its `document.activeElement`
-check (rather than trusting `relatedTarget`, which is unset when the expand
-button itself gets unmounted mid-click) so it doesn't collapse mid-click on
-its own controls. Supports `inReplyToId` prop for reply creation.
+The composer form: avatar, a roomy multi-line textarea, image upload button
+(triggers `POST /uploads`), character count, and submit. Always rendered
+expanded — there is no inline collapsed variant, and no standalone
+composer on the home feed; `ComposeModal` is its only mount point, so the
+composing experience is identical everywhere it's opened from. Requires an
+`onClose` prop, rendered as an inset close (X) button in the card's own
+top-right corner and called after a successful post. Its form posts to an
+absolute `/?/createPost` action so it works when mounted outside the home
+route (`ComposeModal` is mounted once at the `(app)` layout level, not
+per-page).
 
 ### `FormattedContent`
 
@@ -153,8 +167,16 @@ Dropdown (DaisyUI dropdown) with two actions: "Repost" (toggle) and "Quote"
 
 ### `QuoteComposeModal`
 
-Full-screen modal containing a `CreatePost` composer pre-set with `quoteOfId`;
-includes an embedded `QuoteEmbed` preview of the source post.
+Full-screen modal with its own independent form (not `CreatePost`) posting
+`quoteOfId` to `?/quote`; includes an embedded `QuoteEmbed` preview of the
+source post.
+
+### `ComposeModal`
+
+Modal wrapper around `CreatePost` (`onClose={onClose}`), opened from the
+navbar's Compose button. Mounted once in the `(app)` layout so it's
+reachable from every authenticated page — the sole way to compose a new
+post; the home feed has no inline composer of its own.
 
 ### `UserItem`
 
