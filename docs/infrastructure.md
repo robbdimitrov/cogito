@@ -93,8 +93,8 @@ for example after resetting the search index.
 
 ## Init Containers
 
-| Deployment | Init image                     | Action                                            |
-| ---------- | ------------------------------ | ------------------------------------------------- |
+| Deployment | Init image      | Action                                            |
+| ---------- | --------------- | ------------------------------------------------- |
 | apigateway | cogito/database | Runs all pending migrations before gateway starts |
 
 ## Networking
