@@ -68,6 +68,16 @@
     return `posts-${result.item.id}`;
   }
 
+  let groupedResults = $derived.by(() => {
+    const users: Extract<BlendedItem, { type: "users" }>[] = [];
+    const posts: Extract<BlendedItem, { type: "posts" }>[] = [];
+    for (const result of resultsPagination.items) {
+      if (result.type === "users") users.push(result);
+      else if (result.type === "posts") posts.push(result);
+    }
+    return { users, posts };
+  });
+
   function handleSubmit(e: Event) {
     e.preventDefault();
     const trimmed = searchInput.trim();
@@ -99,21 +109,13 @@
         currentUserId={data.currentUser?.id}
         recent={data.recent}
       />
-      <button type="submit" class="btn btn-primary rounded-2xl">Search</button>
+      <button type="submit" class="btn btn-primary min-h-12 rounded-2xl"
+        >Search</button
+      >
     </div>
   </form>
 
   {#if data.type === "hashtag-posts"}
-    <div
-      class="subtle-border mb-6 flex items-center justify-between border-b pb-4"
-    >
-      <h1
-        class="text-2xl font-bold tracking-tight text-base-content sm:text-3xl"
-      >
-        <span class="text-primary">#</span>{data.tag}
-      </h1>
-    </div>
-
     <PostList
       posts={hashtagPostsPagination.items}
       users={[]}
@@ -142,10 +144,10 @@
     <GlassCard>
       <div class="card-body muted-text items-center py-12 text-center">
         <Search class="mb-2 h-12 w-12 text-base-content opacity-50" />
-        <p>Enter a search query to find posts, people, and hashtags.</p>
+        <p>Enter a search query to find posts and people.</p>
       </div>
     </GlassCard>
-  {:else if resultsPagination.items.length === 0}
+  {:else if groupedResults.users.length === 0 && groupedResults.posts.length === 0}
     <GlassCard>
       <div class="card-body muted-text items-center py-12 text-center">
         <Search class="mb-2 h-12 w-12 text-base-content opacity-50" />
@@ -153,15 +155,42 @@
       </div>
     </GlassCard>
   {:else}
-    <ul class="space-y-3">
-      {#each resultsPagination.items as result (resultKey(result))}
-        <SearchResultRow
-          {result}
-          currentUserId={data.currentUser?.id}
-          onQuote={handleQuote}
-        />
-      {/each}
-    </ul>
+    {#if groupedResults.users.length > 0}
+      <section class="mb-6">
+        <h2
+          class="mb-2 text-xs font-semibold uppercase tracking-wide text-base-content/50"
+        >
+          People
+        </h2>
+        <ul class="space-y-3">
+          {#each groupedResults.users as result (resultKey(result))}
+            <SearchResultRow
+              {result}
+              currentUserId={data.currentUser?.id}
+              onQuote={handleQuote}
+            />
+          {/each}
+        </ul>
+      </section>
+    {/if}
+    {#if groupedResults.posts.length > 0}
+      <section>
+        <h2
+          class="mb-2 text-xs font-semibold uppercase tracking-wide text-base-content/50"
+        >
+          Posts
+        </h2>
+        <ul class="space-y-3">
+          {#each groupedResults.posts as result (resultKey(result))}
+            <SearchResultRow
+              {result}
+              currentUserId={data.currentUser?.id}
+              onQuote={handleQuote}
+            />
+          {/each}
+        </ul>
+      </section>
+    {/if}
     {#if !resultsPagination.done}
       <div class="mt-4 flex justify-center">
         <button

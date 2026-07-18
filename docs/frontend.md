@@ -191,6 +191,14 @@ omit it for cover photos and full-resolution post media.
   hashtag in post content) shows that tag's exact post feed instead of the
   blended/typeahead results — a distinct `type=hashtag-posts` mode backed by
   `getHashtagPosts`, not the full-text hashtag-name search.
+- The blended `type=all` results page groups the response client-side into a
+  "People" and a "Posts" section (headers only render when that section is
+  non-empty) and drops any `hashtags` items from the blend entirely — hashtag
+  lookup stays a typeahead-only affordance, not a results-page entity type.
+- The search box has a clear ("X") button once it has text; it only resets the
+  input locally (clears typed text, no navigation) — the current results stay
+  on screen. The `#tag` view has no separate heading — the search box itself
+  (prefilled with the query) is the only place the current tag is shown.
 
 ## Image Upload Flow
 

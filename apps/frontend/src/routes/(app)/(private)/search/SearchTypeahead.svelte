@@ -26,6 +26,15 @@
   let open = $state(false);
   let inputFocused = $state(false);
   let activeIndex = $state(-1);
+  let inputRef: HTMLInputElement | undefined = $state();
+
+  function clearQuery() {
+    query = "";
+    items = [];
+    open = false;
+    activeIndex = -1;
+    inputRef?.focus();
+  }
 
   let debounceTimer: ReturnType<typeof setTimeout> | undefined;
   let abortController: AbortController | undefined;
@@ -198,7 +207,8 @@
   <label class="form-input flex items-center gap-2 rounded-2xl">
     <Search class="h-4 w-4 opacity-60" />
     <input
-      type="search"
+      bind:this={inputRef}
+      type="text"
       placeholder="Search users, posts, hashtags..."
       bind:value={query}
       oninput={handleInput}
@@ -209,6 +219,16 @@
       aria-controls="search-typeahead-listbox"
       aria-autocomplete="list"
     />
+    {#if query}
+      <button
+        type="button"
+        class="grid h-5 w-5 shrink-0 place-items-center rounded-full opacity-60 hover:opacity-100"
+        aria-label="Clear search"
+        onclick={clearQuery}
+      >
+        <X class="h-4 w-4" />
+      </button>
+    {/if}
   </label>
 
   {#if showRecent}
