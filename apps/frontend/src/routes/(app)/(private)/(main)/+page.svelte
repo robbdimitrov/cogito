@@ -3,7 +3,7 @@
   import ComposePrompt from "$lib/domains/posts/components/ComposePrompt.svelte";
   import PostList from "$lib/domains/posts/components/PostList.svelte";
   import QuoteComposeModal from "$lib/domains/posts/components/QuoteComposeModal.svelte";
-  import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
+  import EmptyState from "$lib/shared/components/ui/EmptyState.svelte";
   import { createPagination } from "$lib/shared/createPagination.svelte";
   import type { Post } from "$lib/domains/posts/model";
   import { Search } from "@lucide/svelte";
@@ -36,21 +36,14 @@
       <ComposePrompt {user} />
     {/if}
     {#if data.isEmpty}
-      <GlassCard>
-        <div class="card-body muted-text items-center py-12 text-center">
-          <Search
-            class="mb-2 size-12 text-base-content opacity-50"
-            aria-hidden="true"
-          />
-          <p>No posts in your feed yet.</p>
-          <a
-            href={resolve("/search")}
-            class="btn btn-primary btn-sm mt-2 rounded-full"
-          >
-            Find people to follow
-          </a>
-        </div>
-      </GlassCard>
+      <EmptyState icon={Search} message="No posts in your feed yet.">
+        <a
+          href={resolve("/search")}
+          class="btn btn-primary btn-sm mt-2 rounded-full"
+        >
+          Find people to follow
+        </a>
+      </EmptyState>
     {:else}
       <PostList
         posts={pagination.items}

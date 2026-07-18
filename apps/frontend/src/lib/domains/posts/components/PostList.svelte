@@ -1,7 +1,7 @@
 <script lang="ts">
   import PostItem from "$lib/domains/posts/components/PostItem.svelte";
   import { MessageSquare } from "@lucide/svelte";
-  import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
+  import EmptyState from "$lib/shared/components/ui/EmptyState.svelte";
   import type { Post, User } from "$lib/shared/types";
 
   interface Props {
@@ -24,12 +24,7 @@
 </script>
 
 {#if !posts || posts.length === 0}
-  <GlassCard>
-    <div class="card-body muted-text items-center py-12 text-center">
-      <MessageSquare class="size-12 mb-2 text-base-content opacity-50" />
-      <p>{emptyMessage}</p>
-    </div>
-  </GlassCard>
+  <EmptyState icon={MessageSquare} message={emptyMessage} />
 {:else}
   <ul class="space-y-3">
     {#each posts as post (post.id + (post.repostOfId ? `-repost-${post.userId}` : ""))}

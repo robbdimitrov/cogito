@@ -3,6 +3,7 @@
   import type { Pathname } from "$app/types";
   import Avatar from "$lib/shared/components/ui/Avatar.svelte";
   import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
+  import EmptyState from "$lib/shared/components/ui/EmptyState.svelte";
   import { createPagination } from "$lib/shared/createPagination.svelte";
   import type { Notification } from "$lib/domains/notifications/model";
   import { Bell } from "@lucide/svelte";
@@ -77,15 +78,7 @@
     <h1 class="px-1 text-2xl font-bold text-base-content">Notifications</h1>
 
     {#if pagination.items.length === 0}
-      <GlassCard>
-        <div class="card-body muted-text items-center py-12 text-center">
-          <Bell
-            class="mb-2 size-12 text-base-content opacity-50"
-            aria-hidden="true"
-          />
-          <p>No notifications yet</p>
-        </div>
-      </GlassCard>
+      <EmptyState icon={Bell} message="No notifications yet" />
     {:else}
       <ul class="space-y-3">
         {#each pagination.items as notification (notification.id)}
