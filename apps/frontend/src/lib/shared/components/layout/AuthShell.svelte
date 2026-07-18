@@ -17,31 +17,10 @@
 <div
   class="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12"
 >
-  <div class="w-full max-w-md lg:max-w-4xl">
-    <div class="glass-card overflow-hidden lg:grid lg:grid-cols-2">
-      <div
-        data-theme="dark"
-        class="relative hidden flex-col justify-between overflow-hidden bg-base-100 p-10 lg:flex"
-      >
-        <div
-          class="absolute inset-0 opacity-10"
-          style="background-image: radial-gradient(circle at 25% 25%, white 1px, transparent 1px); background-size: 24px 24px;"
-        ></div>
-        <div
-          class="absolute -top-16 -right-16 size-72 rounded-full bg-primary/30 blur-3xl"
-        ></div>
-        <span
-          class="relative font-serif text-3xl font-semibold tracking-tight text-base-content"
-          >Cogito</span
-        >
-        <p
-          class="relative font-serif text-xl leading-relaxed text-base-content/80"
-        >
-          Where thinking finds its ink.
-        </p>
-      </div>
+  <div class="w-full max-w-md">
+    <div class="glass-card overflow-hidden">
       <div class="card-body">
-        <div class="mb-4 text-center lg:hidden">
+        <div class="mb-4 text-center">
           <span class="font-serif text-2xl font-semibold text-primary"
             >Cogito</span
           >

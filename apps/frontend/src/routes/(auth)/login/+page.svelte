@@ -89,8 +89,7 @@
     </button>
   </form>
 
-  <div class="divider my-4">or</div>
-  <p class="text-center text-sm text-base-content/60">
+  <p class="mt-4 text-center text-sm text-base-content/60">
     Don&apos;t have an account?
     <a href={resolve("/register")} class="link link-primary font-medium"
       >Register</a

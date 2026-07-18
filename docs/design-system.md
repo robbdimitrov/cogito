@@ -199,12 +199,11 @@ centered spinner. `ToastProvider` — toast queue context and renderer.
 inline post context components. `ControlBar` — profile action strip.
 
 Login/register share `AuthShell` (`eyebrow`/`heading`/`description` props +
-a `children` snippet for the page's own `<form>`), a two-panel layout on
-`lg+`: a `font-serif` brand panel (dot-grid texture, ember glow, forced to
-the dark theme via a scoped `data-theme="dark"` regardless of the page's
-active theme) beside the form card, collapsing to a single centered column
-below `lg`. `AuthShell` owns only the chrome — form fields, validation, and
-submission stay in each page.
+a `children` snippet for the page's own `<form>`): a single centered card at
+every width, with the `font-serif` "Cogito" wordmark above the eyebrow/
+heading/description. No "or" divider between the form and the link to the
+other auth page. `AuthShell` owns only the chrome — form fields, validation,
+and submission stay in each page.
 
 ## Icons
 

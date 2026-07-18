@@ -118,8 +118,7 @@
     </button>
   </form>
 
-  <div class="divider my-4">or</div>
-  <p class="text-center text-sm text-base-content/60">
+  <p class="mt-4 text-center text-sm text-base-content/60">
     Already have an account?
     <a href={resolve("/login")} class="link link-primary font-medium">Log In</a>
   </p>
