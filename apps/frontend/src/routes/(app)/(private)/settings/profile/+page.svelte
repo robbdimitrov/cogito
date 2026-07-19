@@ -1,7 +1,7 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
   import { enhance } from "$app/forms";
-  import { ArrowLeft, Trash2, AlertCircle } from "@lucide/svelte";
+  import { ArrowLeft, Camera, Trash2, AlertCircle } from "@lucide/svelte";
   import Avatar from "$lib/shared/components/ui/Avatar.svelte";
   import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
   import Field from "$lib/shared/components/ui/Field.svelte";
@@ -83,8 +83,8 @@
   }
 </script>
 
-<GlassCard>
-  <div class="card-body gap-4 p-4 sm:gap-5 sm:p-6">
+<GlassCard class="overflow-hidden">
+  <div class="card-body gap-4 p-4 pb-0 sm:gap-5 sm:p-6 sm:pb-0">
     <div class="subtle-border flex items-start gap-3 border-b pb-4">
       <a
         href={resolve("/settings")}
@@ -103,156 +103,168 @@
     </div>
 
     {#if form?.error}
-      <div class="alert alert-error" role="alert">
+      <div class="alert alert-error mb-4" role="alert">
         <AlertCircle class="size-5 shrink-0" aria-hidden="true" />
         <span>{form.error}</span>
       </div>
     {/if}
+  </div>
 
-    <form
-      method="POST"
-      enctype="multipart/form-data"
-      class="space-y-4 sm:space-y-5"
-      use:enhance={({ formData }) => {
-        isSubmitting = true;
-        const previousOverride = userOverride;
+  <form
+    method="POST"
+    enctype="multipart/form-data"
+    use:enhance={({ formData }) => {
+      isSubmitting = true;
+      const previousOverride = userOverride;
 
-        if (avatarFile) formData.set("avatar", avatarFile);
-        if (coverFile) formData.set("cover", coverFile);
+      if (avatarFile) formData.set("avatar", avatarFile);
+      if (coverFile) formData.set("cover", coverFile);
 
-        formData.set("profilePhotoKey", user.profilePhotoKey || "");
-        formData.set("coverPhotoKey", user.coverPhotoKey || "");
+      formData.set("profilePhotoKey", user.profilePhotoKey || "");
+      formData.set("coverPhotoKey", user.coverPhotoKey || "");
 
-        // Optimistic UI for text fields
-        userOverride = {
-          ...userOverride,
-          name: formData.get("name") as string,
-          username: formData.get("username") as string,
-          email: formData.get("email") as string,
-          bio: formData.get("bio") as string,
-        };
+      // Optimistic UI for text fields
+      userOverride = {
+        ...userOverride,
+        name: formData.get("name") as string,
+        username: formData.get("username") as string,
+        email: formData.get("email") as string,
+        bio: formData.get("bio") as string,
+      };
 
-        return async ({ result, update }) => {
-          isSubmitting = false;
-          if (result.type === "failure") {
-            userOverride = previousOverride;
-            return;
-          }
-
-          toast.success("Profile updated successfully");
-          avatarFile = null;
-          coverFile = null;
-          if (result.type === "success") {
-            userOverride = {
-              ...userOverride,
-              profilePhotoKey: result.data?.profilePhotoKey as
-                | string
-                | undefined,
-              coverPhotoKey: result.data?.coverPhotoKey as string | undefined,
-            };
-          }
+      return async ({ result, update }) => {
+        isSubmitting = false;
+        if (result.type === "failure") {
+          userOverride = previousOverride;
           await update({ invalidateAll: false });
-        };
-      }}
-    >
-      <div class="flex flex-col gap-4 sm:flex-row sm:gap-6">
-        <Field id="settings-avatar" label="Profile Photo">
-          <div class="flex items-center gap-3">
-            {#if avatarFile}
-              <div
-                class="relative size-14 overflow-hidden rounded-full border border-base-content/10"
-              >
-                <img
-                  src={profilePreview}
-                  alt="Avatar"
-                  width="56"
-                  height="56"
-                  class="size-full object-cover"
-                />
-              </div>
-            {:else}
-              <Avatar
-                name={user.name}
-                size="lg"
-                photoKey={user.profilePhotoKey}
-              />
-            {/if}
-            <div class="flex gap-2">
-              <button
-                type="button"
-                class="btn btn-outline btn-sm"
-                onclick={() => avatarInput.click()}
-              >
-                Change
-              </button>
-              {#if profilePreview}
-                <button
-                  type="button"
-                  class="btn btn-ghost btn-sm text-error"
-                  onclick={() => removeImage("avatar")}
-                >
-                  <Trash2 class="size-4" />
-                </button>
-              {/if}
-            </div>
-            <input
-              bind:this={avatarInput}
-              type="file"
-              accept="image/jpeg,image/png,image/gif,image/webp"
-              class="hidden"
-              onchange={(e) => handleImageSelect(e, "avatar")}
-            />
-          </div>
-        </Field>
+          return;
+        }
 
-        <Field id="settings-cover" label="Cover Photo">
-          <div class="flex items-center gap-3">
-            {#if coverPreview}
-              <div
-                class="relative h-16 w-32 overflow-hidden rounded-lg border border-base-content/10"
-              >
-                <img
-                  src={coverPreview}
-                  alt="Cover"
-                  width="128"
-                  height="64"
-                  class="size-full object-cover"
-                />
-              </div>
-            {:else}
-              <div
-                class="h-16 w-32 rounded-lg border border-base-content/10 bg-linear-to-tr from-primary via-primary/80 to-secondary"
-              ></div>
-            {/if}
-            <div class="flex gap-2">
-              <button
-                type="button"
-                class="btn btn-outline btn-sm"
-                onclick={() => coverInput.click()}
-              >
-                Change
-              </button>
-              {#if coverPreview}
-                <button
-                  type="button"
-                  class="btn btn-ghost btn-sm text-error"
-                  onclick={() => removeImage("cover")}
-                >
-                  <Trash2 class="size-4" />
-                </button>
-              {/if}
-            </div>
-            <input
-              bind:this={coverInput}
-              type="file"
-              accept="image/jpeg,image/png,image/gif,image/webp"
-              class="hidden"
-              onchange={(e) => handleImageSelect(e, "cover")}
-            />
-          </div>
-        </Field>
+        toast.success("Profile updated successfully");
+        avatarFile = null;
+        coverFile = null;
+        if (result.type === "success") {
+          userOverride = {
+            ...userOverride,
+            profilePhotoKey: result.data?.profilePhotoKey as string | undefined,
+            coverPhotoKey: result.data?.coverPhotoKey as string | undefined,
+          };
+        }
+        await update({ invalidateAll: false });
+      };
+    }}
+  >
+    <div class="relative">
+      <div
+        class="relative h-24 bg-linear-to-tr from-primary via-primary/80 to-secondary sm:h-32"
+      >
+        {#if coverPreview}
+          <img
+            src={coverPreview}
+            alt="Cover"
+            width="768"
+            height="128"
+            class="absolute inset-0 size-full object-cover"
+          />
+        {:else}
+          <div
+            class="absolute inset-0 opacity-10"
+            style="background-image: radial-gradient(circle at 25% 25%, white 1px, transparent 1px); background-size: 24px 24px;"
+          ></div>
+        {/if}
+        <button
+          type="button"
+          class="group absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/0 transition-colors hover:bg-black/40 focus-visible:bg-black/40"
+          onclick={() => coverInput.click()}
+          aria-label="Change cover photo"
+        >
+          <Camera
+            class="size-6 text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+            aria-hidden="true"
+          />
+          <span
+            class="text-xs font-medium text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+          >
+            Change cover photo
+          </span>
+        </button>
+        {#if coverPreview}
+          <button
+            type="button"
+            class="btn btn-circle btn-xs absolute right-2 top-2 border-none bg-black/50 text-white hover:bg-black/70"
+            onclick={() => removeImage("cover")}
+            aria-label="Remove cover photo"
+          >
+            <Trash2 class="size-3.5" aria-hidden="true" />
+          </button>
+        {/if}
+        <input
+          bind:this={coverInput}
+          type="file"
+          accept="image/jpeg,image/png,image/gif,image/webp"
+          class="hidden"
+          onchange={(e) => handleImageSelect(e, "cover")}
+        />
       </div>
 
+      <div class="absolute left-5 top-24 -translate-y-3/4 sm:left-8 sm:top-32">
+        <div
+          class="relative rounded-full border border-base-300/80 bg-base-100 p-1 dark:border-base-300/30 dark:bg-base-200"
+        >
+          {#if avatarFile}
+            <div class="size-20 overflow-hidden rounded-full">
+              <img
+                src={profilePreview}
+                alt="Avatar"
+                width="80"
+                height="80"
+                class="size-full object-cover"
+              />
+            </div>
+          {:else}
+            <Avatar
+              name={user.name}
+              size="xl"
+              photoKey={user.profilePhotoKey}
+            />
+          {/if}
+          <button
+            type="button"
+            class="group absolute inset-1 flex items-center justify-center rounded-full bg-black/0 transition-colors hover:bg-black/40 focus-visible:bg-black/40"
+            onclick={() => avatarInput.click()}
+            aria-label="Change profile photo"
+          >
+            <Camera
+              class="size-5 text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+              aria-hidden="true"
+            />
+          </button>
+          {#if profilePreview}
+            <button
+              type="button"
+              class="btn btn-circle btn-xs absolute -bottom-1 -right-1 border-none bg-black/50 text-white hover:bg-black/70"
+              onclick={() => removeImage("avatar")}
+              aria-label="Remove profile photo"
+            >
+              <Trash2 class="size-3.5" aria-hidden="true" />
+            </button>
+          {/if}
+        </div>
+        <input
+          bind:this={avatarInput}
+          type="file"
+          accept="image/jpeg,image/png,image/gif,image/webp"
+          class="hidden"
+          onchange={(e) => handleImageSelect(e, "avatar")}
+        />
+      </div>
+    </div>
+
+    <p class="muted-text px-4 pb-4 pt-9 text-xs sm:px-6">
+      Click the cover or profile photo to change it.
+    </p>
+
+    <div class="card-body gap-4 p-4 pt-0 sm:gap-5 sm:p-6 sm:pt-0">
       <Field id="settings-name" label="Name">
         <FormInput
           id="settings-name"
@@ -318,6 +330,6 @@
           Save Changes
         {/if}
       </button>
-    </form>
-  </div>
+    </div>
+  </form>
 </GlassCard>
