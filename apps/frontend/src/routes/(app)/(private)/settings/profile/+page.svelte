@@ -260,11 +260,7 @@
       </div>
     </div>
 
-    <p class="muted-text px-4 pb-4 pt-9 text-xs sm:px-6">
-      Click the cover or profile photo to change it.
-    </p>
-
-    <div class="card-body gap-4 p-4 pt-0 sm:gap-5 sm:p-6 sm:pt-0">
+    <div class="card-body gap-4 p-4 pt-10 sm:gap-5 sm:p-6 sm:pt-10">
       <Field id="settings-name" label="Name">
         <FormInput
           id="settings-name"
