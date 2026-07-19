@@ -14,10 +14,11 @@ afterEach(() => {
 export function mountComponent<Props extends Record<string, unknown>>(
   component: Component<Props>,
   props: Props,
+  context?: Map<unknown, unknown>,
 ): HTMLDivElement {
   container = document.createElement("div");
   document.body.appendChild(container);
-  instance = mount(component, { target: container, props });
+  instance = mount(component, { target: container, props, context });
   flushSync();
   return container;
 }

@@ -16,7 +16,9 @@ export interface ToastController {
   remove: (id: number) => void;
 }
 
-const TOAST_CONTEXT = Symbol("toast");
+// Exported so tests can mount a component with a toast context directly
+// (via mount()'s `context` option) without rendering a real ToastProvider.
+export const TOAST_CONTEXT = Symbol("toast");
 const TOAST_DURATION_MS = 3_000;
 
 export function setToastContext(): ToastController {

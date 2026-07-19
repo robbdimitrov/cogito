@@ -7,11 +7,14 @@
   import LoginGateButton from "$lib/shared/components/ui/LoginGateButton.svelte";
   import { resolve } from "$app/paths";
   import type { User } from "$lib/shared/types";
+  import { getToastContext } from "$lib/shared/toast.svelte";
 
   let { user, currentUser } = $props<{
     user: User;
     currentUser?: User | null;
   }>();
+
+  const toast = getToastContext();
 
   let optimisticFollowOverride = $state<boolean | null>(null);
   let followed = $derived(
@@ -84,6 +87,7 @@
 
                   if (result.type === "failure") {
                     optimisticFollowOverride = wasFollowed;
+                    toast.error("Action failed");
                     return;
                   }
                   await update({ invalidateAll: false });
