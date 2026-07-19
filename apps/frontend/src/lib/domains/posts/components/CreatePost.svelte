@@ -107,7 +107,7 @@
             class="form-textarea min-h-0 resize-none rounded-2xl pl-10 shadow-inner shadow-base-300/10 sm:text-lg dark:shadow-base-100/15"
             placeholder="What's on your mind?"
             bind:value={content}
-            rows={5}
+            rows={imagePreview ? 2 : 5}
             maxlength={255}></textarea>
         </div>
       </div>
@@ -125,9 +125,10 @@
                 imageBlob = null;
                 imagePreview = null;
               }}
-              class="absolute right-2 top-2 rounded-full bg-black/50 p-1 text-white transition-colors hover:bg-black/70"
+              class="btn btn-circle btn-xs absolute right-2 top-2 border-none bg-black/60 text-white hover:bg-error"
+              aria-label="Remove image"
             >
-              <X class="size-4" />
+              <X class="size-3.5" aria-hidden="true" />
             </button>
           </div>
         </div>

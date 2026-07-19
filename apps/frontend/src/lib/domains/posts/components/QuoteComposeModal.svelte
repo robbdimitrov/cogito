@@ -1,5 +1,6 @@
 <script lang="ts">
   import { enhance } from "$app/forms";
+  import { X } from "@lucide/svelte";
   import type { Post } from "$lib/shared/types";
   import QuoteEmbed from "$lib/domains/posts/components/QuoteEmbed.svelte";
 
@@ -24,8 +25,16 @@
 </script>
 
 <dialog class="modal modal-open">
-  <div class="modal-box glass-card max-w-lg p-6">
-    <h3 class="mb-3 text-lg font-bold">Repost</h3>
+  <div class="modal-box glass-card relative max-w-lg p-6">
+    <button
+      type="button"
+      class="btn btn-circle btn-ghost btn-sm absolute right-3 top-3 z-10"
+      onclick={handleClose}
+      aria-label="Close"
+    >
+      <X class="size-4" aria-hidden="true" />
+    </button>
+    <h3 class="mb-3 pr-8 text-lg font-bold">Quote</h3>
     <form
       method="POST"
       action="?/quote"
@@ -47,7 +56,7 @@
         placeholder="Add a comment…"
         bind:value={content}
         maxlength={255}
-        rows={3}
+        rows={2}
         bind:this={textarea}></textarea>
       <div
         class="mt-1 text-right text-sm {content.length > 240
@@ -59,22 +68,14 @@
       <QuoteEmbed post={quotedPost} />
       <div class="modal-action mt-4">
         <button
-          type="button"
-          class="btn btn-ghost rounded-xl"
-          onclick={handleClose}
-          disabled={isSubmitting}
-        >
-          Cancel
-        </button>
-        <button
           type="submit"
-          class="btn btn-primary rounded-xl"
+          class="btn btn-primary rounded-full"
           disabled={isSubmitting || !content.trim()}
         >
           {#if isSubmitting}
             <span class="loading loading-spinner loading-xs"></span>
           {/if}
-          Repost
+          Quote
         </button>
       </div>
     </form>

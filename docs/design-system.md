@@ -90,7 +90,7 @@ than split pieces. `navbar-start` holds the logo lockup — a plain `Brain`
 glyph (`text-primary`, no circle/background) beside the `font-serif`
 "Cogito" wordmark (`from-primary to-primary/70` gradient) — which doubles as
 the Home link. `navbar-end` holds every other action — Search, Compose
-(opens `ComposeModal`), Notifications (unread badge), and a generic profile
+(opens `ComposeModal`), Notifications (unread dot), and a generic profile
 icon that links directly to the signed-in user's own profile — as plain
 icon buttons spaced directly in the bar, deliberately not wrapped in a pill
 container: a shared pill chrome around the whole cluster read as one more
@@ -190,7 +190,11 @@ via a document-level listener attached only while open.
 
 Full-screen modal with its own independent form (not `CreatePost`) posting
 `quoteOfId` to `?/quote`; includes an embedded `QuoteEmbed` preview of the
-source post.
+source post. Heading and submit button both read "Quote" — distinct from the
+plain zero-comment repost in `RepostMenu`. Dismissed via a top-right X
+(`btn btn-circle btn-ghost btn-sm`, matching `CreatePost`'s close button) or
+backdrop click; no bottom Cancel button. The submit button is `rounded-full`,
+matching the app's pill button language everywhere else.
 
 ### `ComposeModal`
 
