@@ -20,6 +20,9 @@
 
   let avatarFile: File | null = $state(null);
   let coverFile: File | null = $state(null);
+  let name = $state(untrack(() => data.currentUser?.name ?? ""));
+  let username = $state(untrack(() => data.currentUser?.username ?? ""));
+  let email = $state(untrack(() => data.currentUser?.email ?? ""));
   let bio = $state(untrack(() => data.currentUser?.bio ?? ""));
 
   let userOverride = $state<Partial<typeof data.currentUser>>({});
@@ -134,7 +137,7 @@
         isSubmitting = false;
         if (result.type === "failure") {
           userOverride = previousOverride;
-          await update({ invalidateAll: false });
+          await update({ invalidateAll: false, reset: false });
           return;
         }
 
@@ -148,7 +151,9 @@
             coverPhotoKey: result.data?.coverPhotoKey as string | undefined,
           };
         }
-        await update({ invalidateAll: false });
+        // reset: false — the default form.reset() would wipe every field back
+        // to empty, since these bind:value inputs carry no static value attr.
+        await update({ invalidateAll: false, reset: false });
       };
     }}
   >
@@ -265,7 +270,7 @@
           type="text"
           name="name"
           placeholder="Name"
-          value={user.name}
+          bind:value={name}
           required
           autocomplete="name"
           maxlength={100}
@@ -277,7 +282,7 @@
           type="text"
           name="username"
           placeholder="Username"
-          value={user.username}
+          bind:value={username}
           required
           autocomplete="username"
           pattern="[a-zA-Z0-9_]+"
@@ -291,7 +296,7 @@
           type="email"
           name="email"
           placeholder="Email"
-          value={user.email}
+          bind:value={email}
           required
           autocomplete="email"
           maxlength={255}
