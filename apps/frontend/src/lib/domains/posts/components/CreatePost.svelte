@@ -2,16 +2,19 @@
   import { Pen, Send, ImageIcon, X } from "@lucide/svelte";
   import Avatar from "$lib/shared/components/ui/Avatar.svelte";
   import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
+  import QuoteEmbed from "$lib/domains/posts/components/QuoteEmbed.svelte";
   import type { User } from "$lib/domains/users/model";
+  import type { Post } from "$lib/shared/types";
 
   import { resizeImageForUpload } from "$lib/shared/image";
   import { getToastContext } from "$lib/shared/toast.svelte";
   import { enhance } from "$app/forms";
   import { resolve } from "$app/paths";
 
-  let { user, onClose } = $props<{
+  let { user, onClose, quotedPost } = $props<{
     user: User;
     onClose: () => void;
+    quotedPost?: Post;
   }>();
   let content = $state("");
   let imageBlob = $state<Blob | null>(null);
@@ -89,6 +92,9 @@
         };
       }}
     >
+      {#if quotedPost}
+        <input type="hidden" name="quoteOfId" value={quotedPost.publicId} />
+      {/if}
       <div class="flex gap-3 pr-10 sm:gap-4">
         <div class="hidden shrink-0 sm:block">
           <Avatar
@@ -105,12 +111,17 @@
             bind:this={textareaRef}
             name="content"
             class="form-textarea min-h-0 resize-none rounded-2xl pl-10 shadow-inner shadow-base-300/10 sm:text-lg dark:shadow-base-100/15"
-            placeholder="What's on your mind?"
+            placeholder={quotedPost ? "Add a comment…" : "What's on your mind?"}
             bind:value={content}
-            rows={imagePreview ? 2 : 5}
+            rows={imagePreview || quotedPost ? 2 : 5}
             maxlength={255}></textarea>
         </div>
       </div>
+      {#if quotedPost}
+        <div class="mt-3 sm:pl-14">
+          <QuoteEmbed post={quotedPost} />
+        </div>
+      {/if}
       {#if imagePreview}
         <div class="mt-3 sm:pl-14">
           <div class="relative inline-block">
@@ -165,10 +176,10 @@
         <button
           type="submit"
           class="btn btn-primary btn-sm gap-1 rounded-full px-5 disabled:bg-primary! disabled:text-primary-content! disabled:opacity-70 {!isPending &&
-          (content.trim() || imageBlob)
+          content.trim()
             ? 'shadow-lg shadow-primary/20'
             : 'shadow-none'}"
-          disabled={isPending || (!content.trim() && !imageBlob)}
+          disabled={isPending || !content.trim()}
         >
           <Send class="size-4" />
           Post

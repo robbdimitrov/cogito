@@ -71,8 +71,9 @@
     {/if}
   </div>
 
-  {#if quotingPost}
+  {#if quotingPost && user}
     <QuoteComposeModal
+      {user}
       quotedPost={quotingPost}
       onClose={() => (quotingPost = null)}
     />
