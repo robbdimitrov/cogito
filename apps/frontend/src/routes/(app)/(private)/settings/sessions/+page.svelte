@@ -1,6 +1,7 @@
 <script lang="ts">
+  import { resolve } from "$app/paths";
   import { enhance } from "$app/forms";
-  import { AlertCircle, XCircle, Monitor, X } from "@lucide/svelte";
+  import { ArrowLeft, AlertCircle, XCircle, Monitor, X } from "@lucide/svelte";
   import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
   import { getToastContext } from "$lib/shared/toast.svelte";
 
@@ -19,31 +20,44 @@
   );
 </script>
 
-{#if data.error || form?.error}
-  <GlassCard>
-    <div class="card-body p-4 sm:p-6">
+<GlassCard>
+  <div class="card-body gap-4 p-4 sm:gap-5 sm:p-6">
+    <div class="subtle-border flex items-start gap-3 border-b pb-4">
+      <a
+        href={resolve("/settings")}
+        class="btn btn-ghost btn-circle btn-sm shrink-0"
+        aria-label="Back to Settings"
+        title="Back to Settings"
+      >
+        <ArrowLeft class="size-4" aria-hidden="true" />
+      </a>
+      <div class="grid gap-0.5">
+        <h1 class="text-xl font-semibold leading-tight sm:text-2xl">
+          Active Sessions
+        </h1>
+        <p class="muted-text text-sm">
+          Review browsers signed in to your account and revoke ones you don't
+          recognize.
+        </p>
+      </div>
+    </div>
+
+    {#if data.error || form?.error}
       <div class="alert alert-error" role="alert">
         <AlertCircle class="size-5 shrink-0" aria-hidden="true" />
         <span>{form?.error || data.error}</span>
       </div>
-    </div>
-  </GlassCard>
-{:else if !sessions || sessions.length === 0}
-  <GlassCard>
-    <div class="card-body items-center text-center text-base-content/70 py-12">
-      <XCircle
-        class="size-12 mb-2 text-base-content opacity-60"
-        aria-hidden="true"
-      />
-      <p class="text-base">No active sessions found.</p>
-    </div>
-  </GlassCard>
-{:else}
-  <GlassCard>
-    <div class="card-body gap-4 p-4 sm:gap-5 sm:p-6">
-      <h1 class="text-xl font-semibold leading-tight sm:text-2xl">
-        Active Sessions
-      </h1>
+    {:else if !sessions || sessions.length === 0}
+      <div
+        class="flex flex-col items-center py-12 text-center text-base-content/70"
+      >
+        <XCircle
+          class="mb-2 size-12 text-base-content opacity-60"
+          aria-hidden="true"
+        />
+        <p class="text-base">No active sessions found.</p>
+      </div>
+    {:else}
       <div class="overflow-x-auto">
         <table class="table w-full">
           <caption class="sr-only"
@@ -69,10 +83,11 @@
               <tr class="border-base-200/70">
                 <td>
                   <div class="flex min-h-12 items-center gap-3">
-                    <Monitor
-                      class="size-5 shrink-0 opacity-60"
-                      aria-hidden="true"
-                    />
+                    <span
+                      class="grid size-8 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary"
+                    >
+                      <Monitor class="size-4" aria-hidden="true" />
+                    </span>
                     <span class="text-base font-medium">Browser</span>
                     {#if isCurrent}
                       <span class="badge badge-primary badge-sm">Current</span>
@@ -129,6 +144,6 @@
           </tbody>
         </table>
       </div>
-    </div>
-  </GlassCard>
-{/if}
+    {/if}
+  </div>
+</GlassCard>

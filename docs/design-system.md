@@ -61,7 +61,6 @@ Defined in `app.css`:
 | `.glass-surface`          | `border-white/60 bg-base-100/80 shadow-xl shadow-base-300/25 backdrop-blur-2xl` (dark: `border-white/15 bg-base-200/85 shadow-base-100/35`) — shadows are tinted from the theme's own base palette, never plain black |
 | `.glass-card`             | `.glass-surface` + `card rounded-2xl`                                                                                  |
 | `.glass-card-interactive` | `.glass-card` + `transition hover:bg-base-100/95` (dark: `hover:bg-base-300/85`)                                      |
-| `.page-shell`             | Root page shell for wide or multi-column app screens: `container mx-auto max-w-5xl px-3 py-3 sm:px-4 sm:py-6`          |
 | `.feed-shell`             | Root page shell for single-column timelines, detail pages, search, hashtags, and notifications: `max-w-2xl`            |
 | `.profile-shell`          | Root page shell for profile pages: `max-w-3xl`                                                                         |
 | `.soft-surface`           | Tokenized inline/list surface with `rounded-2xl`, base borders, translucent base background, and dark hover states     |
@@ -76,7 +75,6 @@ Defined in `app.css`:
 
 | Screen category | Utility          | Width       | Used for                                                             |
 | --------------- | ---------------- | ----------- | --------------------------------------------------------------------- |
-| Wide shell      | `.page-shell`    | `max-w-5xl` | Settings/account screens                                             |
 | Feed shell      | `.feed-shell`    | `max-w-2xl` | Home feed, timelines, post detail, search, hashtags, and notifications |
 | Profile shell   | `.profile-shell` | `max-w-3xl` | Profile header plus profile tabs                                     |
 
@@ -140,10 +138,10 @@ Full-width profile header: cover image, or
 `bg-linear-to-tr from-primary via-primary/80 to-secondary` gradient placeholder
 when none is set. Below: avatar, display name, `@username`, bio, stat links
 (posts, likes, following, followers), and `ControlBar` for follow access. On
-your own profile, a single "Settings" pill button (→ `/settings/profile`) is
-the sole entry point into account settings — it replaces the earlier
-"Edit Profile"/gear pair, since both landed on the same settings area; Logout
-lives in the Settings page's utility row, not on the profile.
+your own profile, a single "Settings" pill button (→ `/settings`) is the sole
+entry point into account settings, landing on the overview hub — it replaces
+the earlier "Edit Profile"/gear pair, since both landed on the same settings
+area; Logout lives on the Settings hub, not on the profile.
 
 ### `CreatePost`
 
@@ -208,6 +206,20 @@ With an empty query, the page shows a "Popular" section (`PostList` of
 `GET /search/popular`, paginated like the feed) instead of the results list,
 falling back to the empty-query message if there are no popular posts.
 
+### Settings
+
+`/settings` is a centered `max-w-xl` card — a single-focus flow like auth,
+not a dashboard. The hub (`/settings`) is the sole entry point: an Appearance
+theme switcher (System/Light/Dark pill radiogroup), drill-down rows to
+Profile/Password/Sessions (`bg-primary/10 text-primary` icon tile +
+`ChevronRight`, the same tinted-tile idiom as `SearchResultRow`'s hashtag
+row), and a bordered Logout row set off by a divider — no identity summary,
+since that's already `UserHeader` on the profile and the Edit Profile form.
+Each destination page owns its content and has no shared layout chrome
+beyond the centered wrapper — it gets back to the hub via its own
+`ArrowLeft` button beside its `h1` (with a one-line subtitle underneath,
+matching the hub's own header), not a persistent tab strip.
+
 ### Auth, Primitives, Containers
 
 `ConfirmModal` — accessible `role="dialog"` confirmation. `Field` — label +
@@ -222,8 +234,7 @@ feed, search, notifications, `PostList`, and `UserList`. `PostList` /
 — profile action strip.
 `TabStrip` — shared `glass-surface tabs tabs-boxed` pill strip (`tabs:
 {name, href, isActive, count?}[]`); grid column count derives from
-`tabs.length`. Used by `ControlBar` (4 tabs, with counts) and the Settings
-layout's Profile/Password/Sessions nav (3 tabs, no counts), identically at
+`tabs.length`. Used by `ControlBar` (4 tabs, with counts), identically at
 every breakpoint — no responsive column-switching.
 
 Login/register share `AuthShell` (`eyebrow`/`heading`/`description` props +

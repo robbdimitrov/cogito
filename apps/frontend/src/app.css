@@ -81,10 +81,6 @@
   }
 }
 
-@utility page-shell {
-  @apply container mx-auto max-w-5xl px-3 py-3 sm:px-4 sm:py-6;
-}
-
 @utility feed-shell {
   @apply container mx-auto max-w-2xl px-3 py-3 sm:px-4 sm:py-6;
 }

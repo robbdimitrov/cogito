@@ -57,7 +57,7 @@
       </div>
       {#if isOwnProfile}
         <a
-          href={resolve("/settings/profile")}
+          href={resolve("/settings")}
           class="btn btn-outline btn-sm gap-1 rounded-full px-3 sm:px-4"
         >
           <Settings class="size-4" />

@@ -1,6 +1,7 @@
 <script lang="ts">
+  import { resolve } from "$app/paths";
   import { enhance } from "$app/forms";
-  import { AlertCircle } from "@lucide/svelte";
+  import { ArrowLeft, AlertCircle } from "@lucide/svelte";
   import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
   import Field from "$lib/shared/components/ui/Field.svelte";
   import FormInput from "$lib/shared/components/ui/FormInput.svelte";
@@ -16,9 +17,24 @@
 
 <GlassCard>
   <div class="card-body gap-4 p-4 sm:gap-5 sm:p-6">
-    <h1 class="text-xl font-semibold leading-tight sm:text-2xl">
-      Change Password
-    </h1>
+    <div class="subtle-border flex items-start gap-3 border-b pb-4">
+      <a
+        href={resolve("/settings")}
+        class="btn btn-ghost btn-circle btn-sm shrink-0"
+        aria-label="Back to Settings"
+        title="Back to Settings"
+      >
+        <ArrowLeft class="size-4" aria-hidden="true" />
+      </a>
+      <div class="grid gap-0.5">
+        <h1 class="text-xl font-semibold leading-tight sm:text-2xl">
+          Change Password
+        </h1>
+        <p class="muted-text text-sm">
+          Choose a strong password you don't use anywhere else.
+        </p>
+      </div>
+    </div>
 
     {#if form?.error}
       <div class="alert alert-error" role="alert">

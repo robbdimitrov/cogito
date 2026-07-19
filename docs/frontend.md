@@ -38,7 +38,7 @@
 | /{username}/following | Following list                                                          | toggleFollow                                       |
 | /search               | Search results (`#tag` shows that tag's post feed) with users/hashtags typeahead and last 10 recent searches | toggleLike, toggleRepost, deletePost, remove/clear recent searches |
 | /notifications        | Notifications (initial unread rows marked read server-side after fetch) | —                                                  |
-| /settings             | Redirect to /settings/profile                                           | —                                                  |
+| /settings             | Settings hub — appearance, links to Profile/Password/Sessions           | —                                                  |
 | /settings/profile     | Current user profile                                                    | default — update name/username/email/bio/photos    |
 | /settings/password    | Password form                                                           | default — change password (old + new)              |
 | /settings/sessions    | Active sessions                                                         | deleteSession                                      |
@@ -64,8 +64,10 @@ profile route itself doesn't require one).
       /(main)/+page.svelte  feed
       /(main)/notifications/+page.svelte
       search/+page.svelte
-      settings/+layout.svelte  settings sidebar nav
-        /settings/profile, /settings/password, /settings/sessions
+      settings/+layout.svelte  centered account-flow wrapper, no shared nav
+        /settings/+page.svelte  hub — appearance, drill-down links, logout
+        /settings/profile, /settings/password, /settings/sessions  each owns
+          its own back-arrow header
 ```
 
 ## Auth Guards

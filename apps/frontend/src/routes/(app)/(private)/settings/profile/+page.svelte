@@ -1,6 +1,7 @@
 <script lang="ts">
+  import { resolve } from "$app/paths";
   import { enhance } from "$app/forms";
-  import { Trash2, AlertCircle } from "@lucide/svelte";
+  import { ArrowLeft, Trash2, AlertCircle } from "@lucide/svelte";
   import Avatar from "$lib/shared/components/ui/Avatar.svelte";
   import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
   import Field from "$lib/shared/components/ui/Field.svelte";
@@ -84,9 +85,22 @@
 
 <GlassCard>
   <div class="card-body gap-4 p-4 sm:gap-5 sm:p-6">
-    <h1 class="text-xl font-semibold leading-tight sm:text-2xl">
-      Edit Profile
-    </h1>
+    <div class="subtle-border flex items-start gap-3 border-b pb-4">
+      <a
+        href={resolve("/settings")}
+        class="btn btn-ghost btn-circle btn-sm shrink-0"
+        aria-label="Back to Settings"
+        title="Back to Settings"
+      >
+        <ArrowLeft class="size-4" aria-hidden="true" />
+      </a>
+      <div class="grid gap-0.5">
+        <h1 class="text-xl font-semibold leading-tight sm:text-2xl">
+          Edit Profile
+        </h1>
+        <p class="muted-text text-sm">Update your photo, name, and bio.</p>
+      </div>
+    </div>
 
     {#if form?.error}
       <div class="alert alert-error" role="alert">
