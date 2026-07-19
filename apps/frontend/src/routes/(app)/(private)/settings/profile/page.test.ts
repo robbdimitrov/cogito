@@ -68,7 +68,15 @@ describe("Profile edit form save", () => {
   it("keeps name/username/email in the DOM after a successful save, since update() is called with reset: false", async () => {
     const el = mountComponent(
       ProfilePage,
-      { data: { currentUser }, form: undefined },
+      {
+        data: {
+          theme: "system",
+          currentUser,
+          sessionUnavailable: false,
+          unreadCount: 0,
+        },
+        form: null,
+      },
       toastContext,
     );
 
