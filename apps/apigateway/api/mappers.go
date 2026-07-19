@@ -22,6 +22,7 @@ func mapUserWithEmail(u *pb.User, includeEmail bool) user {
 		Email:           email,
 		Bio:             u.Bio,
 		Posts:           u.Posts,
+		Replies:         u.Replies,
 		Likes:           u.Likes,
 		Following:       u.Following,
 		Followers:       u.Followers,

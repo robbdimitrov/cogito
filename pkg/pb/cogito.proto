@@ -38,6 +38,7 @@ message User {
   string created = 11;
   string profile_photo_key = 12;
   string cover_photo_key = 13;
+  int32 replies = 14;
 }
 
 message UpdateUserRequest {

@@ -7,6 +7,7 @@ type user struct {
 	Email           string `json:"email"`
 	Bio             string `json:"bio"`
 	Posts           int32  `json:"posts"`
+	Replies         int32  `json:"replies"`
 	Likes           int32  `json:"likes"`
 	Following       int32  `json:"following"`
 	Followers       int32  `json:"followers"`

@@ -10,6 +10,7 @@ const user: User = {
   username: "alice",
   email: "alice@example.com",
   posts: 0,
+  replies: 0,
   following: 0,
   followers: 0,
   likes: 0,

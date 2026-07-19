@@ -5,6 +5,7 @@ export interface User {
   email: string;
   bio?: string;
   posts: number;
+  replies: number;
   following: number;
   followers: number;
   likes: number;

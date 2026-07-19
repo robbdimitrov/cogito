@@ -18,6 +18,7 @@
     },
     {
       name: "Replies",
+      count: user.replies,
       href: `${path}/replies`,
       isActive: page.url.pathname.endsWith("/replies"),
     },

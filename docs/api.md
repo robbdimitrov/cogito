@@ -219,6 +219,7 @@ to 10 in the same transaction.
   "email": "string",
   "bio": "string",
   "posts": 0,
+  "replies": 0,
   "likes": 0,
   "following": 0,
   "followers": 0,

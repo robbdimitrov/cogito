@@ -214,9 +214,10 @@ same transaction.
 - Reposts resolve to the canonical original:
   `repost_of_id = COALESCE(source.repost_of_id, source.id)`. Chains never exceed
   one hop.
-- User counters (posts, likes, following, followers) and boolean states (liked,
-  reposted, followed) are computed at read time via subqueries — no stored
-  counter columns.
+- User counters (posts, replies, likes, following, followers) and boolean
+  states (liked, reposted, followed) are computed at read time via
+  subqueries — no stored counter columns. `posts` and `replies` are a
+  disjoint split on `in_reply_to_id`.
 - `fan_out_disabled` is one-way once set; high-follower authors are pulled at
   feed read time instead of materialized into every follower's feed.
 - Uploads are staged at `staging/{filename}` in S3 until owner-checked

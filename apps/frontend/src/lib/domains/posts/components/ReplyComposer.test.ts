@@ -10,6 +10,7 @@ const currentUser: User = {
   email: "",
   bio: "",
   posts: 0,
+  replies: 0,
   likes: 0,
   following: 0,
   followers: 0,

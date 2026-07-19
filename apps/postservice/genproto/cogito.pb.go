@@ -236,6 +236,7 @@ type User struct {
 	Created         string                 `protobuf:"bytes,11,opt,name=created,proto3" json:"created,omitempty"`
 	ProfilePhotoKey string                 `protobuf:"bytes,12,opt,name=profile_photo_key,json=profilePhotoKey,proto3" json:"profile_photo_key,omitempty"`
 	CoverPhotoKey   string                 `protobuf:"bytes,13,opt,name=cover_photo_key,json=coverPhotoKey,proto3" json:"cover_photo_key,omitempty"`
+	Replies         int32                  `protobuf:"varint,14,opt,name=replies,proto3" json:"replies,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -359,6 +360,13 @@ func (x *User) GetCoverPhotoKey() string {
 		return x.CoverPhotoKey
 	}
 	return ""
+}
+
+func (x *User) GetReplies() int32 {
+	if x != nil {
+		return x.Replies
+	}
+	return 0
 }
 
 type UpdateUserRequest struct {
@@ -2325,7 +2333,7 @@ const file_pkg_pb_cogito_proto_rawDesc = "" +
 	"\x03Ids\x12\x10\n" +
 	"\x03ids\x18\x01 \x03(\x05R\x03ids\"&\n" +
 	"\vUserRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x05R\x06userId\"\xe0\x02\n" +
+	"\auser_id\x18\x01 \x01(\x05R\x06userId\"\xfa\x02\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x05R\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1a\n" +
@@ -2340,7 +2348,8 @@ const file_pkg_pb_cogito_proto_rawDesc = "" +
 	" \x01(\bR\bfollowed\x12\x18\n" +
 	"\acreated\x18\v \x01(\tR\acreated\x12*\n" +
 	"\x11profile_photo_key\x18\f \x01(\tR\x0fprofilePhotoKey\x12&\n" +
-	"\x0fcover_photo_key\x18\r \x01(\tR\rcoverPhotoKey\"\xee\x02\n" +
+	"\x0fcover_photo_key\x18\r \x01(\tR\rcoverPhotoKey\x12\x18\n" +
+	"\areplies\x18\x0e \x01(\x05R\areplies\"\xee\x02\n" +
 	"\x11UpdateUserRequest\x12\x17\n" +
 	"\x04name\x18\x01 \x01(\tH\x00R\x04name\x88\x01\x01\x12\x1f\n" +
 	"\busername\x18\x02 \x01(\tH\x01R\busername\x88\x01\x01\x12\x19\n" +

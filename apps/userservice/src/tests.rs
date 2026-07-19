@@ -18,6 +18,16 @@ impl MockDb {
             users: Mutex::new(Vec::new()),
         }
     }
+
+    // Mirrors the real DB's separate posts/replies count subqueries for
+    // controller pass-through tests, without exercising actual SQL.
+    async fn set_post_counts(&self, user_id: i32, posts: i32, replies: i32) {
+        let mut users = self.users.lock().await;
+        if let Some(u) = users.iter_mut().find(|u| u.id == user_id) {
+            u.posts = posts;
+            u.replies = replies;
+        }
+    }
 }
 
 #[async_trait]
@@ -38,6 +48,7 @@ impl UserDb for Arc<MockDb> {
             email: email.to_string(),
             bio: "".to_string(),
             posts: 0,
+            replies: 0,
             likes: 0,
             following: 0,
             followers: 0,
@@ -284,6 +295,24 @@ async fn test_get_user() {
     assert!(res.is_ok());
     let user = res.unwrap().into_inner();
     assert_eq!(user.username, "testuser");
+}
+
+#[tokio::test]
+async fn test_get_user_reports_posts_and_replies_separately() {
+    let db = Arc::new(MockDb::new());
+    let controller = Controller::new(db.clone());
+
+    let _ = db
+        .create_user("Test", "testuser", "test@example.com", "hash")
+        .await;
+    db.set_post_counts(1, 2, 3).await;
+
+    let req = create_request(UserRequest { user_id: 1 }, 1);
+    let res = controller.get_user(req).await;
+
+    let user = res.unwrap().into_inner();
+    assert_eq!(user.posts, 2, "posts must exclude replies");
+    assert_eq!(user.replies, 3, "replies must be reported separately");
 }
 
 #[tokio::test]
