@@ -662,7 +662,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PostServiceClient interface {
-	CreatePost(ctx context.Context, in *CreatePostRequest, opts ...grpc.CallOption) (*Identifier, error)
+	CreatePost(ctx context.Context, in *CreatePostRequest, opts ...grpc.CallOption) (*PostIdentifier, error)
 	GetFeed(ctx context.Context, in *GetFeedRequest, opts ...grpc.CallOption) (*Posts, error)
 	GetPosts(ctx context.Context, in *GetPostsRequest, opts ...grpc.CallOption) (*Posts, error)
 	GetUserReplies(ctx context.Context, in *GetPostsRequest, opts ...grpc.CallOption) (*Posts, error)
@@ -687,9 +687,9 @@ func NewPostServiceClient(cc grpc.ClientConnInterface) PostServiceClient {
 	return &postServiceClient{cc}
 }
 
-func (c *postServiceClient) CreatePost(ctx context.Context, in *CreatePostRequest, opts ...grpc.CallOption) (*Identifier, error) {
+func (c *postServiceClient) CreatePost(ctx context.Context, in *CreatePostRequest, opts ...grpc.CallOption) (*PostIdentifier, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Identifier)
+	out := new(PostIdentifier)
 	err := c.cc.Invoke(ctx, PostService_CreatePost_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -841,7 +841,7 @@ func (c *postServiceClient) GetPopularPosts(ctx context.Context, in *GetPopularP
 // All implementations must embed UnimplementedPostServiceServer
 // for forward compatibility.
 type PostServiceServer interface {
-	CreatePost(context.Context, *CreatePostRequest) (*Identifier, error)
+	CreatePost(context.Context, *CreatePostRequest) (*PostIdentifier, error)
 	GetFeed(context.Context, *GetFeedRequest) (*Posts, error)
 	GetPosts(context.Context, *GetPostsRequest) (*Posts, error)
 	GetUserReplies(context.Context, *GetPostsRequest) (*Posts, error)
@@ -866,7 +866,7 @@ type PostServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedPostServiceServer struct{}
 
-func (UnimplementedPostServiceServer) CreatePost(context.Context, *CreatePostRequest) (*Identifier, error) {
+func (UnimplementedPostServiceServer) CreatePost(context.Context, *CreatePostRequest) (*PostIdentifier, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreatePost not implemented")
 }
 func (UnimplementedPostServiceServer) GetFeed(context.Context, *GetFeedRequest) (*Posts, error) {

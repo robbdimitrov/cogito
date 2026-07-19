@@ -117,10 +117,17 @@ message CreatePostRequest {
   optional string media_key = 2;
   optional int32 in_reply_to_id = 3;
   optional int32 quote_of_id = 4;
+  optional string in_reply_to_public_id = 5;
+  optional string quote_of_public_id = 6;
+}
+
+message PostIdentifier {
+  string public_id = 1;
 }
 
 message PostRequest {
   int32 post_id = 1;
+  string public_id = 2;
 }
 
 message Post {
@@ -140,6 +147,8 @@ message Post {
   int32 quote_of_id = 14;
   Post quote_post = 15;
   Post repost_of = 16;
+  string public_id = 17;
+  optional string repost_of_public_id = 18;
 }
 
 message GetFeedRequest {
@@ -168,6 +177,7 @@ message GetRepliesRequest {
   int32 post_id = 1;
   string cursor = 2;
   int32 limit = 3;
+  string public_id = 4;
 }
 
 message GetPopularPostsRequest {
@@ -187,7 +197,7 @@ message Hashtags {
 }
 
 service PostService {
-  rpc CreatePost(CreatePostRequest) returns (Identifier);
+  rpc CreatePost(CreatePostRequest) returns (PostIdentifier);
   rpc GetFeed(GetFeedRequest) returns (Posts);
   rpc GetPosts(GetPostsRequest) returns (Posts);
   rpc GetUserReplies(GetPostsRequest) returns (Posts);
