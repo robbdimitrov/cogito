@@ -32,11 +32,10 @@ describe("UserHeader anonymous gating", () => {
     expect(el.querySelector('form[action*="?/toggleFollow"]')).not.toBeNull();
   });
 
-  it("renders edit-profile and settings links when viewing your own profile", () => {
+  it("renders a settings link when viewing your own profile", () => {
     const el = mountComponent(UserHeader, { user, currentUser: user });
 
     expect(el.querySelector('a[href="/settings/profile"]')).not.toBeNull();
-    expect(el.querySelector('a[href="/settings"]')).not.toBeNull();
     expect(el.querySelector('form[action*="?/toggleFollow"]')).toBeNull();
   });
 });

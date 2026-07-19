@@ -140,9 +140,10 @@ Full-width profile header: cover image, or
 `bg-linear-to-tr from-primary via-primary/80 to-secondary` gradient placeholder
 when none is set. Below: avatar, display name, `@username`, bio, stat links
 (posts, likes, following, followers), and `ControlBar` for follow access. On
-your own profile, "Edit Profile" (→ `/settings/profile`) sits beside a
-circular Settings icon button (→ `/settings`); Logout lives in the Settings
-page's utility row, not on the profile.
+your own profile, a single "Settings" pill button (→ `/settings/profile`) is
+the sole entry point into account settings — it replaces the earlier
+"Edit Profile"/gear pair, since both landed on the same settings area; Logout
+lives in the Settings page's utility row, not on the profile.
 
 ### `CreatePost`
 
