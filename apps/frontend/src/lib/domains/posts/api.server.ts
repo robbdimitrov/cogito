@@ -43,6 +43,15 @@ export async function getUserPosts(
   return getCursorPage(api, `/users/${userID}/posts`, cursor, limit);
 }
 
+export async function getUserReplies(
+  api: ApiClient,
+  userID: string | number,
+  cursor = "",
+  limit = DEFAULT_PAGE_SIZE,
+): Promise<PostPage> {
+  return getCursorPage(api, `/users/${userID}/replies`, cursor, limit);
+}
+
 export async function getLikedPosts(
   api: ApiClient,
   userID: string | number,

@@ -33,6 +33,7 @@
 | Route                 | Load                                                                    | Actions                                            |
 | --------------------- | ----------------------------------------------------------------------- | -------------------------------------------------- |
 | /                     | Feed (posts, nextCursor)                                                | createPost, toggleLike, toggleRepost, deletePost   |
+| /{username}/replies   | User's own replies, each showing "Replying to @x" context               | same post/follow actions                           |
 | /{username}/likes     | User's liked posts                                                      | same post/follow actions                           |
 | /{username}/followers | Followers list                                                          | toggleFollow                                       |
 | /{username}/following | Following list                                                          | toggleFollow                                       |
@@ -43,10 +44,10 @@
 | /settings/password    | Password form                                                           | default — change password (old + new)              |
 | /settings/sessions    | Active sessions                                                         | deleteSession                                      |
 
-Route params: `username` (any string), `tab` (matches `likes`, `followers`,
-`following` — the `[tab=tab]` route always requires a session, enforced by a
-`(private)` layout guard nested under the profile route, even though the
-profile route itself doesn't require one).
+Route params: `username` (any string), `tab` (matches `replies`, `likes`,
+`followers`, `following` — the `[tab=tab]` route always requires a session,
+enforced by a `(private)` layout guard nested under the profile route, even
+though the profile route itself doesn't require one).
 
 ## Layout Hierarchy
 
@@ -58,7 +59,7 @@ profile route itself doesn't require one).
     /[username]/+layout.svelte  loads profile user (404 if not found)
       /[username]/+page.svelte  posts tab — anonymous-readable
       /[username]/(private)/+layout.server.ts  guard: redirect /login if unauthenticated
-        /[username]/(private)/[tab]/+page.svelte  likes / followers / following
+        /[username]/(private)/[tab]/+page.svelte  replies / likes / followers / following
     /posts/[id]/+page.svelte  anonymous-readable; replies/composer require a session
     (private)/+layout.server.ts  guard: redirect /login if unauthenticated
       /(main)/+page.svelte  feed
@@ -134,6 +135,8 @@ unchanged after DTO mapping.
 | `/`                     | GET    | +server.ts      | GET /posts/feed?cursor=                                           |
 | `/{username}`           | GET    | page load       | GET /users?username= + GET /users/{id}/posts                      |
 | `/{username}`           | GET    | +server.ts      | GET /users/{id}/posts?cursor=                                     |
+| `/{username}/replies`   | GET    | page load       | GET /users/{id}/replies                                           |
+| `/{username}/replies`   | GET    | +server.ts      | GET /users/{id}/replies?cursor=                                   |
 | `/{username}/likes`     | GET    | page load       | GET /users/{id}/likes                                             |
 | `/{username}/likes`     | GET    | +server.ts      | GET /users/{id}/likes?cursor=                                     |
 | `/{username}/followers` | GET    | page load       | GET /users/{id}/followers                                         |
@@ -180,8 +183,8 @@ omit it for cover photos and full-resolution post media.
   `+server.ts` falls back to resolving by username only if `userId` is absent.
 - `createPagination<T>()` state: `items`, `cursor`, `loading`. `more()` appends
   and advances cursor.
-- Used in: feed, user posts, liked posts, followers, following, hashtag post
-  feed (`/search?q=#tag`).
+- Used in: feed, user posts, user replies, liked posts, followers, following,
+  hashtag post feed (`/search?q=#tag`).
 - The feed renders a first-page empty state linking to `/search` when
   `/posts/feed` returns no items and no cursor.
 - `/notifications` initial page marks unread rows as read after retrieval.

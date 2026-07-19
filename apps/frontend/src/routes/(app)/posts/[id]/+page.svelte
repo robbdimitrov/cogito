@@ -1,5 +1,6 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
+  import { goto } from "$app/navigation";
   import {
     AlertTriangle,
     ArrowLeft,
@@ -36,9 +37,18 @@
   });
   let quotingPost = $state<Post | null>(null);
 
-  // Optimistic states for main post
   let isLiking = $state(false);
   let isReposting = $state(false);
+
+  // A deep-linked post (shared URL, notification) has no in-app history, so
+  // browser back would leave the app; fall back to the feed in that case.
+  function goBack() {
+    if (history.length > 1) {
+      history.back();
+    } else {
+      goto(resolve("/"));
+    }
+  }
 
   function formatRelativeTime(dateString: string) {
     const date = new Date(dateString);
@@ -82,13 +92,14 @@
 {:else}
   <div class="feed-shell">
     <div class="mb-3 sm:mb-4">
-      <a
-        href={resolve("/")}
+      <button
+        type="button"
+        onclick={goBack}
         class="btn btn-ghost btn-sm gap-1 rounded-full px-3"
       >
         <ArrowLeft class="size-4" />
         Back
-      </a>
+      </button>
     </div>
 
     <GlassCard class="overflow-hidden">
@@ -258,7 +269,6 @@
       confirmText="Delete"
       onconfirm={() => {
         if (!post) return;
-        // Need to submit to delete action
         const form = document.createElement("form");
         form.method = "POST";
         form.action = "?/deletePost";
@@ -281,7 +291,7 @@
 
     {#if user}
       {#if replies.length > 0}
-        <div
+        <ul
           class="mt-2 space-y-0 divide-y divide-base-300/70 dark:divide-white/10"
         >
           {#each replies as reply (reply.id)}
@@ -289,9 +299,10 @@
               post={reply}
               currentUserId={user?.id}
               onQuote={(p) => (quotingPost = p)}
+              threaded
             />
           {/each}
-        </div>
+        </ul>
       {/if}
     {:else}
       <div class="mt-3 text-center">

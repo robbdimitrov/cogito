@@ -1,5 +1,5 @@
 import { json } from "@sveltejs/kit";
-import { getLikedPosts } from "$lib/domains/posts/api.server";
+import { getLikedPosts, getUserReplies } from "$lib/domains/posts/api.server";
 import {
   getFollowers,
   getFollowing,
@@ -17,9 +17,8 @@ export const GET = async (event) => {
   const tab = params.tab;
 
   try {
-    // The client already resolved the profile user on initial page load and
-    // passes its ID along, so pagination requests skip a redundant username
-    // lookup. Fall back to resolving by username if the ID is missing.
+    // Client passes the already-resolved user ID to skip a redundant lookup;
+    // fall back to resolving by username if it's missing.
     const userID =
       parseIdParam(url.searchParams.get("userId")) ??
       (
@@ -28,7 +27,10 @@ export const GET = async (event) => {
           decodeURIComponent(params.username).replace(/^@/, ""),
         )
       ).id;
-    if (tab === "likes") {
+    if (tab === "replies") {
+      const feed = await getUserReplies(apiClient(event), userID, cursor);
+      return json(feed ?? { items: [], nextCursor: null });
+    } else if (tab === "likes") {
       const feed = await getLikedPosts(apiClient(event), userID, cursor);
       return json(feed ?? { items: [], nextCursor: null });
     } else if (tab === "followers") {

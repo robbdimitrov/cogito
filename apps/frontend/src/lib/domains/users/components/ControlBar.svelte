@@ -14,7 +14,12 @@
       href: path,
       isActive:
         page.url.pathname === path &&
-        !page.url.pathname.match(/\/(following|followers|likes)$/),
+        !page.url.pathname.match(/\/(replies|following|followers|likes)$/),
+    },
+    {
+      name: "Replies",
+      href: `${path}/replies`,
+      isActive: page.url.pathname.endsWith("/replies"),
     },
     {
       name: "Following",

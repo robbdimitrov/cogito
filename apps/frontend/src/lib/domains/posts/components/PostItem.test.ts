@@ -31,3 +31,19 @@ describe("PostItem anonymous gating", () => {
     expect(el.querySelector('form[action*="?/toggleRepost"]')).not.toBeNull();
   });
 });
+
+describe("PostItem reply context", () => {
+  it("renders a replying-to line when inReplyToUsername is present", () => {
+    const reply: Post = { ...post, inReplyToId: 5, inReplyToUsername: "carol" };
+    const el = mountComponent(PostItem, { post: reply, currentUserId: 2 });
+
+    expect(el.textContent).toContain("Replying to");
+    expect(el.textContent).toContain("@carol");
+  });
+
+  it("omits the replying-to line when inReplyToUsername is absent", () => {
+    const el = mountComponent(PostItem, { post, currentUserId: 2 });
+
+    expect(el.textContent).not.toContain("Replying to");
+  });
+});

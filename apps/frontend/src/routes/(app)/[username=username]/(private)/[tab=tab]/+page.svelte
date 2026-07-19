@@ -12,6 +12,9 @@
 
   let tab = $derived(data.tab);
   let isPosts = $derived(data.type === "posts");
+  let emptyMessage = $derived(
+    tab === "replies" ? "No replies yet." : "No liked posts yet.",
+  );
 
   const pagination = createPagination<Post | User>(
     () => ({ items: data.items, nextCursor: data.nextCursor }),
@@ -36,7 +39,7 @@
     users={[user]}
     currentUserId={currentUser?.id}
     onQuote={handleQuote}
-    emptyMessage="No liked posts yet."
+    {emptyMessage}
   />
 {:else}
   <UserList

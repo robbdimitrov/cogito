@@ -15,6 +15,7 @@ export interface Post {
   mediaKey?: string;
   replies: number;
   inReplyToId?: number;
+  inReplyToUsername?: string;
   quoteOfId?: number;
   quotePost?: Post;
 }

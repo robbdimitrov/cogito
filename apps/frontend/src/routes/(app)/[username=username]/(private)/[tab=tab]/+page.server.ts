@@ -1,5 +1,5 @@
 import { fail, error } from "@sveltejs/kit";
-import { getLikedPosts } from "$lib/domains/posts/api.server";
+import { getLikedPosts, getUserReplies } from "$lib/domains/posts/api.server";
 import {
   toggleLike,
   toggleRepost,
@@ -20,12 +20,25 @@ export const load = async (event) => {
 
   const tab = params.tab;
 
-  if (tab !== "likes" && tab !== "followers" && tab !== "following") {
+  if (
+    tab !== "replies" &&
+    tab !== "likes" &&
+    tab !== "followers" &&
+    tab !== "following"
+  ) {
     throw error(404, "Not found");
   }
 
   try {
-    if (tab === "likes") {
+    if (tab === "replies") {
+      const feed = await getUserReplies(apiClient(event), profileUser.id, "");
+      return {
+        tab,
+        items: feed?.items ?? [],
+        nextCursor: feed?.nextCursor ?? null,
+        type: "posts",
+      };
+    } else if (tab === "likes") {
       const feed = await getLikedPosts(apiClient(event), profileUser.id, "");
       return {
         tab,
@@ -56,7 +69,7 @@ export const load = async (event) => {
       tab,
       items: [],
       nextCursor: null,
-      type: tab === "likes" ? "posts" : "users",
+      type: tab === "replies" || tab === "likes" ? "posts" : "users",
     };
   }
 };

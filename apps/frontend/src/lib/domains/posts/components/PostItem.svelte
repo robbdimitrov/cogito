@@ -17,9 +17,16 @@
     user?: User;
     currentUserId?: number | null;
     onQuote?: (post: Post) => void;
+    threaded?: boolean;
   }
 
-  let { post, user, currentUserId, onQuote }: Props = $props();
+  let {
+    post,
+    user,
+    currentUserId,
+    onQuote,
+    threaded = false,
+  }: Props = $props();
 
   let isRepost = $derived(!!post.repostOfId);
   let displayPost = $derived(isRepost && post.repostOf ? post.repostOf : post);
@@ -115,9 +122,11 @@
   {/if}
   <GlassCard
     interactive
-    class="overflow-hidden {repostedBy ? 'rounded-b-2xl rounded-t-none' : ''}"
+    class="overflow-hidden {threaded
+      ? 'rounded-none shadow-none'
+      : ''} {repostedBy ? 'rounded-b-2xl rounded-t-none' : ''}"
   >
-    <div class="card-body p-4 sm:p-5">
+    <div class="card-body p-4 sm:p-5 {threaded ? 'sm:p-4' : ''}">
       <div class="flex items-start gap-3 sm:gap-4">
         {#if author}
           <a
@@ -126,26 +135,35 @@
           >
             <Avatar
               name={author.name}
-              size="md"
+              size={threaded ? "sm" : "md"}
               photoKey={author.profilePhotoKey}
             />
           </a>
         {/if}
         <div class="flex-1 min-w-0">
           <div class="flex items-start justify-between gap-3 sm:gap-4">
-            <div class="flex flex-col min-w-0">
+            <div
+              class="flex min-w-0 flex-wrap items-baseline gap-x-1.5 gap-y-0.5"
+            >
               {#if author}
                 <a
                   href={resolve(`/@${author.username}`)}
-                  class="mb-0.5 max-w-full truncate text-base font-bold leading-none tracking-tight text-base-content hover:underline sm:mb-1 sm:text-lg"
+                  class="min-w-0 max-w-full truncate text-base font-bold leading-tight tracking-tight text-base-content hover:underline sm:text-lg"
                 >
                   {author.name}
                 </a>
                 <a
                   href={resolve(`/@${author.username}`)}
-                  class="muted-text max-w-full truncate text-[0.9rem] transition-colors hover:text-base-content/80 sm:text-sm"
+                  class="muted-text min-w-0 max-w-full truncate text-sm transition-colors hover:text-base-content/80"
                 >
                   @{author.username}
+                </a>
+                <span class="muted-text text-sm">·</span>
+                <a
+                  href={resolve(`/posts/${displayPost.id}`)}
+                  class="muted-text shrink-0 text-sm transition-colors hover:text-primary"
+                >
+                  {formatPostDate(displayPost.created)}
                 </a>
               {/if}
             </div>
@@ -160,9 +178,19 @@
               </button>
             {/if}
           </div>
+          {#if displayPost.inReplyToUsername}
+            <a
+              href={resolve(`/posts/${displayPost.inReplyToId}`)}
+              class="muted-text mt-0.5 block text-xs hover:text-base-content/80"
+            >
+              Replying to <span class="text-primary"
+                >@{displayPost.inReplyToUsername}</span
+              >
+            </a>
+          {/if}
           <FormattedContent
             content={displayPost.content}
-            class="mt-3 whitespace-pre-wrap wrap-break-word text-[15px] leading-relaxed text-base-content/85 sm:mt-3.5 sm:text-[1.05rem]"
+            class="mt-1.5 whitespace-pre-wrap wrap-break-word text-[15px] leading-relaxed text-base-content/85 sm:mt-2 sm:text-[1.05rem]"
           />
           {#if displayPost.mediaKey}
             <div
@@ -191,16 +219,8 @@
           {#if displayPost.quotePost}
             <QuoteEmbed post={displayPost.quotePost} />
           {/if}
-          <div class="mt-3">
-            <a
-              href={resolve(`/posts/${displayPost.id}`)}
-              class="text-[0.8rem] font-medium text-base-content/45 transition-colors hover:text-primary sm:text-sm"
-            >
-              {formatPostDate(displayPost.created)}
-            </a>
-          </div>
           <div
-            class="subtle-border mt-3 flex items-center gap-2 border-t pt-3 sm:mt-4 sm:gap-3"
+            class="subtle-border mt-3 flex max-w-sm items-center justify-between border-t pt-3 sm:mt-4"
           >
             <a
               href={resolve(`/posts/${displayPost.id}`)}

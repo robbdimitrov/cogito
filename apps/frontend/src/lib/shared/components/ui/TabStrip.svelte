@@ -10,12 +10,19 @@
   };
 
   let { tabs }: { tabs: Tab[] } = $props();
+
+  // Tailwind needs each grid-cols-N class spelled out literally to keep it in
+  // the generated stylesheet; this repo's tab strips only ever use 3-5 tabs.
+  const gridCols: Record<number, string> = {
+    3: "grid-cols-3",
+    4: "grid-cols-4",
+    5: "grid-cols-5",
+  };
+  let gridColsClass = $derived(gridCols[tabs.length] ?? "grid-cols-3");
 </script>
 
 <div
-  class={`glass-surface tabs tabs-boxed mt-3 grid rounded-2xl p-1 sm:mt-4 sm:p-1.5 ${
-    tabs.length === 4 ? "grid-cols-4" : "grid-cols-3"
-  }`}
+  class={`glass-surface tabs tabs-boxed mt-3 grid rounded-2xl p-1 sm:mt-4 sm:p-1.5 ${gridColsClass}`}
 >
   {#each tabs as tab (tab.name)}
     <a

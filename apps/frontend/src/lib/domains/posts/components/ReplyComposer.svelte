@@ -25,7 +25,7 @@
     return async ({ update }) => {
       isSubmitting = false;
       content = "";
-      await update({ invalidateAll: false });
+      await update();
     };
   }}
 >
@@ -44,7 +44,20 @@
       placeholder="Reply to @{replyToPost.user?.username ?? 'this post'}…"
       bind:value={content}
       maxlength={255}
-      rows={2}></textarea>
+      rows={2}
+      onkeydown={(e) => {
+        if (
+          e.key !== "Enter" ||
+          e.shiftKey ||
+          e.altKey ||
+          e.metaKey ||
+          e.ctrlKey
+        )
+          return;
+        e.preventDefault();
+        if (content.trim() && !isSubmitting)
+          e.currentTarget.form?.requestSubmit();
+      }}></textarea>
   </div>
   <button
     type="submit"

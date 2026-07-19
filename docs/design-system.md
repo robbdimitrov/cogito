@@ -97,12 +97,11 @@ container: a shared pill chrome around the whole cluster read as one more
 repeated rounded shape competing with the circular buttons themselves.
 There is no account dropdown. The profile icon is a plain `User` glyph
 rather than the `Avatar` component, to avoid a second filled circle. Solid
-`bg-primary` fill is reserved for Compose alone, so it reads as the bar's
-one call-to-action; the active route (Search, Notifications, or profile)
-instead gets the tinted `bg-primary/20 text-primary` treatment already used
-for the active tab in the Settings tab strip — visually distinct from
-Compose's solid fill, so an active icon and the compose button never look
-interchangeable. Icon-only throughout (no text labels, no
+`bg-primary` fill is reserved for Compose alone as the bar's one
+call-to-action; the active route (Search, Notifications, or profile) instead
+gets the tinted `bg-primary/20 text-primary` treatment already used for the
+active tab in the Settings tab strip, so it never reads as another Compose
+button. Icon-only throughout (no text labels, no
 breakpoint-dependent sizing) so the bar behaves identically at every width;
 `aria-label`/`title` carry the names. Settings and Logout live on the
 Settings page, not the navbar. Signed out, the icon cluster is replaced
@@ -115,14 +114,24 @@ Circular image with initials fallback when no `profilePhotoKey` is set. Props:
 
 ### `PostItem`
 
-Full-width `.glass-card-interactive` post card. Shows author avatar, username,
-timestamp, formatted content, optional embedded image, action bar (like with
-count, repost with dropdown, reply with count, delete for own posts). Renders
-`QuoteEmbed` when `quotePost` is present; renders repost attribution header when
-`repostOf` is present. Owner sees a delete button that triggers `ConfirmModal`.
-Authenticated users can double-click an embedded image to like it; the existing
-like form handles mutation and rollback, while a large heart overlay uses
-`--animate-like-burst`.
+Full-width `.glass-card-interactive` post card. Header is one wrapped row —
+author name, `@username`, and timestamp inline (`flex-wrap items-baseline`) —
+rather than a stacked name/username block, so the header reads compactly at
+any width. Below it: formatted content, optional embedded image, action bar
+(reply with count, repost with dropdown, like with count) capped at
+`max-w-sm` and laid out `justify-between` so the three pills spread evenly
+across that width instead of clustering at the left edge. Renders
+`QuoteEmbed` when `quotePost` is present; renders repost attribution header
+when `repostOf` is present. Owner sees a delete button, top-right of the
+header row, that triggers `ConfirmModal`. Authenticated users can
+double-click an embedded image to like it; the existing like form handles
+mutation and rollback, while a large heart overlay uses
+`--animate-like-burst`. Renders a small "Replying to @username" line above
+the content when `inReplyToUsername` is present (only populated by the
+profile Replies tab). A `threaded` prop, used for the post detail page's
+reply list, drops the card's rounding/shadow and shrinks the avatar to `sm`
+so consecutive replies read as one connected list (relying on the wrapping
+`<ul>`'s `divide-y` for separation) rather than a stack of independent cards.
 
 ### `ComposePrompt`
 
@@ -246,8 +255,11 @@ feed, search, notifications, `PostList`, and `UserList`. `PostList` /
 — profile action strip.
 `TabStrip` — shared `glass-surface tabs tabs-boxed` pill strip (`tabs:
 {name, href, isActive, count?}[]`); grid column count derives from
-`tabs.length`. Used by `ControlBar` (4 tabs, with counts), identically at
-every breakpoint — no responsive column-switching.
+`tabs.length` (a literal 3/4/5-column class lookup, since Tailwind needs each
+`grid-cols-N` spelled out to keep it in the build). Used by `ControlBar` (5
+tabs — Posts, Replies, Following, Followers, Likes; Replies has no count,
+since there's no per-user replies counter), identically at every breakpoint
+— no responsive column-switching.
 
 Login/register share `AuthShell` (`eyebrow`/`heading`/`description` props +
 a `children` snippet for the page's own `<form>`): a single centered card at
