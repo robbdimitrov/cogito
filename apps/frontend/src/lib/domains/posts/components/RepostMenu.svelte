@@ -2,6 +2,7 @@
   import { Repeat, Quote } from "@lucide/svelte";
   import { slide } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
+  import { onDestroy } from "svelte";
 
   interface Props {
     reposted: boolean;
@@ -20,13 +21,33 @@
   let sheetRef: HTMLDivElement | null = $state(null);
   let open = $state(false);
 
+  function handleOutsideClick(e: MouseEvent) {
+    const target = e.target as Node;
+    if (sheetRef?.contains(target) || triggerRef?.contains(target)) return;
+    closeMenu();
+  }
+
+  function handleKeydown(e: KeyboardEvent) {
+    if (e.key === "Escape") closeMenu();
+  }
+
+  // Attached synchronously here, not via $effect (which flushes a tick late
+  // and can miss a same-tick second click, e.g. one opening another overlay).
   function toggleMenu() {
     if (isReposting) return;
-    open = !open;
+    if (open) {
+      closeMenu();
+    } else {
+      open = true;
+      document.addEventListener("click", handleOutsideClick);
+      document.addEventListener("keydown", handleKeydown);
+    }
   }
 
   function closeMenu() {
     open = false;
+    document.removeEventListener("click", handleOutsideClick);
+    document.removeEventListener("keydown", handleKeydown);
   }
 
   function handleRepost() {
@@ -39,22 +60,9 @@
     onQuote();
   }
 
-  $effect(() => {
-    if (!open) return;
-    function handleClick(e: MouseEvent) {
-      const target = e.target as Node;
-      if (sheetRef?.contains(target) || triggerRef?.contains(target)) return;
-      closeMenu();
-    }
-    function handleKeydown(e: KeyboardEvent) {
-      if (e.key === "Escape") closeMenu();
-    }
-    document.addEventListener("click", handleClick);
-    document.addEventListener("keydown", handleKeydown);
-    return () => {
-      document.removeEventListener("click", handleClick);
-      document.removeEventListener("keydown", handleKeydown);
-    };
+  onDestroy(() => {
+    document.removeEventListener("click", handleOutsideClick);
+    document.removeEventListener("keydown", handleKeydown);
   });
 </script>
 
