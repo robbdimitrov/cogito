@@ -66,6 +66,7 @@ before insert).
 | Feed / user timeline | `in_reply_to_id IS NULL`; if repost, original must not be a reply | created DESC, id DESC            |
 | Liked posts          | All post types                                                    | likes.created DESC, post.id DESC |
 | Replies              | `in_reply_to_id = parent_id`                                      | created ASC, id ASC              |
+| User replies         | `user_id = user_id AND in_reply_to_id IS NOT NULL`                | created DESC, id DESC            |
 | Hashtag posts        | Posts in post_hashtags for tag                                    | created DESC, id DESC            |
 
 Home feed is a hybrid follow graph query. Regular authors are pushed into the

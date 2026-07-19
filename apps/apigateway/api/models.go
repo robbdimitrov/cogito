@@ -30,9 +30,12 @@ type post struct {
 	MediaKey    string `json:"mediaKey,omitempty"`
 	Replies     int32  `json:"replies"`
 	InReplyToID int32  `json:"inReplyToId,omitempty"`
-	QuoteOfID   int32  `json:"quoteOfId,omitempty"`
-	QuotePost   *post  `json:"quotePost,omitempty"`
-	User        *user  `json:"user,omitempty"`
+	// InReplyToUsername is only populated by getUserReplies, for the profile
+	// Replies tab's "Replying to @x" affordance.
+	InReplyToUsername *string `json:"inReplyToUsername,omitempty"`
+	QuoteOfID         int32   `json:"quoteOfId,omitempty"`
+	QuotePost         *post   `json:"quotePost,omitempty"`
+	User              *user   `json:"user,omitempty"`
 }
 
 type session struct {

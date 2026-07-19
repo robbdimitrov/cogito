@@ -114,9 +114,8 @@ func newImageHTTPTransport() *http.Transport {
 	}
 }
 
-// This literal segment shares a shape with the public {id} route but must
-// stay gated; auth_guard.go consumes the constant so the route name cannot
-// drift.
+// Shares a shape with the public {id} route but must stay gated; auth_guard.go
+// consumes this constant so the route name cannot drift.
 const postsFeedSegment = "feed"
 
 func (r *router) configureRoutes(mux *http.ServeMux) {
@@ -151,6 +150,7 @@ func (r *router) configureRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /posts", r.post.getFeed)
 	mux.HandleFunc("GET /posts/"+postsFeedSegment, r.post.getFeed)
 	mux.HandleFunc("GET /users/{userId}/posts", r.post.getPosts)
+	mux.HandleFunc("GET /users/{userId}/replies", r.post.getUserReplies)
 	mux.HandleFunc("GET /users/{userId}/likes", r.post.getLikedPosts)
 	mux.HandleFunc("GET /hashtags/{tag}/posts", r.post.getHashtagPosts)
 	mux.HandleFunc("GET /posts/{postId}", r.post.getPost)

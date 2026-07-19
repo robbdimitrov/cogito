@@ -18,14 +18,8 @@ import (
 	pb "cogito/postservice/genproto"
 )
 
-// postCountsAndViewerFlags returns the likes/reposts count-and-viewer-flag
-// subqueries shared verbatim by every post-listing query in this file.
-// postIDExpr is the SQL expression identifying the post being counted
-// against — e.g. "posts.id", "p.id", a bare "id" (only safe where no sibling
-// alias shadows it — see callers' comments), or "COALESCE(o.id, p.id)" for
-// feed queries that resolve reposts back to their original post. The viewer
-// id is always bound as $1 by convention in every query that embeds this
-// fragment.
+// postCountsAndViewerFlags returns the likes/reposts count-and-viewer-flag subqueries
+// shared by every post-listing query; the viewer id must be bound as $1 by every caller.
 func postCountsAndViewerFlags(postIDExpr string) string {
 	return fmt.Sprintf(`(SELECT count(*) FROM likes WHERE post_id = %[1]s) AS likes,
 		EXISTS (SELECT 1 FROM likes WHERE post_id = %[1]s AND likes.user_id = $1) AS liked,
@@ -33,11 +27,25 @@ func postCountsAndViewerFlags(postIDExpr string) string {
 		EXISTS (SELECT 1 FROM posts AS rp WHERE rp.repost_of_id = %[1]s AND rp.user_id = $1) AS reposted`, postIDExpr)
 }
 
-// repliesCount returns the replies-count subquery shared verbatim by every
-// post-listing query in this file. See postCountsAndViewerFlags for
-// postIDExpr.
+// repliesCount returns the replies-count subquery shared by every post-listing
+// query; see postCountsAndViewerFlags for postIDExpr.
 func repliesCount(postIDExpr string) string {
 	return fmt.Sprintf("(SELECT count(*) FROM posts AS r WHERE r.in_reply_to_id = %s) AS replies", postIDExpr)
+}
+
+// postWithRepostSelect returns the column list shared by every query that
+// resolves a repost via `LEFT JOIN posts o ON o.id = p.repost_of_id`.
+func postWithRepostSelect() string {
+	return `p.id, p.user_id, p.content,
+		` + postCountsAndViewerFlags("COALESCE(o.id, p.id)") + `,
+		p.created, p.repost_of_id, p.media_key,
+		` + repliesCount("COALESCE(o.id, p.id)") + `,
+		COALESCE(p.in_reply_to_id, 0) AS in_reply_to_id,
+		COALESCE(p.quote_of_id, 0) AS quote_of_id,
+		o.id AS o_id, o.user_id AS o_user_id, o.content AS o_content,
+		o.created AS o_created, o.media_key AS o_media_key,
+		COALESCE(o.in_reply_to_id, 0) AS o_in_reply_to_id,
+		COALESCE(o.quote_of_id, 0) AS o_quote_of_id`
 }
 
 // popularPostsWindow bounds the ranking to recent posts so trending reflects
@@ -116,9 +124,8 @@ func NewDBClient(dbURL string) (*DBClient, error) {
 	config.MaxConnLifetime = dbMaxConnLifetime
 	config.MaxConnIdleTime = dbMaxConnIdleTime
 	config.HealthCheckPeriod = dbPoolHealthCheckPeriod
-	// PostgreSQL 18 tightened type-inference for unspecified parameter OIDs in
-	// extended query protocol. Simple protocol avoids this by sending complete SQL
-	// text; pgx handles value escaping so there is no injection risk.
+	// PostgreSQL 18 tightened parameter type-inference in extended query protocol; simple
+	// protocol avoids it by sending complete SQL text, and pgx still escapes values safely.
 	config.ConnConfig.PreferSimpleProtocol = true
 
 	db, err := pgxpool.ConnectConfig(context.Background(), config)
@@ -267,17 +274,7 @@ func (c *DBClient) createPost(ctx context.Context, content string, tags []string
 }
 
 func (c *DBClient) getFeed(ctx context.Context, cursor Cursor, hasCursor bool, limit int32, currentUserID int32) (iter.Seq2[feedPostItem, error], error) {
-	querySelect := `SELECT
-		p.id, p.user_id, p.content,
-		` + postCountsAndViewerFlags("COALESCE(o.id, p.id)") + `,
-		p.created, p.repost_of_id, p.media_key,
-		` + repliesCount("COALESCE(o.id, p.id)") + `,
-		COALESCE(p.in_reply_to_id, 0) AS in_reply_to_id,
-		COALESCE(p.quote_of_id, 0) AS quote_of_id,
-		o.id AS o_id, o.user_id AS o_user_id, o.content AS o_content,
-		o.created AS o_created, o.media_key AS o_media_key,
-		COALESCE(o.in_reply_to_id, 0) AS o_in_reply_to_id,
-		COALESCE(o.quote_of_id, 0) AS o_quote_of_id`
+	querySelect := "SELECT " + postWithRepostSelect()
 	materializedQuery := querySelect + `, f.created AS fan_out_created
 		FROM feed f
 		JOIN posts p ON p.id = f.post_id
@@ -359,17 +356,7 @@ func collectFeedPosts(r rows) ([]feedPostItem, error) {
 }
 
 func (c *DBClient) getPosts(ctx context.Context, userID int32, cursor Cursor, hasCursor bool, limit int32, currentUserID *int32) (iter.Seq2[postCursorRow, error], error) {
-	query := `SELECT
-		p.id, p.user_id, p.content,
-		` + postCountsAndViewerFlags("COALESCE(o.id, p.id)") + `,
-		p.created, p.repost_of_id, p.media_key,
-		` + repliesCount("COALESCE(o.id, p.id)") + `,
-		COALESCE(p.in_reply_to_id, 0) AS in_reply_to_id,
-		COALESCE(p.quote_of_id, 0) AS quote_of_id,
-		o.id AS o_id, o.user_id AS o_user_id, o.content AS o_content,
-		o.created AS o_created, o.media_key AS o_media_key,
-		COALESCE(o.in_reply_to_id, 0) AS o_in_reply_to_id,
-		COALESCE(o.quote_of_id, 0) AS o_quote_of_id
+	query := "SELECT " + postWithRepostSelect() + `
 		FROM posts p
 		LEFT JOIN posts o ON o.id = p.repost_of_id
 		WHERE p.user_id = $2
@@ -390,13 +377,38 @@ func (c *DBClient) getPosts(ctx context.Context, userID int32, cursor Cursor, ha
 		return nil, err
 	}
 
-	return mapFeedPostCursorRows(rows), nil
+	return mapPostCursorRows(rows), nil
+}
+
+// getUserReplies returns a user's own replies, newest first — the inverse of
+// getPosts's `in_reply_to_id IS NULL` filter.
+func (c *DBClient) getUserReplies(ctx context.Context, userID int32, cursor Cursor, hasCursor bool, limit int32, currentUserID *int32) (iter.Seq2[postCursorRow, error], error) {
+	query := "SELECT " + postWithRepostSelect() + `
+		FROM posts p
+		LEFT JOIN posts o ON o.id = p.repost_of_id
+		WHERE p.user_id = $2
+		AND p.in_reply_to_id IS NOT NULL
+		AND ($3::timestamptz IS NULL OR (p.created, p.id) < ($3::timestamptz, $4::int))
+		ORDER BY p.created DESC, p.id DESC
+		LIMIT $5`
+
+	var cursorTS *time.Time
+	var cursorID int32
+	if hasCursor {
+		cursorTS = &cursor.Created
+		cursorID = cursor.ID
+	}
+	rows, err := c.db.Query(ctx, query, currentUserID, userID, cursorTS, cursorID, limit+1)
+	if err != nil {
+		return nil, err
+	}
+
+	return mapPostCursorRows(rows), nil
 }
 
 func (c *DBClient) getLikedPosts(ctx context.Context, userID int32, cursor Cursor, hasCursor bool, limit int32, currentUserID int32) (iter.Seq2[likedPostRow, error], error) {
-	// posts.id must stay qualified in postCountsAndViewerFlags/repliesCount:
-	// their own FROM posts AS rp/r shadows a bare `id`, binding it to the
-	// inner alias instead of the outer row and silently zeroing every count.
+	// posts.id must stay qualified: postCountsAndViewerFlags/repliesCount's own FROM posts
+	// AS rp/r shadows a bare `id`, silently zeroing every count.
 	query := `SELECT likes.created AS cursor_ts,
 		id, posts.user_id, content,
 		` + postCountsAndViewerFlags("posts.id") + `,
@@ -426,13 +438,9 @@ func (c *DBClient) getLikedPosts(ctx context.Context, userID int32, cursor Curso
 }
 
 func (c *DBClient) getHashtagPosts(ctx context.Context, tag string, cursor Cursor, hasCursor bool, limit int32, currentUserID int32) (iter.Seq2[postCursorRow, error], error) {
-	query := `SELECT p.id, p.user_id, p.content,
-		` + postCountsAndViewerFlags("p.id") + `,
-		p.created, p.repost_of_id, p.media_key,
-		` + repliesCount("p.id") + `,
-		COALESCE(p.in_reply_to_id, 0) AS in_reply_to_id,
-		COALESCE(p.quote_of_id, 0) AS quote_of_id
+	query := "SELECT " + postWithRepostSelect() + `
 		FROM posts p
+		LEFT JOIN posts o ON o.id = p.repost_of_id
 		JOIN post_hashtags ph ON ph.post_id = p.id
 		JOIN hashtags h ON h.id = ph.hashtag_id
 		WHERE h.name = $2
@@ -456,9 +464,8 @@ func (c *DBClient) getHashtagPosts(ctx context.Context, tag string, cursor Curso
 }
 
 func (c *DBClient) getPost(ctx context.Context, id int32, currentUserID *int32) (*pb.Post, error) {
-	// posts.id must stay qualified in postCountsAndViewerFlags/repliesCount:
-	// their own FROM posts AS rp/r shadows a bare `id`, binding it to the
-	// inner alias instead of the outer row and silently zeroing every count.
+	// posts.id must stay qualified: postCountsAndViewerFlags/repliesCount's own FROM posts
+	// AS rp/r shadows a bare `id`, silently zeroing every count.
 	query := `SELECT id, user_id, content,
 		` + postCountsAndViewerFlags("posts.id") + `,
 		created, repost_of_id, media_key,
@@ -784,18 +791,12 @@ func (c *DBClient) removeRepost(ctx context.Context, postID int32, userID int32)
 }
 
 func (c *DBClient) getReplies(ctx context.Context, postID int32, cursor Cursor, hasCursor bool, limit int32, currentUserID int32) (iter.Seq2[postCursorRow, error], error) {
-	// posts.id must stay qualified — see getPost for why a bare `id` here
-	// would silently bind to postCountsAndViewerFlags/repliesCount's own alias.
-	query := `SELECT id, user_id, content,
-		` + postCountsAndViewerFlags("posts.id") + `,
-		created, repost_of_id, media_key,
-		` + repliesCount("posts.id") + `,
-		COALESCE(in_reply_to_id, 0) AS in_reply_to_id,
-		COALESCE(quote_of_id, 0) AS quote_of_id
-		FROM posts
-		WHERE in_reply_to_id = $2
-		AND ($3::timestamptz IS NULL OR (created, id) > ($3::timestamptz, $4::int))
-		ORDER BY created ASC, id ASC
+	query := "SELECT " + postWithRepostSelect() + `
+		FROM posts p
+		LEFT JOIN posts o ON o.id = p.repost_of_id
+		WHERE p.in_reply_to_id = $2
+		AND ($3::timestamptz IS NULL OR (p.created, p.id) > ($3::timestamptz, $4::int))
+		ORDER BY p.created ASC, p.id ASC
 		LIMIT $5`
 
 	var cursorTS *time.Time

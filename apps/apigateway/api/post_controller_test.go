@@ -155,6 +155,41 @@ func TestBuildPosts_NoQuotesSkipsQuoteCall(t *testing.T) {
 	}
 }
 
+func TestResolveInReplyTo_AttachesParentAuthorUsername(t *testing.T) {
+	parent := &pb.Post{Id: 5, UserId: 2, Content: "original"}
+	postClient := &mockBatchPostClient{quotes: map[int32]*pb.Post{5: parent}}
+	userClient := &mockBatchUserClient{users: map[int32]*pb.User{
+		1: {Id: 1, Username: "replier"},
+		2: {Id: 2, Username: "original-author"},
+	}}
+	pc := &postController{client: postClient, userClient: userClient}
+
+	raw := []*pb.Post{{Id: 10, UserId: 1, InReplyToId: 5}}
+	posts := pc.buildPosts(context.Background(), raw)
+	pc.resolveInReplyTo(context.Background(), posts, raw)
+
+	if posts[0].InReplyToUsername == nil || *posts[0].InReplyToUsername != "original-author" {
+		t.Fatalf("expected inReplyToUsername %q, got %+v", "original-author", posts[0].InReplyToUsername)
+	}
+}
+
+func TestResolveInReplyTo_NoRepliesSkipsCall(t *testing.T) {
+	postClient := &mockBatchPostClient{}
+	userClient := &mockBatchUserClient{users: map[int32]*pb.User{1: {Id: 1, Username: "a"}}}
+	pc := &postController{client: postClient, userClient: userClient}
+
+	raw := []*pb.Post{{Id: 1, UserId: 1}}
+	posts := pc.buildPosts(context.Background(), raw)
+	pc.resolveInReplyTo(context.Background(), posts, raw)
+
+	if postClient.getPostsByIDsCalled {
+		t.Errorf("GetPostsByIds should not be called when there are no replies")
+	}
+	if posts[0].InReplyToUsername != nil {
+		t.Errorf("expected no inReplyToUsername, got %v", *posts[0].InReplyToUsername)
+	}
+}
+
 func idSet(ids []int32) map[int32]bool {
 	set := make(map[int32]bool, len(ids))
 	for _, id := range ids {

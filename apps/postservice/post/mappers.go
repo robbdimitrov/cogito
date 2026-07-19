@@ -43,9 +43,8 @@ func mapPost(r row) (*pb.Post, error) {
 	return &post, nil
 }
 
-// mapFeedPost maps feed queries that may include repost shells (21 columns).
-// It returns the raw post created timestamp alongside the post so callers can
-// use it directly as a cursor without a string round-trip.
+// mapFeedPost maps feed queries that may include repost shells (21 columns), returning
+// the raw created timestamp too so callers can use it directly as a cursor.
 func mapFeedPost(r row) (*pb.Post, time.Time, error) {
 	post := pb.Post{}
 	var created time.Time
@@ -184,43 +183,9 @@ func mapPosts(r rows) iter.Seq2[*pb.Post, error] {
 	}
 }
 
+// mapPostCursorRows maps queries built on postWithRepostSelect (21 columns),
+// resolving a repost row's original into Post.RepostOf.
 func mapPostCursorRows(r rows) iter.Seq2[postCursorRow, error] {
-	return func(yield func(postCursorRow, error) bool) {
-		defer r.Close()
-		for r.Next() {
-			post := pb.Post{}
-			var content *string
-			var created time.Time
-			var repostOfID *int32
-
-			err := r.Scan(&post.Id, &post.UserId, &content,
-				&post.Likes, &post.Liked, &post.Reposts, &post.Reposted,
-				&created, &repostOfID, &post.MediaKey, &post.Replies,
-				&post.InReplyToId, &post.QuoteOfId)
-			if err != nil {
-				if !yield(postCursorRow{}, err) {
-					return
-				}
-				continue
-			}
-			post.Created = created.UTC().Format(time.RFC3339Nano)
-			if content != nil {
-				post.Content = *content
-			}
-			if repostOfID != nil {
-				post.RepostOfId = repostOfID
-			}
-			if !yield(postCursorRow{Post: &post, CursorTS: created}, nil) {
-				return
-			}
-		}
-		if err := r.Err(); err != nil {
-			yield(postCursorRow{}, err)
-		}
-	}
-}
-
-func mapFeedPostCursorRows(r rows) iter.Seq2[postCursorRow, error] {
 	return func(yield func(postCursorRow, error) bool) {
 		defer r.Close()
 		for r.Next() {

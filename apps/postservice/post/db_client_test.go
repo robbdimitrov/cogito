@@ -41,6 +41,20 @@ func TestPopularPostsQueryRanksByEngagementWithinWindow(t *testing.T) {
 	}
 }
 
+func TestPostWithRepostSelectIncludesOriginalPostColumns(t *testing.T) {
+	got := postWithRepostSelect()
+	for _, want := range []string{
+		"p.repost_of_id",
+		"o.id AS o_id",
+		"o.user_id AS o_user_id",
+		"o.content AS o_content",
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("postWithRepostSelect missing %q in:\n%s", want, got)
+		}
+	}
+}
+
 func TestFeedPullQueryIncludesOwnPostsAndDedupesMaterializedRows(t *testing.T) {
 	got := feedPullQuery("SELECT p.id")
 	for _, want := range []string{

@@ -165,6 +165,7 @@ still requires a session.
 | DELETE | /posts/{postId}/reposts | Remove repost                                                                                                                            |
 | GET    | /posts/{postId}/replies | Paginated replies (oldest-first)                                                                                                         |
 | GET    | /users/{userId}/likes   | Paginated posts liked by user                                                                                                            |
+| GET    | /users/{userId}/replies | Paginated replies authored by user, newest-first                                                                                        |
 | GET    | /hashtags/{tag}/posts   | Paginated posts with hashtag                                                                                                             |
 
 #### Search
@@ -247,6 +248,7 @@ the account owner (no `omitempty` on this field — unlike `profilePhotoKey`/
   "mediaKey": "string",
   "replies": 0,
   "inReplyToId": 0,
+  "inReplyToUsername": "string",
   "quoteOfId": 0,
   "quotePost": {},
   "repostOfId": 0,
@@ -256,6 +258,9 @@ the account owner (no `omitempty` on this field — unlike `profilePhotoKey`/
 ```
 
 Zero-value integer fields and null nested objects are omitted.
+`inReplyToUsername` is only populated by `GET /users/{userId}/replies`
+(the profile Replies tab), resolved from the reply's parent post in a
+gateway-side batch call — it is never set by other endpoints.
 
 **Notification**
 
@@ -321,6 +326,7 @@ Standard timeout: 10 seconds. Search endpoints: 5 seconds.
 | CreatePost      | content, media_key?, in_reply_to_id?, quote_of_id? | Identifier |
 | GetFeed         | cursor, limit                                      | Posts      |
 | GetPosts        | user_id, cursor, limit                             | Posts      |
+| GetUserReplies  | user_id, cursor, limit                             | Posts      |
 | GetLikedPosts   | user_id, cursor, limit                             | Posts      |
 | GetHashtagPosts | tag, cursor, limit                                 | Posts      |
 | GetPost         | post_id                                            | Post       |

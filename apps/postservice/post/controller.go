@@ -149,6 +149,52 @@ func (c *controller) GetPosts(ctx context.Context, req *pb.GetPostsRequest) (*pb
 	return &pb.Posts{Posts: posts, NextCursor: nextCursor}, nil
 }
 
+func (c *controller) GetUserReplies(ctx context.Context, req *pb.GetPostsRequest) (*pb.Posts, error) {
+	userID := optionalUserID(ctx)
+
+	cur, hasCur, err := DecodeCursor(req.Cursor)
+	if err != nil {
+		return nil, newError(codes.InvalidArgument)
+	}
+
+	limit := req.Limit
+	if limit < 1 {
+		limit = 10
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
+	resIter, err := c.dbClient.getUserReplies(ctx, req.UserId, cur, hasCur, limit, userID)
+	if err != nil {
+		slog.Warn("getting user replies failed", "request_id", requestID(ctx), "error", err)
+		return nil, newError(codes.Internal)
+	}
+
+	var rows []postCursorRow
+	for row, err := range resIter {
+		if err != nil {
+			slog.Warn("mapping post failed", "request_id", requestID(ctx), "error", err)
+			return nil, newError(codes.Internal)
+		}
+		rows = append(rows, row)
+	}
+
+	var nextCursor string
+	if len(rows) > int(limit) {
+		last := rows[limit-1]
+		nextCursor = EncodeCursor(last.CursorTS, last.Post.Id)
+		rows = rows[:limit]
+	}
+
+	posts := make([]*pb.Post, len(rows))
+	for i, r := range rows {
+		posts[i] = r.Post
+	}
+
+	return &pb.Posts{Posts: posts, NextCursor: nextCursor}, nil
+}
+
 func (c *controller) GetLikedPosts(ctx context.Context, req *pb.GetPostsRequest) (*pb.Posts, error) {
 	userID, err := getUserID(ctx)
 	if err != nil {
@@ -251,10 +297,8 @@ func (c *controller) GetHashtagPosts(ctx context.Context, req *pb.GetHashtagPost
 }
 
 func (c *controller) GetPostsByIds(ctx context.Context, req *pb.Ids) (*pb.Posts, error) {
-	// Viewer-optional: this is only called internally by the gateway to
-	// resolve embedded quote posts for GetPost/GetPosts, both of which are
-	// viewer-optional themselves — an anonymous caller must not lose quote
-	// embeds just because this batch lookup required a session.
+	// Viewer-optional: called internally to resolve quote posts for viewer-optional
+	// GetPost/GetPosts, so an anonymous caller must not lose quote embeds here.
 	userID := optionalUserID(ctx)
 
 	if len(req.Ids) == 0 {

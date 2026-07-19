@@ -56,10 +56,8 @@ func isPublicUploadRead(r *http.Request) bool {
 	return ok && filename != "" && !strings.Contains(filename, "/")
 }
 
-// isPublicResourceRead matches GET {prefix}{id} and, if allowedSubpath is
-// non-empty, GET {prefix}{id}/{allowedSubpath}. reservedID excludes a sibling
-// literal route registered under the same prefix that would otherwise collide
-// with the {id} shape (e.g. "feed" for /posts/feed).
+// isPublicResourceRead matches GET {prefix}{id}, and GET {prefix}{id}/{allowedSubpath} if set.
+// reservedID excludes a sibling literal route (e.g. "feed") that would otherwise collide with {id}.
 func isPublicResourceRead(r *http.Request, prefix, reservedID, allowedSubpath string) bool {
 	if r.Method != http.MethodGet {
 		return false
@@ -78,16 +76,14 @@ func isPublicResourceRead(r *http.Request, prefix, reservedID, allowedSubpath st
 	return ok && id != "" && id != reservedID && sub == allowedSubpath
 }
 
-// isPublicPostRead matches GET /posts/{postId} only. postsFeedSegment is
-// excluded because GET /posts/feed is the personalized, session-required
-// getFeed route and has the same single-segment shape as /posts/{postId}.
+// isPublicPostRead matches GET /posts/{postId} only; postsFeedSegment is excluded
+// since GET /posts/feed is the gated, session-required getFeed route.
 func isPublicPostRead(r *http.Request) bool {
 	return isPublicResourceRead(r, "/posts/", postsFeedSegment, "")
 }
 
-// isPublicUserRead matches GET /users/{userId} and GET /users/{userId}/posts
-// only; "likes", "following", "followers" stay gated since only "posts" is
-// public.
+// isPublicUserRead matches GET /users/{userId} and .../posts only; likes,
+// replies, following, and followers stay gated.
 func isPublicUserRead(r *http.Request) bool {
 	return isPublicResourceRead(r, "/users/", "", "posts")
 }

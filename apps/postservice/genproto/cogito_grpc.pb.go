@@ -644,6 +644,7 @@ const (
 	PostService_CreatePost_FullMethodName      = "/cogito.PostService/CreatePost"
 	PostService_GetFeed_FullMethodName         = "/cogito.PostService/GetFeed"
 	PostService_GetPosts_FullMethodName        = "/cogito.PostService/GetPosts"
+	PostService_GetUserReplies_FullMethodName  = "/cogito.PostService/GetUserReplies"
 	PostService_GetLikedPosts_FullMethodName   = "/cogito.PostService/GetLikedPosts"
 	PostService_GetHashtagPosts_FullMethodName = "/cogito.PostService/GetHashtagPosts"
 	PostService_GetPost_FullMethodName         = "/cogito.PostService/GetPost"
@@ -664,6 +665,7 @@ type PostServiceClient interface {
 	CreatePost(ctx context.Context, in *CreatePostRequest, opts ...grpc.CallOption) (*Identifier, error)
 	GetFeed(ctx context.Context, in *GetFeedRequest, opts ...grpc.CallOption) (*Posts, error)
 	GetPosts(ctx context.Context, in *GetPostsRequest, opts ...grpc.CallOption) (*Posts, error)
+	GetUserReplies(ctx context.Context, in *GetPostsRequest, opts ...grpc.CallOption) (*Posts, error)
 	GetLikedPosts(ctx context.Context, in *GetPostsRequest, opts ...grpc.CallOption) (*Posts, error)
 	GetHashtagPosts(ctx context.Context, in *GetHashtagPostsRequest, opts ...grpc.CallOption) (*Posts, error)
 	GetPost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*Post, error)
@@ -709,6 +711,16 @@ func (c *postServiceClient) GetPosts(ctx context.Context, in *GetPostsRequest, o
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(Posts)
 	err := c.cc.Invoke(ctx, PostService_GetPosts_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *postServiceClient) GetUserReplies(ctx context.Context, in *GetPostsRequest, opts ...grpc.CallOption) (*Posts, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Posts)
+	err := c.cc.Invoke(ctx, PostService_GetUserReplies_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -832,6 +844,7 @@ type PostServiceServer interface {
 	CreatePost(context.Context, *CreatePostRequest) (*Identifier, error)
 	GetFeed(context.Context, *GetFeedRequest) (*Posts, error)
 	GetPosts(context.Context, *GetPostsRequest) (*Posts, error)
+	GetUserReplies(context.Context, *GetPostsRequest) (*Posts, error)
 	GetLikedPosts(context.Context, *GetPostsRequest) (*Posts, error)
 	GetHashtagPosts(context.Context, *GetHashtagPostsRequest) (*Posts, error)
 	GetPost(context.Context, *PostRequest) (*Post, error)
@@ -861,6 +874,9 @@ func (UnimplementedPostServiceServer) GetFeed(context.Context, *GetFeedRequest) 
 }
 func (UnimplementedPostServiceServer) GetPosts(context.Context, *GetPostsRequest) (*Posts, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetPosts not implemented")
+}
+func (UnimplementedPostServiceServer) GetUserReplies(context.Context, *GetPostsRequest) (*Posts, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetUserReplies not implemented")
 }
 func (UnimplementedPostServiceServer) GetLikedPosts(context.Context, *GetPostsRequest) (*Posts, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetLikedPosts not implemented")
@@ -966,6 +982,24 @@ func _PostService_GetPosts_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PostServiceServer).GetPosts(ctx, req.(*GetPostsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PostService_GetUserReplies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPostsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).GetUserReplies(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PostService_GetUserReplies_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).GetUserReplies(ctx, req.(*GetPostsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1186,6 +1220,10 @@ var PostService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetPosts",
 			Handler:    _PostService_GetPosts_Handler,
+		},
+		{
+			MethodName: "GetUserReplies",
+			Handler:    _PostService_GetUserReplies_Handler,
 		},
 		{
 			MethodName: "GetLikedPosts",

@@ -133,6 +133,33 @@ func TestMapMaterializedFeedPost(t *testing.T) {
 	}
 }
 
+func TestMapPostCursorRowsResolvesRepostOf(t *testing.T) {
+	rows := &mockRows{next: true}
+
+	var got postCursorRow
+	for row, err := range mapPostCursorRows(rows) {
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		got = row
+	}
+
+	if got.Post == nil {
+		t.Fatal("expected a mapped post")
+	}
+	// Regression guard: getReplies/getHashtagPosts/getUserReplies previously
+	// dropped RepostOf via a mapper that didn't resolve it.
+	if got.Post.RepostOfId == nil {
+		t.Errorf("expected repost_of_id to be set")
+	}
+	if got.Post.RepostOf == nil {
+		t.Errorf("expected repost_of to be populated")
+	}
+	if !rows.closed {
+		t.Fatal("expected rows to be closed")
+	}
+}
+
 func TestMapPostsPropagatesRowsError(t *testing.T) {
 	rowsErr := errors.New("rows error")
 	rows := &mockRows{rowsErr: rowsErr}

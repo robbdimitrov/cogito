@@ -2508,12 +2508,13 @@ const file_pkg_pb_cogito_proto_rawDesc = "" +
 	"\n" +
 	"GetSession\x12\x16.cogito.SessionRequest\x1a\x0f.cogito.Session\x126\n" +
 	"\rDeleteSession\x12\x16.cogito.SessionRequest\x1a\r.cogito.Empty\x124\n" +
-	"\vGetSessions\x12\x13.cogito.UserRequest\x1a\x10.cogito.Sessions2\xfa\x05\n" +
+	"\vGetSessions\x12\x13.cogito.UserRequest\x1a\x10.cogito.Sessions2\xb4\x06\n" +
 	"\vPostService\x12;\n" +
 	"\n" +
 	"CreatePost\x12\x19.cogito.CreatePostRequest\x1a\x12.cogito.Identifier\x120\n" +
 	"\aGetFeed\x12\x16.cogito.GetFeedRequest\x1a\r.cogito.Posts\x122\n" +
-	"\bGetPosts\x12\x17.cogito.GetPostsRequest\x1a\r.cogito.Posts\x127\n" +
+	"\bGetPosts\x12\x17.cogito.GetPostsRequest\x1a\r.cogito.Posts\x128\n" +
+	"\x0eGetUserReplies\x12\x17.cogito.GetPostsRequest\x1a\r.cogito.Posts\x127\n" +
 	"\rGetLikedPosts\x12\x17.cogito.GetPostsRequest\x1a\r.cogito.Posts\x12@\n" +
 	"\x0fGetHashtagPosts\x12\x1e.cogito.GetHashtagPostsRequest\x1a\r.cogito.Posts\x12,\n" +
 	"\aGetPost\x12\x13.cogito.PostRequest\x1a\f.cogito.Post\x12+\n" +
@@ -2627,72 +2628,74 @@ var file_pkg_pb_cogito_proto_depIdxs = []int32{
 	14, // 23: cogito.PostService.CreatePost:input_type -> cogito.CreatePostRequest
 	17, // 24: cogito.PostService.GetFeed:input_type -> cogito.GetFeedRequest
 	19, // 25: cogito.PostService.GetPosts:input_type -> cogito.GetPostsRequest
-	19, // 26: cogito.PostService.GetLikedPosts:input_type -> cogito.GetPostsRequest
-	20, // 27: cogito.PostService.GetHashtagPosts:input_type -> cogito.GetHashtagPostsRequest
-	15, // 28: cogito.PostService.GetPost:input_type -> cogito.PostRequest
-	2,  // 29: cogito.PostService.GetPostsByIds:input_type -> cogito.Ids
-	15, // 30: cogito.PostService.DeletePost:input_type -> cogito.PostRequest
-	15, // 31: cogito.PostService.LikePost:input_type -> cogito.PostRequest
-	15, // 32: cogito.PostService.UnlikePost:input_type -> cogito.PostRequest
-	15, // 33: cogito.PostService.RepostPost:input_type -> cogito.PostRequest
-	15, // 34: cogito.PostService.RemoveRepost:input_type -> cogito.PostRequest
-	21, // 35: cogito.PostService.GetReplies:input_type -> cogito.GetRepliesRequest
-	22, // 36: cogito.PostService.GetPopularPosts:input_type -> cogito.GetPopularPostsRequest
-	25, // 37: cogito.ImageService.VerifyUpload:input_type -> cogito.VerifyUploadRequest
-	26, // 38: cogito.ImageService.ConsumeUpload:input_type -> cogito.ConsumeUploadRequest
-	27, // 39: cogito.ImageService.DeleteImage:input_type -> cogito.DeleteImageRequest
-	28, // 40: cogito.SearchService.SearchUsers:input_type -> cogito.SearchRequest
-	28, // 41: cogito.SearchService.SearchPosts:input_type -> cogito.SearchRequest
-	28, // 42: cogito.SearchService.SearchHashtags:input_type -> cogito.SearchRequest
-	9,  // 43: cogito.SearchService.ListRecentSearches:input_type -> cogito.Empty
-	31, // 44: cogito.SearchService.RecordRecentSearch:input_type -> cogito.RecordRecentSearchRequest
-	32, // 45: cogito.SearchService.DeleteRecentSearch:input_type -> cogito.DeleteRecentSearchRequest
-	9,  // 46: cogito.SearchService.ClearRecentSearches:input_type -> cogito.Empty
-	33, // 47: cogito.NotificationService.GetNotifications:input_type -> cogito.GetNotificationsRequest
-	36, // 48: cogito.NotificationService.MarkNotificationRead:input_type -> cogito.NotificationRequest
-	3,  // 49: cogito.NotificationService.GetUnreadCount:input_type -> cogito.UserRequest
-	1,  // 50: cogito.UserService.CreateUser:output_type -> cogito.Identifier
-	4,  // 51: cogito.UserService.GetUser:output_type -> cogito.User
-	4,  // 52: cogito.UserService.GetUserByUsername:output_type -> cogito.User
-	7,  // 53: cogito.UserService.GetUsersByIds:output_type -> cogito.Users
-	9,  // 54: cogito.UserService.UpdateUser:output_type -> cogito.Empty
-	7,  // 55: cogito.UserService.GetFollowing:output_type -> cogito.Users
-	7,  // 56: cogito.UserService.GetFollowers:output_type -> cogito.Users
-	9,  // 57: cogito.UserService.FollowUser:output_type -> cogito.Empty
-	9,  // 58: cogito.UserService.UnfollowUser:output_type -> cogito.Empty
-	12, // 59: cogito.AuthService.CreateSession:output_type -> cogito.Session
-	12, // 60: cogito.AuthService.GetSession:output_type -> cogito.Session
-	9,  // 61: cogito.AuthService.DeleteSession:output_type -> cogito.Empty
-	13, // 62: cogito.AuthService.GetSessions:output_type -> cogito.Sessions
-	1,  // 63: cogito.PostService.CreatePost:output_type -> cogito.Identifier
-	18, // 64: cogito.PostService.GetFeed:output_type -> cogito.Posts
-	18, // 65: cogito.PostService.GetPosts:output_type -> cogito.Posts
-	18, // 66: cogito.PostService.GetLikedPosts:output_type -> cogito.Posts
-	18, // 67: cogito.PostService.GetHashtagPosts:output_type -> cogito.Posts
-	16, // 68: cogito.PostService.GetPost:output_type -> cogito.Post
-	18, // 69: cogito.PostService.GetPostsByIds:output_type -> cogito.Posts
-	9,  // 70: cogito.PostService.DeletePost:output_type -> cogito.Empty
-	9,  // 71: cogito.PostService.LikePost:output_type -> cogito.Empty
-	9,  // 72: cogito.PostService.UnlikePost:output_type -> cogito.Empty
-	9,  // 73: cogito.PostService.RepostPost:output_type -> cogito.Empty
-	9,  // 74: cogito.PostService.RemoveRepost:output_type -> cogito.Empty
-	18, // 75: cogito.PostService.GetReplies:output_type -> cogito.Posts
-	18, // 76: cogito.PostService.GetPopularPosts:output_type -> cogito.Posts
-	9,  // 77: cogito.ImageService.VerifyUpload:output_type -> cogito.Empty
-	9,  // 78: cogito.ImageService.ConsumeUpload:output_type -> cogito.Empty
-	9,  // 79: cogito.ImageService.DeleteImage:output_type -> cogito.Empty
-	7,  // 80: cogito.SearchService.SearchUsers:output_type -> cogito.Users
-	18, // 81: cogito.SearchService.SearchPosts:output_type -> cogito.Posts
-	24, // 82: cogito.SearchService.SearchHashtags:output_type -> cogito.Hashtags
-	30, // 83: cogito.SearchService.ListRecentSearches:output_type -> cogito.RecentSearches
-	9,  // 84: cogito.SearchService.RecordRecentSearch:output_type -> cogito.Empty
-	9,  // 85: cogito.SearchService.DeleteRecentSearch:output_type -> cogito.Empty
-	9,  // 86: cogito.SearchService.ClearRecentSearches:output_type -> cogito.Empty
-	35, // 87: cogito.NotificationService.GetNotifications:output_type -> cogito.Notifications
-	9,  // 88: cogito.NotificationService.MarkNotificationRead:output_type -> cogito.Empty
-	37, // 89: cogito.NotificationService.GetUnreadCount:output_type -> cogito.UnreadCountResponse
-	50, // [50:90] is the sub-list for method output_type
-	10, // [10:50] is the sub-list for method input_type
+	19, // 26: cogito.PostService.GetUserReplies:input_type -> cogito.GetPostsRequest
+	19, // 27: cogito.PostService.GetLikedPosts:input_type -> cogito.GetPostsRequest
+	20, // 28: cogito.PostService.GetHashtagPosts:input_type -> cogito.GetHashtagPostsRequest
+	15, // 29: cogito.PostService.GetPost:input_type -> cogito.PostRequest
+	2,  // 30: cogito.PostService.GetPostsByIds:input_type -> cogito.Ids
+	15, // 31: cogito.PostService.DeletePost:input_type -> cogito.PostRequest
+	15, // 32: cogito.PostService.LikePost:input_type -> cogito.PostRequest
+	15, // 33: cogito.PostService.UnlikePost:input_type -> cogito.PostRequest
+	15, // 34: cogito.PostService.RepostPost:input_type -> cogito.PostRequest
+	15, // 35: cogito.PostService.RemoveRepost:input_type -> cogito.PostRequest
+	21, // 36: cogito.PostService.GetReplies:input_type -> cogito.GetRepliesRequest
+	22, // 37: cogito.PostService.GetPopularPosts:input_type -> cogito.GetPopularPostsRequest
+	25, // 38: cogito.ImageService.VerifyUpload:input_type -> cogito.VerifyUploadRequest
+	26, // 39: cogito.ImageService.ConsumeUpload:input_type -> cogito.ConsumeUploadRequest
+	27, // 40: cogito.ImageService.DeleteImage:input_type -> cogito.DeleteImageRequest
+	28, // 41: cogito.SearchService.SearchUsers:input_type -> cogito.SearchRequest
+	28, // 42: cogito.SearchService.SearchPosts:input_type -> cogito.SearchRequest
+	28, // 43: cogito.SearchService.SearchHashtags:input_type -> cogito.SearchRequest
+	9,  // 44: cogito.SearchService.ListRecentSearches:input_type -> cogito.Empty
+	31, // 45: cogito.SearchService.RecordRecentSearch:input_type -> cogito.RecordRecentSearchRequest
+	32, // 46: cogito.SearchService.DeleteRecentSearch:input_type -> cogito.DeleteRecentSearchRequest
+	9,  // 47: cogito.SearchService.ClearRecentSearches:input_type -> cogito.Empty
+	33, // 48: cogito.NotificationService.GetNotifications:input_type -> cogito.GetNotificationsRequest
+	36, // 49: cogito.NotificationService.MarkNotificationRead:input_type -> cogito.NotificationRequest
+	3,  // 50: cogito.NotificationService.GetUnreadCount:input_type -> cogito.UserRequest
+	1,  // 51: cogito.UserService.CreateUser:output_type -> cogito.Identifier
+	4,  // 52: cogito.UserService.GetUser:output_type -> cogito.User
+	4,  // 53: cogito.UserService.GetUserByUsername:output_type -> cogito.User
+	7,  // 54: cogito.UserService.GetUsersByIds:output_type -> cogito.Users
+	9,  // 55: cogito.UserService.UpdateUser:output_type -> cogito.Empty
+	7,  // 56: cogito.UserService.GetFollowing:output_type -> cogito.Users
+	7,  // 57: cogito.UserService.GetFollowers:output_type -> cogito.Users
+	9,  // 58: cogito.UserService.FollowUser:output_type -> cogito.Empty
+	9,  // 59: cogito.UserService.UnfollowUser:output_type -> cogito.Empty
+	12, // 60: cogito.AuthService.CreateSession:output_type -> cogito.Session
+	12, // 61: cogito.AuthService.GetSession:output_type -> cogito.Session
+	9,  // 62: cogito.AuthService.DeleteSession:output_type -> cogito.Empty
+	13, // 63: cogito.AuthService.GetSessions:output_type -> cogito.Sessions
+	1,  // 64: cogito.PostService.CreatePost:output_type -> cogito.Identifier
+	18, // 65: cogito.PostService.GetFeed:output_type -> cogito.Posts
+	18, // 66: cogito.PostService.GetPosts:output_type -> cogito.Posts
+	18, // 67: cogito.PostService.GetUserReplies:output_type -> cogito.Posts
+	18, // 68: cogito.PostService.GetLikedPosts:output_type -> cogito.Posts
+	18, // 69: cogito.PostService.GetHashtagPosts:output_type -> cogito.Posts
+	16, // 70: cogito.PostService.GetPost:output_type -> cogito.Post
+	18, // 71: cogito.PostService.GetPostsByIds:output_type -> cogito.Posts
+	9,  // 72: cogito.PostService.DeletePost:output_type -> cogito.Empty
+	9,  // 73: cogito.PostService.LikePost:output_type -> cogito.Empty
+	9,  // 74: cogito.PostService.UnlikePost:output_type -> cogito.Empty
+	9,  // 75: cogito.PostService.RepostPost:output_type -> cogito.Empty
+	9,  // 76: cogito.PostService.RemoveRepost:output_type -> cogito.Empty
+	18, // 77: cogito.PostService.GetReplies:output_type -> cogito.Posts
+	18, // 78: cogito.PostService.GetPopularPosts:output_type -> cogito.Posts
+	9,  // 79: cogito.ImageService.VerifyUpload:output_type -> cogito.Empty
+	9,  // 80: cogito.ImageService.ConsumeUpload:output_type -> cogito.Empty
+	9,  // 81: cogito.ImageService.DeleteImage:output_type -> cogito.Empty
+	7,  // 82: cogito.SearchService.SearchUsers:output_type -> cogito.Users
+	18, // 83: cogito.SearchService.SearchPosts:output_type -> cogito.Posts
+	24, // 84: cogito.SearchService.SearchHashtags:output_type -> cogito.Hashtags
+	30, // 85: cogito.SearchService.ListRecentSearches:output_type -> cogito.RecentSearches
+	9,  // 86: cogito.SearchService.RecordRecentSearch:output_type -> cogito.Empty
+	9,  // 87: cogito.SearchService.DeleteRecentSearch:output_type -> cogito.Empty
+	9,  // 88: cogito.SearchService.ClearRecentSearches:output_type -> cogito.Empty
+	35, // 89: cogito.NotificationService.GetNotifications:output_type -> cogito.Notifications
+	9,  // 90: cogito.NotificationService.MarkNotificationRead:output_type -> cogito.Empty
+	37, // 91: cogito.NotificationService.GetUnreadCount:output_type -> cogito.UnreadCountResponse
+	51, // [51:92] is the sub-list for method output_type
+	10, // [10:51] is the sub-list for method input_type
 	10, // [10:10] is the sub-list for extension type_name
 	10, // [10:10] is the sub-list for extension extendee
 	0,  // [0:10] is the sub-list for field type_name

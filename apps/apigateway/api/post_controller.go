@@ -157,6 +157,44 @@ func (pc *postController) resolveQuotes(ctx context.Context, posts []*pb.Post) {
 	}
 }
 
+// resolveInReplyTo attaches each reply's parent-post author username, for
+// the profile Replies tab's "Replying to @x" affordance.
+func (pc *postController) resolveInReplyTo(ctx context.Context, posts []post, raw []*pb.Post) {
+	idSet := make(map[int32]struct{})
+	for _, p := range raw {
+		if p.InReplyToId != 0 {
+			idSet[p.InReplyToId] = struct{}{}
+		}
+	}
+	if len(idSet) == 0 {
+		return
+	}
+
+	ids := make([]int32, 0, len(idSet))
+	for id := range idSet {
+		ids = append(ids, id)
+	}
+
+	res, err := pc.client.GetPostsByIds(ctx, &pb.Ids{Ids: ids})
+	if err != nil {
+		slog.Warn("resolving reply parents failed", "request_id", requestIDFromContext(ctx), "error_kind", grpcCode(err))
+		return
+	}
+
+	usernameByParentID := make(map[int32]string, len(res.Posts))
+	for _, parent := range pc.buildPosts(ctx, res.Posts) {
+		if parent.User != nil {
+			usernameByParentID[parent.ID] = parent.User.Username
+		}
+	}
+
+	for i, p := range raw {
+		if username, ok := usernameByParentID[p.InReplyToId]; ok {
+			posts[i].InReplyToUsername = &username
+		}
+	}
+}
+
 // resolveAuthors batch-fetches the authors of every post (including nested
 // repost/quote posts) in a single call, returning a map keyed by user ID.
 func (pc *postController) resolveAuthors(ctx context.Context, posts []*pb.Post) map[int32]user {
@@ -284,6 +322,48 @@ func (pc *postController) getPosts(w http.ResponseWriter, r *http.Request) {
 	jsonResponse(w, 200, map[string]any{"items": pc.buildPosts(ctx, res.Posts), "nextCursor": res.NextCursor})
 }
 
+func (pc *postController) getUserReplies(w http.ResponseWriter, r *http.Request) {
+	client := pc.client
+
+	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
+	ctx, errCtx := appendUserIDHeader(ctx, r)
+	if errCtx != nil {
+		jsonError(w, http.StatusUnauthorized, "Unauthorized")
+		cancel()
+		return
+	}
+	defer cancel()
+
+	userID, err := strconv.ParseInt(r.PathValue("userId"), 10, 32)
+	if err != nil {
+		jsonError(w, http.StatusBadRequest, "Invalid user ID")
+		return
+	}
+	cursor, limit, err := getCursorAndLimit(r)
+	if err != nil {
+		grpcError(w, err)
+		return
+	}
+
+	req := pb.GetPostsRequest{
+		UserId: int32(userID),
+		Cursor: cursor,
+		Limit:  int32(limit),
+	}
+
+	res, err := client.GetUserReplies(ctx, &req)
+	if err != nil {
+		slog.Warn("getting user replies failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
+		grpcError(w, err)
+		return
+	}
+
+	posts := pc.buildPosts(ctx, res.Posts)
+	pc.resolveInReplyTo(ctx, posts, res.Posts)
+
+	jsonResponse(w, 200, map[string]any{"items": posts, "nextCursor": res.NextCursor})
+}
+
 func (pc *postController) getLikedPosts(w http.ResponseWriter, r *http.Request) {
 	client := pc.client
 
@@ -400,7 +480,6 @@ func (pc *postController) deletePost(w http.ResponseWriter, r *http.Request) {
 	}
 	req := pb.PostRequest{PostId: int32(postID)}
 
-	// Fetch post first to check if there is a media_key
 	postRes, err := client.GetPost(ctx, &req)
 	if err != nil {
 		slog.Warn("getting post for deletion check failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))

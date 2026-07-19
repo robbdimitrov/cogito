@@ -94,10 +94,8 @@ func TestAuthGuard_PublicPostReadStillResolvesValidSession(t *testing.T) {
 }
 
 func TestAuthGuard_PublicUserByUsernameReadStillResolvesValidSession(t *testing.T) {
-	// Regression test: GET /users (getUserByUsername) was previously in the
-	// unconditional `allowed` allowlist, which bypasses validateSessionOptional
-	// entirely — a logged-in caller looking up any profile by username, the
-	// primary way profiles are loaded, always looked anonymous.
+	// Regression: GET /users was previously in the unconditional `allowed` allowlist,
+	// bypassing validateSessionOptional so a logged-in caller always looked anonymous.
 	ac := &authController{client: &mockAuthServiceClient{sessionUserID: 42}}
 
 	var gotUserID string
@@ -146,9 +144,8 @@ func TestAuthGuard_PublicPostReadToleratesInvalidSession(t *testing.T) {
 }
 
 func TestAuthGuard_PublicPostReadSurfacesTransientAuthFailure(t *testing.T) {
-	// Regression test: a valid session must not be silently downgraded to
-	// anonymous when authservice itself is unavailable — only a missing or
-	// confirmed-invalid cookie should fall back to anonymous.
+	// Regression: a valid session must not be silently downgraded to anonymous when
+	// authservice is unavailable — only a missing/invalid cookie should fall back.
 	ac := &authController{client: &mockAuthServiceClient{errGetSession: status.Error(codes.Unavailable, "authservice down")}}
 
 	called := false
@@ -172,14 +169,14 @@ func TestAuthGuard_PublicPostReadSurfacesTransientAuthFailure(t *testing.T) {
 }
 
 func TestAuthGuard_DoesNotBypassGatedPostAndUserRoutes(t *testing.T) {
-	// Includes the collision-regression case: GET /posts/feed has the same
-	// single-segment shape as the public /posts/{postId} route, but must
-	// stay gated.
+	// Includes the collision case: GET /posts/feed shares a shape with the public
+	// /posts/{postId} route but must stay gated.
 	paths := []string{
 		"/posts/123/likes",
 		"/posts/123/replies",
 		"/posts/feed",
 		"/users/123/likes",
+		"/users/123/replies",
 		"/users/123/following",
 		"/users/123/followers",
 	}
