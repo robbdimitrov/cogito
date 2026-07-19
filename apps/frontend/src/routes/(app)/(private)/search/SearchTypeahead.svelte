@@ -1,6 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
+  import { page } from "$app/state";
   import { History, Search, X } from "@lucide/svelte";
   import { recordRecentSearch } from "$lib/shared/recentSearch";
   import SearchResultRow from "./SearchResultRow.svelte";
@@ -34,6 +35,7 @@
     open = false;
     activeIndex = -1;
     inputRef?.focus();
+    if (page.url.searchParams.get("q")) goto(resolve("/search"));
   }
 
   let debounceTimer: ReturnType<typeof setTimeout> | undefined;

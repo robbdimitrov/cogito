@@ -4,11 +4,13 @@ import { mountComponent } from "$lib/shared/testing/mountComponent";
 import SearchTypeahead from "./SearchTypeahead.svelte";
 import type { RecentSearchItem } from "./types";
 
-const { gotoMock, recordRecentSearchMock } = vi.hoisted(() => ({
+const { gotoMock, recordRecentSearchMock, pageState } = vi.hoisted(() => ({
   gotoMock: vi.fn(),
   recordRecentSearchMock: vi.fn(),
+  pageState: { url: new URL("http://localhost/search") },
 }));
 vi.mock("$app/navigation", () => ({ goto: gotoMock }));
+vi.mock("$app/state", () => ({ page: pageState }));
 vi.mock("$lib/shared/recentSearch", () => ({
   recordRecentSearch: recordRecentSearchMock,
 }));
@@ -61,6 +63,7 @@ describe("SearchTypeahead", () => {
     vi.useFakeTimers();
     gotoMock.mockClear();
     recordRecentSearchMock.mockClear();
+    pageState.url = new URL("http://localhost/search");
   });
 
   afterEach(() => {
@@ -271,6 +274,31 @@ describe("SearchTypeahead", () => {
       flushSync();
       expect(el.textContent).toContain("live flow");
     });
+  });
+
+  it("navigates to plain /search when clearing a query loaded from the URL", async () => {
+    pageState.url = new URL("http://localhost/search?q=alice");
+    const el = mountComponent(SearchTypeahead, { query: "alice" });
+
+    const clearButton = el.querySelector(
+      'button[aria-label="Clear search"]',
+    ) as HTMLButtonElement;
+    clearButton.click();
+    flushSync();
+
+    expect(gotoMock).toHaveBeenCalledWith("/search");
+  });
+
+  it("does not navigate when clearing a query never submitted to the URL", async () => {
+    const el = mountComponent(SearchTypeahead, { query: "alice" });
+
+    const clearButton = el.querySelector(
+      'button[aria-label="Clear search"]',
+    ) as HTMLButtonElement;
+    clearButton.click();
+    flushSync();
+
+    expect(gotoMock).not.toHaveBeenCalled();
   });
 
   it("restores recent searches when clear fetch rejects", async () => {
