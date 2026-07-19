@@ -5,6 +5,8 @@ microservices architecture. Combining high-performance Go and Rust gRPC backends
 with a SvelteKit frontend, it provides a seamless experience for users to
 create, browse, and interact with posts.
 
+![Home page](docs/images/home.png)
+
 ## Features
 
 - **Post interactions**: Create plain posts, replies, quotes, and reposts. Like,
@@ -124,7 +126,7 @@ script:
 
 The script builds the Docker images, creates the Kubernetes namespace (`cogito`
 by default) and resources, waits for pods to be ready, and starts a port-forward
-to the frontend at http://localhost:8080/. It is idempotent and safe to re-run
+to the frontend at http://cogito.localhost:8080/. It is idempotent and safe to re-run
 for updates.
 
 ## Cleanup
