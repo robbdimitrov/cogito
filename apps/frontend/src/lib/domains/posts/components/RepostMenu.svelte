@@ -3,6 +3,7 @@
   import { slide } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
   import { onDestroy } from "svelte";
+  import { browser } from "$app/environment";
 
   interface Props {
     reposted: boolean;
@@ -60,7 +61,10 @@
     onQuote();
   }
 
+  // onDestroy fires during SSR teardown too (unlike $effect), so guard the
+  // browser-only cleanup.
   onDestroy(() => {
+    if (!browser) return;
     document.removeEventListener("click", handleOutsideClick);
     document.removeEventListener("keydown", handleKeydown);
   });
