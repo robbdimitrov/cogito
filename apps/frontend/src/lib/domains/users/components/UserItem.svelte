@@ -5,11 +5,14 @@
   import { Check, UserPlus } from "@lucide/svelte";
   import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
   import type { User } from "$lib/shared/types";
+  import { getToastContext } from "$lib/shared/toast.svelte";
 
   let { user, currentUserId } = $props<{
     user: User;
     currentUserId?: number | null;
   }>();
+
+  const toast = getToastContext();
 
   let isCurrentUser = $derived(currentUserId && user.id === currentUserId);
 
@@ -22,7 +25,7 @@
   let isActionLoading = $state(false);
 </script>
 
-<GlassCard as="li" interactive class="hover:scale-[1.005]">
+<GlassCard as="li" interactive>
   <div class="card-body p-4 sm:p-5">
     <div class="flex items-start justify-between gap-3">
       <a
@@ -30,7 +33,7 @@
         class="group flex min-w-0 items-center gap-3"
       >
         <div
-          class="shrink-0 rounded-full bg-base-100/55 p-1 ring-1 ring-base-300/80 transition-transform duration-200 group-hover:scale-105 dark:bg-white/5 dark:ring-white/10"
+          class="shrink-0 rounded-full bg-base-100/55 p-1 ring-1 ring-base-300/80 dark:bg-white/5 dark:ring-white/10"
         >
           <Avatar name={user.name} size="md" photoKey={user.profilePhotoKey} />
         </div>
@@ -58,6 +61,7 @@
               isActionLoading = false;
               if (result.type === "failure") {
                 optimisticFollowOverride = wasFollowed;
+                toast.error("Action failed");
                 return;
               }
               await update({ invalidateAll: false });
