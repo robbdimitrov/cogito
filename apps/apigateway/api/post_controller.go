@@ -49,8 +49,8 @@ func (pc *postController) createPost(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Content     string  `json:"content"`
 		MediaKey    *string `json:"mediaKey"`
-		InReplyToID *int32  `json:"inReplyToId"`
-		QuoteOfID   *int32  `json:"quoteOfId"`
+		InReplyToID *string `json:"inReplyToId"`
+		QuoteOfID   *string `json:"quoteOfId"`
 	}
 	if err := decodeJSONBody(r, &body); err != nil {
 		if grpcCode(err) == codes.ResourceExhausted.String() {
@@ -62,6 +62,14 @@ func (pc *postController) createPost(w http.ResponseWriter, r *http.Request) {
 	}
 	if strings.TrimSpace(body.Content) == "" || utf8.RuneCountInString(body.Content) > 255 {
 		jsonError(w, http.StatusBadRequest, "Content must be between 1 and 255 characters")
+		return
+	}
+	if body.InReplyToID != nil && !isUUID(*body.InReplyToID) {
+		jsonError(w, http.StatusBadRequest, "Invalid inReplyToId")
+		return
+	}
+	if body.QuoteOfID != nil && !isUUID(*body.QuoteOfID) {
+		jsonError(w, http.StatusBadRequest, "Invalid quoteOfId")
 		return
 	}
 
@@ -83,10 +91,10 @@ func (pc *postController) createPost(w http.ResponseWriter, r *http.Request) {
 		req.MediaKey = body.MediaKey
 	}
 	if body.InReplyToID != nil {
-		req.InReplyToId = body.InReplyToID
+		req.InReplyToPublicId = body.InReplyToID
 	}
 	if body.QuoteOfID != nil {
-		req.QuoteOfId = body.QuoteOfID
+		req.QuoteOfPublicId = body.QuoteOfID
 	}
 
 	res, err := client.CreatePost(ctx, &req)
@@ -105,7 +113,7 @@ func (pc *postController) createPost(w http.ResponseWriter, r *http.Request) {
 		_, err = pc.imgClient.ConsumeUpload(ctx, &pb.ConsumeUploadRequest{Filename: *body.MediaKey, UserId: int32(userIDInt)})
 		if err != nil {
 			slog.Warn("consuming upload failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
-			if _, deleteErr := client.DeletePost(ctx, &pb.PostRequest{PostId: res.Id}); deleteErr != nil {
+			if _, deleteErr := client.DeletePost(ctx, &pb.PostRequest{PublicId: res.PublicId}); deleteErr != nil {
 				slog.Warn("compensating post delete failed", "request_id", getRequestID(r), "error_kind", grpcCode(deleteErr))
 			}
 			grpcError(w, err)
@@ -113,7 +121,7 @@ func (pc *postController) createPost(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	jsonResponse(w, 201, map[string]int32{"id": res.Id})
+	jsonResponse(w, 201, map[string]string{"publicId": res.PublicId})
 }
 
 // resolveQuotes fetches every quoted post referenced by the given posts in a
@@ -157,9 +165,9 @@ func (pc *postController) resolveQuotes(ctx context.Context, posts []*pb.Post) {
 	}
 }
 
-// resolveInReplyTo attaches each reply's parent-post author username, for
-// the profile Replies tab's "Replying to @x" affordance.
-func (pc *postController) resolveInReplyTo(ctx context.Context, posts []post, raw []*pb.Post) {
+// resolveReplyParents batch-resolves each post's reply-parent by numeric id,
+// so buildPosts can populate InReplyToPublicID for every endpoint.
+func (pc *postController) resolveReplyParents(ctx context.Context, raw []*pb.Post) map[int32]*pb.Post {
 	idSet := make(map[int32]struct{})
 	for _, p := range raw {
 		if p.InReplyToId != 0 {
@@ -167,7 +175,7 @@ func (pc *postController) resolveInReplyTo(ctx context.Context, posts []post, ra
 		}
 	}
 	if len(idSet) == 0 {
-		return
+		return nil
 	}
 
 	ids := make([]int32, 0, len(idSet))
@@ -178,13 +186,33 @@ func (pc *postController) resolveInReplyTo(ctx context.Context, posts []post, ra
 	res, err := pc.client.GetPostsByIds(ctx, &pb.Ids{Ids: ids})
 	if err != nil {
 		slog.Warn("resolving reply parents failed", "request_id", requestIDFromContext(ctx), "error_kind", grpcCode(err))
+		return nil
+	}
+
+	parents := make(map[int32]*pb.Post, len(res.Posts))
+	for _, parent := range res.Posts {
+		parents[parent.Id] = parent
+	}
+	return parents
+}
+
+// attachInReplyToUsernames derives "Replying to @x" usernames from the
+// already-resolved reply parents; only GET /users/{userId}/replies calls this.
+func (pc *postController) attachInReplyToUsernames(ctx context.Context, posts []post, raw []*pb.Post, replyParents map[int32]*pb.Post) {
+	if len(replyParents) == 0 {
 		return
 	}
 
-	usernameByParentID := make(map[int32]string, len(res.Posts))
-	for _, parent := range pc.buildPosts(ctx, res.Posts) {
-		if parent.User != nil {
-			usernameByParentID[parent.ID] = parent.User.Username
+	parentPosts := make([]*pb.Post, 0, len(replyParents))
+	for _, p := range replyParents {
+		parentPosts = append(parentPosts, p)
+	}
+	authors := pc.resolveAuthors(ctx, parentPosts)
+
+	usernameByParentID := make(map[int32]string, len(replyParents))
+	for id, p := range replyParents {
+		if a, ok := authors[p.UserId]; ok {
+			usernameByParentID[id] = a.Username
 		}
 	}
 
@@ -237,18 +265,30 @@ func (pc *postController) resolveAuthors(ctx context.Context, posts []*pb.Post) 
 	return authors
 }
 
-// buildPosts resolves quotes and authors for a batch of posts and maps them to
-// the JSON response shape with embedded authors.
+// buildPosts resolves quotes, authors, and reply parents for a batch of posts
+// and maps them to the JSON response shape with embedded authors.
 func (pc *postController) buildPosts(ctx context.Context, raw []*pb.Post) []post {
+	posts, _ := pc.buildPostsWithReplyParents(ctx, raw)
+	return posts
+}
+
+// buildPostsWithReplyParents is buildPosts, additionally returning the
+// resolved reply-parent map so getUserReplies can reuse it without a second
+// GetPostsByIds call.
+func (pc *postController) buildPostsWithReplyParents(ctx context.Context, raw []*pb.Post) ([]post, map[int32]*pb.Post) {
 	pc.resolveQuotes(ctx, raw)
 	authors := pc.resolveAuthors(ctx, raw)
+	replyParents := pc.resolveReplyParents(ctx, raw)
 
 	posts := make([]post, len(raw))
 	for i, v := range raw {
 		posts[i] = mapPost(v)
 		attachAuthors(&posts[i], authors)
+		if parent, ok := replyParents[v.InReplyToId]; ok {
+			posts[i].InReplyToPublicID = parent.PublicId
+		}
 	}
-	return posts
+	return posts, replyParents
 }
 
 func (pc *postController) buildPost(ctx context.Context, raw *pb.Post) post {
@@ -358,8 +398,8 @@ func (pc *postController) getUserReplies(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	posts := pc.buildPosts(ctx, res.Posts)
-	pc.resolveInReplyTo(ctx, posts, res.Posts)
+	posts, replyParents := pc.buildPostsWithReplyParents(ctx, res.Posts)
+	pc.attachInReplyToUsernames(ctx, posts, res.Posts, replyParents)
 
 	jsonResponse(w, 200, map[string]any{"items": posts, "nextCursor": res.NextCursor})
 }
@@ -444,12 +484,12 @@ func (pc *postController) getPost(w http.ResponseWriter, r *http.Request) {
 	ctx = appendOptionalUserIDHeader(ctx, r)
 	defer cancel()
 
-	postID, err := strconv.ParseInt(r.PathValue("postId"), 10, 32)
-	if err != nil {
+	publicID := r.PathValue("publicId")
+	if !isUUID(publicID) {
 		jsonError(w, http.StatusBadRequest, "Invalid post ID")
 		return
 	}
-	req := pb.PostRequest{PostId: int32(postID)}
+	req := pb.PostRequest{PublicId: publicID}
 
 	res, err := client.GetPost(ctx, &req)
 	if err != nil {
@@ -473,12 +513,12 @@ func (pc *postController) deletePost(w http.ResponseWriter, r *http.Request) {
 	}
 	defer cancel()
 
-	postID, err := strconv.ParseInt(r.PathValue("postId"), 10, 32)
-	if err != nil {
+	publicID := r.PathValue("publicId")
+	if !isUUID(publicID) {
 		jsonError(w, http.StatusBadRequest, "Invalid post ID")
 		return
 	}
-	req := pb.PostRequest{PostId: int32(postID)}
+	req := pb.PostRequest{PublicId: publicID}
 
 	postRes, err := client.GetPost(ctx, &req)
 	if err != nil {
@@ -520,14 +560,14 @@ func (pc *postController) likePost(w http.ResponseWriter, r *http.Request) {
 	}
 	defer cancel()
 
-	postID, err := strconv.ParseInt(r.PathValue("postId"), 10, 32)
-	if err != nil {
+	publicID := r.PathValue("publicId")
+	if !isUUID(publicID) {
 		jsonError(w, http.StatusBadRequest, "Invalid post ID")
 		return
 	}
-	req := pb.PostRequest{PostId: int32(postID)}
+	req := pb.PostRequest{PublicId: publicID}
 
-	_, err = client.LikePost(ctx, &req)
+	_, err := client.LikePost(ctx, &req)
 	if err != nil {
 		slog.Warn("liking post failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
@@ -549,14 +589,14 @@ func (pc *postController) unlikePost(w http.ResponseWriter, r *http.Request) {
 	}
 	defer cancel()
 
-	postID, err := strconv.ParseInt(r.PathValue("postId"), 10, 32)
-	if err != nil {
+	publicID := r.PathValue("publicId")
+	if !isUUID(publicID) {
 		jsonError(w, http.StatusBadRequest, "Invalid post ID")
 		return
 	}
-	req := pb.PostRequest{PostId: int32(postID)}
+	req := pb.PostRequest{PublicId: publicID}
 
-	_, err = client.UnlikePost(ctx, &req)
+	_, err := client.UnlikePost(ctx, &req)
 	if err != nil {
 		slog.Warn("unliking post failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
@@ -578,14 +618,14 @@ func (pc *postController) repostPost(w http.ResponseWriter, r *http.Request) {
 	}
 	defer cancel()
 
-	postID, err := strconv.ParseInt(r.PathValue("postId"), 10, 32)
-	if err != nil {
+	publicID := r.PathValue("publicId")
+	if !isUUID(publicID) {
 		jsonError(w, http.StatusBadRequest, "Invalid post ID")
 		return
 	}
-	req := pb.PostRequest{PostId: int32(postID)}
+	req := pb.PostRequest{PublicId: publicID}
 
-	_, err = client.RepostPost(ctx, &req)
+	_, err := client.RepostPost(ctx, &req)
 	if err != nil {
 		slog.Warn("creating repost failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
@@ -607,14 +647,14 @@ func (pc *postController) removeRepost(w http.ResponseWriter, r *http.Request) {
 	}
 	defer cancel()
 
-	postID, err := strconv.ParseInt(r.PathValue("postId"), 10, 32)
-	if err != nil {
+	publicID := r.PathValue("publicId")
+	if !isUUID(publicID) {
 		jsonError(w, http.StatusBadRequest, "Invalid post ID")
 		return
 	}
-	req := pb.PostRequest{PostId: int32(postID)}
+	req := pb.PostRequest{PublicId: publicID}
 
-	_, err = client.RemoveRepost(ctx, &req)
+	_, err := client.RemoveRepost(ctx, &req)
 	if err != nil {
 		slog.Warn("deleting repost failed", "request_id", getRequestID(r), "error_kind", grpcCode(err))
 		grpcError(w, err)
@@ -636,8 +676,8 @@ func (pc *postController) getReplies(w http.ResponseWriter, r *http.Request) {
 	}
 	defer cancel()
 
-	postID, err := strconv.ParseInt(r.PathValue("postId"), 10, 32)
-	if err != nil {
+	publicID := r.PathValue("publicId")
+	if !isUUID(publicID) {
 		jsonError(w, http.StatusBadRequest, "Invalid post ID")
 		return
 	}
@@ -648,9 +688,9 @@ func (pc *postController) getReplies(w http.ResponseWriter, r *http.Request) {
 	}
 
 	req := pb.GetRepliesRequest{
-		PostId: int32(postID),
-		Cursor: cursor,
-		Limit:  int32(limit),
+		PublicId: publicID,
+		Cursor:   cursor,
+		Limit:    int32(limit),
 	}
 
 	res, err := client.GetReplies(ctx, &req)

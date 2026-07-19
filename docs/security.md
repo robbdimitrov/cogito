@@ -45,7 +45,7 @@
 | -------------------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
 | Delete session by ID                   | Gateway                  | Fetch session handles for current user → compare public handle; 403 on mismatch                                            |
 | Update user profile                    | Gateway                  | Compare path `{userId}` to context user ID; 403 if not self                                                                |
-| Delete post                            | PostService              | `DELETE FROM posts WHERE id = $1 AND user_id = $2` (0 rows → not found)                                                    |
+| Delete post                            | PostService              | `WHERE public_id = $1 AND user_id = $2` (0 rows → not found); the internal numeric id is resolved in the same query, never accepted from the client |
 | Image upload ownership                 | ImageService HTTP + gRPC | `x-user-id`/`user_id` injected by gateway from validated session; consume atomically claims metadata by filename and owner |
 | Notification read / unread-count       | FlowService              | Acting user derived from `user-id` gRPC metadata, not the request body                                                     |
 | Recent-search list / delete / clear    | FlowService              | Acting user derived from `user-id`; delete scopes by public row ID and owner                                               |

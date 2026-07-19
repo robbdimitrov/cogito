@@ -30,7 +30,7 @@ Applied in this order (outermost to innermost):
 | GET        | /users              |
 | GET        | /users/{userId}     |
 | GET        | /users/{userId}/posts |
-| GET        | /posts/{postId}     |
+| GET        | /posts/{publicId}     |
 
 All other routes require a valid `session` cookie. The last four rows above
 are matched by path shape (`isPublicPostRead`/`isPublicUserRead` in
@@ -116,7 +116,7 @@ the resource owner.
 | GET    | /users?username=      | Get user by username (email hidden unless self)                |
 | GET    | /users/{userId}       | Get user profile (email field included for own profile only)   |
 | GET    | /users/{userId}/posts | Paginated user timeline                                         |
-| GET    | /posts/{postId}       | Get single post                                                 |
+| GET    | /posts/{publicId}       | Get single post                                                 |
 
 ### Protected (session cookie required)
 
@@ -150,7 +150,7 @@ are anonymous-readable — see above. Everything below still requires a session.
 
 #### Posts
 
-`GET /posts/{postId}` is anonymous-readable — see above. Everything below
+`GET /posts/{publicId}` is anonymous-readable — see above. Everything below
 still requires a session.
 
 | Method | Path                    | Purpose                                                                                                                                  |
@@ -158,12 +158,12 @@ still requires a session.
 | POST   | /posts                  | Create post (content, mediaKey?, inReplyToId?, quoteOfId?)                                                                               |
 | GET    | /posts                  | Home feed (alias for /posts/feed)                                                                                                        |
 | GET    | /posts/feed             | Non-reply posts from followed accounts, cursor-paginated; backed by a materialized feed table with pull-merge for high-follower accounts |
-| DELETE | /posts/{postId}         | Delete own post; removes associated image via ImageService                                                                               |
-| POST   | /posts/{postId}/likes   | Like post (idempotent)                                                                                                                   |
-| DELETE | /posts/{postId}/likes   | Unlike post                                                                                                                              |
-| POST   | /posts/{postId}/reposts | Repost (idempotent; resolves to original post)                                                                                           |
-| DELETE | /posts/{postId}/reposts | Remove repost                                                                                                                            |
-| GET    | /posts/{postId}/replies | Paginated replies (newest-first)                                                                                                         |
+| DELETE | /posts/{publicId}         | Delete own post; removes associated image via ImageService                                                                               |
+| POST   | /posts/{publicId}/likes   | Like post (idempotent)                                                                                                                   |
+| DELETE | /posts/{publicId}/likes   | Unlike post                                                                                                                              |
+| POST   | /posts/{publicId}/reposts | Repost (idempotent; resolves to original post)                                                                                           |
+| DELETE | /posts/{publicId}/reposts | Remove repost                                                                                                                            |
+| GET    | /posts/{publicId}/replies | Paginated replies (newest-first)                                                                                                         |
 | GET    | /users/{userId}/likes   | Paginated posts liked by user                                                                                                            |
 | GET    | /users/{userId}/replies | Paginated replies authored by user, newest-first                                                                                        |
 | GET    | /hashtags/{tag}/posts   | Paginated posts with hashtag                                                                                                             |
@@ -238,7 +238,7 @@ the account owner (no `omitempty` on this field — unlike `profilePhotoKey`/
 
 ```json
 {
-  "id": 1,
+  "publicId": "550e8400-e29b-41d4-a716-446655440000",
   "userId": 1,
   "content": "string",
   "likes": 0,
@@ -248,17 +248,19 @@ the account owner (no `omitempty` on this field — unlike `profilePhotoKey`/
   "created": "2024-01-01T00:00:00Z",
   "mediaKey": "string",
   "replies": 0,
-  "inReplyToId": 0,
+  "inReplyToPublicId": "uuid",
   "inReplyToUsername": "string",
-  "quoteOfId": 0,
+  "quoteOfPublicId": "uuid",
   "quotePost": {},
-  "repostOfId": 0,
+  "repostOfPublicId": "uuid",
   "repostOf": {},
   "user": {}
 }
 ```
 
-Zero-value integer fields and null nested objects are omitted.
+`publicId` is the only post identifier ever exposed; the internal numeric
+`posts.id` never appears in a URL or a response body. Zero-value integer
+fields, empty UUID fields, and null nested objects are omitted.
 `inReplyToUsername` is only populated by `GET /users/{userId}/replies`
 (the profile Replies tab), resolved from the reply's parent post in a
 gateway-side batch call — it is never set by other endpoints.
@@ -322,22 +324,22 @@ Standard timeout: 10 seconds. Search endpoints: 5 seconds.
 
 ### PostService
 
-| Method          | Key request fields                                 | Response   |
-| --------------- | -------------------------------------------------- | ---------- |
-| CreatePost      | content, media_key?, in_reply_to_id?, quote_of_id? | Identifier |
-| GetFeed         | cursor, limit                                      | Posts      |
-| GetPosts        | user_id, cursor, limit                             | Posts      |
-| GetUserReplies  | user_id, cursor, limit                             | Posts      |
-| GetLikedPosts   | user_id, cursor, limit                             | Posts      |
-| GetHashtagPosts | tag, cursor, limit                                 | Posts      |
-| GetPost         | post_id                                            | Post       |
-| GetPostsByIds   | ids[]                                              | Posts      |
-| DeletePost      | post_id                                            | Empty      |
-| LikePost        | post_id                                            | Empty      |
-| UnlikePost      | post_id                                            | Empty      |
-| RepostPost      | post_id                                            | Empty      |
-| RemoveRepost    | post_id                                            | Empty      |
-| GetReplies      | post_id, cursor, limit                             | Posts      |
+| Method          | Key request fields                                                       | Response       |
+| --------------- | ------------------------------------------------------------------------- | -------------- |
+| CreatePost      | content, media_key?, in_reply_to_public_id?, quote_of_public_id?          | PostIdentifier |
+| GetFeed         | cursor, limit                                                            | Posts          |
+| GetPosts        | user_id, cursor, limit                                                   | Posts          |
+| GetUserReplies  | user_id, cursor, limit                                                   | Posts          |
+| GetLikedPosts   | user_id, cursor, limit                                                   | Posts          |
+| GetHashtagPosts | tag, cursor, limit                                                       | Posts          |
+| GetPost         | public_id                                                                | Post           |
+| GetPostsByIds   | ids[] (internal numeric ids only — never used across the public API)     | Posts          |
+| DeletePost      | public_id                                                                | Empty          |
+| LikePost        | public_id                                                                | Empty          |
+| UnlikePost      | public_id                                                                | Empty          |
+| RepostPost      | public_id                                                                | Empty          |
+| RemoveRepost    | public_id                                                                | Empty          |
+| GetReplies      | public_id, cursor, limit                                                 | Posts          |
 | GetPopularPosts | cursor, limit                                      | Posts      |
 
 ### ImageService (gRPC)

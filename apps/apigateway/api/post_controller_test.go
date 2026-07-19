@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"google.golang.org/grpc"
@@ -13,12 +14,56 @@ import (
 	pb "cogito/apigateway/genproto"
 )
 
+const validPostUUID = "11111111-1111-1111-1111-111111111111"
+
 type mockPostServiceClient struct {
 	pb.PostServiceClient
 	deletePostCalled bool
 	mediaKey         string
 	errDelete        error
 	errGet           error
+
+	// errAction is returned by the like/unlike/repost/removeRepost/getReplies
+	// RPCs, for status-mapping tests that don't care which action failed.
+	errAction error
+
+	createRes    *pb.PostIdentifier
+	errCreate    error
+	gotCreateReq *pb.CreatePostRequest
+}
+
+func (m *mockPostServiceClient) LikePost(ctx context.Context, in *pb.PostRequest, opts ...grpc.CallOption) (*pb.Empty, error) {
+	return &pb.Empty{}, m.errAction
+}
+
+func (m *mockPostServiceClient) UnlikePost(ctx context.Context, in *pb.PostRequest, opts ...grpc.CallOption) (*pb.Empty, error) {
+	return &pb.Empty{}, m.errAction
+}
+
+func (m *mockPostServiceClient) RepostPost(ctx context.Context, in *pb.PostRequest, opts ...grpc.CallOption) (*pb.Empty, error) {
+	return &pb.Empty{}, m.errAction
+}
+
+func (m *mockPostServiceClient) RemoveRepost(ctx context.Context, in *pb.PostRequest, opts ...grpc.CallOption) (*pb.Empty, error) {
+	return &pb.Empty{}, m.errAction
+}
+
+func (m *mockPostServiceClient) GetReplies(ctx context.Context, in *pb.GetRepliesRequest, opts ...grpc.CallOption) (*pb.Posts, error) {
+	if m.errAction != nil {
+		return nil, m.errAction
+	}
+	return &pb.Posts{}, nil
+}
+
+func (m *mockPostServiceClient) CreatePost(ctx context.Context, in *pb.CreatePostRequest, opts ...grpc.CallOption) (*pb.PostIdentifier, error) {
+	m.gotCreateReq = in
+	if m.errCreate != nil {
+		return nil, m.errCreate
+	}
+	if m.createRes != nil {
+		return m.createRes, nil
+	}
+	return &pb.PostIdentifier{PublicId: validPostUUID}, nil
 }
 
 func (m *mockPostServiceClient) GetPost(ctx context.Context, in *pb.PostRequest, opts ...grpc.CallOption) (*pb.Post, error) {
@@ -97,7 +142,7 @@ func (m *mockBatchUserClient) GetUsersByIds(ctx context.Context, in *pb.Ids, opt
 }
 
 func TestBuildPosts_EmbedsAuthorsAndQuotes(t *testing.T) {
-	quote := &pb.Post{Id: 7, UserId: 3, Content: "quoted"}
+	quote := &pb.Post{Id: 7, PublicId: "quote-uuid", UserId: 3, Content: "quoted"}
 	postClient := &mockBatchPostClient{quotes: map[int32]*pb.Post{7: quote}}
 	userClient := &mockBatchUserClient{users: map[int32]*pb.User{
 		1: {Id: 1, Username: "reposter"},
@@ -124,8 +169,11 @@ func TestBuildPosts_EmbedsAuthorsAndQuotes(t *testing.T) {
 		t.Errorf("expected repost author 2, got %+v", got[0].RepostOf)
 	}
 	// Quoted post resolved and its author embedded.
-	if got[0].RepostOf.QuotePost == nil || got[0].RepostOf.QuotePost.ID != 7 {
-		t.Fatalf("expected quoted post 7, got %+v", got[0].RepostOf.QuotePost)
+	if got[0].RepostOf.QuotePost == nil || got[0].RepostOf.QuotePost.PublicID != "quote-uuid" {
+		t.Fatalf("expected quoted post quote-uuid, got %+v", got[0].RepostOf.QuotePost)
+	}
+	if got[0].RepostOf.QuoteOfPublicID != "quote-uuid" {
+		t.Errorf("expected quoteOfPublicId quote-uuid, got %q", got[0].RepostOf.QuoteOfPublicID)
 	}
 	if got[0].RepostOf.QuotePost.User == nil || got[0].RepostOf.QuotePost.User.ID != 3 {
 		t.Errorf("expected quote author 3, got %+v", got[0].RepostOf.QuotePost.User)
@@ -155,8 +203,8 @@ func TestBuildPosts_NoQuotesSkipsQuoteCall(t *testing.T) {
 	}
 }
 
-func TestResolveInReplyTo_AttachesParentAuthorUsername(t *testing.T) {
-	parent := &pb.Post{Id: 5, UserId: 2, Content: "original"}
+func TestBuildPosts_ResolvesInReplyToPublicID(t *testing.T) {
+	parent := &pb.Post{Id: 5, PublicId: "parent-uuid", UserId: 2, Content: "original"}
 	postClient := &mockBatchPostClient{quotes: map[int32]*pb.Post{5: parent}}
 	userClient := &mockBatchUserClient{users: map[int32]*pb.User{
 		1: {Id: 1, Username: "replier"},
@@ -166,21 +214,38 @@ func TestResolveInReplyTo_AttachesParentAuthorUsername(t *testing.T) {
 
 	raw := []*pb.Post{{Id: 10, UserId: 1, InReplyToId: 5}}
 	posts := pc.buildPosts(context.Background(), raw)
-	pc.resolveInReplyTo(context.Background(), posts, raw)
+
+	if posts[0].InReplyToPublicID != "parent-uuid" {
+		t.Fatalf("expected inReplyToPublicId %q, got %q", "parent-uuid", posts[0].InReplyToPublicID)
+	}
+}
+
+func TestAttachInReplyToUsernames_AttachesParentAuthorUsername(t *testing.T) {
+	parent := &pb.Post{Id: 5, PublicId: "parent-uuid", UserId: 2, Content: "original"}
+	postClient := &mockBatchPostClient{quotes: map[int32]*pb.Post{5: parent}}
+	userClient := &mockBatchUserClient{users: map[int32]*pb.User{
+		1: {Id: 1, Username: "replier"},
+		2: {Id: 2, Username: "original-author"},
+	}}
+	pc := &postController{client: postClient, userClient: userClient}
+
+	raw := []*pb.Post{{Id: 10, UserId: 1, InReplyToId: 5}}
+	posts, replyParents := pc.buildPostsWithReplyParents(context.Background(), raw)
+	pc.attachInReplyToUsernames(context.Background(), posts, raw, replyParents)
 
 	if posts[0].InReplyToUsername == nil || *posts[0].InReplyToUsername != "original-author" {
 		t.Fatalf("expected inReplyToUsername %q, got %+v", "original-author", posts[0].InReplyToUsername)
 	}
 }
 
-func TestResolveInReplyTo_NoRepliesSkipsCall(t *testing.T) {
+func TestAttachInReplyToUsernames_NoRepliesSkipsCall(t *testing.T) {
 	postClient := &mockBatchPostClient{}
 	userClient := &mockBatchUserClient{users: map[int32]*pb.User{1: {Id: 1, Username: "a"}}}
 	pc := &postController{client: postClient, userClient: userClient}
 
 	raw := []*pb.Post{{Id: 1, UserId: 1}}
-	posts := pc.buildPosts(context.Background(), raw)
-	pc.resolveInReplyTo(context.Background(), posts, raw)
+	posts, replyParents := pc.buildPostsWithReplyParents(context.Background(), raw)
+	pc.attachInReplyToUsernames(context.Background(), posts, raw, replyParents)
 
 	if postClient.getPostsByIDsCalled {
 		t.Errorf("GetPostsByIds should not be called when there are no replies")
@@ -207,8 +272,8 @@ func TestDeletePost_ImageOrchestration(t *testing.T) {
 		imgClient: mockImage,
 	}
 
-	req := httptest.NewRequest("DELETE", "/posts/123", nil)
-	req.SetPathValue("postId", "123")
+	req := httptest.NewRequest("DELETE", "/posts/"+validPostUUID, nil)
+	req.SetPathValue("publicId", validPostUUID)
 	req = setUserID(req, "1")
 
 	w := httptest.NewRecorder()
@@ -237,8 +302,8 @@ func TestDeletePost_ImageDeleteFailurePreservesPost(t *testing.T) {
 		imgClient: mockImage,
 	}
 
-	req := httptest.NewRequest("DELETE", "/posts/123", nil)
-	req.SetPathValue("postId", "123")
+	req := httptest.NewRequest("DELETE", "/posts/"+validPostUUID, nil)
+	req.SetPathValue("publicId", validPostUUID)
 	req = setUserID(req, "1")
 
 	w := httptest.NewRecorder()
@@ -256,8 +321,8 @@ func TestGetPost_NoSessionSucceeds(t *testing.T) {
 	mockPost := &mockPostServiceClient{}
 	pc := &postController{client: mockPost}
 
-	req := httptest.NewRequest("GET", "/posts/123", nil)
-	req.SetPathValue("postId", "123")
+	req := httptest.NewRequest("GET", "/posts/"+validPostUUID, nil)
+	req.SetPathValue("publicId", validPostUUID)
 	// No setUserID call: simulates an anonymous visitor.
 
 	w := httptest.NewRecorder()
@@ -281,5 +346,121 @@ func TestGetPosts_NoSessionSucceeds(t *testing.T) {
 
 	if w.Code != http.StatusOK {
 		t.Fatalf("expected anonymous getPosts to succeed, got status %d: %s", w.Code, w.Body.String())
+	}
+}
+
+func TestPostHandlers_InvalidPublicID(t *testing.T) {
+	tests := []struct {
+		name    string
+		method  string
+		handler func(*postController) http.HandlerFunc
+	}{
+		{"getPost", "GET", func(pc *postController) http.HandlerFunc { return pc.getPost }},
+		{"deletePost", "DELETE", func(pc *postController) http.HandlerFunc { return pc.deletePost }},
+		{"likePost", "POST", func(pc *postController) http.HandlerFunc { return pc.likePost }},
+		{"unlikePost", "DELETE", func(pc *postController) http.HandlerFunc { return pc.unlikePost }},
+		{"repostPost", "POST", func(pc *postController) http.HandlerFunc { return pc.repostPost }},
+		{"removeRepost", "DELETE", func(pc *postController) http.HandlerFunc { return pc.removeRepost }},
+		{"getReplies", "GET", func(pc *postController) http.HandlerFunc { return pc.getReplies }},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			pc := &postController{client: &mockPostServiceClient{}}
+
+			req := httptest.NewRequest(tt.method, "/posts/not-a-uuid", nil)
+			req.SetPathValue("publicId", "not-a-uuid")
+			req = setUserID(req, "1")
+
+			w := httptest.NewRecorder()
+			tt.handler(pc)(w, req)
+
+			if w.Code != http.StatusBadRequest {
+				t.Errorf("expected 400 for malformed public id, got %d: %s", w.Code, w.Body.String())
+			}
+		})
+	}
+}
+
+func TestGetPost_NotFoundOnUnknownUUID(t *testing.T) {
+	mockPost := &mockPostServiceClient{errGet: status.Error(codes.NotFound, "post not found")}
+	pc := &postController{client: mockPost}
+
+	req := httptest.NewRequest("GET", "/posts/"+validPostUUID, nil)
+	req.SetPathValue("publicId", validPostUUID)
+
+	w := httptest.NewRecorder()
+	pc.getPost(w, req)
+
+	if w.Code != http.StatusNotFound {
+		t.Errorf("expected 404 for unknown post id, got %d: %s", w.Code, w.Body.String())
+	}
+}
+
+func TestCreatePost_InvalidReplyOrQuoteID(t *testing.T) {
+	tests := []struct {
+		name string
+		body string
+	}{
+		{"invalid inReplyToId", `{"content":"hi","inReplyToId":"not-a-uuid"}`},
+		{"invalid quoteOfId", `{"content":"hi","quoteOfId":"not-a-uuid"}`},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			pc := &postController{client: &mockPostServiceClient{}}
+
+			req := httptest.NewRequest("POST", "/posts", strings.NewReader(tt.body))
+			req = setUserID(req, "1")
+
+			w := httptest.NewRecorder()
+			pc.createPost(w, req)
+
+			if w.Code != http.StatusBadRequest {
+				t.Errorf("expected 400, got %d: %s", w.Code, w.Body.String())
+			}
+		})
+	}
+}
+
+func TestCreatePost_ResponseBodyShape(t *testing.T) {
+	mockPost := &mockPostServiceClient{createRes: &pb.PostIdentifier{PublicId: validPostUUID}}
+	pc := &postController{client: mockPost}
+
+	req := httptest.NewRequest("POST", "/posts", strings.NewReader(`{"content":"hello"}`))
+	req = setUserID(req, "1")
+
+	w := httptest.NewRecorder()
+	pc.createPost(w, req)
+
+	if w.Code != http.StatusCreated {
+		t.Fatalf("expected 201, got %d: %s", w.Code, w.Body.String())
+	}
+	if got := strings.TrimSpace(w.Body.String()); got != `{"publicId":"`+validPostUUID+`"}` {
+		t.Errorf("expected response body {\"publicId\":%q}, got %s", validPostUUID, got)
+	}
+}
+
+func TestCreatePost_ForwardsReplyAndQuotePublicIDs(t *testing.T) {
+	mockPost := &mockPostServiceClient{}
+	pc := &postController{client: mockPost}
+
+	replyTo := validPostUUID
+	quoteOf := "22222222-2222-2222-2222-222222222222"
+	body := `{"content":"hello","inReplyToId":"` + replyTo + `","quoteOfId":"` + quoteOf + `"}`
+	req := httptest.NewRequest("POST", "/posts", strings.NewReader(body))
+	req = setUserID(req, "1")
+
+	w := httptest.NewRecorder()
+	pc.createPost(w, req)
+
+	if w.Code != http.StatusCreated {
+		t.Fatalf("expected 201, got %d: %s", w.Code, w.Body.String())
+	}
+	if mockPost.gotCreateReq.GetInReplyToPublicId() != replyTo {
+		t.Errorf("expected InReplyToPublicId %q, got %q", replyTo, mockPost.gotCreateReq.GetInReplyToPublicId())
+	}
+	if mockPost.gotCreateReq.GetQuoteOfPublicId() != quoteOf {
+		t.Errorf("expected QuoteOfPublicId %q, got %q", quoteOf, mockPost.gotCreateReq.GetQuoteOfPublicId())
 	}
 }

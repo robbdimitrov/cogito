@@ -18,23 +18,23 @@ type user struct {
 }
 
 type post struct {
-	ID          int32  `json:"id"`
-	UserID      int32  `json:"userId"`
-	Content     string `json:"content"`
-	Likes       int32  `json:"likes"`
-	Liked       bool   `json:"liked"`
-	Reposts     int32  `json:"reposts"`
-	Reposted    bool   `json:"reposted"`
-	Created     string `json:"created"`
-	RepostOfID  int32  `json:"repostOfId,omitempty"`
-	RepostOf    *post  `json:"repostOf,omitempty"`
-	MediaKey    string `json:"mediaKey,omitempty"`
-	Replies     int32  `json:"replies"`
-	InReplyToID int32  `json:"inReplyToId,omitempty"`
+	PublicID          string `json:"publicId"`
+	UserID            int32  `json:"userId"`
+	Content           string `json:"content"`
+	Likes             int32  `json:"likes"`
+	Liked             bool   `json:"liked"`
+	Reposts           int32  `json:"reposts"`
+	Reposted          bool   `json:"reposted"`
+	Created           string `json:"created"`
+	RepostOfPublicID  string `json:"repostOfPublicId,omitempty"`
+	RepostOf          *post  `json:"repostOf,omitempty"`
+	MediaKey          string `json:"mediaKey,omitempty"`
+	Replies           int32  `json:"replies"`
+	InReplyToPublicID string `json:"inReplyToPublicId,omitempty"`
 	// InReplyToUsername is only populated by getUserReplies, for the profile
 	// Replies tab's "Replying to @x" affordance.
 	InReplyToUsername *string `json:"inReplyToUsername,omitempty"`
-	QuoteOfID         int32   `json:"quoteOfId,omitempty"`
+	QuoteOfPublicID   string  `json:"quoteOfPublicId,omitempty"`
 	QuotePost         *post   `json:"quotePost,omitempty"`
 	User              *user   `json:"user,omitempty"`
 }

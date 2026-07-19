@@ -41,37 +41,37 @@ func TestMapUser(t *testing.T) {
 }
 
 func TestMapPost(t *testing.T) {
-	repostOfID := int32(10)
+	repostOfPublicID := "repost-of-uuid"
 	p := &pb.Post{
-		Id:         1,
-		UserId:     2,
-		Content:    "content",
-		Likes:      5,
-		Liked:      true,
-		Reposts:    2,
-		Reposted:   false,
-		Created:    "now",
-		RepostOfId: &repostOfID,
-		MediaKey:   "media.jpg",
+		PublicId:         "post-uuid",
+		UserId:           2,
+		Content:          "content",
+		Likes:            5,
+		Liked:            true,
+		Reposts:          2,
+		Reposted:         false,
+		Created:          "now",
+		RepostOfPublicId: &repostOfPublicID,
+		MediaKey:         "media.jpg",
 		RepostOf: &pb.Post{
-			Id:      10,
-			UserId:  3,
-			Content: "original",
-			Created: "before",
+			PublicId: "repost-of-uuid",
+			UserId:   3,
+			Content:  "original",
+			Created:  "before",
 		},
 	}
 
 	mapped := mapPost(p)
-	if mapped.ID != 1 || mapped.UserID != 2 || mapped.Content != "content" {
+	if mapped.PublicID != "post-uuid" || mapped.UserID != 2 || mapped.Content != "content" {
 		t.Errorf("post mapping failed")
 	}
 	if mapped.MediaKey != "media.jpg" {
 		t.Errorf("expected media key to be mapped")
 	}
-	if mapped.RepostOfID != 10 {
-		t.Errorf("expected repost_of_id to be mapped")
+	if mapped.RepostOfPublicID != "repost-of-uuid" {
+		t.Errorf("expected repost_of_public_id to be mapped")
 	}
-	if mapped.RepostOf == nil || mapped.RepostOf.ID != 10 {
+	if mapped.RepostOf == nil || mapped.RepostOf.PublicID != "repost-of-uuid" {
 		t.Errorf("expected repost_of to be mapped")
 	}
 }
