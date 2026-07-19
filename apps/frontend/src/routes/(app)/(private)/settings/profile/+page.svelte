@@ -191,7 +191,7 @@
         {#if coverPreview}
           <button
             type="button"
-            class="btn btn-circle btn-xs absolute right-2 top-2 border-none bg-black/50 text-white hover:bg-black/70"
+            class="btn btn-circle btn-xs absolute right-2 top-2 border-none bg-black/60 text-white hover:bg-error"
             onclick={() => removeImage("cover")}
             aria-label="Remove cover photo"
           >
@@ -242,7 +242,7 @@
           {#if profilePreview}
             <button
               type="button"
-              class="btn btn-circle btn-xs absolute -bottom-1 -right-1 border-none bg-black/50 text-white hover:bg-black/70"
+              class="btn btn-circle btn-xs absolute -bottom-1 -right-1 border-none bg-black/60 text-white hover:bg-error"
               onclick={() => removeImage("avatar")}
               aria-label="Remove profile photo"
             >
