@@ -114,16 +114,16 @@ Circular image with initials fallback when no `profilePhotoKey` is set. Props:
 
 ### `PostItem`
 
-Full-width `.glass-card-interactive` post card. Header is one wrapped row —
-author name, `@username`, and timestamp inline (`flex-wrap items-baseline`) —
-rather than a stacked name/username block, so the header reads compactly at
-any width. Below it: formatted content, optional embedded image, action bar
-(reply with count, repost with dropdown, like with count) capped at
-`max-w-sm` and laid out `justify-between` so the three pills spread evenly
-across that width instead of clustering at the left edge. Renders
-`QuoteEmbed` when `quotePost` is present; renders repost attribution header
-when `repostOf` is present. Owner sees a delete button, top-right of the
-header row, that triggers `ConfirmModal`. Authenticated users can
+Full-width `.glass-card-interactive` post card. Header is `justify-between`:
+a left block stacks author name (bold) above `@username` (muted, smaller),
+and a right block holds only the owner's delete button, top-aligned with the
+name line (empty for posts you don't own). Below it: formatted content,
+optional embedded image, a full-width action bar laid out `justify-between`
+with the reply/repost/like pills clustered on the left and the timestamp
+(muted, small, links to the post) right-aligned, filling the width instead of
+leaving dead space next to a narrow pill cluster. Renders `QuoteEmbed` when
+`quotePost` is present; renders repost attribution header when `repostOf` is
+present. Authenticated users can
 double-click an embedded image to like it; the existing like form handles
 mutation and rollback, while a large heart overlay uses
 `--animate-like-burst`. Renders a small "Replying to @username" line above

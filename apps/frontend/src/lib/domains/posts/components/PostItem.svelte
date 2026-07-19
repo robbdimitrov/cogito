@@ -142,41 +142,34 @@
         {/if}
         <div class="flex-1 min-w-0">
           <div class="flex items-start justify-between gap-3 sm:gap-4">
-            <div
-              class="flex min-w-0 flex-wrap items-baseline gap-x-1.5 gap-y-0.5"
-            >
+            <div class="flex min-w-0 flex-col">
               {#if author}
                 <a
                   href={resolve(`/@${author.username}`)}
-                  class="min-w-0 max-w-full truncate text-base font-bold leading-tight tracking-tight text-base-content hover:underline sm:text-lg"
+                  class="max-w-full truncate text-base font-bold leading-tight tracking-tight text-base-content hover:underline sm:text-lg"
                 >
                   {author.name}
                 </a>
                 <a
                   href={resolve(`/@${author.username}`)}
-                  class="muted-text min-w-0 max-w-full truncate text-sm transition-colors hover:text-base-content/80"
+                  class="muted-text max-w-full truncate text-sm transition-colors hover:text-base-content/80"
                 >
                   @{author.username}
                 </a>
-                <span class="muted-text text-sm">·</span>
-                <a
-                  href={resolve(`/posts/${displayPost.id}`)}
-                  class="muted-text shrink-0 text-sm transition-colors hover:text-primary"
-                >
-                  {formatPostDate(displayPost.created)}
-                </a>
               {/if}
             </div>
-            {#if isOwnPost}
-              <button
-                type="button"
-                class="btn btn-ghost btn-sm btn-square shrink-0 opacity-40 transition-transform duration-150 hover:scale-110 hover:bg-error/10 hover:text-error hover:opacity-100 active:scale-90"
-                onclick={() => (showDeleteModal = true)}
-                aria-label="Delete post"
-              >
-                <Trash2 class="size-4" />
-              </button>
-            {/if}
+            <div class="shrink-0">
+              {#if isOwnPost}
+                <button
+                  type="button"
+                  class="btn btn-ghost btn-sm btn-square shrink-0 opacity-40 transition-transform duration-150 hover:scale-110 hover:bg-error/10 hover:text-error hover:opacity-100 active:scale-90"
+                  onclick={() => (showDeleteModal = true)}
+                  aria-label="Delete post"
+                >
+                  <Trash2 class="size-4" />
+                </button>
+              {/if}
+            </div>
           </div>
           {#if displayPost.inReplyToUsername}
             <a
@@ -220,120 +213,135 @@
             <QuoteEmbed post={displayPost.quotePost} />
           {/if}
           <div
-            class="subtle-border mt-3 flex max-w-sm items-center justify-between border-t pt-3 sm:mt-4"
+            class="subtle-border mt-3 flex items-center justify-between border-t pt-3 sm:mt-4"
           >
-            <a
-              href={resolve(`/posts/${displayPost.id}`)}
-              class="action-pill gap-1.5 px-3 opacity-60 hover:bg-primary/5 hover:text-primary hover:opacity-100"
-              aria-label="Replies"
-            >
-              <MessageSquare class="size-4" />
-              <span class="text-xs sm:text-sm font-semibold"
-                >{displayPost.replies ?? 0}</span
+            <div class="flex items-center gap-1 sm:gap-2">
+              <a
+                href={resolve(`/posts/${displayPost.id}`)}
+                class="action-pill gap-1.5 px-3 opacity-60 hover:bg-primary/5 hover:text-primary hover:opacity-100"
+                aria-label="Replies"
               >
-            </a>
-
-            {#if currentUserId}
-              <form
-                bind:this={repostForm}
-                method="POST"
-                action="?/toggleRepost"
-                class="hidden"
-                use:enhance={() => {
-                  if (isReposting) return () => {};
-                  isReposting = true;
-                  const wasReposted = reposted;
-                  const previousDelta = optimisticRepostsDelta;
-                  optimisticRepostOverride = !wasReposted;
-                  optimisticRepostsDelta += wasReposted ? -1 : 1;
-
-                  return async ({ result, update }) => {
-                    isReposting = false;
-
-                    if (result.type === "failure") {
-                      optimisticRepostOverride = wasReposted;
-                      optimisticRepostsDelta = previousDelta;
-                      return;
-                    }
-                    await update({ invalidateAll: false });
-                  };
-                }}
-              >
-                <input type="hidden" name="postId" value={displayPost.id} />
-                <input type="hidden" name="reposted" value={String(reposted)} />
-              </form>
-
-              <RepostMenu
-                {reposted}
-                {reposts}
-                {isReposting}
-                onRepost={triggerRepost}
-                onQuote={() => onQuote?.(displayPost)}
-              />
-            {:else}
-              <LoginGateButton
-                icon={Repeat}
-                ariaLabel="Log in to repost"
-                buttonClass="action-pill opacity-60"
-                count={reposts}
-                countClass="text-xs sm:text-sm font-semibold tracking-wide"
-              />
-            {/if}
-
-            {#if currentUserId}
-              <form
-                bind:this={likeForm}
-                method="POST"
-                action="?/toggleLike"
-                use:enhance={() => {
-                  if (isLiking) return () => {};
-                  isLiking = true;
-                  const wasLiked = liked;
-                  const previousDelta = optimisticLikesDelta;
-                  optimisticLikeOverride = !wasLiked;
-                  optimisticLikesDelta += wasLiked ? -1 : 1;
-
-                  return async ({ result, update }) => {
-                    isLiking = false;
-
-                    if (result.type === "failure") {
-                      optimisticLikeOverride = wasLiked;
-                      optimisticLikesDelta = previousDelta;
-                      return;
-                    }
-                    await update({ invalidateAll: false });
-                  };
-                }}
-              >
-                <input type="hidden" name="postId" value={displayPost.id} />
-                <input type="hidden" name="liked" value={String(liked)} />
-                <button
-                  type="submit"
-                  class="action-pill disabled:opacity-70 {liked
-                    ? 'text-error bg-error/10 disabled:text-error!'
-                    : 'opacity-60 hover:text-error hover:bg-error/5 hover:opacity-100'}"
-                  disabled={isLiking}
-                  aria-label={liked ? "Unlike post" : "Like post"}
+                <MessageSquare class="size-4" />
+                <span class="text-xs sm:text-sm font-semibold"
+                  >{displayPost.replies ?? 0}</span
                 >
-                  <Heart
-                    class="size-4 transition-transform duration-500 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] {liked
-                      ? 'scale-125'
-                      : 'scale-100'}"
-                    fill={liked ? "currentColor" : "none"}
+              </a>
+
+              {#if currentUserId}
+                <form
+                  bind:this={repostForm}
+                  method="POST"
+                  action="?/toggleRepost"
+                  class="hidden"
+                  use:enhance={() => {
+                    if (isReposting) return () => {};
+                    isReposting = true;
+                    const wasReposted = reposted;
+                    const previousDelta = optimisticRepostsDelta;
+                    optimisticRepostOverride = !wasReposted;
+                    optimisticRepostsDelta += wasReposted ? -1 : 1;
+
+                    return async ({ result, update }) => {
+                      isReposting = false;
+
+                      if (result.type === "failure") {
+                        optimisticRepostOverride = wasReposted;
+                        optimisticRepostsDelta = previousDelta;
+                        return;
+                      }
+                      await update({ invalidateAll: false });
+                    };
+                  }}
+                >
+                  <input type="hidden" name="postId" value={displayPost.id} />
+                  <input
+                    type="hidden"
+                    name="reposted"
+                    value={String(reposted)}
                   />
-                  <span class="text-xs sm:text-sm font-semibold tracking-wide"
-                    >{likes}</span
+                </form>
+
+                <RepostMenu
+                  {reposted}
+                  {reposts}
+                  {isReposting}
+                  onRepost={triggerRepost}
+                  onQuote={() => onQuote?.(displayPost)}
+                />
+              {:else}
+                <LoginGateButton
+                  icon={Repeat}
+                  ariaLabel="Log in to repost"
+                  buttonClass="action-pill opacity-60"
+                  count={reposts}
+                  countClass="text-xs sm:text-sm font-semibold tracking-wide"
+                />
+              {/if}
+
+              {#if currentUserId}
+                <form
+                  bind:this={likeForm}
+                  method="POST"
+                  action="?/toggleLike"
+                  use:enhance={() => {
+                    if (isLiking) return () => {};
+                    isLiking = true;
+                    const wasLiked = liked;
+                    const previousDelta = optimisticLikesDelta;
+                    optimisticLikeOverride = !wasLiked;
+                    optimisticLikesDelta += wasLiked ? -1 : 1;
+
+                    return async ({ result, update }) => {
+                      isLiking = false;
+
+                      if (result.type === "failure") {
+                        optimisticLikeOverride = wasLiked;
+                        optimisticLikesDelta = previousDelta;
+                        return;
+                      }
+                      await update({ invalidateAll: false });
+                    };
+                  }}
+                >
+                  <input type="hidden" name="postId" value={displayPost.id} />
+                  <input type="hidden" name="liked" value={String(liked)} />
+                  <button
+                    type="submit"
+                    class="action-pill disabled:opacity-70 {liked
+                      ? 'text-error bg-error/10 disabled:text-error!'
+                      : 'opacity-60 hover:text-error hover:bg-error/5 hover:opacity-100'}"
+                    disabled={isLiking}
+                    aria-label={liked ? "Unlike post" : "Like post"}
                   >
-                </button>
-              </form>
-            {:else}
-              <LoginGateButton
-                icon={Heart}
-                ariaLabel="Log in to like"
-                buttonClass="action-pill opacity-60"
-                count={likes}
-                countClass="text-xs sm:text-sm font-semibold tracking-wide"
-              />
+                    <Heart
+                      class="size-4 transition-transform duration-500 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] {liked
+                        ? 'scale-125'
+                        : 'scale-100'}"
+                      fill={liked ? "currentColor" : "none"}
+                    />
+                    <span class="text-xs sm:text-sm font-semibold tracking-wide"
+                      >{likes}</span
+                    >
+                  </button>
+                </form>
+              {:else}
+                <LoginGateButton
+                  icon={Heart}
+                  ariaLabel="Log in to like"
+                  buttonClass="action-pill opacity-60"
+                  count={likes}
+                  countClass="text-xs sm:text-sm font-semibold tracking-wide"
+                />
+              {/if}
+            </div>
+
+            {#if author}
+              <a
+                href={resolve(`/posts/${displayPost.id}`)}
+                class="muted-text shrink-0 text-xs transition-colors hover:text-primary sm:text-sm"
+              >
+                {formatPostDate(displayPost.created)}
+              </a>
             {/if}
           </div>
         </div>
