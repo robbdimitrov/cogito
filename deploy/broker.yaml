@@ -113,7 +113,7 @@ data:
           FROM users u
           UNION ALL
           SELECT 'entity-changes' AS topic,
-                 jsonb_build_object('table','posts','op','upsert','id',p.id,'author_id',p.user_id,'follower_count',(SELECT COUNT(*)::int FROM followers WHERE user_id = p.user_id),'fan_out_disabled',u.fan_out_disabled,'content',p.content,'hashtags',COALESCE(jsonb_agg(h.name) FILTER (WHERE h.name IS NOT NULL), '[]'::jsonb),'created',p.created) AS payload
+                 jsonb_build_object('table','posts','op','upsert','id',p.id,'public_id',p.public_id,'author_id',p.user_id,'follower_count',(SELECT COUNT(*)::int FROM followers WHERE user_id = p.user_id),'fan_out_disabled',u.fan_out_disabled,'content',p.content,'hashtags',COALESCE(jsonb_agg(h.name) FILTER (WHERE h.name IS NOT NULL), '[]'::jsonb),'created',p.created) AS payload
           FROM posts p
           JOIN users u ON u.id = p.user_id
           LEFT JOIN post_hashtags ph ON ph.post_id = p.id

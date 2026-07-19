@@ -23,6 +23,7 @@ pub(crate) struct UserHit {
 #[derive(Deserialize)]
 pub(crate) struct PostHit {
     pub id: i32,
+    pub public_id: String,
     pub author_id: i32,
     pub content: String,
     pub created: String,

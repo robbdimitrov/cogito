@@ -166,6 +166,7 @@ impl<D: RecentSearchDb> SearchService for SearchController<D> {
 
         let (items, next_cursor) = paginate(hits, limit, offset, |h| Post {
             id: h.id,
+            public_id: h.public_id,
             user_id: h.author_id,
             content: h.content,
             created: h.created,

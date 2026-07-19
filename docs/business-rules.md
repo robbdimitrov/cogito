@@ -146,9 +146,14 @@ Gateway also calls `ImageService.DeleteImage` when deleting a post with a
 3. Topic `entity-changes` carries user, post, and hashtag upsert/delete events
    for Meilisearch sync, feed fan-out, and media cleanup. User and post upserts
    include `follower_count` and `fan_out_disabled` as a point-in-time fan-out
-   routing snapshot.
+   routing snapshot. Post upserts/deletes also carry `public_id`, additive
+   alongside the numeric `id` — search results and notifications resolve
+   posts by `public_id`; feed fan-out keeps using the numeric `id`.
 4. Topic `activity` carries like, unlike, repost, unrepost, reply, unreply,
-   follow, and unfollow events for notifications and feed maintenance.
+   follow, and unfollow events for notifications and feed maintenance. Post-
+   related events additionally carry the post's `public_id` (as
+   `post_public_id`/`reply_post_public_id`) alongside the numeric post id,
+   since notifications key their `entity_id` off the public id.
 5. Search sync is idempotent: upserts replace Meilisearch documents and deletes
    remove missing documents. Hashtags with `post_count = 0` are deleted from
    search.
