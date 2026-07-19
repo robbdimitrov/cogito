@@ -289,10 +289,8 @@ fn is_uuid(value: &str) -> bool {
         })
 }
 
-/// Trim `hits` to `limit`, map each to `T`, and compute the next-page cursor.
-///
-/// The caller fetches `limit + 1` results; if more than `limit` came back the
-/// extra item confirms there is a next page, and its position becomes the cursor.
+/// Trims `hits` to `limit`, maps each to `T`, and computes the next-page cursor.
+/// Callers fetch `limit + 1`; a leftover item confirms another page exists.
 fn paginate<H, T, F>(mut hits: Vec<H>, limit: u32, offset: u32, map: F) -> (Vec<T>, String)
 where
     F: Fn(H) -> T,

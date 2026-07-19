@@ -11,9 +11,8 @@ import (
 	"github.com/valkey-io/valkey-go"
 )
 
-// recordFailureLua atomically increments the counter and sets a TTL whenever
-// none exists, so a key stranded without expiry (e.g. by a failed Clear) does
-// not permanently lock out the account.
+// recordFailureLua atomically increments and sets a TTL whenever none exists, so a
+// key stranded without expiry (e.g. by a failed Clear) can't permanently lock out the account.
 const recordFailureLua = `
 local n = redis.call('INCR', KEYS[1])
 if redis.call('PTTL', KEYS[1]) < 0 then

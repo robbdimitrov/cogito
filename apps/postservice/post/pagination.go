@@ -35,18 +35,16 @@ func EncodeCursor(created time.Time, id int32) string {
 	return base64.RawURLEncoding.EncodeToString(b)
 }
 
-// maxPopularOffset bounds OFFSET-based pagination over the popular-posts
-// ranking, matching flowservice SearchService's cursor cap for the same
-// reason: the ranking key is a computed score, not a stable keyset column.
+// maxPopularOffset bounds OFFSET-based pagination since the ranking key is a
+// computed score, not a stable keyset column; matches flowservice's cap.
 const maxPopularOffset = 1000
 
 type offsetCursor struct {
 	Offset int32 `json:"offset"`
 }
 
-// DecodeOffsetCursor base64-decodes and JSON-unmarshals an offset cursor.
-// Returns 0 for an empty string; a malformed or negative offset is clamped to
-// 0 rather than rejected, since it only affects which page is served.
+// DecodeOffsetCursor base64-decodes and JSON-unmarshals an offset cursor. A malformed
+// or negative offset is clamped to 0 rather than rejected, since it only affects the page served.
 func DecodeOffsetCursor(s string) (int32, error) {
 	if s == "" {
 		return 0, nil

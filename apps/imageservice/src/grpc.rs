@@ -65,10 +65,8 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
         let req = request.into_inner();
         validate_filename(&req.filename)?;
 
-        // Confirm ownership without destroying the claim yet: promoting the
-        // blob is not atomic, so the DB row must stay intact until the copy
-        // is known to have succeeded. Deleting it first would orphan the
-        // staged bytes forever if the copy failed afterward.
+        // Confirm ownership without deleting the claim yet: promoting the blob
+        // isn't atomic, so the row must survive until the copy succeeds.
         let owned = self
             .db
             .verify_upload(&req.filename, req.user_id)
@@ -92,9 +90,8 @@ impl<D: ImageDb> ImageService for ImageGrpcService<D> {
                 Status::internal("Internal server error.")
             })?;
 
-        // The blob is promoted; finalize the claim. If a concurrent caller
-        // already finalized it, the copy above was a harmless duplicate of
-        // an idempotent operation, so no rows affected is not an error.
+        // Blob is promoted; finalize the claim. A concurrent caller may have
+        // already finalized it, so zero rows affected is not an error.
         self.db
             .consume_upload(&req.filename, req.user_id)
             .await

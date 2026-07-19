@@ -215,9 +215,8 @@ async fn test_consume_upload_copy_failure_preserves_claim() {
     assert!(res.is_err());
     assert_eq!(res.unwrap_err().code(), tonic::Code::Internal);
 
-    // The DB claim must survive a failed copy so a retry can still find and
-    // finish the promotion. Deleting the claim before the copy succeeds
-    // would orphan the staged upload with nothing left to reference it.
+    // The DB claim must survive a failed copy, or a retry would have nothing
+    // left to reference for the promotion.
     let uploads = db.uploads.lock().await;
     assert_eq!(uploads.len(), 1);
     assert_eq!(uploads[0], ("test.jpg".to_string(), 1));

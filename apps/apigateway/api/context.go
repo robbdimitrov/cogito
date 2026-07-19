@@ -111,10 +111,8 @@ func appendUserIDHeader(ctx context.Context, r *http.Request) (context.Context, 
 	return appendInternalAuth(appendRequestIDHeader(metadata.AppendToOutgoingContext(ctx, "user-id", uid), r)), nil
 }
 
-// appendOptionalUserIDHeader attaches user-id metadata when a session is
-// present, but never errors — for handlers whose backend read tolerates an
-// anonymous viewer (e.g. GetPost, GetUser) and degrades booleans like
-// liked/followed to false rather than requiring a session.
+// appendOptionalUserIDHeader attaches user-id metadata when present but never errors,
+// for viewer-optional reads that degrade booleans like liked/followed instead of requiring a session.
 func appendOptionalUserIDHeader(ctx context.Context, r *http.Request) context.Context {
 	ctx = appendInternalAuthForRequest(ctx, r)
 	if uid := getUserID(r); uid != "" {

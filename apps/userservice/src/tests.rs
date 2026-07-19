@@ -52,7 +52,7 @@ impl UserDb for Arc<MockDb> {
     async fn get_user_with_id(&self, user_id: i32) -> Result<Option<(i32, String)>, SqlxError> {
         let users = self.users.lock().await;
         if let Some(u) = users.iter().find(|u| u.id == user_id) {
-            Ok(Some((u.id, "hashedpassword".to_string()))) // Dummy password
+            Ok(Some((u.id, "hashedpassword".to_string())))
         } else {
             Ok(None)
         }
@@ -274,7 +274,6 @@ async fn test_get_user() {
     let db = Arc::new(MockDb::new());
     let controller = Controller::new(db.clone());
 
-    // Create a user first
     let _ = db
         .create_user("Test", "testuser", "test@example.com", "hash")
         .await;

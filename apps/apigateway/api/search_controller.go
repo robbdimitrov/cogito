@@ -112,9 +112,8 @@ func (sc *searchController) search(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// getPopularPosts serves the search screen's empty-query state: posts ranked
-// by recent engagement, via PostService rather than SearchService since it's
-// a Postgres aggregation, not a Meilisearch lookup.
+// getPopularPosts serves the empty-query state via PostService, not SearchService,
+// since ranking by recent engagement is a Postgres aggregation, not a Meilisearch lookup.
 func (sc *searchController) getPopularPosts(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 10*time.Second)
 	ctx, err := appendUserIDHeader(ctx, r)
@@ -300,12 +299,8 @@ func isUUID(value string) bool {
 	return true
 }
 
-// searchAll fans the blended "all" search type out to the three underlying
-// search RPCs concurrently and blends their results. If every type fails the
-// request fails as a whole (matching single-type behavior); if only some
-// types fail, the failed type(s) are treated as an empty page for this
-// response and their cursor component is left unadvanced so a later "Load
-// more" retries them once the transient failure clears.
+// searchAll fans out to the three search RPCs concurrently and blends results; if
+// only some types fail, they're treated as an empty page with an unadvanced cursor so "Load more" retries them.
 func (sc *searchController) searchAll(w http.ResponseWriter, r *http.Request, ctx context.Context, q, cursor string, limit int) {
 	in := decodeAllCursor(cursor)
 	targetUsers, targetPosts, targetHashtags := computeBlendTargets(limit)

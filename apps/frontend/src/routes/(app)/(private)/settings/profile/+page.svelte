@@ -25,9 +25,8 @@
   let userOverride = $state<Partial<typeof data.currentUser>>({});
   let user = $derived({ ...data.currentUser!, ...userOverride });
 
-  // Track visual state of images before upload. Object URLs are created here
-  // (not in $derived) so the cleanup return revokes the previous URL on every
-  // change and on unmount, avoiding a blob URL leak.
+  // Created here rather than in $derived so the cleanup return revokes the
+  // previous object URL on every change and on unmount, avoiding a leak.
   let profilePreview = $state("");
   $effect(() => {
     if (avatarFile) {
@@ -123,7 +122,6 @@
       formData.set("profilePhotoKey", user.profilePhotoKey || "");
       formData.set("coverPhotoKey", user.coverPhotoKey || "");
 
-      // Optimistic UI for text fields
       userOverride = {
         ...userOverride,
         name: formData.get("name") as string,

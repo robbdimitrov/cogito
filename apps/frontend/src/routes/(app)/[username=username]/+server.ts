@@ -8,9 +8,8 @@ export const GET = async (event) => {
   const { params, url } = event;
   const cursor = url.searchParams.get("cursor") ?? "";
   try {
-    // The client already resolved the profile user on initial page load and
-    // passes its ID along, so pagination requests skip a redundant username
-    // lookup. Fall back to resolving by username if the ID is missing.
+    // Client passes the already-resolved user ID to skip a redundant lookup;
+    // fall back to resolving by username if it's missing.
     const userID =
       parseIdParam(url.searchParams.get("userId")) ??
       (

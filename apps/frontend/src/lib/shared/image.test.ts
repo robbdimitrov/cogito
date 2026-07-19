@@ -40,9 +40,8 @@ beforeEach(() => {
     fillStyle: "",
   })) as unknown as typeof HTMLCanvasElement.prototype.getContext;
 
-  // Blob size = canvas area × quality so the mock mirrors compression behaviour.
-  // 1600×800 at quality 0.88 → ~1 126 400 bytes (> 900 KB limit), so the
-  // implementation steps quality down until the result fits.
+  // Blob size = canvas area × quality, so the mock mirrors compression: the
+  // implementation must step quality down from 0.88 until the result fits 900 KB.
   HTMLCanvasElement.prototype.toBlob = vi.fn(function (
     this: HTMLCanvasElement,
     callback: BlobCallback,

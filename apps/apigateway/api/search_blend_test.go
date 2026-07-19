@@ -95,9 +95,8 @@ func TestInterleaveBlended_PreservesTotalAndInternalOrder(t *testing.T) {
 }
 
 func TestInterleaveBlended_SpreadsRatherThanBlocking(t *testing.T) {
-	// At a 4/12/4 ratio (the limit=20 target), the leading run of same-type
-	// items should never be as long as it would be if the lists were simply
-	// concatenated (a run of 12 consecutive posts).
+	// At a 4/12/4 ratio, the leading same-type run should be shorter than a naive
+	// concatenation (a run of 12 consecutive posts).
 	users := makeBlendItems("users", 4)
 	posts := makeBlendItems("posts", 12)
 	hashtags := makeBlendItems("hashtags", 4)

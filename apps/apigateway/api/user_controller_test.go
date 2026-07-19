@@ -141,9 +141,8 @@ func TestImageUploadProxy_ForwardsFrontendRouteWithUserHeader(t *testing.T) {
 }
 
 func TestImageUploadProxy_RejectsOversizedUploadBeforeProxying(t *testing.T) {
-	// Regression test: an oversized upload must get a clean JSON 413 without
-	// ever reaching the reverse proxy, since a body-write error mid-proxy can
-	// drop the connection with no response at all instead of a clean error.
+	// Regression: an oversized upload must get a clean JSON 413 without reaching the
+	// reverse proxy, since a body-write error mid-proxy can drop the connection with no response.
 	proxyReached := false
 	imageServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		proxyReached = true
@@ -191,9 +190,8 @@ func (p panicOnReadBody) Read([]byte) (int, error) {
 func (p panicOnReadBody) Close() error { return nil }
 
 func TestImageUploadProxy_RejectsOversizedContentLengthWithoutReadingBody(t *testing.T) {
-	// Regression test: an honestly oversized Content-Length must be rejected
-	// by a header-only check before any body I/O, not by reading up to
-	// maxRequestBodyBytes+1 bytes first.
+	// Regression: an honestly oversized Content-Length must be rejected by a header-only
+	// check before any body I/O, not by reading up to the limit first.
 	proxyReached := false
 	imageServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		proxyReached = true
@@ -222,10 +220,8 @@ func TestImageUploadProxy_RejectsOversizedContentLengthWithoutReadingBody(t *tes
 }
 
 func TestImageUploadProxy_RejectsOversizedUploadWithUnknownContentLength(t *testing.T) {
-	// Regression test: a chunked-encoded (or otherwise Content-Length-less)
-	// request reports req.ContentLength == -1, which a header-only size check
-	// would never catch. The body must still be bounded by actually reading
-	// it, not by trusting a client-supplied length.
+	// Regression: a chunked request reports ContentLength == -1, which a header-only check
+	// would never catch; the body must still be bounded by actually reading it.
 	proxyReached := false
 	imageServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		proxyReached = true
@@ -464,11 +460,8 @@ func TestGetUserByUsername_NoSessionSucceedsAndHidesEmail(t *testing.T) {
 }
 
 func TestGetUserByUsername_AnonymousNeverMatchesUserIdZero(t *testing.T) {
-	// Regression test: currentUserID used to come from strconv.ParseInt on a
-	// possibly-empty getUserID(r) with the error discarded, so an anonymous
-	// caller's "" collapsed to a currentUserID of 0. If the looked-up user's
-	// id were ever 0 (should not happen with a `serial` PK, but must not be
-	// relied on), that would match and leak the owner's email.
+	// Regression: currentUserID used to come from ParseInt on a possibly-empty getUserID(r)
+	// with the error discarded, so anonymous "" collapsed to 0 and could match a real id 0.
 	mockUser := &mockUserServiceClientWithZeroID{}
 	uc := &userController{client: mockUser}
 

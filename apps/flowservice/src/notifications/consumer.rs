@@ -150,9 +150,8 @@ async fn dispatch_entity_change(
         };
         db.delete_by_entity(&post_id.to_string(), &["like", "repost"])
             .await?;
-        // Reply notifications are keyed by the reply's own entity ID, not the
-        // parent's — the parent's FK SET NULL orphans replies rather than
-        // deleting them, so those IDs must be captured by the producer.
+        // Reply notifications are keyed by the reply's own entity ID; the
+        // parent's FK SET NULL orphans them instead of deleting them.
         for reply_id in event.reply_post_ids.unwrap_or_default() {
             db.delete_by_entity(&reply_id.to_string(), &["reply"])
                 .await?;

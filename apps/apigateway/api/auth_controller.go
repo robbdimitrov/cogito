@@ -169,9 +169,8 @@ func (ac *authController) validateSessionOptional(w http.ResponseWriter, r *http
 	return newReq, nil
 }
 
-// resolveSession extracts and validates the session cookie against
-// authservice, returning a request with the resolved user id attached to its
-// context. Returns errNoSessionCookie if no cookie was present.
+// resolveSession validates the session cookie against authservice, returning a
+// request with the resolved user id, or errNoSessionCookie if none was present.
 func (ac *authController) resolveSession(r *http.Request) (*http.Request, error) {
 	cookie, err := r.Cookie("session")
 	if err != nil {

@@ -1,8 +1,7 @@
 use tonic::{Request, Status};
 
-/// Derives the acting user ID from the `user-id` gRPC metadata header set by
-/// the gateway after validating the session. Never trust a client-supplied
-/// user ID field in the request body for identity.
+/// Derives the acting user ID from the gateway-set `user-id` metadata header;
+/// never trust a client-supplied user ID field in the request body.
 // tonic::Status is mandated by the gRPC handler signatures that call this;
 // boxing it isn't practical here.
 #[allow(clippy::result_large_err)]

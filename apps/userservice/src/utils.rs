@@ -24,10 +24,8 @@ pub fn get_user_id<T>(req: &Request<T>) -> Result<i32, Status> {
     }
 }
 
-// Returns None for an anonymous caller rather than a 0 sentinel: 0 is a
-// valid-looking i32 that an equality check like `follower_id = $1` could
-// accidentally match if the users id sequence were ever reset or seeded to
-// start at 0. Callers must bind this as a nullable query parameter.
+// None (not a 0 sentinel) for anonymous callers, since 0 could match a real
+// row if the id sequence were ever seeded to start there; bind as nullable.
 pub fn optional_user_id<T>(req: &Request<T>) -> Option<i32> {
     get_user_id(req).ok()
 }

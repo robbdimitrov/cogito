@@ -108,12 +108,8 @@ func newCacheStore(url string, failOpen bool) (*CacheStore, error) {
 	}, nil
 }
 
-// NewCacheStore returns a RateLimiterStore backed by the cache. It attempts
-// a synchronous connection first so rate limiting is active immediately when
-// the cache is available. If the initial attempt fails and RATE_LIMIT_FAIL_OPEN
-// is true, it returns a no-op store and promotes it to the real store in the
-// background once the cache becomes reachable. If fail-open is false, a startup
-// failure is fatal.
+// NewCacheStore connects synchronously first; if that fails and RATE_LIMIT_FAIL_OPEN is
+// true it degrades to a no-op store and retries in the background, else the startup failure is fatal.
 func NewCacheStore(ctx context.Context) RateLimiterStore {
 	url := os.Getenv("CACHE_URL")
 	failOpen := envBool("RATE_LIMIT_FAIL_OPEN", false)

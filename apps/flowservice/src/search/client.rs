@@ -41,9 +41,8 @@ pub(crate) struct SearchClient {
 }
 
 impl SearchClient {
-    /// Connect with `master_key`, provision a scoped API key (idempotent), ensure
-    /// the three indexes exist with correct attribute settings, then return a client
-    /// configured with the scoped key. The master key is not retained.
+    /// Connects with `master_key` only to provision the scoped key and indexes;
+    /// the returned client uses the scoped key, and the master key is not retained.
     pub(crate) async fn new(
         host: &str,
         master_key: &str,
@@ -172,10 +171,8 @@ async fn ensure_indexes(master: &Client) -> Result<(), Box<dyn std::error::Error
             tracing::info!(index = def.uid, "created search index");
         }
 
-        // Only apply an attribute setting when it actually differs from what's
-        // live, on new and existing indexes alike: re-applying the same value
-        // on every startup would otherwise trigger a full Meilisearch
-        // re-index and can block search availability.
+        // Only apply an attribute setting when it differs from what's live:
+        // re-applying the same value would trigger a full re-index and block search.
         let idx = master.index(def.uid);
 
         let current = idx.get_searchable_attributes().await?;
@@ -222,8 +219,6 @@ fn attributes_match(current: &[String], desired: &[&str]) -> bool {
         .eq(desired.iter().copied())
 }
 
-// --- Cursor encoding / decoding ---
-
 #[derive(Serialize, Deserialize)]
 struct CursorPayload {
     offset: u32,
@@ -246,10 +241,8 @@ pub(crate) fn decode_cursor(cursor: &str) -> u32 {
     payload.offset.min(MAX_OFFSET)
 }
 
-/// Encode a page offset as a base64url cursor string.
-/// Returns an empty string (end-of-results) when offset >= MAX_OFFSET.
-/// Meilisearch's default maxTotalHits (1000) matches this cap; if maxTotalHits
-/// is raised, results beyond MAX_OFFSET become inaccessible via cursor pagination.
+/// Encodes offset as a base64url cursor; empty string signals end-of-results.
+/// Cap tracks Meilisearch's default maxTotalHits (1000) — keep both in sync.
 pub(crate) fn encode_cursor(offset: u32) -> String {
     if offset >= MAX_OFFSET {
         return String::new();

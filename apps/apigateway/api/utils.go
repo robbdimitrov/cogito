@@ -12,7 +12,6 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-// getStatusCode converts grpc code to http status code
 func getStatusCode(s *status.Status) int {
 	c := s.Proto().GetCode()
 	switch codes.Code(c) {
@@ -39,7 +38,6 @@ func getStatusCode(s *status.Status) int {
 	}
 }
 
-// grpcError writes grpc error to http response
 func grpcError(w http.ResponseWriter, err error) {
 	s := status.Convert(err)
 	httpStatus := getStatusCode(s)
@@ -86,7 +84,6 @@ func insecureCredentials() grpc.DialOption {
 	return grpc.WithTransportCredentials(insecure.NewCredentials())
 }
 
-// getIntQuery parses an integer query parameter with a fallback default value.
 func getIntQuery(r *http.Request, key string, defaultValue int) (int, error) {
 	value := r.URL.Query().Get(key)
 	if value == "" {

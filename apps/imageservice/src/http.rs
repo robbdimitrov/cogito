@@ -24,13 +24,8 @@ const IMAGE_CACHE_CONTROL: &str = "private, max-age=86400";
 const THUMBNAIL_DIM: u32 = 128;
 const THUMBNAIL_CONTENT_TYPE: &str = "image/jpeg";
 
-/// Overall request-body ceiling, deliberately well above the per-field 1 MB
-/// image limit below: it exists to bound abusive/garbage multipart bodies
-/// (many oversized non-"image" fields), not to duplicate the image limit. If
-/// it sat close to 1 MB, a legitimate ~1 MB image plus ordinary multipart
-/// boundary/header overhead could trip this router-level limit before the
-/// field-level check below ever runs, replacing the specific 413 "File
-/// exceeds 1MB limit" response with a generic, unhelpful body-read error.
+/// Deliberately above the per-field 1 MB image limit, so a legitimate image
+/// upload can't trip this body ceiling before the specific 413 check runs.
 const MAX_REQUEST_BODY_BYTES: usize = 2 * 1024 * 1024;
 const MAX_IMAGE_FIELD_BYTES: usize = 1024 * 1024;
 
@@ -120,8 +115,7 @@ async fn get_handler<D: ImageDb, B: BlobStore>(
     let Query(params) = params.map_err(|_| json_error(StatusCode::BAD_REQUEST, "Invalid query"))?;
 
     // Allow-list of exactly one derived variant: bounds cache-key growth and
-    // resize CPU cost to one thumbnail per original, not an arbitrary-resize
-    // DoS surface.
+    // resize CPU cost, not an arbitrary-resize DoS surface.
     match params.size.as_deref() {
         None => get_original(&state, &filename).await,
         Some("thumb") => get_thumbnail(&state, &filename).await,
@@ -204,19 +198,13 @@ async fn get_thumbnail<D: ImageDb, B: BlobStore>(
     Ok(image_response(thumbnail, THUMBNAIL_CONTENT_TYPE))
 }
 
-// Uploads are already capped at MAX_IMAGE_FIELD_BYTES compressed bytes, but a
-// pathological low-entropy image (e.g. a large solid-color PNG) can still
-// expand hundreds of times on decode. `image`'s own default limits only cap
-// allocation at 512MiB, well above what this service's container memory
-// limit allows, so decoding one such image could get the pod OOM-killed
-// before that check ever rejects it. These tighter limits reject oversized
-// images from their header before a pixel buffer is allocated.
+// A compressed upload can still decode into a huge pixel buffer (decompression
+// bomb) and OOM the pod; these tighter limits reject it before allocation.
 const MAX_DECODE_DIMENSION: u32 = 4096;
 const MAX_DECODE_ALLOC_BYTES: u64 = 128 * 1024 * 1024;
 
-/// Decodes `data`, cover-crops it to a fixed `THUMBNAIL_DIM` square, and
-/// re-encodes as JPEG (flattening any transparency onto white, matching the
-/// client-side upload compression in `image.ts`).
+/// Cover-crops `data` to a `THUMBNAIL_DIM` square JPEG, flattening
+/// transparency onto white to match client-side compression in `image.ts`.
 fn generate_thumbnail(data: &[u8]) -> Result<Vec<u8>, String> {
     let mut reader = image::ImageReader::new(std::io::Cursor::new(data))
         .with_guessed_format()
@@ -599,11 +587,8 @@ mod tests {
 
     #[tokio::test]
     async fn upload_enforces_size_limit() {
-        // A file just over the 1MB field limit but comfortably under the
-        // router's 2MB body ceiling must deterministically hit the specific
-        // per-field check (413 JSON), not fall through to the generic
-        // multipart-read-error path (400) — regression test for the router
-        // limit sitting too close to the field limit.
+        // Just over the 1MB field limit but under the 2MB body ceiling: must
+        // hit the specific 413 check, not the generic 400 multipart-read error.
         let store = MockBlobStore::new();
         let oversized: Vec<u8> = {
             let mut v = vec![0xff, 0xd8, 0xff];
@@ -639,9 +624,8 @@ mod tests {
 
     #[tokio::test]
     async fn upload_rejects_body_beyond_router_limit_as_json() {
-        // A body well beyond the router's own 2MB ceiling can't reach the
-        // field-level check at all; it must still fail as valid JSON (not a
-        // raw framework/plaintext body), honoring the API-wide JSON contract.
+        // Beyond the 2MB router ceiling, the field-level check never runs, but
+        // the error must still be JSON, not axum's raw plaintext body.
         let store = MockBlobStore::new();
         let huge: Vec<u8> = {
             let mut v = vec![0xff, 0xd8, 0xff];

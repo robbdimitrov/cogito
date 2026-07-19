@@ -87,9 +87,8 @@ func loggerMiddleware() func(http.Handler) http.Handler {
 	}
 }
 
-// recoveryMiddleware sits inside loggerMiddleware so the recovered response's
-// status still reaches the access log, and outside routes/backends so it
-// catches panics from any handler or inner middleware.
+// recoveryMiddleware sits inside loggerMiddleware so the recovered status still
+// reaches the access log, and outside handlers so it catches any panic.
 func recoveryMiddleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -104,11 +103,8 @@ func recoveryMiddleware() func(http.Handler) http.Handler {
 	}
 }
 
-// secureHeadersMiddleware applies to every response. The gateway only ever
-// emits JSON, so the CSP stays fully locked down rather than carrying a
-// browser-app baseline this origin doesn't need. No Strict-Transport-Security:
-// this deployment has no TLS termination (local k3s only), and sending it
-// over plain HTTP would be a false guarantee to clients.
+// secureHeadersMiddleware locks the CSP fully down since the gateway only emits
+// JSON. No HSTS: this deployment has no TLS termination, so sending it would lie to clients.
 func secureHeadersMiddleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

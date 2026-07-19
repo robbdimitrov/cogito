@@ -5,10 +5,8 @@ import { handle } from "./hooks.server";
 describe("handle", () => {
   it("preserves SvelteKit CSP while adding security headers", async () => {
     const csp = "default-src 'self'; script-src 'self' 'nonce-test'";
-    // The real RequestEvent has ~15 properties this test never touches
-    // (fetch, getClientAddress, locals, params, ...); cast just this mock
-    // rather than padding it out, so `resolve` below still gets its real,
-    // non-`any` parameter types from `handle`'s signature.
+    // Cast just this mock instead of stubbing all ~15 RequestEvent properties,
+    // so `resolve` below still gets its real, non-`any` parameter types.
     const event = {
       cookies: {
         get: () => "dark",

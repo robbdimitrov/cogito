@@ -41,11 +41,8 @@ function forwardSetCookies(
 }
 
 /**
- * Per-request BFF client: resolves backend-relative paths against `BACKEND_URL`,
- * forwards the session cookie, and sets `x-forwarded-for` to the real client
- * address so the gateway can rate-limit unauthenticated requests per client
- * rather than by this BFF's own pod IP. Runs only server-side, so these calls
- * never involve CORS; `connect-src 'self'` keeps the browser off the backend.
+ * Per-request BFF client: forwards the session cookie and sets
+ * `x-forwarded-for` so the gateway rate-limits per client, not by this pod's IP.
  */
 export function apiClient(
   event: Pick<RequestEvent, "fetch" | "cookies"> & {

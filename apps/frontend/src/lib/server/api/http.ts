@@ -28,11 +28,8 @@ export async function unwrap<T>(res: Response): Promise<T | null> {
   }
 }
 
-/**
- * Parses a query-param-supplied ID as a positive integer, or returns null if
- * absent or malformed. Callers should fall back to resolving the ID some
- * other way (e.g. by username) when this returns null.
- */
+/** Parses a query-param ID as a positive integer; null means the caller should
+ *  fall back to resolving it another way (e.g. by username). */
 export function parseIdParam(value: string | null): number | null {
   if (!value) return null;
   const parsed = Number(value);

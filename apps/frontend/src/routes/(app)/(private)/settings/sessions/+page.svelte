@@ -11,7 +11,6 @@
 
   let deletingSessionId = $state<string | null>(null);
 
-  // Optimistic UI for sessions
   let optimisticDeletedSessions = $state<Set<string>>(new Set());
   let sessions = $derived(
     data.sessions?.filter(

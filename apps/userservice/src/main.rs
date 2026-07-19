@@ -40,7 +40,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let controller =
         Controller::with_semaphore(db_client, Arc::new(Semaphore::new(max_concurrency)));
 
-    // Graceful shutdown handler
     let shutdown = async {
         signal::ctrl_c()
             .await

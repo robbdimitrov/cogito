@@ -5,10 +5,8 @@ import (
 	"encoding/json"
 )
 
-// computeBlendTargets splits a page limit across the three search types at a
-// fixed ~20% users / 60% posts / 20% hashtags ratio, favoring posts for a
-// text-first feed. Small limits round up each of users/hashtags to at least 1
-// before giving the remainder to posts.
+// computeBlendTargets splits a page limit ~20% users / 60% posts / 20% hashtags,
+// favoring posts; small limits round users/hashtags up to at least 1 before giving the remainder to posts.
 func computeBlendTargets(limit int) (users, posts, hashtags int) {
 	if limit <= 0 {
 		return 0, 0, 0
@@ -41,9 +39,8 @@ type allCursor struct {
 
 var blendCursorEncoding = base64.URLEncoding.WithPadding(base64.NoPadding)
 
-// decodeAllCursor decodes a combined cursor, matching flowservice's
-// base64url-no-pad cursor encoding. An empty or malformed cursor decodes to
-// an all-empty allCursor, restarting every type from its first page.
+// decodeAllCursor decodes a combined cursor (matching flowservice's base64url-no-pad
+// encoding); an empty or malformed cursor restarts every type from its first page.
 func decodeAllCursor(cursor string) allCursor {
 	if cursor == "" {
 		return allCursor{}
@@ -78,11 +75,8 @@ type blendedItem struct {
 	Item any    `json:"item"`
 }
 
-// interleaveBlended merges three relevance-ordered result lists into one,
-// preserving each list's internal order while spreading entries evenly by
-// each list's own share of the total rather than emitting three blocks. At
-// each step it picks the list that has consumed the smallest fraction of its
-// own items so far, ties broken by users, then posts, then hashtags.
+// interleaveBlended merges three relevance-ordered lists, preserving each list's order
+// while spreading entries by each list's consumed share rather than emitting three blocks.
 func interleaveBlended(users, posts, hashtags []blendedItem) []blendedItem {
 	streams := [][]blendedItem{users, posts, hashtags}
 	next := [3]int{0, 0, 0}
