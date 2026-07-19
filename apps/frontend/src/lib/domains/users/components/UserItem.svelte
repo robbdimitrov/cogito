@@ -104,7 +104,7 @@
     </div>
     {#if user.bio}
       <p
-        class="line-clamp-2 mt-3 text-sm leading-relaxed text-base-content/75 sm:pl-14"
+        class="line-clamp-2 mt-1.5 text-sm leading-relaxed text-base-content/75 sm:pl-14"
       >
         {user.bio}
       </p>
