@@ -15,6 +15,7 @@ PORT_FORWARD_LOG="${PORT_FORWARD_LOG:-/tmp/cogito-port-forward-${LOCAL_PORT}.log
 PORT_FORWARD_PID_FILE="${PORT_FORWARD_PID_FILE:-/tmp/cogito-port-forward-${LOCAL_PORT}.pid}"
 FORCE_BACKFILL="${FORCE_BACKFILL:-0}"
 FORCE_BUILD="${FORCE_BUILD:-0}"
+FORCE_ORIGIN="${FORCE_ORIGIN:-0}"
 
 APIGATEWAY_IMAGE_TAG="${APIGATEWAY_IMAGE_TAG:-}"
 AUTHSERVICE_IMAGE_TAG="${AUTHSERVICE_IMAGE_TAG:-}"
@@ -457,6 +458,22 @@ annotate_configmap_checksums() {
   annotate_data_resource_checksums configmap "${resource}" "$@"
 }
 
+sync_frontend_origin() {
+  local target="http://${APP_HOST}:${LOCAL_PORT}"
+  local current
+  current="$(kubectl -n "${NS}" get deployment frontend \
+    -o jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="ORIGIN")].value}' 2>/dev/null || true)"
+
+  # A non-default LOCAL_PORT usually means scratch/parallel testing, not an
+  # intent to move the shared dev origin; don't clobber another port's ORIGIN
+  # without FORCE_ORIGIN=1.
+  if [[ "${FORCE_ORIGIN}" == "1" || "${LOCAL_PORT}" == "8080" || -z "${current}" || "${current}" == "${target}" ]]; then
+    kubectl -n "${NS}" set env deployment/frontend ORIGIN="${target}" >/dev/null
+  else
+    echo "warn: frontend ORIGIN is ${current}, not overwriting for LOCAL_PORT=${LOCAL_PORT}; set FORCE_ORIGIN=1 to override" >&2
+  fi
+}
+
 wait_for_rollouts() {
   local failed=()
   local resource
@@ -535,7 +552,7 @@ apply_manifests() {
 
   log "applying application services"
   apply_rendered_app_manifests
-  kubectl -n "${NS}" set env deployment/frontend ORIGIN="http://${APP_HOST}:${LOCAL_PORT}" >/dev/null
+  sync_frontend_origin
   annotate_secret_checksums deployment/apigateway cogito-db-secret
   annotate_secret_checksums deployment/authservice cogito-db-secret
   annotate_secret_checksums deployment/flowservice cogito-db-secret
