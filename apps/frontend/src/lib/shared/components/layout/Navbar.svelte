@@ -71,6 +71,7 @@
         {/if}
         <a
           href={resolve("/notifications")}
+          data-sveltekit-preload-data="off"
           class="btn btn-circle {notificationsActive
             ? 'bg-primary/20! text-primary!'
             : 'btn-ghost hover:bg-base-100/60 dark:hover:bg-white/10'}"
