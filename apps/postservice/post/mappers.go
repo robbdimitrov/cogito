@@ -18,7 +18,7 @@ type rows interface {
 	Next() bool
 }
 
-// mapPost maps simple read queries (no repost shells, 13 columns).
+// mapPost maps simple read queries (no repost shells, 14 columns).
 func mapPost(r row) (*pb.Post, error) {
 	post := pb.Post{}
 	var content *string
@@ -28,7 +28,7 @@ func mapPost(r row) (*pb.Post, error) {
 	err := r.Scan(&post.Id, &post.UserId, &content,
 		&post.Likes, &post.Liked, &post.Reposts, &post.Reposted,
 		&created, &repostOfID, &post.MediaKey, &post.Replies,
-		&post.InReplyToId, &post.QuoteOfId)
+		&post.InReplyToId, &post.QuoteOfId, &post.PublicId)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func mapPost(r row) (*pb.Post, error) {
 	return &post, nil
 }
 
-// mapFeedPost maps feed queries that may include repost shells (21 columns), returning
+// mapFeedPost maps feed queries that may include repost shells (23 columns), returning
 // the raw created timestamp too so callers can use it directly as a cursor.
 func mapFeedPost(r row) (*pb.Post, time.Time, error) {
 	post := pb.Post{}
@@ -57,13 +57,14 @@ func mapFeedPost(r row) (*pb.Post, time.Time, error) {
 	var oMediaKey *string
 	var oInReplyToID int32
 	var oQuoteOfID int32
+	var oPublicID *string
 
 	err := r.Scan(&post.Id, &post.UserId, &content,
 		&post.Likes, &post.Liked, &post.Reposts, &post.Reposted,
 		&created, &repostOfID, &post.MediaKey, &post.Replies,
-		&post.InReplyToId, &post.QuoteOfId,
+		&post.InReplyToId, &post.QuoteOfId, &post.PublicId,
 		&oID, &oUserID, &oContent, &oCreated, &oMediaKey,
-		&oInReplyToID, &oQuoteOfID)
+		&oInReplyToID, &oQuoteOfID, &oPublicID)
 	if err != nil {
 		return nil, time.Time{}, err
 	}
@@ -74,9 +75,11 @@ func mapFeedPost(r row) (*pb.Post, time.Time, error) {
 	}
 	if repostOfID != nil {
 		post.RepostOfId = repostOfID
+		post.RepostOfPublicId = oPublicID
 		orig := &pb.Post{
 			Id:          *oID,
 			UserId:      *oUserID,
+			PublicId:    *oPublicID,
 			Likes:       post.Likes,
 			Liked:       post.Liked,
 			Reposts:     post.Reposts,
@@ -99,7 +102,7 @@ func mapFeedPost(r row) (*pb.Post, time.Time, error) {
 	return &post, created, nil
 }
 
-// mapMaterializedFeedPost maps materialized feed rows that include f.created (22 columns).
+// mapMaterializedFeedPost maps materialized feed rows that include f.created (24 columns).
 func mapMaterializedFeedPost(r row) (*pb.Post, time.Time, error) {
 	post := pb.Post{}
 	var created time.Time
@@ -112,14 +115,15 @@ func mapMaterializedFeedPost(r row) (*pb.Post, time.Time, error) {
 	var oMediaKey *string
 	var oInReplyToID int32
 	var oQuoteOfID int32
+	var oPublicID *string
 	var fanOutCreated time.Time
 
 	err := r.Scan(&post.Id, &post.UserId, &content,
 		&post.Likes, &post.Liked, &post.Reposts, &post.Reposted,
 		&created, &repostOfID, &post.MediaKey, &post.Replies,
-		&post.InReplyToId, &post.QuoteOfId,
+		&post.InReplyToId, &post.QuoteOfId, &post.PublicId,
 		&oID, &oUserID, &oContent, &oCreated, &oMediaKey,
-		&oInReplyToID, &oQuoteOfID, &fanOutCreated)
+		&oInReplyToID, &oQuoteOfID, &oPublicID, &fanOutCreated)
 	if err != nil {
 		return nil, time.Time{}, err
 	}
@@ -130,9 +134,11 @@ func mapMaterializedFeedPost(r row) (*pb.Post, time.Time, error) {
 	}
 	if repostOfID != nil {
 		post.RepostOfId = repostOfID
+		post.RepostOfPublicId = oPublicID
 		orig := &pb.Post{
 			Id:          *oID,
 			UserId:      *oUserID,
+			PublicId:    *oPublicID,
 			Likes:       post.Likes,
 			Liked:       post.Liked,
 			Reposts:     post.Reposts,
@@ -183,7 +189,7 @@ func mapPosts(r rows) iter.Seq2[*pb.Post, error] {
 	}
 }
 
-// mapPostCursorRows maps queries built on postWithRepostSelect (21 columns),
+// mapPostCursorRows maps queries built on postWithRepostSelect (23 columns),
 // resolving a repost row's original into Post.RepostOf.
 func mapPostCursorRows(r rows) iter.Seq2[postCursorRow, error] {
 	return func(yield func(postCursorRow, error) bool) {
@@ -200,13 +206,14 @@ func mapPostCursorRows(r rows) iter.Seq2[postCursorRow, error] {
 			var oMediaKey *string
 			var oInReplyToID int32
 			var oQuoteOfID int32
+			var oPublicID *string
 
 			err := r.Scan(&post.Id, &post.UserId, &content,
 				&post.Likes, &post.Liked, &post.Reposts, &post.Reposted,
 				&created, &repostOfID, &post.MediaKey, &post.Replies,
-				&post.InReplyToId, &post.QuoteOfId,
+				&post.InReplyToId, &post.QuoteOfId, &post.PublicId,
 				&oID, &oUserID, &oContent, &oCreated, &oMediaKey,
-				&oInReplyToID, &oQuoteOfID)
+				&oInReplyToID, &oQuoteOfID, &oPublicID)
 			if err != nil {
 				if !yield(postCursorRow{}, err) {
 					return
@@ -219,9 +226,11 @@ func mapPostCursorRows(r rows) iter.Seq2[postCursorRow, error] {
 			}
 			if repostOfID != nil {
 				post.RepostOfId = repostOfID
+				post.RepostOfPublicId = oPublicID
 				orig := &pb.Post{
 					Id:          *oID,
 					UserId:      *oUserID,
+					PublicId:    *oPublicID,
 					Likes:       post.Likes,
 					Liked:       post.Liked,
 					Reposts:     post.Reposts,
@@ -274,7 +283,7 @@ func mapLikedPosts(r rows) iter.Seq2[likedPostRow, error] {
 			err := r.Scan(&cursorTS, &post.Id, &post.UserId, &content,
 				&post.Likes, &post.Liked, &post.Reposts, &post.Reposted,
 				&created, &repostOfID, &post.MediaKey, &post.Replies,
-				&post.InReplyToId, &post.QuoteOfId)
+				&post.InReplyToId, &post.QuoteOfId, &post.PublicId)
 			if err != nil {
 				if !yield(likedPostRow{}, err) {
 					return

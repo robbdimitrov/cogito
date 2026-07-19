@@ -44,7 +44,7 @@ func TestPopularPostsQueryRanksByEngagementWithinWindow(t *testing.T) {
 func TestRepliesQueryOrdersNewestFirst(t *testing.T) {
 	got := repliesQuery()
 	for _, want := range []string{
-		"p.in_reply_to_id = $2",
+		"p.in_reply_to_id = (SELECT id FROM posts WHERE public_id = $2)",
 		"(p.created, p.id) < ($3::timestamptz, $4::int)",
 		"ORDER BY p.created DESC, p.id DESC",
 	} {
@@ -58,12 +58,23 @@ func TestPostWithRepostSelectIncludesOriginalPostColumns(t *testing.T) {
 	got := postWithRepostSelect()
 	for _, want := range []string{
 		"p.repost_of_id",
+		"p.public_id",
 		"o.id AS o_id",
 		"o.user_id AS o_user_id",
 		"o.content AS o_content",
+		"o.public_id AS o_public_id",
 	} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("postWithRepostSelect missing %q in:\n%s", want, got)
+		}
+	}
+}
+
+func TestPopularPostsQueryIncludesPublicID(t *testing.T) {
+	got := popularPostsQuery()
+	for _, want := range []string{"p.public_id", "public_id"} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("popularPostsQuery missing %q in:\n%s", want, got)
 		}
 	}
 }

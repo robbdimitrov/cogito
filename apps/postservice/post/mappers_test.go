@@ -75,6 +75,9 @@ func TestMapPost(t *testing.T) {
 	if post.Id != 0 || post.UserId != 1 || post.Content != "test" {
 		t.Errorf("mapping failed: %+v", post)
 	}
+	if post.PublicId != "test" {
+		t.Errorf("expected public_id to be mapped, got %q", post.PublicId)
+	}
 
 	mr = &mockRow{err: errors.New("scan error")}
 	_, err = mapPost(mr)
@@ -98,6 +101,12 @@ func TestMapFeedPost(t *testing.T) {
 	}
 	if post.RepostOf == nil {
 		t.Errorf("expected repost_of to be populated")
+	}
+	if post.RepostOfPublicId == nil || *post.RepostOfPublicId != "test" {
+		t.Errorf("expected repost_of_public_id to be mapped, got %+v", post.RepostOfPublicId)
+	}
+	if post.RepostOf.PublicId != "test" {
+		t.Errorf("expected repost_of.public_id to be mapped, got %q", post.RepostOf.PublicId)
 	}
 
 	mr = &mockRow{err: errors.New("scan error")}
@@ -155,6 +164,12 @@ func TestMapPostCursorRowsResolvesRepostOf(t *testing.T) {
 	if got.Post.RepostOf == nil {
 		t.Errorf("expected repost_of to be populated")
 	}
+	if got.Post.PublicId != "test" {
+		t.Errorf("expected public_id to be mapped, got %q", got.Post.PublicId)
+	}
+	if got.Post.RepostOfPublicId == nil || *got.Post.RepostOfPublicId != "test" {
+		t.Errorf("expected repost_of_public_id to be mapped, got %+v", got.Post.RepostOfPublicId)
+	}
 	if !rows.closed {
 		t.Fatal("expected rows to be closed")
 	}
@@ -195,5 +210,24 @@ func TestMapPostsClosesRowsAfterMapping(t *testing.T) {
 	}
 	if !rows.closed {
 		t.Fatal("expected rows to be closed")
+	}
+}
+
+func TestMapLikedPostsPopulatesPublicId(t *testing.T) {
+	rows := &mockRows{next: true}
+
+	var got likedPostRow
+	for row, err := range mapLikedPosts(rows) {
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		got = row
+	}
+
+	if got.Post == nil {
+		t.Fatal("expected a mapped post")
+	}
+	if got.Post.PublicId != "test" {
+		t.Errorf("expected public_id to be mapped, got %q", got.Post.PublicId)
 	}
 }

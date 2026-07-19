@@ -42,10 +42,12 @@ func postWithRepostSelect() string {
 		` + repliesCount("COALESCE(o.id, p.id)") + `,
 		COALESCE(p.in_reply_to_id, 0) AS in_reply_to_id,
 		COALESCE(p.quote_of_id, 0) AS quote_of_id,
+		p.public_id,
 		o.id AS o_id, o.user_id AS o_user_id, o.content AS o_content,
 		o.created AS o_created, o.media_key AS o_media_key,
 		COALESCE(o.in_reply_to_id, 0) AS o_in_reply_to_id,
-		COALESCE(o.quote_of_id, 0) AS o_quote_of_id`
+		COALESCE(o.quote_of_id, 0) AS o_quote_of_id,
+		o.public_id AS o_public_id`
 }
 
 // popularPostsWindow bounds the ranking to recent posts so trending reflects
@@ -56,14 +58,15 @@ const popularPostsWindow = 7 * 24 * time.Hour
 // excluding zero-engagement posts so the empty-search-state list stays real.
 func popularPostsQuery() string {
 	return `SELECT id, user_id, content, likes, liked, reposts, reposted,
-		created, repost_of_id, media_key, replies, in_reply_to_id, quote_of_id
+		created, repost_of_id, media_key, replies, in_reply_to_id, quote_of_id, public_id
 		FROM (
 			SELECT p.id, p.user_id, p.content,
 				` + postCountsAndViewerFlags("p.id") + `,
 				p.created, p.repost_of_id, p.media_key,
 				` + repliesCount("p.id") + `,
 				COALESCE(p.in_reply_to_id, 0) AS in_reply_to_id,
-				COALESCE(p.quote_of_id, 0) AS quote_of_id
+				COALESCE(p.quote_of_id, 0) AS quote_of_id,
+				p.public_id
 			FROM posts p
 			WHERE p.repost_of_id IS NULL
 			AND p.in_reply_to_id IS NULL
@@ -162,7 +165,10 @@ func authorFanOutSnapshot(ctx context.Context, tx pgx.Tx, userID int32) (int32, 
 	return followerCount, fanOutDisabled, err
 }
 
-func (c *DBClient) createPost(ctx context.Context, content string, tags []string, userID int32, mediaKey *string, inReplyToID *int32, quoteOfID *int32) (int32, error) {
+// createPost resolves inReplyToPublicID/quoteOfPublicID to internal numeric ids inline via
+// a WHERE public_id = $n subquery; a nonexistent public id yields a zero-row INSERT (ErrNoRows),
+// mapped below to errInvalidReference. Callers must enforce mutual exclusion before calling.
+func (c *DBClient) createPost(ctx context.Context, content string, tags []string, userID int32, mediaKey *string, inReplyToPublicID *string, quoteOfPublicID *string) (int32, string, error) {
 	var mk string
 	if mediaKey != nil {
 		mk = *mediaKey
@@ -170,84 +176,86 @@ func (c *DBClient) createPost(ctx context.Context, content string, tags []string
 
 	tx, err := c.db.Begin(ctx)
 	if err != nil {
-		return 0, err
+		return 0, "", err
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
 
 	var postID int32
 	var created time.Time
+	var publicID string
+	var resolvedInReplyToID int32
 	var storedQuoteOfID int32
 
-	var replyID pgtype.Int4
-	if inReplyToID != nil {
-		replyID = pgtype.Int4{Int: *inReplyToID, Status: pgtype.Present}
-	} else {
-		replyID = pgtype.Int4{Status: pgtype.Null}
-	}
-
-	if quoteOfID != nil {
-		query := `INSERT INTO posts (user_id, content, media_key, in_reply_to_id, quote_of_id)
-			SELECT $1, $2, $3, $4, COALESCE(p.repost_of_id, p.id)
-			FROM posts p WHERE p.id = $5
-			RETURNING id, created, quote_of_id`
-		err = tx.QueryRow(ctx, query, userID, content, mk, replyID, *quoteOfID).Scan(&postID, &created, &storedQuoteOfID)
-	} else {
-		query := "INSERT INTO posts (user_id, content, media_key, in_reply_to_id, quote_of_id) VALUES ($1, $2, $3, $4, NULL) RETURNING id, created"
-		err = tx.QueryRow(ctx, query, userID, content, mk, replyID).Scan(&postID, &created)
+	switch {
+	case quoteOfPublicID != nil:
+		query := `INSERT INTO posts (user_id, content, media_key, quote_of_id)
+			SELECT $1, $2, $3, COALESCE(p.repost_of_id, p.id)
+			FROM posts p WHERE p.public_id = $4
+			RETURNING id, created, quote_of_id, public_id`
+		err = tx.QueryRow(ctx, query, userID, content, mk, *quoteOfPublicID).Scan(&postID, &created, &storedQuoteOfID, &publicID)
+	case inReplyToPublicID != nil:
+		query := `INSERT INTO posts (user_id, content, media_key, in_reply_to_id)
+			SELECT $1, $2, $3, p.id
+			FROM posts p WHERE p.public_id = $4
+			RETURNING id, created, in_reply_to_id, public_id`
+		err = tx.QueryRow(ctx, query, userID, content, mk, *inReplyToPublicID).Scan(&postID, &created, &resolvedInReplyToID, &publicID)
+	default:
+		query := "INSERT INTO posts (user_id, content, media_key) VALUES ($1, $2, $3) RETURNING id, created, public_id"
+		err = tx.QueryRow(ctx, query, userID, content, mk).Scan(&postID, &created, &publicID)
 	}
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return 0, errInvalidReference
+			return 0, "", errInvalidReference
 		}
 		var databaseErr *pgconn.PgError
 		if errors.As(err, &databaseErr) && databaseErr.Code == "23503" {
-			return 0, errInvalidReference
+			return 0, "", errInvalidReference
 		}
-		return 0, err
+		return 0, "", err
 	}
 
 	for _, tag := range tags {
 		_, err = tx.Exec(ctx, "INSERT INTO hashtags (name) VALUES ($1) ON CONFLICT (name) DO NOTHING", tag)
 		if err != nil {
-			return 0, err
+			return 0, "", err
 		}
 		_, err = tx.Exec(ctx, "INSERT INTO post_hashtags (post_id, hashtag_id) SELECT $1, id FROM hashtags WHERE name = $2 ON CONFLICT DO NOTHING", postID, tag)
 		if err != nil {
-			return 0, err
+			return 0, "", err
 		}
 	}
 
 	followerCount, fanOutDisabled, err := authorFanOutSnapshot(ctx, tx, userID)
 	if err != nil {
-		return 0, err
+		return 0, "", err
 	}
 	payload := map[string]any{
 		"table": "posts", "op": "upsert",
-		"id": postID, "author_id": userID,
+		"id": postID, "public_id": publicID, "author_id": userID,
 		"follower_count": followerCount, "fan_out_disabled": fanOutDisabled,
 		"content": content, "hashtags": tags, "created": created,
 	}
-	if inReplyToID != nil {
-		payload["in_reply_to_id"] = *inReplyToID
-	} else if quoteOfID != nil {
+	if inReplyToPublicID != nil {
+		payload["in_reply_to_id"] = resolvedInReplyToID
+	} else if quoteOfPublicID != nil {
 		payload["quote_of_id"] = storedQuoteOfID
 	}
 	if err = outbox(tx, ctx, "entity-changes", payload); err != nil {
-		return 0, err
+		return 0, "", err
 	}
 
-	if inReplyToID != nil {
+	if inReplyToPublicID != nil {
 		var parentOwner int32
-		err = tx.QueryRow(ctx, "SELECT user_id FROM posts WHERE id = $1", *inReplyToID).Scan(&parentOwner)
+		err = tx.QueryRow(ctx, "SELECT user_id FROM posts WHERE id = $1", resolvedInReplyToID).Scan(&parentOwner)
 		if err != nil {
-			return 0, err
+			return 0, "", err
 		}
 		err = outbox(tx, ctx, "activity", map[string]any{
-			"op": "reply", "reply_post_id": postID, "post_id": *inReplyToID,
+			"op": "reply", "reply_post_id": postID, "reply_post_public_id": publicID, "post_id": resolvedInReplyToID,
 			"actor_id": userID, "recipient_id": parentOwner,
 		})
 		if err != nil {
-			return 0, err
+			return 0, "", err
 		}
 	}
 
@@ -260,17 +268,17 @@ func (c *DBClient) createPost(ctx context.Context, content string, tags []string
 			WHERE h.name = $1
 			GROUP BY h.id`, tag).Scan(&hashtagID, &count)
 		if err != nil {
-			return 0, err
+			return 0, "", err
 		}
 		err = outbox(tx, ctx, "entity-changes", map[string]any{
 			"table": "hashtags", "op": "upsert", "id": hashtagID, "name": tag, "post_count": count,
 		})
 		if err != nil {
-			return 0, err
+			return 0, "", err
 		}
 	}
 
-	return postID, tx.Commit(ctx)
+	return postID, publicID, tx.Commit(ctx)
 }
 
 func (c *DBClient) getFeed(ctx context.Context, cursor Cursor, hasCursor bool, limit int32, currentUserID int32) (iter.Seq2[feedPostItem, error], error) {
@@ -415,7 +423,8 @@ func (c *DBClient) getLikedPosts(ctx context.Context, userID int32, cursor Curso
 		posts.created, posts.repost_of_id, posts.media_key,
 		` + repliesCount("posts.id") + `,
 		COALESCE(in_reply_to_id, 0) AS in_reply_to_id,
-		COALESCE(quote_of_id, 0) AS quote_of_id
+		COALESCE(quote_of_id, 0) AS quote_of_id,
+		posts.public_id
 		FROM posts
 		INNER JOIN likes ON post_id = id
 		WHERE likes.user_id = $2
@@ -463,7 +472,7 @@ func (c *DBClient) getHashtagPosts(ctx context.Context, tag string, cursor Curso
 	return mapPostCursorRows(rows), nil
 }
 
-func (c *DBClient) getPost(ctx context.Context, id int32, currentUserID *int32) (*pb.Post, error) {
+func (c *DBClient) getPost(ctx context.Context, publicID string, currentUserID *int32) (*pb.Post, error) {
 	// posts.id must stay qualified: postCountsAndViewerFlags/repliesCount's own FROM posts
 	// AS rp/r shadows a bare `id`, silently zeroing every count.
 	query := `SELECT id, user_id, content,
@@ -471,10 +480,11 @@ func (c *DBClient) getPost(ctx context.Context, id int32, currentUserID *int32) 
 		created, repost_of_id, media_key,
 		` + repliesCount("posts.id") + `,
 		COALESCE(in_reply_to_id, 0) AS in_reply_to_id,
-		COALESCE(quote_of_id, 0) AS quote_of_id
-		FROM posts WHERE id = $2`
+		COALESCE(quote_of_id, 0) AS quote_of_id,
+		public_id
+		FROM posts WHERE public_id = $2`
 
-	row := c.db.QueryRow(ctx, query, currentUserID, id)
+	row := c.db.QueryRow(ctx, query, currentUserID, publicID)
 	post, err := mapPost(row)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, errNotFound
@@ -490,7 +500,8 @@ func (c *DBClient) getPostsByIds(ctx context.Context, ids []int32, currentUserID
 		created, repost_of_id, media_key,
 		` + repliesCount("posts.id") + `,
 		COALESCE(in_reply_to_id, 0) AS in_reply_to_id,
-		COALESCE(quote_of_id, 0) AS quote_of_id
+		COALESCE(quote_of_id, 0) AS quote_of_id,
+		public_id
 		FROM posts WHERE id = ANY($2)`
 
 	rows, err := c.db.Query(ctx, query, currentUserID, ids)
@@ -501,16 +512,17 @@ func (c *DBClient) getPostsByIds(ctx context.Context, ids []int32, currentUserID
 	return mapPosts(rows), nil
 }
 
-func (c *DBClient) deletePost(ctx context.Context, postID int32, userID int32) error {
+func (c *DBClient) deletePost(ctx context.Context, publicID string, userID int32) error {
 	tx, err := c.db.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
 
+	var postID int32
 	var mediaKey string
 	var inReplyToID int32
-	err = tx.QueryRow(ctx, "SELECT COALESCE(media_key, ''), COALESCE(in_reply_to_id, 0) FROM posts WHERE id = $1 AND user_id = $2", postID, userID).Scan(&mediaKey, &inReplyToID)
+	err = tx.QueryRow(ctx, "SELECT id, COALESCE(media_key, ''), COALESCE(in_reply_to_id, 0) FROM posts WHERE public_id = $1 AND user_id = $2", publicID, userID).Scan(&postID, &mediaKey, &inReplyToID)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return errNotFound
@@ -540,17 +552,20 @@ func (c *DBClient) deletePost(ctx context.Context, postID int32, userID int32) e
 	// Capture reply IDs before the FK SET NULL orphans them, so their reply
 	// notifications can still be cleaned up via this delete event.
 	var replyPostIDs []int32
-	rows, err = tx.Query(ctx, "SELECT id FROM posts WHERE in_reply_to_id = $1", postID)
+	var replyPostPublicIDs []string
+	rows, err = tx.Query(ctx, "SELECT id, public_id FROM posts WHERE in_reply_to_id = $1", postID)
 	if err != nil {
 		return err
 	}
 	for rows.Next() {
 		var replyID int32
-		if err := rows.Scan(&replyID); err != nil {
+		var replyPublicID string
+		if err := rows.Scan(&replyID, &replyPublicID); err != nil {
 			rows.Close()
 			return err
 		}
 		replyPostIDs = append(replyPostIDs, replyID)
+		replyPostPublicIDs = append(replyPostPublicIDs, replyPublicID)
 	}
 	if err := rows.Err(); err != nil {
 		rows.Close()
@@ -564,7 +579,8 @@ func (c *DBClient) deletePost(ctx context.Context, postID int32, userID int32) e
 	}
 
 	err = outbox(tx, ctx, "entity-changes", map[string]any{
-		"table": "posts", "op": "delete", "id": postID, "author_id": userID, "media_key": mediaKey, "reply_post_ids": replyPostIDs,
+		"table": "posts", "op": "delete", "id": postID, "public_id": publicID, "author_id": userID, "media_key": mediaKey,
+		"reply_post_ids": replyPostIDs, "reply_post_public_ids": replyPostPublicIDs,
 	})
 	if err != nil {
 		return err
@@ -572,7 +588,7 @@ func (c *DBClient) deletePost(ctx context.Context, postID int32, userID int32) e
 
 	if inReplyToID != 0 {
 		err = outbox(tx, ctx, "activity", map[string]any{
-			"op": "unreply", "reply_post_id": postID, "actor_id": userID,
+			"op": "unreply", "reply_post_id": postID, "reply_post_public_id": publicID, "actor_id": userID,
 		})
 		if err != nil {
 			return err
@@ -620,12 +636,20 @@ func (c *DBClient) deletePost(ctx context.Context, postID int32, userID int32) e
 	return tx.Commit(ctx)
 }
 
-func (c *DBClient) likePost(ctx context.Context, postID int32, userID int32) error {
+func (c *DBClient) likePost(ctx context.Context, publicID string, userID int32) error {
 	tx, err := c.db.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
+
+	var postID int32
+	if err := tx.QueryRow(ctx, "SELECT id FROM posts WHERE public_id = $1", publicID).Scan(&postID); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return errInvalidReference
+		}
+		return err
+	}
 
 	query := "INSERT INTO likes (post_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING"
 	tag, err := tx.Exec(ctx, query, postID, userID)
@@ -642,7 +666,7 @@ func (c *DBClient) likePost(ctx context.Context, postID int32, userID int32) err
 			return err
 		}
 		err = outbox(tx, ctx, "activity", map[string]any{
-			"op": "like", "post_id": postID, "actor_id": userID, "recipient_id": recipientID,
+			"op": "like", "post_id": postID, "post_public_id": publicID, "actor_id": userID, "recipient_id": recipientID,
 		})
 		if err != nil {
 			return err
@@ -651,15 +675,16 @@ func (c *DBClient) likePost(ctx context.Context, postID int32, userID int32) err
 	return tx.Commit(ctx)
 }
 
-func (c *DBClient) unlikePost(ctx context.Context, postID int32, userID int32) error {
+func (c *DBClient) unlikePost(ctx context.Context, publicID string, userID int32) error {
 	tx, err := c.db.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
 
+	var postID int32
 	var recipientID int32
-	if err := tx.QueryRow(ctx, "SELECT user_id FROM posts WHERE id = $1", postID).Scan(&recipientID); err != nil {
+	if err := tx.QueryRow(ctx, "SELECT id, user_id FROM posts WHERE public_id = $1", publicID).Scan(&postID, &recipientID); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return errInvalidReference
 		}
@@ -671,7 +696,7 @@ func (c *DBClient) unlikePost(ctx context.Context, postID int32, userID int32) e
 	}
 	if tag.RowsAffected() > 0 {
 		err = outbox(tx, ctx, "activity", map[string]any{
-			"op": "unlike", "post_id": postID, "actor_id": userID, "recipient_id": recipientID,
+			"op": "unlike", "post_id": postID, "post_public_id": publicID, "actor_id": userID, "recipient_id": recipientID,
 		})
 		if err != nil {
 			return err
@@ -680,7 +705,7 @@ func (c *DBClient) unlikePost(ctx context.Context, postID int32, userID int32) e
 	return tx.Commit(ctx)
 }
 
-func (c *DBClient) repostPost(ctx context.Context, postID int32, userID int32) error {
+func (c *DBClient) repostPost(ctx context.Context, publicID string, userID int32) error {
 	tx, err := c.db.Begin(ctx)
 	if err != nil {
 		return err
@@ -689,7 +714,7 @@ func (c *DBClient) repostPost(ctx context.Context, postID int32, userID int32) e
 
 	var repostOfID int32
 	var targetIsReply bool
-	err = tx.QueryRow(ctx, "SELECT COALESCE(repost_of_id, id), in_reply_to_id IS NOT NULL FROM posts WHERE id = $1", postID).Scan(&repostOfID, &targetIsReply)
+	err = tx.QueryRow(ctx, "SELECT COALESCE(repost_of_id, id), in_reply_to_id IS NOT NULL FROM posts WHERE public_id = $1", publicID).Scan(&repostOfID, &targetIsReply)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return errInvalidReference
 	}
@@ -703,10 +728,11 @@ func (c *DBClient) repostPost(ctx context.Context, postID int32, userID int32) e
 	query := `INSERT INTO posts (user_id, repost_of_id)
 		VALUES ($1, $2)
 		ON CONFLICT (user_id, repost_of_id) DO NOTHING
-		RETURNING id, created`
+		RETURNING id, created, public_id`
 	var newPostID int32
 	var created time.Time
-	err = tx.QueryRow(ctx, query, userID, repostOfID).Scan(&newPostID, &created)
+	var newPublicID string
+	err = tx.QueryRow(ctx, query, userID, repostOfID).Scan(&newPostID, &created, &newPublicID)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return tx.Commit(ctx)
 	}
@@ -719,7 +745,8 @@ func (c *DBClient) repostPost(ctx context.Context, postID int32, userID int32) e
 	}
 
 	var recipientID int32
-	if err := tx.QueryRow(ctx, "SELECT user_id FROM posts WHERE id = $1", repostOfID).Scan(&recipientID); err != nil {
+	var repostOfPublicID string
+	if err := tx.QueryRow(ctx, "SELECT user_id, public_id FROM posts WHERE id = $1", repostOfID).Scan(&recipientID, &repostOfPublicID); err != nil {
 		return err
 	}
 	followerCount, fanOutDisabled, err := authorFanOutSnapshot(ctx, tx, userID)
@@ -728,7 +755,7 @@ func (c *DBClient) repostPost(ctx context.Context, postID int32, userID int32) e
 	}
 	err = outbox(tx, ctx, "entity-changes", map[string]any{
 		"table": "posts", "op": "upsert",
-		"id": newPostID, "author_id": userID,
+		"id": newPostID, "public_id": newPublicID, "author_id": userID,
 		"follower_count": followerCount, "fan_out_disabled": fanOutDisabled,
 		"repost_of_id": repostOfID, "created": created,
 	})
@@ -736,7 +763,7 @@ func (c *DBClient) repostPost(ctx context.Context, postID int32, userID int32) e
 		return err
 	}
 	err = outbox(tx, ctx, "activity", map[string]any{
-		"op": "repost", "post_id": repostOfID, "actor_id": userID, "recipient_id": recipientID,
+		"op": "repost", "post_id": repostOfID, "post_public_id": repostOfPublicID, "actor_id": userID, "recipient_id": recipientID,
 	})
 	if err != nil {
 		return err
@@ -744,7 +771,7 @@ func (c *DBClient) repostPost(ctx context.Context, postID int32, userID int32) e
 	return tx.Commit(ctx)
 }
 
-func (c *DBClient) removeRepost(ctx context.Context, postID int32, userID int32) error {
+func (c *DBClient) removeRepost(ctx context.Context, publicID string, userID int32) error {
 	tx, err := c.db.Begin(ctx)
 	if err != nil {
 		return err
@@ -752,15 +779,16 @@ func (c *DBClient) removeRepost(ctx context.Context, postID int32, userID int32)
 	defer func() { _ = tx.Rollback(ctx) }()
 
 	var repostRowID int32
+	var repostRowPublicID string
 	var repostOfID int32
-	err = tx.QueryRow(ctx, "SELECT COALESCE(repost_of_id, id) FROM posts WHERE id = $1", postID).Scan(&repostOfID)
+	err = tx.QueryRow(ctx, "SELECT COALESCE(repost_of_id, id) FROM posts WHERE public_id = $1", publicID).Scan(&repostOfID)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return tx.Commit(ctx)
 	}
 	if err != nil {
 		return err
 	}
-	err = tx.QueryRow(ctx, "SELECT id FROM posts WHERE user_id = $1 AND repost_of_id = $2", userID, repostOfID).Scan(&repostRowID)
+	err = tx.QueryRow(ctx, "SELECT id, public_id FROM posts WHERE user_id = $1 AND repost_of_id = $2", userID, repostOfID).Scan(&repostRowID, &repostRowPublicID)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return tx.Commit(ctx)
 	}
@@ -772,17 +800,18 @@ func (c *DBClient) removeRepost(ctx context.Context, postID int32, userID int32)
 		return err
 	}
 	var recipientID int32
-	if err := tx.QueryRow(ctx, "SELECT user_id FROM posts WHERE id = $1", repostOfID).Scan(&recipientID); err != nil {
+	var repostOfPublicID string
+	if err := tx.QueryRow(ctx, "SELECT user_id, public_id FROM posts WHERE id = $1", repostOfID).Scan(&recipientID, &repostOfPublicID); err != nil {
 		return err
 	}
 	err = outbox(tx, ctx, "entity-changes", map[string]any{
-		"table": "posts", "op": "delete", "id": repostRowID, "author_id": userID, "media_key": "",
+		"table": "posts", "op": "delete", "id": repostRowID, "public_id": repostRowPublicID, "author_id": userID, "media_key": "",
 	})
 	if err != nil {
 		return err
 	}
 	err = outbox(tx, ctx, "activity", map[string]any{
-		"op": "unrepost", "post_id": repostOfID, "actor_id": userID, "recipient_id": recipientID,
+		"op": "unrepost", "post_id": repostOfID, "post_public_id": repostOfPublicID, "actor_id": userID, "recipient_id": recipientID,
 	})
 	if err != nil {
 		return err
@@ -791,25 +820,26 @@ func (c *DBClient) removeRepost(ctx context.Context, postID int32, userID int32)
 }
 
 // repliesQuery returns replies newest-first, matching every other
-// post-listing query's DESC cursor pagination.
+// post-listing query's DESC cursor pagination. The parent is resolved by public id
+// inline; a nonexistent parent yields NULL, matching no rows rather than erroring.
 func repliesQuery() string {
 	return "SELECT " + postWithRepostSelect() + `
 		FROM posts p
 		LEFT JOIN posts o ON o.id = p.repost_of_id
-		WHERE p.in_reply_to_id = $2
+		WHERE p.in_reply_to_id = (SELECT id FROM posts WHERE public_id = $2)
 		AND ($3::timestamptz IS NULL OR (p.created, p.id) < ($3::timestamptz, $4::int))
 		ORDER BY p.created DESC, p.id DESC
 		LIMIT $5`
 }
 
-func (c *DBClient) getReplies(ctx context.Context, postID int32, cursor Cursor, hasCursor bool, limit int32, currentUserID int32) (iter.Seq2[postCursorRow, error], error) {
+func (c *DBClient) getReplies(ctx context.Context, publicID string, cursor Cursor, hasCursor bool, limit int32, currentUserID int32) (iter.Seq2[postCursorRow, error], error) {
 	var cursorTS *time.Time
 	var cursorID int32
 	if hasCursor {
 		cursorTS = &cursor.Created
 		cursorID = cursor.ID
 	}
-	rows, err := c.db.Query(ctx, repliesQuery(), currentUserID, postID, cursorTS, cursorID, limit+1)
+	rows, err := c.db.Query(ctx, repliesQuery(), currentUserID, publicID, cursorTS, cursorID, limit+1)
 	if err != nil {
 		return nil, err
 	}

@@ -22,13 +22,13 @@ func newController(dbClient *DBClient) *controller {
 	return &controller{dbClient: dbClient}
 }
 
-func (c *controller) CreatePost(ctx context.Context, req *pb.CreatePostRequest) (*pb.Identifier, error) {
+func (c *controller) CreatePost(ctx context.Context, req *pb.CreatePostRequest) (*pb.PostIdentifier, error) {
 	userID, err := getUserID(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	if req.InReplyToId != nil && req.QuoteOfId != nil {
+	if req.InReplyToPublicId != nil && req.QuoteOfPublicId != nil {
 		return nil, newError(codes.InvalidArgument)
 	}
 
@@ -42,7 +42,7 @@ func (c *controller) CreatePost(ctx context.Context, req *pb.CreatePostRequest) 
 
 	tags := ExtractHashtags(content)
 
-	res, err := c.dbClient.createPost(ctx, content, tags, userID, req.MediaKey, req.InReplyToId, req.QuoteOfId)
+	_, publicID, err := c.dbClient.createPost(ctx, content, tags, userID, req.MediaKey, req.InReplyToPublicId, req.QuoteOfPublicId)
 	if err != nil {
 		if errors.Is(err, errInvalidReference) {
 			return nil, newError(codes.InvalidArgument)
@@ -51,7 +51,7 @@ func (c *controller) CreatePost(ctx context.Context, req *pb.CreatePostRequest) 
 		return nil, newError(codes.Internal)
 	}
 
-	return &pb.Identifier{Id: res}, nil
+	return &pb.PostIdentifier{PublicId: publicID}, nil
 }
 
 func (c *controller) GetFeed(ctx context.Context, req *pb.GetFeedRequest) (*pb.Posts, error) {
@@ -299,7 +299,7 @@ func (c *controller) GetPostsByIds(ctx context.Context, req *pb.Ids) (*pb.Posts,
 func (c *controller) GetPost(ctx context.Context, req *pb.PostRequest) (*pb.Post, error) {
 	userID := optionalUserID(ctx)
 
-	res, err := c.dbClient.getPost(ctx, req.PostId, userID)
+	res, err := c.dbClient.getPost(ctx, req.PublicId, userID)
 	if err != nil {
 		if errors.Is(err, errNotFound) {
 			return nil, newError(codes.NotFound)
@@ -324,7 +324,7 @@ func (c *controller) GetReplies(ctx context.Context, req *pb.GetRepliesRequest) 
 
 	limit := clampLimit(req.Limit)
 
-	resIter, err := c.dbClient.getReplies(ctx, req.PostId, cur, hasCur, limit, userID)
+	resIter, err := c.dbClient.getReplies(ctx, req.PublicId, cur, hasCur, limit, userID)
 	if err != nil {
 		slog.Warn("getting replies failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
@@ -397,7 +397,7 @@ func (c *controller) DeletePost(ctx context.Context, req *pb.PostRequest) (*pb.E
 		return nil, err
 	}
 
-	if err := c.dbClient.deletePost(ctx, req.PostId, userID); err != nil {
+	if err := c.dbClient.deletePost(ctx, req.PublicId, userID); err != nil {
 		if errors.Is(err, errNotFound) {
 			return nil, newError(codes.NotFound)
 		}
@@ -414,7 +414,7 @@ func (c *controller) LikePost(ctx context.Context, req *pb.PostRequest) (*pb.Emp
 		return nil, err
 	}
 
-	if err = c.dbClient.likePost(ctx, req.PostId, userID); err != nil {
+	if err = c.dbClient.likePost(ctx, req.PublicId, userID); err != nil {
 		if errors.Is(err, errInvalidReference) {
 			return nil, newError(codes.NotFound)
 		}
@@ -431,7 +431,7 @@ func (c *controller) UnlikePost(ctx context.Context, req *pb.PostRequest) (*pb.E
 		return nil, err
 	}
 
-	if err = c.dbClient.unlikePost(ctx, req.PostId, userID); err != nil {
+	if err = c.dbClient.unlikePost(ctx, req.PublicId, userID); err != nil {
 		if errors.Is(err, errInvalidReference) {
 			return nil, newError(codes.NotFound)
 		}
@@ -448,7 +448,7 @@ func (c *controller) RepostPost(ctx context.Context, req *pb.PostRequest) (*pb.E
 		return nil, err
 	}
 
-	if err = c.dbClient.repostPost(ctx, req.PostId, userID); err != nil {
+	if err = c.dbClient.repostPost(ctx, req.PublicId, userID); err != nil {
 		if errors.Is(err, errInvalidReference) {
 			return nil, newError(codes.NotFound)
 		}
@@ -465,7 +465,7 @@ func (c *controller) RemoveRepost(ctx context.Context, req *pb.PostRequest) (*pb
 		return nil, err
 	}
 
-	if err = c.dbClient.removeRepost(ctx, req.PostId, userID); err != nil {
+	if err = c.dbClient.removeRepost(ctx, req.PublicId, userID); err != nil {
 		slog.Warn("removing repost failed", "request_id", requestID(ctx), "error", err)
 		return nil, newError(codes.Internal)
 	}
