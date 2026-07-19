@@ -11,9 +11,7 @@ export function setComposeContext(controller: ComposeController): void {
 }
 
 export function getComposeContext(): ComposeController {
-  const controller = getContext<ComposeController | undefined>(
-    COMPOSE_CONTEXT,
-  );
+  const controller = getContext<ComposeController | undefined>(COMPOSE_CONTEXT);
   if (!controller) {
     throw new Error("Compose context is unavailable");
   }
