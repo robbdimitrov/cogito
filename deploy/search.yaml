@@ -47,9 +47,9 @@ spec:
         - containerPort: 7700
         resources:
           limits:
-            memory: 1Gi
+            memory: 2Gi # 1Gi OOMKilled Meilisearch in a restart loop regardless of document count
           requests:
-            memory: 256Mi
+            memory: 512Mi
             cpu: 50m
         env:
         - name: MEILI_ENV
