@@ -163,7 +163,7 @@
         </div>
         <button
           type="submit"
-          class="btn btn-primary btn-sm gap-1 rounded-full px-5 {!isPending &&
+          class="btn btn-primary btn-sm gap-1 rounded-full px-5 disabled:bg-primary! disabled:text-primary-content! disabled:opacity-70 {!isPending &&
           (content.trim() || imageBlob)
             ? 'shadow-lg shadow-primary/20'
             : 'shadow-none'}"

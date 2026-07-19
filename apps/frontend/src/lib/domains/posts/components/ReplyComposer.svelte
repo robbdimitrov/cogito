@@ -48,7 +48,7 @@
   </div>
   <button
     type="submit"
-    class="btn btn-primary btn-sm btn-square mt-1 shrink-0 rounded-xl"
+    class="btn btn-primary btn-sm btn-square mt-1 shrink-0 rounded-xl disabled:bg-primary! disabled:text-primary-content! disabled:opacity-70"
     disabled={isSubmitting || !content.trim()}
     aria-label="Send reply"
   >

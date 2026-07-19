@@ -177,9 +177,9 @@
                   />
                   <button
                     type="submit"
-                    class="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 transition-all duration-150 hover:scale-105 active:scale-95 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4 {post.reposted
-                      ? 'bg-success/10 text-success'
-                      : 'opacity-60 hover:bg-success/10 hover:text-success hover:opacity-100'}"
+                    class="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 transition-all duration-150 hover:scale-105 active:scale-95 disabled:opacity-70 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4 {post.reposted
+                      ? 'bg-success/10 text-success disabled:text-success!'
+                      : 'opacity-60 hover:bg-success/10 hover:text-success hover:opacity-100 disabled:text-base-content!'}"
                     disabled={isReposting}
                   >
                     <Repeat class="size-4 sm:h-5 sm:w-5" />
@@ -217,9 +217,9 @@
                   />
                   <button
                     type="submit"
-                    class="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 transition-all duration-150 hover:scale-105 active:scale-95 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4 {post.liked
-                      ? 'bg-error/10 text-error'
-                      : 'opacity-60 hover:bg-error/10 hover:text-error hover:opacity-100'}"
+                    class="btn btn-ghost btn-xs h-8 min-h-8 gap-1 rounded-full px-3 transition-all duration-150 hover:scale-105 active:scale-95 disabled:opacity-70 sm:btn-sm sm:h-10 sm:min-h-10 sm:px-4 {post.liked
+                      ? 'bg-error/10 text-error disabled:text-error!'
+                      : 'opacity-60 hover:bg-error/10 hover:text-error hover:opacity-100 disabled:text-base-content!'}"
                     disabled={isLiking}
                   >
                     <Heart
