@@ -289,8 +289,8 @@
                 <input type="hidden" name="liked" value={String(liked)} />
                 <button
                   type="submit"
-                  class="action-pill {liked
-                    ? 'text-error bg-error/10'
+                  class="action-pill disabled:opacity-70 {liked
+                    ? 'text-error bg-error/10 disabled:text-error!'
                     : 'opacity-60 hover:text-error hover:bg-error/5 hover:opacity-100'}"
                   disabled={isLiking}
                   aria-label={liked ? "Unlike post" : "Like post"}
