@@ -1,5 +1,8 @@
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 CREATE TABLE posts (
   id serial PRIMARY KEY,
+  public_id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id integer NOT NULL REFERENCES users ON DELETE CASCADE,
   content varchar(255),
   media_key varchar(255) DEFAULT '',
@@ -15,6 +18,7 @@ CREATE TABLE posts (
   CONSTRAINT posts_repost_unique UNIQUE (user_id, repost_of_id)
 );
 
+CREATE UNIQUE INDEX posts_public_id_idx ON posts (public_id);
 CREATE INDEX posts_user_id_created_idx ON posts (user_id, created DESC);
 CREATE INDEX posts_in_reply_to_id_idx ON posts (in_reply_to_id)
   WHERE in_reply_to_id IS NOT NULL;
