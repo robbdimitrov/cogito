@@ -790,22 +790,26 @@ func (c *DBClient) removeRepost(ctx context.Context, postID int32, userID int32)
 	return tx.Commit(ctx)
 }
 
-func (c *DBClient) getReplies(ctx context.Context, postID int32, cursor Cursor, hasCursor bool, limit int32, currentUserID int32) (iter.Seq2[postCursorRow, error], error) {
-	query := "SELECT " + postWithRepostSelect() + `
+// repliesQuery returns replies newest-first, matching every other
+// post-listing query's DESC cursor pagination.
+func repliesQuery() string {
+	return "SELECT " + postWithRepostSelect() + `
 		FROM posts p
 		LEFT JOIN posts o ON o.id = p.repost_of_id
 		WHERE p.in_reply_to_id = $2
-		AND ($3::timestamptz IS NULL OR (p.created, p.id) > ($3::timestamptz, $4::int))
-		ORDER BY p.created ASC, p.id ASC
+		AND ($3::timestamptz IS NULL OR (p.created, p.id) < ($3::timestamptz, $4::int))
+		ORDER BY p.created DESC, p.id DESC
 		LIMIT $5`
+}
 
+func (c *DBClient) getReplies(ctx context.Context, postID int32, cursor Cursor, hasCursor bool, limit int32, currentUserID int32) (iter.Seq2[postCursorRow, error], error) {
 	var cursorTS *time.Time
 	var cursorID int32
 	if hasCursor {
 		cursorTS = &cursor.Created
 		cursorID = cursor.ID
 	}
-	rows, err := c.db.Query(ctx, query, currentUserID, postID, cursorTS, cursorID, limit+1)
+	rows, err := c.db.Query(ctx, repliesQuery(), currentUserID, postID, cursorTS, cursorID, limit+1)
 	if err != nil {
 		return nil, err
 	}

@@ -163,7 +163,7 @@ still requires a session.
 | DELETE | /posts/{postId}/likes   | Unlike post                                                                                                                              |
 | POST   | /posts/{postId}/reposts | Repost (idempotent; resolves to original post)                                                                                           |
 | DELETE | /posts/{postId}/reposts | Remove repost                                                                                                                            |
-| GET    | /posts/{postId}/replies | Paginated replies (oldest-first)                                                                                                         |
+| GET    | /posts/{postId}/replies | Paginated replies (newest-first)                                                                                                         |
 | GET    | /users/{userId}/likes   | Paginated posts liked by user                                                                                                            |
 | GET    | /users/{userId}/replies | Paginated replies authored by user, newest-first                                                                                        |
 | GET    | /hashtags/{tag}/posts   | Paginated posts with hashtag                                                                                                             |

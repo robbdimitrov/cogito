@@ -144,6 +144,7 @@ unchanged after DTO mapping.
 | `/{username}/following` | GET    | page load       | GET /users/{id}/following                                         |
 | `/{username}/following` | GET    | +server.ts      | GET /users/{id}/following?cursor=                                 |
 | `/posts/{id}`           | GET    | page load       | GET /posts/{id} + GET /posts/{id}/replies                         |
+| `/posts/{id}`           | GET    | +server.ts      | GET /posts/{id}/replies?cursor=                                   |
 | `/search`               | GET    | page load       | GET /search?q=&type=all (or type=users for @ prefix) + GET /search/recent, or GET /hashtags/{tag}/posts for a # prefix |
 | `/search`               | GET    | +server.ts      | GET /search?q=&type=&cursor= — backs pagination and users/hashtags typeahead; type=hashtag-posts calls GET /hashtags/{tag}/posts?cursor= directly |
 | `/search/recent`        | POST/DELETE | +server.ts | POST /search/recent, DELETE /search/recent                         |
@@ -184,7 +185,7 @@ omit it for cover photos and full-resolution post media.
 - `createPagination<T>()` state: `items`, `cursor`, `loading`. `more()` appends
   and advances cursor.
 - Used in: feed, user posts, user replies, liked posts, followers, following,
-  hashtag post feed (`/search?q=#tag`).
+  post detail replies, hashtag post feed (`/search?q=#tag`).
 - The feed renders a first-page empty state linking to `/search` when
   `/posts/feed` returns no items and no cursor.
 - `/notifications` initial page marks unread rows as read after retrieval.

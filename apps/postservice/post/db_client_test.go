@@ -41,6 +41,19 @@ func TestPopularPostsQueryRanksByEngagementWithinWindow(t *testing.T) {
 	}
 }
 
+func TestRepliesQueryOrdersNewestFirst(t *testing.T) {
+	got := repliesQuery()
+	for _, want := range []string{
+		"p.in_reply_to_id = $2",
+		"(p.created, p.id) < ($3::timestamptz, $4::int)",
+		"ORDER BY p.created DESC, p.id DESC",
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("repliesQuery missing %q in:\n%s", want, got)
+		}
+	}
+}
+
 func TestPostWithRepostSelectIncludesOriginalPostColumns(t *testing.T) {
 	got := postWithRepostSelect()
 	for _, want := range []string{

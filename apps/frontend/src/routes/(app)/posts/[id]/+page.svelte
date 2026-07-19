@@ -12,11 +12,23 @@
   import { imageUrl } from "$lib/shared/imageUrl";
   import { enhance } from "$app/forms";
   import { getToastContext } from "$lib/shared/toast.svelte";
+  import { createPagination } from "$lib/shared/createPagination.svelte";
   import type { Post } from "$lib/domains/posts/model";
 
   let { data } = $props();
   let user = $derived(data.currentUser);
-  const replies = $derived(data.replies.items);
+
+  const pagination = createPagination<Post>(
+    () => data.replies,
+    async (cursor) => {
+      if (!post) return { items: [], nextCursor: null };
+      const res = await fetch(
+        `/posts/${post.id}?cursor=${encodeURIComponent(cursor)}`,
+      );
+      return res.ok ? res.json() : { items: [], nextCursor: null };
+    },
+  );
+  const replies = $derived(pagination.items);
 
   const toast = getToastContext();
 
@@ -275,6 +287,22 @@
             />
           {/each}
         </ul>
+      {/if}
+      {#if !pagination.done}
+        <div class="py-4 text-center">
+          <button
+            type="button"
+            class="btn btn-outline btn-sm rounded-full"
+            disabled={pagination.loading}
+            onclick={() => pagination.more()}
+          >
+            {#if pagination.loading}
+              <span class="loading loading-spinner loading-xs"></span>
+            {:else}
+              Load more
+            {/if}
+          </button>
+        </div>
       {/if}
     {:else}
       <div class="mt-3 text-center">
