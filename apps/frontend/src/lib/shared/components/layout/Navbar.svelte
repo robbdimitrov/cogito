@@ -83,11 +83,9 @@
           <span class="indicator">
             {#if unreadCount > 0}
               <span
-                class="badge badge-primary indicator-item badge-xs min-w-5 px-1 text-[0.65rem]"
+                class="badge badge-primary indicator-item size-2 rounded-full p-0"
                 aria-hidden="true"
-              >
-                {unreadCount > 99 ? "99+" : unreadCount}
-              </span>
+              ></span>
             {/if}
             <Bell class="size-6" aria-hidden="true" />
           </span>
