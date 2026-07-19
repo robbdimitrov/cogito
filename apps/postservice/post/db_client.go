@@ -44,10 +44,8 @@ func repliesCount(postIDExpr string) string {
 // current activity rather than all-time accumulated likes/replies.
 const popularPostsWindow = 7 * 24 * time.Hour
 
-// popularPostsQuery ranks original, top-level posts created within the recent
-// window by (likes + replies), wrapping postCountsAndViewerFlags/repliesCount
-// in a subquery so the outer ORDER BY can reference their computed aliases
-// directly instead of repeating the subqueries.
+// popularPostsQuery ranks recent top-level posts by (likes + replies),
+// excluding zero-engagement posts so the empty-search-state list stays real.
 func popularPostsQuery() string {
 	return `SELECT id, user_id, content, likes, liked, reposts, reposted,
 		created, repost_of_id, media_key, replies, in_reply_to_id, quote_of_id
@@ -63,6 +61,7 @@ func popularPostsQuery() string {
 			AND p.in_reply_to_id IS NULL
 			AND p.created >= $2
 		) t
+		WHERE likes + replies > 0
 		ORDER BY (likes + replies) DESC, created DESC, id DESC
 		OFFSET $3
 		LIMIT $4`

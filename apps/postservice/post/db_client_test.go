@@ -30,6 +30,7 @@ func TestPopularPostsQueryRanksByEngagementWithinWindow(t *testing.T) {
 		"p.repost_of_id IS NULL",
 		"p.in_reply_to_id IS NULL",
 		"p.created >= $2",
+		"WHERE likes + replies > 0",
 		"ORDER BY (likes + replies) DESC, created DESC, id DESC",
 		"OFFSET $3",
 		"LIMIT $4",

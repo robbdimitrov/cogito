@@ -181,7 +181,8 @@ still requires a session.
 `GET /search/popular` calls PostService's `GetPopularPosts`, not
 SearchService — it's a Postgres ranking (likes + replies) over posts created
 in the last 7 days, not a Meilisearch lookup. Only original, top-level posts
-are ranked (no replies or reposts). Response shape matches other post lists:
+with at least one like or reply are ranked (no replies, reposts, or
+zero-engagement posts). Response shape matches other post lists:
 `{"items": [Post...], "nextCursor": "..."}`.
 
 `type=all` returns one relevance-ranked list blending all three entity
