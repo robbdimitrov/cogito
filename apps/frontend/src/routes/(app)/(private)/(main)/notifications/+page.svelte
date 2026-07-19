@@ -6,7 +6,14 @@
   import EmptyState from "$lib/shared/components/ui/EmptyState.svelte";
   import { createPagination } from "$lib/shared/createPagination.svelte";
   import type { Notification } from "$lib/domains/notifications/model";
-  import { Bell } from "@lucide/svelte";
+  import {
+    Bell,
+    Heart,
+    MessageSquare,
+    Repeat,
+    UserPlus,
+    type LucideIcon,
+  } from "@lucide/svelte";
 
   let { data } = $props();
 
@@ -20,28 +27,53 @@
     },
   );
 
-  function notificationLabel(type: string): string {
-    switch (type) {
-      case "like":
-        return "liked your post";
-      case "repost":
-        return "reposted your post";
-      case "reply":
-        return "replied to your post";
-      case "follow":
-        return "followed you";
-      default:
-        return "interacted with you";
-    }
+  interface NotificationTypeMeta {
+    label: string;
+    icon: LucideIcon;
+    badgeClass: string;
+  }
+
+  // badgeClass mirrors the action colors PostItem/RepostMenu already use for like/repost/reply.
+  const notificationTypeMeta: Record<string, NotificationTypeMeta> = {
+    like: {
+      label: "liked your post",
+      icon: Heart,
+      badgeClass: "bg-error/10 text-error",
+    },
+    repost: {
+      label: "reposted your post",
+      icon: Repeat,
+      badgeClass: "bg-success/10 text-success",
+    },
+    reply: {
+      label: "replied to your post",
+      icon: MessageSquare,
+      badgeClass: "bg-primary/10 text-primary",
+    },
+    follow: {
+      label: "followed you",
+      icon: UserPlus,
+      badgeClass: "bg-secondary/10 text-secondary",
+    },
+  };
+
+  const defaultNotificationTypeMeta: NotificationTypeMeta = {
+    label: "interacted with you",
+    icon: Bell,
+    badgeClass: "bg-base-200 text-base-content",
+  };
+
+  function notificationMeta(type: string): NotificationTypeMeta {
+    return notificationTypeMeta[type] ?? defaultNotificationTypeMeta;
   }
 
   function notificationHref(notification: Notification): string {
     if (notification.type === "follow") {
       return notification.actor?.username
-        ? resolve(`/@${notification.actor.username}`)
-        : resolve("/notifications");
+        ? `/@${notification.actor.username}`
+        : "/notifications";
     }
-    return resolve(`/posts/${notification.entityId}`);
+    return `/posts/${notification.entityId}`;
   }
 
   function actorName(notification: Notification): string {
@@ -82,26 +114,33 @@
     {:else}
       <ul class="space-y-3">
         {#each pagination.items as notification (notification.id)}
+          {@const meta = notificationMeta(notification.type)}
           <GlassCard as="li" interactive class="hover:scale-[1.005]">
             <a
               href={resolve(notificationHref(notification) as Pathname)}
               class="card-body flex-row items-start gap-3 p-4 sm:p-5"
             >
               <div
-                class="shrink-0 rounded-full bg-base-100/55 p-1 ring-1 ring-base-300/80 dark:bg-white/5 dark:ring-white/10"
+                class="relative shrink-0 rounded-full bg-base-100/55 p-1 ring-1 ring-base-300/80 dark:bg-white/5 dark:ring-white/10"
               >
                 <Avatar
                   name={actorName(notification)}
                   photoKey={notification.actor?.profilePhotoKey}
                   size="md"
                 />
+                <span
+                  class="absolute -bottom-1 -right-1 grid size-5 place-items-center rounded-full border-2 border-base-100 dark:border-base-200 {meta.badgeClass}"
+                  aria-hidden="true"
+                >
+                  <meta.icon class="size-3" />
+                </span>
               </div>
               <div class="min-w-0 flex-1">
                 <p class="text-sm leading-6 text-base-content/80">
                   <span class="font-semibold text-base-content">
                     {actorName(notification)}
                   </span>
-                  {notificationLabel(notification.type)}
+                  {meta.label}
                 </p>
                 <p class="muted-text text-xs">
                   {formatRelativeTime(notification.created)}
