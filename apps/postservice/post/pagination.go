@@ -39,6 +39,23 @@ func EncodeCursor(created time.Time, id int32) string {
 // computed score, not a stable keyset column; matches flowservice's cap.
 const maxPopularOffset = 1000
 
+const (
+	defaultLimit = 20
+	maxLimit     = 100
+)
+
+// clampLimit applies the shared list-endpoint bounds: unset or invalid values
+// fall back to defaultLimit; values above maxLimit are capped.
+func clampLimit(limit int32) int32 {
+	if limit < 1 {
+		return defaultLimit
+	}
+	if limit > maxLimit {
+		return maxLimit
+	}
+	return limit
+}
+
 type offsetCursor struct {
 	Offset int32 `json:"offset"`
 }

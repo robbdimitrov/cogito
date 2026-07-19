@@ -16,7 +16,7 @@ use super::db::{RecentSearchDb, normalize_recent_reference, validate_recent_sear
 
 const MAX_QUERY_CHARS: usize = 255;
 const DEFAULT_LIMIT: u32 = 20;
-const MAX_LIMIT: u32 = 50;
+const MAX_LIMIT: u32 = 100;
 
 #[derive(Clone)]
 pub struct SearchController<D> {
@@ -381,10 +381,10 @@ mod tests {
     }
 
     #[test]
-    fn validate_clamps_limit_above_50() {
-        let req = make_request("test", 100, "");
+    fn validate_clamps_limit_above_100() {
+        let req = make_request("test", 150, "");
         let (_, limit, _) = validate_request(&req).unwrap();
-        assert_eq!(limit, 50);
+        assert_eq!(limit, 100);
     }
 
     #[test]

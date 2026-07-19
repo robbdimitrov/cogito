@@ -65,13 +65,7 @@ func (c *controller) GetFeed(ctx context.Context, req *pb.GetFeedRequest) (*pb.P
 		return nil, newError(codes.InvalidArgument)
 	}
 
-	limit := req.Limit
-	if limit < 1 {
-		limit = 20
-	}
-	if limit > 100 {
-		limit = 100
-	}
+	limit := clampLimit(req.Limit)
 
 	resIter, err := c.dbClient.getFeed(ctx, cur, hasCur, limit, userID)
 	if err != nil {
@@ -111,13 +105,7 @@ func (c *controller) GetPosts(ctx context.Context, req *pb.GetPostsRequest) (*pb
 		return nil, newError(codes.InvalidArgument)
 	}
 
-	limit := req.Limit
-	if limit < 1 {
-		limit = 10
-	}
-	if limit > 100 {
-		limit = 100
-	}
+	limit := clampLimit(req.Limit)
 
 	resIter, err := c.dbClient.getPosts(ctx, req.UserId, cur, hasCur, limit, userID)
 	if err != nil {
@@ -157,13 +145,7 @@ func (c *controller) GetUserReplies(ctx context.Context, req *pb.GetPostsRequest
 		return nil, newError(codes.InvalidArgument)
 	}
 
-	limit := req.Limit
-	if limit < 1 {
-		limit = 10
-	}
-	if limit > 100 {
-		limit = 100
-	}
+	limit := clampLimit(req.Limit)
 
 	resIter, err := c.dbClient.getUserReplies(ctx, req.UserId, cur, hasCur, limit, userID)
 	if err != nil {
@@ -206,13 +188,7 @@ func (c *controller) GetLikedPosts(ctx context.Context, req *pb.GetPostsRequest)
 		return nil, newError(codes.InvalidArgument)
 	}
 
-	limit := req.Limit
-	if limit < 1 {
-		limit = 10
-	}
-	if limit > 100 {
-		limit = 100
-	}
+	limit := clampLimit(req.Limit)
 
 	resIter, err := c.dbClient.getLikedPosts(ctx, req.UserId, cur, hasCur, limit, userID)
 	if err != nil {
@@ -258,13 +234,7 @@ func (c *controller) GetHashtagPosts(ctx context.Context, req *pb.GetHashtagPost
 		return nil, newError(codes.InvalidArgument)
 	}
 
-	limit := req.Limit
-	if limit < 1 {
-		limit = 10
-	}
-	if limit > 100 {
-		limit = 100
-	}
+	limit := clampLimit(req.Limit)
 
 	resIter, err := c.dbClient.getHashtagPosts(ctx, req.Tag, cur, hasCur, limit, userID)
 	if err != nil {
@@ -352,13 +322,7 @@ func (c *controller) GetReplies(ctx context.Context, req *pb.GetRepliesRequest) 
 		return nil, newError(codes.InvalidArgument)
 	}
 
-	limit := req.Limit
-	if limit < 1 {
-		limit = 10
-	}
-	if limit > 100 {
-		limit = 100
-	}
+	limit := clampLimit(req.Limit)
 
 	resIter, err := c.dbClient.getReplies(ctx, req.PostId, cur, hasCur, limit, userID)
 	if err != nil {
@@ -401,13 +365,7 @@ func (c *controller) GetPopularPosts(ctx context.Context, req *pb.GetPopularPost
 		return nil, newError(codes.InvalidArgument)
 	}
 
-	limit := req.Limit
-	if limit < 1 {
-		limit = 20
-	}
-	if limit > 100 {
-		limit = 100
-	}
+	limit := clampLimit(req.Limit)
 
 	resIter, err := c.dbClient.getPopularPosts(ctx, offset, limit, userID)
 	if err != nil {
