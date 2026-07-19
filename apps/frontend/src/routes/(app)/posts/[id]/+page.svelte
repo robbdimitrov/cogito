@@ -1,13 +1,6 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
-  import { goto } from "$app/navigation";
-  import {
-    AlertTriangle,
-    ArrowLeft,
-    Trash2,
-    Repeat,
-    Heart,
-  } from "@lucide/svelte";
+  import { AlertTriangle, Trash2, Repeat, Heart } from "@lucide/svelte";
   import Avatar from "$lib/shared/components/ui/Avatar.svelte";
   import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
   import ConfirmModal from "$lib/shared/components/ui/ConfirmModal.svelte";
@@ -39,16 +32,6 @@
 
   let isLiking = $state(false);
   let isReposting = $state(false);
-
-  // A deep-linked post (shared URL, notification) has no in-app history, so
-  // browser back would leave the app; fall back to the feed in that case.
-  function goBack() {
-    if (history.length > 1) {
-      history.back();
-    } else {
-      goto(resolve("/"));
-    }
-  }
 
   function formatRelativeTime(dateString: string) {
     const date = new Date(dateString);
@@ -91,17 +74,6 @@
   </div>
 {:else}
   <div class="feed-shell">
-    <div class="mb-3 sm:mb-4">
-      <button
-        type="button"
-        onclick={goBack}
-        class="btn btn-ghost btn-sm gap-1 rounded-full px-3"
-      >
-        <ArrowLeft class="size-4" />
-        Back
-      </button>
-    </div>
-
     <GlassCard class="overflow-hidden">
       <div class="card-body p-4 sm:p-5">
         <div class="flex items-start gap-3 sm:gap-4">
@@ -184,7 +156,7 @@
                   <input
                     type="hidden"
                     name="reposted"
-                    value={String(!post.reposted)}
+                    value={String(post.reposted)}
                   />
                   <button
                     type="submit"
@@ -224,7 +196,7 @@
                   <input
                     type="hidden"
                     name="liked"
-                    value={String(!post.liked)}
+                    value={String(post.liked)}
                   />
                   <button
                     type="submit"
