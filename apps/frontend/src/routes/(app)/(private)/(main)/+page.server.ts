@@ -28,7 +28,9 @@ export const actions = {
     const quoteOfId = data.get("quoteOfId")?.toString();
     const file = data.get("image") as File | null;
 
-    if (!content.trim() && (!file || file.size === 0)) {
+    // Every non-repost post requires non-empty content (posts_content_not_empty
+    // DB constraint); an attached image never substitutes for it.
+    if (!content.trim()) {
       return fail(400, { error: "Post cannot be empty" });
     }
 
