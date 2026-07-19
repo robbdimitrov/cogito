@@ -164,13 +164,19 @@ render as navigation links to `/search?q=#{tag}`.
 
 ### `RepostMenu`
 
-Dropdown with two actions: "Repost" (toggle) and "Quote" (opens
-`QuoteComposeModal`) — not a DaisyUI `.dropdown`/`<details>`. The menu is
-portaled to `document.body` on open and positioned from the trigger's
-bounding rect, so it's never clipped by an ancestor's `overflow-hidden` (e.g.
-`PostItem`'s card) or trapped by a filtered ancestor's containing block (e.g.
-`backdrop-blur`). Closes on outside click or `Escape` via a document-level
-listener attached only while open.
+Bottom sheet with two actions, split evenly side by side with a divider:
+"Repost" (toggle) and "Quote" (opens `QuoteComposeModal`) — not a DaisyUI
+`.dropdown`/`<details>`. Slides up from the card's bottom edge on open
+(`transition:slide`, which animates to the sheet's own measured height rather
+than a hardcoded distance), absolutely positioned against `PostItem`'s card
+(the nearest `position: relative` ancestor), so it scrolls with the card via
+native layout instead of JS-tracked coordinates. `PostItem`'s card keeps
+`overflow-hidden` since the sheet never needs to escape the card's box. Needs
+an explicit `z-index` (not just `position: absolute`) to paint above its
+sibling action-row buttons — the action row is a flex container, and flex
+items paint by z-index/DOM order regardless of `position: static` vs
+`absolute`, unlike normal block layout. Closes on outside click or `Escape`
+via a document-level listener attached only while open.
 
 ### `QuoteComposeModal`
 
