@@ -23,7 +23,7 @@
     async (cursor) => {
       if (!post) return { items: [], nextCursor: null };
       const res = await fetch(
-        `/posts/${post.id}?cursor=${encodeURIComponent(cursor)}`,
+        `/posts/${post.publicId}?cursor=${encodeURIComponent(cursor)}`,
       );
       return res.ok ? res.json() : { items: [], nextCursor: null };
     },
@@ -164,7 +164,7 @@
                     };
                   }}
                 >
-                  <input type="hidden" name="postId" value={post.id} />
+                  <input type="hidden" name="postId" value={post.publicId} />
                   <input
                     type="hidden"
                     name="reposted"
@@ -204,7 +204,7 @@
                     };
                   }}
                 >
-                  <input type="hidden" name="postId" value={post.id} />
+                  <input type="hidden" name="postId" value={post.publicId} />
                   <input
                     type="hidden"
                     name="liked"
@@ -259,7 +259,7 @@
         const input = document.createElement("input");
         input.type = "hidden";
         input.name = "postId";
-        input.value = String(post.id);
+        input.value = post.publicId;
         form.appendChild(input);
         document.body.appendChild(form);
         form.submit();
@@ -278,7 +278,7 @@
         <ul
           class="mt-2 space-y-0 divide-y divide-base-300/70 dark:divide-white/10"
         >
-          {#each replies as reply (reply.id)}
+          {#each replies as reply (reply.publicId)}
             <PostItem
               post={reply}
               currentUserId={user?.id}

@@ -12,12 +12,14 @@ export const load = async (event) => {
   const { params } = event;
   // Fetch the public post immediately; only replies wait for parent() to prove
   // a logged-in viewer.
-  const postPromise = getPost(apiClient(event), params.id).catch(() => null);
+  const postPromise = getPost(apiClient(event), params.publicId).catch(
+    () => null,
+  );
   const repliesPromise = event
     .parent()
     .then(({ currentUser }) =>
       currentUser
-        ? getReplies(apiClient(event), params.id, "").catch(() => null)
+        ? getReplies(apiClient(event), params.publicId, "").catch(() => null)
         : null,
     );
 
@@ -45,7 +47,7 @@ export const actions = {
     try {
       await create(apiClient(event), {
         content: content.trim(),
-        inReplyToId: params.id,
+        inReplyToId: params.publicId,
       });
       return { success: true };
     } catch (e) {

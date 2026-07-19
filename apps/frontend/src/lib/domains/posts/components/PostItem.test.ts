@@ -4,7 +4,7 @@ import PostItem from "./PostItem.svelte";
 import type { Post } from "$lib/shared/types";
 
 const post: Post = {
-  id: 1,
+  publicId: "550e8400-e29b-41d4-a716-446655440000",
   content: "hello",
   userId: 1,
   created: "2026-01-01T00:00:00Z",
@@ -34,7 +34,11 @@ describe("PostItem anonymous gating", () => {
 
 describe("PostItem reply context", () => {
   it("renders a replying-to line when inReplyToUsername is present", () => {
-    const reply: Post = { ...post, inReplyToId: 5, inReplyToUsername: "carol" };
+    const reply: Post = {
+      ...post,
+      inReplyToPublicId: "6f9619ff-8b86-d011-b42d-00cf4fc964ff",
+      inReplyToUsername: "carol",
+    };
     const el = mountComponent(PostItem, { post: reply, currentUserId: 2 });
 
     expect(el.textContent).toContain("Replying to");

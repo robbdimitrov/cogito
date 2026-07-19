@@ -26,7 +26,7 @@ const hashtagResult: BlendedItem = {
 const postResult: BlendedItem = {
   type: "posts",
   item: {
-    id: 1,
+    publicId: "550e8400-e29b-41d4-a716-446655440000",
     content: "hello world",
     userId: 1,
     created: "2026-01-01T00:00:00Z",
@@ -62,7 +62,9 @@ describe("SearchResultRow", () => {
       result: postResult,
       compact: true,
     });
-    const link = el.querySelector('a[href="/posts/1"]');
+    const link = el.querySelector(
+      'a[href="/posts/550e8400-e29b-41d4-a716-446655440000"]',
+    );
     expect(link).not.toBeNull();
     expect(link?.textContent).toContain("hello world");
   });

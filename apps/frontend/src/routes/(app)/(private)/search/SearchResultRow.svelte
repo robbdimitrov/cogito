@@ -103,7 +103,7 @@
   {/if}
 {:else if compact}
   <a
-    href={resolve(`/posts/${result.item.id}`)}
+    href={resolve(`/posts/${result.item.publicId}`)}
     class="block truncate rounded-xl px-3 py-2 text-sm text-base-content/75 hover:bg-base-200"
     onclick={onSelect}
   >

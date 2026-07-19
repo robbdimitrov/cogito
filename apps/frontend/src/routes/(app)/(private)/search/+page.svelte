@@ -75,7 +75,7 @@
   function resultKey(result: BlendedItem): string {
     if (result.type === "users") return `users-${result.item.username}`;
     if (result.type === "hashtags") return `hashtags-${result.item.name}`;
-    return `posts-${result.item.id}`;
+    return `posts-${result.item.publicId}`;
   }
 
   let groupedResults = $derived.by(() => {

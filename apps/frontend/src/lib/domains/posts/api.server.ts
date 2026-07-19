@@ -4,8 +4,8 @@ import { unwrap } from "$lib/server/api/http";
 
 const DEFAULT_PAGE_SIZE = 20;
 
-interface Identifier {
-  id: number;
+interface PostIdentifier {
+  publicId: string;
 }
 
 export interface PostPage {
@@ -22,8 +22,8 @@ export interface Hashtag {
 export interface CreatePostInput {
   content: string;
   mediaKey?: string;
-  inReplyToId?: string | number;
-  quoteOfId?: string | number;
+  inReplyToId?: string;
+  quoteOfId?: string;
 }
 
 export async function getFeed(
@@ -83,10 +83,7 @@ export async function getPopularPosts(
   return getCursorPage(api, "/search/popular", cursor, limit);
 }
 
-export async function getPost(
-  api: ApiClient,
-  postID: string | number,
-): Promise<Post> {
+export async function getPost(api: ApiClient, postID: string): Promise<Post> {
   const res = await api(`/posts/${postID}`);
   const unwrapped = await unwrap<Post>(res);
   return unwrapped!;
@@ -94,7 +91,7 @@ export async function getPost(
 
 export async function getReplies(
   api: ApiClient,
-  postID: string | number,
+  postID: string,
   cursor = "",
   limit = DEFAULT_PAGE_SIZE,
 ): Promise<PostPage> {
@@ -104,16 +101,16 @@ export async function getReplies(
 export async function create(
   api: ApiClient,
   input: CreatePostInput,
-): Promise<Identifier> {
+): Promise<PostIdentifier> {
   const body: Record<string, unknown> = {
     content: input.content,
     mediaKey: input.mediaKey,
   };
   if (input.inReplyToId !== undefined) {
-    body.inReplyToId = Number(input.inReplyToId);
+    body.inReplyToId = input.inReplyToId;
   }
   if (input.quoteOfId !== undefined) {
-    body.quoteOfId = Number(input.quoteOfId);
+    body.quoteOfId = input.quoteOfId;
   }
 
   const res = await api("/posts", {
@@ -121,33 +118,27 @@ export async function create(
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
   });
-  const unwrapped = await unwrap<Identifier>(res);
+  const unwrapped = await unwrap<PostIdentifier>(res);
   return unwrapped!;
 }
 
-export function deletePost(
-  api: ApiClient,
-  postID: string | number,
-): Promise<void> {
+export function deletePost(api: ApiClient, postID: string): Promise<void> {
   return postMutation(api, postID, "", "DELETE");
 }
 
-export function like(api: ApiClient, postID: string | number): Promise<void> {
+export function like(api: ApiClient, postID: string): Promise<void> {
   return postMutation(api, postID, "likes", "POST");
 }
 
-export function unlike(api: ApiClient, postID: string | number): Promise<void> {
+export function unlike(api: ApiClient, postID: string): Promise<void> {
   return postMutation(api, postID, "likes", "DELETE");
 }
 
-export function repost(api: ApiClient, postID: string | number): Promise<void> {
+export function repost(api: ApiClient, postID: string): Promise<void> {
   return postMutation(api, postID, "reposts", "POST");
 }
 
-export function removeRepost(
-  api: ApiClient,
-  postID: string | number,
-): Promise<void> {
+export function removeRepost(api: ApiClient, postID: string): Promise<void> {
   return postMutation(api, postID, "reposts", "DELETE");
 }
 
@@ -166,7 +157,7 @@ async function getCursorPage(
 
 async function postMutation(
   api: ApiClient,
-  postID: string | number,
+  postID: string,
   suffix: "" | "likes" | "reposts",
   method: "POST" | "DELETE",
 ): Promise<void> {

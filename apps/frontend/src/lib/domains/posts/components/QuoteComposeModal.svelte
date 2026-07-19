@@ -49,7 +49,7 @@
         };
       }}
     >
-      <input type="hidden" name="quotePostId" value={quotedPost.id} />
+      <input type="hidden" name="quotePostId" value={quotedPost.publicId} />
       <textarea
         name="content"
         class="form-textarea min-h-0 resize-none"

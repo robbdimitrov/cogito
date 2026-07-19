@@ -27,7 +27,7 @@
   <EmptyState icon={MessageSquare} message={emptyMessage} />
 {:else}
   <ul class="space-y-3">
-    {#each posts as post (post.id + (post.repostOfId ? `-repost-${post.userId}` : ""))}
+    {#each posts as post (post.publicId + (post.repostOfPublicId ? `-repost-${post.userId}` : ""))}
       <PostItem
         {post}
         user={usersById.get(post.userId) ?? users[0]}

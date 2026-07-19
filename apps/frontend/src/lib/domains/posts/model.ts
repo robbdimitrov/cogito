@@ -1,7 +1,7 @@
 import type { User } from "$lib/domains/users/model";
 
 export interface Post {
-  id: number;
+  publicId: string;
   content: string;
   userId: number;
   created: string;
@@ -10,12 +10,12 @@ export interface Post {
   liked?: boolean;
   reposted?: boolean;
   user?: User;
-  repostOfId?: number;
+  repostOfPublicId?: string;
   repostOf?: Post;
   mediaKey?: string;
   replies: number;
-  inReplyToId?: number;
+  inReplyToPublicId?: string;
   inReplyToUsername?: string;
-  quoteOfId?: number;
+  quoteOfPublicId?: string;
   quotePost?: Post;
 }

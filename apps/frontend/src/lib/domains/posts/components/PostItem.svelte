@@ -28,7 +28,7 @@
     threaded = false,
   }: Props = $props();
 
-  let isRepost = $derived(!!post.repostOfId);
+  let isRepost = $derived(!!post.repostOfPublicId);
   let displayPost = $derived(isRepost && post.repostOf ? post.repostOf : post);
   let repostedBy = $derived(isRepost ? post.user : undefined);
   let author = $derived(displayPost.user || user);
@@ -173,7 +173,7 @@
           </div>
           {#if displayPost.inReplyToUsername}
             <a
-              href={resolve(`/posts/${displayPost.inReplyToId}`)}
+              href={resolve(`/posts/${displayPost.inReplyToPublicId}`)}
               class="muted-text mt-0.5 block text-xs hover:text-base-content/80"
             >
               Replying to <span class="text-primary"
@@ -217,7 +217,7 @@
           >
             <div class="flex items-center gap-1 sm:gap-2">
               <a
-                href={resolve(`/posts/${displayPost.id}`)}
+                href={resolve(`/posts/${displayPost.publicId}`)}
                 class="action-pill gap-1.5 px-3 opacity-60 hover:bg-primary/5 hover:text-primary hover:opacity-100"
                 aria-label="Replies"
               >
@@ -253,7 +253,11 @@
                     };
                   }}
                 >
-                  <input type="hidden" name="postId" value={displayPost.id} />
+                  <input
+                    type="hidden"
+                    name="postId"
+                    value={displayPost.publicId}
+                  />
                   <input
                     type="hidden"
                     name="reposted"
@@ -303,7 +307,11 @@
                     };
                   }}
                 >
-                  <input type="hidden" name="postId" value={displayPost.id} />
+                  <input
+                    type="hidden"
+                    name="postId"
+                    value={displayPost.publicId}
+                  />
                   <input type="hidden" name="liked" value={String(liked)} />
                   <button
                     type="submit"
@@ -337,7 +345,7 @@
 
             {#if author}
               <a
-                href={resolve(`/posts/${displayPost.id}`)}
+                href={resolve(`/posts/${displayPost.publicId}`)}
                 class="muted-text shrink-0 text-xs transition-colors hover:text-primary sm:text-sm"
               >
                 {formatPostDate(displayPost.created)}
@@ -364,7 +372,7 @@
       };
     }}
   >
-    <input type="hidden" name="postId" value={post.id} />
+    <input type="hidden" name="postId" value={post.publicId} />
   </form>
 
   <ConfirmModal

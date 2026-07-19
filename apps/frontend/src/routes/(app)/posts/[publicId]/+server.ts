@@ -8,6 +8,6 @@ export const GET = async (event) => {
   }
   const { params, url } = event;
   const cursor = url.searchParams.get("cursor") ?? "";
-  const replies = await getReplies(apiClient(event), params.id, cursor);
+  const replies = await getReplies(apiClient(event), params.publicId, cursor);
   return json(replies ?? { items: [], nextCursor: null });
 };
