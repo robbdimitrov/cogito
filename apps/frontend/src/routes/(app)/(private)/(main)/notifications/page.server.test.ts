@@ -74,4 +74,14 @@ describe("markRead action", () => {
     expect(markNotificationRead).toHaveBeenCalledWith(apiCall, "1");
     expect(markNotificationRead).toHaveBeenCalledWith(apiCall, "3");
   });
+
+  it("caps a request carrying more ids than the backend's own page size", async () => {
+    markNotificationRead.mockResolvedValue(undefined);
+    const ids = Array.from({ length: 250 }, (_, i) => String(i));
+
+    await actions.markRead!(markReadEvent(ids));
+    await new Promise((resolve) => setImmediate(resolve));
+
+    expect(markNotificationRead).toHaveBeenCalledTimes(100);
+  });
 });
