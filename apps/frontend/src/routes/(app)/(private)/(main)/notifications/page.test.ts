@@ -3,10 +3,6 @@ import { mountComponent } from "$lib/shared/testing/mountComponent";
 import type { Notification } from "$lib/domains/notifications/model";
 import NotificationsPage from "./+page.svelte";
 
-vi.mock("$app/forms", () => ({
-  enhance: () => ({ destroy() {} }),
-}));
-
 const notifications: Notification[] = [
   {
     id: 1,
@@ -25,10 +21,10 @@ describe("Notifications page mount", () => {
     vi.restoreAllMocks();
   });
 
-  it("submits the mark-read form once the page has actually mounted", () => {
-    const requestSubmit = vi
-      .spyOn(HTMLFormElement.prototype, "requestSubmit")
-      .mockImplementation(() => {});
+  it("POSTs the unread ids to the same-origin route once the page has actually mounted", () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(new Response(null, { status: 200 }));
 
     mountComponent(NotificationsPage, {
       data: {
@@ -41,6 +37,12 @@ describe("Notifications page mount", () => {
       },
     });
 
-    expect(requestSubmit).toHaveBeenCalledTimes(1);
+    expect(fetchSpy).toHaveBeenCalledWith(
+      "/notifications",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ ids: [1] }),
+      }),
+    );
   });
 });

@@ -38,7 +38,7 @@
 | /{username}/followers | Followers list                                                          | toggleFollow                                       |
 | /{username}/following | Following list                                                          | toggleFollow                                       |
 | /search               | Search results (`#tag` shows that tag's post feed) with users/hashtags typeahead and last 10 recent searches | toggleLike, toggleRepost, deletePost, remove/clear recent searches |
-| /notifications        | Notifications (initial unread rows marked read server-side after fetch) | —                                                  |
+| /notifications        | Notifications (unread rows marked read client-side on mount, via a same-origin POST) | —                                                  |
 | /settings             | Settings hub — appearance, links to Profile/Password/Sessions           | —                                                  |
 | /settings/profile     | Current user profile                                                    | default — update name/username/email/bio/photos    |
 | /settings/password    | Password form                                                           | default — change password (old + new)              |
@@ -150,8 +150,9 @@ unchanged after DTO mapping.
 | `/search/recent`        | POST/DELETE | +server.ts | POST /search/recent, DELETE /search/recent                         |
 | `/search/recent/{id}`   | DELETE | +server.ts      | DELETE /search/recent/{id}                                         |
 | `/notifications`        | GET    | app layout load | GET /notifications/unread-count                                   |
-| `/notifications`        | GET    | page load       | GET /notifications + PUT /notifications/{id}/read for unread rows |
+| `/notifications`        | GET    | page load       | GET /notifications                                                 |
 | `/notifications`        | GET    | +server.ts      | GET /notifications?cursor=                                        |
+| `/notifications`        | POST   | +server.ts      | PUT /notifications/{id}/read for unread rows, fired client-side on mount |
 | `/uploads/{key}`        | GET    | +server.ts      | GET /uploads/{key} (proxied)                                      |
 | `/health`               | GET    | +server.ts      | returns "ok"                                                      |
 
@@ -188,8 +189,10 @@ omit it for cover photos and full-resolution post media.
   post detail replies, hashtag post feed (`/search?q=#tag`).
 - The feed renders a first-page empty state linking to `/search` when
   `/posts/feed` returns no items and no cursor.
-- `/notifications` initial page marks unread rows as read after retrieval.
-  Pagination through same-origin `+server.ts` is read-only.
+- `/notifications` marks unread rows as read via a same-origin POST fired
+  once the page has actually mounted, never from `load` — a GET can never
+  trigger the write, closing it off from speculative preloads. Pagination
+  through same-origin `+server.ts` GET stays read-only.
 - `/search` shows recent searches when the empty input is focused. Typing
   switches to a users/hashtags-only typeahead capped at 10 combined rows; Enter
   submits the typed query unless the user arrow-highlights a suggestion first.

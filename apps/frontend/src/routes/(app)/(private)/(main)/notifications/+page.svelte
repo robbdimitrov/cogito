@@ -1,8 +1,7 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
   import type { Pathname } from "$app/types";
-  import { enhance } from "$app/forms";
-  import { onMount, flushSync } from "svelte";
+  import { onMount } from "svelte";
   import Avatar from "$lib/shared/components/ui/Avatar.svelte";
   import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
   import EmptyState from "$lib/shared/components/ui/EmptyState.svelte";
@@ -19,8 +18,6 @@
 
   let { data } = $props();
 
-  let markReadForm = $state<HTMLFormElement | null>(null);
-  let pendingIds = $state<number[]>([]);
   // Optimistic overlay: ids marked read without awaiting the fire-and-forget backend call.
   let locallyRead = $state(new Set<number>());
 
@@ -28,9 +25,11 @@
   function markUnreadIds(ids: number[]) {
     if (ids.length === 0) return;
     locallyRead = new Set([...locallyRead, ...ids]);
-    pendingIds = ids;
-    flushSync();
-    markReadForm?.requestSubmit();
+    void fetch("/notifications", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ ids }),
+    });
   }
 
   onMount(() => {
@@ -124,18 +123,6 @@
 <svelte:head>
   <title>Notifications - Cogito</title>
 </svelte:head>
-
-<form
-  bind:this={markReadForm}
-  method="POST"
-  action="?/markRead"
-  class="hidden"
-  use:enhance={() => async () => {}}
->
-  {#each pendingIds as id (id)}
-    <input type="hidden" name="id" value={id} />
-  {/each}
-</form>
 
 <main class="feed-shell">
   <section class="flex flex-col gap-3 sm:gap-4">
