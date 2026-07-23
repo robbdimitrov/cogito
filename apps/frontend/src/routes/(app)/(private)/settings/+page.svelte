@@ -11,6 +11,7 @@
     ChevronRight,
   } from "@lucide/svelte";
   import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
+  import { pageTitle } from "$lib/shared/pageTitle";
   import { getThemeContext } from "$lib/shared/theme.svelte";
 
   const theme = getThemeContext();
@@ -27,6 +28,10 @@
     { title: "Sessions", href: "/settings/sessions", icon: Monitor },
   ] as const;
 </script>
+
+<svelte:head>
+  <title>{pageTitle("Settings")}</title>
+</svelte:head>
 
 <GlassCard>
   <div class="card-body gap-5 p-4 sm:p-6">

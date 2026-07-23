@@ -9,6 +9,7 @@
   import FormTextarea from "$lib/shared/components/ui/FormTextarea.svelte";
   import { resizeImageForUpload } from "$lib/shared/image";
   import { imageUrl } from "$lib/shared/imageUrl";
+  import { pageTitle } from "$lib/shared/pageTitle";
   import { getToastContext } from "$lib/shared/toast.svelte";
   import { untrack } from "svelte";
 
@@ -84,6 +85,10 @@
     }
   }
 </script>
+
+<svelte:head>
+  <title>{pageTitle("Edit Profile")}</title>
+</svelte:head>
 
 <GlassCard class="overflow-hidden">
   <div class="card-body gap-4 p-4 pb-0 sm:gap-5 sm:p-6 sm:pb-0">

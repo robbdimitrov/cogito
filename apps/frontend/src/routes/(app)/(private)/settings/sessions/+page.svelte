@@ -3,6 +3,7 @@
   import { enhance } from "$app/forms";
   import { ArrowLeft, AlertCircle, XCircle, Monitor, X } from "@lucide/svelte";
   import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
+  import { pageTitle } from "$lib/shared/pageTitle";
   import { getToastContext } from "$lib/shared/toast.svelte";
 
   let { data, form } = $props();
@@ -18,6 +19,10 @@
     ) || [],
   );
 </script>
+
+<svelte:head>
+  <title>{pageTitle("Active Sessions")}</title>
+</svelte:head>
 
 <GlassCard>
   <div class="card-body gap-4 p-4 sm:gap-5 sm:p-6">

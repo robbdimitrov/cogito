@@ -4,6 +4,7 @@
   import AuthShell from "$lib/shared/components/layout/AuthShell.svelte";
   import Field from "$lib/shared/components/ui/Field.svelte";
   import FormInput from "$lib/shared/components/ui/FormInput.svelte";
+  import { pageTitle } from "$lib/shared/pageTitle";
   import { AlertCircle } from "@lucide/svelte";
   import { untrack } from "svelte";
   import type { ActionData } from "./$types";
@@ -18,7 +19,7 @@
 </script>
 
 <svelte:head>
-  <title>Register · Cogito</title>
+  <title>{pageTitle("Register")}</title>
 </svelte:head>
 
 <AuthShell

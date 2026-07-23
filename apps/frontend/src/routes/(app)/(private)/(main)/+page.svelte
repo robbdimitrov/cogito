@@ -5,6 +5,7 @@
   import QuoteComposeModal from "$lib/domains/posts/components/QuoteComposeModal.svelte";
   import EmptyState from "$lib/shared/components/ui/EmptyState.svelte";
   import { createPagination } from "$lib/shared/createPagination.svelte";
+  import { pageTitle } from "$lib/shared/pageTitle";
   import type { Post } from "$lib/domains/posts/model";
   import { Search } from "@lucide/svelte";
 
@@ -27,7 +28,7 @@
 </script>
 
 <svelte:head>
-  <title>Cogito</title>
+  <title>{pageTitle()}</title>
 </svelte:head>
 
 <main class="feed-shell">

@@ -81,6 +81,11 @@ Defined in `app.css`:
 Breakpoints: sm=640px, md=768px, lg=1024px. The home feed is single-column
 at every width — no sidebar grid.
 
+## Browser Titles
+
+User-facing pages use `Page - Cogito` document titles. The root feed may use
+the bare app name, `Cogito`.
+
 ## Component Inventory
 
 ### `Navbar`
@@ -230,6 +235,8 @@ text-secondary`). An unrecognized type falls back to a neutral `Bell` badge
 (`bg-base-200 text-base-content`). The badge has a `border-base-100`/
 `dark:border-base-200` ring so it reads as a cutout against the card surface,
 matching `Avatar`'s own ring treatment on the notifications list.
+Read notifications keep their type-colored badge and use subtle text dimming;
+the unread dot is the only explicit unread-state marker.
 
 ### Settings
 

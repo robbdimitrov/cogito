@@ -5,6 +5,7 @@
   import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
   import Field from "$lib/shared/components/ui/Field.svelte";
   import FormInput from "$lib/shared/components/ui/FormInput.svelte";
+  import { pageTitle } from "$lib/shared/pageTitle";
   import { getToastContext } from "$lib/shared/toast.svelte";
 
   let { form } = $props();
@@ -14,6 +15,10 @@
   let oldPassword = $state("");
   let password = $state("");
 </script>
+
+<svelte:head>
+  <title>{pageTitle("Change Password")}</title>
+</svelte:head>
 
 <GlassCard>
   <div class="card-body gap-4 p-4 sm:gap-5 sm:p-6">

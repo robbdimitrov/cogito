@@ -1,10 +1,11 @@
 <script lang="ts">
   import { resolve } from "$app/paths";
   import { page } from "$app/state";
+  import { pageTitle } from "$lib/shared/pageTitle";
 </script>
 
 <svelte:head>
-  <title>{page.status} · Cogito</title>
+  <title>{pageTitle(String(page.status))}</title>
 </svelte:head>
 
 <main class="grid min-h-screen place-items-center px-4">

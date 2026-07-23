@@ -6,6 +6,7 @@
   import { recordRecentSearch } from "$lib/shared/recentSearch";
   import EmptyState from "$lib/shared/components/ui/EmptyState.svelte";
   import { createPagination } from "$lib/shared/createPagination.svelte";
+  import { pageTitle } from "$lib/shared/pageTitle";
   import { Search } from "@lucide/svelte";
   import SearchResultRow from "./SearchResultRow.svelte";
   import SearchTypeahead from "./SearchTypeahead.svelte";
@@ -103,11 +104,13 @@
 
 <svelte:head>
   <title
-    >{data.type === "hashtag-posts"
-      ? `#${data.tag}`
-      : q
-        ? `${q} - Search`
-        : "Search"} - Cogito</title
+    >{pageTitle(
+      data.type === "hashtag-posts"
+        ? `#${data.tag}`
+        : q
+          ? `${q} - Search`
+          : "Search",
+    )}</title
   >
 </svelte:head>
 

@@ -6,6 +6,7 @@
   import GlassCard from "$lib/shared/components/ui/GlassCard.svelte";
   import EmptyState from "$lib/shared/components/ui/EmptyState.svelte";
   import { createPagination } from "$lib/shared/createPagination.svelte";
+  import { pageTitle } from "$lib/shared/pageTitle";
   import type { Notification } from "$lib/domains/notifications/model";
   import {
     Bell,
@@ -121,7 +122,7 @@
 </script>
 
 <svelte:head>
-  <title>Notifications - Cogito</title>
+  <title>{pageTitle("Notifications")}</title>
 </svelte:head>
 
 <main class="feed-shell">
@@ -157,8 +158,16 @@
                 </span>
               </div>
               <div class="min-w-0 flex-1">
-                <p class="text-sm leading-6 text-base-content/80">
-                  <span class="font-semibold text-base-content">
+                <p
+                  class="text-sm leading-6 {isRead
+                    ? 'text-base-content/60'
+                    : 'text-base-content/80'}"
+                >
+                  <span
+                    class="font-semibold {isRead
+                      ? 'text-base-content/75'
+                      : 'text-base-content'}"
+                  >
                     {actorName(notification)}
                   </span>
                   {meta.label}

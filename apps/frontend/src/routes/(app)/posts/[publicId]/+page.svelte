@@ -13,6 +13,7 @@
   import { enhance } from "$app/forms";
   import { getToastContext } from "$lib/shared/toast.svelte";
   import { createPagination } from "$lib/shared/createPagination.svelte";
+  import { pageTitle } from "$lib/shared/pageTitle";
   import type { Post } from "$lib/domains/posts/model";
 
   let { data } = $props();
@@ -62,7 +63,11 @@
 </script>
 
 <svelte:head>
-  <title>{post ? `Post by ${post.user?.name}` : "Post not found"}</title>
+  <title
+    >{pageTitle(
+      post?.user ? `Post by ${post.user.name}` : "Post not found",
+    )}</title
+  >
   {#if post}
     <meta property="og:title" content="Post by {post.user?.name}" />
     <meta property="og:description" content={post.content} />

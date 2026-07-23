@@ -1,6 +1,7 @@
 <script lang="ts">
   import UserHeader from "$lib/domains/users/components/UserHeader.svelte";
   import ControlBar from "$lib/domains/users/components/ControlBar.svelte";
+  import { pageTitle } from "$lib/shared/pageTitle";
 
   let { data, children } = $props();
   let user = $derived(data.profileUser);
@@ -8,7 +9,7 @@
 </script>
 
 <svelte:head>
-  <title>{user.name} (@{user.username}) - Cogito</title>
+  <title>{pageTitle(`${user.name} (@${user.username})`)}</title>
   <meta property="og:title" content="{user.name} (@{user.username})" />
   <meta
     property="og:description"
