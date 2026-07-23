@@ -57,22 +57,22 @@
     like: {
       label: "liked your post",
       icon: Heart,
-      badgeClass: "bg-error/10 text-error",
+      badgeClass: "bg-error/20 text-error",
     },
     repost: {
       label: "reposted your post",
       icon: Repeat,
-      badgeClass: "bg-success/10 text-success",
+      badgeClass: "bg-success/20 text-success",
     },
     reply: {
       label: "replied to your post",
       icon: MessageSquare,
-      badgeClass: "bg-primary/10 text-primary",
+      badgeClass: "bg-primary/20 text-primary",
     },
     follow: {
       label: "followed you",
       icon: UserPlus,
-      badgeClass: "bg-secondary/10 text-secondary",
+      badgeClass: "bg-secondary/20 text-secondary",
     },
   };
 
