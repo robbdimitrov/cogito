@@ -13,7 +13,7 @@ import (
 )
 
 type controller struct {
-	pb.UnsafePostServiceServer
+	pb.UnimplementedPostServiceServer
 
 	dbClient *DBClient
 }
